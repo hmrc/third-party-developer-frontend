@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class SubmissionServiceSpec extends AsyncHmrcSpec {
 
   trait Setup extends SubmissionsTestData {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 

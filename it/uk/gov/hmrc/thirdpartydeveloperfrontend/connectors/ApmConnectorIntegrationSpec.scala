@@ -49,7 +49,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       .build()
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
     val underTest   = app.injector.instanceOf[ApmConnector]
 
   }

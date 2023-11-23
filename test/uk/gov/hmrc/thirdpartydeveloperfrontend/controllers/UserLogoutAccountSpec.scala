@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import play.api.mvc.AnyContent
 
 class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
@@ -102,7 +103,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
     }
 
     "destroy session on logout" in new Setup {
-      implicit val request = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
+      implicit val request: FakeRequest[AnyContent] = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
       val result           = await(underTest.logout()(request))
 
       verify(underTest.sessionService, atLeastOnce).destroy(eqTo(session.sessionId))(*)

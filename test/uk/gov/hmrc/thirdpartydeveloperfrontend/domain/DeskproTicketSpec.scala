@@ -23,10 +23,11 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import play.api.mvc.AnyContentAsEmpty
 
 class DeskproTicketSpec extends AsyncHmrcSpec {
 
-  implicit val fakeRequest = FakeRequest()
+  implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val requestorName   = "bob example"
   val requestorEmail  = "bob@example.com".toLaxEmail

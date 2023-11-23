@@ -43,7 +43,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with SubmissionsTestData {
 
   trait Setup {
-    implicit val hc    = HeaderCarrier()
+    implicit val hc: HeaderCarrier   = HeaderCarrier()
     val applicationId  = ApplicationId.random
     val application    = aStandardPendingResponsibleIndividualVerificationApplication()
     val code           = "12345678"

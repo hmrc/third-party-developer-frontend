@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretsHashingConfig
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecretsHashingConfig
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.crypto.services.SecretsHashingService
 

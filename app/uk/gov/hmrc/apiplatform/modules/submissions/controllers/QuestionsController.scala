@@ -19,13 +19,10 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-
 import cats.data.NonEmptyList
-
 import play.api.libs.crypto.CookieSigner
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat, OWrites, Reads}
 import play.api.mvc.{MessagesControllerComponents, _}
-
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
@@ -37,15 +34,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService
 
 object QuestionsController {
   case class ErrorMessage(message: String)
-  implicit val writesErrorMessage = Json.writes[ErrorMessage]
+  implicit val writesErrorMessage: OWrites[ErrorMessage] = Json.writes[ErrorMessage]
 
   case class InboundRecordAnswersRequest(answers: NonEmptyList[String])
-  implicit val readsInboundRecordAnswersRequest = Json.reads[InboundRecordAnswersRequest]
+  implicit val readsInboundRecordAnswersRequest: Reads[InboundRecordAnswersRequest] = Json.reads[InboundRecordAnswersRequest]
 
   case class ViewErrorInfo private (summary: String, message: String)
 
   object ViewErrorInfo {
-    implicit val format = Json.format[ViewErrorInfo]
+    implicit val format: OFormat[ViewErrorInfo] = Json.format[ViewErrorInfo]
 
     def apply(errorInfo: ErrorInfo): ViewErrorInfo = errorInfo match {
       case ErrorInfo(summary, Some(message)) => new ViewErrorInfo(summary, message)
@@ -101,13 +98,13 @@ class QuestionsController @Inject() (
       .fold[Result](BadRequest(_), identity(_))
   }
 
-  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) =
+  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
       processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
-  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None) =
+  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
       processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
@@ -172,7 +169,7 @@ class QuestionsController @Inject() (
       .flatten
   }
 
-  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id) = withSubmission(submissionId) { implicit request =>
+  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id): Action[AnyContent] = withSubmission(submissionId) { implicit request =>
     val success = (extSubmission: ExtendedSubmission) => {
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
       val nextQuestion  = extSubmission.questionnaireProgress.get(questionnaire.id)
@@ -188,7 +185,7 @@ class QuestionsController @Inject() (
     processAnswer(submissionId, questionId)(success)
   }
 
-  def updateAnswer(submissionId: Submission.Id, questionId: Question.Id) = withSubmission(submissionId) { implicit request =>
+  def updateAnswer(submissionId: Submission.Id, questionId: Question.Id): Action[AnyContent] = withSubmission(submissionId) { implicit request =>
     def hasQuestionBeenAnswered(questionId: Question.Id) = {
       request.submission.latestInstance.answersToQuestions.get(questionId).fold(false)(_ => true)
     }

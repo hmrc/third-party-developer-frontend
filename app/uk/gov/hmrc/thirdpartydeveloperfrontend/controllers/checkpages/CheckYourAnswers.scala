@@ -20,19 +20,18 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
-
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
-
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ContactDetails
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -181,16 +180,16 @@ case class CheckYourSubscriptionData(
   )
 
 case class CheckYourAnswersData(
-    appId: ApplicationId,
-    softwareName: String,
-    fullName: Option[String],
-    email: Option[LaxEmailAddress],
-    telephoneNumber: Option[String],
-    teamMembers: Set[LaxEmailAddress],
-    privacyPolicyLocation: PrivacyPolicyLocation,
-    termsAndConditionsLocation: TermsAndConditionsLocation,
-    acceptedTermsOfUse: Boolean,
-    subscriptions: Seq[CheckYourSubscriptionData]
+   appId: ApplicationId,
+   softwareName: String,
+   fullName: Option[FullName],
+   email: Option[LaxEmailAddress],
+   telephoneNumber: Option[String],
+   teamMembers: Set[LaxEmailAddress],
+   privacyPolicyLocation: PrivacyPolicyLocation,
+   termsAndConditionsLocation: TermsAndConditionsLocation,
+   acceptedTermsOfUse: Boolean,
+   subscriptions: Seq[CheckYourSubscriptionData]
   )
 
 object CheckYourAnswersData {

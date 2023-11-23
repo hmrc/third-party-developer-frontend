@@ -21,9 +21,9 @@ trait AskWhenJsonFormatters extends AnswersJsonFormatters {
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
 
-  implicit val jsonFormatAskWhenContext = Json.format[AskWhenContext]
-  implicit val jsonFormatAskWhenAnswer  = Json.format[AskWhenAnswer]
-  implicit val jsonFormatAskAlways      = Json.format[AlwaysAsk.type]
+  implicit val jsonFormatAskWhenContext: OFormat[AskWhenContext] = Json.format[AskWhenContext]
+  implicit val jsonFormatAskWhenAnswer: OFormat[AskWhenAnswer] = Json.format[AskWhenAnswer]
+  implicit val jsonFormatAskAlways: OFormat[AlwaysAsk.type] = Json.format[AlwaysAsk.type]
 
   implicit val jsonFormatCondition: Format[AskWhen] = Union.from[AskWhen]("askWhen")
     .and[AskWhenContext]("askWhenContext")

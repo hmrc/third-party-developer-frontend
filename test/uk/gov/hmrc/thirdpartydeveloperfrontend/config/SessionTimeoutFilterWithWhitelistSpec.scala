@@ -29,11 +29,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import akka.stream.Materializer
 
 class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
 
   trait Setup {
-    implicit val m = app.materializer
+    implicit val m: Materializer = app.materializer
     val config     = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]

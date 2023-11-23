@@ -31,7 +31,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -68,7 +68,7 @@ class SubscriptionsSpec
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
     val unsubscribeRequestSubmittedView    = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
     val subscribeRequestSubmittedView      = app.injector.instanceOf[SubscribeRequestSubmittedView]
-    implicit val environmentNameService    = new EnvironmentNameService(appConfig)
+    implicit val environmentNameService: EnvironmentNameService    = new EnvironmentNameService(appConfig)
 
     val underTest = new SubscriptionsController(
       mock[ThirdPartyDeveloperConnector],

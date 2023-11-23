@@ -26,7 +26,7 @@ import views.html.include.SubscriptionsGroup
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, SubscriptionsBuilder}
@@ -36,6 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
+import play.api.mvc.AnyContentAsEmpty
 
 class SubscriptionsGroupSpec
     extends CommonViewSpec
@@ -46,7 +47,7 @@ class SubscriptionsGroupSpec
     with DeveloperSessionBuilder
     with DeveloperBuilder {
 
-  implicit val request = FakeRequest().withCSRFToken
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   val loggedInDeveloper = buildDeveloper("givenname.familyname@example.com".toLaxEmail, "Givenname", "Familyname").loggedIn
 

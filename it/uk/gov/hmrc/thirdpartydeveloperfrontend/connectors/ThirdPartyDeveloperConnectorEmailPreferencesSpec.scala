@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.HeaderNames
 import play.api.http.Status._
 import play.api.inject.bind
@@ -26,15 +25,15 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, TaxRegimeInterests}
+import play.api.libs.json.Writes
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
@@ -53,14 +52,14 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail                 = "thirdpartydeveloper@example.com".toLaxEmail
+    val userEmail: LaxEmailAddress = "thirdpartydeveloper@example.com".toLaxEmail
     val userPassword              = "password1!"
     val sessionId                 = "sessionId"
-    val loginRequest              = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val loginRequest: LoginRequest = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val accessCode                = "123456"
     val nonce                     = "ABC-123"
-    val mfaId                     = MfaId.random
-    val totpAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
+    val mfaId: MfaId = MfaId.random
+    val totpAuthenticationRequest: AccessCodeAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption        = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue              = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
@@ -70,10 +69,10 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
   "resendVerificationEmail" should {
     "return" in new Setup {
-      val email  = "foo@bar.com".toLaxEmail
-      val userId = UserId.random
+      val email: LaxEmailAddress = "foo@bar.com".toLaxEmail
+      val userId: UserId = UserId.random
 
-      implicit val writes = Json.writes[FindUserIdResponse]
+      implicit val writes: Writes[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))
@@ -139,7 +138,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
 
     "return true when NO_CONTENT is returned" in new Setup {
-      val userId = UserId.random
+      val userId: UserId = UserId.random
 
       stubFor(
         put(urlEqualTo(s"/developer/$userId/email-preferences"))
@@ -155,7 +154,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     }
 
     "throw InvalidEmail when the email is not found" in new Setup {
-      val userId = UserId.random
+      val userId: UserId = UserId.random
 
       stubFor(
         put(urlEqualTo(s"/developer/$userId/email-preferences"))

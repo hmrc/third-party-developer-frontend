@@ -29,9 +29,10 @@ import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
@@ -42,6 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 class ManageResponsibleIndividualControllerSpec
     extends BaseControllerSpec
@@ -100,7 +102,7 @@ class ManageResponsibleIndividualControllerSpec
     val loggedInRequest       = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val responsibleIndividual = ResponsibleIndividual.build("Bob Responsible", "bob@example.com".toLaxEmail)
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     def givenTheApplicationExistWithUserRole(teamMembers: Seq[Collaborator], touAcceptances: List[TermsOfUseAcceptance]) = {
       val application = aStandardApplication.copy(

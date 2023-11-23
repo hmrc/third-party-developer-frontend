@@ -30,24 +30,25 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import play.api.libs.json.Writes
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
 
   case class OutboundRecordAnswersRequest(answers: List[String])
-  implicit val writesOutboundRecordAnswersRequest = Json.writes[OutboundRecordAnswersRequest]
+  implicit val writesOutboundRecordAnswersRequest: Writes[OutboundRecordAnswersRequest] = Json.writes[OutboundRecordAnswersRequest]
 
   case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: LaxEmailAddress)
-  implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
+  implicit val writesApprovalsRequest: Writes[ApprovalsRequest] = Json.writes[ApprovalsRequest]
 
   case class ResponsibleIndividualVerificationRequest(code: String)
-  implicit val writesResponsibleIndividualVerificationRequest = Json.writes[ResponsibleIndividualVerificationRequest]
+  implicit val writesResponsibleIndividualVerificationRequest: Writes[ResponsibleIndividualVerificationRequest] = Json.writes[ResponsibleIndividualVerificationRequest]
 
   case class ConfirmSetupCompleteRequest(requesterEmailAddress: LaxEmailAddress)
-  implicit val writesConfirmSetupCompleteRequest = Json.writes[ConfirmSetupCompleteRequest]
+  implicit val writesConfirmSetupCompleteRequest: Writes[ConfirmSetupCompleteRequest] = Json.writes[ConfirmSetupCompleteRequest]
 
   case class CreateSubmissionRequest(requestedBy: LaxEmailAddress)
-  implicit val readsCreateSubmissionRequest = Json.writes[CreateSubmissionRequest]
+  implicit val readsCreateSubmissionRequest: Writes[CreateSubmissionRequest] = Json.writes[CreateSubmissionRequest]
 }
 
 @Singleton

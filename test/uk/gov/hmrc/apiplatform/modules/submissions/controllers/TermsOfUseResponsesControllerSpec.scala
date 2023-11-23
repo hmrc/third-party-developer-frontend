@@ -65,7 +65,7 @@ class TermsOfUseResponsesControllerSpec
       with HasSubscriptions
       with HasSessionDeveloperFlow {
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val termsOfUseResponsesView = app.injector.instanceOf[TermsOfUseResponsesView]
 

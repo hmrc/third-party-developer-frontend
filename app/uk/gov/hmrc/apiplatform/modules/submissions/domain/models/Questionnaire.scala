@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import cats.data.NonEmptyList
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 
 object AskWhen {
   import Submission.AnswersToQuestions
@@ -68,13 +68,13 @@ object Questionnaire {
   case class Id(value: String)    extends AnyVal
 
   object Label {
-    implicit val format = Json.valueFormat[Label]
+    implicit val format: Format[Label] = Json.valueFormat[Label]
   }
 
   object Id {
     def random = Questionnaire.Id(java.util.UUID.randomUUID.toString)
 
-    implicit val format = Json.valueFormat[Id]
+    implicit val format: Format[Id] = Json.valueFormat[Id]
   }
 }
 

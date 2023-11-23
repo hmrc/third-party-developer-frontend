@@ -17,9 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import java.time.LocalDateTime
-
-import play.api.libs.json.Format
-
+import play.api.libs.json.{Format, OFormat, Reads}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
@@ -81,13 +79,13 @@ case class ResponsibleIndividualUpdateVerification(
 object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
-  implicit val utcReads = DefaultLocalDateTimeReads
+  implicit val utcReads: Reads[LocalDateTime] = DefaultLocalDateTimeReads
 
-  implicit val responsibleIndividualVerificationFormat          = Json.format[ResponsibleIndividualToUVerification]
-  implicit val responsibleIndividualTouUpliftVerificationFormat = Json.format[ResponsibleIndividualTouUpliftVerification]
-  implicit val responsibleIndividualUpdateVerificationFormat    = Json.format[ResponsibleIndividualUpdateVerification]
+  implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification] = Json.format[ResponsibleIndividualToUVerification]
+  implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]
+  implicit val responsibleIndividualUpdateVerificationFormat: OFormat[ResponsibleIndividualUpdateVerification] = Json.format[ResponsibleIndividualUpdateVerification]
 
-  implicit val jsonFormatResponsibleIndividualVerification = Union.from[ResponsibleIndividualVerification]("verificationType")
+  implicit val jsonFormatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Union.from[ResponsibleIndividualVerification]("verificationType")
     .and[ResponsibleIndividualToUVerification]("termsOfUse")
     .and[ResponsibleIndividualTouUpliftVerification]("termsOfUseUplift")
     .and[ResponsibleIndividualUpdateVerification]("adminUpdate")

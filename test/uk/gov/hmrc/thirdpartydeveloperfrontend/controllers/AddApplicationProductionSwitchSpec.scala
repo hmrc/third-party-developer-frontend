@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -79,7 +79,7 @@ class AddApplicationProductionSwitchSpec
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
-    implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
       mock[ErrorHandler],
@@ -178,7 +178,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
@@ -199,7 +199,7 @@ class AddApplicationProductionSwitchSpec
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
 
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
@@ -217,7 +217,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
 
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 
@@ -236,7 +236,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
 
-      implicit val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe OK
 

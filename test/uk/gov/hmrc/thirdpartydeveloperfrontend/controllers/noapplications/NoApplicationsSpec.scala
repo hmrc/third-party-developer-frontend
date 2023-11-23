@@ -48,7 +48,7 @@ class NoApplicationsSpec
   trait Setup extends SessionServiceMock {
     val noApplicationsChoiceView        = app.injector.instanceOf[NoApplicationsChoiceView]
     val startUsingRestApisView          = app.injector.instanceOf[StartUsingRestApisView]
-    implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val noApplicationsController = new NoApplications(
       mock[ErrorHandler],

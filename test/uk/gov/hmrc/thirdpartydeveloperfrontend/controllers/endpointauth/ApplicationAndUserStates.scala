@@ -19,15 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
 import scala.concurrent.Future
-
 import cats.data.NonEmptyList
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
-
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, ContactDetails}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
@@ -41,6 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId   = ApplicationId.random
@@ -188,7 +187,7 @@ trait IsOldJourneyStandardApplication extends HasApplication {
     true,
     true,
     true,
-    Some(ContactDetails(s"$userFirstName $userLastName", userEmail, "01611234567")),
+    Some(ContactDetails(FullName(s"$userFirstName $userLastName"), userEmail, "01611234567")),
     true,
     true,
     true,
@@ -283,7 +282,7 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def loggedInState               = LoggedInState.LOGGED_IN
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
-  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+  when(tpdConnector.findUserId(* [LaxEmailAddress] )(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
 
@@ -304,7 +303,7 @@ trait UserIsNotAuthenticated extends HasUserSession {
   def loggedInState               = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
-  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(None))
+  when(tpdConnector.findUserId(* [LaxEmailAddress] )(*)).thenReturn(Future.successful(None))
 }
 
 trait HasAppDeploymentEnvironment {

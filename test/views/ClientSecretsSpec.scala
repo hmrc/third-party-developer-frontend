@@ -27,7 +27,7 @@ import views.html.{ClientSecretsGeneratedView, ClientSecretsView}
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._

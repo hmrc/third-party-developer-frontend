@@ -31,7 +31,7 @@ import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector

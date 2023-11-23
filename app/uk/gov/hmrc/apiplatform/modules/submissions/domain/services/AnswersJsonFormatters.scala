@@ -21,11 +21,11 @@ trait AnswersJsonFormatters {
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
 
-  implicit val jfAcknowledgedAnswer   = Json.format[AcknowledgedAnswer.type]
-  implicit val jfNoAnswer             = Json.format[NoAnswer.type]
-  implicit val jfTextAnswer           = Json.format[TextAnswer]
-  implicit val jfSingleChoiceAnswer   = Json.format[SingleChoiceAnswer]
-  implicit val jfMultipleChoiceAnswer = Json.format[MultipleChoiceAnswer]
+  implicit val jfAcknowledgedAnswer: OFormat[AcknowledgedAnswer.type] = Json.format[AcknowledgedAnswer.type]
+  implicit val jfNoAnswer: OFormat[NoAnswer.type] = Json.format[NoAnswer.type]
+  implicit val jfTextAnswer: OFormat[TextAnswer] = Json.format[TextAnswer]
+  implicit val jfSingleChoiceAnswer: OFormat[SingleChoiceAnswer] = Json.format[SingleChoiceAnswer]
+  implicit val jfMultipleChoiceAnswer: OFormat[MultipleChoiceAnswer] = Json.format[MultipleChoiceAnswer]
 
   implicit val jfActualAnswer: OFormat[ActualAnswer] = Union.from[ActualAnswer]("answerType")
     .and[MultipleChoiceAnswer]("multipleChoice")

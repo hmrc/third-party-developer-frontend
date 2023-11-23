@@ -83,7 +83,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
       }
 
       def thenReturnFailure() = {
-        when(aMock.confirmSetupComplete(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Left("nope")))
+        when(aMock.confirmSetupComplete(*[ApplicationId], *[LaxEmailAddress] )(*)).thenReturn(successful(Left("nope")))
       }
     }
   }

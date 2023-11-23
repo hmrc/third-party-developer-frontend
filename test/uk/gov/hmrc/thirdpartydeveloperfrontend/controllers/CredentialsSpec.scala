@@ -29,7 +29,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -135,7 +135,7 @@ class CredentialsSpec
     val application                     = createApplication()
     val applicationWithSubscriptionData = ApplicationWithSubscriptionData(application)
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper)
     fetchCredentialsReturns(application, appTokens)

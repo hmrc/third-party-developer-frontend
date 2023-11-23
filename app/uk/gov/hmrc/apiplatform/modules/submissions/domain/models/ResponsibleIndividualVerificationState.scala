@@ -17,11 +17,12 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
+import play.api.libs.json.Format
 
 object ResponsibleIndividualVerificationState extends Enumeration {
   type ResponsibleIndividualVerificationState = Value
 
   val INITIAL, REMINDERS_SENT = Value
 
-  implicit val format = EnumJson.enumFormat(ResponsibleIndividualVerificationState)
+  implicit val format: Format[ResponsibleIndividualVerificationState]  = EnumJson.enumFormat(ResponsibleIndividualVerificationState)
 }

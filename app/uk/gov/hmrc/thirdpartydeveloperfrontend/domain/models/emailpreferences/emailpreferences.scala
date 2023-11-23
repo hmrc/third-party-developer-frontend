@@ -17,9 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
-
-import play.api.libs.json.Json
-
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 case class TaxRegimeInterests(regime: String, services: Set[String]) {
@@ -27,13 +25,13 @@ case class TaxRegimeInterests(regime: String, services: Set[String]) {
 }
 
 object TaxRegimeInterests {
-  implicit val format = Json.format[TaxRegimeInterests]
+  implicit val format: OFormat[TaxRegimeInterests] = Json.format[TaxRegimeInterests]
 }
 
 case class EmailPreferences(interests: List[TaxRegimeInterests], topics: Set[EmailTopic])
 
 object EmailPreferences {
-  implicit val format = Json.format[EmailPreferences]
+  implicit val format: OFormat[EmailPreferences] = Json.format[EmailPreferences]
 
   def noPreferences: EmailPreferences = EmailPreferences(List.empty, Set.empty)
 }
@@ -42,7 +40,7 @@ sealed abstract class EmailTopic(val value: String, val displayName: String, val
 
 object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[EmailTopic] {
 
-  val values = findValues
+  val values: IndexedSeq[EmailTopic] = findValues
 
   case object BUSINESS_AND_POLICY
       extends EmailTopic("BUSINESS_AND_POLICY", "Business and policy", "Policy compliance, legislative changes and business guidance support", 1)
@@ -72,7 +70,7 @@ case class APICategoryDisplayDetails(category: String, name: String) {
 }
 
 object APICategoryDisplayDetails {
-  implicit val formatApiCategory = Json.format[APICategoryDisplayDetails]
+  implicit val formatApiCategory: OFormat[APICategoryDisplayDetails] = Json.format[APICategoryDisplayDetails]
 
-  def from(category: ApiCategory) = APICategoryDisplayDetails(category.toString, category.displayText)
+  def from(category: ApiCategory): APICategoryDisplayDetails = APICategoryDisplayDetails(category.toString, category.displayText)
 }

@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.play.json.Union
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 
 case class ImportantSubmissionData(
@@ -32,7 +31,7 @@ case class ImportantSubmissionData(
   )
 
 object ImportantSubmissionData {
-  implicit val format = Json.format[ImportantSubmissionData]
+  implicit val format: OFormat[ImportantSubmissionData] = Json.format[ImportantSubmissionData]
 }
 
 sealed trait Access {
@@ -44,11 +43,11 @@ sealed trait Access {
 object Access {
   import play.api.libs.json.Json
 
-  implicit val formatStandard   = Json.format[Standard]
-  implicit val formatPrivileged = Json.format[Privileged]
-  implicit val formatROPC       = Json.format[ROPC]
+  implicit val formatStandard: OFormat[Standard] = Json.format[Standard]
+  implicit val formatPrivileged: OFormat[Privileged] = Json.format[Privileged]
+  implicit val formatROPC: OFormat[ROPC] = Json.format[ROPC]
 
-  implicit val format = Union.from[Access]("accessType")
+  implicit val format: OFormat[Access] = Union.from[Access]("accessType")
     .and[Standard](AccessType.STANDARD.toString)
     .and[Privileged](AccessType.PRIVILEGED.toString)
     .and[ROPC](AccessType.ROPC.toString)
@@ -63,19 +62,19 @@ case class Standard(
     sellResellOrDistribute: Option[SellResellOrDistribute] = None,
     importantSubmissionData: Option[ImportantSubmissionData] = None
   ) extends Access {
-  override val accessType = AccessType.STANDARD
+  override val accessType: AccessType = AccessType.STANDARD
 
   lazy val hasSubmissions: Boolean = importantSubmissionData.nonEmpty
 }
 
 case class Privileged(scopes: Set[String] = Set.empty) extends Access {
-  override val accessType = AccessType.PRIVILEGED
+  override val accessType: AccessType = AccessType.PRIVILEGED
 
   val hasSubmissions: Boolean = false
 }
 
 case class ROPC(scopes: Set[String] = Set.empty) extends Access {
-  override val accessType = AccessType.ROPC
+  override val accessType: AccessType = AccessType.ROPC
 
   val hasSubmissions: Boolean = false
 }

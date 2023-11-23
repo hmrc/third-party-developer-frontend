@@ -26,7 +26,7 @@ import views.html.include.LeftHandNav
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
@@ -34,6 +34,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
+import play.api.mvc.AnyContentAsEmpty
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
@@ -43,8 +45,8 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val now                   = LocalDateTime.now(ZoneOffset.UTC)
     val applicationId         = ApplicationId.random
     val clientId              = ClientId("std-client-id")
-    implicit val request      = FakeRequest()
-    implicit val loggedIn     = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
+    implicit val request: FakeRequest[AnyContentAsEmpty.type]      = FakeRequest()
+    implicit val loggedIn: DeveloperSession     = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
     val standardApplication   = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Standard())
     val privilegedApplication = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Privileged())
     val ropcApplication       = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = ROPC())

@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json._
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.utils.JsonFormattersSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec

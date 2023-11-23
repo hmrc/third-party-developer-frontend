@@ -95,7 +95,7 @@ class AddApplicationSuccessSpec
     val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
-    implicit val environmentNameService           = new EnvironmentNameService(appConfig)
+    implicit val environmentNameService: EnvironmentNameService           = new EnvironmentNameService(appConfig)
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
     val sr20UpliftJourneySwitchMock            = mock[UpliftJourneySwitch]
@@ -126,7 +126,7 @@ class AddApplicationSuccessSpec
       flowServiceMock
     )
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)

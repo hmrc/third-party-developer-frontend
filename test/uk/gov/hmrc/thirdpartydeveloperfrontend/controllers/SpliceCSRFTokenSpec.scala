@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class SpliceCSRFTokenSpec @Inject() (csrfConfigProvider: CSRFConfigProvider) extends AsyncHmrcSpec {
 
   trait Setup {
-    implicit val requestHeaderWithToken = mock[RequestHeader]
+    implicit val requestHeaderWithToken: RequestHeader = mock[RequestHeader]
     val csrfConfig                      = csrfConfigProvider.get
     val token                           = Token(csrfConfig.tokenName, "token")
   }

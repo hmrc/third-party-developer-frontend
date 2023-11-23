@@ -91,7 +91,7 @@ class CheckAnswersControllerSpec
       with HasSessionDeveloperFlow
       with HasAppInTestingState {
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockApmConnector     = ApmConnectorMock.aMock
     val mockRequestProdCreds = mock[RequestProductionCredentials]

@@ -17,10 +17,8 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import scala.util.{Success, Try}
-
 import org.apache.commons.validator.routines.EmailValidator
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 sealed trait TextValidation {
   def isValid(text: String): Boolean = this.validate(text).isRight
@@ -50,7 +48,7 @@ sealed trait TextValidation {
 }
 
 object TextValidation {
-  val emailValidator = EmailValidator.getInstance()
+  val emailValidator: EmailValidator = EmailValidator.getInstance()
 
   case object Url                      extends TextValidation
   case class MatchRegex(regex: String) extends TextValidation
@@ -58,11 +56,11 @@ object TextValidation {
 
   import uk.gov.hmrc.play.json.Union
 
-  implicit val formatAsUrl      = Json.format[Url.type]
-  implicit val formatMatchRegex = Json.format[MatchRegex]
-  implicit val formatIsEmail    = Json.format[Email.type]
+  implicit val formatAsUrl: OFormat[Url.type] = Json.format[Url.type]
+  implicit val formatMatchRegex: OFormat[MatchRegex] = Json.format[MatchRegex]
+  implicit val formatIsEmail: OFormat[Email.type] = Json.format[Email.type]
 
-  implicit val formatTextValidation = Union.from[TextValidation]("validationType")
+  implicit val formatTextValidation: OFormat[TextValidation] = Union.from[TextValidation]("validationType")
     .and[Url.type]("url")
     .and[MatchRegex]("regex")
     .and[Email.type]("email")

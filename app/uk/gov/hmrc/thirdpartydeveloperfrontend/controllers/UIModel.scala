@@ -17,9 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import scala.collection.SortedMap
-
-import play.api.libs.json.Json
-
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
@@ -33,11 +31,11 @@ case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISu
 
 case class APISubscriptions(apiHumanReadableAppName: String, apiServiceName: ServiceName, apiContext: ApiContext, subscriptions: Seq[APISubscriptionStatus]) {
 
-  lazy val subscriptionNumberText = subscriptionNumberLabel(subscriptions)
+  lazy val subscriptionNumberText: String = subscriptionNumberLabel(subscriptions)
 
-  def hasSubscriptions = subscriptions.count(_.subscribed) > 0
+  def hasSubscriptions: Boolean = subscriptions.count(_.subscribed) > 0
 
-  def isExpanded = hasSubscriptions
+  def isExpanded: Boolean = hasSubscriptions
 }
 
 object APISubscriptions {
@@ -62,7 +60,7 @@ object APISubscriptions {
     }).toList
   }
 
-  def subscriptionNumberLabel(subscriptions: Seq[APISubscriptionStatus]) = subscriptions.count(_.subscribed) match {
+  def subscriptionNumberLabel(subscriptions: Seq[APISubscriptionStatus]): String = subscriptions.count(_.subscribed) match {
     case 1  => "1 subscription"
     case nr => s"$nr subscriptions"
   }
@@ -71,7 +69,7 @@ object APISubscriptions {
 case class AjaxSubscriptionResponse(apiName: ApiContext, group: String, numberOfSubscriptionText: String)
 
 object AjaxSubscriptionResponse {
-  implicit val format = Json.format[AjaxSubscriptionResponse]
+  implicit val format: OFormat[AjaxSubscriptionResponse] = Json.format[AjaxSubscriptionResponse]
 
   def from(context: ApiContext, version: ApiVersionNbr, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions

@@ -29,7 +29,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, CommandHandlerTypes}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow

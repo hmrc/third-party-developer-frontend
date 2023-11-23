@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._

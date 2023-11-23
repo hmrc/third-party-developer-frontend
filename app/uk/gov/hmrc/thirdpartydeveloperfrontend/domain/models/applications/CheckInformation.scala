@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ContactDetails
+
 case class CheckInformation(
     confirmedName: Boolean = false,
     apiSubscriptionsConfirmed: Boolean = false,

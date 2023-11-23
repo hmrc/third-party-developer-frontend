@@ -54,7 +54,7 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
       def succeeds() = succeedsWith(UserId.random)
 
       def succeedsWith(userId: UserId) =
-        when(aMock.getOrCreateUserId(*[LaxEmailAddress])(*)).thenReturn(successful(userId))
+        when(aMock.getOrCreateUserId(*[LaxEmailAddress] )(*)).thenReturn(successful(userId))
     }
   }
 

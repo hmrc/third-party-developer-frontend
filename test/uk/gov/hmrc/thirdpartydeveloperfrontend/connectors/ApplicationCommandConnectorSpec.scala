@@ -26,8 +26,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborators.Administrator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Administrator
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, DispatchRequest, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, UserId, _}
@@ -66,7 +66,7 @@ class ApplicationCommandConnectorSpec
   val developer     = Collaborators.Developer(UserId.random, "someone@example.com".toLaxEmail)
 
   val authToken   = "Bearer Token"
-  implicit val hc = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
+  implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
 
   val emailAddressToRemove = "toRemove@example.com".toLaxEmail
   val gatekeeperUserName   = "maxpower"

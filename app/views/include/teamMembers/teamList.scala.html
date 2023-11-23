@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SpliceCSRFToken
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @(app: Application,role: Collaborator.Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 

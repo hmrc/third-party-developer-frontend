@@ -19,10 +19,11 @@ package uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import play.api.libs.json.OFormat
 
 case class DispatchSuccessResult(applicationResponse: Application)
 
 object DispatchSuccessResult {
 
-  implicit val format = Json.format[DispatchSuccessResult]
+  implicit val format: OFormat[DispatchSuccessResult] = Json.format[DispatchSuccessResult]
 }

@@ -41,7 +41,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
       .build()
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val connector = app.injector.instanceOf[DeskproConnector]
   }

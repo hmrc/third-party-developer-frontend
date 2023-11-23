@@ -20,7 +20,6 @@ import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
-
 import org.jsoup.Jsoup
 import org.mockito.invocation.InvocationOnMock
 import views.html.checkpages._
@@ -28,15 +27,13 @@ import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
-
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator, ContactDetails}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -50,6 +47,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec
@@ -200,14 +198,14 @@ class CheckYourAnswersSpec
 
     givenApplicationNameIsValid()
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
 
-    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678")))
+    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails(FullName("Tester"), "tester@example.com".toLaxEmail, "12345678")))
 
     def givenApplicationExists(
         appId: ApplicationId = appId,
@@ -265,7 +263,7 @@ class CheckYourAnswersSpec
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
           apiSubscriptionConfigurationsConfirmed = true,
-          Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
+          Some(ContactDetails(FullName("Example Name"), "name@example.com".toLaxEmail, "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,

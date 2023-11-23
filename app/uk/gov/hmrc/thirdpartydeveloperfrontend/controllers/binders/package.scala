@@ -22,7 +22,7 @@ import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
@@ -62,7 +62,7 @@ package object binders {
     }
   }
 
-  implicit def apiContextQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApiContext] {
+  implicit def apiContextQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ApiContext] = new QueryStringBindable[ApiContext] {
 
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApiContext]] = {
       for {
@@ -109,7 +109,7 @@ package object binders {
     }
   }
 
-  implicit def apiVersionQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApiVersionNbr] {
+  implicit def apiVersionQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ApiVersionNbr] = new QueryStringBindable[ApiVersionNbr] {
 
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApiVersionNbr]] = {
       for {
@@ -171,7 +171,7 @@ package object binders {
       }
     }
 
-  implicit def mfaTypeQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[MfaType] {
+  implicit def mfaTypeQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[MfaType] = new QueryStringBindable[MfaType] {
 
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, MfaType]] = {
       for {
@@ -189,7 +189,7 @@ package object binders {
     }
   }
 
-  implicit def mfaActionQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[MfaAction] {
+  implicit def mfaActionQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[MfaAction] = new QueryStringBindable[MfaAction] {
 
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, MfaAction]] = {
       for {
@@ -222,7 +222,7 @@ package object binders {
     }
   }
 
-  implicit def applicationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]) = new QueryStringBindable[ApplicationId] {
+  implicit def applicationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[ApplicationId] = new QueryStringBindable[ApplicationId] {
 
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ApplicationId]] = {
       textBinder.bind(key, params).map(_.flatMap(applicationIdFromString))

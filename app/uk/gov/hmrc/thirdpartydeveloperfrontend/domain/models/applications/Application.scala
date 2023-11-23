@@ -20,7 +20,8 @@ import java.time.{LocalDateTime, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, GrantLength}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
@@ -49,7 +50,7 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress.equalsIgnoreCase(email)).map(_.role)
+  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
   def roleForCollaborator(userId: UserId): Option[Collaborator.Role] = collaborators.find(_.userId == userId).map(_.role)
 

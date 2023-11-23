@@ -18,9 +18,8 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import java.time.LocalDateTime
 import java.util.UUID
-
 import cats.data.NonEmptyList
-
+import play.api.libs.json.Format
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 sealed trait QuestionnaireState
@@ -68,7 +67,7 @@ object Submission {
   }
 
   object Id {
-    implicit val format = play.api.libs.json.Json.valueFormat[Id]
+    implicit val format: Format[Id] = play.api.libs.json.Json.valueFormat[Id]
 
     def random: Id = Id(UUID.randomUUID().toString())
   }
@@ -139,16 +138,16 @@ object Submission {
   sealed trait Status {
     def timestamp: LocalDateTime
 
-    def isOpenToAnswers = isCreated || isAnswering
+    def isOpenToAnswers: Boolean = isCreated || isAnswering
 
-    def canBeMarked = isAnsweredCompletely || isSubmitted || isDeclined || isGranted || isGrantedWithWarnings || isFailed || isWarnings || isPendingResponsibleIndividual
+    def canBeMarked: Boolean = isAnsweredCompletely || isSubmitted || isDeclined || isGranted || isGrantedWithWarnings || isFailed || isWarnings || isPendingResponsibleIndividual
 
-    def isAnsweredCompletely = this match {
+    def isAnsweredCompletely: Boolean = this match {
       case Submission.Status.Answering(_, completed) => completed
       case _                                         => false
     }
 
-    def isReadOnly = this match {
+    def isReadOnly: Boolean = this match {
       case _: Submission.Status.Submitted                    => true
       case _: Submission.Status.Granted                      => true
       case _: Submission.Status.GrantedWithWarnings          => true
@@ -159,47 +158,47 @@ object Submission {
       case _                                                 => false
     }
 
-    def isCreated = this match {
+    def isCreated: Boolean = this match {
       case _: Submission.Status.Created => true
       case _                            => false
     }
 
-    def isAnswering = this match {
+    def isAnswering: Boolean = this match {
       case _: Submission.Status.Answering => true
       case _                              => false
     }
 
-    def isSubmitted = this match {
+    def isSubmitted: Boolean = this match {
       case _: Submission.Status.Submitted => true
       case _                              => false
     }
 
-    def isGranted = this match {
+    def isGranted: Boolean = this match {
       case _: Submission.Status.Granted => true
       case _                            => false
     }
 
-    def isGrantedWithWarnings = this match {
+    def isGrantedWithWarnings: Boolean = this match {
       case _: Submission.Status.GrantedWithWarnings => true
       case _                                        => false
     }
 
-    def isDeclined = this match {
+    def isDeclined: Boolean = this match {
       case _: Submission.Status.Declined => true
       case _                             => false
     }
 
-    def isFailed = this match {
+    def isFailed: Boolean = this match {
       case _: Submission.Status.Failed => true
       case _                           => false
     }
 
-    def isWarnings = this match {
+    def isWarnings: Boolean = this match {
       case _: Submission.Status.Warnings => true
       case _                             => false
     }
 
-    def isPendingResponsibleIndividual = this match {
+    def isPendingResponsibleIndividual: Boolean = this match {
       case _: Submission.Status.PendingResponsibleIndividual => true
       case _                                                 => false
     }
@@ -285,18 +284,18 @@ object Submission {
     ) {
     lazy val status: Status = statusHistory.head
 
-    lazy val isOpenToAnswers      = status.isOpenToAnswers
-    lazy val isAnsweredCompletely = status.isAnsweredCompletely
+    lazy val isOpenToAnswers: Boolean = status.isOpenToAnswers
+    lazy val isAnsweredCompletely: Boolean = status.isAnsweredCompletely
 
-    lazy val isCreated                      = status.isCreated
-    lazy val isAnswering                    = status.isAnswering
-    lazy val isFailed                       = status.isFailed
-    lazy val isWarnings                     = status.isWarnings
-    lazy val isPendingResponsibleIndividual = status.isPendingResponsibleIndividual
-    lazy val isGranted                      = status.isGranted
-    lazy val isGrantedWithWarnings          = status.isGrantedWithWarnings
-    lazy val isDeclined                     = status.isDeclined
-    lazy val isSubmitted                    = status.isSubmitted
+    lazy val isCreated: Boolean = status.isCreated
+    lazy val isAnswering: Boolean = status.isAnswering
+    lazy val isFailed: Boolean = status.isFailed
+    lazy val isWarnings: Boolean = status.isWarnings
+    lazy val isPendingResponsibleIndividual: Boolean = status.isPendingResponsibleIndividual
+    lazy val isGranted: Boolean = status.isGranted
+    lazy val isGrantedWithWarnings: Boolean = status.isGrantedWithWarnings
+    lazy val isDeclined: Boolean = status.isDeclined
+    lazy val isSubmitted: Boolean = status.isSubmitted
   }
 }
 
@@ -322,7 +321,7 @@ case class Submission(
       )
     )
 
-  lazy val latestInstance = instances.head
+  lazy val latestInstance: Submission.Instance = instances.head
 
   lazy val status: Submission.Status = latestInstance.statusHistory.head
 }
@@ -336,7 +335,7 @@ case class MarkedSubmission(
     submission: Submission,
     markedAnswers: Map[Question.Id, Mark]
   ) {
-  lazy val isFail = markedAnswers.values.toList.contains(Fail) | markedAnswers.values.filter(_ == Warn).size >= 4
-  lazy val isWarn = markedAnswers.values.toList.contains(Warn)
-  lazy val isPass = !isWarn && !isFail
+  lazy val isFail: Boolean = markedAnswers.values.toList.contains(Fail) | markedAnswers.values.filter(_ == Warn).size >= 4
+  lazy val isWarn: Boolean = markedAnswers.values.toList.contains(Warn)
+  lazy val isPass: Boolean = !isWarn && !isFail
 }

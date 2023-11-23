@@ -39,7 +39,7 @@ case class APISubscriptionStatus(
     }
   }
 
-  lazy val apiIdentifier = ApiIdentifier(context, apiVersion.versionNbr)
+  lazy val apiIdentifier: ApiIdentifier = ApiIdentifier(context, apiVersion.versionNbr)
 }
 
 case class APISubscriptionStatusWithSubscriptionFields(

@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @Singleton
 class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
 
-  implicit val crypto = localCrypto
+  implicit val crypto: LocalCrypto = localCrypto
 
   def encrypt[T](payload: T)(implicit writes: Writes[T]): JsValue = {
     val encryptor = new JsonEncryptor[T]()(crypto, writes)

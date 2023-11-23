@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecretResponse
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecretResponse
 
 case class ApplicationToken(clientSecrets: List[ClientSecretResponse], accessToken: String)
 

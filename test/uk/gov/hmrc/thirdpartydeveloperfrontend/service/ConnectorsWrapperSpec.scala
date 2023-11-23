@@ -37,7 +37,7 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
   val mockAppConfig = mock[ApplicationConfig]
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val connectors = new ConnectorsWrapper(
       mock[ThirdPartyApplicationSandboxConnector],

@@ -18,18 +18,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application => PlayApplication, Configuration, Mode}
+import play.api.{Configuration, Mode, Application => PlayApplication}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, ContactDetails}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -37,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
     with CollaboratorTracker with LocalUserIdTracker with FixedClock {
@@ -102,7 +100,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"))
     )
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
   }
 
   trait Setup extends BaseSetup {
@@ -360,7 +358,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   }
 
   "updateApproval" should {
-    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails("name", "email".toLaxEmail, "telephone")))
+    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails(FullName("name"), "email".toLaxEmail, "telephone")))
     val url           = s"/application/${applicationId}/check-information"
 
     "return success response in case of a 204 on backend " in new Setup {

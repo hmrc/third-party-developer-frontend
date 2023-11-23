@@ -73,7 +73,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       title.get
     }
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val confirmApisView                    = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView              = app.injector.instanceOf[TurnOffApisMasterView]

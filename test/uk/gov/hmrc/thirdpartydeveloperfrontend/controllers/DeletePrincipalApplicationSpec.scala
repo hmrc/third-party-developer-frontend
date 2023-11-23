@@ -75,7 +75,7 @@ class DeletePrincipalApplicationSpec
 
     val loggedInDeveloper = DeveloperSession(session)
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val application = Application(
       appId,

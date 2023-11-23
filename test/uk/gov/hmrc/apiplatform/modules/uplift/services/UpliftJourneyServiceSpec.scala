@@ -58,7 +58,7 @@ class UpliftJourneyServiceSpec
     val sandboxAppId = ApplicationId.random
     val prodAppId    = ApplicationId.random
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
@@ -257,7 +257,7 @@ class UpliftJourneyServiceSpec
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApplicationServiceMock.updateApplicationSuccessful()
-      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress] )(*)).thenReturn(successful(Some(aSubmission)))
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 

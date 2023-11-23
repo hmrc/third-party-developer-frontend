@@ -28,8 +28,8 @@ case class GetProductionCredentialsFlow(
 }
 
 object GetProductionCredentialsFlow {
-  import play.api.libs.json.Json
-  implicit val format = Json.format[GetProductionCredentialsFlow]
+  import play.api.libs.json.{Json, OFormat}
+  implicit val format: OFormat[GetProductionCredentialsFlow] = Json.format[GetProductionCredentialsFlow]
 
   def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None, None)
 }

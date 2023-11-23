@@ -34,9 +34,14 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
+  PrivacyPolicyLocation,
+  PrivacyPolicyLocations,
+  TermsAndConditionsLocation,
+  TermsAndConditionsLocations
+}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -49,6 +54,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import play.api.libs.json.OFormat
 
 class DetailsSpec
     extends BaseControllerSpec
@@ -389,7 +396,7 @@ class DetailsSpec
     "show success page if name changed successfully" in new Setup {
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
-      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*))
+      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress] )(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
@@ -397,7 +404,7 @@ class DetailsSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*)
+      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress] )(*)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 
@@ -876,7 +883,7 @@ class DetailsSpec
       }
     }
 
-    implicit val format = Json.format[EditApplicationForm]
+    implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
 
     implicit class ChangeDetailsAppAugment(val app: Application) {
       private val appAccess = app.access.asInstanceOf[Standard]

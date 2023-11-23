@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.Combined
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
+import play.api.libs.json.Writes
 
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
@@ -39,8 +40,8 @@ object ApmConnector {
 
   case class RequestUpliftV2(upliftRequest: UpliftData)
 
-  implicit val writesV1 = play.api.libs.json.Json.writes[RequestUpliftV1]
-  implicit val writesV2 = play.api.libs.json.Json.writes[RequestUpliftV2]
+  implicit val writesV1: Writes[RequestUpliftV1] = play.api.libs.json.Json.writes[RequestUpliftV1]
+  implicit val writesV2: Writes[RequestUpliftV2] = play.api.libs.json.Json.writes[RequestUpliftV2]
 }
 
 @Singleton

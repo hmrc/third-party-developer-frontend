@@ -17,16 +17,14 @@
 package views
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.Assertion
 import views.helper.{CommonViewSpec, EnvironmentNameService}
 import views.html.ManageApplicationsView
 import views.html.noapplications.StartUsingRestApisView
-
 import play.api.test.FakeRequest
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -61,8 +59,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   val environmentNameService = new EnvironmentNameService(appConfig)
 
   trait EnvNames {
-    def principalCapitalized   = principal.capitalize
-    def subordinateCapitalized = subordinate.capitalize
+    def principalCapitalized: String = principal.capitalize
+    def subordinateCapitalized: String = subordinate.capitalize
     def principal: String
     def subordinate: String
     def subordinateWording: String
@@ -83,52 +81,52 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   trait Setup {
     self: EnvNames =>
 
-    def showsHeading()(implicit document: Document) =
+    def showsHeading()(implicit document: Document): Assertion =
       elementExistsByText(document, "h1", "View all applications") shouldBe true
 
-    def showsAppName(appName: String)(implicit document: Document) =
+    def showsAppName(appName: String)(implicit document: Document): Assertion =
       elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName) shouldBe true
 
-    def showsSubordinateAppsHeading()(implicit document: Document) =
+    def showsSubordinateAppsHeading()(implicit document: Document): Assertion =
       elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe true
 
-    def showsPrincipalAppsHeading()(implicit document: Document) =
+    def showsPrincipalAppsHeading()(implicit document: Document): Assertion =
       elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe true
 
-    def showsTermsOfUseOutstandingBox()(implicit document: Document) =
+    def showsTermsOfUseOutstandingBox()(implicit document: Document): Assertion =
       elementExistsByText(document, "h2", "Important") shouldBe true
 
-    def hidesTermsOfUseOutstandingBox()(implicit document: Document) =
+    def hidesTermsOfUseOutstandingBox()(implicit document: Document): Assertion =
       elementExistsByText(document, "h2", "Important") shouldBe false
 
-    def showsTermsOfUseReviewBox()(implicit document: Document) =
+    def showsTermsOfUseReviewBox()(implicit document: Document): Assertion =
       elementExistsByText(document, "h2", "Terms of use") shouldBe true
 
-    def hidesTermsOfUseReviewBox()(implicit document: Document) =
+    def hidesTermsOfUseReviewBox()(implicit document: Document): Assertion =
       elementExistsByText(document, "h2", "Terms of use") shouldBe false
 
-    def hidesSubordinateAppsHeading()(implicit document: Document) =
+    def hidesSubordinateAppsHeading()(implicit document: Document): Assertion =
       elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe false
 
-    def hidesPrincipalAppsHeading()(implicit document: Document) =
+    def hidesPrincipalAppsHeading()(implicit document: Document): Assertion =
       elementExistsByText(document, "th", s"$principalCapitalized applications") shouldBe false
 
-    def showsGetCredentialsButton()(implicit document: Document) =
+    def showsGetCredentialsButton()(implicit document: Document): Assertion =
       isGreenAddProductionApplicationButtonVisible(document) shouldBe true
 
-    def hidesGetCredentialsButton()(implicit document: Document) =
+    def hidesGetCredentialsButton()(implicit document: Document): Assertion =
       isGreenAddProductionApplicationButtonVisible(document) shouldBe false
 
-    def showsAfterTestingMessage()(implicit document: Document) =
+    def showsAfterTestingMessage()(implicit document: Document): Assertion =
       elementExistsByText(document, "p", s"After testing in ${subordinateWording}, you can apply for ${principal.toLowerCase} credentials.") shouldBe true
 
-    def hidesAfterTestingMessage()(implicit document: Document) =
+    def hidesAfterTestingMessage()(implicit document: Document): Assertion =
       elementExistsByText(document, "p", s"After testing in ${subordinateWording}, you can apply for ${principal.toLowerCase} credentials.") shouldBe false
 
-    def showsPriviledAppsMessage()(implicit document: Document) =
+    def showsPriviledAppsMessage()(implicit document: Document): Assertion =
       elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe true
 
-    def hidesPriviledAppsMessage()(implicit document: Document) =
+    def hidesPriviledAppsMessage()(implicit document: Document): Assertion =
       elementExistsByText(document, "h2", "Using privileged application credentials") shouldBe false
 
     when(appConfig.nameOfPrincipalEnvironment).thenReturn(principal)
@@ -200,13 +198,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the application page when an application exists" should {
       "show the heading when there is a sandbox app" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
 
         showsHeading()
       }
 
       "show the heading when there is a production app" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
 
         showsHeading()
       }
@@ -214,7 +212,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with correct app headings" should {
       "work in Prod/Sandbox with prod and sandbox apps" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -222,7 +220,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Prod/Sandbox with prod apps" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
 
         showsAppName(appName)
         hidesSubordinateAppsHeading()
@@ -230,7 +228,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Prod/Sandbox with sandbox apps" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -238,7 +236,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Qa/Dev with appropriate heading labels" in new QaAndDev with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -248,9 +246,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with outstanding terms of use box" should {
       "work in Qa/Dev with invites to display" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
 
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -260,7 +258,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Qa/Dev with no invites to display" in new QaAndDev with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), List.empty).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), List.empty).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -272,10 +270,10 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with no outstanding terms of use box" should {
       "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
-        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
-        val submissions = List(grantedSubmission)
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val submissions: List[Submission] = List(grantedSubmission)
 
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -287,10 +285,10 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with review terms of use box" should {
       "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
-        val invites     = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
-        val submissions = List(submittedSubmission)
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val submissions: List[Submission] = List(submittedSubmission)
 
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -300,9 +298,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
-        val invites = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
 
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
 
         showsAppName(appName)
         showsSubordinateAppsHeading()
@@ -314,7 +312,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "handling application information" should {
       "show no api called and user role" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
 
         showsAppName(appName)
         elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe true
@@ -322,10 +320,10 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "show the last access and user role" in new ProdAndET with Setup {
-        val datetime          = LocalDateTime.now(ZoneOffset.UTC)
-        val datetimeText      = DateFormatter.standardFormatter.format(datetime)
-        val calledApp         = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
-        implicit val document = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
+        val datetime: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+        val datetimeText: String = DateFormatter.standardFormatter.format(datetime)
+        val calledApp: Seq[ApplicationSummary] = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
+        implicit val document: Document = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
 
         showsAppName(appName)
         elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe false
@@ -337,21 +335,21 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "handle credentials button" should {
       "show when sandbox app is upliftable" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set(applicationId)).body)
 
         showsGetCredentialsButton()
         showsAfterTestingMessage()
       }
 
       "hides when sandbox app is not upliftable" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set.empty).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, Seq.empty, Set.empty).body)
 
         hidesGetCredentialsButton()
         hidesAfterTestingMessage()
       }
 
       "hides when production app is present even when upliftable sandbox app is present" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId)).body)
 
         hidesGetCredentialsButton()
         hidesAfterTestingMessage()
@@ -360,9 +358,9 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "handling of privileged applications" should {
       "show using privileged application credentials text if user is a collaborator on at least one privileged application" in new ProdAndET with Setup {
-        val priviledgedAppSummaries = productionAppSummaries.map(_.copy(accessType = AccessType.PRIVILEGED))
+        val priviledgedAppSummaries: Seq[ApplicationSummary] = productionAppSummaries.map(_.copy(accessType = AccessType.PRIVILEGED))
 
-        implicit val document = Jsoup.parse(renderPage(Seq.empty, priviledgedAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(Seq.empty, priviledgedAppSummaries, Set(applicationId)).body)
 
         showsAppName(appName)
 
@@ -370,7 +368,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "hide using privileged application credentials text if user is not a collaborator on at least one privileged application" in new ProdAndET with Setup {
-        implicit val document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
+        implicit val document: Document = Jsoup.parse(renderPage(Seq.empty, productionAppSummaries, Set(applicationId)).body)
 
         showsAppName(appName)
 
@@ -390,17 +388,17 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     }
 
     "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new ProdAndET with Setup {
-      val appSummaries = Seq()
+      val appSummaries: Seq[Nothing] = Seq()
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document: Document = Jsoup.parse(renderPage(appSummaries).body)
 
       elementExistsByText(document, "h1", "Start using our REST APIs") shouldBe true
     }
 
     "show the empty nest page when there are no applications when environment is QA/Dev" in new QaAndDev with Setup {
-      val appSummaries = Seq()
+      val appSummaries: Seq[Nothing] = Seq()
 
-      val document = Jsoup.parse(renderPage(appSummaries).body)
+      val document: Document = Jsoup.parse(renderPage(appSummaries).body)
 
       elementExistsByText(document, "h1", "Start using our REST APIs") shouldBe true
     }

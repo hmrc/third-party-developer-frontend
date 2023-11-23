@@ -18,23 +18,22 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalatest.Assertion
+import play.api.mvc.AnyContentAsEmpty
 import views.helper.CommonViewSpec
-
 import play.api.test.FakeRequest
-
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {
-  implicit val request             = FakeRequest()
-  val securityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
-  val authAppMfaDetail             = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)
-  val smsMfaDetail                 = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), mobileNumber = "1234567890", verified = true)
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  val securityPreferencesItemsView: SecurityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
+  val authAppMfaDetail: AuthenticatorAppMfaDetailSummary = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)
+  val smsMfaDetail: SmsMfaDetailSummary = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), mobileNumber = "1234567890", verified = true)
 
   "SecurityPreferencesItems view" should {
 
@@ -68,7 +67,7 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
     }
   }
 
-  def verifyMfaRow(document: Document, mfaDetail: MfaDetail, rowId: Int, shouldShowCreatedDate: Boolean) = {
+  def verifyMfaRow(document: Document, mfaDetail: MfaDetail, rowId: Int, shouldShowCreatedDate: Boolean): Assertion = {
     document.getElementById("description").text shouldBe "This is how you get your access codes."
     val mfaTypeField = Option(document.getElementById(s"mfaType-$rowId"))
     mfaTypeField should not be None

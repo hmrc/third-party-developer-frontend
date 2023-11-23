@@ -87,7 +87,7 @@ class QuestionControllerSpec
       with HasAppInTestingState
       with AppendedClues {
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val questionView     = app.injector.instanceOf[QuestionView]
     val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
