@@ -53,7 +53,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     val riVerification        = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
       applicationId,
-      Submission.Id.random,
+      SubmissionId.random,
       0,
       "App name",
       LocalDateTime.now(ZoneOffset.UTC),
@@ -113,7 +113,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val riVerificationUplift = ResponsibleIndividualTouUpliftVerification(
         ResponsibleIndividualVerificationId(code),
         applicationId,
-        Submission.Id.random,
+        SubmissionId.random,
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),
@@ -148,7 +148,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val riVerificationUplift = ResponsibleIndividualTouUpliftVerification(
         ResponsibleIndividualVerificationId(code),
         applicationId,
-        Submission.Id.random,
+        SubmissionId.random,
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),
@@ -174,7 +174,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val riUpdateVerification = ResponsibleIndividualUpdateVerification(
         ResponsibleIndividualVerificationId(code),
         applicationId,
-        Submission.Id.random,
+        SubmissionId.random,
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),

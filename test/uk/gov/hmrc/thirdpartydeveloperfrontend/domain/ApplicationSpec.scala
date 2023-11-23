@@ -32,6 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
@@ -49,7 +50,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     Set(ServerLocation.InUK),
     TermsAndConditionsLocations.InDesktopSoftware,
     PrivacyPolicyLocations.InDesktopSoftware,
-    List(TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.now().minusYears(1), Submission.Id.random, 0))
+    List(TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.now().minusYears(1), SubmissionId.random, 0))
   )
 
   describe("Application.canViewCredentials()") {

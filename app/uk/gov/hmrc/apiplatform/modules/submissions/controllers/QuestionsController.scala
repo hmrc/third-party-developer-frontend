@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 object QuestionsController {
   case class ErrorMessage(message: String)
@@ -72,7 +73,7 @@ class QuestionsController @Inject() (
   import QuestionsController._
 
   private def processQuestion(
-      submissionId: Submission.Id,
+      submissionId: SubmissionId,
       questionId: Question.Id,
       onFormAnswer: Option[ActualAnswer],
       errorInfo: Option[ErrorInfo]
@@ -98,20 +99,20 @@ class QuestionsController @Inject() (
       .fold[Result](BadRequest(_), identity(_))
   }
 
-  def showQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
+  def showQuestion(submissionId: SubmissionId, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
       processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
-  def updateQuestion(submissionId: Submission.Id, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
+  def updateQuestion(submissionId: SubmissionId, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
       processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
   private def processAnswer(
-      submissionId: Submission.Id,
+      submissionId: SubmissionId,
       questionId: Question.Id
     )(
       success: (ExtendedSubmission) => Future[Result]
@@ -169,7 +170,7 @@ class QuestionsController @Inject() (
       .flatten
   }
 
-  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id): Action[AnyContent] = withSubmission(submissionId) { implicit request =>
+  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id): Action[AnyContent] = withSubmission(submissionId) { implicit request =>
     val success = (extSubmission: ExtendedSubmission) => {
       val questionnaire = extSubmission.submission.findQuestionnaireContaining(questionId).get
       val nextQuestion  = extSubmission.questionnaireProgress.get(questionnaire.id)
@@ -185,7 +186,7 @@ class QuestionsController @Inject() (
     processAnswer(submissionId, questionId)(success)
   }
 
-  def updateAnswer(submissionId: Submission.Id, questionId: Question.Id): Action[AnyContent] = withSubmission(submissionId) { implicit request =>
+  def updateAnswer(submissionId: SubmissionId, questionId: Question.Id): Action[AnyContent] = withSubmission(submissionId) { implicit request =>
     def hasQuestionBeenAnswered(questionId: Question.Id) = {
       request.submission.latestInstance.answersToQuestions.get(questionId).fold(false)(_ => true)
     }

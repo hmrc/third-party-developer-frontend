@@ -43,6 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullNam
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId   = ApplicationId.random
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
   val clientId        = ClientId.random
   val applicationName = "my app"
   val createdOn       = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
@@ -150,7 +151,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
 
   lazy val allPossibleSubscriptions            = List(defaultApiDefinition)
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
-  lazy val submissionId                        = Submission.Id.random
+
   lazy val submissionIndex                     = 1
   lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com".toLaxEmail)
 

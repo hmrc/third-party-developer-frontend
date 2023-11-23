@@ -73,7 +73,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     val riVerification: ResponsibleIndividualVerification = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
       ApplicationId.random,
-      Submission.Id.random,
+      SubmissionId.random,
       0,
       "App name",
       LocalDateTime.now(ZoneOffset.UTC),

@@ -53,26 +53,26 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     object Fetch {
 
       def thenReturns(out: ExtendedSubmission) = {
-        when(aMock.fetch(*[Submission.Id])(*)).thenReturn(successful(Some(out)))
+        when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(Some(out)))
       }
 
       def thenReturnsNone() = {
-        when(aMock.fetch(*[Submission.Id])(*)).thenReturn(successful(None))
+        when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(None))
       }
     }
 
     object RecordAnswer {
 
       def thenReturns(out: ExtendedSubmission) = {
-        when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Right(out)))
+        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], *)(*)).thenReturn(successful(Right(out)))
       }
 
       def thenReturnsForAnswer(answer: List[String], out: ExtendedSubmission) = {
-        when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], eqTo(answer))(*)).thenReturn(successful(Right(out)))
+        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], eqTo(answer))(*)).thenReturn(successful(Right(out)))
       }
 
       def thenReturnsNone() = {
-        when(aMock.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
+        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
       }
     }
 

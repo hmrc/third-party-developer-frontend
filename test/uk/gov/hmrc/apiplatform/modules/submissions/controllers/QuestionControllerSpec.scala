@@ -276,7 +276,7 @@ class QuestionControllerSpec
     "succeed when given an answer and redirect to check answers page if no more questions need answering" in new Setup {
       val fullyAnsweredSubmission = Submission.create(
         "bob@example.com",
-        Submission.Id.random,
+        SubmissionId.random,
         applicationId,
         LocalDateTime.now(ZoneOffset.UTC),
         testGroups,
@@ -301,7 +301,7 @@ class QuestionControllerSpec
     "succeed when given an answer and redirect to the next question to answer" in new Setup {
       val fullyAnsweredSubmission = Submission.create(
         "bob@example.com",
-        Submission.Id.random,
+        SubmissionId.random,
         applicationId,
         LocalDateTime.now(ZoneOffset.UTC),
         testGroups,

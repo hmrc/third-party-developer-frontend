@@ -44,6 +44,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 class ManageResponsibleIndividualControllerSpec
     extends BaseControllerSpec
@@ -137,8 +138,8 @@ class ManageResponsibleIndividualControllerSpec
       givenTheApplicationExistWithUserRole(
         List(user),
         List(
-          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), Submission.Id.random, 0),
-          TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), Submission.Id.random, 0)
+          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), SubmissionId.random, 0),
+          TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), SubmissionId.random, 0)
         )
       )
 

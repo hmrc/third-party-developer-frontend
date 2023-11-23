@@ -22,6 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -34,7 +35,7 @@ object ResponsibleIndividualVerificationId {
 sealed trait ResponsibleIndividualVerification {
   def id: ResponsibleIndividualVerificationId
   def applicationId: ApplicationId
-  def submissionId: Submission.Id
+  def submissionId: SubmissionId
   def submissionInstance: Int
   def applicationName: String
   def createdOn: LocalDateTime
@@ -44,7 +45,7 @@ sealed trait ResponsibleIndividualVerification {
 case class ResponsibleIndividualToUVerification(
     id: ResponsibleIndividualVerificationId,
     applicationId: ApplicationId,
-    submissionId: Submission.Id,
+    submissionId: SubmissionId,
     submissionInstance: Int,
     applicationName: String,
     createdOn: LocalDateTime,
@@ -54,7 +55,7 @@ case class ResponsibleIndividualToUVerification(
 case class ResponsibleIndividualTouUpliftVerification(
     id: ResponsibleIndividualVerificationId,
     applicationId: ApplicationId,
-    submissionId: Submission.Id,
+    submissionId: SubmissionId,
     submissionInstance: Int,
     applicationName: String,
     createdOn: LocalDateTime,
@@ -66,7 +67,7 @@ case class ResponsibleIndividualTouUpliftVerification(
 case class ResponsibleIndividualUpdateVerification(
     id: ResponsibleIndividualVerificationId,
     applicationId: ApplicationId,
-    submissionId: Submission.Id,
+    submissionId: SubmissionId,
     submissionInstance: Int,
     applicationName: String,
     createdOn: LocalDateTime,

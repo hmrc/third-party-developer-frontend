@@ -25,6 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
 class TermsOfUseServiceSpec extends HmrcSpec {
@@ -63,7 +64,7 @@ class TermsOfUseServiceSpec extends HmrcSpec {
   val version1_2                 = "1.2"
   val appWithNoAgreements        = buildApplication()
   val checkInfoAgreement         = TermsOfUseAgreement(email, timestamp, version1_2)
-  val stdAppAgreement            = TermsOfUseAcceptance(responsibleIndividual, timestamp, Submission.Id.random, 0)
+  val stdAppAgreement            = TermsOfUseAcceptance(responsibleIndividual, timeSubmissionIdstamp, Submission.Id.random, 0)
   val appWithCheckInfoAgreements = buildApplication(Some(List(checkInfoAgreement)))
   val appWithStdAppAgreements    = buildApplication(None, Some(List(stdAppAgreement)))
   val nonStdApp                  = buildApplication().copy(access = Privileged())

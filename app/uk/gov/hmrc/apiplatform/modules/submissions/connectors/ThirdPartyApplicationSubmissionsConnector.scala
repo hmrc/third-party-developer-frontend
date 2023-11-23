@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import play.api.libs.json.Writes
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
@@ -66,7 +67,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   val environment = Environment.PRODUCTION
 
-  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
 
@@ -97,7 +98,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchSubmission(id: Submission.Id)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
     }

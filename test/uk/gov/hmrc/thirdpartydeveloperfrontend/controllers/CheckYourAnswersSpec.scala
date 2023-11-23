@@ -48,6 +48,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 class CheckYourAnswersSpec
     extends BaseControllerSpec

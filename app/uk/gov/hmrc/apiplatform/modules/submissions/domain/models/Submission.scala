@@ -21,6 +21,7 @@ import java.util.UUID
 import cats.data.NonEmptyList
 import play.api.libs.json.Format
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 sealed trait QuestionnaireState
 
@@ -74,7 +75,7 @@ object Submission {
 
   val create: (
       String,
-      Submission.Id,
+      SubmissionId,
       ApplicationId,
       LocalDateTime,
       NonEmptyList[GroupOfQuestionnaires],
@@ -300,7 +301,7 @@ object Submission {
 }
 
 case class Submission(
-    id: Submission.Id,
+    id: SubmissionId,
     applicationId: ApplicationId,
     startedOn: LocalDateTime,
     groups: NonEmptyList[GroupOfQuestionnaires],

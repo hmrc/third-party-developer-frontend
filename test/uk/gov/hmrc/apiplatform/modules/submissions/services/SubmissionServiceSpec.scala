@@ -41,7 +41,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
   "fetch" should {
     "return extended submission for given submission id" in new Setup {
-      when(mockSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
+      when(mockSubmissionsConnector.fetchSubmission(*[SubmissionId])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
 
       val result = await(underTest.fetch(completelyAnswerExtendedSubmission.submission.id))
 
@@ -68,7 +68,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
     }
 
     "record answer for given submisson id and question id" in new Setup {
-      when(mockSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *)(*)).thenReturn(successful(Right(answeringSubmission.withIncompleteProgress())))
+      when(mockSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *)(*)).thenReturn(successful(Right(answeringSubmission.withIncompleteProgress())))
 
       val result = await(underTest.recordAnswer(completelyAnswerExtendedSubmission.submission.id, questionId, List("")))
 
