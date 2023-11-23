@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.mvc.Request
 import play.mvc.Http.HeaderNames.REFERER
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,7 +42,7 @@ case class Feedback(
 
 object Feedback extends FieldTransformer {
 
-  implicit val formats = Json.format[Feedback]
+  implicit val formats: OFormat[Feedback] = Json.format[Feedback]
 
   // scalastyle:off parameter.number
   def create(
@@ -111,7 +111,7 @@ trait FieldTransformer {
 }
 
 object TicketId {
-  implicit val formats = Json.format[TicketId]
+  implicit val formats: Format[TicketId] = Json.format[TicketId]
 }
 
 case class TicketId(ticket_id: Int)

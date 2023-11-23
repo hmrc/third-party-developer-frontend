@@ -32,9 +32,9 @@ case class ApplicationState(
 }
 
 object ApplicationState {
-  import play.api.libs.json.Json
+  import play.api.libs.json.{OFormat, Json}
 
-  implicit val format = Json.format[ApplicationState]
+  implicit val format: OFormat[ApplicationState] = Json.format[ApplicationState]
 
   val testing = ApplicationState(State.TESTING, None, None)
 

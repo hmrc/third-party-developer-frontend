@@ -17,6 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import scala.collection.immutable.{ListMap, ListSet}
+
 import play.api.libs.json.{Format, Json, OFormat}
 
 sealed trait Question {
@@ -93,7 +94,7 @@ case class AcknowledgementOnly(
     wording: Wording,
     statement: Option[Statement]
   ) extends Question {
-  val absence: Option[(String, Mark)] = None
+  val absence: Option[(String, Mark)]   = None
   val afterStatement: Option[Statement] = None
 }
 
@@ -171,8 +172,8 @@ case class YesNoQuestion(
   ) extends SingleChoiceQuestion {
 
   val YES: PossibleAnswer = PossibleAnswer("Yes")
-  val NO: PossibleAnswer = PossibleAnswer("No")
+  val NO: PossibleAnswer  = PossibleAnswer("No")
 
   lazy val marking: ListMap[PossibleAnswer, Mark] = ListMap(YES -> yesMarking, NO -> noMarking)
-  lazy val choices: ListSet[PossibleAnswer] = ListSet(YES, NO)
+  lazy val choices: ListSet[PossibleAnswer]       = ListSet(YES, NO)
 }

@@ -21,5 +21,5 @@ import play.api.libs.json._
 case class UpdateProfileRequest(firstName: String, lastName: String, organisation: Option[String] = None)
 
 object UpdateProfileRequest {
-  implicit val updateProfileRequestFmt = Json.format[UpdateProfileRequest]
+  implicit val updateProfileRequestFmt: OFormat[UpdateProfileRequest] = Json.format[UpdateProfileRequest]
 }

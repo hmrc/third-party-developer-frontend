@@ -17,7 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 
 import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
+
 import play.api.libs.json.{Json, OFormat}
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 case class TaxRegimeInterests(regime: String, services: Set[String]) {

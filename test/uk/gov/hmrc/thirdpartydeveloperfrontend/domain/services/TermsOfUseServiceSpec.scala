@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
-
 import java.time.{LocalDateTime, Period, ZoneOffset}
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, SubmissionId, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
 class TermsOfUseServiceSpec extends HmrcSpec {
@@ -60,11 +59,11 @@ class TermsOfUseServiceSpec extends HmrcSpec {
   val timestamp                  = LocalDateTime.now(ZoneOffset.UTC)
   val email                      = "bob@example.com".toLaxEmail
   val name                       = "Bob Example"
-  val responsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name(name), email)
+  val responsibleIndividual      = ResponsibleIndividual(FullName(name), email)
   val version1_2                 = "1.2"
   val appWithNoAgreements        = buildApplication()
   val checkInfoAgreement         = TermsOfUseAgreement(email, timestamp, version1_2)
-  val stdAppAgreement            = TermsOfUseAcceptance(responsibleIndividual, timeSubmissionIdstamp, Submission.Id.random, 0)
+  val stdAppAgreement            = TermsOfUseAcceptance(responsibleIndividual, timestamp, SubmissionId.random, 0)
   val appWithCheckInfoAgreements = buildApplication(Some(List(checkInfoAgreement)))
   val appWithStdAppAgreements    = buildApplication(None, Some(List(stdAppAgreement)))
   val nonStdApp                  = buildApplication().copy(access = Privileged())

@@ -21,6 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.mockito.MockitoSugar
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -43,11 +44,11 @@ class GetProductionCredentialsFlowServiceSpec
     val underTest                = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
     val sessionId                = "sessionId"
     val sellResellOrDistribute   = SellResellOrDistribute("answer")
-    val responsibleIndividual    = ResponsibleIndividual(ResponsibleIndividual.Name("oldname"), "old@example.com".toLaxEmail)
+    val responsibleIndividual    = ResponsibleIndividual(FullName("oldname"), "old@example.com".toLaxEmail)
     val apiSubscriptions         = ApiSubscriptions()
     val flow                     = GetProductionCredentialsFlow(sessionId, Some(sellResellOrDistribute), Some(apiSubscriptions))
     val flowType                 = FlowType.GET_PRODUCTION_CREDENTIALS
-    val newResponsibleIndividual = ResponsibleIndividual(ResponsibleIndividual.Name("newname"), "new@example.com".toLaxEmail)
+    val newResponsibleIndividual = ResponsibleIndividual(FullName("newname"), "new@example.com".toLaxEmail)
   }
 
   "fetchFlow" should {

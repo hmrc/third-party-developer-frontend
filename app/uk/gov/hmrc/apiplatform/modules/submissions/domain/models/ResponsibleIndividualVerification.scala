@@ -17,12 +17,14 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import java.time.LocalDateTime
+
 import play.api.libs.json.{Format, OFormat, Reads}
+
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -82,9 +84,9 @@ object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
   import uk.gov.hmrc.play.json.Union
   implicit val utcReads: Reads[LocalDateTime] = DefaultLocalDateTimeReads
 
-  implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification] = Json.format[ResponsibleIndividualToUVerification]
+  implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification]                = Json.format[ResponsibleIndividualToUVerification]
   implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]
-  implicit val responsibleIndividualUpdateVerificationFormat: OFormat[ResponsibleIndividualUpdateVerification] = Json.format[ResponsibleIndividualUpdateVerification]
+  implicit val responsibleIndividualUpdateVerificationFormat: OFormat[ResponsibleIndividualUpdateVerification]       = Json.format[ResponsibleIndividualUpdateVerification]
 
   implicit val jsonFormatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Union.from[ResponsibleIndividualVerification]("verificationType")
     .and[ResponsibleIndividualToUVerification]("termsOfUse")

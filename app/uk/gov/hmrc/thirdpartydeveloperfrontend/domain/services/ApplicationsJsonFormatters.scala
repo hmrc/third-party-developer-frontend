@@ -27,7 +27,7 @@ trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 
   implicit val formatFieldValue: Format[FieldValue] = Json.valueFormat[FieldValue]
-  implicit val formatFieldName: Format[FieldName] = Json.valueFormat[FieldName]
+  implicit val formatFieldName: Format[FieldName]   = Json.valueFormat[FieldName]
 
   implicit val keyReadsFieldName: KeyReads[FieldName]   = key => JsSuccess(FieldName(key))
   implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
@@ -42,9 +42,9 @@ trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
 
   implicit val formatOverrideFlag: Format[OverrideFlag] = Format(readsOverrideFlag, writesOverrideFlag)
 
-  implicit val formatStandard: OFormat[Standard] = Json.format[Standard]
+  implicit val formatStandard: OFormat[Standard]     = Json.format[Standard]
   implicit val formatPrivileged: OFormat[Privileged] = Json.format[Privileged]
-  implicit val formatROPC: OFormat[ROPC] = Json.format[ROPC]
+  implicit val formatROPC: OFormat[ROPC]             = Json.format[ROPC]
 
   object TOUAHelper extends LocalDateTimeFormatters {
 

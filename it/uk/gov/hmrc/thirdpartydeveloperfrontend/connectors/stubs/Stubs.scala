@@ -17,11 +17,14 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 
 import java.net.URLEncoder
+
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.matchers.should.Matchers
+
 import play.api.http.Status._
 import play.api.libs.json.{Json, OFormat, Writes}
+
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson

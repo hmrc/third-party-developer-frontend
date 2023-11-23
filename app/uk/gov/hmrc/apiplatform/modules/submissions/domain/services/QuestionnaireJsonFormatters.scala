@@ -25,7 +25,7 @@ trait QuestionnaireJsonFormatters extends QuestionJsonFormatters with AskWhenJso
   implicit val jsonFormatQuestionItem: OFormat[QuestionItem] = Json.format[QuestionItem]
 
   implicit val jsonFormatquestionnaireId: Format[Questionnaire.Id] = Json.valueFormat[Questionnaire.Id]
-  implicit val jsonFormatquestionnaire: OFormat[Questionnaire] = Json.format[Questionnaire]
+  implicit val jsonFormatquestionnaire: OFormat[Questionnaire]     = Json.format[Questionnaire]
 }
 
 object QuestionnaireJsonFormatters extends QuestionnaireJsonFormatters

@@ -18,8 +18,8 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
 import play.api.mvc.PathBindable
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
 
 package object binders {
 
@@ -37,12 +37,10 @@ package object binders {
   implicit def submissionIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[SubmissionId] = new PathBindable[SubmissionId] {
 
     override def bind(key: String, value: String): Either[String, SubmissionId] = {
-      // for {
-      //   text <- textBinder.bind(key, value)
-      //   env  <- Environment.apply(text).toRight("Not a valid environment")
-      // } yield env
-
-      textBinder.bind(key, value).map(SubmissionId.apply(_))
+      for {
+        text <- textBinder.bind(key, value)
+        id   <- SubmissionId.apply(text).toRight("Not a valid SubmissionId")
+      } yield id
     }
 
     override def unbind(key: String, submissionId: SubmissionId): String = {

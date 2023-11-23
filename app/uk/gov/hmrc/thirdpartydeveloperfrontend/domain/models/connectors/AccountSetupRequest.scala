@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class AccountSetupRequest(
     roles: Option[List[String]] = None,
@@ -28,5 +28,5 @@ case class AccountSetupRequest(
   )
 
 object AccountSetupRequest {
-  implicit val format = Json.format[AccountSetupRequest]
+  implicit val format: OFormat[AccountSetupRequest] = Json.format[AccountSetupRequest]
 }

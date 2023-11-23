@@ -166,7 +166,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   def exampleSubscriptionWithFields(prefix: String, count: Int): APISubscriptionStatus =
     exampleSubscriptionWithoutFields(prefix).copy(fields = generateWrapper(prefix, count))
 
-  def asSubscriptions(in: Seq[APISubscriptionStatus]): Set[ApiIdentifier] = {
+  def asSubscriptions(in: List[APISubscriptionStatus]): Set[ApiIdentifier] = {
     in.filter(_.subscribed).map(ass => {
       ApiIdentifier(ass.context, ass.apiVersion.versionNbr)
     })

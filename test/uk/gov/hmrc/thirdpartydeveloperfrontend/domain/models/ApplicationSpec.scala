@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import java.time.{LocalDateTime, Period}
 
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -29,7 +30,7 @@ class ApplicationSpec extends HmrcSpec {
 
   val importantSubmissionData = ImportantSubmissionData(
     None,
-    ResponsibleIndividual(ResponsibleIndividual.Name("bob"), LaxEmailAddress("bob")),
+    ResponsibleIndividual(FullName("bob"), LaxEmailAddress("bob")),
     Set.empty[ServerLocation],
     TermsAndConditionsLocations.NoneProvided,
     PrivacyPolicyLocations.NoneProvided,

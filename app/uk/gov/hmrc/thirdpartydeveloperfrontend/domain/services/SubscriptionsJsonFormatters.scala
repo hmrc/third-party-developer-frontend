@@ -107,7 +107,7 @@ trait SubscriptionsJsonFormatters extends ApplicationsJsonFormatters with Access
     }
   }
 
-  implicit val formatVersionSubscription = Json.format[VersionSubscription]
+  implicit val formatVersionSubscription: OFormat[VersionSubscription] = Json.format[VersionSubscription]
 
 }
 

@@ -23,6 +23,7 @@ import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
 
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
@@ -36,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
-import play.api.mvc.AnyContentAsEmpty
 
 class SubscriptionsGroupSpec
     extends CommonViewSpec

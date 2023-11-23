@@ -21,6 +21,7 @@ import java.util.UUID
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
@@ -28,12 +29,11 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.QrCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import play.api.mvc.AnyContentAsEmpty
 
 class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with StubMessagesFactory {
-  implicit val request: FakeRequest[AnyContentAsEmpty.type]                    = FakeRequest()
-  val qrCodeView                          = app.injector.instanceOf[QrCodeView]
-  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  val qrCodeView                                            = app.injector.instanceOf[QrCodeView]
+  implicit val loggedIn: DeveloperSession                   = JoeBloggs.loggedIn
 
   "QrCodeView view" should {
     "render correctly when form is valid" in {

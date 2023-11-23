@@ -20,14 +20,17 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.LandingPageView
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView}
 import views.html.checkpages.checkyouranswers.CheckYourAnswersView
 import views.html.checkpages.checkyouranswers.team.TeamView
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ContactDetails}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
@@ -180,16 +183,16 @@ case class CheckYourSubscriptionData(
   )
 
 case class CheckYourAnswersData(
-   appId: ApplicationId,
-   softwareName: String,
-   fullName: Option[FullName],
-   email: Option[LaxEmailAddress],
-   telephoneNumber: Option[String],
-   teamMembers: Set[LaxEmailAddress],
-   privacyPolicyLocation: PrivacyPolicyLocation,
-   termsAndConditionsLocation: TermsAndConditionsLocation,
-   acceptedTermsOfUse: Boolean,
-   subscriptions: Seq[CheckYourSubscriptionData]
+    appId: ApplicationId,
+    softwareName: String,
+    fullName: Option[FullName],
+    email: Option[LaxEmailAddress],
+    telephoneNumber: Option[String],
+    teamMembers: Set[LaxEmailAddress],
+    privacyPolicyLocation: PrivacyPolicyLocation,
+    termsAndConditionsLocation: TermsAndConditionsLocation,
+    acceptedTermsOfUse: Boolean,
+    subscriptions: Seq[CheckYourSubscriptionData]
   )
 
 object CheckYourAnswersData {

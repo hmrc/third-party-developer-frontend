@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.play.json.Union
+
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 
@@ -43,9 +44,9 @@ sealed trait Access {
 object Access {
   import play.api.libs.json.Json
 
-  implicit val formatStandard: OFormat[Standard] = Json.format[Standard]
+  implicit val formatStandard: OFormat[Standard]     = Json.format[Standard]
   implicit val formatPrivileged: OFormat[Privileged] = Json.format[Privileged]
-  implicit val formatROPC: OFormat[ROPC] = Json.format[ROPC]
+  implicit val formatROPC: OFormat[ROPC]             = Json.format[ROPC]
 
   implicit val format: OFormat[Access] = Union.from[Access]("accessType")
     .and[Standard](AccessType.STANDARD.toString)

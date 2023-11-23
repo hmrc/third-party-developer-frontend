@@ -23,7 +23,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 case class ClientSecretRequest(actor: Actors.AppCollaborator, timestamp: LocalDateTime)
 
 object ClientSecretRequest {
-  import play.api.libs.json.Json
+  import play.api.libs.json._
 
-  implicit val format = Json.format[ClientSecretRequest]
+  implicit val format: OFormat[ClientSecretRequest] = Json.format[ClientSecretRequest]
 }

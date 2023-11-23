@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.mvc.Result
 import play.api.mvc.Results._
 
 object BadRequestWithErrorMessage {
   private case class ErrorMessage(errorMessage: String)
-  implicit private val writes = Json.writes[ErrorMessage]
+  implicit private val writes: Writes[ErrorMessage] = Json.writes[ErrorMessage]
 
   def apply(message: String): Result = BadRequest(Json.toJson(ErrorMessage(message)))
 }

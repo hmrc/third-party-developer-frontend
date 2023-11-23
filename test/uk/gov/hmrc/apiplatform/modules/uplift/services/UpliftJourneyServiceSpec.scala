@@ -21,6 +21,7 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -159,7 +160,7 @@ class UpliftJourneyServiceSpec
 
     ApmConnectorMock.FetchAllApis.willReturn(singleApi)
 
-    val aResponsibleIndividual      = ResponsibleIndividual(ResponsibleIndividual.Name("test full name"), "test email address".toLaxEmail)
+    val aResponsibleIndividual      = ResponsibleIndividual(FullName("test full name"), "test email address".toLaxEmail)
     val sellResellOrDistribute      = SellResellOrDistribute("Yes")
     val doNotSellResellOrDistribute = SellResellOrDistribute("No")
     val aListOfSubscriptions        = ApiSubscriptions(toIdentifiers(multipleApis).map(id => id -> true).toMap)
@@ -257,7 +258,7 @@ class UpliftJourneyServiceSpec
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApplicationServiceMock.updateApplicationSuccessful()
-      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress] )(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 

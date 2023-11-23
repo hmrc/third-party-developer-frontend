@@ -18,8 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.mfa.models
 
 import java.util.UUID
 
-import play.api.libs.json.Json
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 

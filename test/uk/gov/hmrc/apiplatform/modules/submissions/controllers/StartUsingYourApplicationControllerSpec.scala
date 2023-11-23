@@ -58,7 +58,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       with ApmConnectorMockModule
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow {
-    val view        = app.injector.instanceOf[StartUsingYourApplicationView]
+    val view                       = app.injector.instanceOf[StartUsingYourApplicationView]
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val underTest       = new StartUsingYourApplicationController(

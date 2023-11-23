@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 case class VerifyMfaRequest(code: String)
 
 object VerifyMfaRequest {
-  implicit val format = Json.format[VerifyMfaRequest]
+  implicit val format: OFormat[VerifyMfaRequest] = Json.format[VerifyMfaRequest]
 }

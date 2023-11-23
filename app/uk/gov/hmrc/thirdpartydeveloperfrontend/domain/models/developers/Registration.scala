@@ -23,7 +23,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 case class Registration(firstName: String, lastName: String, email: LaxEmailAddress, password: String, organisation: Option[String] = None)
 
 object Registration {
-  implicit val registrationFmt = Json.format[Registration]
+  implicit val registrationFmt: OFormat[Registration] = Json.format[Registration]
 }
 
 trait RegistrationDownstreamResponse

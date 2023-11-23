@@ -38,6 +38,8 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
@@ -79,7 +81,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       LocalDateTime.now(ZoneOffset.UTC),
       ResponsibleIndividualVerificationState.INITIAL
     )
-    val responsibleIndividual                             = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
+    val responsibleIndividual                             = ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail)
     val riVerificationWithDetails                         = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com".toLaxEmail)
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress()

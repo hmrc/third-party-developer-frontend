@@ -17,7 +17,9 @@
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import scala.util.{Success, Try}
+
 import org.apache.commons.validator.routines.EmailValidator
+
 import play.api.libs.json.{Json, OFormat}
 
 sealed trait TextValidation {
@@ -56,9 +58,9 @@ object TextValidation {
 
   import uk.gov.hmrc.play.json.Union
 
-  implicit val formatAsUrl: OFormat[Url.type] = Json.format[Url.type]
+  implicit val formatAsUrl: OFormat[Url.type]        = Json.format[Url.type]
   implicit val formatMatchRegex: OFormat[MatchRegex] = Json.format[MatchRegex]
-  implicit val formatIsEmail: OFormat[Email.type] = Json.format[Email.type]
+  implicit val formatIsEmail: OFormat[Email.type]    = Json.format[Email.type]
 
   implicit val formatTextValidation: OFormat[TextValidation] = Union.from[TextValidation]("validationType")
     .and[Url.type]("url")

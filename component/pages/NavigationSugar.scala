@@ -18,11 +18,12 @@ package pages
 
 import org.mockito.MockitoSugar
 import org.openqa.selenium.WebDriver
-import org.scalatest.{Assertion, Assertions}
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{Assertion, Assertions}
 import org.scalatestplus.selenium.WebBrowser
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
 
@@ -31,7 +32,7 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
-  implicit val encryptedJson: EncryptedJson = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
+  implicit val encryptedJson: EncryptedJson            = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
 
   def goOn(page: WebPage)(implicit webDriver: WebDriver): Assertion = {
     go(page)

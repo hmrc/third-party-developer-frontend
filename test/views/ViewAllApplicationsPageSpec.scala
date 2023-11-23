@@ -17,13 +17,16 @@
 package views
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
 import views.helper.{CommonViewSpec, EnvironmentNameService}
 import views.html.ManageApplicationsView
 import views.html.noapplications.StartUsingRestApisView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
@@ -59,7 +62,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
   val environmentNameService = new EnvironmentNameService(appConfig)
 
   trait EnvNames {
-    def principalCapitalized: String = principal.capitalize
+    def principalCapitalized: String   = principal.capitalize
     def subordinateCapitalized: String = subordinate.capitalize
     def principal: String
     def subordinate: String
@@ -271,7 +274,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     "show the applications page with no outstanding terms of use box" should {
       "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
         val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
-        val submissions: List[Submission] = List(grantedSubmission)
+        val submissions: List[Submission]       = List(grantedSubmission)
 
         implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
 
@@ -286,7 +289,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     "show the applications page with review terms of use box" should {
       "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
         val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
-        val submissions: List[Submission] = List(submittedSubmission)
+        val submissions: List[Submission]       = List(submittedSubmission)
 
         implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
 
@@ -320,10 +323,10 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "show the last access and user role" in new ProdAndET with Setup {
-        val datetime: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-        val datetimeText: String = DateFormatter.standardFormatter.format(datetime)
+        val datetime: LocalDateTime            = LocalDateTime.now(ZoneOffset.UTC)
+        val datetimeText: String               = DateFormatter.standardFormatter.format(datetime)
         val calledApp: Seq[ApplicationSummary] = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
-        implicit val document: Document = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
+        implicit val document: Document        = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
 
         showsAppName(appName)
         elementIdentifiedByAttrContainsText(document, "td", "data-app-lastAccess", "No API called") shouldBe false

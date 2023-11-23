@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, isSensitive: Boolean = false)
 
 object NavLink {
-  implicit val format = Json.format[NavLink]
+  implicit val format: OFormat[NavLink] = Json.format[NavLink]
 }
 
 case object StaticNavLinks {

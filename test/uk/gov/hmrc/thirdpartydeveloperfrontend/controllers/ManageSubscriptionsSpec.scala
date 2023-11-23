@@ -187,9 +187,9 @@ class ManageSubscriptionsSpec
 
         val pageNumber = 1
 
-        val apiVersion = exampleSubscriptionWithFields("api1", 1)
+        val subsFields = exampleSubscriptionWithFields("api1", 1)
         val subsData   = List(
-          apiVersion
+          subsFields
         )
 
         val app = aStandardPendingApprovalApplication(developer.email)
@@ -224,13 +224,13 @@ class ManageSubscriptionsSpec
       "return a bad request for editApiMetadataPage action" in new PendingApprovalReturnsBadRequest {
         def executeAction =
           () =>
-            manageSubscriptionController.editApiMetadataPage(app.id, apiVersion.context, apiVersion.apiVersion.versionNbr, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest)
+            manageSubscriptionController.editApiMetadataPage(app.id, subsFields.context, subsFields.apiVersion.versionNbr, SaveSubsFieldsPageMode.CheckYourAnswers)(loggedInRequest)
       }
 
       "return a bad request for saveSubscriptionFields action" in new PendingApprovalReturnsBadRequest {
         def executeAction =
           () =>
-            manageSubscriptionController.saveSubscriptionFields(app.id, apiVersion.context, apiVersion.apiVersion.versionNbr, SaveSubsFieldsPageMode.CheckYourAnswers)(
+            manageSubscriptionController.saveSubscriptionFields(app.id, subsFields.context, subsFields.apiVersion.versionNbr, SaveSubsFieldsPageMode.CheckYourAnswers)(
               loggedInRequest
             )
       }

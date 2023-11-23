@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.termsOfUseAgreeKey
 
 case class TermsOfUseForm(termsOfUseAgreed: Boolean)

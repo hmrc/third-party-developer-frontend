@@ -34,7 +34,7 @@ class SubscriptionFieldsConnectorProxySpec extends AsyncHmrcSpec with BeforeAndA
   private val baseUrl         = "https://example.com"
   private val environmentName = "ENVIRONMENT"
 
-  implicit val hc: HeaderCarrier                  = HeaderCarrier()
+  implicit val hc: HeaderCarrier   = HeaderCarrier()
   val clientId: ClientId           = ClientId(UUID.randomUUID().toString)
   val apiContext: ApiContext       = ApiContext("i-am-a-test")
   val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")

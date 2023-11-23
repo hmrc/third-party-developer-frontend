@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 
-import play.api.libs.json.Json
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
 
 case class ChangeMfaNameRequest(name: String)
 

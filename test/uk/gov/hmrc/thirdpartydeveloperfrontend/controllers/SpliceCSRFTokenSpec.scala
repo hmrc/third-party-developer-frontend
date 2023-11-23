@@ -29,8 +29,8 @@ class SpliceCSRFTokenSpec @Inject() (csrfConfigProvider: CSRFConfigProvider) ext
 
   trait Setup {
     implicit val requestHeaderWithToken: RequestHeader = mock[RequestHeader]
-    val csrfConfig                      = csrfConfigProvider.get
-    val token                           = Token(csrfConfig.tokenName, "token")
+    val csrfConfig                                     = csrfConfigProvider.get
+    val token                                          = Token(csrfConfig.tokenName, "token")
   }
 
   "SpliceCSRFTokenSpec" should {

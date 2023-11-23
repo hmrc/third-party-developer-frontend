@@ -17,10 +17,13 @@
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
 import java.time.LocalDateTime
+
 import org.jsoup.Jsoup
-import play.api.mvc.AnyContentAsEmpty
 import views.helper.CommonViewSpec
+
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -29,11 +32,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 
 class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker {
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-  val securityPreferencesView: SecurityPreferencesView = app.injector.instanceOf[SecurityPreferencesView]
+  val securityPreferencesView: SecurityPreferencesView      = app.injector.instanceOf[SecurityPreferencesView]
 
   "SecurityPreferences view" should {
-    val authAppMfaDetail          = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), verified = true)
-    val smsMfaDetail              = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), mobileNumber = "1234567890", verified = true)
+    val authAppMfaDetail                            = AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), verified = true)
+    val smsMfaDetail                                = SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.now(), mobileNumber = "1234567890", verified = true)
     implicit val developerSession: DeveloperSession = buildDeveloper().partLoggedInEnablingMFA
 
     "show suggest 'Get access codes by text message' and display auth app details when developer has only auth app set up" in {

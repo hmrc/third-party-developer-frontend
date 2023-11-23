@@ -46,8 +46,8 @@ class NoApplicationsSpec
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
   trait Setup extends SessionServiceMock {
-    val noApplicationsChoiceView        = app.injector.instanceOf[NoApplicationsChoiceView]
-    val startUsingRestApisView          = app.injector.instanceOf[StartUsingRestApisView]
+    val noApplicationsChoiceView                                = app.injector.instanceOf[NoApplicationsChoiceView]
+    val startUsingRestApisView                                  = app.injector.instanceOf[StartUsingRestApisView]
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val noApplicationsController = new NoApplications(

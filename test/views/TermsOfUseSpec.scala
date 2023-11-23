@@ -18,11 +18,14 @@ package views
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.TermsOfUseView
+
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}

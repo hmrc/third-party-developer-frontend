@@ -18,11 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend
 
 import java.net.URL
 import scala.util.{Failure, Try}
+
 import org.apache.commons.net.util.SubnetUtils
-import play.api.data.{Forms, Mapping}
+
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
+import play.api.data.{Forms, Mapping}
 import uk.gov.hmrc.emailaddress.EmailAddress
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 

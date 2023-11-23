@@ -21,6 +21,7 @@ import scala.concurrent.Future.successful
 import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
@@ -83,7 +84,7 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
       }
 
       def thenReturnFailure() = {
-        when(aMock.confirmSetupComplete(*[ApplicationId], *[LaxEmailAddress] )(*)).thenReturn(successful(Left("nope")))
+        when(aMock.confirmSetupComplete(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Left("nope")))
       }
     }
   }

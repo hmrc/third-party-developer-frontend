@@ -18,10 +18,13 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import java.time.LocalDateTime
 import java.util.UUID
+
 import cats.data.NonEmptyList
+
 import play.api.libs.json.Format
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 
 sealed trait QuestionnaireState
 
@@ -285,18 +288,18 @@ object Submission {
     ) {
     lazy val status: Status = statusHistory.head
 
-    lazy val isOpenToAnswers: Boolean = status.isOpenToAnswers
+    lazy val isOpenToAnswers: Boolean      = status.isOpenToAnswers
     lazy val isAnsweredCompletely: Boolean = status.isAnsweredCompletely
 
-    lazy val isCreated: Boolean = status.isCreated
-    lazy val isAnswering: Boolean = status.isAnswering
-    lazy val isFailed: Boolean = status.isFailed
-    lazy val isWarnings: Boolean = status.isWarnings
+    lazy val isCreated: Boolean                      = status.isCreated
+    lazy val isAnswering: Boolean                    = status.isAnswering
+    lazy val isFailed: Boolean                       = status.isFailed
+    lazy val isWarnings: Boolean                     = status.isWarnings
     lazy val isPendingResponsibleIndividual: Boolean = status.isPendingResponsibleIndividual
-    lazy val isGranted: Boolean = status.isGranted
-    lazy val isGrantedWithWarnings: Boolean = status.isGrantedWithWarnings
-    lazy val isDeclined: Boolean = status.isDeclined
-    lazy val isSubmitted: Boolean = status.isSubmitted
+    lazy val isGranted: Boolean                      = status.isGranted
+    lazy val isGrantedWithWarnings: Boolean          = status.isGrantedWithWarnings
+    lazy val isDeclined: Boolean                     = status.isDeclined
+    lazy val isSubmitted: Boolean                    = status.isSubmitted
   }
 }
 

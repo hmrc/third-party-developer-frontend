@@ -27,9 +27,9 @@ object ServerLocation {
   case object OutsideEEAWithAdequacy    extends ServerLocation
   case object OutsideEEAWithoutAdequacy extends ServerLocation
 
-  implicit val inUkFormat: OFormat[InUK.type] = Json.format[InUK.type]
-  implicit val inEEAFormat: OFormat[InEEA.type] = Json.format[InEEA.type]
-  implicit val outsideEEAWithAdequacyFormat: OFormat[OutsideEEAWithAdequacy.type] = Json.format[OutsideEEAWithAdequacy.type]
+  implicit val inUkFormat: OFormat[InUK.type]                                           = Json.format[InUK.type]
+  implicit val inEEAFormat: OFormat[InEEA.type]                                         = Json.format[InEEA.type]
+  implicit val outsideEEAWithAdequacyFormat: OFormat[OutsideEEAWithAdequacy.type]       = Json.format[OutsideEEAWithAdequacy.type]
   implicit val outsideEEAWithoutAdequacyFormat: OFormat[OutsideEEAWithoutAdequacy.type] = Json.format[OutsideEEAWithoutAdequacy.type]
 
   implicit val format: OFormat[ServerLocation] = Union.from[ServerLocation]("serverLocation")

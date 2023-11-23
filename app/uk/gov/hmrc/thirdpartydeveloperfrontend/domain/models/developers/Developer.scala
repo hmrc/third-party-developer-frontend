@@ -47,5 +47,5 @@ object Developer {
   )(Developer.apply _)
 
   val developerWrites          = Json.writes[Developer]
-  implicit val formatDeveloper = Format(developerReads, developerWrites)
+  implicit val formatDeveloper: Format[Developer] = Format(developerReads, developerWrites)
 }

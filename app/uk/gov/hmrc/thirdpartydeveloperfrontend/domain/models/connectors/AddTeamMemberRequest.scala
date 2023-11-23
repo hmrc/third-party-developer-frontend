@@ -23,5 +23,5 @@ case class AddTeamMemberRequest(email: LaxEmailAddress, role: Collaborator.Role,
 
 object AddTeamMemberRequest {
   import play.api.libs.json._
-  implicit val format = Json.format[AddTeamMemberRequest]
+  implicit val format: OFormat[AddTeamMemberRequest] = Json.format[AddTeamMemberRequest]
 }

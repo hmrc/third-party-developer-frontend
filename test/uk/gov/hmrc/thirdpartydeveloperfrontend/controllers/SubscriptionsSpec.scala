@@ -20,14 +20,17 @@ import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
+
 import views.helper.EnvironmentNameService
 import views.html.include.ChangeSubscriptionConfirmationView
 import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRequestSubmittedView, UnsubscribeRequestSubmittedView}
+
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr}
@@ -60,12 +63,12 @@ class SubscriptionsSpec
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with SubscriptionsServiceMockModule {
-    val manageSubscriptionsView            = app.injector.instanceOf[ManageSubscriptionsView]
-    val addAppSubscriptionsView            = app.injector.instanceOf[AddAppSubscriptionsView]
-    val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
-    val unsubscribeRequestSubmittedView    = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
-    val subscribeRequestSubmittedView      = app.injector.instanceOf[SubscribeRequestSubmittedView]
-    implicit val environmentNameService: EnvironmentNameService    = new EnvironmentNameService(appConfig)
+    val manageSubscriptionsView                                 = app.injector.instanceOf[ManageSubscriptionsView]
+    val addAppSubscriptionsView                                 = app.injector.instanceOf[AddAppSubscriptionsView]
+    val changeSubscriptionConfirmationView                      = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
+    val unsubscribeRequestSubmittedView                         = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
+    val subscribeRequestSubmittedView                           = app.injector.instanceOf[SubscribeRequestSubmittedView]
+    implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new SubscriptionsController(
       mock[ThirdPartyDeveloperConnector],

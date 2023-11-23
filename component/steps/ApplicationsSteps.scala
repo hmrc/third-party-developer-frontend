@@ -19,6 +19,7 @@ package steps
 import java.time.{LocalDateTime, ZoneOffset}
 import java.util.UUID
 import java.util.UUID.randomUUID
+
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -29,8 +30,10 @@ import pages._
 import stubs.ApplicationStub.configureUserApplications
 import stubs._
 import utils.ComponentTestDeveloperBuilder
+
 import play.api.http.Status._
 import play.api.libs.json.Json
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -48,7 +51,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   implicit val webDriver: WebDriver = Env.driver
 
   val applicationId: ApplicationId = ApplicationId.random
-  val clientId: ClientId = ClientId("clientId")
+  val clientId: ClientId           = ClientId("clientId")
 
   val collaboratorEmail: LaxEmailAddress = "john.smith@example.com".toLaxEmail
 

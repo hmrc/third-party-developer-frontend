@@ -65,7 +65,7 @@ class ApplicationCommandConnectorSpec
   val administrator = Administrator(UserId.random, "sample@example.com".toLaxEmail)
   val developer     = Collaborators.Developer(UserId.random, "someone@example.com".toLaxEmail)
 
-  val authToken   = "Bearer Token"
+  val authToken                  = "Bearer Token"
   implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
 
   val emailAddressToRemove = "toRemove@example.com".toLaxEmail

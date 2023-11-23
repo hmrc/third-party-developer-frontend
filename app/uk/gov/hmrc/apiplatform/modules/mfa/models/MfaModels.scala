@@ -22,9 +22,8 @@ import scala.collection.immutable
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.play.json.Union
-import play.api.libs.json.Format
 
 case class MfaId(value: UUID) extends AnyVal {
   override def toString(): String = value.toString()

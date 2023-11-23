@@ -19,13 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
 import scala.concurrent.Future
+
 import cats.data.NonEmptyList
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator, ContactDetails, TermsOfUseAgreement}
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, SubmissionId, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
@@ -39,11 +43,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId   = ApplicationId.random
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
+  val submissionId    = SubmissionId.random
   val clientId        = ClientId.random
   val applicationName = "my app"
   val createdOn       = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
@@ -114,7 +117,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.Su
   lazy val submissionInstance    = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones", None, None)))
 
   lazy val submission            = Submission(
-    submissionId,
+    SubmissionId.random,
     applicationId,
     LocalDateTime.now,
     NonEmptyList.one(groupOfQuestionnaires),
@@ -152,13 +155,13 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.Su
   lazy val allPossibleSubscriptions            = List(defaultApiDefinition)
   lazy val responsibleIndividualVerificationId = ResponsibleIndividualVerificationId(UUID.randomUUID().toString)
 
-  lazy val submissionIndex                     = 1
-  lazy val responsibleIndividual               = ResponsibleIndividual.build("mr responsible", "ri@example.com".toLaxEmail)
+  lazy val submissionIndex       = 1
+  lazy val responsibleIndividual = ResponsibleIndividual(FullName("mr responsible"), "ri@example.com".toLaxEmail)
 
   lazy val responsibleIndividualVerification = ResponsibleIndividualUpdateVerification(
     responsibleIndividualVerificationId,
     applicationId,
-    submissionId,
+    SubmissionId.random,
     submissionIndex,
     applicationName,
     createdOn,
@@ -185,14 +188,14 @@ trait IsOldJourneyStandardApplication extends HasApplication {
   def access: Access      = Standard(List(redirectUrl), None, None, Set.empty, None, None)
 
   def checkInformation = Some(CheckInformation(
-    true,
-    true,
-    true,
-    Some(ContactDetails(FullName(s"$userFirstName $userLastName"), userEmail, "01611234567")),
-    true,
-    true,
-    true,
-    List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))
+    contactDetails = Some(ContactDetails(FullName(s"$userFirstName $userLastName"), userEmail, "01611234567")),
+    confirmedName = true,
+    apiSubscriptionConfigurationsConfirmed = true,
+    providedPrivacyPolicyURL = true,
+    providedTermsAndConditionsURL = true,
+    applicationDetails = None,
+    teamConfirmed = true,
+    termsOfUseAgreements = List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))
   ))
 }
 
@@ -283,7 +286,7 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def loggedInState               = LoggedInState.LOGGED_IN
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
-  when(tpdConnector.findUserId(* [LaxEmailAddress] )(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
 
@@ -304,7 +307,7 @@ trait UserIsNotAuthenticated extends HasUserSession {
   def loggedInState               = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
   when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
-  when(tpdConnector.findUserId(* [LaxEmailAddress] )(*)).thenReturn(Future.successful(None))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(None))
 }
 
 trait HasAppDeploymentEnvironment {
