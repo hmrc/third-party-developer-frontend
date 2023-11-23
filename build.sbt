@@ -17,8 +17,9 @@ lazy val appName = "third-party-developer-frontend"
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.12"
+
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
