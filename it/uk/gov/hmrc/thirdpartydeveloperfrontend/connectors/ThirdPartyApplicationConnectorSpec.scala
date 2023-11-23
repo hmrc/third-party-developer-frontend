@@ -26,7 +26,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Configuration, Mode, Application => PlayApplication}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, ContactDetails}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse, ContactDetails}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock

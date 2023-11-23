@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 
 case class CheckInformationForm(
     apiSubscriptionsComplete: Boolean = false,

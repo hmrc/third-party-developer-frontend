@@ -22,12 +22,13 @@ import views.html.checkpages.PrivacyPolicyView
 
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Standard, UpdateApplicationRequest}
 
 trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
   self: ApplicationController with CanUseCheckActions =>

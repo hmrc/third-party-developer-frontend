@@ -17,10 +17,8 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.{LocalDateTime, Period}
-
 import play.api.libs.json.{OFormat, Reads}
-
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, GrantLength}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator, GrantLength, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
