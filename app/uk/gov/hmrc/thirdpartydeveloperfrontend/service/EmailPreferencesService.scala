@@ -72,19 +72,24 @@ class EmailPreferencesService @Inject() (
   def apiCategoryDetails(category: String): Future[Option[APICategoryDisplayDetails]] =
     fetchAllAPICategoryDetails().map(_.find(_.category == category))
 
-  private def handleGettingApiDetails(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[CombinedApi] = {
+  private def handleGettingApiDetails(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Option[CombinedApi]] = {
     apmConnector.fetchCombinedApi(serviceName).flatMap {
-      case Right(x) => successful(x)
-      case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).map(y => CombinedApi(y.serviceName, y.name, y.categories, REST_API))
+      case Right(x) => successful(Some(x))
+      case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).flatMap {
+        case Right(y) => successful(Some(CombinedApi(y.serviceName, y.name, y.categories, REST_API)))
+        case Left(_) => successful(None)
+      }
     }
   }
 
   def fetchAPIDetails(apiServiceNames: Set[ServiceName])(implicit hc: HeaderCarrier): Future[List[CombinedApi]] =
     Future.sequence(
       apiServiceNames
-        .map(handleGettingApiDetails(_))
+        .map(
+          handleGettingApiDetails(_)
+        )
         .toList
-    )
+    ).map(_.flatten)
 
   def fetchEmailPreferencesFlow(developerSession: DeveloperSession) =
     flowRepository.fetchBySessionIdAndFlowType[EmailPreferencesFlowV2](developerSession.session.sessionId) map {
