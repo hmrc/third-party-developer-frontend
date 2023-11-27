@@ -20,9 +20,8 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
