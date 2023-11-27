@@ -17,22 +17,20 @@
 package views.include
 
 import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import play.api.mvc.AnyContentAsEmpty
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
-
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
@@ -44,40 +42,42 @@ class LeftHandNavSpec extends CommonViewSpec
     with DeveloperTestData {
 
   trait Setup {
-    val leftHandNavView = app.injector.instanceOf[LeftHandNav]
+    val leftHandNavView: LeftHandNav = app.injector.instanceOf[LeftHandNav]
 
-    val request = FakeRequest().withCSRFToken
+    val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-    val applicationId   = ApplicationId.random
-    val clientId        = ClientId("clientId123")
+    val applicationId: ApplicationId = ApplicationId.random
+    val clientId: ClientId = ClientId("clientId123")
     val applicationName = "Test Application"
 
-    val loggedInDeveloper = standardDeveloper.loggedIn
+    val loggedInDeveloper: DeveloperSession = standardDeveloper.loggedIn
 
-    val application = Application(
+    val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+
+    val application: Application = Application(
       applicationId,
       clientId,
       applicationName,
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      now,
+      Some(now),
       None,
       grantLength,
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    val applicationViewModelWithApiSubscriptions   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
-    val applicationViewModelWithNoApiSubscriptions = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
+    val applicationViewModelWithApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
+    val applicationViewModelWithNoApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
     def leftHandNavRender(
         viewModel: Option[ApplicationViewModel],
         navSection: Option[String],
         flags: Map[String, Boolean] = Map.empty,
         fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel] = None
-      ) = {
+      ): Html = {
       leftHandNavView.render(viewModel, navSection, flags, fraudPreventionNavLinkViewModel, request, loggedInDeveloper, appConfig)
     }
   }
@@ -85,11 +85,11 @@ class LeftHandNavSpec extends CommonViewSpec
   "Left Hand Nav" when {
     "working with an application with fraud link hidden" should {
       "render correctly" in new Setup {
-        val page = leftHandNavRender(Some(applicationViewModelWithNoApiSubscriptions), Some("details"))
+        val page: Html = leftHandNavRender(Some(applicationViewModelWithNoApiSubscriptions), Some("details"))
 
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "API subscriptions") shouldBe true
         elementExistsByText(document, "a", "Subscription configuration") shouldBe false
         elementExistsByText(document, "a", "Credentials") shouldBe true
@@ -115,23 +115,23 @@ class LeftHandNavSpec extends CommonViewSpec
       }
 
       "NOT display server token link for old apps" in new Setup {
-        val oldAppWithoutSubsFields =
+        val oldAppWithoutSubsFields: ApplicationViewModel =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
-        val page                    = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
+        val page: Html = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Server token") shouldBe false
       }
     }
 
     "working with an application with api subscriptions" should {
       "render correctly" in new Setup {
-        val page = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions), Some("details"))
+        val page: Html = leftHandNavRender(Some(applicationViewModelWithApiSubscriptions), Some("details"))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "API subscriptions") shouldBe true
         elementExistsByText(document, "a", "Subscription configuration") shouldBe true
         elementExistsByText(document, "a", "Credentials") shouldBe true
@@ -145,41 +145,41 @@ class LeftHandNavSpec extends CommonViewSpec
       }
 
       "NOT display server token link for old apps" in new Setup {
-        val oldAppWithSubsFields =
+        val oldAppWithSubsFields: ApplicationViewModel =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
-        val page                 = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
+        val page: Html = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Server token") shouldBe false
       }
     }
 
     "on the View all applications page" should {
       "render correct wording for default environment config" in new Setup {
-        val page = leftHandNavRender(None, Some("manage-applications"))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to the sandbox") shouldBe true
 
         userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
       "render get production credentials when flag is set" in new Setup {
-        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> true))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> true))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Get production credentials") shouldBe true
       }
 
       "do not render get production credentials when flag is clear" in new Setup {
-        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Get production credentials") shouldBe false
       }
 
@@ -188,10 +188,10 @@ class LeftHandNavSpec extends CommonViewSpec
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
-        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> true))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> true))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Development") shouldBe true
         elementExistsByText(document, "a", "Add an application to QA") shouldBe true
 
@@ -203,10 +203,10 @@ class LeftHandNavSpec extends CommonViewSpec
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
 
-        val page = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"), Map(LeftHandNavFlags.keyForIsGetProductionCredentialsEnabled -> false))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Development") shouldBe true
         elementExistsByText(document, "a", "Add an application to QA") shouldBe false
 
@@ -217,10 +217,10 @@ class LeftHandNavSpec extends CommonViewSpec
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Staging")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Staging")
 
-        val page = leftHandNavRender(None, Some("manage-applications"))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"))
         page.contentType should include("text/html")
 
-        val document = Jsoup.parse(page.body)
+        val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Staging") shouldBe true
 
         userProfileSectionCorrectlyDisplayed(document) shouldBe true
@@ -230,7 +230,7 @@ class LeftHandNavSpec extends CommonViewSpec
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("Integration")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Integration")
 
-        val page = leftHandNavRender(None, Some("manage-applications"))
+        val page: Html = leftHandNavRender(None, Some("manage-applications"))
         page.contentType should include("text/html")
 
         val document: Document = Jsoup.parse(page.body)

@@ -76,8 +76,8 @@ class CheckAnswersController @Inject() (
       case Some(extSubmission) => {
         val viewModel                   = convertSubmissionToViewModel(extSubmission)(request.application.id, request.application.name)
         val maybePreviousInstance       = extSubmission.submission.instances.tail.headOption // previous instance, if there was one
-        val previousInstanceWasDeclined = maybePreviousInstance.map(_.isDeclined).getOrElse(false)
-        Ok(checkAnswersView(viewModel, previousInstanceWasDeclined, request.application.state.isProduction, request.msgRequest.flash.get("error")))
+        val previousInstanceWasDeclined = maybePreviousInstance.exists(_.isDeclined)
+        Ok(checkAnswersView(viewModel, previousInstanceWasDeclined, request.application.state.name.isProduction, request.msgRequest.flash.get("error")))
       }
       case None                => BadRequestWithErrorMessage("No submission and/or application found")
     })

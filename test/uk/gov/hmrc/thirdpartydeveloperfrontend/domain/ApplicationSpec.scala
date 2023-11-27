@@ -21,8 +21,9 @@ import java.time.{LocalDateTime, Period}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, SubmissionId, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, SubmissionId, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
@@ -35,15 +36,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
 
-  val developer             = standardDeveloper
-  val developerCollaborator = developer.email.asDeveloperCollaborator
-  val administrator         = adminDeveloper
+  val developer: Developer                = standardDeveloper
+  val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
+  val administrator: Developer            = adminDeveloper
+  val now: LocalDateTime                  = LocalDateTime.now()
 
-  val productionApplicationState: ApplicationState = ApplicationState.production(requestedByEmail = "other email", requestedByName = "name", verificationCode = "123")
-  val testingApplicationState: ApplicationState    = ApplicationState.testing
-  val responsibleIndividual                        = ResponsibleIndividual(FullName("Mr Responsible"), "ri@example.com".toLaxEmail)
+  val productionApplicationState: ApplicationState = ApplicationState(State.PRODUCTION, Some("other email"), Some("name"), Some("123"), now)
+  val testingApplicationState: ApplicationState    = ApplicationState(updatedOn = now)
+  val responsibleIndividual: ResponsibleIndividual = ResponsibleIndividual(FullName("Mr Responsible"), "ri@example.com".toLaxEmail)
 
-  val importantSubmissionData = ImportantSubmissionData(
+  val importantSubmissionData: ImportantSubmissionData = ImportantSubmissionData(
     Some("http://example.com"),
     responsibleIndividual,
     Set(ServerLocation.InUK),

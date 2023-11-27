@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, ContactDetails, CheckInformation, ClientSecretResponse, TermsOfUseAgreement, ClientSecret}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -71,9 +71,9 @@ class CheckYourAnswersSpec
   val anotherCollaboratorEmail               = "collaborator@example.com".toLaxEmail
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
-  val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
-  val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
-  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
+  val testing: ApplicationState         = ApplicationState(State.TESTING, None, None, None, LocalDateTime.now.minusMinutes(1))
+  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), Some("ABCD"), now())
+  val pendingApproval: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), None, now())
 
   val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 

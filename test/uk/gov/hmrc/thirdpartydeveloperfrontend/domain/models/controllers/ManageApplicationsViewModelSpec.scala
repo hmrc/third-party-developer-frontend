@@ -21,10 +21,9 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator,State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
@@ -36,7 +35,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
         "",
         Collaborator.Roles.DEVELOPER,
         TermsOfUseStatus.AGREED,
-        TESTING,
+        State.TESTING,
         Some(LocalDateTime.now(ZoneOffset.UTC)),
         grantLength,
         serverTokenUsed = false,
@@ -52,7 +51,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
         "",
         Collaborator.Roles.DEVELOPER,
         TermsOfUseStatus.AGREED,
-        TESTING,
+        State.TESTING,
         Some(LocalDateTime.now(ZoneOffset.UTC)),
         grantLength,
         serverTokenUsed = false,
@@ -62,7 +61,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers {
         Set.empty
       )
 
-    val liveProductionApp = notYetLiveProductionApp.copy(state = PRODUCTION)
+    val liveProductionApp = notYetLiveProductionApp.copy(state = State.PRODUCTION)
 
     "return true if only sandbox apps" in {
       val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty, Set.empty, false, List.empty, List.empty)

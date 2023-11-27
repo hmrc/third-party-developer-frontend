@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ContactDetails, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ContactDetails, IpAllowlist, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
 trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
@@ -55,7 +55,6 @@ trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
 
   implicit val formatContactDetails: OFormat[ContactDetails] = Json.format[ContactDetails]
 
-  implicit val formatApplicationState: OFormat[ApplicationState] = Json.format[ApplicationState]
   implicit val formatCheckInformation: OFormat[CheckInformation] = Json.format[CheckInformation]
 
   implicit val formatAccessType: OFormat[Access] = Union

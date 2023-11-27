@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -45,7 +46,7 @@ case class CreateApplicationRequest(
   )
 
 object CreateApplicationRequest extends ApplicationRequest {
-  import play.api.libs.json.{OFormat, Json}
+  import play.api.libs.json.{Json, OFormat}
   implicit val format: OFormat[CreateApplicationRequest] = Json.format[CreateApplicationRequest]
 
   def fromAddApplicationJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
@@ -65,7 +66,7 @@ case class UpdateApplicationRequest(
   )
 
 object UpdateApplicationRequest extends ApplicationRequest {
-  import play.api.libs.json.{OFormat, Json}
+  import play.api.libs.json.{Json, OFormat}
 
   implicit val format: OFormat[UpdateApplicationRequest] = Json.format[UpdateApplicationRequest]
 

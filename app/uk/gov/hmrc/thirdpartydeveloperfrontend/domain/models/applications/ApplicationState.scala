@@ -16,40 +16,39 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import java.time.{LocalDateTime, ZoneOffset}
-
-case class ApplicationState(
-    name: State,
-    requestedByEmailAddress: Option[String],
-    requestedByName: Option[String],
-    verificationCode: Option[String] = None,
-    updatedOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-  ) {
-  def isInTesting       = name.isInTesting
-  def isPendingApproval = name.isPendingApproval
-  def isApproved        = name.isApproved
-  def isProduction      = name.isProduction
-}
-
-object ApplicationState {
-  import play.api.libs.json.{OFormat, Json}
-
-  implicit val format: OFormat[ApplicationState] = Json.format[ApplicationState]
-
-  val testing = ApplicationState(State.TESTING, None, None)
-
-  def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName))
-
-  def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName))
-
-  def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
-
-  def preProduction(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None)
-
-  def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-    ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
-}
+//
+//case class ApplicationState(
+//    name: State,
+//    requestedByEmailAddress: Option[String],
+//    requestedByName: Option[String],
+//    verificationCode: Option[String] = None,
+//    updatedOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+//  ) {
+//  def isInTesting       = name.isInTesting
+//  def isPendingApproval = name.isPendingApproval
+//  def isApproved        = name.isApproved
+//  def isProduction      = name.isProduction
+//}
+//
+//object ApplicationState {
+//  import play.api.libs.json.{Json, OFormat}
+//
+//  implicit val format: OFormat[ApplicationState] = Json.format[ApplicationState]
+//
+//  val testing = ApplicationState(State.TESTING, None, None)
+//
+//  def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
+//    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName))
+//
+//  def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
+//    ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName))
+//
+//  def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+//    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
+//
+//  def preProduction(requestedByEmail: String, requestedByName: String) =
+//    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None)
+//
+//  def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+//    ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode))
+//}

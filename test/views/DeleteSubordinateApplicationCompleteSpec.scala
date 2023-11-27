@@ -17,13 +17,11 @@
 package views
 
 import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationCompleteView
-
 import play.api.test.FakeRequest
-
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -43,18 +41,19 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
       val appId             = ApplicationId.random
       val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
+      val now = LocalDateTime.now(ZoneOffset.UTC)
       val application       = Application(
         appId,
         clientId,
         "App name 1",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        now,
+        Some(now),
         None,
         grantLength,
         Environment.SANDBOX,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

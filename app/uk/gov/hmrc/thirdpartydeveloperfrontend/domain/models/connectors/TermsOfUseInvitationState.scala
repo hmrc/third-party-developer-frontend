@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
 import play.api.libs.json._
+
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
 
 object TermsOfUseInvitationState extends Enumeration {
   type TermsOfUseInvitationState = Value

@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 
 case class GetProductionCredentialsFlow(
-    val sessionId: String,
-    sellResellOrDistribute: Option[applications.SellResellOrDistribute],
-    apiSubscriptions: Option[ApiSubscriptions]
+                                         val sessionId: String,
+                                         sellResellOrDistribute: Option[SellResellOrDistribute],
+                                         apiSubscriptions: Option[ApiSubscriptions]
   ) extends Flow {
   val flowType: FlowType = FlowType.GET_PRODUCTION_CREDENTIALS
 }

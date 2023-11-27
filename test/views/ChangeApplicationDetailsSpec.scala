@@ -24,6 +24,7 @@ import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
 
 import play.api.test.FakeRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -40,7 +41,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with DeveloperTestData {
-
+  val now           = LocalDateTime.now()
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
   val applicationId = ApplicationId.random
   val clientId      = ClientId("clientId123")
@@ -93,7 +94,8 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         Some(LocalDateTime.now(ZoneOffset.UTC)),
         None,
         Period.ofDays(547),
-        Environment.SANDBOX
+        Environment.SANDBOX,
+        state = ApplicationState(State.TESTING, None, None, None, now)
       )
       val document    = Jsoup.parse(renderPage(application).body)
 
@@ -121,7 +123,8 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
           grantLength,
           Environment.SANDBOX,
           description = aDescription,
-          access = standardAccess
+          access = standardAccess,
+          state = ApplicationState(State.TESTING, None, None, None, now)
         )
       val document               = Jsoup.parse(renderPage(application).body)
 
@@ -142,7 +145,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         None,
         grantLength,
         Environment.PRODUCTION,
-        state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None)
+        state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None, None, now)
       )
       val document    = Jsoup.parse(renderPage(application).body)
 
@@ -160,7 +163,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         None,
         grantLength,
         Environment.PRODUCTION,
-        state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None)
+        state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None, None, now)
       )
       val document    = Jsoup.parse(renderPage(application).body)
 
@@ -179,7 +182,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
           None,
           grantLength,
           Environment.PRODUCTION,
-          state = ApplicationState(State.PRODUCTION, None, None)
+          state = ApplicationState(State.PRODUCTION, None, None, None, now)
         )
       val document    = Jsoup.parse(renderPage(application).body)
 

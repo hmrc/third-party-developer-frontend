@@ -19,16 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 import views.helper.EnvironmentNameService
 import views.html._
-
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
@@ -55,52 +53,53 @@ class AddApplicationSuccessSpec
     with DeveloperSessionBuilder
     with LocalUserIdTracker {
 
-  val principalApp = Application(
+  private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+  val principalApp: Application = Application(
     appId,
     clientId,
     "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    now,
+    Some(now),
     None,
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    state =ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val subordinateApp = Application(
+  val subordinateApp: Application = Application(
     appId,
     clientId,
     "App name 2",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    now,
+    Some(now),
     None,
     grantLength,
     Environment.SANDBOX,
     Some("Description 2"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock
       with EmailPreferencesServiceMock with CombinedApiTestDataHelper {
-    val accessTokenSwitchView                                   = app.injector.instanceOf[AccessTokenSwitchView]
-    val usingPrivilegedApplicationCredentialsView               = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView                                      = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView                      = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView                        = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView                    = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView                                  = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView                           = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    val accessTokenSwitchView: AccessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
+    val tenDaysWarningView: TenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView: AddApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView: AddApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView: AddApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView: ChooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val sr20UpliftJourneySwitchMock            = mock[UpliftJourneySwitch]
+    val sr20UpliftJourneySwitchMock: UpliftJourneySwitch = mock[UpliftJourneySwitch]
 
-    val flowServiceMock = mock[GetProductionCredentialsFlowService]
+    val flowServiceMock: GetProductionCredentialsFlowService = mock[GetProductionCredentialsFlowService]
 
     val underTest = new AddApplication(
       mock[ErrorHandler],
@@ -202,7 +201,7 @@ class AddApplicationSuccessSpec
 
     "return to the login page when the user is not logged in" in new Setup {
 
-      val request = FakeRequest()
+      val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
       private val result = underTest.addApplicationSubordinate()(request)
 

@@ -17,46 +17,44 @@
 package views
 
 import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
-
 import play.api.data.Form
 import play.api.test.FakeRequest
-
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
-  val appId             = ApplicationId.random
-  val clientId          = ClientId("clientId123")
-  val loggedInDeveloper = adminDeveloper.loggedIn
-  val collaborator      = standardDeveloper.loggedIn
-  val collaborators     = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
+  val appId: ApplicationId = ApplicationId.random
+  val clientId: ClientId = ClientId("clientId123")
+  val loggedInDeveloper: DeveloperSession = adminDeveloper.loggedIn
+  val collaborator: DeveloperSession = standardDeveloper.loggedIn
+  val collaborators: Set[Collaborator] = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
 
-  val application = Application(
+  private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+  val application: Application = Application(
     appId,
     clientId,
     "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    now,
+    Some(now),
     None,
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
     collaborators,
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

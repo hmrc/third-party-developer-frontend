@@ -19,14 +19,13 @@ package views
 import java.time.{LocalDateTime, Period}
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
 import views.html.{ClientSecretsGeneratedView, ClientSecretsView}
-
 import play.api.test.FakeRequest
-
+import play.twirl.api.Html
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -40,8 +39,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     with FixedClock {
 
   trait Setup {
-    val clientSecretsView          = app.injector.instanceOf[ClientSecretsView]
-    val clientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
+    val clientSecretsView: ClientSecretsView = app.injector.instanceOf[ClientSecretsView]
+    val clientSecretsGeneratedView: ClientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
 
     def elementExistsByText(doc: Document, elementType: String, elementText: String): Boolean = {
       doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
@@ -68,21 +67,21 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       ApplicationId(UUID.randomUUID()),
       ClientId("Test Application Client ID"),
       "Test Application",
-      LocalDateTime.now(),
-      Some(LocalDateTime.now()),
+      now(),
+      Some(now()),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Standard(),
-      state = ApplicationState.production("requester@test.com", "requester", "verificationCode"),
+      state = ApplicationState(State.PRODUCTION,Some("requester@test.com"), Some("requester"), Some("verificationCode"),now()),
       checkInformation = None
     )
 
     "show generate a client secret button but no delete button when the app does not have any client secrets yet" in new Setup {
-      val emptyClientSecrets = Seq.empty
-      val page               = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig)
+      val emptyClientSecrets: Seq[Nothing] = Seq.empty
+      val page: Html = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -92,8 +91,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "show generate another client secret button but no delete button when the app has only one client secret" in new Setup {
-      val oneClientSecret = Seq(clientSecret1)
-      val page            = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig)
+      val oneClientSecret: Seq[ClientSecretResponse] = Seq(clientSecret1)
+      val page: Html = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -104,7 +103,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show copy button when a new client secret has just been added" in new Setup {
       val aSecret = "SomethingSecret"
-      val page    = clientSecretsGeneratedView.render(application, application.id, aSecret, request, developer, messagesProvider, appConfig)
+      val page: Html = clientSecretsGeneratedView.render(application, application.id, aSecret, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -114,9 +113,9 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "not show copy button when a new client secret has not just been added" in new Setup {
-      val oneClientSecret = Seq(clientSecret1)
+      val oneClientSecret: Seq[ClientSecretResponse] = Seq(clientSecret1)
 
-      val page = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig)
+      val page: Html = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -131,8 +130,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "show generate another client secret button and delete button when the app has more than one client secret" in new Setup {
-      val twoClientSecrets = Seq(clientSecret1, clientSecret2)
-      val page             = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig)
+      val twoClientSecrets: Seq[ClientSecretResponse] = Seq(clientSecret1, clientSecret2)
+      val page: Html = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -142,8 +141,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     }
 
     "not show generate another client secret button when the app has reached the limit of 5 client secrets" in new Setup {
-      val twoClientSecrets = Seq(clientSecret1, clientSecret2, clientSecret3, clientSecret4, clientSecret5)
-      val page             = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig)
+      val twoClientSecrets: Seq[ClientSecretResponse] = Seq(clientSecret1, clientSecret2, clientSecret3, clientSecret4, clientSecret5)
+      val page: Html = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 

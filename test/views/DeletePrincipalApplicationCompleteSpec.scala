@@ -25,6 +25,8 @@ import views.html.DeletePrincipalApplicationCompleteView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -34,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperTestData
     with LocalUserIdTracker {
 
-  val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
+  val deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
 
   "delete application complete page" should {
     "render with no errors" in {
@@ -44,18 +46,18 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
       val appId             = ApplicationId.random
       val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
+      val now               = LocalDateTime.now(ZoneOffset.UTC)
       val application       = Application(
         appId,
         clientId,
         "App name 1",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        now,        Some(now),
         None,
         grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

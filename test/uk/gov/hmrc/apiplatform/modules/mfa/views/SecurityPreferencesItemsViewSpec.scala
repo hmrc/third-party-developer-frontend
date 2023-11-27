@@ -36,10 +36,10 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
   implicit val request: FakeRequest[AnyContentAsEmpty.type]      = FakeRequest()
   val securityPreferencesItemsView: SecurityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
 
-  val authAppMfaDetail: AuthenticatorAppMfaDetailSummary         =
+  val authAppMfaDetail: AuthenticatorAppMfaDetailSummary =
     AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)
 
-  val smsMfaDetail: SmsMfaDetailSummary                          =
+  val smsMfaDetail: SmsMfaDetailSummary =
     SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), mobileNumber = "1234567890", verified = true)
 
   "SecurityPreferencesItems view" should {

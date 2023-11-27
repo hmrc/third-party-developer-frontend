@@ -17,42 +17,40 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
-
 import play.api.test.FakeRequest
-
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  val appId             = ApplicationId.random
-  val clientId          = ClientId("clientId123")
-  val loggedInDeveloper = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
-  val loggedInDev       = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
+  val appId: ApplicationId = ApplicationId.random
+  val clientId: ClientId = ClientId("clientId123")
+  val loggedInDeveloper: DeveloperSession = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
+  val loggedInDev: DeveloperSession = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
 
-  val application = Application(
+  private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+  val application: Application = Application(
     appId,
     clientId,
     "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    now,
+    Some(now),
     None,
     Period.ofDays(547),
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
     access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
   )
 

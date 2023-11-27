@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector

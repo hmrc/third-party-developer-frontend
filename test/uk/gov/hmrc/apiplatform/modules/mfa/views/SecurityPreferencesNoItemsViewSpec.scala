@@ -19,15 +19,16 @@ package uk.gov.hmrc.apiplatform.modules.mfa.views
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 
-import play.api.test.FakeRequest
 import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesNoItemsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SecurityPreferencesNoItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {
-  implicit val request: FakeRequest[AnyContentAsEmpty.type]              = FakeRequest()
-  val securityPreferencesNoItemsView = app.injector.instanceOf[SecurityPreferencesNoItemsView]
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  val securityPreferencesNoItemsView                        = app.injector.instanceOf[SecurityPreferencesNoItemsView]
 
   "SecurityPreferencesNoItemsView view" should {
     "render" in {

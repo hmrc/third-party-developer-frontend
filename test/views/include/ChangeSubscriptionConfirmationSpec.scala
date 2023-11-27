@@ -16,17 +16,14 @@
 
 package views.include
 
-import java.time.{LocalDateTime, ZoneOffset}
-
+import java.time.{LocalDateTime, ZoneId, ZoneOffset}
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.include.ChangeSubscriptionConfirmationView
-
 import play.api.data.Form
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
@@ -44,8 +41,8 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
-  val request = FakeRequest().withCSRFToken
-
+  val request         = FakeRequest().withCSRFToken
+  val now             = LocalDateTime.now()
   val applicationId   = ApplicationId.random
   val clientId        = ClientId("clientId123")
   val applicationName = "Test Application"
@@ -67,7 +64,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

@@ -20,22 +20,19 @@ import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
-
 import org.jsoup.Jsoup
 import views.html.checkpages._
 import views.html.checkpages.applicationcheck.team.{TeamMemberAddView, TeamMemberRemoveConfirmationView, TeamView}
 import views.html.checkpages.applicationcheck.{LandingPageView, UnauthorisedAppDetailsView}
 import views.html.editapplication.NameSubmittedView
-
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, ContactDetails, CheckInformation, ClientSecretResponse, TermsOfUseAgreement, ClientSecret}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -45,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpliftSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -61,21 +59,21 @@ class ApplicationCheckSpec
     with SubscriptionsBuilder
     with FixedClock {
 
-  override val appId = ApplicationId.random
+  override val appId: ApplicationId = ApplicationId.random
 
   val appName: String = "app"
 
-  val exampleContext = ApiContext("exampleContext")
-  val version        = ApiVersionNbr("version")
+  val exampleContext: ApiContext = ApiContext("exampleContext")
+  val version: ApiVersionNbr = ApiVersionNbr("version")
 
-  val anotherCollaboratorEmail    = "collaborator@example.com".toLaxEmail
-  val yetAnotherCollaboratorEmail = "collaborator2@example.com".toLaxEmail
+  val anotherCollaboratorEmail: LaxEmailAddress = "collaborator@example.com".toLaxEmail
+  val yetAnotherCollaboratorEmail: LaxEmailAddress = "collaborator2@example.com".toLaxEmail
 
-  val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
-  val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
-  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
+  val testing: ApplicationState         = ApplicationState(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
+  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+  val pendingApproval: ApplicationState =production.copy(name=State.PENDING_GATEKEEPER_APPROVAL)
 
-  val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersionNbr("api-example-microservice"))
+  val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersionNbr("api-example-microservice"))
 
   val appTokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -111,24 +109,25 @@ class ApplicationCheckSpec
 
   trait BasicApplicationProvider extends ApplicationProvider {
 
-    def createApplication() =
+    def createApplication(): Application = {
       Application(
         appId,
         clientId,
         "App name 1",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        now,
+        Some(now),
         None,
         grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
         )
       )
+    }
   }
 
   def createFullyConfigurableApplication(
@@ -205,21 +204,21 @@ class ApplicationCheckSpec
 
   trait BaseSetup extends ApplicationServiceMock with ApplicationActionServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationProvider
       with TermsOfUseVersionServiceMock {
-    val landingPageView                  = app.injector.instanceOf[LandingPageView]
-    val unauthorisedAppDetailsView       = app.injector.instanceOf[UnauthorisedAppDetailsView]
-    val nameSubmittedView                = app.injector.instanceOf[NameSubmittedView]
-    val teamView                         = app.injector.instanceOf[TeamView]
-    val teamMemberAddView                = app.injector.instanceOf[TeamMemberAddView]
-    val teamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
-    val termsOfUseView                   = app.injector.instanceOf[TermsOfUseView]
-    val confirmNameView                  = app.injector.instanceOf[ConfirmNameView]
-    val contactDetailsView               = app.injector.instanceOf[ContactDetailsView]
-    val apiSubscriptionsViewTemplate     = app.injector.instanceOf[ApiSubscriptionsView]
-    val privacyPolicyView                = app.injector.instanceOf[PrivacyPolicyView]
-    val termsAndConditionsView           = app.injector.instanceOf[TermsAndConditionsView]
+    val landingPageView: LandingPageView = app.injector.instanceOf[LandingPageView]
+    val unauthorisedAppDetailsView: UnauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val nameSubmittedView: NameSubmittedView = app.injector.instanceOf[NameSubmittedView]
+    val teamView: TeamView = app.injector.instanceOf[TeamView]
+    val teamMemberAddView: TeamMemberAddView = app.injector.instanceOf[TeamMemberAddView]
+    val teamMemberRemoveConfirmationView: TeamMemberRemoveConfirmationView = app.injector.instanceOf[TeamMemberRemoveConfirmationView]
+    val termsOfUseView: TermsOfUseView = app.injector.instanceOf[TermsOfUseView]
+    val confirmNameView: ConfirmNameView = app.injector.instanceOf[ConfirmNameView]
+    val contactDetailsView: ContactDetailsView = app.injector.instanceOf[ContactDetailsView]
+    val apiSubscriptionsViewTemplate: ApiSubscriptionsView = app.injector.instanceOf[ApiSubscriptionsView]
+    val privacyPolicyView: PrivacyPolicyView = app.injector.instanceOf[PrivacyPolicyView]
+    val termsAndConditionsView: TermsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
 
-    val applicationCheck = app.injector.instanceOf[ApplicationCheck]
-    val clock            = Clock.fixed(Instant.now(), ZoneOffset.UTC)
+    val applicationCheck: ApplicationCheck = app.injector.instanceOf[ApplicationCheck]
+    val clock: Clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
 
     val underTest = new ApplicationCheck(
       mockErrorHandler,
@@ -245,7 +244,7 @@ class ApplicationCheckSpec
       clock
     )
 
-    val application = createApplication()
+    val application: Application = createApplication()
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -265,7 +264,7 @@ class ApplicationCheckSpec
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
+    val loggedInRequestWithFormBody: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody()
 
     def idAttributeOnCheckedInput(result: Future[Result]): String = Jsoup.parse(contentAsString(result)).select("input[checked]").attr("id")
 
@@ -286,7 +285,7 @@ class ApplicationCheckSpec
     "return credentials requested page when environment is Production" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = underTest.credentialsRequested(appId)(loggedInRequest)
 
@@ -303,7 +302,7 @@ class ApplicationCheckSpec
     "return credentials requested page when environment is QA" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = underTest.credentialsRequested(appId)(loggedInRequest)
 
@@ -318,7 +317,7 @@ class ApplicationCheckSpec
       body should include("By requesting credentials you've created a new QA application")
     }
     "return forbidden when not logged in" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val result      = underTest.credentialsRequested(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
@@ -330,7 +329,7 @@ class ApplicationCheckSpec
     "return landing page when environment is Production" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -344,7 +343,7 @@ class ApplicationCheckSpec
     "return landing page when environment is QA" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -356,7 +355,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -364,7 +363,7 @@ class ApplicationCheckSpec
     }
 
     "show all steps as required when no check information exists" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -379,7 +378,7 @@ class ApplicationCheckSpec
     }
 
     "show app name step as complete when it has been done" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(confirmedName = true)))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(confirmedName = true)))
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -394,7 +393,7 @@ class ApplicationCheckSpec
     }
 
     "show api subscription step as complete when it has been done" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(apiSubscriptionsConfirmed = true)))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(apiSubscriptionsConfirmed = true)))
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -409,7 +408,7 @@ class ApplicationCheckSpec
     }
 
     "show contact details step as complete when it has been done" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(
+      def createApplication(): Application = createPartiallyConfigurableApplication(
         checkInformation = Some(CheckInformation(contactDetails = Some(ContactDetails(FullName("Tester"), "tester@example.com".toLaxEmail, "12345678"))))
       )
 
@@ -426,7 +425,7 @@ class ApplicationCheckSpec
     }
 
     "show privacy policy and terms and conditions step as complete when it has been done" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(
+      def createApplication(): Application = createPartiallyConfigurableApplication(
         checkInformation = Some(CheckInformation(providedPrivacyPolicyURL = true, providedTermsAndConditionsURL = true))
       )
 
@@ -443,7 +442,7 @@ class ApplicationCheckSpec
     }
 
     "show agree to terms of use step as complete when it has been done" in new Setup {
-      def createApplication() =
+      def createApplication(): Application =
         createPartiallyConfigurableApplication(
           checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
         )
@@ -460,7 +459,7 @@ class ApplicationCheckSpec
     }
 
     "show api subscription configuration step as complete when it has been done" in new SetupWithSubs {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation(apiSubscriptionConfigurationsConfirmed = true)))
 
       setupApplicationWithSubs(application, sampleSubscriptionsWithSubscriptionConfiguration(application))
 
@@ -477,7 +476,7 @@ class ApplicationCheckSpec
     }
 
     "successful submit action should take you to the check-your-answers page" in new Setup {
-      def createApplication() =
+      def createApplication(): Application =
         createPartiallyConfigurableApplication(checkInformation =
           Some(
             CheckInformation(
@@ -503,7 +502,7 @@ class ApplicationCheckSpec
     }
 
     "successful submit action should take you to the check-your-answers page when no configurations confirmed because none required" in new Setup {
-      def createApplication() =
+      def createApplication(): Application =
         createPartiallyConfigurableApplication(checkInformation =
           Some(
             CheckInformation(
@@ -529,7 +528,7 @@ class ApplicationCheckSpec
     }
 
     "validation failure submit action" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
@@ -537,7 +536,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
@@ -545,7 +544,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -553,7 +552,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
 
@@ -561,7 +560,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
@@ -569,7 +568,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.requestCheckAction(appId))(loggedInRequestWithFormBody)
 
@@ -579,8 +578,8 @@ class ApplicationCheckSpec
 
   "api subscriptions review" should {
     "return page" in new SetupWithSubs {
-      def createApplication() = createPartiallyConfigurableApplication()
-      val subsData            = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      def createApplication(): Application = createPartiallyConfigurableApplication()
+      val subsData: List[APISubscriptionStatus] = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
@@ -591,8 +590,8 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when application is new submission based uplift" in new SetupWithSubs {
-      def createApplication() = createFakeApplicationWithImporantSubmissionData()
-      val subsData            = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      def createApplication(): Application = createFakeApplicationWithImporantSubmissionData()
+      val subsData: List[APISubscriptionStatus] = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsPage(application.id))(loggedInRequest)
@@ -601,8 +600,8 @@ class ApplicationCheckSpec
     }
 
     "success action" in new SetupWithSubs {
-      def createApplication() = createPartiallyConfigurableApplication()
-      val subsData            = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
+      def createApplication(): Application = createPartiallyConfigurableApplication()
+      val subsData: List[APISubscriptionStatus] = List(exampleSubscriptionWithoutFields("api1"), exampleSubscriptionWithoutFields("api2"))
       setupApplicationWithSubs(application, subsData)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
@@ -612,7 +611,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -620,7 +619,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest)
 
@@ -628,7 +627,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.apiSubscriptionsPage(appId))(loggedInRequest)
 
@@ -636,7 +635,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -644,7 +643,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.apiSubscriptionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -671,7 +670,7 @@ class ApplicationCheckSpec
   "contact review" should {
     "return page" in new Setup {
 
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val result = addToken(underTest.contactPage(appId))(loggedInRequest)
 
@@ -681,7 +680,7 @@ class ApplicationCheckSpec
     }
 
     "successful contact action" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val requestWithFormBody = loggedInRequest
         .withFormUrlEncodedBody("email" -> "email@example.com", "telephone" -> "0000", "fullname" -> "john smith")
@@ -693,7 +692,7 @@ class ApplicationCheckSpec
     }
 
     "Validation failure contact action" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody)
 
@@ -701,7 +700,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody)
 
@@ -709,7 +708,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.contactPage(appId))(loggedInRequestWithFormBody)
 
@@ -717,7 +716,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.contactPage(appId))(loggedInRequest)
 
@@ -725,7 +724,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.contactPage(appId))(loggedInRequest)
 
@@ -733,7 +732,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody)
 
@@ -741,7 +740,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.contactAction(appId))(loggedInRequestWithFormBody)
 
@@ -752,7 +751,7 @@ class ApplicationCheckSpec
   "name review" should {
     "return page" in new Setup {
 
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.namePage(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -760,7 +759,7 @@ class ApplicationCheckSpec
     }
 
     "successful name action different names" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "My First Tax App")
 
@@ -776,7 +775,7 @@ class ApplicationCheckSpec
     }
 
     "successful name action same names" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "app")
 
@@ -794,7 +793,7 @@ class ApplicationCheckSpec
     }
 
     "Validation failure name is blank action" in new Setup {
-      def createApplication()         = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("applicationName" -> "")
 
       private val result = addToken(underTest.nameAction(appId))(requestWithFormBody)
@@ -803,7 +802,7 @@ class ApplicationCheckSpec
     }
 
     "Validation failure name contains HMRC action" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
@@ -823,7 +822,7 @@ class ApplicationCheckSpec
     }
 
     "Validation failure when duplicate name" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.duplicateName))
@@ -843,7 +842,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody)
 
@@ -851,7 +850,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.namePage(appId))(loggedInRequestWithFormBody)
 
@@ -859,7 +858,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.namePage(appId))(loggedInRequest)
 
@@ -867,7 +866,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.namePage(appId))(loggedInRequest)
 
@@ -875,7 +874,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody)
 
@@ -883,7 +882,7 @@ class ApplicationCheckSpec
     }
 
     "return bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.nameAction(appId))(loggedInRequestWithFormBody)
 
@@ -893,7 +892,7 @@ class ApplicationCheckSpec
 
   "privacy policy review" should {
     "return page" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -902,7 +901,7 @@ class ApplicationCheckSpec
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -911,10 +910,10 @@ class ApplicationCheckSpec
     }
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
-      lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = false)
-      lazy val access           = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = false)
+      lazy val access: Standard = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
 
-      def createApplication() = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -923,9 +922,9 @@ class ApplicationCheckSpec
     }
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
-      lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      lazy val access           = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
-      def createApplication()   = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
+      lazy val access: Standard = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      def createApplication(): Application = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -934,8 +933,8 @@ class ApplicationCheckSpec
     }
 
     "return page with no pre-selected when the step was previously completed with no URL" in new Setup {
-      lazy val checkInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      def createApplication()   = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
+      lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -943,7 +942,7 @@ class ApplicationCheckSpec
     }
 
     "successfully process valid urls" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "http://privacypolicy.example.com")
 
@@ -960,7 +959,7 @@ class ApplicationCheckSpec
       redirectLocation(result) shouldBe Some(s"/developer/applications/${application.id}/request-check")
     }
     "successfully process when no URL" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
@@ -979,7 +978,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when privacy policy url is invalid" in new Setup {
-      def createApplication()             = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "invalid url")
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
@@ -987,7 +986,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when privacy policy url is missing" in new Setup {
-      def createApplication()             = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
@@ -995,7 +994,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the action without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody)
 
@@ -1003,7 +1002,7 @@ class ApplicationCheckSpec
     }
 
     "return forbidden when accessing the page without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequestWithFormBody)
 
@@ -1011,7 +1010,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -1019,7 +1018,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
 
@@ -1027,7 +1026,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody)
 
@@ -1035,7 +1034,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithFormBody)
 
@@ -1045,7 +1044,7 @@ class ApplicationCheckSpec
 
   "terms and conditions review" should {
     "return page" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1054,7 +1053,7 @@ class ApplicationCheckSpec
     }
 
     "return page with no option pre-selected when the step has not been completed and no URL has been provided" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1063,9 +1062,9 @@ class ApplicationCheckSpec
     }
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
-      lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = false)
-      lazy val access           = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
-      def createApplication()   = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = false)
+      lazy val access: Standard = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      def createApplication(): Application = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1074,9 +1073,9 @@ class ApplicationCheckSpec
     }
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
-      lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      lazy val access           = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
-      def createApplication()   = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
+      lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
+      lazy val access: Standard = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      def createApplication(): Application = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1085,8 +1084,8 @@ class ApplicationCheckSpec
     }
 
     "return page with no pre-selected when the step was previously completed with no URL" in new Setup {
-      lazy val checkInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      def createApplication()   = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
+      lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1095,7 +1094,7 @@ class ApplicationCheckSpec
     }
 
     "successfully process valid urls" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls =
         loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "http://termsAndConditionsURL.example.com")
@@ -1114,7 +1113,7 @@ class ApplicationCheckSpec
     }
 
     "successfully process when doesn't have url" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(defaultCheckInformation))
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
@@ -1132,7 +1131,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when terms and conditions url is invalid but hasUrl true" in new Setup {
-      def createApplication()             = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "invalid url")
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
@@ -1140,7 +1139,7 @@ class ApplicationCheckSpec
     }
 
     "fail validation when terms and conditions url is missing but hasUrl true" in new Setup {
-      def createApplication()             = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true")
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
@@ -1148,7 +1147,7 @@ class ApplicationCheckSpec
     }
 
     "action unavailable when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -1156,7 +1155,7 @@ class ApplicationCheckSpec
     }
 
     "page unavailable when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequestWithFormBody)
 
@@ -1164,7 +1163,7 @@ class ApplicationCheckSpec
     }
 
     "redirect to the application credentials tab when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1172,7 +1171,7 @@ class ApplicationCheckSpec
     }
 
     "redirect to the application credentials tab when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
 
@@ -1180,7 +1179,7 @@ class ApplicationCheckSpec
     }
 
     "redirect to the application credentials tab when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -1188,7 +1187,7 @@ class ApplicationCheckSpec
     }
 
     "redirect to the application credentials tab when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithFormBody)
 
@@ -1199,7 +1198,7 @@ class ApplicationCheckSpec
   "terms of use review" should {
     "return page" in new Setup {
 
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       returnTermsOfUseVersionForApplication
       private val result      = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
@@ -1208,7 +1207,7 @@ class ApplicationCheckSpec
     }
 
     "be forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
@@ -1216,7 +1215,7 @@ class ApplicationCheckSpec
     }
 
     "action is forbidden when accessed without being an admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody)
 
@@ -1224,7 +1223,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
@@ -1232,7 +1231,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.termsOfUsePage(appId))(loggedInRequest)
 
@@ -1240,7 +1239,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when an attempt is made to submit and the app is already approved" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = production)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = production)
 
       private val result = addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody)
 
@@ -1248,7 +1247,7 @@ class ApplicationCheckSpec
     }
 
     "return a bad request when an attempt is made to submit and the app is pending check" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(state = pendingApproval)
+      def createApplication(): Application = createPartiallyConfigurableApplication(state = pendingApproval)
 
       private val result = addToken(underTest.termsOfUseAction(appId))(loggedInRequestWithFormBody)
 
@@ -1256,7 +1255,7 @@ class ApplicationCheckSpec
     }
 
     "successful terms of use action" in new Setup {
-      def createApplication()         = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
       private val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
 
       private val result = addToken(underTest.termsOfUseAction(appId))(requestWithFormBody)
@@ -1269,7 +1268,7 @@ class ApplicationCheckSpec
 
   "Manage teams checks" should {
     "return manage team list page when check page is navigated to" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.team(appId))(loggedInRequest)
 
@@ -1280,7 +1279,7 @@ class ApplicationCheckSpec
     }
 
     "not return the manage team list page when not logged in" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.team(appId))(loggedOutRequest)
 
@@ -1289,7 +1288,7 @@ class ApplicationCheckSpec
     }
 
     "team post redirect to check landing page" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation()))
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = Some(CheckInformation()))
 
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
@@ -1301,7 +1300,7 @@ class ApplicationCheckSpec
     }
 
     "team post doesn't redirect to the check landing page when not logged in" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.teamAction(appId))(loggedOutRequest)
 
@@ -1310,7 +1309,7 @@ class ApplicationCheckSpec
     }
 
     "return add team member page when check page is navigated to" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.teamAddMember(appId))(loggedInRequest)
 
@@ -1320,7 +1319,7 @@ class ApplicationCheckSpec
     }
 
     "not return the add team member page when not logged in" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.teamAddMember(appId))(loggedOutRequest)
 
@@ -1331,7 +1330,7 @@ class ApplicationCheckSpec
     val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
     "return remove team member confirmation page when navigated to" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedInRequest)
 
@@ -1343,7 +1342,7 @@ class ApplicationCheckSpec
     }
 
     "not return the remove team member confirmation page when not logged in" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.teamMemberRemoveConfirmation(appId, hashedAnotherCollaboratorEmail))(loggedOutRequest)
 
@@ -1352,9 +1351,9 @@ class ApplicationCheckSpec
     }
 
     "redirect to the team member list when the remove confirmation post is executed" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
-      val request = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail.text)
+      val request: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("email" -> anotherCollaboratorEmail.text)
 
       private val result = addToken(underTest.teamMemberRemoveAction(appId))(request)
 
@@ -1366,7 +1365,7 @@ class ApplicationCheckSpec
     }
 
     "team post redirect to check landing page when no check information on application" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(checkInformation = None)
+      def createApplication(): Application = createPartiallyConfigurableApplication(checkInformation = None)
 
       private val result = addToken(underTest.teamAction(appId))(loggedInRequest)
 
@@ -1380,7 +1379,7 @@ class ApplicationCheckSpec
 
   "unauthorised App details" should {
     "redirect to landing page when Admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication()
+      def createApplication(): Application = createPartiallyConfigurableApplication()
 
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
@@ -1389,7 +1388,7 @@ class ApplicationCheckSpec
     }
 
     "return unauthorised App details page with one Admin" in new Setup {
-      def createApplication() = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
+      def createApplication(): Application = createPartiallyConfigurableApplication(userRole = Collaborator.Roles.DEVELOPER)
 
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
@@ -1403,13 +1402,13 @@ class ApplicationCheckSpec
     }
 
     "return unauthorised App details page with 2 Admins " in new Setup {
-      lazy val collaborators = Set(
+      lazy val collaborators: Set[Collaborator] = Set(
         loggedInDeveloper.email.asDeveloperCollaborator,
         anotherCollaboratorEmail.asAdministratorCollaborator,
         yetAnotherCollaboratorEmail.asAdministratorCollaborator
       )
 
-      def createApplication() = createFullyConfigurableApplication(collaborators = collaborators)
+      def createApplication(): Application = createFullyConfigurableApplication(collaborators = collaborators)
 
       private val result = addToken(underTest.unauthorisedAppDetails(appId))(loggedInRequest)
 
