@@ -197,7 +197,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
         isJavascript = true
       )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
-        "rating"                 -> form.rating.getOrElse("").toString,
+        "rating"                 -> form.rating.fold("")(_.toString),
         "email"                  -> form.email,
         "name"                   -> form.name,
         "isJavascript"           -> form.isJavascript.toString,

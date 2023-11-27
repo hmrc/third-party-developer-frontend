@@ -234,7 +234,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
       val newLocation = PrivacyPolicyLocations.Url("http://example.com")
-      val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
+      val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, now(), newLocation)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updatePrivacyPolicyLocation(productionApplication, userId, newLocation))
@@ -247,7 +247,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
       val newLocation = TermsAndConditionsLocations.Url("http://example.com")
-      val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
+      val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, now(), newLocation)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updateTermsConditionsLocation(productionApplication, userId, newLocation))
@@ -262,7 +262,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val riName        = "ri name"
       val riEmail       = "ri@example.com".toLaxEmail
       val requesterName = "ms admin"
-      val cmd           = ApplicationCommands.VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
+      val cmd           = ApplicationCommands.VerifyResponsibleIndividual(userId, now(), requesterName, riName, riEmail)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
       val result        = await(applicationService.verifyResponsibleIndividual(productionApplication, userId, requesterName, riName, riEmail))
 
@@ -344,7 +344,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val expectedMessage    = "Only standard subordinate applications can be deleted by admins"
 
     "delete standard subordinate application when requested by an admin" in new Setup {
-      val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminRequester.developer.userId, reasons, LocalDateTime.now(clock))
+      val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminRequester.developer.userId, reasons, now())
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       await(applicationService.deleteSubordinateApplication(adminRequester, sandboxApp))
@@ -477,7 +477,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val userId  = UserId.random
       val riName  = "Mr Responsible"
       val riEmail = "ri@example.com".toLaxEmail
-      val cmd     = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), riName, riEmail)
+      val cmd     = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, now(), riName, riEmail)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updateResponsibleIndividual(productionApplication, userId, riName, riEmail))

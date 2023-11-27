@@ -31,27 +31,27 @@ trait SampleApplications extends SampleApplication {
 
   val privilegedApplication: Application = sampleApp.copy(access = Privileged())
 
-  val newApplication: Application = sampleApp.copy(state = ApplicationState.testing)
+  val newApplication: Application = sampleApp.copy(state = InState.testing)
 
-  val newSandboxApplication: Application = sampleApp.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
+  val newSandboxApplication: Application = sampleApp.copy(deployedTo = Environment.SANDBOX, state = InState.testing)
 
   val adminApplication: Application     = sampleApp.copy(collaborators = Set(loggedInDeveloper.email.asAdministratorCollaborator))
   val developerApplication: Application = sampleApp.copy(collaborators = Set(loggedInDeveloper.email.asDeveloperCollaborator))
 
   val adminSubmittedProductionApplication: Application =
-    adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
-  val adminCreatedProductionApplication: Application   = adminApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.testing)
+    adminApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
+  val adminCreatedProductionApplication: Application   = adminApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.testing)
 
   val adminSubmittedSandboxApplication: Application =
-    adminApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
-  val adminCreatedSandboxApplication: Application   = adminApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
+    adminApplication.copy(deployedTo = Environment.SANDBOX, state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
+  val adminCreatedSandboxApplication: Application   = adminApplication.copy(deployedTo = Environment.SANDBOX, state = InState.testing)
 
   val developerSubmittedProductionApplication: Application =
-    developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
-  val developerCreatedProductionApplication: Application   = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = ApplicationState.testing)
+    developerApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
+  val developerCreatedProductionApplication: Application   = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.testing)
 
   val developerSubmittedSandboxApplication: Application =
-    developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
-  val devloperCreatedSandboxApplication: Application    = developerApplication.copy(deployedTo = Environment.SANDBOX, state = ApplicationState.testing)
+    developerApplication.copy(deployedTo = Environment.SANDBOX, state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""))
+  val devloperCreatedSandboxApplication: Application    = developerApplication.copy(deployedTo = Environment.SANDBOX, state = InState.testing)
 
 }

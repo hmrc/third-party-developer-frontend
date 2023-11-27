@@ -19,13 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse, Collaborator, IpAllowlist, RedirectUri}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, CheckInformation, ClientSecret, ClientSecretResponse, Collaborator, IpAllowlist, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 
-trait TestApplications {
+trait TestApplications extends FixedClock with ApplicationStateHelper {
   self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
@@ -41,7 +43,7 @@ trait TestApplications {
       appId,
       clientId,
       environment = Environment.SANDBOX,
-      state = ApplicationState(State.PRODUCTION, None, None),
+      state = InState.production("a", "b", "c"),
       adminEmail = adminEmail,
       developerEmail = developerEmail
     )
@@ -52,7 +54,7 @@ trait TestApplications {
       clientId: ClientId = ClientId(randomString(28)),
       grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
-      state: ApplicationState = ApplicationState.production("test@test.com", "test name", "test"),
+      state: ApplicationState = InState.production("test@test.com", "test name", "test"),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
       access: Access = standardAccess(),
@@ -80,13 +82,13 @@ trait TestApplications {
   def aStandardApprovedApplication: Application = aStandardApplication
 
   def aStandardNonApprovedApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
+    anApplication(adminEmail = adminEmail).withState(InState.testing)
 
   def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test@test.com", "test name", "test"))
+    anApplication(adminEmail = adminEmail).withState(InState.pendingRequesterVerification("test@test.com", "test name", "test"))
 
   def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
+    anApplication(adminEmail = adminEmail).withState(InState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
       redirectUris: List[String] = List("https://redirect1", "https://redirect2"),

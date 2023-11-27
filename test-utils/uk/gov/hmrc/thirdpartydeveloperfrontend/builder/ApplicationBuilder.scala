@@ -25,8 +25,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-trait ApplicationBuilder extends CollaboratorTracker {
+trait ApplicationBuilder extends CollaboratorTracker with FixedClock with ApplicationStateHelper {
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: LaxEmailAddress): Application = {
@@ -46,7 +47,7 @@ trait ApplicationBuilder extends CollaboratorTracker {
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),
-      state = ApplicationState.production(appOwnerEmail.text, appOwnerName, ""),
+      state = InState.production(appOwnerEmail.text, appOwnerName, ""),
       access = Standard(
         redirectUris = List("https://red1", "https://red2"),
         termsAndConditionsUrl = Some("http://tnc-url.com")

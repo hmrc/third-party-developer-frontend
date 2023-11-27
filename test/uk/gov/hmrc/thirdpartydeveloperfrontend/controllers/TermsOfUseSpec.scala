@@ -39,12 +39,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Develop
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class TermsOfUseSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with DeveloperBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker
+    with FixedClock {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
 
@@ -58,7 +60,8 @@ class TermsOfUseSpec
       mcc,
       cookieSigner,
       termsOfUseView,
-      termsOfUseVersionServiceMock
+      termsOfUseVersionServiceMock,
+      clock
     )
 
     val loggedInDeveloper: Developer         = buildDeveloper()

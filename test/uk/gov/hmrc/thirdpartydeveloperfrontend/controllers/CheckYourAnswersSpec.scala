@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -136,7 +136,6 @@ class CheckYourAnswersSpec
     val privacyPolicyView                = app.injector.instanceOf[PrivacyPolicyView]
     val apiSubscriptionsViewTemplate     = app.injector.instanceOf[ApiSubscriptionsView]
     val contactDetailsView               = app.injector.instanceOf[ContactDetailsView]
-    val clock                            = Clock.fixed(Instant.now(), ZoneOffset.UTC)
 
     val underTest = new CheckYourAnswers(
       mockErrorHandler,

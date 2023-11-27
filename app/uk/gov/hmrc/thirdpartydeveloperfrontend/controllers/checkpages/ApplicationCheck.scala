@@ -31,7 +31,7 @@ import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, optional, text}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
@@ -75,6 +75,7 @@ class ApplicationCheck @Inject() (
     with ApiSubscriptionsPartialController
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
+    with ClockNow
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
 

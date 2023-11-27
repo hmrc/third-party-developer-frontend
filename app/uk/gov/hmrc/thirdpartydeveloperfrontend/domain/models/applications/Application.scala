@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permis
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
+import java.time.temporal.ChronoUnit
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
@@ -178,7 +179,7 @@ case class Application(
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now()),
+    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist()
   ) extends BaseApplication
@@ -202,7 +203,7 @@ case class ApplicationWithSubscriptionIds(
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now()),
+    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist(),
     subscriptions: Set[ApiIdentifier] = Set.empty

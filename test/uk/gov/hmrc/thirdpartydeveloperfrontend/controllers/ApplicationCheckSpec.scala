@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -70,7 +70,7 @@ class ApplicationCheckSpec
   val yetAnotherCollaboratorEmail: LaxEmailAddress = "collaborator2@example.com".toLaxEmail
 
   val testing: ApplicationState         = ApplicationState(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
-  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now())
   val pendingApproval: ApplicationState =production.copy(name=State.PENDING_GATEKEEPER_APPROVAL)
 
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersionNbr("api-example-microservice"))
@@ -114,14 +114,14 @@ class ApplicationCheckSpec
         appId,
         clientId,
         "App name 1",
-        now,
-        Some(now),
+        now(),
+        Some(now()),
         None,
         grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
         access = Standard(
           redirectUris = List("https://red1", "https://red2"),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -218,7 +218,6 @@ class ApplicationCheckSpec
     val termsAndConditionsView: TermsAndConditionsView = app.injector.instanceOf[TermsAndConditionsView]
 
     val applicationCheck: ApplicationCheck = app.injector.instanceOf[ApplicationCheck]
-    val clock: Clock = Clock.fixed(Instant.now(), ZoneOffset.UTC)
 
     val underTest = new ApplicationCheck(
       mockErrorHandler,

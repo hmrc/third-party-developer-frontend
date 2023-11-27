@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -63,11 +64,12 @@ class CancelRequestController @Inject() (
     appCmdConnector: ApplicationCommandConnector,
     confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
     cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
-    clock: Clock
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]
+    with ClockNow
     with SubmissionActionBuilders {
 
   import cats.instances.future.catsStdInstancesForFuture
@@ -93,7 +95,7 @@ class CancelRequestController @Inject() (
     val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val reasons                            = "DevHub user cancelled request for production credentials"
     val instigator                         = request.userId
-    val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+    val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, now())
 
     val x =
       (

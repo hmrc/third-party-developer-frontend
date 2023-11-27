@@ -75,19 +75,20 @@ class DeletePrincipalApplicationSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    private val now: LocalDateTime = LocalDate.now.atStartOfDay()
+    private val startOfDay: LocalDateTime = LocalDate.now.atStartOfDay()
+
     val application = Application(
       appId,
       clientId,
       appName,
-      now,
-      Some(now),
+      startOfDay,
+      Some(startOfDay),
       None,
       grantLength,
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), startOfDay),
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 

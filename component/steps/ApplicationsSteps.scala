@@ -38,13 +38,15 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSe
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
   var tokens: Map[String, ApplicationToken]        = Map.empty
 }
 
-class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder {
+class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder with FixedClock with ApplicationStateHelper {
 
   import java.time.Period
 
@@ -109,10 +111,10 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
     AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
       val applicationState = app.getOrElse("state", "TESTING") match {
-        case "TESTING"                        => ApplicationState.testing
-        case "PRODUCTION"                     => ApplicationState.production(email.text, name, verificationCode)
-        case "PENDING_GATEKEEPER_APPROVAL"    => ApplicationState.pendingGatekeeperApproval(email.text, name)
-        case "PENDING_REQUESTER_VERIFICATION" => ApplicationState.pendingRequesterVerification(email.text, name, verificationCode)
+        case "TESTING"                        => InState.testing
+        case "PRODUCTION"                     => InState.production(email.text, name, verificationCode)
+        case "PENDING_GATEKEEPER_APPROVAL"    => InState.pendingGatekeeperApproval(email.text, name)
+        case "PENDING_REQUESTER_VERIFICATION" => InState.pendingRequesterVerification(email.text, name, verificationCode)
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access           = app.getOrElse("accessType", "STANDARD") match {

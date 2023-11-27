@@ -27,10 +27,11 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class SubmissionServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends SubmissionsTestData {
+  trait Setup extends FixedClock with SubmissionsTestData {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]

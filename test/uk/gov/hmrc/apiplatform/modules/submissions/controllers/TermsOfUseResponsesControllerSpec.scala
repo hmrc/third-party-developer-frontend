@@ -35,6 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class TermsOfUseResponsesControllerSpec
     extends BaseControllerSpec
@@ -44,7 +46,9 @@ class TermsOfUseResponsesControllerSpec
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
-    with SubmissionsTestData {
+    with SubmissionsTestData
+    with FixedClock
+    with ApplicationStateHelper {
 
   trait HasSubscriptions {
     val aSubscription = exampleSubscriptionWithoutFields("prefix")
@@ -102,7 +106,7 @@ class TermsOfUseResponsesControllerSpec
 
   "termsOfUseResponsesPage" should {
     "succeed when application is in production" in new Setup {
-      givenAppInState(ApplicationState.production("requestedByEmail", "requestedByName", "verificationCode"))
+      givenAppInState(InState.production("requestedByEmail", "requestedByName", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -111,7 +115,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "succeed when application is in pre-production" in new Setup {
-      givenAppInState(ApplicationState.preProduction("requestedByEmail", "requestedByName"))
+      givenAppInState(InState.preProduction("requestedByEmail", "requestedByName"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -120,7 +124,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "fails when application is not in production" in new Setup {
-      givenAppInState(ApplicationState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
+      givenAppInState(InState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -129,7 +133,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "fails when submission not found" in new Setup {
-      givenAppInState(ApplicationState.production("requestedByEmail", "requestedByName", "verificationCode"))
+      givenAppInState(InState.production("requestedByEmail", "requestedByName", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)

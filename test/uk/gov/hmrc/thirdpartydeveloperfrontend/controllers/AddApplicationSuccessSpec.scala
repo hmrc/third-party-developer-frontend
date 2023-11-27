@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import views.helper.EnvironmentNameService
@@ -53,19 +52,18 @@ class AddApplicationSuccessSpec
     with DeveloperSessionBuilder
     with LocalUserIdTracker {
 
-  private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
   val principalApp: Application = Application(
     appId,
     clientId,
     "App name 1",
-    now,
-    Some(now),
+    now(),
+    Some(now()),
     None,
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state =ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+    state =ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -73,14 +71,14 @@ class AddApplicationSuccessSpec
     appId,
     clientId,
     "App name 2",
-    now,
-    Some(now),
+    now(),
+    Some(now()),
     None,
     grantLength,
     Environment.SANDBOX,
     Some("Description 2"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
     access = Standard(redirectUris = List("https://red3", "https://red4"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

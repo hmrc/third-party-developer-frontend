@@ -47,9 +47,9 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with WireMockExtensions
     with CollaboratorTracker
     with LocalUserIdTracker
-    with SubmissionsTestData
     with SubmissionsFrontendJsonFormatters
     with TestApplications
+    with SubmissionsTestData
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
   private val code   = "123456789"

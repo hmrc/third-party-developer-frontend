@@ -17,7 +17,6 @@
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 
 case class GetProductionCredentialsFlow(

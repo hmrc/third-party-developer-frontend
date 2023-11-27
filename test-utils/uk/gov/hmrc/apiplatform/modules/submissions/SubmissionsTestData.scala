@@ -25,6 +25,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.Su
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 trait StatusTestDataHelper {
 
@@ -86,6 +88,7 @@ trait ProgressTestDataHelper {
 }
 
 trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData with ProgressTestDataHelper with StatusTestDataHelper {
+  self: ClockNow =>
 
   val submissionId  = SubmissionId.random
   val applicationId = ApplicationId.random
@@ -94,13 +97,12 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
     AskWhen.Context.Keys.IN_HOUSE_SOFTWARE -> "No",
     AskWhen.Context.Keys.VAT_OR_ITSA       -> "No"
   )
-  val now                              = LocalDateTime.now(ZoneOffset.UTC)
 
-  val aSubmission = Submission.create("bob@example.com", submissionId, applicationId, now, testGroups, testQuestionIdsOfInterest, standardContext)
+  val aSubmission = Submission.create("bob@example.com", submissionId, applicationId, now(), testGroups, testQuestionIdsOfInterest, standardContext)
 
   val altSubmissionId = SubmissionId.random
   require(altSubmissionId != submissionId)
-  val altSubmission   = Submission.create("bob@example.com", altSubmissionId, applicationId, now.plusSeconds(100), testGroups, testQuestionIdsOfInterest, standardContext)
+  val altSubmission   = Submission.create("bob@example.com", altSubmissionId, applicationId, now().plusSeconds(100), testGroups, testQuestionIdsOfInterest, standardContext)
 
   val completedSubmissionId = SubmissionId.random
   require(completedSubmissionId != submissionId)
@@ -116,9 +118,9 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   val createdSubmission   = aSubmission
   val answeringSubmission = createdSubmission.answeringWith(answersToQuestions)
   val answeredSubmission  = createdSubmission.hasCompletelyAnsweredWith(answersToQuestions)
-  val submittedSubmission = Submission.submit(now, "bob@example.com")(answeredSubmission)
-  val declinedSubmission  = Submission.decline(now, gatekeeperUserName, reasons)(submittedSubmission)
-  val grantedSubmission   = Submission.grant(now, gatekeeperUserName, None, None)(submittedSubmission)
+  val submittedSubmission = Submission.submit(now(), "bob@example.com")(answeredSubmission)
+  val declinedSubmission  = Submission.decline(now(), gatekeeperUserName, reasons)(submittedSubmission)
+  val grantedSubmission   = Submission.grant(now(), gatekeeperUserName, None, None)(submittedSubmission)
 
   def buildSubmissionWithQuestions(appId: ApplicationId = ApplicationId.random): Submission = {
     val subId = SubmissionId.random
@@ -294,7 +296,7 @@ trait AnsweringQuestionsHelper {
   }
 }
 
-trait MarkedSubmissionsTestData extends SubmissionsTestData with AnsweringQuestionsHelper {
+trait MarkedSubmissionsTestData extends SubmissionsTestData with AnsweringQuestionsHelper with FixedClock {
 
   val markedAnswers: Map[Question.Id, Mark] = Map(
     (DevelopmentPractices.question1.id             -> Pass),

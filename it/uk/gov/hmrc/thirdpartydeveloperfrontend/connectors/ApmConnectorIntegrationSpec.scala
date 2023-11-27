@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{LocalDateTime, Period}
+import java.time.{ Period}
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -34,8 +34,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters {
+class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters with FixedClock {
 
   private val stubConfig = Configuration(
     "microservice.services.api-platform-microservice.port" -> stubPort
@@ -56,7 +57,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
   "fetchApplicationById" should {
     val applicationId                                                    = ApplicationId.random
-    val application                                                      = Application(applicationId, ClientId("someId"), "someName", LocalDateTime.now(), None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
+    val application                                                      = Application(applicationId, ClientId("someId"), "someName", now(), None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
     val applicationWithSubscriptionData: ApplicationWithSubscriptionData =
       ApplicationWithSubscriptionData(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
 
