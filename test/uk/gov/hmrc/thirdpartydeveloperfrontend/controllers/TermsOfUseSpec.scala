@@ -31,6 +31,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -84,7 +85,7 @@ class TermsOfUseSpec
         userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
         environment: Environment = Environment.PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
-        access: Access = Standard()
+        access: Access = Access.Standard()
       ): Application = {
       val now         = LocalDateTime.now(ZoneOffset.UTC)
       val application = Application(
@@ -158,13 +159,13 @@ class TermsOfUseSpec
     }
 
     "return the ROPC page for a ROPC app" in new Setup {
-      givenApplicationExists(access = ROPC())
+      givenApplicationExists(access = Access.Ropc())
       val result: Future[Result] = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
 
     "return the privileged page for a privileged app" in new Setup {
-      givenApplicationExists(access = Privileged())
+      givenApplicationExists(access = Access.Privileged())
       val result: Future[Result] = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
@@ -208,14 +209,14 @@ class TermsOfUseSpec
     }
 
     "return a bad request for a ROPC app" in new Setup {
-      givenApplicationExists(access = ROPC())
+      givenApplicationExists(access = Access.Ropc())
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result: Future[Result]                           = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe BAD_REQUEST // FORBIDDEN
     }
 
     "return a bad request for a Privileged app" in new Setup {
-      givenApplicationExists(access = Privileged())
+      givenApplicationExists(access = Access.Privileged())
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")
       val result: Future[Result]                           = addToken(underTest.agreeTermsOfUse(appId))(request)
       status(result) shouldBe BAD_REQUEST // FORBIDDEN

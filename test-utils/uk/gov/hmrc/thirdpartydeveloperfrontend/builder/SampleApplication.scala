@@ -18,6 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -43,7 +45,7 @@ trait SampleApplication
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
     state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   val testingApp   = sampleApp.copy(state = InState.testing)

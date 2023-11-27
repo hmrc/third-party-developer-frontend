@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -338,7 +339,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val developerRequester = standardDeveloper.loggedIn
     val teamMembers        = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     val sandboxApp         = sandboxApplication.copy(collaborators = teamMembers)
-    val invalidROPCApp     = sandboxApplication.copy(collaborators = teamMembers, access = ROPC())
+    val invalidROPCApp     = sandboxApplication.copy(collaborators = teamMembers, access = Access.Ropc())
     val productionApp      = productionApplication.copy(collaborators = teamMembers)
     val reasons            = "Subordinate application deleted by DevHub user"
     val expectedMessage    = "Only standard subordinate applications can be deleted by admins"

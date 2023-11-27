@@ -27,6 +27,7 @@ import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
@@ -75,7 +76,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     checkInformation,
     IpAllowlist()
   )
-  lazy val redirectUrl                                    = "https://example.com/redirect-here"
+  lazy val redirectUrl                                    = RedirectUri.unsafeApply("https://example.com/redirect-here")
   lazy val apiContext: ApiContext                         = ApiContext("ctx")
   lazy val apiVersion: ApiVersionNbr                      = ApiVersionNbr("1.0")
   lazy val apiIdentifier: ApiIdentifier                   = ApiIdentifier(apiContext, apiVersion)
@@ -186,7 +187,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
 
 trait IsOldJourneyStandardApplication extends HasApplication {
   def describeApplication = "an Old Journey application with Standard access"
-  def access: Access      = Standard(List(redirectUrl), None, None, Set.empty, None, None)
+  def access: Access      = Access.Standard(List(redirectUrl), None, None, Set.empty, None, None)
 
   def checkInformation: Option[CheckInformation] = Some(CheckInformation(
     contactDetails = Some(ContactDetails(FullName(s"$userFirstName $userLastName"), userEmail, "01611234567")),
@@ -203,7 +204,7 @@ trait IsOldJourneyStandardApplication extends HasApplication {
 trait IsNewJourneyStandardApplication extends HasApplication {
   def describeApplication = "a New Journey application with Standard access"
 
-  def access: Access                             = Standard(
+  def access: Access                             = Access.Standard(
     List(redirectUrl),
     None,
     None,
@@ -223,7 +224,7 @@ trait IsNewJourneyStandardApplication extends HasApplication {
 
 trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
   def describeApplication                        = "a New Journey application with Standard access but no submission"
-  def access: Access                             = Standard(List(redirectUrl), None, None, Set.empty, None, None)
+  def access: Access                             = Access.Standard(List(redirectUrl), None, None, Set.empty, None, None)
   def checkInformation: Option[CheckInformation] = None
 }
 

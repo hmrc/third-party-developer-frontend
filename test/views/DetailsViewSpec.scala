@@ -28,6 +28,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -186,7 +187,7 @@ class DetailsViewSpec
         val deployedTo = Environment.PRODUCTION
 
         "the app is a privileged app" should {
-          val access                        = Privileged()
+          val access                        = Access.Privileged()
           val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(exists = false)
 
           "show nothing when a developer" in {
@@ -208,7 +209,7 @@ class DetailsViewSpec
         }
 
         "the app is an ROPC app" should {
-          val access                        = ROPC()
+          val access                        = Access.Ropc()
           val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(exists = false)
 
           "show nothing when a developer" in {
@@ -228,7 +229,7 @@ class DetailsViewSpec
         }
 
         "the app is a standard app" when {
-          val access = Standard()
+          val access = Access.Standard()
 
           "the user is a developer" should {
             "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {

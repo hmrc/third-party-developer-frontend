@@ -27,6 +27,7 @@ import views.html.include.LeftHandNav
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocations, ResponsibleIndividual, TermsAndConditionsLocations}
@@ -48,9 +49,11 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val clientId: ClientId                                    = ClientId("std-client-id")
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val loggedIn: DeveloperSession                   = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
-    val standardApplication: Application                      = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Standard())
-    val privilegedApplication: Application                    = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Privileged())
-    val ropcApplication: Application                          = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = ROPC())
+    val standardApplication: Application                      = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Standard())
+
+    val privilegedApplication: Application                    =
+      Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Privileged())
+    val ropcApplication: Application                          = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Ropc())
     val productionState: ApplicationState                     = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), now)
 
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
@@ -157,7 +160,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
         standardApplication.copy(
           deployedTo = Environment.PRODUCTION,
           state = productionState,
-          access = Standard(importantSubmissionData = Some(importantSubmissionData))
+          access = Access.Standard(importantSubmissionData = Some(importantSubmissionData))
         )
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)

@@ -27,6 +27,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
@@ -84,7 +85,10 @@ class SubscriptionsGroupSpec
         Some("Description 1"),
         Set(loggedInDeveloper.email.asCollaborator(role)),
         state = state,
-        access = Standard(redirectUris = List("https://red1.example.com", "https://red2.example.con"), termsAndConditionsUrl = Some("http://tnc-url.example.com"))
+        access = Access.Standard(
+          redirectUris = List("https://red1.example.com", "https://red2.example.con").map(RedirectUri.unsafeApply),
+          termsAndConditionsUrl = Some("http://tnc-url.example.com")
+        )
       )
 
       Jsoup.parse(

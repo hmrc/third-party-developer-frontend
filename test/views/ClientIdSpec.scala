@@ -27,6 +27,7 @@ import views.html.ClientIdView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -63,7 +64,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
-      access = Standard(),
+      access = Access.Standard(),
       state = ApplicationState(updatedOn = now),
       checkInformation = None
     )

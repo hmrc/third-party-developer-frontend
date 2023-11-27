@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -42,7 +42,7 @@ case class CreateApplicationRequest(
     environment: Environment,
     description: Option[String],
     collaborators: List[Collaborator],
-    access: Access = Standard(List.empty, None, None, Set.empty)
+    access: Access = Access.Standard(List.empty, None, None, Set.empty)
   )
 
 object CreateApplicationRequest extends ApplicationRequest {
@@ -77,7 +77,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
       application.name
     }
 
-    val access = application.access.asInstanceOf[Standard]
+    val access = application.access.asInstanceOf[Access.Standard]
 
     UpdateApplicationRequest(
       application.id,

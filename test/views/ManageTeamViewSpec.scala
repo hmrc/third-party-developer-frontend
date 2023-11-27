@@ -25,7 +25,8 @@ import views.html.manageTeamViews.ManageTeamView
 import play.api.data.Form
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
@@ -47,7 +48,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
 
   private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 
-  val application: Application   = Application(
+  val application: Application = Application(
     appId,
     clientId,
     "App name 1",
@@ -59,7 +60,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     Some("Description 1"),
     collaborators,
     state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   "manageTeam view" should {

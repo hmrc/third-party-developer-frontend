@@ -26,6 +26,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, InternalServerException}
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Administrator
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, DispatchRequest, DispatchSuccessResult}
@@ -53,7 +54,7 @@ class ApplicationCommandConnectorSpec
       Environment.PRODUCTION,
       None,
       Set.empty,
-      Privileged(),
+      Access.Privileged(),
       ApplicationState(State.TESTING, None, None, None, LocalDateTime.now()),
       None,
       IpAllowlist(required = false, Set.empty)

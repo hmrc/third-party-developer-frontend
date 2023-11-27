@@ -19,10 +19,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 import java.time.LocalDateTime
 import javax.inject.Singleton
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsOfUseAcceptance
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, Standard}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object TermsOfUseService {
@@ -36,7 +37,7 @@ class TermsOfUseService {
     checkInformation.termsOfUseAgreements.map((toua: TermsOfUseAgreement) => TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version)))
   }
 
-  private def getAgreementDetailsFromStandardApp(std: Standard): List[TermsOfUseAgreementDetails] = {
+  private def getAgreementDetailsFromStandardApp(std: Access.Standard): List[TermsOfUseAgreementDetails] = {
     std.importantSubmissionData.fold[List[TermsOfUseAgreementDetails]](List.empty)(isd =>
       isd.termsOfUseAcceptances
         .map((toua: TermsOfUseAcceptance) =>
@@ -48,8 +49,8 @@ class TermsOfUseService {
   def getAgreementDetails(application: Application): List[TermsOfUseAgreementDetails] =
     application.checkInformation.fold[List[TermsOfUseAgreementDetails]](List.empty)(getAgreementDetailsFromCheckInformation) ++ (
       application.access match {
-        case std: Standard => getAgreementDetailsFromStandardApp(std)
-        case _             => List.empty
+        case std: Access.Standard => getAgreementDetailsFromStandardApp(std)
+        case _                    => List.empty
       }
     )
 }

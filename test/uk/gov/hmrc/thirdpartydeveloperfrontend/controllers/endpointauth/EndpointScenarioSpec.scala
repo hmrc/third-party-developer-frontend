@@ -285,14 +285,15 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   final def getQueryParameterValues(endpoint: Endpoint): Map[String, String] = {
     endpoint match {
       case Endpoint("GET", "/developer/applications/:id/change-locked-subscription", _)           =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)          =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("GET", "/developer/applications/:id/change-private-subscription", _)          =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)         =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                 => Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                 =>
+        Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("GET", "/developer/applications/:id/ip-allowlist/remove", _)                  => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/remove", _)                 => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("GET", "/developer/verification", _)                                          => Map("code" -> "CODE123")
@@ -346,8 +347,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                                        => Map("redirectUri" -> "https://example.com/redirect")
       case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                                                     => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                                        =>
-        Map("originalRedirectUri" -> redirectUrl, "newRedirectUri" -> (redirectUrl + "-new"))
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                                                     => Map("redirectUri" -> redirectUrl, "deleteRedirectConfirm" -> "yes")
+        Map("originalRedirectUri" -> redirectUrl.toString(), "newRedirectUri" -> (redirectUrl.toString() + "-new"))
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                                                     => Map("redirectUri" -> redirectUrl.toString(), "deleteRedirectConfirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                                         => Map("deleteConfirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                                         => Map("ipAddress" -> "1.2.3.4/24")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                                                      => Map("confirm" -> "yes")

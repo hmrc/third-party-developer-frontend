@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 sealed trait Capability {
@@ -25,7 +26,7 @@ sealed trait Capability {
 object Capabilities {
 
   trait StandardAppCapability extends Capability {
-    final def hasCapability(app: BaseApplication): Boolean = app.access.accessType.isStandard
+    final def hasCapability(app: BaseApplication): Boolean = app.access.accessType == AccessType.STANDARD
   }
 
   case object Guaranteed extends Capability {
@@ -65,7 +66,12 @@ object Capabilities {
   case object SupportsDeletion extends StandardAppCapability
 
   case object SupportsAppChecks extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting && app.access.hasSubmissions == false
+
+    def hasSubmissions(access: Access): Boolean      = access match {
+      case Access.Standard(_, _, _, _, _, importantSubmissionData) => importantSubmissionData.nonEmpty
+      case _                                                       => false
+    }
+    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting && false == hasSubmissions(app.access)
   }
 
   case object SupportChangingAppDetails extends Capability {

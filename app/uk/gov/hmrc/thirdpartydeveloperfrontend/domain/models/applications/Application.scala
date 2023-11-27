@@ -21,10 +21,16 @@ import java.time.{LocalDateTime, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations, _}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
+  PrivacyPolicyLocation,
+  PrivacyPolicyLocations,
+  TermsAndConditionsLocation,
+  TermsAndConditionsLocations,
+  _
+}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
@@ -71,7 +77,7 @@ trait BaseApplication {
   }
 
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo.isSandbox || access.accessType.isNotStandard) {
+    if (deployedTo.isSandbox || access.accessType != AccessType.STANDARD) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED
@@ -82,21 +88,21 @@ trait BaseApplication {
 
   def hasResponsibleIndividual: Boolean = {
     access match {
-      case Standard(_, _, _, _, _, Some(_)) => true
-      case _                                => false
+      case Access.Standard(_, _, _, _, _, Some(_)) => true
+      case _                                       => false
     }
   }
 
   def privacyPolicyLocation: PrivacyPolicyLocation = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocations.Url(url)
-    case _                                                                                            => PrivacyPolicyLocations.NoneProvided
+    case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+    case Access.Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocations.Url(url)
+    case _                                                                                                   => PrivacyPolicyLocations.NoneProvided
   }
 
   def termsAndConditionsLocation: TermsAndConditionsLocation = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocations.Url(url)
-    case _                                                                                                 => TermsAndConditionsLocations.NoneProvided
+    case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+    case Access.Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocations.Url(url)
+    case _                                                                                                        => TermsAndConditionsLocations.NoneProvided
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
@@ -115,11 +121,11 @@ trait BaseApplication {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (Environment.SANDBOX, _, _, _)                                                                => false
-      case (Environment.PRODUCTION, STANDARD, State.TESTING, Some(ADMINISTRATOR))                        => true
-      case (Environment.PRODUCTION, STANDARD, State.PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
-      case (Environment.PRODUCTION, STANDARD, State.PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
-      case _                                                                                             => false
+      case (Environment.SANDBOX, _, _, _)                                                                           => false
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.TESTING, Some(ADMINISTRATOR))                        => true
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
+      case _                                                                                                        => false
     }
   }
 
@@ -127,9 +133,9 @@ trait BaseApplication {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (Environment.SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
-      case (Environment.PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _                                                                         => false
+      case (Environment.SANDBOX, AccessType.STANDARD, State.PRODUCTION, _)                      => true
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _                                                                                    => false
     }
   }
 
@@ -140,13 +146,13 @@ trait BaseApplication {
   private val maximumNumberOfRedirectUris = 5
 
   def canAddRedirectUri: Boolean = access match {
-    case s: Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
-    case _           => false
+    case s: Access.Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
+    case _                  => false
   }
 
-  def hasRedirectUri(redirectUri: String): Boolean = access match {
-    case s: Standard => s.redirectUris.contains(redirectUri)
-    case _           => false
+  def hasRedirectUri(redirectUri: RedirectUri): Boolean = access match {
+    case s: Access.Standard => s.redirectUris.contains(redirectUri)
+    case _                  => false
   }
 
   def isInTesting: Boolean            = state.isInTesting
@@ -173,7 +179,7 @@ case class Application(
     deployedTo: Environment,
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
-    access: Access = Standard(),
+    access: Access = Access.Standard(),
     state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist()
@@ -197,7 +203,7 @@ case class ApplicationWithSubscriptionIds(
     deployedTo: Environment,
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
-    access: Access = Standard(),
+    access: Access = Access.Standard(),
     state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist(),

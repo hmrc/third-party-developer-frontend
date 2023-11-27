@@ -28,6 +28,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -35,7 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel, formatDateTime}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Standard
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object ManageResponsibleIndividualController {
@@ -93,7 +93,7 @@ class ManageResponsibleIndividualController @Inject() (
 
   def showResponsibleIndividualDetails(applicationId: ApplicationId): Action[AnyContent] = canViewResponsibleIndividualDetailsAction(applicationId) { implicit request =>
     request.application.access match {
-      case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, termsOfUseAcceptances))) => {
+      case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, termsOfUseAcceptances))) => {
         val environment                       = request.application.deployedTo.toString().toLowerCase().capitalize
         val responsibleIndividualHistoryItems = buildResponsibleIndividualHistoryItems(termsOfUseAcceptances).reverse
         val allowChanges                      = request.role.isAdministrator
@@ -102,7 +102,7 @@ class ManageResponsibleIndividualController @Inject() (
         val viewModel                         = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails, userIsResponsibleIndividual)
         successful(Ok(responsibleIndividualDetailsView(request.application, viewModel)))
       }
-      case _                                                                                                                => successful(BadRequest("Only Standard apps have Responsible Individual details"))
+      case _                                                                                                                       => successful(BadRequest("Only Standard apps have Responsible Individual details"))
     }
   }
 
@@ -150,7 +150,7 @@ class ManageResponsibleIndividualController @Inject() (
 
     def handleValidForm(form: ResponsibleIndividualChangeToOtherForm): Future[Result] = {
       request.application.access match {
-        case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, _))) => {
+        case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, _))) => {
           val isAlreadyResponsibleIndividual = form.name.equalsIgnoreCase(responsibleIndividual.fullName.value) &&
             form.email.equalsIgnoreCase(responsibleIndividual.emailAddress.text)
           if (isAlreadyResponsibleIndividual) {

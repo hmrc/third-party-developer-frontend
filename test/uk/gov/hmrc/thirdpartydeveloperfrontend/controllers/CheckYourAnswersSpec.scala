@@ -36,6 +36,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -215,7 +216,7 @@ class CheckYourAnswersSpec
         userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
-        access: Access = Standard()
+        access: Access = Access.Standard()
       ): Application = {
 
       val collaborators = Set(
@@ -269,7 +270,7 @@ class CheckYourAnswersSpec
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+          termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, now(), "1.0"))
         )
       )
     )

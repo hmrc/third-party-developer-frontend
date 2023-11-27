@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 trait SampleApplications extends SampleApplication {
   self: SampleSession with CollaboratorTracker =>
@@ -27,9 +29,9 @@ trait SampleApplications extends SampleApplication {
 
   val activeDeveloperApplication: Application = sampleApp.copy(collaborators = Set(loggedInDeveloper.email.asDeveloperCollaborator))
 
-  val ropcApplication: Application = sampleApp.copy(access = ROPC())
+  val ropcApplication: Application = sampleApp.copy(access = Access.Ropc())
 
-  val privilegedApplication: Application = sampleApp.copy(access = Privileged())
+  val privilegedApplication: Application = sampleApp.copy(access = Access.Privileged())
 
   val newApplication: Application = sampleApp.copy(state = InState.testing)
 

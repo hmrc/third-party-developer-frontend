@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -35,7 +35,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class SubscribeRequestSubmittedSpec
+    extends CommonViewSpec
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with DeveloperBuilder
+    with SampleSession
+    with SampleApplication {
+
   "Subscribe request submitted page" should {
     "render with no errors" in {
       val appConfig = mock[ApplicationConfig]
@@ -47,20 +56,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
       val clientId    = ClientId("clientId123")
       val developer   = buildDeveloperWithRandomId("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
       val now         = LocalDateTime.now(ZoneOffset.UTC)
-      val application = Application(
-        appId,
-        clientId,
-        "Test Application",
-        now,
-        Some(now),
-        None,
-        grantLength,
-        Environment.PRODUCTION,
-        Some("Test Application Description"),
-        Set(developer.email.asAdministratorCollaborator),
-        state = ApplicationState(State.PRODUCTION, Some(developer.email.text), Some(developer.displayedName), Some(""), now),
-        access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-      )
+      val application = sampleApp
 
       val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]
 

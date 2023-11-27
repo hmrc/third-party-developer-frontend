@@ -34,9 +34,15 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations, _}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
+  PrivacyPolicyLocation,
+  PrivacyPolicyLocations,
+  TermsAndConditionsLocation,
+  TermsAndConditionsLocations,
+  _
+}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -454,7 +460,8 @@ class DetailsSpec
   }
 
   "changing privacy policy location for old journey applications" should {
-    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
+    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) =
+      anApplication(access = Access.Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
     val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
 
     "display update page with url field populated" in new Setup {
@@ -501,7 +508,7 @@ class DetailsSpec
 
   "changing privacy policy location for new journey applications" should {
     def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = anApplication(access =
-      Standard(
+      Access.Standard(
         List.empty,
         None,
         None,
@@ -591,7 +598,7 @@ class DetailsSpec
 
   "changing terms and conditions location for old journey applications" should {
     def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
-      anApplication(access = Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
+      anApplication(access = Access.Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
     val termsAndConditionsUrl                                                               = "http://example.com/terms-conds"
 
     "display update page with url field populated" in new Setup {
@@ -637,7 +644,7 @@ class DetailsSpec
 
   "changing terms and conditions location for new journey applications" should {
     def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = anApplication(access =
-      Standard(
+      Access.Standard(
         List.empty,
         None,
         None,
@@ -870,7 +877,7 @@ class DetailsSpec
       updatedApplication.name shouldBe newName
       updatedApplication.description shouldBe newDescription
       updatedApplication.access match {
-        case access: Standard =>
+        case access: Access.Standard =>
           access.termsAndConditionsUrl shouldBe newTermsUrl
           access.privacyPolicyUrl shouldBe newPrivacyUrl
 
@@ -881,7 +888,7 @@ class DetailsSpec
     implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
 
     implicit class ChangeDetailsAppAugment(val app: Application) {
-      private val appAccess = app.access.asInstanceOf[Standard]
+      private val appAccess = app.access.asInstanceOf[Access.Standard]
 
       final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue())
 

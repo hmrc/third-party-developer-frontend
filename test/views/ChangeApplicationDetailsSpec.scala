@@ -25,6 +25,7 @@ import views.html.ChangeDetailsView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -111,7 +112,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val aDescription           = Some("a helpful description")
       val aPrivacyPolicyURL      = Some("a privacy policy url")
       val aTermsAndConditionsURL = Some("a terms and conditions url")
-      val standardAccess         = Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
+      val standardAccess         = Access.Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
       val application            =
         Application(
           applicationId,

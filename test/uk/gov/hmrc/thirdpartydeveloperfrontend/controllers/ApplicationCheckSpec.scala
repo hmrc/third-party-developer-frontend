@@ -34,6 +34,7 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
@@ -126,8 +127,8 @@ class ApplicationCheckSpec
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
         state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
-        access = Standard(
-          redirectUris = List("https://red1", "https://red2"),
+        access = Access.Standard(
+          redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
           termsAndConditionsUrl = Some("http://tnc-url.com")
         )
       )
@@ -140,7 +141,7 @@ class ApplicationCheckSpec
       clientId: ClientId = clientId,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
-      access: Access = Standard()
+      access: Access = Access.Standard()
     ): Application = {
 
     Application(
@@ -165,7 +166,7 @@ class ApplicationCheckSpec
       userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
       state: ApplicationState = testing,
       checkInformation: Option[CheckInformation] = None,
-      access: Access = Standard()
+      access: Access = Access.Standard()
     ): Application = {
 
     // this is to ensure we always have one ADMINISTRATOR
@@ -200,7 +201,7 @@ class ApplicationCheckSpec
       grantLength,
       Environment.PRODUCTION,
       collaborators = collaborators,
-      access = Standard().copy(importantSubmissionData = Some(mock[ImportantSubmissionData])),
+      access = Access.Standard().copy(importantSubmissionData = Some(mock[ImportantSubmissionData])),
       state = state,
       checkInformation = None
     )
@@ -914,7 +915,7 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
       lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = false)
-      lazy val access: Standard                   = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      lazy val access: Access.Standard            = Access.Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
 
       def createApplication(): Application = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
@@ -926,7 +927,7 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
       lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedPrivacyPolicyURL = true)
-      lazy val access: Standard                   = Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      lazy val access: Access.Standard            = Access.Standard().copy(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       def createApplication(): Application        = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.privacyPolicyPage(appId))(loggedInRequest)
@@ -950,7 +951,7 @@ class ApplicationCheckSpec
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "privacyPolicyURL" -> "http://privacypolicy.example.com")
 
       private val result                = addToken(underTest.privacyPolicyAction(appId))(loggedInRequestWithUrls)
-      private val standardAccess        = Standard(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
+      private val standardAccess        = Access.Standard(privacyPolicyUrl = Some("http://privacypolicy.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
@@ -966,9 +967,9 @@ class ApplicationCheckSpec
 
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
-      private val result                   = addToken(underTest.privacyPolicyAction(application.id))(loggedInRequestWithUrls)
-      private val standardAccess: Standard = Standard(privacyPolicyUrl = None)
-      private val expectedUpdateRequest    =
+      private val result                          = addToken(underTest.privacyPolicyAction(application.id))(loggedInRequestWithUrls)
+      private val standardAccess: Access.Standard = Access.Standard(privacyPolicyUrl = None)
+      private val expectedUpdateRequest           =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
       await(result) // await before verify
@@ -1066,7 +1067,7 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step has not been completed but a URL has already been provided" in new Setup {
       lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = false)
-      lazy val access: Standard                   = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      lazy val access: Access.Standard            = Access.Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
       def createApplication(): Application        = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
@@ -1077,7 +1078,7 @@ class ApplicationCheckSpec
 
     "return page with yes pre-selected when the step was previously completed with a URL" in new Setup {
       lazy val checkInformation: CheckInformation = defaultCheckInformation.copy(providedTermsAndConditionsURL = true)
-      lazy val access: Standard                   = Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
+      lazy val access: Access.Standard            = Access.Standard().copy(termsAndConditionsUrl = Some("http://termsandconds.example.com"))
       def createApplication(): Application        = createPartiallyConfigurableApplication(access = access, checkInformation = Some(checkInformation))
 
       private val result = addToken(underTest.termsAndConditionsPage(appId))(loggedInRequest)
@@ -1103,7 +1104,7 @@ class ApplicationCheckSpec
         loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "true", "termsAndConditionsURL" -> "http://termsAndConditionsURL.example.com")
 
       private val result                = addToken(underTest.termsAndConditionsAction(application.id))(loggedInRequestWithUrls)
-      private val standardAccess        = Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
+      private val standardAccess        = Access.Standard(termsAndConditionsUrl = Some("http://termsAndConditionsURL.example.com"))
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 
@@ -1121,7 +1122,7 @@ class ApplicationCheckSpec
       private val loggedInRequestWithUrls = loggedInRequest.withFormUrlEncodedBody("hasUrl" -> "false")
 
       private val result                = addToken(underTest.termsAndConditionsAction(appId))(loggedInRequestWithUrls)
-      private val standardAccess        = Standard(termsAndConditionsUrl = None)
+      private val standardAccess        = Access.Standard(termsAndConditionsUrl = None)
       private val expectedUpdateRequest =
         UpdateApplicationRequest(application.id, application.deployedTo, application.name, application.description, standardAccess)
 

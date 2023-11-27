@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, SellResellOrDistribute}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -148,8 +148,8 @@ class UpliftJourneyService @Inject() (
   private def updateSellResellOrDistributeIfNeeded(application: Application, sellResellOrDistribute: SellResellOrDistribute)(implicit hc: HeaderCarrier) = {
     def updatedAccess(existing: Application, sellResell: SellResellOrDistribute): Access =
       existing.access match {
-        case stdAccess: Standard => stdAccess.copy(sellResellOrDistribute = Some(sellResell))
-        case _                   => existing.access
+        case stdAccess: Access.Standard => stdAccess.copy(sellResellOrDistribute = Some(sellResell))
+        case _                          => existing.access
       }
 
     def createUpdateApplicationRequest(app: Application, sellResell: SellResellOrDistribute) = UpdateApplicationRequest(
@@ -161,8 +161,8 @@ class UpliftJourneyService @Inject() (
     )
 
     def existingSellResellOrDistribute = application.access match {
-      case Standard(_, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
-      case _                                               => None
+      case Access.Standard(_, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
+      case _                                                      => None
     }
 
     // Only save if the value is different

@@ -28,6 +28,7 @@ import views.html.ServerTokenView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -63,7 +64,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
-      access = Standard(),
+      access = Access.Standard(),
       state = ApplicationState(updatedOn = now),
       checkInformation = None
     )

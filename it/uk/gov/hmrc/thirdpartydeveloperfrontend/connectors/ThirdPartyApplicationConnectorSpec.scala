@@ -29,6 +29,7 @@ import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -77,7 +78,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       connector.environment,
       "My Application",
       Some("Description"),
-      Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
+      Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
     lazy val createApplicationRequest = new CreateApplicationRequest(
@@ -85,7 +86,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       connector.environment,
       Some("Description"),
       List("admin@example.com".toLaxEmail.asAdministratorCollaborator),
-      Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy"))
+      Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: String = "My Application") = new Application(
@@ -99,7 +100,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       connector.environment,
       Some("Description"),
       Set("john@example.com".toLaxEmail.asAdministratorCollaborator),
-      Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
+      Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy")),
       state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"), None, now())
     )
 

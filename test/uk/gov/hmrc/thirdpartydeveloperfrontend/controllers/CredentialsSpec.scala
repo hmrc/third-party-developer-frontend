@@ -32,7 +32,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ClientSecret, ClientSecretResponse, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -78,8 +79,8 @@ class CredentialsSpec
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
         state = productionState,
-        access = Standard(
-          redirectUris = List("https://red1", "https://red2"),
+        access = Access.Standard(
+          redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
           termsAndConditionsUrl = Some("http://tnc-url.com")
         )
       )
@@ -90,7 +91,7 @@ class CredentialsSpec
       applicationId: ApplicationId,
       userRole: Collaborator.Role,
       state: ApplicationState = productionState,
-      access: Access = Standard(),
+      access: Access = Access.Standard(),
       environment: Environment = Environment.PRODUCTION,
       createdOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
     ): Application =

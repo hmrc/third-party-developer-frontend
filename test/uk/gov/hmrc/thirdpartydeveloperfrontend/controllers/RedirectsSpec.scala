@@ -100,7 +100,7 @@ class RedirectsSpec
 
       val document = Jsoup.parse(contentAsString(result))
 
-      application.standardAccess.redirectUris.foreach(uri => elementExistsByText(document, "td", uri) shouldBe true)
+      application.standardAccess.redirectUris.foreach(uri => elementExistsByText(document, "td", uri.toString()) shouldBe true)
       elementExistsByText(document, "button", "Delete") shouldBe shouldShowDeleteButton
     }
 

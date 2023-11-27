@@ -19,7 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -48,8 +49,8 @@ trait ApplicationBuilder extends CollaboratorTracker with FixedClock with Applic
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),
       state = InState.production(appOwnerEmail.text, appOwnerName, ""),
-      access = Standard(
-        redirectUris = List("https://red1", "https://red2"),
+      access = Access.Standard(
+        redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
         termsAndConditionsUrl = Some("http://tnc-url.com")
       )
     )

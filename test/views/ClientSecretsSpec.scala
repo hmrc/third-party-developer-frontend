@@ -28,6 +28,7 @@ import views.html.{ClientSecretsGeneratedView, ClientSecretsView}
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ClientSecret, ClientSecretResponse, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -76,7 +77,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
-      access = Standard(),
+      access = Access.Standard(),
       state = ApplicationState(State.PRODUCTION, Some("requester@test.com"), Some("requester"), Some("verificationCode"), now()),
       checkInformation = None
     )

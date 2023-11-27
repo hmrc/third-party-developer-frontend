@@ -34,7 +34,8 @@ import utils.ComponentTestDeveloperBuilder
 import play.api.http.Status._
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -119,9 +120,9 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
         case unknownState: String             => fail(s"Unknown state '$unknownState'")
       }
       val access           = app.getOrElse("accessType", "STANDARD") match {
-        case "STANDARD"   => Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toList.map(_.trim).filter(_.nonEmpty))
-        case "PRIVILEGED" => Privileged()
-        case "ROPC"       => ROPC()
+        case "STANDARD"   => Access.Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toList.map(_.trim).filter(_.nonEmpty).map(RedirectUri.unsafeApply))
+        case "PRIVILEGED" => Access.Privileged()
+        case "ROPC"       => Access.Ropc()
       }
 
       val environment = app.getOrElse("environment", "PRODUCTION") match {

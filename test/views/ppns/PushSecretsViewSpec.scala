@@ -40,7 +40,9 @@ class PushSecretsViewSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with DeveloperTestData
+    with SampleSession
+    with SampleApplication {
 
   trait Setup {
     val pushSecretsView: PushSecretsView = app.injector.instanceOf[PushSecretsView]
@@ -54,21 +56,7 @@ class PushSecretsViewSpec extends CommonViewSpec
     val request = FakeRequest().withCSRFToken
 
     val now                               = LocalDateTime.now()
-    val application                       = Application(
-      ApplicationId.random,
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      now,
-      Some(now),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(standardDeveloper.email.asAdministratorCollaborator),
-      access = Standard(),
-      state = ApplicationState(updatedOn = now),
-      checkInformation = None
-    )
+    val application                       = sampleApp
     val pushSecrets: NonEmptyList[String] = NonEmptyList.one("the secret")
 
     "render" in new Setup {

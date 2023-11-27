@@ -24,60 +24,45 @@ import views.html.RedirectsView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.CollaboratorSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder
+    with SampleSession with SampleApplication {
 
-  val appId: ApplicationId                = ApplicationId.random
-  val clientId: ClientId                  = ClientId("clientId123")
-  val loggedInDeveloper: DeveloperSession = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
-  val loggedInDev: DeveloperSession       = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
-
-  private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-
-  val application: Application   = Application(
-    appId,
-    clientId,
-    "App name 1",
-    now,
-    Some(now),
-    None,
-    Period.ofDays(547),
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator, loggedInDev.email.asDeveloperCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
-    access = Standard(redirectUris = List.empty, termsAndConditionsUrl = None)
-  )
+  val loggedInDeveloper1: DeveloperSession = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
+  val loggedInDeveloper2: DeveloperSession = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
 
   "redirects page" should {
     val redirectLimit = 5
 
     def renderPageWithRedirectUris(role: Collaborator.Role, numberOfRedirectUris: Int) = {
       val request        = FakeRequest().withCSRFToken
-      val redirects      = 1 to numberOfRedirectUris map (num => s"http://localhost:$num")
-      val standardAccess = Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
+      val redirects      = 1 to numberOfRedirectUris map (num => RedirectUri.unsafeApply(s"http://localhost:$num"))
+      val standardAccess = Access.Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
 
-      val applicationWithRedirects = application.copy(access = standardAccess)
+      val applicationWithRedirects =
+        sampleApp.copy(access = standardAccess, collaborators = Set(loggedInDeveloper1.email.asAdministratorCollaborator, loggedInDeveloper2.email.asDeveloperCollaborator))
       val user                     = if (role.isAdministrator) {
-        loggedInDeveloper
+        loggedInDeveloper1
       } else {
-        loggedInDev
+        loggedInDeveloper2
       }
 
       val redirectsView = app.injector.instanceOf[RedirectsView]
 
       redirectsView.render(
         ApplicationViewModel(applicationWithRedirects, hasSubscriptionsFields = false, hasPpnsFields = false),
-        redirects,
+        redirects.toList,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
         request,
         user,

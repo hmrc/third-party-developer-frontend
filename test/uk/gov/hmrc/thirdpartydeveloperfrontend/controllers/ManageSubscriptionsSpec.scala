@@ -32,6 +32,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator.Roles
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -82,15 +83,15 @@ class ManageSubscriptionsSpec
     Some("Description 1"),
     Set(loggedInDeveloper.email.asCollaborator(role)),
     state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
-    access = Standard(
-      redirectUris = List("https://red1", "https://red2"),
+    access = Access.Standard(
+      redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
       termsAndConditionsUrl = Some("http://tnc-url.com")
     )
   )
 
   val productionApplication: Application = application.copy(deployedTo = Environment.PRODUCTION, id = ApplicationId.random)
 
-  val privilegedApplication: Application = application.copy(id = ApplicationId.random, access = Privileged())
+  val privilegedApplication: Application = application.copy(id = ApplicationId.random, access = Access.Privileged())
 
   val tokens: ApplicationToken =
     ApplicationToken(List(aClientSecret(), aClientSecret()), "token")

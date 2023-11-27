@@ -24,7 +24,8 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
@@ -37,7 +38,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
 
   private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 
-  val application                = Application(
+  val application = Application(
     ApplicationId.random,
     ClientId("clientId123"),
     "App name 1",
@@ -49,7 +50,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
     Some("Description 1"),
     Set.empty,
     state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user name"), Some(""), now),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   "responsible individual details view" should {
