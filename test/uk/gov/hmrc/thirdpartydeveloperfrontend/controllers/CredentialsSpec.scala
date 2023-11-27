@@ -16,19 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import akka.util.ByteString
-import play.api.libs.streams.Accumulator
-
 import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+import akka.util.ByteString
 import views.html.editapplication.DeleteClientSecretView
 import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
+
+import play.api.libs.streams.Accumulator
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ClientSecret, ClientSecretResponse, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -41,8 +44,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-
-import scala.concurrent.Future
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -59,7 +60,7 @@ class CredentialsSpec
   trait ApplicationProvider {
     def createApplication(): Application
   }
-  val productionState: ApplicationState = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now())
+  val productionState: ApplicationState           = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now())
   val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
 
   trait BasicApplicationProvider extends ApplicationProvider {

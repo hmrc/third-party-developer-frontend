@@ -24,8 +24,8 @@ import views.helper.CommonViewSpec
 import views.html.ChangeDetailsView
 
 import play.api.test.FakeRequest
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._

@@ -22,23 +22,23 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 trait ApplicationStateHelper {
   self: ClockNow =>
 
- object InState {
+  object InState {
 
-  def testing = ApplicationState(State.TESTING, None, None,None, now())
+    def testing = ApplicationState(State.TESTING, None, None, None, now())
 
-  def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName), None, now())
+    def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
+      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName), None, now())
 
-  def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName), None, now())
+    def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
+      ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName), None, now())
 
-  def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-    ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), now())
+    def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), now())
 
-  def preProduction(requestedByEmail: String, requestedByName: String) =
-    ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None, now())
+    def preProduction(requestedByEmail: String, requestedByName: String) =
+      ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None, now())
 
-  def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-    ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), now())
+    def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
+      ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), now())
   }
 }

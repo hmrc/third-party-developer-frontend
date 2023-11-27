@@ -24,7 +24,7 @@ import views.html.SubscribeRequestSubmittedView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState,State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
@@ -46,7 +46,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
       val apiVersion  = ApiVersionNbr("1.0")
       val clientId    = ClientId("clientId123")
       val developer   = buildDeveloperWithRandomId("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
-      val now = LocalDateTime.now(ZoneOffset.UTC)
+      val now         = LocalDateTime.now(ZoneOffset.UTC)
       val application = Application(
         appId,
         clientId,
@@ -58,7 +58,7 @@ class SubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddToken
         Environment.PRODUCTION,
         Some("Test Application Description"),
         Set(developer.email.asAdministratorCollaborator),
-        state = ApplicationState(State.PRODUCTION,Some(developer.email.text), Some(developer.displayedName), Some(""),now),
+        state = ApplicationState(State.PRODUCTION, Some(developer.email.text), Some(developer.displayedName), Some(""), now),
         access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

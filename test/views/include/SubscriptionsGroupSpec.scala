@@ -17,15 +17,17 @@
 package views.include
 
 import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import views.helper.CommonViewSpec
 import views.html.include.SubscriptionsGroup
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, SubscriptionsBuilder}
@@ -49,14 +51,14 @@ class SubscriptionsGroupSpec
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   val loggedInDeveloper: DeveloperSession = buildDeveloper("givenname.familyname@example.com".toLaxEmail, "Givenname", "Familyname").loggedIn
-  val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+  val now: LocalDateTime                  = LocalDateTime.now(ZoneOffset.UTC)
 
   val applicationId: ApplicationId = ApplicationId.random
-  val clientId: ClientId = ClientId("clientId123")
-  val applicationName = "Test Application"
-  val apiName         = "Test API"
-  val apiContext: ApiContext = ApiContext("test")
-  val apiVersion: ApiVersionNbr = ApiVersionNbr("1.0")
+  val clientId: ClientId           = ClientId("clientId123")
+  val applicationName              = "Test Application"
+  val apiName                      = "Test API"
+  val apiContext: ApiContext       = ApiContext("test")
+  val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
 
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
@@ -102,14 +104,16 @@ class SubscriptionsGroupSpec
       )
     }
 
-    lazy val toggle: Element = body.getElementById("test-1_0-toggle")
+    lazy val toggle: Element                    = body.getElementById("test-1_0-toggle")
     lazy val requestChangeLink: Option[Element] = Option(body.getElementsByClass("request-change-link").first)
   }
 
   "subscriptionsGroup" when {
-    val productionState = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
-    val pendingGatekeeperApprovalState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
-    val pendingRequesterVerificationState = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+    val productionState                   = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+    val pendingGatekeeperApprovalState    =
+      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+    val pendingRequesterVerificationState =
+      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
 
     "logged in as a developer" should {
       val role = Collaborator.Roles.DEVELOPER
@@ -136,14 +140,14 @@ class SubscriptionsGroupSpec
       }
 
       "render disabled toggles for a pending-requester-verification production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION,pendingRequesterVerificationState)
+        val page = Page(role, Environment.PRODUCTION, pendingRequesterVerificationState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a checked production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION,productionState)
+        val page = Page(role, Environment.PRODUCTION, productionState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
@@ -154,7 +158,7 @@ class SubscriptionsGroupSpec
       val role = Collaborator.Roles.ADMINISTRATOR
 
       "render enabled toggles for a sandbox app" in {
-        val page = Page(role, Environment.SANDBOX,productionState)
+        val page = Page(role, Environment.SANDBOX, productionState)
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
@@ -168,7 +172,7 @@ class SubscriptionsGroupSpec
       }
 
       "render disabled toggles for a pending-gatekeeper-approval production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION,pendingGatekeeperApprovalState)
+        val page = Page(role, Environment.PRODUCTION, pendingGatekeeperApprovalState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink.isDefined shouldBe true

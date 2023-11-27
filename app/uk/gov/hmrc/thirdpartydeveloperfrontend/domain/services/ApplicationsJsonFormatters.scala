@@ -32,16 +32,6 @@ trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
   implicit val keyReadsFieldName: KeyReads[FieldName]   = key => JsSuccess(FieldName(key))
   implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
-  val readsOverrideFlag: Reads[OverrideFlag] = Reads[OverrideFlag] {
-    case JsString(value) => JsSuccess(OverrideFlag(value))
-    case o: JsObject     => Json.reads[OverrideFlag].reads(o)
-    case _               => JsError()
-  }
-
-  val writesOverrideFlag: OWrites[OverrideFlag] = Json.writes[OverrideFlag]
-
-  implicit val formatOverrideFlag: Format[OverrideFlag] = Format(readsOverrideFlag, writesOverrideFlag)
-
   implicit val formatStandard: OFormat[Standard]     = Json.format[Standard]
   implicit val formatPrivileged: OFormat[Privileged] = Json.format[Privileged]
   implicit val formatROPC: OFormat[ROPC]             = Json.format[ROPC]

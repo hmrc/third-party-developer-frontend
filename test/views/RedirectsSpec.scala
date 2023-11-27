@@ -17,10 +17,13 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.RedirectsView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -33,13 +36,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
 
-  val appId: ApplicationId = ApplicationId.random
-  val clientId: ClientId = ClientId("clientId123")
+  val appId: ApplicationId                = ApplicationId.random
+  val clientId: ClientId                  = ClientId("clientId123")
   val loggedInDeveloper: DeveloperSession = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
-  val loggedInDev: DeveloperSession = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
+  val loggedInDev: DeveloperSession       = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
 
   private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-  val application: Application = Application(
+
+  val application: Application   = Application(
     appId,
     clientId,
     "App name 1",

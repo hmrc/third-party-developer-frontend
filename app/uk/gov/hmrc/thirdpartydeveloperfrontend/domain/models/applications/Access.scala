@@ -16,24 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+import play.api.libs.json.OFormat
 import uk.gov.hmrc.play.json.Union
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
+
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{OverrideFlag, SellResellOrDistribute}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
-
-case class ImportantSubmissionData(
-    organisationUrl: Option[String] = None,
-    responsibleIndividual: ResponsibleIndividual,
-    serverLocations: Set[ServerLocation],
-    termsAndConditionsLocation: TermsAndConditionsLocation,
-    privacyPolicyLocation: PrivacyPolicyLocation,
-    termsOfUseAcceptances: List[TermsOfUseAcceptance]
-  )
-
-object ImportantSubmissionData {
-  implicit val format: OFormat[ImportantSubmissionData] = Json.format[ImportantSubmissionData]
-}
 
 sealed trait Access {
   val accessType: AccessType

@@ -37,16 +37,17 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, _}
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil
   var tokens: Map[String, ApplicationToken]        = Map.empty
 }
 
-class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder with FixedClock with ApplicationStateHelper {
+class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder with FixedClock
+    with ApplicationStateHelper {
 
   import java.time.Period
 

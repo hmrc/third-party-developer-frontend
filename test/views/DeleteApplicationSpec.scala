@@ -17,10 +17,13 @@
 package views
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
+
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -40,7 +43,8 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
   val loggedInDeveloper     = JoeBloggs.loggedIn
 
   private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-  val application             = Application(
+
+  val application                = Application(
     appId,
     clientId,
     "App name 1",
@@ -54,10 +58,10 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
     state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
-  val prodAppId               = ApplicationId.random
-  val sandboxAppId            = ApplicationId.random
-  val prodApp: Application    = application.copy(id = prodAppId)
-  val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
+  val prodAppId                  = ApplicationId.random
+  val sandboxAppId               = ApplicationId.random
+  val prodApp: Application       = application.copy(id = prodAppId)
+  val sandboxApp: Application    = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
 
   "delete application page" should {
     "show content and link to delete application for Administrator" when {

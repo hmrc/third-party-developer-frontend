@@ -18,14 +18,17 @@ package uk.gov.hmrc.apiplatform.modules.uplift.controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -76,15 +79,15 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val confirmApisView: ConfirmApisView = app.injector.instanceOf[ConfirmApisView]
-    val turnOffApisMasterView: TurnOffApisMasterView = app.injector.instanceOf[TurnOffApisMasterView]
+    val confirmApisView: ConfirmApisView                                       = app.injector.instanceOf[ConfirmApisView]
+    val turnOffApisMasterView: TurnOffApisMasterView                           = app.injector.instanceOf[TurnOffApisMasterView]
     val sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
-    val weWillCheckYourAnswersView: WeWillCheckYourAnswersView = app.injector.instanceOf[WeWillCheckYourAnswersView]
-    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val unauthorisedAppDetailsView: UnauthorisedAppDetailsView = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val weWillCheckYourAnswersView: WeWillCheckYourAnswersView                 = app.injector.instanceOf[WeWillCheckYourAnswersView]
+    val beforeYouStartView: BeforeYouStartView                                 = app.injector.instanceOf[BeforeYouStartView]
+    val unauthorisedAppDetailsView: UnauthorisedAppDetailsView                 = app.injector.instanceOf[UnauthorisedAppDetailsView]
 
     val mockUpliftJourneyConfig: UpliftJourneyConfig = mock[UpliftJourneyConfig]
-    val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
+    val sr20UpliftJourneySwitchMock                  = new UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val controller = new UpliftJourneyController(
       mockErrorHandler,
@@ -107,22 +110,22 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sr20UpliftJourneySwitchMock
     )
 
-    val appName: String = "app"
+    val appName: String           = "app"
     val apiVersion: ApiVersionNbr = ApiVersionNbr("version")
 
     val developer: Developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session: Session = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val sessionId            = "sessionId"
+    val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-    val testingApp: Application = sampleApp.copy(state = ApplicationState(updatedOn = now()), deployedTo = Environment.SANDBOX)
+    val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = now()), deployedTo = Environment.SANDBOX)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
 
     val apiIdentifier1: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
     val apiIdentifier2: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
@@ -391,8 +394,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
 
       val testSellResellOrDistribute: SellResellOrDistribute = SellResellOrDistribute("Yes")
-      val prodAppId: ApplicationId = ApplicationId.random
-      val prodApp: Application = sampleApp.copy(id = prodAppId)
+      val prodAppId: ApplicationId                           = ApplicationId.random
+      val prodApp: Application                               = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
@@ -426,7 +429,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "redirect to the 'sell resell or distribute' page if a prod app" in new Setup {
       val prodAppId: ApplicationId = ApplicationId.random
-      val prodApp: Application = sampleApp.copy(id = prodAppId)
+      val prodApp: Application     = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),

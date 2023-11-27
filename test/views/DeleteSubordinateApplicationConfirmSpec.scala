@@ -23,7 +23,8 @@ import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationConfirmView
 
 import play.api.test.FakeRequest
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{State, ApplicationState}
+
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -41,7 +42,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
     val appId             = ApplicationId.random
     val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
-    val now = LocalDateTime.now(ZoneOffset.UTC)
+    val now               = LocalDateTime.now(ZoneOffset.UTC)
     val application       = Application(
       appId,
       clientId,

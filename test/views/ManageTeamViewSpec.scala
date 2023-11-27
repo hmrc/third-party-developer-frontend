@@ -17,11 +17,14 @@
 package views
 
 import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.manageTeamViews.ManageTeamView
+
 import play.api.data.Form
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -36,14 +39,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
 
-  val appId: ApplicationId = ApplicationId.random
-  val clientId: ClientId = ClientId("clientId123")
+  val appId: ApplicationId                = ApplicationId.random
+  val clientId: ClientId                  = ClientId("clientId123")
   val loggedInDeveloper: DeveloperSession = adminDeveloper.loggedIn
-  val collaborator: DeveloperSession = standardDeveloper.loggedIn
-  val collaborators: Set[Collaborator] = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
+  val collaborator: DeveloperSession      = standardDeveloper.loggedIn
+  val collaborators: Set[Collaborator]    = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
 
   private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-  val application: Application = Application(
+
+  val application: Application   = Application(
     appId,
     clientId,
     "App name 1",

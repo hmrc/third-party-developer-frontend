@@ -20,9 +20,9 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellRes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 
 case class GetProductionCredentialsFlow(
-                                         val sessionId: String,
-                                         sellResellOrDistribute: Option[SellResellOrDistribute],
-                                         apiSubscriptions: Option[ApiSubscriptions]
+    val sessionId: String,
+    sellResellOrDistribute: Option[SellResellOrDistribute],
+    apiSubscriptions: Option[ApiSubscriptions]
   ) extends Flow {
   val flowType: FlowType = FlowType.GET_PRODUCTION_CREDENTIALS
 }

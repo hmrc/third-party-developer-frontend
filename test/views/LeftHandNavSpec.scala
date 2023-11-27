@@ -26,9 +26,10 @@ import views.html.include.LeftHandNav
 
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
+
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocations, ResponsibleIndividual, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
@@ -50,7 +51,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val standardApplication: Application                      = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Standard())
     val privilegedApplication: Application                    = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Privileged())
     val ropcApplication: Application                          = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = ROPC())
-    val productionState: ApplicationState = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), now)
+    val productionState: ApplicationState                     = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), now)
 
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
@@ -104,7 +105,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
       val application: Application =
-        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator), state =productionState)
+        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator), state = productionState)
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 

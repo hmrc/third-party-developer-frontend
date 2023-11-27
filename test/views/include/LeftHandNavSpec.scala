@@ -17,13 +17,16 @@
 package views.include
 
 import java.time.{LocalDateTime, ZoneOffset}
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import play.api.mvc.AnyContentAsEmpty
 import views.helper.CommonViewSpec
 import views.html.include.LeftHandNav
+
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
@@ -47,8 +50,8 @@ class LeftHandNavSpec extends CommonViewSpec
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val applicationId: ApplicationId = ApplicationId.random
-    val clientId: ClientId = ClientId("clientId123")
-    val applicationName = "Test Application"
+    val clientId: ClientId           = ClientId("clientId123")
+    val applicationName              = "Test Application"
 
     val loggedInDeveloper: DeveloperSession = standardDeveloper.loggedIn
 
@@ -69,7 +72,7 @@ class LeftHandNavSpec extends CommonViewSpec
       access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    val applicationViewModelWithApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
+    val applicationViewModelWithApiSubscriptions: ApplicationViewModel   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
 
     def leftHandNavRender(
@@ -117,7 +120,7 @@ class LeftHandNavSpec extends CommonViewSpec
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields: ApplicationViewModel =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
-        val page: Html = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
+        val page: Html                                    = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 
@@ -147,7 +150,7 @@ class LeftHandNavSpec extends CommonViewSpec
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields: ApplicationViewModel =
           ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
-        val page: Html = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
+        val page: Html                                 = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")
 

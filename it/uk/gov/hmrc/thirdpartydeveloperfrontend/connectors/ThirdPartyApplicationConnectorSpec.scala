@@ -100,7 +100,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       Some("Description"),
       Set("john@example.com".toLaxEmail.asAdministratorCollaborator),
       Standard(List("http://example.com/redirect"), Some("http://example.com/terms"), Some("http://example.com/privacy")),
-      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"),None, now())
+      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"), None, now())
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

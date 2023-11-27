@@ -18,14 +18,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 import views.helper.EnvironmentNameService
 import views.html._
+
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
@@ -63,7 +66,7 @@ class AddApplicationSuccessSpec
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state =ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
     access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -84,17 +87,17 @@ class AddApplicationSuccessSpec
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock
       with EmailPreferencesServiceMock with CombinedApiTestDataHelper {
-    val accessTokenSwitchView: AccessTokenSwitchView = app.injector.instanceOf[AccessTokenSwitchView]
+    val accessTokenSwitchView: AccessTokenSwitchView                                         = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView: TenDaysWarningView = app.injector.instanceOf[TenDaysWarningView]
-    val addApplicationStartSubordinateView: AddApplicationStartSubordinateView = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView: AddApplicationStartPrincipalView = app.injector.instanceOf[AddApplicationStartPrincipalView]
-    val addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
-    val addApplicationNameView: AddApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
-    val chooseApplicationToUpliftView: ChooseApplicationToUpliftView = app.injector.instanceOf[ChooseApplicationToUpliftView]
-    implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
+    val tenDaysWarningView: TenDaysWarningView                                               = app.injector.instanceOf[TenDaysWarningView]
+    val addApplicationStartSubordinateView: AddApplicationStartSubordinateView               = app.injector.instanceOf[AddApplicationStartSubordinateView]
+    val addApplicationStartPrincipalView: AddApplicationStartPrincipalView                   = app.injector.instanceOf[AddApplicationStartPrincipalView]
+    val addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView           = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
+    val addApplicationNameView: AddApplicationNameView                                       = app.injector.instanceOf[AddApplicationNameView]
+    val chooseApplicationToUpliftView: ChooseApplicationToUpliftView                         = app.injector.instanceOf[ChooseApplicationToUpliftView]
+    implicit val environmentNameService: EnvironmentNameService                              = new EnvironmentNameService(appConfig)
 
-    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
+    val beforeYouStartView: BeforeYouStartView           = app.injector.instanceOf[BeforeYouStartView]
     val sr20UpliftJourneySwitchMock: UpliftJourneySwitch = mock[UpliftJourneySwitch]
 
     val flowServiceMock: GetProductionCredentialsFlowService = mock[GetProductionCredentialsFlowService]

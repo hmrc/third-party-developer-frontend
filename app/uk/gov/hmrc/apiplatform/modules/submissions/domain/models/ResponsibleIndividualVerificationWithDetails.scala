@@ -18,8 +18,8 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import play.api.libs.json.{Json, Reads}
 
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.ResponsibleIndividual
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 
 object ResponsibleIndividualVerificationWithDetails {
   implicit val responsibleIndividualVerificationWithDetailsReader: Reads[ResponsibleIndividualVerificationWithDetails] = Json.reads[ResponsibleIndividualVerificationWithDetails]

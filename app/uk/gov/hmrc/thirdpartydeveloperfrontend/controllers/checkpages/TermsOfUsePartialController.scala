@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import java.time.{Clock}
+import java.time.Clock
 import scala.concurrent.Future
 
 import views.html.checkpages.TermsOfUseView
@@ -26,10 +26,10 @@ import play.api.mvc.{Action, AnyContent, Call}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, TermsOfUseForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
-import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 
 trait TermsOfUsePartialController {
   self: ApplicationController with CanUseCheckActions with ClockNow =>

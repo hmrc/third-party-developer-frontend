@@ -53,7 +53,7 @@ class PushSecretsViewSpec extends CommonViewSpec
   "Push secrets page" should {
     val request = FakeRequest().withCSRFToken
 
-    val now = LocalDateTime.now()
+    val now                               = LocalDateTime.now()
     val application                       = Application(
       ApplicationId.random,
       ClientId("Test Application Client ID"),
@@ -66,7 +66,7 @@ class PushSecretsViewSpec extends CommonViewSpec
       Some("Test Application"),
       collaborators = Set(standardDeveloper.email.asAdministratorCollaborator),
       access = Standard(),
-      state = ApplicationState(updatedOn=now),
+      state = ApplicationState(updatedOn = now),
       checkInformation = None
     )
     val pushSecrets: NonEmptyList[String] = NonEmptyList.one("the secret")

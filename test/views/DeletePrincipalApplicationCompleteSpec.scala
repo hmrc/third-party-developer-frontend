@@ -24,9 +24,8 @@ import views.html.DeletePrincipalApplicationCompleteView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
-
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -51,7 +50,8 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
         appId,
         clientId,
         "App name 1",
-        now,        Some(now),
+        now,
+        Some(now),
         None,
         grantLength,
         Environment.PRODUCTION,

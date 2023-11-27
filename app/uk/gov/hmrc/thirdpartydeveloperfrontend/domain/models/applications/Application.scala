@@ -16,17 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import java.time.temporal.ChronoUnit
 import java.time.{LocalDateTime, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
-  PrivacyPolicyLocation,
-  PrivacyPolicyLocations,
-  TermsAndConditionsLocation,
-  TermsAndConditionsLocations
-}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
@@ -34,7 +30,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permis
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
-import java.time.temporal.ChronoUnit
 
 trait BaseApplication {
   val defaultGrantLengthDays = 547
