@@ -20,13 +20,15 @@ import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.util.Random
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
-trait TestApplications {
+trait TestApplications extends FixedClock with ApplicationStateHelper {
   self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
@@ -42,7 +44,7 @@ trait TestApplications {
       appId,
       clientId,
       environment = Environment.SANDBOX,
-      state = ApplicationState(State.PRODUCTION, None, None),
+      state = InState.production("a", "b", "c"),
       adminEmail = adminEmail,
       developerEmail = developerEmail
     )
@@ -53,7 +55,7 @@ trait TestApplications {
       clientId: ClientId = ClientId(randomString(28)),
       grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
-      state: ApplicationState = ApplicationState.production("test@test.com", "test name", "test"),
+      state: ApplicationState = InState.production("test@test.com", "test name", "test"),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
       access: Access = standardAccess(),
@@ -81,30 +83,30 @@ trait TestApplications {
   def aStandardApprovedApplication: Application = aStandardApplication
 
   def aStandardNonApprovedApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.testing)
+    anApplication(adminEmail = adminEmail).withState(InState.testing)
 
   def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingRequesterVerification("test@test.com", "test name", "test"))
+    anApplication(adminEmail = adminEmail).withState(InState.pendingRequesterVerification("test@test.com", "test name", "test"))
 
   def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
-    anApplication(adminEmail = adminEmail).withState(ApplicationState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
+    anApplication(adminEmail = adminEmail).withState(InState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
-      redirectUris: List[String] = List("https://redirect1", "https://redirect2"),
+      redirectUris: List[RedirectUri] = List("https://redirect1", "https://redirect2").map(RedirectUri.unsafeApply(_)),
       termsAndConditionsUrl: Option[String] = Some("http://example.com/terms"),
       privacyPolicyUrl: Option[String] = Some("http://example.com/privacy")
-    ): Standard = {
+    ): Access.Standard = {
 
-    Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
+    Access.Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
   }
 
   def anROPCApplication(): Application = anApplication(access = ropcAccess())
 
-  def ropcAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access = ROPC(scopes)
+  def ropcAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access = Access.Ropc(scopes)
 
   def aPrivilegedApplication(): Application = anApplication(access = privilegedAccess())
 
-  def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Privileged = Privileged(scopes)
+  def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access.Privileged = Access.Privileged(None, scopes)
 
   def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
     ApplicationToken(List(aClientSecret()), accessToken)
@@ -126,15 +128,15 @@ trait TestApplications {
 
     final def withCheckInformation(checkInformation: CheckInformation): Application = app.copy(checkInformation = Some(checkInformation))
 
-    def standardAccess: Standard = {
+    def standardAccess: Access.Standard = {
       if (app.access.accessType != AccessType.STANDARD) {
         throw new IllegalArgumentException(s"You can only use this method on a Standard application. Your app was ${app.access.accessType}")
       } else {
-        app.access.asInstanceOf[Standard]
+        app.access.asInstanceOf[Access.Standard]
       }
     }
 
-    final def withRedirectUris(redirectUris: List[RedirectUri]): Application = app.copy(access = standardAccess.copy(redirectUris = redirectUris.map(_.uri)))
+    final def withRedirectUris(someRedirectUris: List[RedirectUri]): Application = app.copy(access = standardAccess.copy(redirectUris = someRedirectUris))
 
     final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(termsAndConditionsUrl = url))
 

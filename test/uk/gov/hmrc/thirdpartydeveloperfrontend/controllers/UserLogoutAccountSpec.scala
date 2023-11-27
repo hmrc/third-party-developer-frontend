@@ -22,7 +22,7 @@ import scala.concurrent.Future
 
 import views.html.{LogoutConfirmationView, SignoutSurveyView}
 
-import play.api.mvc.Request
+import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF._
@@ -102,8 +102,8 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
     }
 
     "destroy session on logout" in new Setup {
-      implicit val request = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
-      val result           = await(underTest.logout()(request))
+      implicit val request: FakeRequest[AnyContent] = loggedInRequestWithCsrfToken.withSession("access_uri" -> "https://www.example.com")
+      val result                                    = await(underTest.logout()(request))
 
       verify(underTest.sessionService, atLeastOnce).destroy(eqTo(session.sessionId))(*)
       result.session.data shouldBe Map.empty
@@ -197,7 +197,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
         isJavascript = true
       )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(
-        "rating"                 -> form.rating.getOrElse("").toString,
+        "rating"                 -> form.rating.fold("")(_.toString),
         "email"                  -> form.email,
         "name"                   -> form.name,
         "isJavascript"           -> form.isJavascript.toString,

@@ -27,6 +27,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -87,7 +88,7 @@ class QuestionControllerSpec
       with HasAppInTestingState
       with AppendedClues {
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val questionView     = app.injector.instanceOf[QuestionView]
     val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
@@ -276,7 +277,7 @@ class QuestionControllerSpec
     "succeed when given an answer and redirect to check answers page if no more questions need answering" in new Setup {
       val fullyAnsweredSubmission = Submission.create(
         "bob@example.com",
-        Submission.Id.random,
+        SubmissionId.random,
         applicationId,
         LocalDateTime.now(ZoneOffset.UTC),
         testGroups,
@@ -301,7 +302,7 @@ class QuestionControllerSpec
     "succeed when given an answer and redirect to the next question to answer" in new Setup {
       val fullyAnsweredSubmission = Submission.create(
         "bob@example.com",
-        Submission.Id.random,
+        SubmissionId.random,
         applicationId,
         LocalDateTime.now(ZoneOffset.UTC),
         testGroups,

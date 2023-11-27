@@ -18,7 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import java.time.Instant
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
@@ -31,7 +32,9 @@ case class ManageApplicationsViewModel(
     termsOfUseInvitations: List[TermsOfUseInvitation],
     productionApplicationSubmissions: List[Submission]
   ) {
-  lazy val hasPriviledgedApplications = sandboxApplicationSummaries.exists(_.accessType.isPriviledged) || productionApplicationSummaries.exists(_.accessType.isPriviledged)
+
+  lazy val hasPriviledgedApplications =
+    sandboxApplicationSummaries.exists(_.accessType == AccessType.PRIVILEGED) || productionApplicationSummaries.exists(_.accessType == AccessType.PRIVILEGED)
   lazy val hasAppsThatCanBeUplifted   = upliftableApplicationIds.nonEmpty
 
   lazy val notYetLiveProductionApplications = productionApplicationSummaries.filterNot(_.state.isApproved)

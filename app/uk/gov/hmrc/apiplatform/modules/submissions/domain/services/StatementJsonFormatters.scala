@@ -24,8 +24,8 @@ trait StatementJsonFormatters extends NonEmptyListFormatters {
   import play.api.libs.functional.syntax._
   import uk.gov.hmrc.play.json.Union
 
-  implicit val jsonFormatStatementText = Json.format[StatementText]
-  implicit val jsonFormatStatementLink = Json.format[StatementLink]
+  implicit val jsonFormatStatementText: OFormat[StatementText] = Json.format[StatementText]
+  implicit val jsonFormatStatementLink: OFormat[StatementLink] = Json.format[StatementLink]
 
   implicit lazy val readsStatementBullets: Reads[StatementBullets] = (
     (__ \ "bullets").read(nelReads[NonBulletStatementFragment])
@@ -73,7 +73,7 @@ trait StatementJsonFormatters extends NonEmptyListFormatters {
     .andLazy[CompoundFragment]("compound", jsonFormatCompoundFragment)
     .format
 
-  implicit val jsonFormatStatement = Json.format[Statement]
+  implicit val jsonFormatStatement: OFormat[Statement] = Json.format[Statement]
 }
 
 object StatementJsonFormatters extends StatementJsonFormatters

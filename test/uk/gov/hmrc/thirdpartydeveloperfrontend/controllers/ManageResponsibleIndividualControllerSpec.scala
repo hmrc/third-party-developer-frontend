@@ -29,10 +29,11 @@ import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{Collaborator, PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividual, TermsOfUseAcceptance, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
@@ -98,9 +99,9 @@ class ManageResponsibleIndividualControllerSpec
     val sessionParams         = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest      = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest       = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val responsibleIndividual = ResponsibleIndividual.build("Bob Responsible", "bob@example.com".toLaxEmail)
+    val responsibleIndividual = ResponsibleIndividual(FullName("Bob Responsible"), "bob@example.com".toLaxEmail)
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     def givenTheApplicationExistWithUserRole(teamMembers: Seq[Collaborator], touAcceptances: List[TermsOfUseAcceptance]) = {
       val application = aStandardApplication.copy(
@@ -135,8 +136,8 @@ class ManageResponsibleIndividualControllerSpec
       givenTheApplicationExistWithUserRole(
         List(user),
         List(
-          TermsOfUseAcceptance(ResponsibleIndividual.build("Old RI", "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), Submission.Id.random, 0),
-          TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), Submission.Id.random, 0)
+          TermsOfUseAcceptance(ResponsibleIndividual(FullName("Old RI"), "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), SubmissionId.random, 0),
+          TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), SubmissionId.random, 0)
         )
       )
 

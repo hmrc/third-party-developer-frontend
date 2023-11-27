@@ -21,6 +21,7 @@ import java.util.UUID
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaNameChangeForm
@@ -32,9 +33,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 
 class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with StubMessagesFactory {
 
-  implicit val request                    = FakeRequest()
-  val nameChangeView                      = app.injector.instanceOf[NameChangeView]
-  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  val nameChangeView                                        = app.injector.instanceOf[NameChangeView]
+  implicit val loggedIn: DeveloperSession                   = JoeBloggs.loggedIn
 
   "NameChangeView view" should {
     "render correctly when form is valid" in {

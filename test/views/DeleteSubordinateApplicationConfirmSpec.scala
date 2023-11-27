@@ -24,6 +24,8 @@ import views.html.DeleteSubordinateApplicationConfirmView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -41,19 +43,20 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
     val appId             = ApplicationId.random
     val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
+    val now               = LocalDateTime.now(ZoneOffset.UTC)
     val application       = Application(
       appId,
       clientId,
       "App name 1",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      now,
+      Some(now),
       None,
       Period.ofDays(547),
       Environment.SANDBOX,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
-      access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+      access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
     "show link and text to confirm deletion" in {

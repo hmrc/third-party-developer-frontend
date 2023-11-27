@@ -16,20 +16,20 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 
 case class GetProductionCredentialsFlow(
     val sessionId: String,
-    sellResellOrDistribute: Option[applications.SellResellOrDistribute],
+    sellResellOrDistribute: Option[SellResellOrDistribute],
     apiSubscriptions: Option[ApiSubscriptions]
   ) extends Flow {
   val flowType: FlowType = FlowType.GET_PRODUCTION_CREDENTIALS
 }
 
 object GetProductionCredentialsFlow {
-  import play.api.libs.json.Json
-  implicit val format = Json.format[GetProductionCredentialsFlow]
+  import play.api.libs.json.{Json, OFormat}
+  implicit val format: OFormat[GetProductionCredentialsFlow] = Json.format[GetProductionCredentialsFlow]
 
   def create(sessionId: String): GetProductionCredentialsFlow = GetProductionCredentialsFlow(sessionId, None, None)
 }

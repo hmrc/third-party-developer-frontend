@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
 import scala.collection.immutable.{ListMap, ListSet}
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json, OFormat}
 
 sealed trait Question {
   def id: Question.Id
@@ -47,7 +47,7 @@ object ErrorInfo {
   def apply(summary: String): ErrorInfo                  = new ErrorInfo(summary, None)
   def apply(summary: String, message: String): ErrorInfo = if (summary == message) apply(summary) else new ErrorInfo(summary, Some(message))
 
-  implicit val format = Json.format[ErrorInfo]
+  implicit val format: OFormat[ErrorInfo] = Json.format[ErrorInfo]
 }
 
 trait ErrorMessaging {
@@ -58,22 +58,22 @@ trait ErrorMessaging {
 case class Wording(value: String) extends AnyVal
 
 object Wording {
-  implicit val format = Json.valueFormat[Wording]
+  implicit val format: Format[Wording] = Json.valueFormat[Wording]
 }
 
 object Question {
   case class Id(value: String) extends AnyVal
 
   object Id {
-    def random = Id(java.util.UUID.randomUUID.toString)
+    def random: Id = Id(java.util.UUID.randomUUID.toString)
 
-    implicit val format = Json.valueFormat[Id]
+    implicit val format: Format[Id] = Json.valueFormat[Id]
   }
 
   case class Label(value: String) extends AnyVal
 
   object Label {
-    implicit val format = Json.valueFormat[Label]
+    implicit val format: Format[Label] = Json.valueFormat[Label]
   }
 }
 
@@ -94,8 +94,8 @@ case class AcknowledgementOnly(
     wording: Wording,
     statement: Option[Statement]
   ) extends Question {
-  val absence        = None
-  val afterStatement = None
+  val absence: Option[(String, Mark)]   = None
+  val afterStatement: Option[Statement] = None
 }
 
 sealed trait Mark
@@ -120,7 +120,7 @@ object Mark {
 }
 
 case class PossibleAnswer(value: String) extends AnyVal {
-  def htmlValue = value.replace(" ", "-").filter(c => c.isLetterOrDigit || c == '-')
+  def htmlValue: String = value.replace(" ", "-").filter(c => c.isLetterOrDigit || c == '-')
 }
 
 sealed trait ChoiceQuestion extends Question with LabelAndHints with ErrorMessaging {
@@ -171,9 +171,9 @@ case class YesNoQuestion(
     errorInfo: Option[ErrorInfo] = None
   ) extends SingleChoiceQuestion {
 
-  val YES = PossibleAnswer("Yes")
-  val NO  = PossibleAnswer("No")
+  val YES: PossibleAnswer = PossibleAnswer("Yes")
+  val NO: PossibleAnswer  = PossibleAnswer("No")
 
   lazy val marking: ListMap[PossibleAnswer, Mark] = ListMap(YES -> yesMarking, NO -> noMarking)
-  lazy val choices                                = ListSet(YES, NO)
+  lazy val choices: ListSet[PossibleAnswer]       = ListSet(YES, NO)
 }

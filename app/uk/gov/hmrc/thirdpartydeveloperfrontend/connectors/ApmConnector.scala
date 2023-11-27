@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
+import play.api.libs.json.Writes
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -39,8 +40,8 @@ object ApmConnector {
 
   case class RequestUpliftV2(upliftRequest: UpliftData)
 
-  implicit val writesV1 = play.api.libs.json.Json.writes[RequestUpliftV1]
-  implicit val writesV2 = play.api.libs.json.Json.writes[RequestUpliftV2]
+  implicit val writesV1: Writes[RequestUpliftV1] = play.api.libs.json.Json.writes[RequestUpliftV1]
+  implicit val writesV2: Writes[RequestUpliftV2] = play.api.libs.json.Json.writes[RequestUpliftV2]
 }
 
 @Singleton

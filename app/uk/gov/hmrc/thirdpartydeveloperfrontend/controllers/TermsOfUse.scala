@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +26,9 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTermsOfUse
@@ -44,11 +46,13 @@ class TermsOfUse @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     termsOfUseView: TermsOfUseView,
-    termsOfUseVersionService: TermsOfUseVersionService
+    termsOfUseVersionService: TermsOfUseVersionService,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with ApplicationHelper {
+    with ApplicationHelper
+    with ClockNow {
 
   def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTermsOfUse, SandboxOrAdmin)(applicationId)(fun)
@@ -72,7 +76,7 @@ class TermsOfUse @Inject() (
         val information        = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
           termsOfUseAgreements =
-            information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, LocalDateTime.now(ZoneOffset.UTC), termsOfUseVersionService.getLatest().toString)
+            information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, now(), termsOfUseVersionService.getLatest().toString)
         )
 
         applicationService

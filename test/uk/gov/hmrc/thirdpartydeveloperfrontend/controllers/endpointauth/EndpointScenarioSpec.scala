@@ -31,13 +31,15 @@ import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId, Submission}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
@@ -196,9 +198,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpdConnector.resendVerificationEmail(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
   when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
   when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[Submission.Id])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[SubmissionId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
   when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
-  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[Submission.Id], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
   when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(submission)))
   when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
   when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
@@ -267,7 +269,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     "id"                     -> applicationId.toString(),
     "aid"                    -> applicationId.toString(),
     "qid"                    -> question.id.value,
-    "sid"                    -> submissionId.value,
+    "sid"                    -> submissionId.toString(),
     "environment"            -> Environment.PRODUCTION.toString(),
     "pageNumber"             -> "1",
     "context"                -> apiContext.value,
@@ -283,14 +285,15 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   final def getQueryParameterValues(endpoint: Endpoint): Map[String, String] = {
     endpoint match {
       case Endpoint("GET", "/developer/applications/:id/change-locked-subscription", _)           =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)          =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("GET", "/developer/applications/:id/change-private-subscription", _)          =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)         =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                 => Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl)
+        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                 =>
+        Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("GET", "/developer/applications/:id/ip-allowlist/remove", _)                  => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/remove", _)                 => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("GET", "/developer/verification", _)                                          => Map("code" -> "CODE123")
@@ -344,8 +347,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                                        => Map("redirectUri" -> "https://example.com/redirect")
       case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                                                     => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                                        =>
-        Map("originalRedirectUri" -> redirectUrl, "newRedirectUri" -> (redirectUrl + "-new"))
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                                                     => Map("redirectUri" -> redirectUrl, "deleteRedirectConfirm" -> "yes")
+        Map("originalRedirectUri" -> redirectUrl.toString(), "newRedirectUri" -> (redirectUrl.toString() + "-new"))
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                                                     => Map("redirectUri" -> redirectUrl.toString(), "deleteRedirectConfirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                                         => Map("deleteConfirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                                         => Map("ipAddress" -> "1.2.3.4/24")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                                                      => Map("confirm" -> "yes")

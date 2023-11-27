@@ -22,11 +22,12 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
@@ -52,16 +53,16 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val userEmail = "thirdpartydeveloper@example.com".toLaxEmail
-    val userId    = idOf(userEmail)
+    val userEmail: LaxEmailAddress = "thirdpartydeveloper@example.com".toLaxEmail
+    val userId: UserId             = idOf(userEmail)
 
-    val userPassword                    = "password1!"
-    val sessionId                       = "sessionId"
-    val loginRequest                    = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val accessCode                      = "123456"
-    val nonce                           = "ABC-123"
-    val mfaId                           = MfaId.random
-    val accessCodeAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
+    val userPassword                                                     = "password1!"
+    val sessionId                                                        = "sessionId"
+    val loginRequest: LoginRequest                                       = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val accessCode                                                       = "123456"
+    val nonce                                                            = "ABC-123"
+    val mfaId: MfaId                                                     = MfaId.random
+    val accessCodeAuthenticationRequest: AccessCodeAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
     val payloadEncryption: PayloadEncryption        = app.injector.instanceOf[PayloadEncryption]
     val encryptedLoginRequest: JsValue              = Json.toJson(SecretRequest(payloadEncryption.encrypt(loginRequest).as[String]))
@@ -164,12 +165,11 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "updateSessionLoggedInState" should {
-    val sessionId = "sessionId"
-    val url       = s"/session/$sessionId/loggedInState/LOGGED_IN"
 
     "update session logged in state" in new Setup {
-      val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session                    = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+      val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val session: Session                                       = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
 
       stubFor(
         put(urlEqualTo(url))
@@ -184,7 +184,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "error with SessionInvalid if we get a 404 response" in new Setup {
-      val updateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
       stubFor(
         put(urlEqualTo(url))
           .willReturn(
@@ -201,8 +202,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   "updateProfile" should {
 
     "update profile" in new Setup {
-      val updateProfileRequest = UpdateProfileRequest("First", "Last")
-      val url                  = s"/developer/${userId}"
+      val updateProfileRequest: UpdateProfileRequest = UpdateProfileRequest("First", "Last")
+      val url                                        = s"/developer/${userId}"
 
       stubFor(
         post(urlEqualTo(url))
@@ -218,9 +219,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Resend verification" should {
     "send verification mail" in new Setup {
-      val email            = "john.smith@example.com".toLaxEmail
-      implicit val writes1 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdRequest]
-      implicit val writes2 = Json.writes[ThirdPartyDeveloperConnector.FindUserIdResponse]
+      val email: LaxEmailAddress                                                     = "john.smith@example.com".toLaxEmail
+      implicit val writes1: OWrites[ThirdPartyDeveloperConnector.FindUserIdRequest]  = Json.writes[ThirdPartyDeveloperConnector.FindUserIdRequest]
+      implicit val writes2: OWrites[ThirdPartyDeveloperConnector.FindUserIdResponse] = Json.writes[ThirdPartyDeveloperConnector.FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))
@@ -276,7 +277,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val code = "ABC123"
 
       import ThirdPartyDeveloperConnector.EmailForResetResponse
-      implicit val writes = Json.writes[EmailForResetResponse]
+      implicit val writes: OWrites[EmailForResetResponse] = Json.writes[EmailForResetResponse]
 
       stubFor(
         get(urlPathEqualTo("/reset-password"))
@@ -291,9 +292,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "successfully reset password" in new Setup {
-      val passwordReset = PasswordReset("user@example.com".toLaxEmail, "newPassword")
-      val payload       = Json.toJson(passwordReset)
-      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      val passwordReset: PasswordReset = PasswordReset("user@example.com".toLaxEmail, "newPassword")
+      val payload: JsValue             = Json.toJson(passwordReset)
+      val encryptedBody: SecretRequest = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
         post(urlPathEqualTo("/reset-password"))
@@ -371,7 +372,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val payload               = Json.toJson(changePasswordRequest)
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
-      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      val encryptedBody: SecretRequest = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
         post(urlPathEqualTo("/change-password"))
@@ -385,7 +386,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "throw Unverified Account if the response is Forbidden" in new Setup {
-      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      val encryptedBody: SecretRequest = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
         post(urlPathEqualTo("/change-password"))
@@ -399,7 +400,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
 
     "throw Locked Account if the response is Locked" in new Setup {
-      val encryptedBody = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      val encryptedBody: SecretRequest = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
         post(urlPathEqualTo("/change-password"))

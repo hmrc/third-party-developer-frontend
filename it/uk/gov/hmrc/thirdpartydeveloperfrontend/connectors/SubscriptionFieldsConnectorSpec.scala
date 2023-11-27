@@ -80,13 +80,13 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
       .build()
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
-    val underTest   = app.injector.instanceOf[ProductionSubscriptionFieldsConnector]
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val underTest                  = app.injector.instanceOf[ProductionSubscriptionFieldsConnector]
   }
 
   trait ProxiedSetup {
-    implicit val hc = HeaderCarrier()
-    val underTest   = app.injector.instanceOf[SandboxSubscriptionFieldsConnector]
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val underTest                  = app.injector.instanceOf[SandboxSubscriptionFieldsConnector]
   }
 
   "fetchFieldsValuesWithPrefetchedDefinitions" should {

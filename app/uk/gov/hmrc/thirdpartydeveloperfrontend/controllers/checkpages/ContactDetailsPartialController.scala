@@ -23,10 +23,11 @@ import views.html.checkpages.ContactDetailsView
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ContactDetails}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, ContactDetails}
 
 trait ContactDetailsPartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -39,7 +40,7 @@ trait ContactDetailsPartialController {
     val contactForm = for {
       approvalInfo   <- app.checkInformation
       contactDetails <- approvalInfo.contactDetails
-    } yield ContactForm(contactDetails.fullname, contactDetails.email.text, contactDetails.telephoneNumber)
+    } yield ContactForm(contactDetails.fullname.value, contactDetails.email.text, contactDetails.telephoneNumber)
 
     Future.successful(contactForm match {
       case Some(form) =>
@@ -61,7 +62,7 @@ trait ContactDetailsPartialController {
     def withValidForm(form: ContactForm) = {
       val information = app.checkInformation
         .getOrElse(CheckInformation())
-        .copy(contactDetails = Some(ContactDetails(form.fullname, form.email.toLaxEmail, form.telephone)))
+        .copy(contactDetails = Some(ContactDetails(FullName(form.fullname), form.email.toLaxEmail, form.telephone)))
       applicationService.updateCheckInformation(app, information) map { _ => Redirect(landingPageRoute(app.id)) }
     }
 

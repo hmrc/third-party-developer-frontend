@@ -18,13 +18,14 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers.models
 
 import cats.data.NonEmptyList
 
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 object AnswersViewModel {
   case class ViewQuestion(id: Question.Id, text: String, answer: String)
   case class ViewQuestionnaire(label: String, state: String, id: Questionnaire.Id, questions: NonEmptyList[ViewQuestion])
-  case class ViewModel(appId: ApplicationId, appName: String, submissionId: Submission.Id, questionnaires: List[ViewQuestionnaire])
+  case class ViewModel(appId: ApplicationId, appName: String, submissionId: SubmissionId, questionnaires: List[ViewQuestionnaire])
 
   private def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
     case SingleChoiceAnswer(value)    => Some(value)

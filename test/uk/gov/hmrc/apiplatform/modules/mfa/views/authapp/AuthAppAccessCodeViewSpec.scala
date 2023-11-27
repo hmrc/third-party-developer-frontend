@@ -21,6 +21,7 @@ import java.util.UUID
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
@@ -37,8 +38,8 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
     with LocalUserIdTracker
     with StubMessagesFactory {
 
-  implicit val request      = FakeRequest()
-  val authAppAccessCodeView = app.injector.instanceOf[AuthAppAccessCodeView]
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  val authAppAccessCodeView                                 = app.injector.instanceOf[AuthAppAccessCodeView]
 
   implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
 

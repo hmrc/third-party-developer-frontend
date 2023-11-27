@@ -22,7 +22,7 @@ import scala.collection.immutable
 
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.play.json.Union
 
 case class MfaId(value: UUID) extends AnyVal {
@@ -32,7 +32,7 @@ case class MfaId(value: UUID) extends AnyVal {
 object MfaId {
   def random: MfaId = MfaId(UUID.randomUUID())
 
-  implicit val mfaIdFormat = Json.valueFormat[MfaId]
+  implicit val mfaIdFormat: Format[MfaId] = Json.valueFormat[MfaId]
 }
 
 sealed trait MfaType extends EnumEntry {

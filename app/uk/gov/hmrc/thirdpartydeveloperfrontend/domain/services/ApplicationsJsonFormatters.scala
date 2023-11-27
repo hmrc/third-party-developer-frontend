@@ -16,59 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
 trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
   import play.api.libs.json._
 
-  import uk.gov.hmrc.play.json.Union
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 
-  implicit val formatFieldValue = Json.valueFormat[FieldValue]
-  implicit val formatFieldName  = Json.valueFormat[FieldName]
+  implicit val formatFieldValue: Format[FieldValue] = Json.valueFormat[FieldValue]
+  implicit val formatFieldName: Format[FieldName]   = Json.valueFormat[FieldName]
 
   implicit val keyReadsFieldName: KeyReads[FieldName]   = key => JsSuccess(FieldName(key))
   implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
-  val readsOverrideFlag = Reads[OverrideFlag] {
-    case JsString(value) => JsSuccess(OverrideFlag(value))
-    case o: JsObject     => Json.reads[OverrideFlag].reads(o)
-    case _               => JsError()
-  }
-
-  val writesOverrideFlag = Json.writes[OverrideFlag]
-
-  implicit val formatOverrideFlag = Format(readsOverrideFlag, writesOverrideFlag)
-
-  implicit val formatStandard   = Json.format[Standard]
-  implicit val formatPrivileged = Json.format[Privileged]
-  implicit val formatROPC       = Json.format[ROPC]
-
   object TOUAHelper extends LocalDateTimeFormatters {
 
-    val formatTOUA = Json.format[TermsOfUseAgreement]
+    val formatTOUA: OFormat[TermsOfUseAgreement] = Json.format[TermsOfUseAgreement]
   }
 
-  implicit val formatTermsOfUseAgreement = TOUAHelper.formatTOUA
+  implicit val formatTermsOfUseAgreement: OFormat[TermsOfUseAgreement] = TOUAHelper.formatTOUA
 
-  implicit val formatContactDetails = Json.format[ContactDetails]
+  implicit val formatApplication: OFormat[Application] = Json.format[Application]
 
-  implicit val formatApplicationState = Json.format[ApplicationState]
-  implicit val formatCheckInformation = Json.format[CheckInformation]
-
-  implicit val formatAccessType = Union
-    .from[Access]("accessType")
-    .and[Standard](AccessType.STANDARD.toString)
-    .and[Privileged](AccessType.PRIVILEGED.toString)
-    .and[ROPC](AccessType.ROPC.toString)
-    .format
-
-  implicit val formatIpAllowlist = Json.format[IpAllowlist]
-
-  implicit val formatApplication = Json.format[Application]
-
-  implicit val format = Json.format[ApplicationWithSubscriptionData]
+  implicit val format: OFormat[ApplicationWithSubscriptionData] = Json.format[ApplicationWithSubscriptionData]
 }
 
 object ApplicationsJsonFormatters extends ApplicationsJsonFormatters

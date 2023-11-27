@@ -17,8 +17,9 @@ lazy val appName = "third-party-developer-frontend"
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-scalaVersion := "2.13.8"
+scalaVersion := "2.13.12"
+
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
@@ -87,7 +88,8 @@ lazy val microservice = Project(appName, file("."))
         "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._",
         "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
         "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
-        "uk.gov.hmrc.apiplatform.modules.applications.domain.models._"
+        "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._",
+       "uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._"
     )
   )
   .settings(
@@ -96,7 +98,8 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.hmrcfrontend.views.html.helpers._",
       "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers",
       "uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig",
-      "uk.gov.hmrc.apiplatform.modules.applications.domain.models.ClientSecret.Id",
+      "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret.Id",
+      "uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.common.domain.models._"
     )

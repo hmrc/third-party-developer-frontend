@@ -27,6 +27,8 @@ import views.html.CredentialsView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -52,19 +54,20 @@ class CredentialsSpec extends CommonViewSpec
     val request   = FakeRequest().withCSRFToken
     val developer = standardDeveloper.loggedIn
 
+    val now         = LocalDateTime.now()
     val application = Application(
       ApplicationId.random,
       ClientId("Test Application Client ID"),
       "Test Application",
-      LocalDateTime.now(),
-      Some(LocalDateTime.now()),
+      now,
+      Some(now),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
-      access = Standard(),
-      state = ApplicationState.production("", "", ""),
+      access = Access.Standard(),
+      state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), now),
       checkInformation = None
     )
 

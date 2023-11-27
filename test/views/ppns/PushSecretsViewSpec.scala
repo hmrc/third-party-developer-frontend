@@ -28,7 +28,7 @@ import views.html.ppns.PushSecretsView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationState
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -40,7 +40,9 @@ class PushSecretsViewSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with DeveloperTestData
+    with SampleSession
+    with SampleApplication {
 
   trait Setup {
     val pushSecretsView: PushSecretsView = app.injector.instanceOf[PushSecretsView]
@@ -53,21 +55,8 @@ class PushSecretsViewSpec extends CommonViewSpec
   "Push secrets page" should {
     val request = FakeRequest().withCSRFToken
 
-    val application                       = Application(
-      ApplicationId.random,
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      LocalDateTime.now(),
-      Some(LocalDateTime.now()),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(standardDeveloper.email.asAdministratorCollaborator),
-      access = Standard(),
-      state = ApplicationState.testing,
-      checkInformation = None
-    )
+    val now                               = LocalDateTime.now()
+    val application                       = sampleApp
     val pushSecrets: NonEmptyList[String] = NonEmptyList.one("the secret")
 
     "render" in new Setup {

@@ -24,7 +24,8 @@ import views.html.DeleteApplicationView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -33,29 +34,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
+class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with SampleSession with SampleApplication
     with DeveloperSessionBuilder
     with DeveloperTestData {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
-  val appId                 = ApplicationId.random
-  val clientId              = ClientId("clientId123")
-  val loggedInDeveloper     = JoeBloggs.loggedIn
 
-  val application             = Application(
-    appId,
-    clientId,
-    "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
-    None,
-    Period.ofDays(547),
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val application             = sampleApp
   val prodAppId               = ApplicationId.random
   val sandboxAppId            = ApplicationId.random
   val prodApp: Application    = application.copy(id = prodAppId)

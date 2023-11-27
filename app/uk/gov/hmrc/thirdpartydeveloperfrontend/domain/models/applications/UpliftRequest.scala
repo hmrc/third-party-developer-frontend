@@ -21,7 +21,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 case class UpliftRequest(applicationName: String, requestedByEmailAddress: LaxEmailAddress)
 
 object UpliftRequest {
-  import play.api.libs.json.Json
+  import play.api.libs.json._
 
-  implicit val format = Json.format[UpliftRequest]
+  implicit val format: OFormat[UpliftRequest] = Json.format[UpliftRequest]
 }

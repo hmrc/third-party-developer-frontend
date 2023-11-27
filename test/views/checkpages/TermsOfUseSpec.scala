@@ -25,6 +25,8 @@ import views.html.checkpages.TermsOfUseView
 import play.api.mvc.{AnyContentAsEmpty, Call}
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, CheckInformation, State, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -53,7 +55,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
         Set("sample@example.com".toLaxEmail.asAdministratorCollaborator, "someone@example.com".toLaxEmail.asDeveloperCollaborator),
-        Standard(),
+        Access.Standard(),
         ApplicationState(State.TESTING, None, None, None, LocalDateTime.now(ZoneOffset.UTC))
       )
 

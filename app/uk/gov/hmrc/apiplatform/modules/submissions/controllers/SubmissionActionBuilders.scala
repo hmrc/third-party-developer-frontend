@@ -23,7 +23,8 @@ import cats.instances.future.catsStdInstancesForFuture
 
 import play.api.mvc.{ActionRefiner, _}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
@@ -31,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, BaseController, HasApplication, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, State}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
   lazy val submission         = extSubmission.submission
@@ -86,7 +87,7 @@ trait SubmissionActionBuilders {
     implicit val ec: ExecutionContext = ecPassThru
   }
 
-  private def submissionRefiner(submissionId: Submission.Id)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
+  private def submissionRefiner(submissionId: SubmissionId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
     new ActionRefiner[UserRequest, SubmissionRequest] {
       def executionContext = ec
 
@@ -175,7 +176,7 @@ trait SubmissionActionBuilders {
         }
     }
 
-  def withSubmission(submissionId: Submission.Id)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen

@@ -18,10 +18,10 @@ package pages
 
 import org.mockito.MockitoSugar
 import org.openqa.selenium.WebDriver
-import org.scalatest.Assertions
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{Assertion, Assertions}
 import org.scalatestplus.selenium.WebBrowser
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -31,19 +31,19 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
   private val mockAppConfig = mock[ApplicationConfig]
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
-  implicit override val patienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
-  implicit val encryptedJson           = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
+  implicit val encryptedJson: EncryptedJson            = new EncryptedJson(new PayloadEncryption(new LocalCrypto(mockAppConfig)))
 
-  def goOn(page: WebPage)(implicit webDriver: WebDriver) = {
+  def goOn(page: WebPage)(implicit webDriver: WebDriver): Assertion = {
     go(page)
     on(page)
   }
 
-  def go(page: WebLink)(implicit webDriver: WebDriver) = {
+  def go(page: WebLink)(implicit webDriver: WebDriver): Unit = {
     WebBrowser.go to page
   }
 
-  def on(page: WebPage)(implicit webDriver: WebDriver) = {
+  def on(page: WebPage)(implicit webDriver: WebDriver): Assertion = {
     eventually {
       find(tagName("body")) // .filter(_ => page.isCurrentPage)
     }
@@ -52,7 +52,7 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
     }
   }
 
-  def anotherTabIsOpened()(implicit webDriver: WebDriver) = {
+  def anotherTabIsOpened()(implicit webDriver: WebDriver): Assertion = {
     webDriver.getWindowHandles.size() shouldBe 2
   }
 }

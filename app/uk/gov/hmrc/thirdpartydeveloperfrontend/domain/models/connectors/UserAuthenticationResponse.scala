@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
 
 case class UserAuthenticationResponse(accessCodeRequired: Boolean, mfaEnabled: Boolean, nonce: Option[String] = None, session: Option[Session] = None)
 
 object UserAuthenticationResponse {
-  implicit val formatUserAuthenticationResponse = Json.format[UserAuthenticationResponse]
+  implicit val formatUserAuthenticationResponse: OFormat[UserAuthenticationResponse] = Json.format[UserAuthenticationResponse]
 }

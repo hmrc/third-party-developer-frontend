@@ -24,12 +24,14 @@ import play.api.test.Helpers.status
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.TermsOfUseResponsesView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationStateHelper, DeveloperBuilder, SampleApplication, SampleSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -43,7 +45,9 @@ class TermsOfUseResponsesControllerSpec
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
-    with SubmissionsTestData {
+    with SubmissionsTestData
+    with FixedClock
+    with ApplicationStateHelper {
 
   trait HasSubscriptions {
     val aSubscription = exampleSubscriptionWithoutFields("prefix")
@@ -65,7 +69,7 @@ class TermsOfUseResponsesControllerSpec
       with HasSubscriptions
       with HasSessionDeveloperFlow {
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val termsOfUseResponsesView = app.injector.instanceOf[TermsOfUseResponsesView]
 
@@ -101,7 +105,7 @@ class TermsOfUseResponsesControllerSpec
 
   "termsOfUseResponsesPage" should {
     "succeed when application is in production" in new Setup {
-      givenAppInState(ApplicationState.production("requestedByEmail", "requestedByName", "verificationCode"))
+      givenAppInState(InState.production("requestedByEmail", "requestedByName", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -110,7 +114,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "succeed when application is in pre-production" in new Setup {
-      givenAppInState(ApplicationState.preProduction("requestedByEmail", "requestedByName"))
+      givenAppInState(InState.preProduction("requestedByEmail", "requestedByName"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -119,7 +123,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "fails when application is not in production" in new Setup {
-      givenAppInState(ApplicationState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
+      givenAppInState(InState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(grantedSubmission.withCompletedProgress())
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)
@@ -128,7 +132,7 @@ class TermsOfUseResponsesControllerSpec
     }
 
     "fails when submission not found" in new Setup {
-      givenAppInState(ApplicationState.production("requestedByEmail", "requestedByName", "verificationCode"))
+      givenAppInState(InState.production("requestedByEmail", "requestedByName", "verificationCode"))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturnsNone()
 
       val result = underTest.termsOfUseResponsesPage(appId)(loggedInRequest.withCSRFToken)

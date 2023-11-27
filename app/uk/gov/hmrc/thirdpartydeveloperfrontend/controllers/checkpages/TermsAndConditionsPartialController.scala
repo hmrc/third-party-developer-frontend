@@ -23,10 +23,12 @@ import views.html.checkpages.TermsAndConditionsView
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpdateApplicationRequest
 
 trait TermsAndConditionsPartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -37,10 +39,10 @@ trait TermsAndConditionsPartialController {
     val app = request.application
 
     Future.successful(app.access match {
-      case std: Standard =>
+      case std: Access.Standard =>
         val form = TermsAndConditionsForm(hasUrl(std.termsAndConditionsUrl, app.checkInformation.map(_.providedTermsAndConditionsURL)), std.termsAndConditionsUrl)
         Ok(termsAndConditionsView(app, TermsAndConditionsForm.form.fill(form), termsAndConditionsActionRoute(app.id)))
-      case _             => Ok(termsAndConditionsView(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
+      case _                    => Ok(termsAndConditionsView(app, TermsAndConditionsForm.form, termsAndConditionsActionRoute(app.id)))
     })
   }
 
@@ -54,8 +56,8 @@ trait TermsAndConditionsPartialController {
 
     def updateUrl(form: TermsAndConditionsForm) = {
       val access = app.access match {
-        case s: Standard => s.copy(termsAndConditionsUrl = form.termsAndConditionsURL, overrides = Set.empty)
-        case other       => other
+        case s: Access.Standard => s.copy(termsAndConditionsUrl = form.termsAndConditionsURL, overrides = Set.empty)
+        case other              => other
       }
 
       applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))

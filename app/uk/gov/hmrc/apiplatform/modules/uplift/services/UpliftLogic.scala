@@ -22,6 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
@@ -51,7 +52,7 @@ class UpliftLogic @Inject() (
       apisAvailableInProd    <- fApisAvailableInProd
       sandboxApis            <- fAllSandboxApiDetails
       allSummaries           <- fAllSummaries
-      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType.isStandard)
+      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType == AccessType.STANDARD)
 
       subscriptionsForApps = getSubscriptionsByApp(possibleUpliftSummaries)
 

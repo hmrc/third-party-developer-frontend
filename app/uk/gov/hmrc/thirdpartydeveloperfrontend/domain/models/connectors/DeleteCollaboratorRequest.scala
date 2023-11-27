@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
@@ -27,5 +27,5 @@ case class DeleteCollaboratorRequest(
   )
 
 object DeleteCollaboratorRequest {
-  implicit val writesDeleteCollaboratorRequest = Json.writes[DeleteCollaboratorRequest]
+  implicit val writesDeleteCollaboratorRequest: Writes[DeleteCollaboratorRequest] = Json.writes[DeleteCollaboratorRequest]
 }

@@ -20,15 +20,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
-import play.api.mvc.Result
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -39,8 +42,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationState, ApplicationWithSubscriptionData, SellResellOrDistribute}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -66,24 +70,24 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       with UpliftJourneyServiceMockModule
       with SessionServiceMock {
 
-    def titleOf(result: Future[Result]) = {
+    def titleOf(result: Future[Result]): String = {
       val titleRegEx = """<title[^>]*>(.*)</title>""".r
       val title      = titleRegEx.findFirstMatchIn(contentAsString(result)).map(_.group(1))
       title.isDefined shouldBe true
       title.get
     }
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val confirmApisView                    = app.injector.instanceOf[ConfirmApisView]
-    val turnOffApisMasterView              = app.injector.instanceOf[TurnOffApisMasterView]
-    val sellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
-    val weWillCheckYourAnswersView         = app.injector.instanceOf[WeWillCheckYourAnswersView]
-    val beforeYouStartView                 = app.injector.instanceOf[BeforeYouStartView]
-    val unauthorisedAppDetailsView         = app.injector.instanceOf[UnauthorisedAppDetailsView]
+    val confirmApisView: ConfirmApisView                                       = app.injector.instanceOf[ConfirmApisView]
+    val turnOffApisMasterView: TurnOffApisMasterView                           = app.injector.instanceOf[TurnOffApisMasterView]
+    val sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView = app.injector.instanceOf[SellResellOrDistributeSoftwareView]
+    val weWillCheckYourAnswersView: WeWillCheckYourAnswersView                 = app.injector.instanceOf[WeWillCheckYourAnswersView]
+    val beforeYouStartView: BeforeYouStartView                                 = app.injector.instanceOf[BeforeYouStartView]
+    val unauthorisedAppDetailsView: UnauthorisedAppDetailsView                 = app.injector.instanceOf[UnauthorisedAppDetailsView]
 
-    val mockUpliftJourneyConfig     = mock[UpliftJourneyConfig]
-    val sr20UpliftJourneySwitchMock = new UpliftJourneySwitch(mockUpliftJourneyConfig)
+    val mockUpliftJourneyConfig: UpliftJourneyConfig = mock[UpliftJourneyConfig]
+    val sr20UpliftJourneySwitchMock                  = new UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val controller = new UpliftJourneyController(
       mockErrorHandler,
@@ -106,29 +110,29 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sr20UpliftJourneySwitchMock
     )
 
-    val appName: String = "app"
-    val apiVersion      = ApiVersionNbr("version")
+    val appName: String           = "app"
+    val apiVersion: ApiVersionNbr = ApiVersionNbr("version")
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val developer: Developer = buildDeveloper()
+    val sessionId            = "sessionId"
+    val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
-    val loggedInDeveloper = DeveloperSession(session)
-    val testingApp        = sampleApp.copy(state = ApplicationState.testing, deployedTo = Environment.SANDBOX)
+    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
+    val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = now()), deployedTo = Environment.SANDBOX)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
-    val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
+    val apiIdentifier1: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
+    val apiIdentifier2: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
 
-    val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.versionNbr)
+    val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(appId, clientId, apiIdentifier1.context, apiIdentifier1.versionNbr)
 
-    val testAPISubscriptionStatus1 = APISubscriptionStatus(
+    val testAPISubscriptionStatus1: APISubscriptionStatus = APISubscriptionStatus(
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
@@ -138,7 +142,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fields = emptyFields
     )
 
-    val testAPISubscriptionStatus2 = APISubscriptionStatus(
+    val testAPISubscriptionStatus2: APISubscriptionStatus = APISubscriptionStatus(
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
@@ -234,7 +238,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "The selected apis are saved on the 'Turn off API subscriptions you don’t need' view and 'save and continue' clicked" in new Setup {
 
-      val apiIdentifiers = Set(
+      val apiIdentifiers: Set[ApiIdentifier] = Set(
         ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
       )
 
@@ -255,7 +259,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
-      val testFlow = ApiSubscriptions(Map(apiIdentifier1 -> true))
+      val testFlow: ApiSubscriptions = ApiSubscriptions(Map(apiIdentifier1 -> true))
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, Some(testFlow)))
       GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
 
@@ -324,7 +328,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       contentAsString(result) should include("Do you sell, resell or distribute your software?")
 
-      val document = Jsoup.parse(contentAsString(result))
+      val document: Document = Jsoup.parse(contentAsString(result))
       document.getElementById("answer") shouldNot be(null)
       document.getElementById("answer").hasAttr("checked") shouldBe true
     }
@@ -338,7 +342,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       contentAsString(result) should include("Do you sell, resell or distribute your software?")
 
-      val document = Jsoup.parse(contentAsString(result))
+      val document: Document = Jsoup.parse(contentAsString(result))
       document.getElementById("distribute-question-no") shouldNot be(null)
       document.getElementById("distribute-question-no").hasAttr("checked") shouldBe true
     }
@@ -359,7 +363,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
 
-      val testSellResellOrDistribute = SellResellOrDistribute("Yes")
+      val testSellResellOrDistribute: SellResellOrDistribute = SellResellOrDistribute("Yes")
 
       GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
@@ -374,7 +378,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "store the answer 'No' from the 'sell resell or distribute your software view' and redirect to next page" in new Setup {
 
-      val testSellResellOrDistribute = SellResellOrDistribute("No")
+      val testSellResellOrDistribute: SellResellOrDistribute = SellResellOrDistribute("No")
 
       GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
@@ -389,9 +393,9 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     "store the answer 'Yes' from the 'sell resell or distribute your software view' and redirect to questionnaire when application is Production" in new Setup {
 
-      val testSellResellOrDistribute = SellResellOrDistribute("Yes")
-      val prodAppId                  = ApplicationId.random
-      val prodApp                    = sampleApp.copy(id = prodAppId)
+      val testSellResellOrDistribute: SellResellOrDistribute = SellResellOrDistribute("Yes")
+      val prodAppId: ApplicationId                           = ApplicationId.random
+      val prodApp: Application                               = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
@@ -424,8 +428,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "redirect to the 'sell resell or distribute' page if a prod app" in new Setup {
-      val prodAppId = ApplicationId.random
-      val prodApp   = sampleApp.copy(id = prodAppId)
+      val prodAppId: ApplicationId = ApplicationId.random
+      val prodApp: Application     = sampleApp.copy(id = prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),

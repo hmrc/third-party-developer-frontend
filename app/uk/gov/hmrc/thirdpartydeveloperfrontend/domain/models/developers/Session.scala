@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 case class Session(sessionId: String, developer: Developer, loggedInState: LoggedInState)
 
 object Session {
-  implicit val formatSession = Json.format[Session]
+  implicit val formatSession: OFormat[Session] = Json.format[Session]
 }
 
 class SessionInvalid(message: Option[String] = None) extends RuntimeException(message.orNull)

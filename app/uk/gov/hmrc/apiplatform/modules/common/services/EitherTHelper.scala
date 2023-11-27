@@ -36,6 +36,6 @@ trait EitherTHelper[E] {
 object EitherTHelper {
 
   def make[E](implicit outerEC: ExecutionContext) = new EitherTHelper[E] {
-    implicit val ec = outerEC
+    implicit val ec: ExecutionContext = outerEC
   }
 }

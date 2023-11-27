@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{Clock, Instant, LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -36,7 +36,9 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -70,9 +72,9 @@ class CheckYourAnswersSpec
   val anotherCollaboratorEmail               = "collaborator@example.com".toLaxEmail
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
-  val testing: ApplicationState         = ApplicationState.testing.copy(updatedOn = LocalDateTime.now.minusMinutes(1))
-  val production: ApplicationState      = ApplicationState.production("thirdpartydeveloper@example.com", "thirdpartydeveloper", "ABCD")
-  val pendingApproval: ApplicationState = ApplicationState.pendingGatekeeperApproval("thirdpartydeveloper@example.com", "thirdpartydeveloper")
+  val testing: ApplicationState         = ApplicationState(State.TESTING, None, None, None, LocalDateTime.now.minusMinutes(1))
+  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), Some("ABCD"), now())
+  val pendingApproval: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), None, now())
 
   val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -135,7 +137,6 @@ class CheckYourAnswersSpec
     val privacyPolicyView                = app.injector.instanceOf[PrivacyPolicyView]
     val apiSubscriptionsViewTemplate     = app.injector.instanceOf[ApiSubscriptionsView]
     val contactDetailsView               = app.injector.instanceOf[ContactDetailsView]
-    val clock                            = Clock.fixed(Instant.now(), ZoneOffset.UTC)
 
     val underTest = new CheckYourAnswers(
       mockErrorHandler,
@@ -200,14 +201,14 @@ class CheckYourAnswersSpec
 
     givenApplicationNameIsValid()
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
     val loggedInRequestWithFormBody                           = loggedInRequest.withFormUrlEncodedBody()
 
-    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails("Tester", "tester@example.com".toLaxEmail, "12345678")))
+    val defaultCheckInformation = CheckInformation(contactDetails = Some(ContactDetails(FullName("Tester"), "tester@example.com".toLaxEmail, "12345678")))
 
     def givenApplicationExists(
         appId: ApplicationId = appId,
@@ -215,7 +216,7 @@ class CheckYourAnswersSpec
         userRole: Collaborator.Role = Collaborator.Roles.ADMINISTRATOR,
         state: ApplicationState = testing,
         checkInformation: Option[CheckInformation] = None,
-        access: Access = Standard()
+        access: Access = Access.Standard()
       ): Application = {
 
       val collaborators = Set(
@@ -265,11 +266,11 @@ class CheckYourAnswersSpec
           confirmedName = true,
           apiSubscriptionsConfirmed = true,
           apiSubscriptionConfigurationsConfirmed = true,
-          Some(ContactDetails("Example Name", "name@example.com".toLaxEmail, "012346789")),
+          contactDetails = Some(ContactDetails(FullName("Example Name"), "name@example.com".toLaxEmail, "012346789")),
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+          termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, now(), "1.0"))
         )
       )
     )

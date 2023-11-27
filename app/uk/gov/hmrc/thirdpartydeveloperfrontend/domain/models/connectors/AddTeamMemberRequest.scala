@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class AddTeamMemberRequest(email: LaxEmailAddress, role: Collaborator.Role, requestingEmail: Option[LaxEmailAddress])
 
 object AddTeamMemberRequest {
   import play.api.libs.json._
-  implicit val format = Json.format[AddTeamMemberRequest]
+  implicit val format: OFormat[AddTeamMemberRequest] = Json.format[AddTeamMemberRequest]
 }

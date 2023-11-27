@@ -24,6 +24,8 @@ import views.html.DeletePrincipalApplicationCompleteView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -31,10 +33,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedIn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperTestData
+class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with DeveloperTestData with SampleSession
+    with SampleApplication
     with LocalUserIdTracker {
 
-  val deletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
+  val deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
 
   "delete application complete page" should {
     "render with no errors" in {
@@ -44,20 +47,8 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
       val appId             = ApplicationId.random
       val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
-      val application       = Application(
-        appId,
-        clientId,
-        "App name 1",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
-        None,
-        grantLength,
-        Environment.PRODUCTION,
-        Some("Description 1"),
-        Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
-        access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
-      )
+      val now               = LocalDateTime.now(ZoneOffset.UTC)
+      val application       = sampleApp
 
       val page = deletePrincipalApplicationCompleteView.render(application, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")

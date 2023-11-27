@@ -23,14 +23,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
-  ResponsibleIndividualToUVerification,
-  ResponsibleIndividualVerificationId,
-  ResponsibleIndividualVerificationState,
-  Submission
-}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ResponsibleIndividualToUVerification, ResponsibleIndividualVerificationId, ResponsibleIndividualVerificationState}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.ResponsibleIndividualVerificationServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{
   ResponsibleIndividualAcceptedView,
@@ -117,7 +113,7 @@ class VerifyResponsibleIndividualControllerSpec
     val riVerification = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
       ApplicationId.random,
-      Submission.Id.random,
+      SubmissionId.random,
       0,
       "App name",
       LocalDateTime.now(ZoneOffset.UTC),

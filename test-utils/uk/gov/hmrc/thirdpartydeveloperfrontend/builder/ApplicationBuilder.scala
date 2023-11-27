@@ -19,14 +19,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import java.time.{LocalDateTime, Period, ZoneOffset}
 import java.util.UUID.randomUUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 
-trait ApplicationBuilder extends CollaboratorTracker {
+trait ApplicationBuilder extends CollaboratorTracker with FixedClock with ApplicationStateHelper {
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: LaxEmailAddress): Application = {
@@ -46,9 +48,9 @@ trait ApplicationBuilder extends CollaboratorTracker {
       Environment.SANDBOX,
       Some(s"$appId-description"),
       buildCollaborators(Seq(appOwnerEmail)),
-      state = ApplicationState.production(appOwnerEmail.text, appOwnerName, ""),
-      access = Standard(
-        redirectUris = List("https://red1", "https://red2"),
+      state = InState.production(appOwnerEmail.text, appOwnerName, ""),
+      access = Access.Standard(
+        redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
         termsAndConditionsUrl = Some("http://tnc-url.com")
       )
     )

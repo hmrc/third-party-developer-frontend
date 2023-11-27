@@ -24,10 +24,12 @@ import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, Standard, UpdateApplicationRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpdateApplicationRequest
 
 trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
   self: ApplicationController with CanUseCheckActions =>
@@ -38,10 +40,10 @@ trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
     val app = request.application
 
     Future.successful(app.access match {
-      case std: Standard =>
+      case std: Access.Standard =>
         val form = PrivacyPolicyForm(hasUrl(std.privacyPolicyUrl, app.checkInformation.map(_.providedPrivacyPolicyURL)), std.privacyPolicyUrl)
         Ok(privacyPolicyView(app, PrivacyPolicyForm.form.fill(form), privacyPolicyActionRoute(app.id)))
-      case _             => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
+      case _                    => Ok(privacyPolicyView(app, PrivacyPolicyForm.form, privacyPolicyActionRoute(app.id)))
     })
   }
 
@@ -55,8 +57,8 @@ trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
 
     def updateUrl(form: PrivacyPolicyForm) = {
       val access = app.access match {
-        case s: Standard => s.copy(privacyPolicyUrl = form.privacyPolicyURL, overrides = Set.empty)
-        case other       => other
+        case s: Access.Standard => s.copy(privacyPolicyUrl = form.privacyPolicyURL, overrides = Set.empty)
+        case other              => other
       }
 
       applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))

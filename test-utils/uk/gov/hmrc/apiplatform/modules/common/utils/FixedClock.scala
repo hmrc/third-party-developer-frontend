@@ -27,9 +27,9 @@ trait FixedClock extends ClockNow {
 
   private val pointInTime: LocalDateTime = LocalDateTime.of(2020, 1, 2, 3, 4, 5, 6 * 1000 * 1000).truncatedTo(ChronoUnit.MILLIS)
 
-  val clock: Clock = Clock.fixed(pointInTime.toInstant(utc), utc)
+  lazy val clock: Clock = Clock.fixed(pointInTime.toInstant(utc), utc)
 
-  val nowAsText: String = "2020-01-02T03:04:05.006Z"
+  lazy val nowAsText: String = "2020-01-02T03:04:05.006Z"
 }
 
 object FixedClock extends FixedClock

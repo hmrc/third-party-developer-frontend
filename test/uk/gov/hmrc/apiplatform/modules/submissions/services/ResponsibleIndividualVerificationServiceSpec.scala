@@ -24,13 +24,14 @@ import org.mockito.captor.ArgCaptor
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{SubmissionId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
@@ -43,23 +44,23 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with SubmissionsTestData {
 
   trait Setup {
-    implicit val hc    = HeaderCarrier()
-    val applicationId  = ApplicationId.random
-    val application    = aStandardPendingResponsibleIndividualVerificationApplication()
-    val code           = "12345678"
-    val requesterName  = "Mr Submitter"
-    val requesterEmail = "submitter@example.com".toLaxEmail
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val applicationId              = ApplicationId.random
+    val application                = aStandardPendingResponsibleIndividualVerificationApplication()
+    val code                       = "12345678"
+    val requesterName              = "Mr Submitter"
+    val requesterEmail             = "submitter@example.com".toLaxEmail
 
     val riVerification        = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
       applicationId,
-      Submission.Id.random,
+      SubmissionId.random,
       0,
       "App name",
       LocalDateTime.now(ZoneOffset.UTC),
       ResponsibleIndividualVerificationState.INITIAL
     )
-    val responsibleIndividual = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
+    val responsibleIndividual = ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail)
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
     val mockDeskproConnector                                                = mock[DeskproConnector]
@@ -113,7 +114,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val riVerificationUplift = ResponsibleIndividualTouUpliftVerification(
         ResponsibleIndividualVerificationId(code),
         applicationId,
-        Submission.Id.random,
+        SubmissionId.random,
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),
@@ -148,7 +149,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val riVerificationUplift = ResponsibleIndividualTouUpliftVerification(
         ResponsibleIndividualVerificationId(code),
         applicationId,
-        Submission.Id.random,
+        SubmissionId.random,
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),
@@ -174,7 +175,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val riUpdateVerification = ResponsibleIndividualUpdateVerification(
         ResponsibleIndividualVerificationId(code),
         applicationId,
-        Submission.Id.random,
+        SubmissionId.random,
         0,
         "App name",
         LocalDateTime.now(ZoneOffset.UTC),

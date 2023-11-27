@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 
-import java.time.{Clock, LocalDateTime}
+import java.time.Clock
 import scala.concurrent.Future
 
 import views.html.checkpages.TermsOfUseView
@@ -24,14 +24,15 @@ import views.html.checkpages.TermsOfUseView
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, Call}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, TermsOfUseForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
 
 trait TermsOfUsePartialController {
-  self: ApplicationController with CanUseCheckActions =>
+  self: ApplicationController with CanUseCheckActions with ClockNow =>
   val clock: Clock
   val termsOfUseView: TermsOfUseView
   val termsOfUseVersionService: TermsOfUseVersionService
@@ -71,7 +72,7 @@ trait TermsOfUsePartialController {
       val updatedInformation = if (information.termsOfUseAgreements.exists(terms => terms.version == version)) {
         information
       } else {
-        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, LocalDateTime.now(clock), version))
+        information.copy(termsOfUseAgreements = information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, now(), version))
       }
 
       for {

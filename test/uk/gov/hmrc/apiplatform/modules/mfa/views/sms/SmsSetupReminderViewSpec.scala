@@ -35,7 +35,7 @@ class SmsSetupReminderViewSpec extends CommonViewSpec
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn = JoeBloggs.loggedIn
+  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
 
   val smsSetupReminderView: SmsSetupReminderView = app.injector.instanceOf[SmsSetupReminderView]
 

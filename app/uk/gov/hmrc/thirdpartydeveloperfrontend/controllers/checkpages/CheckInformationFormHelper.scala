@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages
 import play.api.data.Form
 import play.api.data.Forms.{boolean, ignored, mapping}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.CheckInformation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.CheckInformationForm
 
 trait CheckInformationFormHelper {

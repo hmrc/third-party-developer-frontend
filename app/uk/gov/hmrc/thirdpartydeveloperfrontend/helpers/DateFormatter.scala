@@ -20,6 +20,8 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, LocalDateTime}
 
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+
 object DateFormatter {
   val shortFormatter: DateTimeFormatter    = DateTimeFormatter.ofPattern("d MMM yyyy")
   val standardFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
@@ -33,12 +35,14 @@ object DateFormatter {
     standardFormatter.format(dateTime)
   }
 
-  def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime, clock: Clock): Option[String] = {
+  def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime, aClock: Clock): Option[String] = {
+    val clk = new ClockNow { val clock = aClock }
+
     def formatDateValue(lastAccessDate: LocalDateTime) = {
       if (ChronoUnit.DAYS.between(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
         standardFormatter.format(lastAccessDate)
       } else {
-        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.toLocalDate, LocalDateTime.now(clock).toLocalDate)} months ago"
+        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.toLocalDate, clk.now().toLocalDate)} months ago"
       }
     }
     maybeLastAccess

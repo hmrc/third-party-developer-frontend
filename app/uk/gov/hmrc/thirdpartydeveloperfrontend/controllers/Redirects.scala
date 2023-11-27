@@ -27,13 +27,13 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsRedirects
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Standard
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, RedirectsService, SessionService}
 
 @Singleton
@@ -58,7 +58,7 @@ class Redirects @Inject() (
     checkActionForApprovedApps(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
 
   def redirects(applicationId: ApplicationId) = checkActionForApprovedApps(SupportsRedirects, TeamMembersOnly)(applicationId) { implicit request =>
-    val appAccess = request.application.access.asInstanceOf[Standard]
+    val appAccess = request.application.access.asInstanceOf[Access.Standard]
     successful(Ok(redirectsView(
       applicationViewModelFromApplicationRequest(),
       appAccess.redirectUris,
@@ -75,7 +75,7 @@ class Redirects @Inject() (
     val actor       = Actors.AppCollaborator(request.developerSession.email)
 
     def handleValidForm(form: AddRedirectForm) = {
-      if (application.hasRedirectUri(form.redirectUri)) {
+      if (application.hasRedirectUri(RedirectUri.unsafeApply(form.redirectUri))) {
         successful(BadRequest(addRedirectView(applicationViewModelFromApplicationRequest(), AddRedirectForm.form.fill(form).withError("redirectUri", "redirect.uri.duplicate"))))
       } else {
         redirectsService.addRedirect(actor, application, RedirectUri.unsafeApply(form.redirectUri))
@@ -132,20 +132,21 @@ class Redirects @Inject() (
 
     def handleValidForm(form: ChangeRedirectForm) = {
 
-      if (form.originalRedirectUri == form.newRedirectUri) successful(Redirect(routes.Redirects.redirects(applicationId)))
+      if (form.originalRedirectUri == form.newRedirectUri)
+        successful(Redirect(routes.Redirects.redirects(applicationId)))
       else {
         application.access match {
-          case app: Standard =>
-            if (app.redirectUris.contains(form.newRedirectUri)) {
+          case app: Access.Standard =>
+            if (app.redirectUris.contains(RedirectUri.unsafeApply(form.newRedirectUri))) {
               handleInvalidForm(
                 ChangeRedirectForm.form
                   .fill(form)
                   .withError("newRedirectUri", "redirect.uri.duplicate")
               )
             } else
-              redirectsService.changeRedirect(actor, application, RedirectUri.unsafeApply(form.originalRedirectUri), RedirectUri.unsafeApply(form.newRedirectUri))
+              redirectsService.changeRedirect(actor, application, new RedirectUri(form.originalRedirectUri), RedirectUri.unsafeApply(form.newRedirectUri))
                 .map(_ => Redirect(routes.Redirects.redirects(applicationId)))
-          case _             => successful(Redirect(routes.Details.details(applicationId)))
+          case _                    => successful(Redirect(routes.Details.details(applicationId)))
         }
       }
     }

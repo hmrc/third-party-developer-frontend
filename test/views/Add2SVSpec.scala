@@ -19,6 +19,7 @@ package views
 import views.helper.CommonViewSpec
 import views.html.Add2SVView
 
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
@@ -30,12 +31,12 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
-  implicit val loggedInDeveloper = adminDeveloper.loggedIn
-  implicit val request           = FakeRequest().withCSRFToken
+  implicit val loggedInDeveloper: DeveloperSession          = adminDeveloper.loggedIn
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-  val developer                 = buildDeveloper()
-  val session                   = Session("sessionId", developer, LoggedInState.LOGGED_IN)
-  implicit val developerSession = DeveloperSession(session)
+  val developer                                   = buildDeveloper()
+  val session                                     = Session("sessionId", developer, LoggedInState.LOGGED_IN)
+  implicit val developerSession: DeveloperSession = DeveloperSession(session)
 
   private def renderPage(isAdminOnProductionApp: Boolean): Html = {
     add2SVView.render(isAdminOnProductionApp, messagesProvider, developerSession, request, appConfig)

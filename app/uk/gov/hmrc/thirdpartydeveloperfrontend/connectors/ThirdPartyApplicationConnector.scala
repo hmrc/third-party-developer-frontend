@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -52,7 +53,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
 
-  val api = API("third-party-application")
+  val api: API = API("third-party-application")
 
   def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     metrics.record(api) {
@@ -176,12 +177,12 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
 
-  val environment    = Environment.SANDBOX
-  val serviceBaseUrl = appConfig.thirdPartyApplicationSandboxUrl
-  val useProxy       = appConfig.thirdPartyApplicationSandboxUseProxy
-  val apiKey         = appConfig.thirdPartyApplicationSandboxApiKey
+  val environment: Environment = Environment.SANDBOX
+  val serviceBaseUrl: String   = appConfig.thirdPartyApplicationSandboxUrl
+  val useProxy: Boolean        = appConfig.thirdPartyApplicationSandboxUseProxy
+  val apiKey: String           = appConfig.thirdPartyApplicationSandboxApiKey
 
-  override val isEnabled = appConfig.hasSandbox;
+  override val isEnabled: Boolean = appConfig.hasSandbox;
 }
 
 @Singleton
@@ -193,10 +194,10 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val metrics: ConnectorMetrics
   )(implicit val ec: ExecutionContext
   ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
-  val environment    = Environment.PRODUCTION
-  val serviceBaseUrl = appConfig.thirdPartyApplicationProductionUrl
-  val useProxy       = appConfig.thirdPartyApplicationProductionUseProxy
-  val apiKey         = appConfig.thirdPartyApplicationProductionApiKey
+  val environment: Environment = Environment.PRODUCTION
+  val serviceBaseUrl: String   = appConfig.thirdPartyApplicationProductionUrl
+  val useProxy: Boolean        = appConfig.thirdPartyApplicationProductionUseProxy
+  val apiKey: String           = appConfig.thirdPartyApplicationProductionApiKey
 
   override val isEnabled = true
 }

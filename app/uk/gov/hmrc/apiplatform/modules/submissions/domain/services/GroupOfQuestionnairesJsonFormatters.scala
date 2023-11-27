@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.services
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 trait GroupOfQuestionnairesJsonFormatters extends QuestionnaireJsonFormatters {
-  implicit val groupOfQuestionnairesJsonFormat = Json.format[GroupOfQuestionnaires]
+  implicit val groupOfQuestionnairesJsonFormat: OFormat[GroupOfQuestionnaires] = Json.format[GroupOfQuestionnaires]
 }
 
 object GroupOfQuestionnairesJsonFormatters extends GroupOfQuestionnairesJsonFormatters

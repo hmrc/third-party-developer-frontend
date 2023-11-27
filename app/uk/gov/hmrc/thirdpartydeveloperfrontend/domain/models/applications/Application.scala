@@ -16,16 +16,23 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import java.time.temporal.ChronoUnit
 import java.time.{LocalDateTime, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
+  PrivacyPolicyLocation,
+  PrivacyPolicyLocations,
+  TermsAndConditionsLocation,
+  TermsAndConditionsLocations,
+  _
+}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.AccessType.STANDARD
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.State.{PENDING_GATEKEEPER_APPROVAL, PENDING_REQUESTER_VERIFICATION, TESTING}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
@@ -49,7 +56,7 @@ trait BaseApplication {
   def checkInformation: Option[CheckInformation]
   def ipAllowlist: IpAllowlist
 
-  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress.equalsIgnoreCase(email)).map(_.role)
+  def role(email: LaxEmailAddress): Option[Collaborator.Role] = collaborators.find(_.emailAddress == email).map(_.role)
 
   def roleForCollaborator(userId: UserId): Option[Collaborator.Role] = collaborators.find(_.userId == userId).map(_.role)
 
@@ -70,7 +77,7 @@ trait BaseApplication {
   }
 
   def termsOfUseStatus: TermsOfUseStatus = {
-    if (deployedTo.isSandbox || access.accessType.isNotStandard) {
+    if (deployedTo.isSandbox || access.accessType != AccessType.STANDARD) {
       TermsOfUseStatus.NOT_APPLICABLE
     } else if (termsOfUseAgreements.isEmpty) {
       TermsOfUseStatus.AGREEMENT_REQUIRED
@@ -79,23 +86,23 @@ trait BaseApplication {
     }
   }
 
-  def hasResponsibleIndividual = {
+  def hasResponsibleIndividual: Boolean = {
     access match {
-      case Standard(_, _, _, _, _, Some(_)) => true
-      case _                                => false
+      case Access.Standard(_, _, _, _, _, Some(_)) => true
+      case _                                       => false
     }
   }
 
-  def privacyPolicyLocation = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-    case Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocations.Url(url)
-    case _                                                                                            => PrivacyPolicyLocations.NoneProvided
+  def privacyPolicyLocation: PrivacyPolicyLocation = access match {
+    case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+    case Access.Standard(_, _, Some(url), _, _, None)                                                        => PrivacyPolicyLocations.Url(url)
+    case _                                                                                                   => PrivacyPolicyLocations.NoneProvided
   }
 
-  def termsAndConditionsLocation = access match {
-    case Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-    case Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocations.Url(url)
-    case _                                                                                                 => TermsAndConditionsLocations.NoneProvided
+  def termsAndConditionsLocation: TermsAndConditionsLocation = access match {
+    case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+    case Access.Standard(_, Some(url), _, _, _, None)                                                             => TermsAndConditionsLocations.Url(url)
+    case _                                                                                                        => TermsAndConditionsLocations.NoneProvided
   }
 
   def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
@@ -114,11 +121,11 @@ trait BaseApplication {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (Environment.SANDBOX, _, _, _)                                                          => false
-      case (Environment.PRODUCTION, STANDARD, TESTING, Some(ADMINISTRATOR))                        => true
-      case (Environment.PRODUCTION, STANDARD, PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
-      case (Environment.PRODUCTION, STANDARD, PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
-      case _                                                                                       => false
+      case (Environment.SANDBOX, _, _, _)                                                                           => false
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.TESTING, Some(ADMINISTRATOR))                        => true
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
+      case _                                                                                                        => false
     }
   }
 
@@ -126,9 +133,9 @@ trait BaseApplication {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
-      case (Environment.SANDBOX, STANDARD, State.PRODUCTION, _)                      => true
-      case (Environment.PRODUCTION, STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
-      case _                                                                         => false
+      case (Environment.SANDBOX, AccessType.STANDARD, State.PRODUCTION, _)                      => true
+      case (Environment.PRODUCTION, AccessType.STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+      case _                                                                                    => false
     }
   }
 
@@ -139,19 +146,19 @@ trait BaseApplication {
   private val maximumNumberOfRedirectUris = 5
 
   def canAddRedirectUri: Boolean = access match {
-    case s: Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
-    case _           => false
+    case s: Access.Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
+    case _                  => false
   }
 
-  def hasRedirectUri(redirectUri: String): Boolean = access match {
-    case s: Standard => s.redirectUris.contains(redirectUri)
-    case _           => false
+  def hasRedirectUri(redirectUri: RedirectUri): Boolean = access match {
+    case s: Access.Standard => s.redirectUris.contains(redirectUri)
+    case _                  => false
   }
 
-  def isInTesting            = state.isInTesting
-  def isPendingApproval      = state.isPendingApproval
-  def isApproved             = state.isApproved
-  def hasLockedSubscriptions = deployedTo.isProduction && !isInTesting
+  def isInTesting: Boolean            = state.isInTesting
+  def isPendingApproval: Boolean      = state.name.isPendingApproval
+  def isApproved: Boolean             = state.name.isApproved
+  def hasLockedSubscriptions: Boolean = deployedTo.isProduction && !isInTesting
 
   def findCollaboratorByHash(teamMemberHash: String): Option[Collaborator] = {
     collaborators.find(c => c.emailAddress.text.toSha256 == teamMemberHash)
@@ -162,20 +169,20 @@ trait BaseApplication {
 }
 
 case class Application(
-    val id: ApplicationId,
-    val clientId: ClientId,
-    val name: String,
-    val createdOn: LocalDateTime,
-    val lastAccess: Option[LocalDateTime],
-    val lastAccessTokenUsage: Option[LocalDateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
-    val grantLength: Period,
-    val deployedTo: Environment,
-    val description: Option[String] = None,
-    val collaborators: Set[Collaborator] = Set.empty,
-    val access: Access = Standard(),
-    val state: ApplicationState = ApplicationState.testing,
-    val checkInformation: Option[CheckInformation] = None,
-    val ipAllowlist: IpAllowlist = IpAllowlist()
+    id: ApplicationId,
+    clientId: ClientId,
+    name: String,
+    createdOn: LocalDateTime,
+    lastAccess: Option[LocalDateTime],
+    lastAccessTokenUsage: Option[LocalDateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    grantLength: Period,
+    deployedTo: Environment,
+    description: Option[String] = None,
+    collaborators: Set[Collaborator] = Set.empty,
+    access: Access = Access.Standard(),
+    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
+    checkInformation: Option[CheckInformation] = None,
+    ipAllowlist: IpAllowlist = IpAllowlist()
   ) extends BaseApplication
 
 object Application {
@@ -186,21 +193,21 @@ object Application {
 }
 
 case class ApplicationWithSubscriptionIds(
-    val id: ApplicationId,
-    val clientId: ClientId,
-    val name: String,
-    val createdOn: LocalDateTime,
-    val lastAccess: Option[LocalDateTime],
-    val lastAccessTokenUsage: Option[LocalDateTime] = None,
-    val grantLength: Period = Period.ofDays(547),
-    val deployedTo: Environment,
-    val description: Option[String] = None,
-    val collaborators: Set[Collaborator] = Set.empty,
-    val access: Access = Standard(),
-    val state: ApplicationState = ApplicationState.testing,
-    val checkInformation: Option[CheckInformation] = None,
-    val ipAllowlist: IpAllowlist = IpAllowlist(),
-    val subscriptions: Set[ApiIdentifier] = Set.empty
+    id: ApplicationId,
+    clientId: ClientId,
+    name: String,
+    createdOn: LocalDateTime,
+    lastAccess: Option[LocalDateTime],
+    lastAccessTokenUsage: Option[LocalDateTime] = None,
+    grantLength: Period = Period.ofDays(547),
+    deployedTo: Environment,
+    description: Option[String] = None,
+    collaborators: Set[Collaborator] = Set.empty,
+    access: Access = Access.Standard(),
+    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
+    checkInformation: Option[CheckInformation] = None,
+    ipAllowlist: IpAllowlist = IpAllowlist(),
+    subscriptions: Set[ApiIdentifier] = Set.empty
   ) extends BaseApplication
 
 object ApplicationWithSubscriptionIds extends LocalDateTimeFormatters {
@@ -209,7 +216,7 @@ object ApplicationWithSubscriptionIds extends LocalDateTimeFormatters {
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
   implicit val ordering: Ordering[ApplicationWithSubscriptionIds]                 = Ordering.by(_.name)
 
-  def from(app: Application) =
+  def from(app: Application): ApplicationWithSubscriptionIds =
     ApplicationWithSubscriptionIds(
       app.id,
       app.clientId,

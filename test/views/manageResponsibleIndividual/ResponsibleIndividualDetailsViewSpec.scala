@@ -24,6 +24,8 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
@@ -34,19 +36,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 
 class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperTestData with DeveloperSessionBuilder {
 
+  private val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+
   val application = Application(
     ApplicationId.random,
     ClientId("clientId123"),
     "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    now,
+    Some(now),
     None,
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set.empty,
-    state = ApplicationState.production("user@example.com", "user name", ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user name"), Some(""), now),
+    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
   "responsible individual details view" should {

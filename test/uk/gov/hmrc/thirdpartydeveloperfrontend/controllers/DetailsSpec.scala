@@ -27,14 +27,17 @@ import views.html._
 import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, PrivacyPolicyLocations, TermsAndConditionsLocation, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -87,7 +90,7 @@ class DetailsSpec
       }
 
       "return a redirect when using an application in testing state" in new Setup {
-        val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.testing)
+        val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.testing)
         SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         givenApplicationAction(testingApplication, loggedInDeveloper)
 
@@ -98,7 +101,7 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
-        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingGatekeeperApproval("dont-care", "dont-care"))
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingGatekeeperApproval("dont-care", "dont-care"))
 
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
@@ -113,7 +116,7 @@ class DetailsSpec
 
       "return the credentials requested page on an application pending verification" in new Setup {
         val pendingVerificationApplication =
-          anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
+          anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
 
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
@@ -128,7 +131,7 @@ class DetailsSpec
 
       "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.preProduction(userEmail, "name"))
 
         givenApplicationAction(preProdApplication, loggedInDeveloper)
 
@@ -142,7 +145,7 @@ class DetailsSpec
 
       "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = ApplicationState.preProduction(userEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.preProduction(userEmail, "name"))
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)
@@ -452,7 +455,8 @@ class DetailsSpec
   }
 
   "changing privacy policy location for old journey applications" should {
-    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) = anApplication(access = Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
+    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) =
+      anApplication(access = Access.Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
     val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
 
     "display update page with url field populated" in new Setup {
@@ -499,7 +503,7 @@ class DetailsSpec
 
   "changing privacy policy location for new journey applications" should {
     def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = anApplication(access =
-      Standard(
+      Access.Standard(
         List.empty,
         None,
         None,
@@ -508,7 +512,7 @@ class DetailsSpec
         Some(
           ImportantSubmissionData(
             None,
-            ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
+            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
             Set.empty,
             TermsAndConditionsLocations.InDesktopSoftware,
             privacyPolicyLocation,
@@ -589,7 +593,7 @@ class DetailsSpec
 
   "changing terms and conditions location for old journey applications" should {
     def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
-      anApplication(access = Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
+      anApplication(access = Access.Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
     val termsAndConditionsUrl                                                               = "http://example.com/terms-conds"
 
     "display update page with url field populated" in new Setup {
@@ -635,7 +639,7 @@ class DetailsSpec
 
   "changing terms and conditions location for new journey applications" should {
     def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = anApplication(access =
-      Standard(
+      Access.Standard(
         List.empty,
         None,
         None,
@@ -644,7 +648,7 @@ class DetailsSpec
         Some(
           ImportantSubmissionData(
             None,
-            ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail),
+            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
             Set.empty,
             termsAndConditionsLocation,
             PrivacyPolicyLocations.InDesktopSoftware,
@@ -868,7 +872,7 @@ class DetailsSpec
       updatedApplication.name shouldBe newName
       updatedApplication.description shouldBe newDescription
       updatedApplication.access match {
-        case access: Standard =>
+        case access: Access.Standard =>
           access.termsAndConditionsUrl shouldBe newTermsUrl
           access.privacyPolicyUrl shouldBe newPrivacyUrl
 
@@ -876,10 +880,10 @@ class DetailsSpec
       }
     }
 
-    implicit val format = Json.format[EditApplicationForm]
+    implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
 
     implicit class ChangeDetailsAppAugment(val app: Application) {
-      private val appAccess = app.access.asInstanceOf[Standard]
+      private val appAccess = app.access.asInstanceOf[Access.Standard]
 
       final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue())
 

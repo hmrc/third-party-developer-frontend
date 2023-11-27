@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class ErrorDetails(code: String, message: String)
 
 object ErrorDetails {
-  implicit val formatErrorDetails = Json.format[ErrorDetails]
+  implicit val formatErrorDetails: OFormat[ErrorDetails] = Json.format[ErrorDetails]
 }

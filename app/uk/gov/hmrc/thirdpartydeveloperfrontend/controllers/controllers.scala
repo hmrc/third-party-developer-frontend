@@ -21,12 +21,12 @@ import scala.util.{Failure, Try}
 
 import org.apache.commons.net.util.SubnetUtils
 
-import play.api.data.Forms
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
+import play.api.data.{Forms, Mapping}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 package object controllers {
@@ -183,7 +183,7 @@ package object controllers {
 
     val noApplicationsChoiceRequiredKey = "no.applications.choice.error.required.field"
 
-    val formKeysMap = Map(
+    val formKeysMap: Map[String, String] = Map(
       firstnameRequiredKey           -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey          -> firstnameMaxLengthGlobalKey,
       lastnameRequiredKey            -> lastnameRequiredGlobalKey,
@@ -215,9 +215,9 @@ package object controllers {
       mobileNumberTooShortKey        -> mobileNumberTooShortGlobalKey
     )
 
-    val globalKeys = formKeysMap.values.toSeq
+    val globalKeys: Seq[String] = formKeysMap.values.toSeq
 
-    val globalToField = Map(
+    val globalToField: Map[String, String] = Map(
       firstnameRequiredGlobalKey           -> firstnameField,
       firstnameMaxLengthGlobalKey          -> firstnameField,
       lastnameRequiredGlobalKey            -> lastnameField,
@@ -248,17 +248,17 @@ package object controllers {
 
   import FormKeys._
 
-  def firstnameValidator = textValidator(firstnameRequiredKey, firstnameMaxLengthKey)
+  def firstnameValidator: Mapping[String] = textValidator(firstnameRequiredKey, firstnameMaxLengthKey)
 
-  def lastnameValidator = textValidator(lastnameRequiredKey, lastnameMaxLengthKey)
+  def lastnameValidator: Mapping[String] = textValidator(lastnameRequiredKey, lastnameMaxLengthKey)
 
-  def fullnameValidator = textValidator(fullnameRequiredKey, fullnameMaxLengthKey, 100)
+  def fullnameValidator: Mapping[String] = textValidator(fullnameRequiredKey, fullnameMaxLengthKey, 100)
 
-  def telephoneValidator = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
+  def telephoneValidator: Mapping[String] = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
 
-  def commentsValidator = supportRequestValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
+  def commentsValidator: Mapping[String] = supportRequestValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
 
-  def cidrBlockValidator = {
+  def cidrBlockValidator: Mapping[String] = {
     val privateNetworkRanges = Set(
       new SubnetUtils("10.0.0.0/8"),
       new SubnetUtils("172.16.0.0/12"),
@@ -282,17 +282,17 @@ package object controllers {
     Forms.text.verifying(Constraint[String](validateCidrBlock(_)))
   }
 
-  def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) =
+  def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30): Mapping[String] =
     Forms.text.verifying(requiredKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
 
-  def supportRequestValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30) = {
+  def supportRequestValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30): Mapping[String] = {
     val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
 
     textValidator(requiredKey, maxLengthKey, maxLength)
       .verifying(commentsSpamKey, s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)
   }
 
-  def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320) = {
+  def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320): Mapping[String] = {
 
     Forms.text
       .verifying(emailaddressNotValidKey, email => EmailAddress.isValid(email) || email.length == 0)
@@ -300,13 +300,13 @@ package object controllers {
       .verifying(emailRequiredMessage, email => email.length > 0)
   }
 
-  def loginPasswordValidator =
+  def loginPasswordValidator: Mapping[String] =
     Forms.text.verifying(loginPasswordRequiredKey, isNotBlankString)
 
-  def currentPasswordValidator =
+  def currentPasswordValidator: Mapping[String] =
     Forms.text.verifying(currentPasswordRequiredKey, isNotBlankString)
 
-  def passwordValidator = {
+  def passwordValidator: Mapping[String] = {
     val passwordRegex = """(?=^.{12,}$)(?=.*\d)(?=.*[ !"#\$%&'()\*\+,-\./:;<=>\?@\[\\\]\^_`\{\|\}~]+)(?=.*[A-Z])(?=.*[a-z]).*$""".r
 
     Forms.text
@@ -314,18 +314,18 @@ package object controllers {
       .verifying(passwordRequiredKey, isNotBlankString)
   }
 
-  def passwordsMatch = Constraint[ConfirmPassword](passwordNoMatchKey) {
+  def passwordsMatch: Constraint[ConfirmPassword] = Constraint[ConfirmPassword](passwordNoMatchKey) {
     case rf if rf.password != rf.confirmPassword => Invalid(ValidationError(passwordNoMatchGlobalKey))
     case _                                       => Valid
   }
 
-  def redirectUriValidator = Forms.text.verifying(redirectUriInvalidKey, s => RedirectUri(s).isDefined)
+  def redirectUriValidator: Mapping[String] = Forms.text.verifying(redirectUriInvalidKey, s => RedirectUri(s).isDefined)
 
-  def privacyPolicyUrlValidator = Forms.text.verifying(privacyPolicyUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
+  def privacyPolicyUrlValidator: Mapping[String] = Forms.text.verifying(privacyPolicyUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
-  def tNcUrlValidator = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
+  def tNcUrlValidator: Mapping[String] = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
-  def applicationNameValidator = {
+  def applicationNameValidator: Mapping[String] = {
     def isAcceptedAscii(s: String) = {
       !s.toCharArray.exists(c => 32 > c || c > 126)
     }
@@ -333,7 +333,7 @@ package object controllers {
     Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
   }
 
-  def environmentValidator = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
+  def environmentValidator: Mapping[Option[String]] = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
 
   private def isNotBlankString: String => Boolean = s => s.trim.length > 0
 

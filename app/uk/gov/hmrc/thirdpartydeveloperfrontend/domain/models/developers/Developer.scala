@@ -46,6 +46,6 @@ object Developer {
       ((JsPath \ "emailPreferences").read[EmailPreferences] or Reads.pure(EmailPreferences.noPreferences))
   )(Developer.apply _)
 
-  val developerWrites          = Json.writes[Developer]
-  implicit val formatDeveloper = Format(developerReads, developerWrites)
+  val developerWrites                             = Json.writes[Developer]
+  implicit val formatDeveloper: Format[Developer] = Format(developerReads, developerWrites)
 }

@@ -37,7 +37,7 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
 
   trait Setup {
 
-    implicit val hc = HeaderCarrier().withExtraHeaders(
+    implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(
       "X-email-address" -> developer.email.text,
       "X-name"          -> developer.displayedName
     )
@@ -94,7 +94,7 @@ class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with Develo
 
     "send an event when the password change fails due to invalid credentials for a user who is not logged in" in new Setup {
 
-      implicit override val hc = HeaderCarrier()
+      implicit override val hc: HeaderCarrier = HeaderCarrier()
 
       verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email.text))
     }

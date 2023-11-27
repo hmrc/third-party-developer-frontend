@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -78,7 +78,7 @@ class RedirectsSpec
       RedirectsServiceMock.aMock
     )
 
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
@@ -100,7 +100,7 @@ class RedirectsSpec
 
       val document = Jsoup.parse(contentAsString(result))
 
-      application.standardAccess.redirectUris.foreach(uri => elementExistsByText(document, "td", uri) shouldBe true)
+      application.standardAccess.redirectUris.foreach(uri => elementExistsByText(document, "td", uri.toString()) shouldBe true)
       elementExistsByText(document, "button", "Delete") shouldBe shouldShowDeleteButton
     }
 

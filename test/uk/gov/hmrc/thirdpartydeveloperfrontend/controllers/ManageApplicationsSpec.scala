@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
@@ -59,7 +59,7 @@ class ManageApplicationsSpec
       with TermsOfUseInvitationServiceMockModule with SubmissionServiceMockModule {
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
-    implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val manageApplicationsController = new ManageApplications(
       mock[ErrorHandler],

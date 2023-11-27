@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class ChangeMfaNameRequest(name: String)
 
 object ChangeMfaNameRequest {
-  implicit val format = Json.format[ChangeMfaNameRequest]
+  implicit val format: OFormat[ChangeMfaNameRequest] = Json.format[ChangeMfaNameRequest]
 }
 
 case class CreateMfaSmsRequest(mobileNumber: String)
 
 object CreateMfaSmsRequest {
-  implicit val formatCreateMfaSmsRequest = Json.format[CreateMfaSmsRequest]
+  implicit val formatCreateMfaSmsRequest: OFormat[CreateMfaSmsRequest] = Json.format[CreateMfaSmsRequest]
 }

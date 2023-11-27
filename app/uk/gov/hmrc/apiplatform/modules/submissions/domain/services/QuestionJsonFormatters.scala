@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.services
 
+import scala.collection.immutable.ListMap
+
 import uk.gov.hmrc.apiplatform.modules.common.services.MapJsonFormatters
 
 trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatters {
@@ -23,7 +25,7 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
   import play.api.libs.json._
   import uk.gov.hmrc.play.json.Union
 
-  implicit val jsonFormatWording = Json.valueFormat[Wording]
+  implicit val jsonFormatWording: Format[Wording] = Json.valueFormat[Wording]
 
   implicit val markWrites: Writes[Mark] = Writes {
     case Fail => JsString("fail")
@@ -44,14 +46,14 @@ trait QuestionJsonFormatters extends StatementJsonFormatters with MapJsonFormatt
   implicit val keyReadsPossibleAnswer: KeyReads[PossibleAnswer]   = key => JsSuccess(PossibleAnswer(key))
   implicit val keyWritesPossibleAnswer: KeyWrites[PossibleAnswer] = _.value
 
-  implicit val jsonListMapKV = listMapReads[PossibleAnswer, Mark]
+  implicit val jsonListMapKV: Reads[ListMap[PossibleAnswer, Mark]] = listMapReads[PossibleAnswer, Mark]
 
-  implicit val jsonFormatPossibleAnswer      = Json.valueFormat[PossibleAnswer]
-  implicit val jsonFormatTextQuestion        = Json.format[TextQuestion]
-  implicit val jsonFormatYesNoQuestion       = Json.format[YesNoQuestion]
-  implicit val jsonFormatChooseOneOfQuestion = Json.format[ChooseOneOfQuestion]
-  implicit val jsonFormatMultiChoiceQuestion = Json.format[MultiChoiceQuestion]
-  implicit val jsonFormatAcknowledgementOnly = Json.format[AcknowledgementOnly]
+  implicit val jsonFormatPossibleAnswer: Format[PossibleAnswer]            = Json.valueFormat[PossibleAnswer]
+  implicit val jsonFormatTextQuestion: OFormat[TextQuestion]               = Json.format[TextQuestion]
+  implicit val jsonFormatYesNoQuestion: OFormat[YesNoQuestion]             = Json.format[YesNoQuestion]
+  implicit val jsonFormatChooseOneOfQuestion: OFormat[ChooseOneOfQuestion] = Json.format[ChooseOneOfQuestion]
+  implicit val jsonFormatMultiChoiceQuestion: OFormat[MultiChoiceQuestion] = Json.format[MultiChoiceQuestion]
+  implicit val jsonFormatAcknowledgementOnly: OFormat[AcknowledgementOnly] = Json.format[AcknowledgementOnly]
 
   implicit val jsonFormatQuestion: Format[Question] = Union.from[Question]("questionType")
     .and[MultiChoiceQuestion]("multi")

@@ -18,12 +18,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import java.util.UUID
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class LoginRequest(email: LaxEmailAddress, password: String, mfaMandatedForUser: Boolean, deviceSessionId: Option[UUID])
 
 object LoginRequest {
-  implicit val format = Json.format[LoginRequest]
+  implicit val format: OFormat[LoginRequest] = Json.format[LoginRequest]
 }

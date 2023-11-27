@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
@@ -78,7 +78,7 @@ class ChooseApplicationToUpliftActionSpec
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
-    implicit val environmentNameService = new EnvironmentNameService(appConfig)
+    implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
     val underTest = new AddApplication(
       mock[ErrorHandler],

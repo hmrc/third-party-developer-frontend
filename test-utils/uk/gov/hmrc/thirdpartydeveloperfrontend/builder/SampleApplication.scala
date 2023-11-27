@@ -18,11 +18,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import java.time.{LocalDateTime, Period, ZoneOffset}
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
-trait SampleApplication {
+trait SampleApplication
+    extends FixedClock
+    with ApplicationStateHelper {
   self: SampleSession with CollaboratorTracker =>
 
   val appId    = ApplicationId.random
@@ -39,10 +44,10 @@ trait SampleApplication {
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
-    access = Standard(redirectUris = List("https://red1", "https://red2"), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
-  val testingApp   = sampleApp.copy(state = ApplicationState.testing)
-  val submittedApp = sampleApp.copy(state = ApplicationState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
+  val testingApp   = sampleApp.copy(state = InState.testing)
+  val submittedApp = sampleApp.copy(state = InState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
 }

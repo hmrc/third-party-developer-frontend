@@ -28,7 +28,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @Singleton
 class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
 
-  implicit val crypto = localCrypto
+  implicit val crypto: LocalCrypto = localCrypto
 
   def encrypt[T](payload: T)(implicit writes: Writes[T]): JsValue = {
     val encryptor = new JsonEncryptor[T]()(crypto, writes)
@@ -54,7 +54,7 @@ class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends Compo
 case class SecretRequest(data: String)
 
 object SecretRequest {
-  implicit val format = Json.format[SecretRequest]
+  implicit val format: Format[SecretRequest] = Json.format[SecretRequest]
 }
 
 class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {

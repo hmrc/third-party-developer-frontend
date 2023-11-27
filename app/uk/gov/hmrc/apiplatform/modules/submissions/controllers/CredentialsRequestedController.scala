@@ -90,9 +90,9 @@ class CredentialsRequestedController @Inject() (
 
     def convertToViewModel(application: Application, submission: Submission, subscriptions: List[APISubscriptionStatus], answersViewModel: ViewModel): CredentialsRequestedViewModel = {
       val inHouse                = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
-      val sellResellOrDistribute = if (inHouse == Some("No")) "Yes" else "No"
+      val sellResellOrDistribute = if (inHouse.contains("No")) "Yes" else "No"
       val selectedSubscriptions  = subscriptions.filter(s => s.subscribed)
-      val isNewTermsOfUseUplift  = application.state.isProduction
+      val isNewTermsOfUseUplift  = application.state.name.isProduction
       CredentialsRequestedViewModel(application.id, application.name, selectedSubscriptions, sellResellOrDistribute, isNewTermsOfUseUplift, answersViewModel)
     }
 

@@ -18,14 +18,14 @@ package uk.gov.hmrc.apiplatform.modules.mfa.models
 
 import java.util.UUID
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 case class DeviceSession(deviceSessionId: UUID, userId: UserId)
 
 object DeviceSession {
-  implicit val format = Json.format[DeviceSession]
+  implicit val forma: OFormat[DeviceSession] = Json.format[DeviceSession]
 
 }
 

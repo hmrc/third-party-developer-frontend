@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.mvc.Request
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -38,7 +38,7 @@ case class DeskproTicket(
   )
 
 object DeskproTicket extends FieldTransformer {
-  implicit val format = Json.format[DeskproTicket]
+  implicit val format: OFormat[DeskproTicket] = Json.format[DeskproTicket]
 
   def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
     val message =

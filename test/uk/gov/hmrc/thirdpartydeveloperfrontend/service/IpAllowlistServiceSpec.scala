@@ -23,7 +23,7 @@ import org.scalatest.matchers.should.Matchers
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.CidrBlock
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CidrBlock, IpAllowlist}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockM
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, IpAllowlist}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule

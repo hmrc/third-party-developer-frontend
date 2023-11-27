@@ -19,10 +19,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs
 import java.net.URLEncoder
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.matchers.should.Matchers
 
 import play.api.http.Status._
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{Json, OFormat, Writes}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
@@ -36,7 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJson
 
 object Stubs extends ApplicationLogger {
 
-  def setupRequest(path: String, status: Int, response: String) = {
+  def setupRequest(path: String, status: Int, response: String): StubMapping = {
     logger.info(s"Stubbing $path with $response")
     stubFor(
       get(urlEqualTo(path))
@@ -44,13 +45,13 @@ object Stubs extends ApplicationLogger {
     )
   }
 
-  def setupDeleteRequest(path: String, status: Int) =
+  def setupDeleteRequest(path: String, status: Int): StubMapping =
     stubFor(delete(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
-  def setupPostRequest(path: String, status: Int) =
+  def setupPostRequest(path: String, status: Int): StubMapping =
     stubFor(post(urlEqualTo(path)).willReturn(aResponse().withStatus(status)))
 
-  def setupPostRequest(path: String, status: Int, response: String) =
+  def setupPostRequest(path: String, status: Int, response: String): StubMapping =
     stubFor(
       post(urlEqualTo(path))
         .willReturn(aResponse().withStatus(status).withBody(response))
@@ -70,7 +71,7 @@ object Stubs extends ApplicationLogger {
       response: String
     )(implicit writes: Writes[T],
       encryptedJson: EncryptedJson
-    ) =
+    ): StubMapping =
     stubFor(
       post(urlPathEqualTo(path))
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(data).toString()))
@@ -80,64 +81,64 @@ object Stubs extends ApplicationLogger {
 
 object DeveloperStub {
 
-  def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
+  def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson): StubMapping =
     stubFor(
       post(urlMatching(s"/developer"))
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(registration).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: LaxEmailAddress, profile: UpdateProfileRequest, status: Int) =
+  def update(email: LaxEmailAddress, profile: UpdateProfileRequest, status: Int): StubMapping =
     stubFor(
       post(urlMatching(s"/developer/$email"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def setupResend(email: LaxEmailAddress, status: Int) = {
+  def setupResend(email: LaxEmailAddress, status: Int): StubMapping = {
     stubFor(
       post(urlPathEqualTo(s"/$email/resend-verification"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def verifyResetPassword(email: LaxEmailAddress, request: PasswordResetRequest) = {
+  def verifyResetPassword(email: LaxEmailAddress, request: PasswordResetRequest): Unit = {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(matching(Json.toJson(request).toString())))
   }
 }
 
 object ApplicationStub {
 
-  implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
+  implicit val apiIdentifierFormat: OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
 
-  def setupApplicationNameValidation() = {
+  def setupApplicationNameValidation(): StubMapping = {
     val validNameResult = ApplicationNameValidationResult(None)
 
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }
 
-  def setUpFetchApplication(id: String, status: Int, response: String = "") = {
+  def setUpFetchApplication(id: String, status: Int, response: String = ""): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/application/$id"))
         .willReturn(aResponse().withStatus(status).withBody(response))
     )
   }
 
-  def setUpFetchEmptySubscriptions(id: String, status: Int) = {
+  def setUpFetchEmptySubscriptions(id: String, status: Int): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/application/$id/subscription"))
         .willReturn(aResponse().withStatus(status).withBody("[]"))
     )
   }
 
-  def setUpDeleteSubscription(id: String, api: String, version: ApiVersionNbr, status: Int) = {
+  def setUpDeleteSubscription(id: String, api: String, version: ApiVersionNbr, status: Int): StubMapping = {
     stubFor(
       delete(urlEqualTo(s"/application/$id/subscription?context=$api&version=${version.value}"))
         .willReturn(aResponse().withStatus(status))
     )
   }
 
-  def setUpExecuteSubscription(id: String, api: String, version: ApiVersionNbr, status: Int) = {
+  def setUpExecuteSubscription(id: String, api: String, version: ApiVersionNbr, status: Int): StubMapping = {
     stubFor(
       post(urlEqualTo(s"/application/$id/subscription"))
         .withRequestBody(equalToJson(Json.toJson(ApiIdentifier(ApiContext(api), version)).toString()))
@@ -145,14 +146,14 @@ object ApplicationStub {
     )
   }
 
-  def setUpUpdateApproval(id: String) = {
+  def setUpUpdateApproval(id: String): StubMapping = {
     stubFor(
       post(urlEqualTo(s"/application/$id/check-information"))
         .willReturn(aResponse().withStatus(OK))
     )
   }
 
-  def configureUserApplications(email: LaxEmailAddress, applications: List[Application] = Nil, status: Int = OK) = {
+  def configureUserApplications(email: LaxEmailAddress, applications: List[Application] = Nil, status: Int = OK): StubMapping = {
     val encodedEmail = URLEncoder.encode(email.text, "UTF-8")
 
     def stubResponse(environment: Environment, applications: List[Application]) = {
@@ -174,7 +175,7 @@ object ApplicationStub {
     stubResponse(Environment.SANDBOX, sandboxApps)
   }
 
-  def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK) = {
+  def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK): Unit = {
     tokens.foreach { entry =>
       stubFor(
         get(urlEqualTo(s"/application/${entry._1}/credentials"))
@@ -193,11 +194,11 @@ object DeskproStub extends Matchers {
   val deskproPath: String         = "/deskpro/ticket"
   val deskproFeedbackPath: String = "/deskpro/feedback"
 
-  def setupTicketCreation(status: Int = OK) = {
+  def setupTicketCreation(status: Int = OK): StubMapping = {
     Stubs.setupPostRequest(deskproPath, status)
   }
 
-  def verifyTicketCreationWithSubject(subject: String) = {
+  def verifyTicketCreationWithSubject(subject: String): Unit = {
     verify(1, postRequestedFor(urlPathEqualTo(deskproPath)).withRequestBody(containing(s""""subject":"$subject"""")))
   }
 }
@@ -206,7 +207,7 @@ object AuditStub extends Matchers {
   val auditPath: String       = "/write/audit"
   val mergedAuditPath: String = "/write/audit/merged"
 
-  def setupAudit(status: Int = NO_CONTENT, data: Option[String] = None) = {
+  def setupAudit(status: Int = NO_CONTENT, data: Option[String] = None): Any = {
     if (data.isDefined) {
       Stubs.setupPostContaining(auditPath, data.get, status)
       Stubs.setupPostContaining(mergedAuditPath, data.get, status)
@@ -219,7 +220,7 @@ object AuditStub extends Matchers {
 
 object ThirdPartyDeveloperStub {
 
-  def configureAuthenticate(session: Option[Session]) = {
+  def configureAuthenticate(session: Option[Session]): StubMapping = {
     stubFor(
       post(urlEqualTo("/authenticate"))
         .willReturn(
@@ -231,7 +232,7 @@ object ThirdPartyDeveloperStub {
     )
   }
 
-  def fetchDeveloper(developer: Developer) = {
+  def fetchDeveloper(developer: Developer): StubMapping = {
     stubFor(
       get(urlPathEqualTo("/developer"))
         .withQueryParam("developerId", equalTo(developer.userId.toString()))
@@ -247,7 +248,7 @@ object ThirdPartyDeveloperStub {
 
 object ApiSubscriptionFieldsStub {
 
-  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) = {
+  def setUpDeleteSubscriptionFields(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr): StubMapping = {
     stubFor(
       delete(urlEqualTo(fieldValuesUrl(clientId, apiContext, apiVersion)))
         .willReturn(aResponse().withStatus(NO_CONTENT))
@@ -269,9 +270,9 @@ object ApiSubscriptionFieldsStub {
 
 object ApiPlatformMicroserviceStub {
 
-  implicit val apiIdentifierFormat = Json.format[ApiIdentifier]
+  implicit val apiIdentifierFormat: OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
 
-  def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String) = {
+  def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/api-definitions?applicationId=${applicationId}"))
         .willReturn(
@@ -283,7 +284,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId) = {
+  def stubFetchAllPossibleSubscriptionsFailure(applicationId: ApplicationId): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/api-definitions?applicationId=${applicationId}"))
         .willReturn(
@@ -293,7 +294,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData) = {
+  def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/applications/${applicationId}"))
         .willReturn(
@@ -305,7 +306,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchApplicationByIdFailure(applicationId: ApplicationId) = {
+  def stubFetchApplicationByIdFailure(applicationId: ApplicationId): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/applications/${applicationId}"))
         .willReturn(
@@ -315,7 +316,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubCombinedApiByServiceName(serviceName: String, body: String) = {
+  def stubCombinedApiByServiceName(serviceName: String, body: String): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/combined-rest-xml-apis/$serviceName"))
         .willReturn(
@@ -327,7 +328,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubCombinedApiByServiceNameFailure(status: Int) = {
+  def stubCombinedApiByServiceNameFailure(status: Int): StubMapping = {
     val response = status match {
       case INTERNAL_SERVER_ERROR => aResponse()
           .withStatus(INTERNAL_SERVER_ERROR)
@@ -342,7 +343,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchApiDefinitionsVisibleToUserFailure(userId: UserId) = {
+  def stubFetchApiDefinitionsVisibleToUserFailure(userId: UserId): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.toString()}"))
         .willReturn(
@@ -352,7 +353,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchApiDefinitionsVisibleToUser(userId: UserId, body: String) = {
+  def stubFetchApiDefinitionsVisibleToUser(userId: UserId, body: String): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/combined-api-definitions?developerId=${userId.toString()}"))
         .willReturn(
@@ -364,7 +365,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
+  def stubSubscribeToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier): StubMapping = {
     stubFor(
       post(urlPathEqualTo(s"/applications/${applicationId}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)
@@ -375,7 +376,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier) = {
+  def stubSubscribeToApiFailure(applicationId: ApplicationId, apiIdentifier: ApiIdentifier): StubMapping = {
     stubFor(
       post(urlPathEqualTo(s"/applications/${applicationId}/subscriptions"))
         .withJsonRequestBody(apiIdentifier)

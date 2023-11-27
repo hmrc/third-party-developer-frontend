@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import play.api.libs.json.Json
-
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -43,11 +42,12 @@ case class CreateApplicationRequest(
     environment: Environment,
     description: Option[String],
     collaborators: List[Collaborator],
-    access: Access = Standard(List.empty, None, None, Set.empty)
+    access: Access = Access.Standard(List.empty, None, None, Set.empty)
   )
 
 object CreateApplicationRequest extends ApplicationRequest {
-  implicit val format = Json.format[CreateApplicationRequest]
+  import play.api.libs.json.{Json, OFormat}
+  implicit val format: OFormat[CreateApplicationRequest] = Json.format[CreateApplicationRequest]
 
   def fromAddApplicationJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
     name = form.applicationName.trim,
@@ -66,8 +66,9 @@ case class UpdateApplicationRequest(
   )
 
 object UpdateApplicationRequest extends ApplicationRequest {
+  import play.api.libs.json.{Json, OFormat}
 
-  implicit val format = Json.format[UpdateApplicationRequest]
+  implicit val format: OFormat[UpdateApplicationRequest] = Json.format[UpdateApplicationRequest]
 
   def from(form: EditApplicationForm, application: Application) = {
     val name = if (application.isInTesting || application.deployedTo.isSandbox) {
@@ -76,7 +77,7 @@ object UpdateApplicationRequest extends ApplicationRequest {
       application.name
     }
 
-    val access = application.access.asInstanceOf[Standard]
+    val access = application.access.asInstanceOf[Access.Standard]
 
     UpdateApplicationRequest(
       application.id,

@@ -219,7 +219,7 @@ class AddApplication @Inject() (
       ): Future[Set[String]] = {
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime)
-        val filteredApis    = apiDetails.filter(api => api.categories.intersect(allInCategories).isEmpty)
+        val filteredApis    = apiDetails.filter(api => api.categories.map(_.toString).intersect(allInCategories).isEmpty) // TODO - types
         filteredApis.map(_.serviceName.value).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
       }
     }

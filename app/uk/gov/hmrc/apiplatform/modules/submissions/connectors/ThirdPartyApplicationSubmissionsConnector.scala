@@ -20,11 +20,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
@@ -35,19 +36,19 @@ object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
 
   case class OutboundRecordAnswersRequest(answers: List[String])
-  implicit val writesOutboundRecordAnswersRequest = Json.writes[OutboundRecordAnswersRequest]
+  implicit val writesOutboundRecordAnswersRequest: Writes[OutboundRecordAnswersRequest] = Json.writes[OutboundRecordAnswersRequest]
 
   case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: LaxEmailAddress)
-  implicit val writesApprovalsRequest = Json.writes[ApprovalsRequest]
+  implicit val writesApprovalsRequest: Writes[ApprovalsRequest] = Json.writes[ApprovalsRequest]
 
   case class ResponsibleIndividualVerificationRequest(code: String)
-  implicit val writesResponsibleIndividualVerificationRequest = Json.writes[ResponsibleIndividualVerificationRequest]
+  implicit val writesResponsibleIndividualVerificationRequest: Writes[ResponsibleIndividualVerificationRequest] = Json.writes[ResponsibleIndividualVerificationRequest]
 
   case class ConfirmSetupCompleteRequest(requesterEmailAddress: LaxEmailAddress)
-  implicit val writesConfirmSetupCompleteRequest = Json.writes[ConfirmSetupCompleteRequest]
+  implicit val writesConfirmSetupCompleteRequest: Writes[ConfirmSetupCompleteRequest] = Json.writes[ConfirmSetupCompleteRequest]
 
   case class CreateSubmissionRequest(requestedBy: LaxEmailAddress)
-  implicit val readsCreateSubmissionRequest = Json.writes[CreateSubmissionRequest]
+  implicit val readsCreateSubmissionRequest: Writes[CreateSubmissionRequest] = Json.writes[CreateSubmissionRequest]
 }
 
 @Singleton
@@ -65,7 +66,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   val environment = Environment.PRODUCTION
 
-  def recordAnswer(submissionId: Submission.Id, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
 
@@ -96,7 +97,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchSubmission(id: Submission.Id)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.GET[Option[ExtendedSubmission]](s"$serviceBaseUrl/submissions/${id.value}")
     }

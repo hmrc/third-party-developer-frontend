@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{Clock, LocalDateTime}
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,12 +24,14 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -47,9 +49,9 @@ class ApplicationService @Inject() (
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,
     auditService: AuditService,
-    clock: Clock
+    val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) {
+  ) extends ClockNow {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     connectorWrapper.forEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
@@ -62,7 +64,7 @@ class ApplicationService @Inject() (
   }
 
   def updatePrivacyPolicyLocation(application: Application, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, LocalDateTime.now(clock), newLocation)
+    val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, now(), newLocation)
     dispatchCmd(application.id, request)
   }
 
@@ -73,7 +75,7 @@ class ApplicationService @Inject() (
       emailAddress: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, LocalDateTime.now(clock), fullName, emailAddress)
+    val request = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, now(), fullName, emailAddress)
     dispatchCmd(application.id, request)
   }
 
@@ -83,17 +85,17 @@ class ApplicationService @Inject() (
       newLocation: TermsAndConditionsLocation
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, LocalDateTime.now(clock), newLocation)
+    val request = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, now(), newLocation)
     dispatchCmd(application.id, request)
   }
 
   def acceptResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeResponsibleIndividualToOther(code, LocalDateTime.now(clock))
+    val request = ApplicationCommands.ChangeResponsibleIndividualToOther(code, now())
     dispatchCmd(applicationId, request)
   }
 
   def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.DeclineResponsibleIndividual(code, LocalDateTime.now(clock))
+    val request = ApplicationCommands.DeclineResponsibleIndividual(code, now())
     dispatchCmd(applicationId, request)
   }
 
@@ -105,7 +107,7 @@ class ApplicationService @Inject() (
       riEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.VerifyResponsibleIndividual(userId, LocalDateTime.now(clock), requesterName, riName, riEmail)
+    val request = ApplicationCommands.VerifyResponsibleIndividual(userId, now(), requesterName, riName, riEmail)
     dispatchCmd(application.id, request)
   }
 
@@ -150,7 +152,7 @@ class ApplicationService @Inject() (
                               "appId"                   -> appId.toString(),
                               "requestedByName"         -> requesterName,
                               "requestedByEmailAddress" -> requesterEmail.text,
-                              "timestamp"               -> LocalDateTime.now(clock).toString
+                              "timestamp"               -> now().toString
                             )
                           )
       } yield ticketResponse
@@ -169,7 +171,7 @@ class ApplicationService @Inject() (
 
     if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
-      val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, LocalDateTime.now(clock))
+      val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, now())
       dispatchCmd(application.id, deleteRequest)
 
     } else {
@@ -189,7 +191,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(Some(userId), deleteDeveloperTicket)
-      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> LocalDateTime.now(clock).toString))
+      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> now().toString))
     } yield ticketResponse
   }
 
@@ -198,7 +200,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(userId, remove2SVTicket)
-      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email.text, "timestamp" -> LocalDateTime.now(clock).toString))
+      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email.text, "timestamp" -> now().toString))
     } yield ticketResponse
   }
 
@@ -218,7 +220,7 @@ class ApplicationService @Inject() (
         "userName"               -> name,
         "satisfactionRating"     -> rating,
         "improvementSuggestions" -> improvementSuggestions,
-        "timestamp"              -> LocalDateTime.now(clock).toString
+        "timestamp"              -> now().toString
       )
     )
   }

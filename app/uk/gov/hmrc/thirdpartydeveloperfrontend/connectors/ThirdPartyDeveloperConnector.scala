@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, Json, OFormat, OWrites, Reads}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, _}
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -48,10 +48,10 @@ object ThirdPartyDeveloperConnector {
 
   object JsonFormatters {
     implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
-    implicit val FindUserIdRequestWrites                                                        = Json.writes[FindUserIdRequest]
-    implicit val FindUserIdResponseReads                                                        = Json.reads[FindUserIdResponse]
-    implicit val getOrCreateUserIdRequestFormat                                                 = Json.format[GetOrCreateUserIdRequest]
-    implicit val getOrCreateUserIdResponseFormat                                                = Json.format[GetOrCreateUserIdResponse]
+    implicit val FindUserIdRequestWrites: OWrites[FindUserIdRequest]                            = Json.writes[FindUserIdRequest]
+    implicit val FindUserIdResponseReads: Reads[FindUserIdResponse]                             = Json.reads[FindUserIdResponse]
+    implicit val getOrCreateUserIdRequestFormat: OFormat[GetOrCreateUserIdRequest]              = Json.format[GetOrCreateUserIdRequest]
+    implicit val getOrCreateUserIdResponseFormat: OFormat[GetOrCreateUserIdResponse]            = Json.format[GetOrCreateUserIdResponse]
   }
 }
 
@@ -100,7 +100,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
-  val api                         = API("third-party-developer")
+  val api: API                    = API("third-party-developer")
 
   def register(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
     encryptedJson.secretRequest(
@@ -170,7 +170,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[LaxEmailAddress] = {
-    implicit val EmailForResetResponseReads = Json.reads[EmailForResetResponse]
+    implicit val EmailForResetResponseReads: Reads[EmailForResetResponse] = Json.reads[EmailForResetResponse]
 
     metrics.record(api) {
       http.GET[ErrorOr[EmailForResetResponse]](s"$serviceBaseUrl/reset-password?code=$code")

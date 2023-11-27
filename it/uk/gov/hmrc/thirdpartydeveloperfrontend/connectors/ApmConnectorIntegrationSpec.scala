@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -29,13 +29,14 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
-class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters {
+class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters with FixedClock {
 
   private val stubConfig = Configuration(
     "microservice.services.api-platform-microservice.port" -> stubPort
@@ -49,14 +50,14 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       .build()
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
-    val underTest   = app.injector.instanceOf[ApmConnector]
+    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val underTest                  = app.injector.instanceOf[ApmConnector]
 
   }
 
   "fetchApplicationById" should {
     val applicationId                                                    = ApplicationId.random
-    val application                                                      = Application(applicationId, ClientId("someId"), "someName", LocalDateTime.now(), None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
+    val application                                                      = Application(applicationId, ClientId("someId"), "someName", now(), None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
     val applicationWithSubscriptionData: ApplicationWithSubscriptionData =
       ApplicationWithSubscriptionData(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
 

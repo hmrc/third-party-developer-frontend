@@ -29,7 +29,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result =>
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailures, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
@@ -75,16 +75,16 @@ class ManageTeam @Inject() (
       checkActionForApprovedApps(SupportsTeamMembers, AdministratorOnly)(applicationId)(fun)
     }
 
-  def manageTeam(applicationId: ApplicationId, error: Option[String] = None) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
+  def manageTeam(applicationId: ApplicationId, error: Option[String] = None): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val view = manageTeamView(applicationViewModelFromApplicationRequest(), request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
     Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
   }
 
-  def addTeamMember(applicationId: ApplicationId) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
+  def addTeamMember(applicationId: ApplicationId): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.developerSession, createFraudNavModel(fraudPreventionConfig))))
   }
 
-  def addTeamMemberAction(applicationId: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode) =
+  def addTeamMemberAction(applicationId: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode): Action[AnyContent] =
     canEditTeamMembers(applicationId, alsoAllowTestingState = true) { implicit request =>
       val successRedirect = addTeamMemberPageMode match {
         case ManageTeamMembers => routes.ManageTeam.manageTeam(applicationId, None)
@@ -138,7 +138,7 @@ class ManageTeam @Inject() (
       AddTeamMemberForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
 
-  def removeTeamMember(applicationId: ApplicationId, teamMemberHash: String) = whenAppSupportsTeamMembers(applicationId) { implicit request =>
+  def removeTeamMember(applicationId: ApplicationId, teamMemberHash: String): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>
     val application = request.application
 
     application.findCollaboratorByHash(teamMemberHash) match {
@@ -148,7 +148,7 @@ class ManageTeam @Inject() (
     }
   }
 
-  def removeTeamMemberAction(applicationId: ApplicationId) = canEditTeamMembers(applicationId) { implicit request =>
+  def removeTeamMemberAction(applicationId: ApplicationId): Action[AnyContent] = canEditTeamMembers(applicationId) { implicit request =>
     def handleValidForm(form: RemoveTeamMemberConfirmationForm) = {
       form.confirm match {
         case Some("Yes") =>

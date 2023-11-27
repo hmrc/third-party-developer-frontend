@@ -59,7 +59,7 @@
               </a>
             </li>
           }
-          @if(app.access.accessType.isStandard) {
+          @if(app.access.accessType == AccessType.STANDARD) {
             <li class="side-nav__list @if(section == "subscriptions") { side-nav__list--selected }">
               <a id="nav-manage-subscriptions" class="side-nav__link" href="@controllers.routes.SubscriptionsController.manageSubscriptions(app.id)">
                 API subscriptions
@@ -80,7 +80,7 @@
               </a>
             </li>
           }
-          @if(app.access.accessType.isStandard) {
+          @if(app.access.accessType == AccessType.STANDARD) {
             <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }">
               <a id="nav-manage-redirects" class="side-nav__link" href="@controllers.routes.Redirects.redirects(app.id)">
                 Redirect URIs
@@ -116,7 +116,7 @@
               Team members
             </a>
           </li>
-          @if(app.access.accessType.isStandard) {
+          @if(app.access.accessType == AccessType.STANDARD) {
             <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }">
               <a id="nav-delete-application" class="side-nav__link" href="@controllers.routes.DeleteApplication.deleteApplication(app.id, None)">
                 Delete application

@@ -31,10 +31,13 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
-import uk.gov.hmrc.apiplatform.modules.applications.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ContactDetails}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.applicationNameAlreadyExistsKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.Field
@@ -79,6 +82,7 @@ class CheckYourAnswers @Inject() (
     with ApiSubscriptionsPartialController
     with PrivacyPolicyPartialController
     with TermsAndConditionsPartialController
+    with ClockNow
     with TermsOfUsePartialController
     with CheckInformationFormHelper {
 
@@ -183,7 +187,7 @@ case class CheckYourSubscriptionData(
 case class CheckYourAnswersData(
     appId: ApplicationId,
     softwareName: String,
-    fullName: Option[String],
+    fullName: Option[FullName],
     email: Option[LaxEmailAddress],
     telephoneNumber: Option[String],
     teamMembers: Set[LaxEmailAddress],

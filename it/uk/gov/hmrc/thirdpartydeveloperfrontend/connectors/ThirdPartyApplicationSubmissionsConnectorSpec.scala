@@ -28,6 +28,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -35,7 +37,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
@@ -45,9 +46,9 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with WireMockExtensions
     with CollaboratorTracker
     with LocalUserIdTracker
-    with SubmissionsTestData
     with SubmissionsFrontendJsonFormatters
     with TestApplications
+    with SubmissionsTestData
     with ApplicationsJsonFormatters {
   private val apiKey = UUID.randomUUID().toString
   private val code   = "123456789"
@@ -66,20 +67,20 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       .build()
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val connector = app.injector.instanceOf[ThirdPartyApplicationSubmissionsConnector]
 
     val riVerification: ResponsibleIndividualVerification = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
       ApplicationId.random,
-      Submission.Id.random,
+      SubmissionId.random,
       0,
       "App name",
       LocalDateTime.now(ZoneOffset.UTC),
       ResponsibleIndividualVerificationState.INITIAL
     )
-    val responsibleIndividual                             = ResponsibleIndividual.build("bob example", "bob@example.com".toLaxEmail)
+    val responsibleIndividual                             = ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail)
     val riVerificationWithDetails                         = ResponsibleIndividualVerificationWithDetails(riVerification, responsibleIndividual, "Rick Deckard", "rick@submitter.com".toLaxEmail)
 
     val extendedSubmission = answeringSubmission.withIncompleteProgress()
