@@ -76,9 +76,9 @@ class EmailPreferencesService @Inject() (
     apmConnector.fetchCombinedApi(serviceName).flatMap {
       case Right(x) => successful(Some(x))
       case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).flatMap {
-        case Right(y) => successful(Some(CombinedApi(y.serviceName, y.name, y.categories, REST_API)))
-        case Left(_) => successful(None)
-      }
+          case Right(y) => successful(Some(CombinedApi(y.serviceName, y.name, y.categories, REST_API)))
+          case Left(_)  => successful(None)
+        }
     }
   }
 
