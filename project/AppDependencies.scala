@@ -27,8 +27,9 @@ object AppDependencies {
     "com.beachape"                %% "enumeratum-play"                    % enumeratumVersion,
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "commons-validator"           %  "commons-validator"                  % "1.7",
-    "uk.gov.hmrc"                 %% "api-platform-api-domain"            % "0.7.0",
-    "uk.gov.hmrc"                 %% "api-platform-application-domain"    % "0.31.0"
+    "uk.gov.hmrc"                 %% "api-platform-api-domain"            % "0.11.0",
+    "uk.gov.hmrc"                 %% "api-platform-application-domain"    % "0.32.0"
+
   )
 
   lazy val test =  Seq(
