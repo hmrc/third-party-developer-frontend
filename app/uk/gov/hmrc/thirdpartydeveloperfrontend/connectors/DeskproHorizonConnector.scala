@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import play.api.http.Status.CREATED
+import play.api.http.Status.{CREATED, UNAUTHORIZED}
 import play.api.http.HeaderNames.AUTHORIZATION
 
 class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
@@ -42,10 +42,14 @@ class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationCo
           case CREATED => 
             logger.info(s"Deskpro horizon ticket '${deskproTicket.subject}' created successfully")
             TicketCreated
+          case UNAUTHORIZED =>
+            logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
+            logger.error(response.body)
+            throw new DeskproTicketCreationFailed("Missing authorization")
           case status  => 
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
             logger.error(response.body)
-            throw new DeskproTicketCreationFailed("Failed to create Deskpro Horizon ticket")
+            throw new DeskproTicketCreationFailed("Unknown reason")
         }
       )
   }
