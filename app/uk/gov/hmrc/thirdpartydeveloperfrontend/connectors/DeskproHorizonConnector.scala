@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import play.api.http.Status.CREATED
+import play.api.http.HeaderNames.AUTHORIZATION
 
 class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger {
@@ -35,7 +36,7 @@ class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationCo
     val api                         = API("deskpro-horizon")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    http.POST[DeskproTicket, HttpResponse](requestUrl("/api/v2/tickets"), deskproTicket)
+    http.POST[DeskproHorizonTicket, HttpResponse](requestUrl("/api/v2/tickets"), DeskproHorizonTicket.fromDeskproTicket(deskproTicket), Seq((AUTHORIZATION, config.deskproHorizonApiKey)))
       .map(response =>
         response.status match {
           case CREATED => 
@@ -43,6 +44,7 @@ class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationCo
             TicketCreated
           case status  => 
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
+            logger.error(response.body)
             throw new DeskproTicketCreationFailed("Failed to create Deskpro Horizon ticket")
         }
       )
