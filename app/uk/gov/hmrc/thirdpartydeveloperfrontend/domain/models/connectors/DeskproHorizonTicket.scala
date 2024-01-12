@@ -19,9 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import scala.util.Properties
 
 import play.api.libs.json._
-import play.api.mvc.Request
-
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 case class DeskproHorizonTicketPerson(
     name: String,
