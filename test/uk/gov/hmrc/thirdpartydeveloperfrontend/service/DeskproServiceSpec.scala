@@ -109,5 +109,27 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         verify(underTest.deskproConnector).createTicket(None, expectedData)(hc)
       }
     }
+
+    "A valid Deskpro Horizon ticket is created" should {
+      "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro Horizon" in {
+        val title  = "Title"
+        val userId = UserId.random
+        when(underTest.appConfig.title).thenReturn(title)
+        when(underTest.appConfig.useDesktopHorizon).thenReturn(true)
+        when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
+        when(underTest.deskproHorizonConnector.createTicket(*)(*)).thenReturn(Future(TicketCreated))
+
+        implicit val fakeRequest = FakeRequest()
+        implicit val hc          = HeaderCarrier()
+
+        val form = SupportEnquiryForm("my name", "myemail@example.com", "my comments")
+
+        await(underTest.submitSupportEnquiry(Some(userId), form))
+
+        val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
+        verify(underTest.deskproConnector).createTicket(Some(userId), expectedData)(hc)
+        verify(underTest.deskproHorizonConnector).createTicket(expectedData)(hc)
+      }
+    }
   }
 }

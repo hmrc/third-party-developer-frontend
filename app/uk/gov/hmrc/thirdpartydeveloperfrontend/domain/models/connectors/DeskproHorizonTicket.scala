@@ -52,20 +52,4 @@ object DeskproHorizonTicket extends FieldTransformer {
       message = DeskproHorizonTicketMessage(deskproTicket.message.replaceAll(Properties.lineSeparator, "<br>"), "html"),
       brand = 3
     )
-
-  def createFromSupportEnquiry(supportEnquiry: SupportEnquiryForm, appTitle: String)(implicit request: Request[_]) = {
-    val message =
-      s"""${supportEnquiry.email} has submitted the following support enquiry:
-         |
-         |${supportEnquiry.comments}
-         |
-         |Please send them a response within 2 working days.
-         |HMRC Developer Hub""".stripMargin
-    DeskproHorizonTicket(
-      person = DeskproHorizonTicketPerson(supportEnquiry.fullname, supportEnquiry.email),
-      subject = s"$appTitle: Support Enquiry",
-      message = DeskproHorizonTicketMessage(message, "html"),
-      brand = 3
-    )
-  }
 }
