@@ -115,7 +115,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         val title  = "Title"
         val userId = UserId.random
         when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.appConfig.useDesktopHorizon).thenReturn(true)
+        when(underTest.appConfig.useDeskproHorizon).thenReturn(true)
         when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
         when(underTest.deskproHorizonConnector.createTicket(*)(*)).thenReturn(Future(TicketCreated))
 

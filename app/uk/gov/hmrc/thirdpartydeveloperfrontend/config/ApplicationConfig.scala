@@ -35,7 +35,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val thirdPartyApplicationSandboxUseProxy    = useProxy("third-party-application-sandbox")
   val thirdPartyApplicationProductionApiKey   = getConfString("third-party-application-production.api-key", "")
   val thirdPartyApplicationSandboxApiKey      = getConfString("third-party-application-sandbox.api-key", "")
-  val useDesktopHorizon                       = getConfigDefaulted("useDesktopHorizon", false)
+  val useDeskproHorizon                       = getConfigDefaulted("useDeskproHorizon", false)
   val deskproUrl                              = baseUrl("deskpro-ticket-queue")
   val deskproHorizonUrl                       = baseUrl("deskpro-horizon")
   val deskproHorizonApiKey                    = getConfString("deskpro-horizon.api-key", "")
