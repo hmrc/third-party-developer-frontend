@@ -17,36 +17,41 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import javax.inject.Inject
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import scala.concurrent.{ExecutionContext, Future}
+
+import play.api.http.HeaderNames.AUTHORIZATION
+import play.api.http.Status.{CREATED, UNAUTHORIZED}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
+
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
-import scala.concurrent.Future
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import play.api.http.Status.{CREATED, UNAUTHORIZED}
-import play.api.http.HeaderNames.AUTHORIZATION
 
 class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger {
-  
-    lazy val serviceBaseUrl: String = config.deskproHorizonUrl
-    val api                         = API("deskpro-horizon")
+
+  lazy val serviceBaseUrl: String = config.deskproHorizonUrl
+  val api                         = API("deskpro-horizon")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    http.POST[DeskproHorizonTicket, HttpResponse](requestUrl("/api/v2/tickets"), DeskproHorizonTicket.fromDeskproTicket(deskproTicket), Seq((AUTHORIZATION, config.deskproHorizonApiKey)))
+    http.POST[DeskproHorizonTicket, HttpResponse](
+      requestUrl("/api/v2/tickets"),
+      DeskproHorizonTicket.fromDeskproTicket(deskproTicket),
+      Seq((AUTHORIZATION, config.deskproHorizonApiKey))
+    )
       .map(response =>
         response.status match {
-          case CREATED => 
+          case CREATED      =>
             logger.info(s"Deskpro horizon ticket '${deskproTicket.subject}' created successfully")
             TicketCreated
           case UNAUTHORIZED =>
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
             logger.error(response.body)
             throw new DeskproTicketCreationFailed("Missing authorization")
-          case status  => 
+          case status       =>
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
             logger.error(response.body)
             throw new DeskproTicketCreationFailed("Unknown reason")

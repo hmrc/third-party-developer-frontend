@@ -16,38 +16,40 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
+import scala.util.Properties
+
 import play.api.libs.json._
 import play.api.mvc.Request
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 case class DeskproHorizonTicketPerson(
-  name: String,
-  email: String
-)
+    name: String,
+    email: String
+  )
 
 case class DeskproHorizonTicketMessage(
-  message: String,
-  format: String
-)
+    message: String,
+    format: String
+  )
 
 case class DeskproHorizonTicket(
-  person: DeskproHorizonTicketPerson,
-  subject: String,
-  message: DeskproHorizonTicketMessage,
-  brand: Int
-)
+    person: DeskproHorizonTicketPerson,
+    subject: String,
+    message: DeskproHorizonTicketMessage,
+    brand: Int
+  )
 
 object DeskproHorizonTicket extends FieldTransformer {
-  implicit val ticketPersonFormat: OFormat[DeskproHorizonTicketPerson] = Json.format[DeskproHorizonTicketPerson]
+  implicit val ticketPersonFormat: OFormat[DeskproHorizonTicketPerson]   = Json.format[DeskproHorizonTicketPerson]
   implicit val ticketMessageFormat: OFormat[DeskproHorizonTicketMessage] = Json.format[DeskproHorizonTicketMessage]
-  implicit val ticketFormat: OFormat[DeskproHorizonTicket] = Json.format[DeskproHorizonTicket]
+  implicit val ticketFormat: OFormat[DeskproHorizonTicket]               = Json.format[DeskproHorizonTicket]
 
   def fromDeskproTicket(deskproTicket: DeskproTicket): DeskproHorizonTicket =
     DeskproHorizonTicket(
       person = DeskproHorizonTicketPerson(deskproTicket.name, deskproTicket.email.text),
       subject = deskproTicket.subject,
-      message = DeskproHorizonTicketMessage(deskproTicket.message.replaceAll(System.lineSeparator(), "<br>"), "html"),
+      message = DeskproHorizonTicketMessage(deskproTicket.message.replaceAll(Properties.lineSeparator, "<br>"), "html"),
       brand = 3
     )
 

@@ -17,8 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,10 +30,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Deskpro
 
 @Singleton
 class DeskproService @Inject() (
-  val deskproConnector: DeskproConnector,
-  val deskproHorizonConnector: DeskproHorizonConnector,
-  val appConfig: ApplicationConfig
-)(implicit val ec: ExecutionContext) {
+    val deskproConnector: DeskproConnector,
+    val deskproHorizonConnector: DeskproHorizonConnector,
+    val appConfig: ApplicationConfig
+  )(implicit val ec: ExecutionContext
+  ) {
 
   def submitSurvey(survey: SignOutSurveyForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketId] = {
     val feedback = Feedback.createFromSurvey(survey, Option(appConfig.title))
