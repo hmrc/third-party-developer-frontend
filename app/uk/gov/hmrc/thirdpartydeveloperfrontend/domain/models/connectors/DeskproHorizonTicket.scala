@@ -21,24 +21,33 @@ import play.api.mvc.Request
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
+case class DeskproHorizonTicketPerson(
+  name: String,
+  email: String
+)
+
 case class DeskproHorizonTicketMessage(
-  message: String
+  message: String,
+  format: String
 )
 
 case class DeskproHorizonTicket(
+  person: DeskproHorizonTicketPerson,
   subject: String,
   message: DeskproHorizonTicketMessage,
   brand: Int
 )
 
 object DeskproHorizonTicket extends FieldTransformer {
+  implicit val ticketPersonFormat: OFormat[DeskproHorizonTicketPerson] = Json.format[DeskproHorizonTicketPerson]
   implicit val ticketMessageFormat: OFormat[DeskproHorizonTicketMessage] = Json.format[DeskproHorizonTicketMessage]
   implicit val ticketFormat: OFormat[DeskproHorizonTicket] = Json.format[DeskproHorizonTicket]
 
-  def fromDeskproTicket(deskproTicket: DeskproTicket): DeskproHorizonTicket = 
+  def fromDeskproTicket(deskproTicket: DeskproTicket): DeskproHorizonTicket =
     DeskproHorizonTicket(
+      person = DeskproHorizonTicketPerson(deskproTicket.name, deskproTicket.email.text),
       subject = deskproTicket.subject,
-      message = DeskproHorizonTicketMessage(deskproTicket.message),
+      message = DeskproHorizonTicketMessage(deskproTicket.message.replaceAll(System.lineSeparator(), "<br>"), "html"),
       brand = 3
     )
 
@@ -51,8 +60,9 @@ object DeskproHorizonTicket extends FieldTransformer {
          |Please send them a response within 2 working days.
          |HMRC Developer Hub""".stripMargin
     DeskproHorizonTicket(
+      person = DeskproHorizonTicketPerson(supportEnquiry.fullname, supportEnquiry.email),
       subject = s"$appTitle: Support Enquiry",
-      message = DeskproHorizonTicketMessage(message),
+      message = DeskproHorizonTicketMessage(message, "html"),
       brand = 3
     )
   }
