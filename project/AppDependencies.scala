@@ -19,7 +19,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "play-frontend-hmrc"                 % "7.26.0-play-28",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-28"                 % mongoVersion,
     "uk.gov.hmrc"                 %% "http-metrics"                       % "2.7.0",
-    "uk.gov.hmrc"                 %% "json-encryption"                    % "5.1.0-play-28",
+    "uk.gov.hmrc"                 %% "crypto-json-play-28"                % "7.3.0",
     "uk.gov.hmrc"                 %% "emailaddress"                       % "3.7.0",
     "uk.gov.hmrc"                 %% "play-conditional-form-mapping"      % "1.12.0-play-28",
     "commons-net"                 %  "commons-net"                        % "3.6",
