@@ -25,7 +25,6 @@ import uk.gov.hmrc.crypto.{Decrypter, Encrypter, _}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
-@Singleton
 case class SensitiveT[T](override val decryptedValue: T) extends Sensitive[T]
 
 class PayloadEncryption @Inject() (implicit val crypto: LocalCrypto) {
@@ -45,6 +44,7 @@ class PayloadEncryption @Inject() (implicit val crypto: LocalCrypto) {
   }
 }
 
+@Singleton
 class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends Encrypter with Decrypter {
   implicit val aesCrypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(applicationConfig.jsonEncryptionKey)
 
