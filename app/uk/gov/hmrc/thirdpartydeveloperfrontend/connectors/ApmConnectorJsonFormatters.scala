@@ -19,6 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services._
 
 trait ApmConnectorJsonFormatters extends ApplicationsJsonFormatters
-    with CombinedApiJsonFormatters with SubscriptionsJsonFormatters {}
+    with SubscriptionsJsonFormatters
 
 object ApmConnectorJsonFormatters extends ApmConnectorJsonFormatters

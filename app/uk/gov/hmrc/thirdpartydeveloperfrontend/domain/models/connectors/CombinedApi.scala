@@ -16,16 +16,27 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
+import play.api.libs.json.Format
+import play.api.libs.json.Json
 
-sealed trait ApiType extends EnumEntry
+sealed trait ApiType
 
-object ApiType extends Enum[ApiType] with PlayJsonEnum[ApiType] {
-  val values = findValues
+object ApiType {
   case object REST_API extends ApiType
   case object XML_API  extends ApiType
+
+  val values = List(REST_API, XML_API)
+
+  def apply(text: String): Option[ApiType] = ApiType.values.find(_.toString() == text.toUpperCase)
+
+  import play.api.libs.json.Format
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
+  implicit val format: Format[ApiType] = SealedTraitJsonFormatting.createFormatFor[ApiType]("API Type", ApiType.apply)  
 }
 
 case class CombinedApi(serviceName: ServiceName, displayName: String, categories: List[ApiCategory], apiType: ApiType)
+
+object CombinedApi {
+  implicit val combinedApiFormat: Format[CombinedApi] = Json.format[CombinedApi]
+}
