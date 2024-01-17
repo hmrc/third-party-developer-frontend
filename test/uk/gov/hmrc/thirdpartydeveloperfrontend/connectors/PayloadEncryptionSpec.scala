@@ -26,7 +26,7 @@ class PayloadEncryptionSpec extends AsyncHmrcSpec {
   trait Setup {
     val mockAppConfig     = mock[ApplicationConfig]
     when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
-    val payloadEncryption = new PayloadEncryption(new LocalCrypto(mockAppConfig))
+    val payloadEncryption = new PayloadEncryption()(new LocalCrypto(mockAppConfig))
   }
 
   "payload encryption" should {

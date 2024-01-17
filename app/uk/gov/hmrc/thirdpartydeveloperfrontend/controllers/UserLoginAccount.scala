@@ -162,7 +162,7 @@ class UserLoginAccount @Inject() (
     }
   }
 
-  private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
+  private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession) = {
     successful(
       Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session + ("userId" -> userId.value.toString))
     )

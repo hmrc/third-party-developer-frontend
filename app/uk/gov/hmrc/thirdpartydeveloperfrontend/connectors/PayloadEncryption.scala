@@ -20,35 +20,39 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 import play.api.libs.json._
-import uk.gov.hmrc.crypto._
-import uk.gov.hmrc.crypto.json.{JsonDecryptor, JsonEncryptor}
+import uk.gov.hmrc.crypto.json.JsonEncryption
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, _}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
-class PayloadEncryption @Inject() (localCrypto: LocalCrypto) {
+case class SensitiveT[T](override val decryptedValue: T) extends Sensitive[T]
 
-  implicit val crypto: LocalCrypto = localCrypto
+class PayloadEncryption @Inject() (implicit val crypto: LocalCrypto) {
 
   def encrypt[T](payload: T)(implicit writes: Writes[T]): JsValue = {
-    val encryptor = new JsonEncryptor[T]()(crypto, writes)
-    encryptor.writes(Protected(payload))
+    val encrypter = JsonEncryption.sensitiveEncrypter[T, SensitiveT[T]]
+    encrypter.writes(SensitiveT(payload))
   }
 
-  def decrypt[T](payload: JsValue)(implicit reads: Reads[T]): T = {
-    val decryptor                         = new JsonDecryptor()(crypto, reads)
-    val decrypted: JsResult[Protected[T]] = decryptor.reads(payload)
-
-    decrypted.asOpt.map(_.decryptedValue).getOrElse(throw new scala.RuntimeException(s"Failed to decrypt payload: [$payload]"))
+  def decrypt[T](payload: JsString)(implicit reads: Reads[T]): T = {
+    val encryptedValue: JsValue = payload
+    val decrypter               = JsonEncryption.sensitiveDecrypter[T, SensitiveT[T]](SensitiveT.apply)
+    decrypter.reads(encryptedValue)
+      .asOpt
+      .map(_.decryptedValue)
+      .getOrElse { sys.error(s"Failed to decrypt payload: [$payload]") }
   }
 }
 
-class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends CompositeSymmetricCrypto {
+class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends Encrypter with Decrypter {
+  implicit val aesCrypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(applicationConfig.jsonEncryptionKey)
 
-  override protected val currentCrypto: Encrypter with Decrypter = new AesCrypto {
-    override protected val encryptionKey: String = applicationConfig.jsonEncryptionKey
-  }
-  override protected val previousCryptos: Seq[Decrypter]         = Seq.empty
+  override def encrypt(plain: PlainContent): Crypted = aesCrypto.encrypt(plain)
+
+  override def decryptAsBytes(reversiblyEncrypted: Crypted): PlainBytes = aesCrypto.decryptAsBytes(reversiblyEncrypted)
+
+  override def decrypt(reversiblyEncrypted: Crypted): PlainText = aesCrypto.decrypt(reversiblyEncrypted)
 }
 
 case class SecretRequest(data: String)
