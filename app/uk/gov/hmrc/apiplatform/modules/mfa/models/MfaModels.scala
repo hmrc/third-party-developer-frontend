@@ -35,13 +35,11 @@ object MfaId {
   implicit val mfaIdFormat: Format[MfaId] = Json.valueFormat[MfaId]
 }
 
-sealed trait MfaType extends EnumEntry {
+sealed trait MfaType {
   def asText: String
 }
 
-object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
-  val values: immutable.IndexedSeq[MfaType] = findValues
-
+object MfaType {
   case object AUTHENTICATOR_APP extends MfaType {
     override def asText: String = "Authenticator app"
   }
@@ -50,6 +48,10 @@ object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
     override def asText: String = "Text message"
   }
 
+  val values: immutable.IndexedSeq[MfaType] = immutable.IndexedSeq(AUTHENTICATOR_APP, SMS)
+  
+  def apply(text: String): Option[MfaType] = MfaType.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): MfaType = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaType"))
 }
 
 sealed trait MfaDetail {
