@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 
-import scala.collection.immutable
 import scala.reflect.runtime.universe._
 
 import cats.Semigroup
 import cats.implicits._
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -29,17 +27,24 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.Combined
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 
-sealed trait FlowType extends EnumEntry
+sealed trait FlowType
 
-object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
-  val values: immutable.IndexedSeq[FlowType] = findValues
-
+object FlowType {
   case object IP_ALLOW_LIST                        extends FlowType
   case object EMAIL_PREFERENCES                    extends FlowType
   case object EMAIL_PREFERENCES_V2                 extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES    extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS           extends FlowType
+
+  val values: List[FlowType] = List(
+    IP_ALLOW_LIST,
+    EMAIL_PREFERENCES,
+    EMAIL_PREFERENCES_V2,
+    NEW_APPLICATION_EMAIL_PREFERENCES,
+    NEW_APPLICATION_EMAIL_PREFERENCES_V2,
+    GET_PRODUCTION_CREDENTIALS
+  )
 
   def from[A <: Flow: TypeTag]: FlowType = {
     typeOf[A] match {
@@ -49,6 +54,12 @@ object FlowType extends Enum[FlowType] with PlayJsonEnum[FlowType] {
       case t if t =:= typeOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
     }
   }
+
+  def apply(text: String): Option[FlowType] = FlowType.values.find(_.toString() == text.toUpperCase)
+
+  import play.api.libs.json.Format
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
+  implicit val format: Format[FlowType] = SealedTraitJsonFormatting.createFormatFor[FlowType]("Flow Type", FlowType.apply)
 }
 
 trait Flow {
