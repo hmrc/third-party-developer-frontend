@@ -18,9 +18,6 @@ package uk.gov.hmrc.apiplatform.modules.mfa.models
 
 import java.time.LocalDateTime
 import java.util.UUID
-import scala.collection.immutable
-
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.play.json.Union
@@ -89,12 +86,14 @@ object MfaDetailFormats {
 
 }
 
-sealed trait MfaAction extends EnumEntry
+sealed trait MfaAction
 
-object MfaAction extends Enum[MfaAction] with PlayJsonEnum[MfaAction] {
-  val values: immutable.IndexedSeq[MfaAction] = findValues
-
+object MfaAction  {
   case object CREATE extends MfaAction
-
   case object REMOVE extends MfaAction
+
+  val values: List[MfaAction] = List(CREATE, REMOVE)
+
+  def apply(text: String): Option[MfaAction] = MfaAction.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): MfaAction   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaAction"))
 }
