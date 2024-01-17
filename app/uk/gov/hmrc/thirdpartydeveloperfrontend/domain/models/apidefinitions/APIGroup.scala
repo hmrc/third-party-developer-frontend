@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import enumeratum.{EnumEntry, PlayEnum}
+sealed trait APIGroup
 
-sealed trait APIGroup extends EnumEntry
-
-object APIGroup extends PlayEnum[APIGroup] {
-  val values = findValues
+object APIGroup {
+  val values = List(API, TEST_API, EXAMPLE)
 
   final case object API      extends APIGroup
   final case object TEST_API extends APIGroup
