@@ -88,7 +88,7 @@ object MfaDetailFormats {
 
 sealed trait MfaAction
 
-object MfaAction  {
+object MfaAction {
   case object CREATE extends MfaAction
   case object REMOVE extends MfaAction
 
