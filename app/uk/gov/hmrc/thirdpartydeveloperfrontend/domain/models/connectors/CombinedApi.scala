@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
+import play.api.libs.json.{Format, Json}
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
-import play.api.libs.json.Format
-import play.api.libs.json.Json
 
 sealed trait ApiType
 
@@ -32,7 +32,7 @@ object ApiType {
 
   import play.api.libs.json.Format
   import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
-  implicit val format: Format[ApiType] = SealedTraitJsonFormatting.createFormatFor[ApiType]("API Type", ApiType.apply)  
+  implicit val format: Format[ApiType] = SealedTraitJsonFormatting.createFormatFor[ApiType]("API Type", ApiType.apply)
 }
 
 case class CombinedApi(serviceName: ServiceName, displayName: String, categories: List[ApiCategory], apiType: ApiType)
