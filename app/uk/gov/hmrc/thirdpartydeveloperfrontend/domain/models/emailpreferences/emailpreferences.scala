@@ -37,7 +37,6 @@ object EmailPreferences {
 }
 
 sealed trait EmailTopic {
-  def value: String
   def displayName: String
   def description: String
   def displayOrder: Byte
@@ -46,28 +45,24 @@ sealed trait EmailTopic {
 object EmailTopic {
 
   case object BUSINESS_AND_POLICY extends EmailTopic {
-    val value        = "BUSINESS_AND_POLICY"
     val displayName  = "Business and policy"
     val description  = "Policy compliance, legislative changes and business guidance support"
     val displayOrder = 1
   }
 
   case object TECHNICAL extends EmailTopic {
-    val value        = "TECHNICAL"
     val displayName  = "Technical"
     val description  = "Specifications, service guides, bug fixes and known errors"
     val displayOrder = 2
   }
 
   case object RELEASE_SCHEDULES extends EmailTopic {
-    val value        = "RELEASE_SCHEDULES"
     val displayName  = "Release schedules"
     val description  = "Notifications about planned releases and outages"
     val displayOrder = 3
   }
 
   case object EVENT_INVITES extends EmailTopic {
-    val value        = "EVENT_INVITES"
     val displayName  = "Event invites"
     val description  = "Get invites to knowledge share events and user research opportunities"
     val displayOrder = Byte.MaxValue

@@ -71,11 +71,11 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec
 
   def validateCheckboxItemsAgainstTopics(document: Document) = {
     EmailTopic.values.foreach(topic => {
-      val checkbox = document.getElementById(topic.value)
+      val checkbox = document.getElementById(topic.toString)
       checkbox.attr("name") shouldBe "topic[]"
-      checkbox.`val`() shouldBe topic.value
-      document.select(s"label[for=${topic.value}]").text.startsWith(topic.displayName) shouldBe true
-      document.select(s"label[for=${topic.value}] > div[class=govuk-hint govuk-!-margin-top-0]").text() shouldBe topic.description
+      checkbox.`val`() shouldBe topic.toString
+      document.select(s"label[for=${topic.toString}]").text.startsWith(topic.displayName) shouldBe true
+      document.select(s"label[for=${topic.toString}] > div[class=govuk-hint govuk-!-margin-top-0]").text() shouldBe topic.description
     })
   }
 
@@ -97,7 +97,7 @@ class FlowSelectTopicsViewSpec extends CommonViewSpec
     }
 
     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
-      val usersTopics = Set(BUSINESS_AND_POLICY.value, EVENT_INVITES.value)
+      val usersTopics = Set(BUSINESS_AND_POLICY.toString, EVENT_INVITES.toString)
       val page        =
         flowSelectTopicsView.render(
           SelectedTopicsEmailPreferencesForm.form,

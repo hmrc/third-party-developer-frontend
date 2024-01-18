@@ -110,7 +110,7 @@ class EmailPreferencesService @Inject() (
           applicationId,
           Set.empty,
           Set.empty,
-          developerSession.developer.emailPreferences.topics.map(_.value)
+          developerSession.developer.emailPreferences.topics.map(_.toString)
         )
         flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](newFlowObject)
         newFlowObject

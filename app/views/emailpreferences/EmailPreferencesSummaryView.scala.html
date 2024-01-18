@@ -76,7 +76,7 @@
     <h2 class="govuk-heading-s govuk-!-margin-bottom-1 govuk-!-margin-top-1" id="topics-heading">Topics</h2>
     <ul class="govuk-list govuk-!-margin-bottom-2">
     @for(topic <- loggedIn.developer.emailPreferences.topics.toList.sortBy(_.displayOrder).distinct) {
-      <li id="topic-@topic.value">@topic.displayName</li>
+      <li id="topic-@topic.toString">@topic.displayName</li>
     }
     </ul>
     <p class="govuk-body govuk-!-margin-top-4">

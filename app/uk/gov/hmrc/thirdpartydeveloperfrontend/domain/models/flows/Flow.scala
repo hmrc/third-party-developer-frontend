@@ -112,7 +112,7 @@ object EmailPreferencesFlowV2 {
           developerSession.session.sessionId,
           emailPreferences.interests.map(_.regime).toSet,
           taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
-          emailPreferences.topics.map(_.value),
+          emailPreferences.topics.map(_.toString),
           List.empty
         )
     }
