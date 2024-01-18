@@ -96,7 +96,7 @@ case class EmailPreferencesFlowV2(
     val interests: List[TaxRegimeInterests] =
       selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
 
-    EmailPreferences(interests, selectedTopics.map(EmailTopic.withValue))
+    EmailPreferences(interests, selectedTopics.map(EmailTopic.unsafeApply(_)))
   }
 }
 
@@ -166,7 +166,7 @@ case class NewApplicationEmailPreferencesFlowV2(
 
     val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
 
-    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.withValue))
+    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.unsafeApply(_)))
   }
 }
 
