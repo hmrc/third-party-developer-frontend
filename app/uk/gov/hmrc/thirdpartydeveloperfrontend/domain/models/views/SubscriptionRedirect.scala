@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
-import enumeratum.{EnumEntry, PlayEnum}
+sealed trait SubscriptionRedirect
 
-sealed trait SubscriptionRedirect extends EnumEntry
-
-object SubscriptionRedirect extends PlayEnum[SubscriptionRedirect] {
-  val values = findValues
-
+object SubscriptionRedirect {
   final case object MANAGE_PAGE            extends SubscriptionRedirect
   final case object APPLICATION_CHECK_PAGE extends SubscriptionRedirect
   final case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
+
+  val values = List(MANAGE_PAGE, APPLICATION_CHECK_PAGE, API_SUBSCRIPTIONS_PAGE)
+
+  def apply(text: String): Option[SubscriptionRedirect] = SubscriptionRedirect.values.find(_.toString() == text.toUpperCase)
 }

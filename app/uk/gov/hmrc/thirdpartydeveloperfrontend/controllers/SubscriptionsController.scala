@@ -121,7 +121,7 @@ class SubscriptionsController @Inject() (
     Future.successful(Ok(html))
   }
 
-  private def redirect(redirectTo: String, applicationId: ApplicationId) = SubscriptionRedirect.withNameOption(redirectTo) match {
+  private def redirect(redirectTo: String, applicationId: ApplicationId) = SubscriptionRedirect(redirectTo) match {
     case Some(MANAGE_PAGE)            => Redirect(routes.Details.details(applicationId))
     case Some(APPLICATION_CHECK_PAGE) => Redirect(checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.SubscriptionsController.manageSubscriptions(applicationId))
