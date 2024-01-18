@@ -16,16 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import enumeratum.{EnumEntry, PlayEnum}
+sealed trait SaveSubsFieldsPageMode
 
-sealed trait SaveSubsFieldsPageMode extends EnumEntry
-
-object SaveSubsFieldsPageMode extends PlayEnum[SaveSubsFieldsPageMode] {
-  val values = findValues
-
+object SaveSubsFieldsPageMode {
   final case object LeftHandNavigation extends SaveSubsFieldsPageMode
   final case object CheckYourAnswers   extends SaveSubsFieldsPageMode
 
-  def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
+  val values = List(LeftHandNavigation, CheckYourAnswers)
 
+  def from(mode: String) = values.find(e => e.toString.toLowerCase == mode)
 }
