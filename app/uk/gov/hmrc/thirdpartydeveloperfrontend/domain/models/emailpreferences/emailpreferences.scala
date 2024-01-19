@@ -37,38 +37,40 @@ object EmailPreferences {
 }
 
 sealed trait EmailTopic {
-  def displayName: String
-  def description: String
-  def displayOrder: Byte
+  lazy val displayOrder = EmailTopic.displayOrder(this)
+  lazy val displayName  = EmailTopic.displayName(this)
+  lazy val description  = EmailTopic.description(this)
 }
 
 object EmailTopic {
 
-  case object BUSINESS_AND_POLICY extends EmailTopic {
-    val displayName  = "Business and policy"
-    val description  = "Policy compliance, legislative changes and business guidance support"
-    val displayOrder = 1
-  }
-
-  case object TECHNICAL extends EmailTopic {
-    val displayName  = "Technical"
-    val description  = "Specifications, service guides, bug fixes and known errors"
-    val displayOrder = 2
-  }
-
-  case object RELEASE_SCHEDULES extends EmailTopic {
-    val displayName  = "Release schedules"
-    val description  = "Notifications about planned releases and outages"
-    val displayOrder = 3
-  }
-
-  case object EVENT_INVITES extends EmailTopic {
-    val displayName  = "Event invites"
-    val description  = "Get invites to knowledge share events and user research opportunities"
-    val displayOrder = Byte.MaxValue
-  } // Event Invites is displayed separately, after the other topics
+  case object BUSINESS_AND_POLICY extends EmailTopic
+  case object TECHNICAL           extends EmailTopic
+  case object RELEASE_SCHEDULES   extends EmailTopic
+  case object EVENT_INVITES       extends EmailTopic
 
   val values: List[EmailTopic] = List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES, EVENT_INVITES)
+
+  def displayOrder(et: EmailTopic): Byte = et match {
+    case BUSINESS_AND_POLICY => 1
+    case TECHNICAL           => 2
+    case RELEASE_SCHEDULES   => 3
+    case EVENT_INVITES       => Byte.MaxValue
+  }
+
+  def displayName(et: EmailTopic): String = et match {
+    case BUSINESS_AND_POLICY => "Business and policy"
+    case TECHNICAL           => "Technical"
+    case RELEASE_SCHEDULES   => "Release schedules"
+    case EVENT_INVITES       => "Email invites"
+  }
+
+  def description(et: EmailTopic): String = et match {
+    case BUSINESS_AND_POLICY => "Policy compliance, legislative changes and business guidance support"
+    case TECHNICAL           => "Specifications, service guides, bug fixes and known errors"
+    case RELEASE_SCHEDULES   => "Notifications about planned releases and outages"
+    case EVENT_INVITES       => "Get invites to knowledge share events and user research opportunities"
+  }
 
   def apply(text: String): Option[EmailTopic] = EmailTopic.values.find(_.toString() == text.toUpperCase)
   def unsafeApply(text: String): EmailTopic   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid Email Topic"))
