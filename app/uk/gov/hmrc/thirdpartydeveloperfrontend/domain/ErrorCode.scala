@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
+import scala.collection.immutable.ListSet
+
 sealed trait ErrorCode
 
 object ErrorCode {
-  val values = List(LOCKED_ACCOUNT, BAD_REQUEST, INVALID_PASSWORD, PASSWORD_REQUIRED, USER_ALREADY_EXISTS)
+  val values: ListSet[ErrorCode] = ListSet(LOCKED_ACCOUNT, BAD_REQUEST, INVALID_PASSWORD, PASSWORD_REQUIRED, USER_ALREADY_EXISTS)
 
   final case object LOCKED_ACCOUNT      extends ErrorCode
   final case object BAD_REQUEST         extends ErrorCode

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
+import scala.collection.immutable.ListSet
+
 import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
@@ -26,7 +28,7 @@ object ApiType {
   case object REST_API extends ApiType
   case object XML_API  extends ApiType
 
-  val values = List(REST_API, XML_API)
+  val values: ListSet[ApiType] = ListSet(REST_API, XML_API)
 
   def apply(text: String): Option[ApiType] = ApiType.values.find(_.toString() == text.toUpperCase)
 

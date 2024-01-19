@@ -18,6 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.mfa.models
 
 import java.time.LocalDateTime
 import java.util.UUID
+import scala.collection.immutable.ListSet
 
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.play.json.Union
@@ -46,7 +47,7 @@ object MfaType {
     override def asText: String = "Text message"
   }
 
-  val values: List[MfaType] = List(AUTHENTICATOR_APP, SMS)
+  val values: ListSet[MfaType] = ListSet(AUTHENTICATOR_APP, SMS)
 
   def apply(text: String): Option[MfaType] = MfaType.values.find(_.toString() == text.toUpperCase)
   def unsafeApply(text: String): MfaType   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaType"))
@@ -92,7 +93,7 @@ object MfaAction {
   case object CREATE extends MfaAction
   case object REMOVE extends MfaAction
 
-  val values: List[MfaAction] = List(CREATE, REMOVE)
+  val values: ListSet[MfaAction] = ListSet(CREATE, REMOVE)
 
   def apply(text: String): Option[MfaAction] = MfaAction.values.find(_.toString() == text.toUpperCase)
   def unsafeApply(text: String): MfaAction   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaAction"))

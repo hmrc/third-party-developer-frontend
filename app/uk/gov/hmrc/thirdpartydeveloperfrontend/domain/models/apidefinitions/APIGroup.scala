@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
+import scala.collection.immutable.ListSet
+
 sealed trait APIGroup
 
 object APIGroup {
-  val values = List(API, TEST_API, EXAMPLE)
+  val values: ListSet[APIGroup] = ListSet(API, TEST_API, EXAMPLE)
 
   final case object API      extends APIGroup
   final case object TEST_API extends APIGroup
