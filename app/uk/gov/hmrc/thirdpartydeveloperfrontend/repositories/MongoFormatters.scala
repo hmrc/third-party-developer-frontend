@@ -24,9 +24,8 @@ import uk.gov.hmrc.play.json.Union
 
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.CombinedApiJsonFormatters
 
-object MongoFormatters extends CombinedApiJsonFormatters {
+object MongoFormatters {
 
   implicit val dateFormat: Format[LocalDateTime]               = MongoJavatimeFormats.localDateTimeFormat
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
@@ -41,5 +40,4 @@ object MongoFormatters extends CombinedApiJsonFormatters {
     .and[NewApplicationEmailPreferencesFlowV2](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2.toString)
     .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString)
     .format
-
 }

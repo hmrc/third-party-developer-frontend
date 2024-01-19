@@ -110,7 +110,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     val topicsHeading = document.getElementById("topics-heading")
     topicsHeading.text shouldBe "Topics"
     for (topic <- emailPreferences.topics) {
-      val selectedTopicsCell = document.getElementById(s"topic-${topic.value}")
+      val selectedTopicsCell = document.getElementById(s"topic-${topic.toString}")
       selectedTopicsCell.text shouldBe topic.displayName
     }
 

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 
-import enumeratum.values.{StringEnum, StringEnumEntry, StringPlayJsonValueEnum}
-
 import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
@@ -38,29 +36,48 @@ object EmailPreferences {
   def noPreferences: EmailPreferences = EmailPreferences(List.empty, Set.empty)
 }
 
-sealed abstract class EmailTopic(val value: String, val displayName: String, val description: String, val displayOrder: Byte) extends StringEnumEntry
+sealed trait EmailTopic {
+  lazy val displayOrder = EmailTopic.displayOrder(this)
+  lazy val displayName  = EmailTopic.displayName(this)
+  lazy val description  = EmailTopic.description(this)
+}
 
-object EmailTopic extends StringEnum[EmailTopic] with StringPlayJsonValueEnum[EmailTopic] {
+object EmailTopic {
 
-  val values: IndexedSeq[EmailTopic] = findValues
+  case object BUSINESS_AND_POLICY extends EmailTopic
+  case object TECHNICAL           extends EmailTopic
+  case object RELEASE_SCHEDULES   extends EmailTopic
+  case object EVENT_INVITES       extends EmailTopic
 
-  case object BUSINESS_AND_POLICY
-      extends EmailTopic("BUSINESS_AND_POLICY", "Business and policy", "Policy compliance, legislative changes and business guidance support", 1)
+  val values: List[EmailTopic] = List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES, EVENT_INVITES)
 
-  case object TECHNICAL
-      extends EmailTopic("TECHNICAL", "Technical", "Specifications, service guides, bug fixes and known errors", 2)
+  def displayOrder(et: EmailTopic): Byte = et match {
+    case BUSINESS_AND_POLICY => 1
+    case TECHNICAL           => 2
+    case RELEASE_SCHEDULES   => 3
+    case EVENT_INVITES       => Byte.MaxValue
+  }
 
-  case object RELEASE_SCHEDULES
-      extends EmailTopic("RELEASE_SCHEDULES", "Release schedules", "Notifications about planned releases and outages", 3)
+  def displayName(et: EmailTopic): String = et match {
+    case BUSINESS_AND_POLICY => "Business and policy"
+    case TECHNICAL           => "Technical"
+    case RELEASE_SCHEDULES   => "Release schedules"
+    case EVENT_INVITES       => "Email invites"
+  }
 
-  case object EVENT_INVITES
-      extends EmailTopic(
-        "EVENT_INVITES",
-        "Event invites",
-        "Get invites to knowledge share events and user research opportunities",
-        Byte.MaxValue
-      ) // Event Invites is displayed separately, after the other topics
+  def description(et: EmailTopic): String = et match {
+    case BUSINESS_AND_POLICY => "Policy compliance, legislative changes and business guidance support"
+    case TECHNICAL           => "Specifications, service guides, bug fixes and known errors"
+    case RELEASE_SCHEDULES   => "Notifications about planned releases and outages"
+    case EVENT_INVITES       => "Get invites to knowledge share events and user research opportunities"
+  }
 
+  def apply(text: String): Option[EmailTopic] = EmailTopic.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): EmailTopic   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid Email Topic"))
+
+  import play.api.libs.json.Format
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
+  implicit val format: Format[EmailTopic] = SealedTraitJsonFormatting.createFormatFor[EmailTopic]("Email Topic", EmailTopic.apply)
 }
 
 // TODO - make category an APICategory

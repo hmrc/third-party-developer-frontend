@@ -99,7 +99,7 @@ class MfaController @Inject() (
   }
 
   private def setupSelectedMfa(mfaType: String) = {
-    MfaType.withNameInsensitive(mfaType) match {
+    MfaType.unsafeApply(mfaType) match {
       case SMS               => Future.successful(Redirect(routes.MfaController.setupSms))
       case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart))
     }
@@ -121,7 +121,7 @@ class MfaController @Inject() (
     thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
       case None                       => Future.successful(internalServerErrorTemplate("Unable to obtain user information"))
       case Some(developer: Developer) =>
-        val mfaType                = MfaType.withNameInsensitive(mfaTypeForAuthentication)
+        val mfaType                = MfaType.unsafeApply(mfaTypeForAuthentication)
         val mfaIdForAuthentication = getMfaDetailByType(mfaType, developer.mfaDetails).id
         authenticateToRemoveMfa(mfaType, mfaIdForAuthentication)
     }

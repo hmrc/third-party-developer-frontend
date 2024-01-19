@@ -54,8 +54,8 @@
         <div class="govuk-checkboxes " data-module="govuk-checkboxes">
           @for(topic <- List(BUSINESS_AND_POLICY, TECHNICAL, RELEASE_SCHEDULES).sortBy(_.displayOrder)) {
             <div class="govuk-checkboxes__item">
-              <input id="@topic.value" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@topic.value" @if(selectedTopics.contains(topic.value)) {checked} >
-              <label class="govuk-label govuk-checkboxes__label" for="@topic.value">
+              <input id="@topic.toString" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@topic.toString" @if(selectedTopics.contains(topic.toString)) {checked} >
+              <label class="govuk-label govuk-checkboxes__label" for="@topic.toString">
                 @topic.displayName
                 <div class="govuk-hint">
                   @topic.description
@@ -71,8 +71,8 @@
           <h2 class="govuk-heading-m">Get involved in user research and events</h2>
 
           <div class="govuk-checkboxes__item">
-            <input id="@EVENT_INVITES.value" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@EVENT_INVITES.value" @if(selectedTopics.contains(EVENT_INVITES.value)) {checked} >
-            <label class="govuk-label govuk-checkboxes__label" for="@EVENT_INVITES.value">
+            <input id="@EVENT_INVITES.toString" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@EVENT_INVITES.toString" @if(selectedTopics.contains(EVENT_INVITES.toString)) {checked} >
+            <label class="govuk-label govuk-checkboxes__label" for="@EVENT_INVITES.toString">
               @EVENT_INVITES.displayName
               <div class="govuk-hint">
                 @EVENT_INVITES.description

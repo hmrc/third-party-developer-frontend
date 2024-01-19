@@ -477,7 +477,7 @@ class EmailPreferencesControllerSpec
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
 
-      val expectedSelectedTopics: Set[String] = session.developer.emailPreferences.topics.map(_.value)
+      val expectedSelectedTopics: Set[String] = session.developer.emailPreferences.topics.map(_.toString)
       val emailFlow: EmailPreferencesFlowV2   = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
         .copy(selectedTopics = expectedSelectedTopics)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))

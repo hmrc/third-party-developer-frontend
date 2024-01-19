@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import enumeratum.{EnumEntry, PlayEnum}
+import scala.collection.immutable.ListSet
 
-sealed trait TermsOfUseStatus extends EnumEntry
+sealed trait TermsOfUseStatus
 
-object TermsOfUseStatus extends PlayEnum[TermsOfUseStatus] {
-  val values = findValues
-
+object TermsOfUseStatus {
   final case object NOT_APPLICABLE     extends TermsOfUseStatus
   final case object AGREEMENT_REQUIRED extends TermsOfUseStatus
   final case object AGREED             extends TermsOfUseStatus
+
+  val values: ListSet[TermsOfUseStatus] = ListSet(NOT_APPLICABLE, AGREEMENT_REQUIRED, AGREED)
 }

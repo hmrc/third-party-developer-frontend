@@ -87,7 +87,7 @@ object SelectMfaForm {
   )
 
   def verifyMfaType(mfaType: String) = {
-    MfaType.values.exists(v => v.entryName.equalsIgnoreCase(mfaType))
+    MfaType.values.exists(v => v.toString().equalsIgnoreCase(mfaType))
   }
 }
 

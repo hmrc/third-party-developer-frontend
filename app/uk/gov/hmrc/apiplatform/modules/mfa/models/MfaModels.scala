@@ -18,9 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.mfa.models
 
 import java.time.LocalDateTime
 import java.util.UUID
-import scala.collection.immutable
-
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import scala.collection.immutable.ListSet
 
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.play.json.Union
@@ -35,12 +33,11 @@ object MfaId {
   implicit val mfaIdFormat: Format[MfaId] = Json.valueFormat[MfaId]
 }
 
-sealed trait MfaType extends EnumEntry {
+sealed trait MfaType {
   def asText: String
 }
 
-object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
-  val values: immutable.IndexedSeq[MfaType] = findValues
+object MfaType {
 
   case object AUTHENTICATOR_APP extends MfaType {
     override def asText: String = "Authenticator app"
@@ -50,6 +47,10 @@ object MfaType extends Enum[MfaType] with PlayJsonEnum[MfaType] {
     override def asText: String = "Text message"
   }
 
+  val values: ListSet[MfaType] = ListSet(AUTHENTICATOR_APP, SMS)
+
+  def apply(text: String): Option[MfaType] = MfaType.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): MfaType   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaType"))
 }
 
 sealed trait MfaDetail {
@@ -86,12 +87,14 @@ object MfaDetailFormats {
 
 }
 
-sealed trait MfaAction extends EnumEntry
+sealed trait MfaAction
 
-object MfaAction extends Enum[MfaAction] with PlayJsonEnum[MfaAction] {
-  val values: immutable.IndexedSeq[MfaAction] = findValues
-
+object MfaAction {
   case object CREATE extends MfaAction
-
   case object REMOVE extends MfaAction
+
+  val values: ListSet[MfaAction] = ListSet(CREATE, REMOVE)
+
+  def apply(text: String): Option[MfaAction] = MfaAction.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): MfaAction   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaAction"))
 }

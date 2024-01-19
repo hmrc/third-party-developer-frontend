@@ -16,16 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import enumeratum.{EnumEntry, PlayEnum}
+import scala.collection.immutable.ListSet
 
-sealed trait ErrorCode extends EnumEntry
+sealed trait ErrorCode
 
-object ErrorCode extends PlayEnum[ErrorCode] {
-  val values = findValues
+object ErrorCode {
+  val values: ListSet[ErrorCode] = ListSet(LOCKED_ACCOUNT, BAD_REQUEST, INVALID_PASSWORD, PASSWORD_REQUIRED, USER_ALREADY_EXISTS)
 
   final case object LOCKED_ACCOUNT      extends ErrorCode
   final case object BAD_REQUEST         extends ErrorCode
   final case object INVALID_PASSWORD    extends ErrorCode
   final case object PASSWORD_REQUIRED   extends ErrorCode
   final case object USER_ALREADY_EXISTS extends ErrorCode
+
+  def apply(text: String): Option[ErrorCode] = ErrorCode.values.find(_.toString() == text.toUpperCase)
+
+  import play.api.libs.json.Format
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
+  implicit val format: Format[ErrorCode] = SealedTraitJsonFormatting.createFormatFor[ErrorCode]("Error Code", ErrorCode.apply)
 }

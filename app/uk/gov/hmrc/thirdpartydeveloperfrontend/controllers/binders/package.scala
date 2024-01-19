@@ -178,7 +178,7 @@ package object binders {
         mfaType <- textBinder.bind("mfaType", params)
       } yield {
         mfaType match {
-          case Right(mfaType) => Right(MfaType.withNameInsensitive(mfaType))
+          case Right(mfaType) => Right(MfaType.unsafeApply(mfaType))
           case _              => Left("Unable to bind Mfa Type")
         }
       }
@@ -196,7 +196,7 @@ package object binders {
         mfaAction <- textBinder.bind("mfaAction", params)
       } yield {
         mfaAction match {
-          case Right(mfaAction) => Right(MfaAction.withNameInsensitive(mfaAction))
+          case Right(mfaAction) => Right(MfaAction.unsafeApply(mfaAction))
           case _                => Left("Unable to bind Mfa Action")
         }
       }

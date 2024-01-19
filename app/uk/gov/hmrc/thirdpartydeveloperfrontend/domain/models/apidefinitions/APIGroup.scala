@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import enumeratum.{EnumEntry, PlayEnum}
+import scala.collection.immutable.ListSet
 
-sealed trait APIGroup extends EnumEntry
+sealed trait APIGroup
 
-object APIGroup extends PlayEnum[APIGroup] {
-  val values = findValues
+object APIGroup {
+  val values: ListSet[APIGroup] = ListSet(API, TEST_API, EXAMPLE)
 
   final case object API      extends APIGroup
   final case object TEST_API extends APIGroup

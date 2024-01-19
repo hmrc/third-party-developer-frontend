@@ -7,7 +7,6 @@ object AppDependencies {
 
   lazy val cucumberVersion = "6.2.2"
   lazy val seleniumVersion = "4.2.0"
-  lazy val enumeratumVersion = "1.7.0"
   lazy val bootstrapVersion = "7.19.0"
   lazy val mongoVersion = "0.74.0"
 
@@ -23,8 +22,6 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "emailaddress"                       % "3.7.0",
     "uk.gov.hmrc"                 %% "play-conditional-form-mapping"      % "1.12.0-play-28",
     "commons-net"                 %  "commons-net"                        % "3.6",
-    "com.beachape"                %% "enumeratum"                         % enumeratumVersion,
-    "com.beachape"                %% "enumeratum-play"                    % enumeratumVersion,
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "commons-validator"           %  "commons-validator"                  % "1.7",
     "uk.gov.hmrc"                 %% "api-platform-api-domain"            % "0.11.0",
