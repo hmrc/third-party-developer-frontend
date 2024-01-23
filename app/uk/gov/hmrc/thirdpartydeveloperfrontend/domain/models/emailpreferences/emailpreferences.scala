@@ -62,7 +62,7 @@ object EmailTopic {
     case BUSINESS_AND_POLICY => "Business and policy"
     case TECHNICAL           => "Technical"
     case RELEASE_SCHEDULES   => "Release schedules"
-    case EVENT_INVITES       => "Email invites"
+    case EVENT_INVITES       => "Event invites"
   }
 
   def description(et: EmailTopic): String = et match {
