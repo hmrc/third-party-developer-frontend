@@ -18,31 +18,33 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.{Clock, LocalDateTime}
+import java.time.temporal.ChronoUnit.DAYS
+import java.time.{Clock, Instant, LocalDate}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
 
 object DateFormatter {
   val shortFormatter: DateTimeFormatter    = DateTimeFormatter.ofPattern("d MMM yyyy")
   val standardFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-  val initialLastAccessDate                = LocalDateTime.of(2019, 6, 25, 0, 0) // scalastyle:ignore magic.number
+  val initialLastAccessDate                = LocalDate.of(2019, 6, 25).toInstant // scalastyle:ignore magic.number
 
-  def formatDateWithShortPattern(dateTime: LocalDateTime): String = {
+  def formatDateWithShortPattern(dateTime: Instant): String = {
     shortFormatter.format(dateTime)
   }
 
-  def formatDate(dateTime: LocalDateTime): String = {
+  def formatDate(dateTime: Instant): String = {
     standardFormatter.format(dateTime)
   }
 
-  def formatLastAccessDate(maybeLastAccess: Option[LocalDateTime], createdOnDate: LocalDateTime, aClock: Clock): Option[String] = {
+  def formatLastAccessDate(maybeLastAccess: Option[Instant], createdOnDate: Instant, aClock: Clock): Option[String] = {
     val clk = new ClockNow { val clock = aClock }
 
-    def formatDateValue(lastAccessDate: LocalDateTime) = {
-      if (ChronoUnit.DAYS.between(initialLastAccessDate.toLocalDate, lastAccessDate.toLocalDate) > 0) {
+    def formatDateValue(lastAccessDate: Instant) = {
+      if (DAYS.between(initialLastAccessDate.truncatedTo(DAYS), lastAccessDate.truncatedTo(DAYS)) > 0) { // TODO API-6715: Should we truncate to DAYS?
         standardFormatter.format(lastAccessDate)
       } else {
-        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.toLocalDate, clk.now().toLocalDate)} months ago"
+        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.truncatedTo(DAYS), clk.instant().truncatedTo(DAYS))} months ago" // TODO API-6715: Should we truncate to DAYS?
       }
     }
     maybeLastAccess

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -38,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFiel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder {
+class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock {
 
   val apiContext: ApiContext       = ApiContext("sub-ser-test")
   val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
@@ -48,7 +49,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
   val clientId                     = ClientId("clientId")
 
   val application =
-    Application(applicationId, clientId, applicationName, LocalDateTime.now(), Some(LocalDateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+    Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
 
   trait Setup extends SubscriptionFieldsConnectorMock {
 
@@ -72,7 +73,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     ).thenReturn(
       Future.successful(
         Some(
-          Application(applicationId, clientId, "name", LocalDateTime.now(), Some(LocalDateTime.now()), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+          Application(applicationId, clientId, "name", instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
         )
       )
     )

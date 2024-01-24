@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,7 +56,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object Details {
-  case class Agreement(who: String, when: LocalDateTime)
+  case class Agreement(who: String, when: Instant)
 
   case class TermsOfUseViewModel(
       exists: Boolean,

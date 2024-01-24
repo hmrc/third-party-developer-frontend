@@ -16,7 +16,6 @@
 
 package views
 
-import java.time.LocalDateTime
 import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
@@ -32,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -42,10 +42,10 @@ class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperBuilder
+    with FixedClock {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
-  val now                 = LocalDateTime.now()
 
   trait Setup {
 
@@ -60,8 +60,8 @@ class SubscriptionsSpec extends CommonViewSpec
     ApplicationId.random,
     ClientId("Test Application Client ID"),
     "Test Application",
-    now,
-    Some(now),
+    instant,
+    Some(instant),
     None,
     grantLength,
     environment,
@@ -74,14 +74,14 @@ class SubscriptionsSpec extends CommonViewSpec
 
   "Subscriptions page" should {
     val developer = buildDeveloperWithRandomId("Test".toLaxEmail, "Test", "Test", None).loggedIn
-    val baseState = ApplicationState(State.PRODUCTION, Some("somebody@example.com"), Some("somebody"), Some(""), now)
+    val baseState = ApplicationState(State.PRODUCTION, Some("somebody@example.com"), Some("somebody"), Some(""), instant)
 
     val productionApplicationPendingGatekeeperApproval    = buildApplication(baseState.copy(name = State.PENDING_GATEKEEPER_APPROVAL), Environment.PRODUCTION)
     val productionApplicationPendingRequesterVerification = buildApplication(baseState.copy(name = State.PENDING_REQUESTER_VERIFICATION), Environment.PRODUCTION)
     val productionApplication                             = buildApplication(baseState, Environment.PRODUCTION)
-    val productionApplicationTesting                      = buildApplication(ApplicationState(updatedOn = now), Environment.PRODUCTION)
+    val productionApplicationTesting                      = buildApplication(ApplicationState(updatedOn = instant), Environment.PRODUCTION)
 
-    val sandboxApplicationTesting = buildApplication(ApplicationState(updatedOn = now), Environment.SANDBOX)
+    val sandboxApplicationTesting = buildApplication(ApplicationState(updatedOn = instant), Environment.SANDBOX)
 
     def renderPageForApplicationAndRole(application: Application, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(

@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
-trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
+trait ApplicationsJsonFormatters extends InstantFormatters {
   import play.api.libs.json._
 
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -30,7 +30,7 @@ trait ApplicationsJsonFormatters extends LocalDateTimeFormatters {
   implicit val keyReadsFieldName: KeyReads[FieldName]   = key => JsSuccess(FieldName(key))
   implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
-  object TOUAHelper extends LocalDateTimeFormatters {
+  object TOUAHelper extends InstantFormatters {
 
     val formatTOUA: OFormat[TermsOfUseAgreement] = Json.format[TermsOfUseAgreement]
   }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -50,7 +50,7 @@ object ManageResponsibleIndividualController {
       userIsResponsibleIndividual: Boolean
     )
 
-  def formatDateTime(localDateTime: LocalDateTime) = localDateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+  def formatDateTime(timestamp: Instant) = DateTimeFormatter.ofPattern("d MMMM yyyy").format(timestamp)
 }
 
 @Singleton

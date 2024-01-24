@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
@@ -279,7 +278,7 @@ class QuestionControllerSpec
         "bob@example.com",
         SubmissionId.random,
         applicationId,
-        LocalDateTime.now(ZoneOffset.UTC),
+        instant,
         testGroups,
         testQuestionIdsOfInterest,
         standardContext
@@ -304,7 +303,7 @@ class QuestionControllerSpec
         "bob@example.com",
         SubmissionId.random,
         applicationId,
-        LocalDateTime.now(ZoneOffset.UTC),
+        instant,
         testGroups,
         testQuestionIdsOfInterest,
         standardContext

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
@@ -25,6 +25,7 @@ import play.api.http.Status
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -32,7 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class ConnectorsWrapperSpec extends AsyncHmrcSpec {
+class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock {
 
   val mockAppConfig = mock[ApplicationConfig]
 
@@ -78,8 +79,8 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
       productionApplicationId,
       productionClientId,
       "name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -92,8 +93,8 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec {
     sandboxApplicationId,
     sandboxClientId,
     "name",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    instant,
+    Some(instant),
     None,
     grantLength,
     Environment.SANDBOX,

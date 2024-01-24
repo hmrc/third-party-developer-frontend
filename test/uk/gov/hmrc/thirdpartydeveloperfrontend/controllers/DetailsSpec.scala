@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future._
@@ -808,7 +807,7 @@ class DetailsSpec
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
-        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com".toLaxEmail, Some("Timmy Test"), LocalDateTime.now, None))
+        returnAgreementDetails(TermsOfUseAgreementDetails("test@example.com".toLaxEmail, Some("Timmy Test"), instant, None))
       } else {
         returnAgreementDetails()
       }

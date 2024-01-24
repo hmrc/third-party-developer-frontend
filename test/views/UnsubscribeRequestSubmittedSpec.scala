@@ -16,8 +16,6 @@
 
 package views
 
-import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.UnsubscribeRequestSubmittedView
@@ -46,7 +44,6 @@ class UnsubscribeRequestSubmittedSpec extends CommonViewSpec with WithCSRFAddTok
       val apiVersion  = ApiVersionNbr("1.0")
       val clientId    = ClientId("clientId123")
       val developer   = buildDeveloperWithRandomId("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
-      val now         = LocalDateTime.now(ZoneOffset.UTC)
       val application = sampleApp
 
       val unsubscribeRequestSubmittedView = app.injector.instanceOf[UnsubscribeRequestSubmittedView]

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -35,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberSer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
-class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with AppsByTeamMemberServiceMock {
+class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker with AppsByTeamMemberServiceMock with FixedClock {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -65,8 +66,8 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
           applicationId,
           clientId,
           "myName",
-          LocalDateTime.now,
-          Some(LocalDateTime.now),
+          instant,
+          Some(instant),
           None,
           grantLength,
           Environment.PRODUCTION,
@@ -81,8 +82,8 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
           applicationId,
           clientId,
           "myName",
-          LocalDateTime.now,
-          Some(LocalDateTime.now),
+          instant,
+          Some(instant),
           None,
           grantLength,
           Environment.PRODUCTION,

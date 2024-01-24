@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.Instant
+import java.time.temporal.ChronoUnit.SECONDS
 import scala.util.Random
 
 import cats.data.NonEmptyList
@@ -28,34 +29,34 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
-trait StatusTestDataHelper {
+trait StatusTestDataHelper extends FixedClock {
 
   implicit class StatusHistorySyntax(submission: Submission) {
 
     def hasCompletelyAnsweredWith(answers: Submission.AnswersToQuestions): Submission = {
       (
-        Submission.addStatusHistory(Submission.Status.Answering(LocalDateTime.now(ZoneOffset.UTC), true)) andThen
+        Submission.addStatusHistory(Submission.Status.Answering(instant, true)) andThen
           Submission.updateLatestAnswersTo(answers)
       )(submission)
     }
 
     def hasCompletelyAnswered: Submission = {
-      Submission.addStatusHistory(Submission.Status.Answering(LocalDateTime.now(ZoneOffset.UTC), true))(submission)
+      Submission.addStatusHistory(Submission.Status.Answering(instant, true))(submission)
     }
 
     def answeringWith(answers: Submission.AnswersToQuestions): Submission = {
       (
-        Submission.addStatusHistory(Submission.Status.Answering(LocalDateTime.now(ZoneOffset.UTC), false)) andThen
+        Submission.addStatusHistory(Submission.Status.Answering(instant, false)) andThen
           Submission.updateLatestAnswersTo(answers)
       )(submission)
     }
 
     def answering: Submission = {
-      Submission.addStatusHistory(Submission.Status.Answering(LocalDateTime.now(ZoneOffset.UTC), false))(submission)
+      Submission.addStatusHistory(Submission.Status.Answering(instant, false))(submission)
     }
 
     def submitted: Submission = {
-      Submission.submit(LocalDateTime.now(ZoneOffset.UTC), "bob@example.com")(submission)
+      Submission.submit(instant, "bob@example.com")(submission)
     }
   }
 }
@@ -98,11 +99,11 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
     AskWhen.Context.Keys.VAT_OR_ITSA       -> "No"
   )
 
-  val aSubmission = Submission.create("bob@example.com", submissionId, applicationId, now(), testGroups, testQuestionIdsOfInterest, standardContext)
+  val aSubmission = Submission.create("bob@example.com", submissionId, applicationId, instant, testGroups, testQuestionIdsOfInterest, standardContext)
 
   val altSubmissionId = SubmissionId.random
   require(altSubmissionId != submissionId)
-  val altSubmission   = Submission.create("bob@example.com", altSubmissionId, applicationId, now().plusSeconds(100), testGroups, testQuestionIdsOfInterest, standardContext)
+  val altSubmission   = Submission.create("bob@example.com", altSubmissionId, applicationId, instant.plus(100, SECONDS), testGroups, testQuestionIdsOfInterest, standardContext)
 
   val completedSubmissionId = SubmissionId.random
   require(completedSubmissionId != submissionId)
@@ -118,9 +119,9 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   val createdSubmission   = aSubmission
   val answeringSubmission = createdSubmission.answeringWith(answersToQuestions)
   val answeredSubmission  = createdSubmission.hasCompletelyAnsweredWith(answersToQuestions)
-  val submittedSubmission = Submission.submit(now(), "bob@example.com")(answeredSubmission)
-  val declinedSubmission  = Submission.decline(now(), gatekeeperUserName, reasons)(submittedSubmission)
-  val grantedSubmission   = Submission.grant(now(), gatekeeperUserName, None, None)(submittedSubmission)
+  val submittedSubmission = Submission.submit(instant, "bob@example.com")(answeredSubmission)
+  val declinedSubmission  = Submission.decline(instant, gatekeeperUserName, reasons)(submittedSubmission)
+  val grantedSubmission   = Submission.grant(instant, gatekeeperUserName, None, None)(submittedSubmission)
 
   def buildSubmissionWithQuestions(appId: ApplicationId = ApplicationId.random): Submission = {
     val subId = SubmissionId.random
@@ -167,7 +168,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
       "bob@example.com",
       subId,
       appId,
-      LocalDateTime.now(ZoneOffset.UTC),
+      instant,
       questionnaireGroups,
       QuestionIdsOfInterest(
         questionName.id,
@@ -312,7 +313,7 @@ trait MarkedSubmissionsTestData extends SubmissionsTestData with AnsweringQuesti
 
   val markedSubmission = MarkedSubmission(submittedSubmission, markedAnswers)
 
-  def markAsPass(now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC), requestedBy: String = "bob@example.com")(submission: Submission): MarkedSubmission = {
+  def markAsPass(now: Instant = instant, requestedBy: String = "bob@example.com")(submission: Submission): MarkedSubmission = {
     val answers = answersForGroups(Pass)(submission.groups)
     val marks   = answers.map { case (q, a) => q -> Pass }
 

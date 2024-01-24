@@ -16,7 +16,7 @@
 
 package views.include
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -25,12 +25,13 @@ import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
-class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown {
+class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with SharedMetricsClearDown with FixedClock {
 
   val appConfig = mock[ApplicationConfig]
 
@@ -42,8 +43,8 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Sha
         ApplicationId.random,
         ClientId("clientId123"),
         applicationName,
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        instant,
+        Some(instant),
         None,
         grantLength = Period.ofDays(547),
         Environment.PRODUCTION

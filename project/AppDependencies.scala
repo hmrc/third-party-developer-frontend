@@ -1,5 +1,4 @@
 import sbt._
-import play.core.PlayVersion
 import play.sbt.PlayImport._
 
 object AppDependencies {
@@ -8,7 +7,10 @@ object AppDependencies {
   lazy val cucumberVersion = "6.2.2"
   lazy val seleniumVersion = "4.2.0"
   lazy val bootstrapVersion = "7.19.0"
-  lazy val mongoVersion = "0.74.0"
+  lazy val mongoVersion = "1.7.0"
+  lazy val commonDomainVersion = "0.10.0"
+  lazy val apiDomainVersion = "0.11.0"
+  lazy val appDomainVersion = "0.33.0"
 
   val testScope = "test, it, component"
 
@@ -24,9 +26,9 @@ object AppDependencies {
     "commons-net"                 %  "commons-net"                        % "3.6",
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "commons-validator"           %  "commons-validator"                  % "1.7",
-    "uk.gov.hmrc"                 %% "api-platform-api-domain"            % "0.11.0",
-    "uk.gov.hmrc"                 %% "api-platform-application-domain"    % "0.32.0"
-
+    "uk.gov.hmrc"                 %% "api-platform-common-domain"         % commonDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-api-domain"            % apiDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-application-domain"    % appDomainVersion
   )
 
   lazy val test =  Seq(
@@ -38,9 +40,10 @@ object AppDependencies {
     "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
     "com.github.tomakehurst"      %  "wiremock-jre8-standalone"           % "2.33.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.15.4",
-    "org.scalatestplus"           %% "scalacheck-1-15"                    % "3.2.10.0"
-  ).map(_ % testScope) ++   
-  Seq(    
+    "org.scalatestplus"           %% "scalacheck-1-15"                    % "3.2.10.0",
+    "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion
+  ).map(_ % testScope) ++
+  Seq(
     "io.cucumber"                 %% "cucumber-scala"                     % cucumberVersion,
     "io.cucumber"                 %  "cucumber-junit"                     % cucumberVersion,
     "io.cucumber"                 %  "cucumber-java8"                     % cucumberVersion,

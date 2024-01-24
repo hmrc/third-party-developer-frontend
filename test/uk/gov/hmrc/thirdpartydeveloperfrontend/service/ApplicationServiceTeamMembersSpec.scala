@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
@@ -109,8 +109,8 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       productionApplicationId,
       productionClientId,
       "name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength = Period.ofDays(547),
       Environment.PRODUCTION,
@@ -125,8 +125,8 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       sandboxApplicationId,
       sandboxClientId,
       "name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength = Period.ofDays(547),
       Environment.SANDBOX,

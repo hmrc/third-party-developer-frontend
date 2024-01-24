@@ -16,8 +16,6 @@
 
 package views
 
-import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.DeletePrincipalApplicationCompleteView
@@ -47,7 +45,6 @@ class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSR
       val appId             = ApplicationId.random
       val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
-      val now               = LocalDateTime.now(ZoneOffset.UTC)
       val application       = sampleApp
 
       val page = deletePrincipalApplicationCompleteView.render(application, request, loggedInDeveloper, messagesProvider, appConfig)

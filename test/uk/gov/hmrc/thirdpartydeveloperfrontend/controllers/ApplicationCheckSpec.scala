@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit.MINUTES
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -74,8 +74,8 @@ class ApplicationCheckSpec
   val anotherCollaboratorEmail: LaxEmailAddress    = "collaborator@example.com".toLaxEmail
   val yetAnotherCollaboratorEmail: LaxEmailAddress = "collaborator2@example.com".toLaxEmail
 
-  val testing: ApplicationState         = ApplicationState(updatedOn = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1))
-  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now())
+  val testing: ApplicationState         = ApplicationState(updatedOn = instant.minus(1, MINUTES))
+  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
   val pendingApproval: ApplicationState = production.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
 
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(appId, clientId, exampleContext, ApiVersionNbr("api-example-microservice"))
@@ -119,14 +119,14 @@ class ApplicationCheckSpec
         appId,
         clientId,
         "App name 1",
-        now(),
-        Some(now()),
+        instant,
+        Some(instant),
         None,
         grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
         Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
+        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
         access = Access.Standard(
           redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
           termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -148,8 +148,8 @@ class ApplicationCheckSpec
       appId,
       clientId,
       appName,
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -195,8 +195,8 @@ class ApplicationCheckSpec
       appId,
       clientId,
       appName,
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -448,7 +448,7 @@ class ApplicationCheckSpec
     "show agree to terms of use step as complete when it has been done" in new Setup {
       def createApplication(): Application =
         createPartiallyConfigurableApplication(
-          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))))
+          checkInformation = Some(CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, instant, "1.0"))))
         )
 
       private val result = addToken(underTest.requestCheckPage(appId))(loggedInRequest)
@@ -491,7 +491,7 @@ class ApplicationCheckSpec
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+              termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, instant, "1.0"))
             )
           )
         )
@@ -517,7 +517,7 @@ class ApplicationCheckSpec
               providedPrivacyPolicyURL = true,
               providedTermsAndConditionsURL = true,
               teamConfirmed = true,
-              termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0"))
+              termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, instant, "1.0"))
             )
           )
         )
@@ -1427,7 +1427,7 @@ class ApplicationCheckSpec
     }
   }
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, "name", now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, "name", instant)
 
   private def stepRequiredIndication(id: String) = {
     s"""<div id="$id" class="step-status status-incomplete">To do</div>"""

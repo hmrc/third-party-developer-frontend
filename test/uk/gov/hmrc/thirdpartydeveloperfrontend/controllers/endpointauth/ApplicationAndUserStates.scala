@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import java.time.{LocalDateTime, Period}
+import java.time.{Instant, LocalDate, Period}
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -33,6 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
@@ -45,13 +46,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId: ApplicationId = ApplicationId.random
   val submissionId: SubmissionId   = SubmissionId.random
   val clientId: ClientId           = ClientId.random
   val applicationName              = "my app"
-  val createdOn: LocalDateTime     = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
+  val createdOn: Instant           = LocalDate.of(2020, 1, 1).toInstant
 
   def describeApplication: String
   def access: Access
@@ -116,12 +118,12 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
   lazy val groupOfQuestionnaires: GroupOfQuestionnaires     = GroupOfQuestionnaires("heading", NonEmptyList.one(questionnaire))
   lazy val answersToQuestions: Map[Question.Id, TextAnswer] = Map(question.id -> TextAnswer("yes"))
-  lazy val submissionInstance: Submission.Instance          = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(LocalDateTime.now, "mr jones", None, None)))
+  lazy val submissionInstance: Submission.Instance          = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(instant, "mr jones", None, None)))
 
   lazy val submission: Submission                       = Submission(
     SubmissionId.random,
     applicationId,
-    LocalDateTime.now,
+    instant,
     NonEmptyList.one(groupOfQuestionnaires),
     questionIdsOfInterest,
     NonEmptyList.one(submissionInstance),
@@ -197,7 +199,7 @@ trait IsOldJourneyStandardApplication extends HasApplication {
     providedTermsAndConditionsURL = true,
     applicationDetails = None,
     teamConfirmed = true,
-    termsOfUseAgreements = List(TermsOfUseAgreement(userEmail, LocalDateTime.now(), "1.0"))
+    termsOfUseAgreements = List(TermsOfUseAgreement(userEmail, instant, "1.0"))
   ))
 }
 
@@ -325,21 +327,21 @@ trait AppDeployedToSandboxEnvironment extends HasAppDeploymentEnvironment {
   def environment: Environment = Environment.SANDBOX
 }
 
-trait HasAppState {
+trait HasAppState extends FixedClock {
   def describeAppState = s"in state ${state.name}"
   def state: ApplicationState
 }
 
 trait AppHasProductionStatus extends HasAppState {
-  def state: ApplicationState = ApplicationState(State.PRODUCTION, Some("requester@example.com"), Some("mr requester"), Some("code123"), LocalDateTime.now())
+  def state: ApplicationState = ApplicationState(State.PRODUCTION, Some("requester@example.com"), Some("mr requester"), Some("code123"), instant)
 }
 
 trait AppHasPendingGatekeeperApprovalStatus extends HasAppState {
-  def state: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("requester@example.com"), Some("mr requester"), None, LocalDateTime.now())
+  def state: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("requester@example.com"), Some("mr requester"), None, instant)
 }
 
 trait AppHasTestingStatus extends HasAppState {
-  def state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now())
+  def state: ApplicationState = ApplicationState(updatedOn = instant)
 }
 
 trait UpdatesRequest {

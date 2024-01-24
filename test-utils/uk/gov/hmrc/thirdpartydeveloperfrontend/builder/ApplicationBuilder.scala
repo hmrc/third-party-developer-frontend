@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import java.util.UUID.randomUUID
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
@@ -41,8 +41,8 @@ trait ApplicationBuilder extends CollaboratorTracker with FixedClock with Applic
       appId,
       clientId,
       s"${appId.toString()}-name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength = Period.ofDays(547),
       Environment.SANDBOX,

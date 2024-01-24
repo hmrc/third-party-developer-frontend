@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -75,14 +74,14 @@ class ManageSubscriptionsSpec
     appId,
     clientId,
     "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    instant,
+    Some(instant),
     None,
     grantLength,
     Environment.SANDBOX,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asCollaborator(role)),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
     access = Access.Standard(
       redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
       termsAndConditionsUrl = Some("http://tnc-url.com")
@@ -854,5 +853,5 @@ class ManageSubscriptionsSpec
     }
   }
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 }

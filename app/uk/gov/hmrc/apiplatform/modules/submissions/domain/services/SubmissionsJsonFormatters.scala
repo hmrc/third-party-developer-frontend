@@ -20,9 +20,9 @@ import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
 
-trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with LocalDateTimeFormatters {
+trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with InstantFormatters {
   implicit val keyReadsQuestionnaireId: KeyReads[Questionnaire.Id]   = key => JsSuccess(Questionnaire.Id(key))
   implicit val keyWritesQuestionnaireId: KeyWrites[Questionnaire.Id] = _.value
 

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import scala.concurrent.Future
 import scala.io.Source
 
@@ -103,11 +103,11 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
   when(apmConnector.fetchCombinedApi(*[ServiceName])(*)).thenReturn(Future.successful(Right(CombinedApi(ServiceName("my service"), "my service display name", List.empty, REST_API))))
   when(tpaSandboxConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(
-    List(ClientSecretResponse(s1Id, "s1name", LocalDateTime.now(), None)),
+    List(ClientSecretResponse(s1Id, "s1name", instant, None)),
     "secret"
   )))
   when(tpaProductionConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationToken(
-    List(ClientSecretResponse(s1Id, "s1name", LocalDateTime.now(), None)),
+    List(ClientSecretResponse(s1Id, "s1name", instant, None)),
     "secret"
   )))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.models
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import scala.collection.immutable.ListSet
 
@@ -57,18 +57,18 @@ sealed trait MfaDetail {
   val id: MfaId
   val name: String
   def mfaType: MfaType
-  def createdOn: LocalDateTime
+  def createdOn: Instant
   def verified: Boolean
 }
 
-case class AuthenticatorAppMfaDetailSummary(override val id: MfaId, override val name: String, override val createdOn: LocalDateTime, verified: Boolean = false) extends MfaDetail {
+case class AuthenticatorAppMfaDetailSummary(override val id: MfaId, override val name: String, override val createdOn: Instant, verified: Boolean = false) extends MfaDetail {
   override val mfaType: MfaType = MfaType.AUTHENTICATOR_APP
 }
 
 case class SmsMfaDetailSummary(
     override val id: MfaId = MfaId.random,
     override val name: String,
-    override val createdOn: LocalDateTime,
+    override val createdOn: Instant,
     mobileNumber: String,
     verified: Boolean = false
   ) extends MfaDetail {

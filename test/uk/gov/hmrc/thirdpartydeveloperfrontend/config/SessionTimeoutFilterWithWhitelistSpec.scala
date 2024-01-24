@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import java.time.{Duration, Instant}
+import java.time.Duration
+import java.time.temporal.ChronoUnit.SECONDS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -29,9 +30,10 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
 
-class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
+class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with FixedClock {
 
   trait Setup {
     implicit val m: Materializer = app.materializer
@@ -52,9 +54,9 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
       Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
     })
 
-    def now                   = Instant.now()
+    def now                   = instant
     def nowInMillis: String   = now.toEpochMilli.toString
-    def twoSecondsAgo: String = now.minusSeconds(2).toEpochMilli.toString
+    def twoSecondsAgo: String = now.minus(2, SECONDS).toEpochMilli.toString
   }
 
   "when there is an active session, apply" should {

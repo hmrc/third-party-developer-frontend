@@ -16,7 +16,7 @@
 
 package views.include
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit.DAYS
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -30,6 +30,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -43,7 +44,8 @@ class LeftHandNavSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with DeveloperTestData
+    with FixedClock {
 
   trait Setup {
     val leftHandNavView: LeftHandNav = app.injector.instanceOf[LeftHandNav]
@@ -56,20 +58,18 @@ class LeftHandNavSpec extends CommonViewSpec
 
     val loggedInDeveloper: DeveloperSession = standardDeveloper.loggedIn
 
-    val now: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
-
     val application: Application = Application(
       applicationId,
       clientId,
       applicationName,
-      now,
-      Some(now),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
       access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
@@ -120,7 +120,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields: ApplicationViewModel =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = false, hasPpnsFields = false)
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS)), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page: Html                                    = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
@@ -150,7 +150,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields: ApplicationViewModel =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minusDays(1)), hasSubscriptionsFields = true, hasPpnsFields = false)
+          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS)), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page: Html                                 = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")

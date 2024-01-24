@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
+package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
-import play.api.libs.json.{EnvReads, EnvWrites, Format}
+object InstantConversion {
 
-trait LocalDateTimeFormatters extends EnvReads with EnvWrites {
+  implicit class ConvertFromLocalDateTime(localDateTime: LocalDateTime) {
+    def toInstant: Instant = localDateTime.toInstant(ZoneOffset.UTC)
+  }
 
-  implicit val dateFormat: Format[LocalDateTime] = Format(DefaultLocalDateTimeReads, DefaultLocalDateTimeWrites)
+  implicit class ConvertFromLocalDate(localDate: LocalDate) {
+    def toInstant: Instant = localDate.atTime(0, 0).toInstant(ZoneOffset.UTC)
+  }
+
 }

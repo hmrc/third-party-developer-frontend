@@ -16,8 +16,9 @@
 
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
-@import java.time.format.DateTimeFormatter;
-@import java.time.LocalDateTime;
+@import java.time.format.DateTimeFormatter
+@import java.time.LocalDate
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
 
 @this()
 @(mfaDetails: List[MfaDetail])()
@@ -34,7 +35,7 @@
                         @{mfaDetail.name}<br>
                     }
 
-                    @if(mfaDetail.createdOn.isAfter(LocalDateTime.of(2022,8,1,0,0))) {
+                    @if(mfaDetail.createdOn.isAfter(LocalDate.of(2022,8,1).toInstant)) {
                         <span class="govuk-hint" id="date-hint-@{
                             idx
                         }">Added @DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").format(mfaDetail.createdOn)</span>

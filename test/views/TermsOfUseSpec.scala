@@ -16,8 +16,8 @@
 
 package views
 
+import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, Period, ZoneOffset}
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
@@ -29,6 +29,7 @@ import play.twirl.api.HtmlFormat.Appendable
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, CheckInformation, State, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
@@ -41,7 +42,8 @@ class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperBuilder
+    with FixedClock {
 
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -62,18 +64,17 @@ class TermsOfUseSpec extends CommonViewSpec
     val id          = ApplicationId.random
     val clientId    = ClientId("clientId")
     val appName     = "an application"
-    val createdOn   = LocalDateTime.now(ZoneOffset.UTC)
-    val lastAccess  = Some(LocalDateTime.now(ZoneOffset.UTC))
+    val createdOn   = instant
+    val lastAccess  = Some(instant)
     val grantLength = Period.ofDays(547)
     val deployedTo  = Environment.PRODUCTION
 
     "viewing an agreed application" should {
       trait Setup {
         val emailAddress      = "email@example.com".toLaxEmail
-        val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
-        val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
+        val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(instant)
         val version           = "1.0"
-        val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+        val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
         val application       = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page        =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))

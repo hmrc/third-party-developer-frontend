@@ -16,8 +16,6 @@
 
 package views.checkpages
 
-import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.checkpages.TermsOfUseView
@@ -29,6 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, CheckInformation, State, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
@@ -38,7 +37,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
+class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData
+    with FixedClock {
 
   val termsOfUse = app.injector.instanceOf[TermsOfUseView]
 
@@ -48,15 +48,15 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
         ApplicationId.random,
         ClientId("CLIENT_ID"),
         "APPLICATION NAME",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        instant,
+        Some(instant),
         None,
         grantLength,
         Environment.PRODUCTION,
         Some("APPLICATION DESCRIPTION"),
         Set("sample@example.com".toLaxEmail.asAdministratorCollaborator, "someone@example.com".toLaxEmail.asDeveloperCollaborator),
         Access.Standard(),
-        ApplicationState(State.TESTING, None, None, None, LocalDateTime.now(ZoneOffset.UTC))
+        ApplicationState(State.TESTING, None, None, None, instant)
       )
 
     "show terms of use agreement page that requires terms of use to be agreed" in {
@@ -90,7 +90,7 @@ class TermsOfUseSpec extends CommonViewSpec with WithCSRFAddToken with Collabora
       implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
       val appConfigMock       = mock[ApplicationConfig]
-      val termsOfUseAgreement = TermsOfUseAgreement("email@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0")
+      val termsOfUseAgreement = TermsOfUseAgreement("email@example.com".toLaxEmail, instant, "1.0")
 
       val checkInformation = CheckInformation(termsOfUseAgreements = List(termsOfUseAgreement))
 

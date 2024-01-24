@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, LocalDate}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,6 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTok
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -107,17 +108,15 @@ class Credentials @Inject() (
       name = secretValue.takeRight(4),
       id = ClientSecret.Id.random,
       hashedSecret = hashedSecret,
-      now()
+      instant()
     )
 
-    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).map { results =>
-      results match {
-        case Right(response)                                                                                          => Ok(clientSecretsGeneratedView(response.applicationResponse, applicationId, secretValue))
-        case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))                                             => NotFound(errorHandler.notFoundTemplate)
-        case Left(NonEmptyList(CommandFailures.GenericFailure("App is in PRODUCTION so User must be an ADMIN"), Nil)) => Forbidden(errorHandler.badRequestTemplate)
-        case Left(NonEmptyList(CommandFailures.ClientSecretLimitExceeded, Nil))                                       => UnprocessableEntity(errorHandler.badRequestTemplate)
-        case Left(failures: NonEmptyList[CommandFailure])                                                             => fails(applicationId)(failures)
-      }
+    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).map {
+      case Right(response)                                                                                          => Ok(clientSecretsGeneratedView(response.applicationResponse, applicationId, secretValue))
+      case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))                                             => NotFound(errorHandler.notFoundTemplate)
+      case Left(NonEmptyList(CommandFailures.GenericFailure("App is in PRODUCTION so User must be an ADMIN"), Nil)) => Forbidden(errorHandler.badRequestTemplate)
+      case Left(NonEmptyList(CommandFailures.ClientSecretLimitExceeded, Nil))                                       => UnprocessableEntity(errorHandler.badRequestTemplate)
+      case Left(failures: NonEmptyList[CommandFailure])                                                             => fails(applicationId)(failures)
     }
   }
 
@@ -136,7 +135,7 @@ class Credentials @Inject() (
       val cmd       = ApplicationCommands.RemoveClientSecret(
         actor = Actors.AppCollaborator(developer.email),
         clientSecretId,
-        now()
+        instant()
       )
       appCmdDispatcher.dispatch(applicationId, cmd, Set.empty)
         .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
@@ -144,5 +143,5 @@ class Credentials @Inject() (
 }
 
 object Credentials {
-  val serverTokenCutoffDate = LocalDateTime.of(2020, 4, 1, 0, 0) // scalastyle:ignore magic.number
+  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).toInstant // scalastyle:ignore magic.number
 }

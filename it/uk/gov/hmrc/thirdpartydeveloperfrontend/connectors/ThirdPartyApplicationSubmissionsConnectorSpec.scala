@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{LocalDateTime, ZoneOffset}
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -77,7 +76,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       SubmissionId.random,
       0,
       "App name",
-      LocalDateTime.now(ZoneOffset.UTC),
+      instant,
       ResponsibleIndividualVerificationState.INITIAL
     )
     val responsibleIndividual                             = ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail)

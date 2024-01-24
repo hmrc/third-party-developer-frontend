@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDate}
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -30,6 +30,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {
@@ -37,10 +38,10 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
   val securityPreferencesItemsView: SecurityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
 
   val authAppMfaDetail: AuthenticatorAppMfaDetailSummary =
-    AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), verified = true)
+    AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDate.of(2022, 9, 1).toInstant, verified = true)
 
   val smsMfaDetail: SmsMfaDetailSummary =
-    SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDateTime.of(2022, 9, 1, 0, 0), mobileNumber = "1234567890", verified = true)
+    SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDate.of(2022, 9, 1).toInstant, mobileNumber = "1234567890", verified = true)
 
   "SecurityPreferencesItems view" should {
 
@@ -52,7 +53,7 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
     }
 
     "show 'auth app row' when list contains only auth app mfa details with created on before migration date" in {
-      val authAppMfaDetailWithCreatedOnInPast = authAppMfaDetail.copy(createdOn = LocalDateTime.of(2022, 7, 20, 0, 0))
+      val authAppMfaDetailWithCreatedOnInPast = authAppMfaDetail.copy(createdOn = LocalDate.of(2022, 7, 20).toInstant)
       val mainView                            = securityPreferencesItemsView.apply(List(authAppMfaDetailWithCreatedOnInPast))()
       val document                            = Jsoup.parse(mainView.body)
       verifyMfaRow(document, authAppMfaDetailWithCreatedOnInPast, 0, shouldShowCreatedDate = false)

@@ -118,7 +118,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-    val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = now()), deployedTo = Environment.SANDBOX)
+    val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)

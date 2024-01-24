@@ -40,14 +40,14 @@ class RedirectsService @Inject() (
   }
 
   def addRedirect(actor: Actor, application: Application, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
-    issueCommand(application.id, ApplicationCommands.AddRedirectUri(actor, newRedirectUri, now()))
+    issueCommand(application.id, ApplicationCommands.AddRedirectUri(actor, newRedirectUri, instant()))
   }
 
   def changeRedirect(actor: Actor, application: Application, originalRedirectUri: RedirectUri, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
-    issueCommand(application.id, ApplicationCommands.ChangeRedirectUri(actor, originalRedirectUri, newRedirectUri, now()))
+    issueCommand(application.id, ApplicationCommands.ChangeRedirectUri(actor, originalRedirectUri, newRedirectUri, instant()))
   }
 
   def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: RedirectUri)(implicit hc: HeaderCarrier) = {
-    issueCommand(application.id, ApplicationCommands.DeleteRedirectUri(actor, redirectUriToDelete, now()))
+    issueCommand(application.id, ApplicationCommands.DeleteRedirectUri(actor, redirectUriToDelete, instant()))
   }
 }

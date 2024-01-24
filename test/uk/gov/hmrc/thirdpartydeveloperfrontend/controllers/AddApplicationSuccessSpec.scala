@@ -60,14 +60,14 @@ class AddApplicationSuccessSpec
     appId,
     clientId,
     "App name 1",
-    now(),
-    Some(now()),
+    instant,
+    Some(instant),
     None,
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
     access =
       Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -76,14 +76,14 @@ class AddApplicationSuccessSpec
     appId,
     clientId,
     "App name 2",
-    now(),
-    Some(now()),
+    instant,
+    Some(instant),
     None,
     grantLength,
     Environment.SANDBOX,
     Some("Description 2"),
     Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now()),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
     access =
       Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red3"), RedirectUri.unsafeApply("https://red4")), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

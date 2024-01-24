@@ -46,7 +46,7 @@
         @if(form("termsOfUseAgreed").value.contains("true")) {
           @defining(DateTimeFormatter.ofPattern("dd MMMM yyyy")) { dateFormatter =>
             <div class="govuk-inset-text">
-              Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress.text} on @{app.checkInformation.get.termsOfUseAgreements.head.timeStamp.format(dateFormatter)}.
+              Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress.text} on @{dateFormatter.format(app.checkInformation.get.termsOfUseAgreements.head.timeStamp)}.
             </div>
           }
         }

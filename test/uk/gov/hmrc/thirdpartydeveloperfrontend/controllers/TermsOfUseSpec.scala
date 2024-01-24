@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
@@ -87,19 +86,18 @@ class TermsOfUseSpec
         checkInformation: Option[CheckInformation] = None,
         access: Access = Access.Standard()
       ): Application = {
-      val now         = LocalDateTime.now(ZoneOffset.UTC)
       val application = Application(
         appId,
         ClientId("clientId"),
         "appName",
-        now,
-        Some(now),
+        instant,
+        Some(instant),
         None,
         grantLength,
         environment,
         collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
         access = access,
-        state = ApplicationState(State.PRODUCTION, Some("dont-care"), Some("dont-care"), Some("dont-care"), now),
+        state = ApplicationState(State.PRODUCTION, Some("dont-care"), Some("dont-care"), Some("dont-care"), instant),
         checkInformation = checkInformation
       )
 
@@ -139,11 +137,10 @@ class TermsOfUseSpec
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
       val email: LaxEmailAddress    = "email@exmaple.com".toLaxEmail
-      val timeStamp: LocalDateTime  = LocalDateTime.now(ZoneOffset.UTC)
-      val expectedTimeStamp: String = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
+      val expectedTimeStamp: String = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(instant)
       val version                   = "1.0"
 
-      val checkInformation: CheckInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, timeStamp, version)))
+      val checkInformation: CheckInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, instant, version)))
       returnTermsOfUseVersionForApplication
       givenApplicationExists(checkInformation = Some(checkInformation))
       val result: Future[Result]             = addToken(underTest.termsOfUse(appId))(loggedInRequest)
@@ -199,7 +196,7 @@ class TermsOfUseSpec
 
     "return a bad request if the app already has terms of use agreed" in new Setup {
       val checkInformation: CheckInformation =
-        CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("bob@example.com".toLaxEmail, LocalDateTime.now(ZoneOffset.UTC), "1.0")))
+        CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("bob@example.com".toLaxEmail, instant, "1.0")))
       givenApplicationExists(checkInformation = Some(checkInformation))
 
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

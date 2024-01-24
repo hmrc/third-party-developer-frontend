@@ -94,7 +94,7 @@ class CancelRequestController @Inject() (
     val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val reasons                            = "DevHub user cancelled request for production credentials"
     val instigator                         = request.userId
-    val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, now())
+    val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant())
 
     val x =
       (

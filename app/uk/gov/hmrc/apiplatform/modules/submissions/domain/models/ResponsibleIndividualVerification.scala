@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.models
 
-import java.time.LocalDateTime
+import java.time.Instant
 
-import play.api.libs.json.{Format, OFormat, Reads}
+import play.api.libs.json.{Format, OFormat}
 
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{SubmissionId, _}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -39,7 +39,7 @@ sealed trait ResponsibleIndividualVerification {
   def submissionId: SubmissionId
   def submissionInstance: Int
   def applicationName: String
-  def createdOn: LocalDateTime
+  def createdOn: Instant
   def state: ResponsibleIndividualVerificationState
 }
 
@@ -49,7 +49,7 @@ case class ResponsibleIndividualToUVerification(
     submissionId: SubmissionId,
     submissionInstance: Int,
     applicationName: String,
-    createdOn: LocalDateTime,
+    createdOn: Instant,
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 
@@ -59,7 +59,7 @@ case class ResponsibleIndividualTouUpliftVerification(
     submissionId: SubmissionId,
     submissionInstance: Int,
     applicationName: String,
-    createdOn: LocalDateTime,
+    createdOn: Instant,
     requestingAdminName: String,
     requestingAdminEmail: LaxEmailAddress,
     state: ResponsibleIndividualVerificationState
@@ -71,17 +71,16 @@ case class ResponsibleIndividualUpdateVerification(
     submissionId: SubmissionId,
     submissionInstance: Int,
     applicationName: String,
-    createdOn: LocalDateTime,
+    createdOn: Instant,
     responsibleIndividual: ResponsibleIndividual,
     requestingAdminName: String,
     requestingAdminEmail: LaxEmailAddress,
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 
-object ResponsibleIndividualVerification extends LocalDateTimeFormatters {
+object ResponsibleIndividualVerification extends InstantFormatters {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
-  implicit val utcReads: Reads[LocalDateTime] = DefaultLocalDateTimeReads
 
   implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification]                = Json.format[ResponsibleIndividualToUVerification]
   implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]

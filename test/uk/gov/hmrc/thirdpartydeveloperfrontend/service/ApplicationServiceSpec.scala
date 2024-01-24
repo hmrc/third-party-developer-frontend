@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
@@ -130,8 +130,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       productionApplicationId,
       productionClientId,
       "name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -146,8 +146,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       sandboxApplicationId,
       sandboxClientId,
       "name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.SANDBOX,
@@ -204,8 +204,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       applicationId,
       clientId,
       applicationName,
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -235,7 +235,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
       val newLocation = PrivacyPolicyLocations.Url("http://example.com")
-      val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, now(), newLocation)
+      val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant, newLocation)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updatePrivacyPolicyLocation(productionApplication, userId, newLocation))
@@ -248,7 +248,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
       val newLocation = TermsAndConditionsLocations.Url("http://example.com")
-      val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, now(), newLocation)
+      val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant, newLocation)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updateTermsConditionsLocation(productionApplication, userId, newLocation))
@@ -263,7 +263,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val riName        = "ri name"
       val riEmail       = "ri@example.com".toLaxEmail
       val requesterName = "ms admin"
-      val cmd           = ApplicationCommands.VerifyResponsibleIndividual(userId, now(), requesterName, riName, riEmail)
+      val cmd           = ApplicationCommands.VerifyResponsibleIndividual(userId, instant, requesterName, riName, riEmail)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
       val result        = await(applicationService.verifyResponsibleIndividual(productionApplication, userId, requesterName, riName, riEmail))
 
@@ -345,7 +345,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val expectedMessage    = "Only standard subordinate applications can be deleted by admins"
 
     "delete standard subordinate application when requested by an admin" in new Setup {
-      val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminRequester.developer.userId, reasons, now())
+      val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminRequester.developer.userId, reasons, instant)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       await(applicationService.deleteSubordinateApplication(adminRequester, sandboxApp))
@@ -478,7 +478,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val userId  = UserId.random
       val riName  = "Mr Responsible"
       val riEmail = "ri@example.com".toLaxEmail
-      val cmd     = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, now(), riName, riEmail)
+      val cmd     = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, instant, riName, riEmail)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updateResponsibleIndividual(productionApplication, userId, riName, riEmail))

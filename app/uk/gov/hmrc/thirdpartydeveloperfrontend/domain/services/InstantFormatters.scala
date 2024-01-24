@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.common.utils
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import java.time.temporal.ChronoUnit
-import java.time.{Clock, LocalDateTime, ZoneOffset}
+import java.time.Instant
 
-import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import play.api.libs.json.{EnvReads, EnvWrites, Format}
 
-trait FixedClock extends ClockNow {
+trait InstantFormatters extends EnvReads with EnvWrites {
 
-  private val utc: ZoneOffset = ZoneOffset.UTC
-
-  private val pointInTime: LocalDateTime = LocalDateTime.of(2020, 1, 2, 3, 4, 5, 6 * 1000 * 1000).truncatedTo(ChronoUnit.MILLIS)
-
-  lazy val clock: Clock = Clock.fixed(pointInTime.toInstant(utc), utc)
-
-  lazy val nowAsText: String = "2020-01-02T03:04:05.006Z"
+  implicit val dateFormat: Format[Instant] = Format(DefaultInstantReads, DefaultInstantWrites)
 }
-
-object FixedClock extends FixedClock

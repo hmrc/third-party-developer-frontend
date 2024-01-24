@@ -31,8 +31,8 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{TermsOfUseInvitationService, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
 class ManageApplications @Inject() (
@@ -48,7 +48,7 @@ class ManageApplications @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
-  ) extends LoggedInController(mcc) with LocalDateTimeFormatters {
+  ) extends LoggedInController(mcc) with InstantFormatters {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
     def getSubmission(applicationId: ApplicationId): Future[Option[Submission]] = {

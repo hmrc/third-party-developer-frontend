@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import java.util.UUID.randomUUID
 import scala.util.Random
 
@@ -66,8 +66,8 @@ trait TestApplications extends FixedClock with ApplicationStateHelper {
       id = appId,
       clientId = clientId,
       name = "App name 1",
-      createdOn = LocalDateTime.now(ZoneOffset.UTC),
-      lastAccess = Some(LocalDateTime.now(ZoneOffset.UTC)),
+      createdOn = instant,
+      lastAccess = Some(instant),
       grantLength = Period.ofDays(547),
       deployedTo = environment,
       description = Some("Description 1"),
@@ -112,7 +112,7 @@ trait TestApplications extends FixedClock with ApplicationStateHelper {
     ApplicationToken(List(aClientSecret()), accessToken)
   }
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, LocalDateTime.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 
   implicit class AppAugment(val app: Application) {
     final def withName(name: String): Application = app.copy(name = name)

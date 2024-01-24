@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -93,15 +93,15 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       appId,
       clientId,
       appName,
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       Period.ofDays(547),
       connector.environment,
       Some("Description"),
       Set("john@example.com".toLaxEmail.asAdministratorCollaborator),
       Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy")),
-      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"), None, now())
+      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"), None, instant)
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -434,5 +434,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   }
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, UUID.randomUUID.toString, FixedClock.now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, UUID.randomUUID.toString, FixedClock.instant)
 }

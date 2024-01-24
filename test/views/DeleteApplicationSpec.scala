@@ -16,8 +16,6 @@
 
 package views
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.DeleteApplicationView
