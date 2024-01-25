@@ -28,9 +28,11 @@ GET         /logout                                                             
 GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey
 POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction
 
-GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.raiseSupportEnquiry
+GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.raiseSupportEnquiry(useNewSupport: Boolean ?= false)
 POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.submitSupportEnquiry
 GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.thankyou
+
+POST        /new-support/choose                                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.chooseSupportOption
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked
 

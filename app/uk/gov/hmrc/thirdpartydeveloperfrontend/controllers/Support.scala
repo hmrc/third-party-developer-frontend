@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import views.html.support.LandingPageView
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
@@ -39,7 +40,8 @@ class Support @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     supportEnquiryView: SupportEnquiryView,
-    supportThankyouView: SupportThankyouView
+    supportThankyouView: SupportThankyouView,
+    landingPageView: LandingPageView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends BaseController(mcc) with ApplicationLogger {
@@ -49,13 +51,16 @@ class Support @Inject() (
   private def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
     request.developerSession.filter(_.loggedInState.isLoggedIn)
 
-  def raiseSupportEnquiry: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  def raiseSupportEnquiry(useNewSupport: Boolean): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val prefilledForm = fullyloggedInDeveloper
       .fold(supportForm) { user =>
         supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email.text)).discardingErrors
       }
-    Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
 
+    if (useNewSupport)
+      Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
+    else
+      Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
   }
 
   def submitSupportEnquiry = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
@@ -70,6 +75,10 @@ class Support @Inject() (
       },
       formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
     )
+  }
+
+  def chooseSupportOption: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), SupportEnquiryForm.form)))
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {

@@ -1,0 +1,98 @@
+@*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+
+@this(
+  devMain: DevMainWithFormErrors,
+  govukRadios: GovukRadios,
+  govukButton : GovukButton
+)
+
+@(loggedIn: Option[String], form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+
+@devMain(
+  form,
+  title = "Support",
+  userFullName = loggedIn,
+  breadcrumbs = Seq(
+    Crumb.home
+  ),
+  developerSession = None
+) {
+  @helper.form(action = routes.Support.chooseSupportOption) {
+    @helper.CSRF.formField
+    <span class="govuk-caption-l">Developer Hub support</span>
+    @govukRadios(
+      Radios(
+        fieldset = Some(
+          Fieldset(
+            legend = Some(
+              Legend(
+                content = Text("What do you need help with?"),
+                classes = "govuk-fieldset__legend--l",
+                isPageHeading = true
+              )
+            )
+          )
+        ),
+        name = "what-do-you-need-help-with",
+        items = Seq(
+          RadioItem(
+            id = Some("using-an-api"),
+            content = Text("Using an API"),
+            value = Some("api"),
+            hint = Some(
+              Hint(
+                content = Text("API calls, API documentation, service guides, roadmaps")
+              )
+            )
+          ), 
+          RadioItem(
+            id = Some("signing-into-account"),
+            content = Text("Signing in to my account"),
+            value = Some("account"),
+            hint = Some(
+              Hint(
+                content = Text("Forgotten password, access codes")
+              )
+            )
+          ), 
+          RadioItem(
+            id = Some("setting-up-application"),
+            content = Text("Setting up or managing an application"),
+            value = Some("application"),
+            hint = Some(
+              Hint(
+                content = Text("Terms of use agreement, giving team members access, general application details")
+              )
+            )
+          )
+        )
+      )
+    )
+
+    @govukButton(
+      Button(
+        id = Some("continue"),
+        content = Text("Continue")
+      )
+    )
+  }
+}
