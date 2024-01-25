@@ -21,6 +21,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 import org.jsoup.Jsoup
+import views.html.support.LandingPageView
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.mvc.{Request, Result}
@@ -42,8 +43,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
-    val supportEnquiryView  = app.injector.instanceOf[SupportEnquiryView]
-    val supportThankYouView = app.injector.instanceOf[SupportThankyouView]
+    val supportEnquiryView     = app.injector.instanceOf[SupportEnquiryView]
+    val supportThankYouView    = app.injector.instanceOf[SupportThankyouView]
+    val supportLandingPageView = app.injector.instanceOf[LandingPageView]
 
     val underTest = new Support(
       mock[DeskproService],
@@ -52,7 +54,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       mcc,
       cookieSigner,
       supportEnquiryView,
-      supportThankYouView
+      supportThankYouView,
+      supportLandingPageView
     )
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -61,6 +64,22 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
   }
 
   "support" should {
+    "render the new support landing page when a user is logged in" in new Setup {
+      val request = FakeRequest()
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession(sessionParams: _*)
+
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+
+      val result = addToken(underTest.raiseSupportEnquiry(true))(request)
+
+      status(result) shouldBe 200
+      val dom = Jsoup.parse(contentAsString(result))
+
+      dom.getElementById("using-an-api").attr("value") shouldEqual "api"
+      dom.getElementById("signing-into-account").attr("value") shouldEqual "account"
+      dom.getElementById("setting-up-application").attr("value") shouldEqual "application"
+    }
 
     "support form is prepopulated when user logged in" in new Setup {
       val request = FakeRequest()
@@ -69,7 +88,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-      val result = addToken(underTest.raiseSupportEnquiry())(request)
+      val result = addToken(underTest.raiseSupportEnquiry(false))(request)
 
       assertFullNameAndEmail(result, "John Doe", "thirdpartydeveloper@example.com")
     }
@@ -80,7 +99,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       fetchSessionByIdReturnsNone(sessionId)
 
-      val result = addToken(underTest.raiseSupportEnquiry())(request)
+      val result = addToken(underTest.raiseSupportEnquiry(false))(request)
       assertFullNameAndEmail(result, "", "")
     }
 
@@ -91,7 +110,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
 
-      val result = addToken(underTest.raiseSupportEnquiry())(request)
+      val result = addToken(underTest.raiseSupportEnquiry(false))(request)
 
       assertFullNameAndEmail(result, "", "")
     }
