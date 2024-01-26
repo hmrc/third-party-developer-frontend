@@ -26,7 +26,6 @@ object AppDependencies {
     "commons-net"                 %  "commons-net"                        % "3.6",
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "commons-validator"           %  "commons-validator"                  % "1.7",
-    "uk.gov.hmrc"                 %% "api-platform-common-domain"         % commonDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-api-domain"            % apiDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-application-domain"    % appDomainVersion
   )

@@ -16,6 +16,7 @@
 
 package views
 
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 import org.jsoup.Jsoup
@@ -246,7 +247,7 @@ class DetailsViewSpec
 
             "show agreement details and have no link to read when the terms of use have been agreed" in {
               val emailAddress      = "user@example.com".toLaxEmail
-              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(instant)
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
               val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
 
@@ -279,7 +280,7 @@ class DetailsViewSpec
 
             "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
               val emailAddress      = "user@example.com".toLaxEmail
-              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(instant)
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
               val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
 

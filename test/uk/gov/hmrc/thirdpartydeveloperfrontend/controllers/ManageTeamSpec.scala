@@ -105,8 +105,8 @@ class ManageTeamSpec
       val application   = aStandardApplication.copy(
         id = appId,
         collaborators = collaborators,
-        createdOn = Instant.parse("2018-04-06T09:00"),
-        lastAccess = Some(Instant.parse("2018-04-06T09:00"))
+        createdOn = Instant.parse("2018-04-06T09:00:00Z"),
+        lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       )
 
       givenApplicationAction(application, developerSession)

@@ -46,14 +46,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.LocalDateSyntax
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId: ApplicationId = ApplicationId.random
   val submissionId: SubmissionId   = SubmissionId.random
   val clientId: ClientId           = ClientId.random
   val applicationName              = "my app"
-  val createdOn: Instant           = LocalDate.of(2020, 1, 1).toInstant
+  val createdOn: Instant           = LocalDate.of(2020, 1, 1).asInstant
 
   def describeApplication: String
   def access: Access

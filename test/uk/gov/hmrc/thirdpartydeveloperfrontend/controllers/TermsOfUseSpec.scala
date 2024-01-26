@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -137,7 +138,7 @@ class TermsOfUseSpec
 
     "render the page for an administrator on a standard production app when the ToU have been agreed" in new Setup {
       val email: LaxEmailAddress    = "email@exmaple.com".toLaxEmail
-      val expectedTimeStamp: String = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(instant)
+      val expectedTimeStamp: String = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
       val version                   = "1.0"
 
       val checkInformation: CheckInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(email, instant, version)))

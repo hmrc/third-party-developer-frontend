@@ -117,8 +117,8 @@ class ManageResponsibleIndividualControllerSpec
           ))
         ),
         collaborators = teamMembers.toSet,
-        createdOn = Instant.parse("2018-04-06T09:00"),
-        lastAccess = Some(Instant.parse("2018-04-06T09:00"))
+        createdOn = Instant.parse("2018-04-06T09:00:00Z"),
+        lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       )
 
       givenApplicationAction(application, developerSession)
@@ -136,8 +136,8 @@ class ManageResponsibleIndividualControllerSpec
       givenTheApplicationExistWithUserRole(
         List(user),
         List(
-          TermsOfUseAcceptance(ResponsibleIndividual(FullName("Old RI"), "oldri@example.com".toLaxEmail), Instant.parse("2022-05-01T12:00:00"), SubmissionId.random, 0),
-          TermsOfUseAcceptance(responsibleIndividual, Instant.parse("2022-07-01T12:00:00"), SubmissionId.random, 0)
+          TermsOfUseAcceptance(ResponsibleIndividual(FullName("Old RI"), "oldri@example.com".toLaxEmail), Instant.parse("2022-05-01T12:00:00Z"), SubmissionId.random, 0),
+          TermsOfUseAcceptance(responsibleIndividual, Instant.parse("2022-07-01T12:00:00Z"), SubmissionId.random, 0)
         )
       )
 

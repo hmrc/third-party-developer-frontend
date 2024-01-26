@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import java.time.Period
-import java.time.temporal.ChronoUnit.YEARS
+import java.time.temporal.ChronoUnit.DAYS
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -53,7 +53,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     Set(ServerLocation.InUK),
     TermsAndConditionsLocations.InDesktopSoftware,
     PrivacyPolicyLocations.InDesktopSoftware,
-    List(TermsOfUseAcceptance(responsibleIndividual, instant.minus(1, YEARS), SubmissionId.random, 0))
+    List(TermsOfUseAcceptance(responsibleIndividual, instant.minus(365, DAYS), SubmissionId.random, 0))
   )
 
   describe("Application.canViewCredentials()") {

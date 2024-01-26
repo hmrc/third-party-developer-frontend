@@ -234,6 +234,7 @@ class CredentialsSpec
 
   "The server token page" should {
     val dateBeforeCutoff = Credentials.serverTokenCutoffDate.minus(1, DAYS)
+    val dateAfterCutoff  = Credentials.serverTokenCutoffDate.plus(1, DAYS)
 
     "be displayed for an app" in new Setup {
       def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateBeforeCutoff)
@@ -245,7 +246,7 @@ class CredentialsSpec
     }
 
     "return 404 for new apps" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = instant)
+      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateAfterCutoff)
 
       val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
 

@@ -34,7 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDateTime
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.LocalDateTimeSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
@@ -80,7 +80,7 @@ class DeletePrincipalApplicationSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    private val startOfDay: Instant = LocalDate.now.atStartOfDay().toInstant
+    private val startOfDay: Instant = LocalDate.now.atStartOfDay().asInstant
 
     val application = Application(
       appId,

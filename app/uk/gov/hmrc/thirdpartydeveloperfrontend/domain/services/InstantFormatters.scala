@@ -20,7 +20,10 @@ import java.time.Instant
 
 import play.api.libs.json.{EnvReads, EnvWrites, Format}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter
+
+// TODO APIS-6715 Move to api-platform-common-domain library?
 trait InstantFormatters extends EnvReads with EnvWrites {
 
-  implicit val dateFormat: Format[Instant] = Format(DefaultInstantReads, DefaultInstantWrites)
+  implicit val dateFormat: Format[Instant] = InstantJsonFormatter.WithTimeZone.instantWithTimeZoneFormat
 }

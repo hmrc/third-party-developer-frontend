@@ -18,14 +18,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
+// TODO APIS-6715 Move to api-platform-common-domain library?
 object InstantConversion {
 
-  implicit class ConvertFromLocalDateTime(localDateTime: LocalDateTime) {
-    def toInstant: Instant = localDateTime.toInstant(ZoneOffset.UTC)
+  implicit class LocalDateTimeSyntax(localDateTime: LocalDateTime) {
+    def asInstant: Instant = localDateTime.toInstant(ZoneOffset.UTC)
   }
 
-  implicit class ConvertFromLocalDate(localDate: LocalDate) {
-    def toInstant: Instant = localDate.atTime(0, 0).toInstant(ZoneOffset.UTC)
+  implicit class LocalDateSyntax(localDate: LocalDate) {
+    def asInstant: Instant = localDate.atTime(0, 0).toInstant(ZoneOffset.UTC)
+  }
+
+  implicit class InstantSyntax(instant: Instant) {
+    def asLocalDate: LocalDate = LocalDate.ofInstant(instant, ZoneOffset.UTC)
   }
 
 }

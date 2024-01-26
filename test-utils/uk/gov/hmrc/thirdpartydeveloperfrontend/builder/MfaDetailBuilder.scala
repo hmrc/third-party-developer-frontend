@@ -25,12 +25,10 @@ trait MfaDetailBuilder {
   val verifiedAuthenticatorAppMfaDetail = buildAuthenticatorAppMfaDetail(name = "Auth App", verified = true)
   val verifiedSmsMfaDetail              = buildSmsMfaDetail(name = "Text Message", mobileNumber = "0123456789", verified = true)
 
-  // TODO APIS-6715 Should the default be removed?
   def buildAuthenticatorAppMfaDetail(name: String, verified: Boolean, createdOn: Instant = Instant.now().truncatedTo(ChronoUnit.MILLIS)) = {
     AuthenticatorAppMfaDetailSummary(MfaId.random, name, createdOn, verified)
   }
 
-  // TODO APIS-6715 Should the default be removed?
   def buildSmsMfaDetail(name: String, mobileNumber: String, verified: Boolean, createdOn: Instant = Instant.now().truncatedTo(ChronoUnit.MILLIS)) = {
     SmsMfaDetailSummary(MfaId.random, name, createdOn, mobileNumber, verified)
   }

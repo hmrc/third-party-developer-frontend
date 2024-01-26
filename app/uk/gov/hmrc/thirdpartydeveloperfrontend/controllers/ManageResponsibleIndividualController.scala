@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.Instant
-import java.time.format.DateTimeFormatter
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel, formatDateTime}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object ManageResponsibleIndividualController {
@@ -50,7 +50,7 @@ object ManageResponsibleIndividualController {
       userIsResponsibleIndividual: Boolean
     )
 
-  def formatDateTime(timestamp: Instant) = DateTimeFormatter.ofPattern("d MMMM yyyy").format(timestamp)
+  def formatDateTime(timestamp: Instant) = DateFormatter.formatDate(timestamp)
 }
 
 @Singleton

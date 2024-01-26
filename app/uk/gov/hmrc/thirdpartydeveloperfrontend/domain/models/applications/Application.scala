@@ -174,7 +174,7 @@ case class Application(
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Access.Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)), // TODO API-6715 Should the default be removed?
+    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)), // TODO APIS-6715 Should the default be removed?
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist()
   ) extends BaseApplication
@@ -198,7 +198,7 @@ case class ApplicationWithSubscriptionIds(
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Access.Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)), // TODO API-6715 Should the default be removed?
+    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)), // TODO APIS-6715 Should the default be removed?
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist(),
     subscriptions: Set[ApiIdentifier] = Set.empty

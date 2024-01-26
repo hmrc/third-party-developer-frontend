@@ -39,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTok
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.ConvertFromLocalDate
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.LocalDateSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -143,5 +143,5 @@ class Credentials @Inject() (
 }
 
 object Credentials {
-  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).toInstant // scalastyle:ignore magic.number
+  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).asInstant // scalastyle:ignore magic.number
 }

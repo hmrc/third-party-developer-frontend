@@ -16,8 +16,8 @@
 
 package views
 
-import java.time.Period
 import java.time.format.DateTimeFormatter
+import java.time.{Period, ZoneOffset}
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
@@ -72,7 +72,7 @@ class TermsOfUseSpec extends CommonViewSpec
     "viewing an agreed application" should {
       trait Setup {
         val emailAddress      = "email@example.com".toLaxEmail
-        val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(instant)
+        val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
         val version           = "1.0"
         val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
         val application       = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))

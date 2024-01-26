@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREED
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-@import java.time.format.DateTimeFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 
 @this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
@@ -55,7 +55,7 @@
 
   @if(app.termsOfUseStatus == AGREED) {
     <div id="termsOfUseAlert" class="govuk-inset-text">
-      Terms of use accepted on @{DateTimeFormatter.ofPattern("dd MMMM yyyy")format(app.termsOfUseAgreements.head.timeStamp)} by @{app.termsOfUseAgreements.head.emailAddress.text}.
+      Terms of use accepted on @{DateFormatter.formatTwoDigitDay(app.termsOfUseAgreements.head.timeStamp)} by @{app.termsOfUseAgreements.head.emailAddress.text}.
     </div>
     <br>
   }
