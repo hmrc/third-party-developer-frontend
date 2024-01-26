@@ -23,7 +23,6 @@ import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -78,9 +77,10 @@ case class ResponsibleIndividualUpdateVerification(
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
 
-object ResponsibleIndividualVerification extends InstantFormatters {
+object ResponsibleIndividualVerification {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
   implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification]                = Json.format[ResponsibleIndividualToUVerification]
   implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]

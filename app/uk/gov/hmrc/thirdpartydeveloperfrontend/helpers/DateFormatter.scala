@@ -20,8 +20,8 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, LocalDate, ZoneOffset}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateTimeHelper.{InstantConversionSyntax, LocalDateConversionSyntax}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.{InstantSyntax, LocalDateSyntax}
 
 object DateFormatter {
   val shortFormatter: DateTimeFormatter               = DateTimeFormatter.ofPattern("d MMM yyyy").withZone(ZoneOffset.UTC)

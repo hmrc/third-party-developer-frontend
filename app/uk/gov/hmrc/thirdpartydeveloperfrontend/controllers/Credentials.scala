@@ -32,6 +32,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result =>
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, CommandHandlerTypes}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateTimeHelper.LocalDateConversionSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, ThirdPartyDeveloperConnector}
@@ -39,7 +40,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTok
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.LocalDateSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton

@@ -33,6 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateTimeHelper.LocalDateConversionSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
@@ -46,7 +47,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.LocalDateSyntax
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
   val applicationId: ApplicationId = ApplicationId.random

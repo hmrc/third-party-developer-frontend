@@ -16,14 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import play.api.libs.json.{Json, OFormat}
+import java.time.Instant
+
+import play.api.libs.json.{Format, Json, OFormat}
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.play.json.Union
 
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
 
-object MongoFormatters extends InstantFormatters {
+object MongoFormatters {
+
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
   implicit val formatIpAllowlistFlow: OFormat[IpAllowlistFlow] = Json.format[IpAllowlistFlow]
 

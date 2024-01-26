@@ -31,7 +31,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftLogic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ManageApplicationsViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -48,9 +47,11 @@ class ManageApplications @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
-  ) extends LoggedInController(mcc) with InstantFormatters {
+  ) extends LoggedInController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
+    import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
+
     def getSubmission(applicationId: ApplicationId): Future[Option[Submission]] = {
       submissionService.fetchLatestSubmission(applicationId)
     }

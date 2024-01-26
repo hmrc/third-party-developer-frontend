@@ -28,7 +28,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.InstantFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 
 trait BaseApplication {
@@ -168,13 +167,13 @@ case class Application(
     name: String,
     createdOn: Instant,
     lastAccess: Option[Instant],
-    lastAccessTokenUsage: Option[Instant] = None,                                                         // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    lastAccessTokenUsage: Option[Instant] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
     grantLength: Period,
     deployedTo: Environment,
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Access.Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)), // TODO APIS-6715 Should the default be removed?
+    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist()
   ) extends BaseApplication
@@ -198,14 +197,15 @@ case class ApplicationWithSubscriptionIds(
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Access.Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)), // TODO APIS-6715 Should the default be removed?
+    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist(),
     subscriptions: Set[ApiIdentifier] = Set.empty
   ) extends BaseApplication
 
-object ApplicationWithSubscriptionIds extends InstantFormatters {
+object ApplicationWithSubscriptionIds {
   import play.api.libs.json.Json
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
   implicit val ordering: Ordering[ApplicationWithSubscriptionIds]                 = Ordering.by(_.name)

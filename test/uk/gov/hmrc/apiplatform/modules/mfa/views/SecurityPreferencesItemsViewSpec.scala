@@ -27,10 +27,10 @@ import views.helper.CommonViewSpec
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateTimeHelper.LocalDateConversionSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.LocalDateSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {

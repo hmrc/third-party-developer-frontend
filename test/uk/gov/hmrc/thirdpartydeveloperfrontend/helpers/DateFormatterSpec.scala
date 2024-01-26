@@ -21,9 +21,9 @@ import java.time.{Instant, LocalDate, LocalDateTime}
 
 import org.scalatest.BeforeAndAfterAll
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateTimeHelper.{LocalDateConversionSyntax, LocalDateTimeConversionSyntax}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.initialLastAccessDate
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.InstantConversion.{LocalDateSyntax, LocalDateTimeSyntax}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll with FixedClock {

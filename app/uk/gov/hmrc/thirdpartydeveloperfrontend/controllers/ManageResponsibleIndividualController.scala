@@ -50,7 +50,7 @@ object ManageResponsibleIndividualController {
       userIsResponsibleIndividual: Boolean
     )
 
-  def formatDateTime(timestamp: Instant) = DateFormatter.formatDate(timestamp)
+  def formatDateTime(dateTime: Instant) = DateFormatter.formatDate(dateTime)
 }
 
 @Singleton

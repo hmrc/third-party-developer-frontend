@@ -8,9 +8,9 @@ object AppDependencies {
   lazy val seleniumVersion = "4.2.0"
   lazy val bootstrapVersion = "7.19.0"
   lazy val mongoVersion = "1.7.0"
-  lazy val commonDomainVersion = "0.10.0"
-  lazy val apiDomainVersion = "0.11.0"
-  lazy val appDomainVersion = "0.33.0"
+  lazy val commonDomainVersion = "0.11.0"
+  lazy val apiDomainVersion = "0.12.0"
+  lazy val appDomainVersion = "0.34.0"
 
   val testScope = "test, it, component"
 
