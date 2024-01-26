@@ -333,8 +333,7 @@ object SignOutSurveyForm {
   )
 }
 
-case class SupportEnquiryForm(fullname: String, email: String, comments: String)
-
+final case class SupportEnquiryForm(fullname: String, email: String, comments: String)
 object SupportEnquiryForm {
 
   val form: Form[SupportEnquiryForm] = Form(
@@ -343,6 +342,15 @@ object SupportEnquiryForm {
       "emailaddress" -> emailValidator(),
       "comments"     -> commentsValidator
     )(SupportEnquiryForm.apply)(SupportEnquiryForm.unapply)
+  )
+}
+
+final case class NewSupportPageHelpChoiceForm(helpWithChoice: String)
+object NewSupportPageHelpChoiceForm {
+  val form: Form[NewSupportPageHelpChoiceForm] = Form(
+    mapping(
+      "helpWithChoice" -> text
+    )(NewSupportPageHelpChoiceForm.apply)(NewSupportPageHelpChoiceForm.unapply)
   )
 }
 

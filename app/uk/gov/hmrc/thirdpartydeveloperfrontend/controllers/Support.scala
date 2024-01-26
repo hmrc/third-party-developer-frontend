@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.LandingPageView
+import views.html.support.{ApiPageView, LandingPageView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
+import play.api.mvc.Result
 
 @Singleton
 class Support @Inject() (
@@ -41,7 +42,8 @@ class Support @Inject() (
     val cookieSigner: CookieSigner,
     supportEnquiryView: SupportEnquiryView,
     supportThankyouView: SupportThankyouView,
-    landingPageView: LandingPageView
+    landingPageView: LandingPageView,
+    apiPageView: ApiPageView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends BaseController(mcc) with ApplicationLogger {
@@ -58,7 +60,7 @@ class Support @Inject() (
       }
 
     if (useNewSupport)
-      Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
+      Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
     else
       Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
   }
@@ -78,7 +80,28 @@ class Support @Inject() (
   }
 
   def chooseSupportOption: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), SupportEnquiryForm.form)))
+    def handleValidForm(form: NewSupportPageHelpChoiceForm): Future[Result] = {
+      form.helpWithChoice match {
+        case "api" => Future.successful(
+          Ok(
+            apiPageView(
+              fullyloggedInDeveloper.map(_.displayedName),
+              NewSupportPageHelpChoiceForm.form,
+              routes.Support.raiseSupportEnquiry(true).url
+            )
+          )
+        )
+        case "account" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
+        case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
+        case _ => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
+      }
+    }
+
+    def handleInvalidForm(formWithErrors: Form[NewSupportPageHelpChoiceForm]): Future[Result] = {
+      Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper.map(_.displayedName), formWithErrors)))
+    }
+
+    NewSupportPageHelpChoiceForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
