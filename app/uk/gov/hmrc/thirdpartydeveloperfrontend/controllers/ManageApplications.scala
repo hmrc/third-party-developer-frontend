@@ -50,8 +50,6 @@ class ManageApplications @Inject() (
   ) extends LoggedInController(mcc) {
 
   def manageApps: Action[AnyContent] = loggedInAction { implicit request =>
-    import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
-
     def getSubmission(applicationId: ApplicationId): Future[Option[Submission]] = {
       submissionService.fetchLatestSubmission(applicationId)
     }
