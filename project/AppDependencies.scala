@@ -8,7 +8,6 @@ object AppDependencies {
   lazy val seleniumVersion = "4.2.0"
   lazy val bootstrapVersion = "7.19.0"
   lazy val mongoVersion = "1.7.0"
-  lazy val commonDomainVersion = "0.11.0"
   lazy val apiDomainVersion = "0.13.0"
   lazy val appDomainVersion = "0.34.0"
 
@@ -40,8 +39,7 @@ object AppDependencies {
     "com.github.tomakehurst"      %  "wiremock-jre8-standalone"           % "2.33.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.15.4",
     "org.scalatestplus"           %% "scalacheck-1-15"                    % "3.2.10.0",
-    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion
   ).map(_ % testScope) ++
   Seq(
     "io.cucumber"                 %% "cucumber-scala"                     % cucumberVersion,
