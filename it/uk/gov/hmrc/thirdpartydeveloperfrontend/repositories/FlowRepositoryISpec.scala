@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.mongodb.scala.bson.{BsonValue, Document}
@@ -58,7 +58,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
   override protected def beforeEach(): Unit = {
     await(flowRepository.collection.drop().toFuture())
-    await(flowRepository.ensureIndexes)
+    await(flowRepository.ensureIndexes())
   }
 
   trait PopulatedSetup {
@@ -78,7 +78,7 @@ class FlowRepositoryISpec extends AnyWordSpec
     await(flowRepository.saveFlow(flowOfDifferentType))
     await(flowRepository.collection.countDocuments().toFuture()) shouldBe 3
 
-    def fetchLastUpdated(flow: Flow): LocalDateTime = {
+    def fetchLastUpdated(flow: Flow): Instant = {
       val query = Document("sessionId" -> Codecs.toBson(flow.sessionId), "flowType" -> Codecs.toBson(flow.flowType))
 
       await(flowRepository.collection.aggregate[BsonValue](
@@ -208,9 +208,9 @@ class FlowRepositoryISpec extends AnyWordSpec
 
     "updateLastUpdated" should {
       "update lastUpdated for all flows for the specified session ID" in new PopulatedSetup {
-        val lastUpdatedInCurrentFlow: LocalDateTime            = fetchLastUpdated(currentFlow)
-        val lastUpdatedInFlowOfDifferentType: LocalDateTime    = fetchLastUpdated(flowOfDifferentType)
-        val lastUpdatedInFlowInDifferentSession: LocalDateTime = fetchLastUpdated(flowInDifferentSession)
+        val lastUpdatedInCurrentFlow: Instant            = fetchLastUpdated(currentFlow)
+        val lastUpdatedInFlowOfDifferentType: Instant    = fetchLastUpdated(flowOfDifferentType)
+        val lastUpdatedInFlowInDifferentSession: Instant = fetchLastUpdated(flowInDifferentSession)
 
         await(flowRepository.updateLastUpdated(currentSession))
 
@@ -222,12 +222,12 @@ class FlowRepositoryISpec extends AnyWordSpec
   }
 }
 
-case class ResultSet(lastUpdated: LocalDateTime)
+case class ResultSet(lastUpdated: Instant)
 
 object ResultSet {
   import play.api.libs.json.Json
-  implicit val dateFormat: Format[LocalDateTime]   = MongoJavatimeFormats.localDateTimeFormat
+  implicit val dateFormat: Format[Instant]         = MongoJavatimeFormats.instantFormat
   implicit val resultSetFormat: OFormat[ResultSet] = Json.format[ResultSet]
 
-  def apply(lastUpdated: LocalDateTime) = new ResultSet(lastUpdated)
+  def apply(lastUpdated: Instant) = new ResultSet(lastUpdated)
 }

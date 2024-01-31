@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -29,6 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -41,8 +42,8 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
-  val now           = LocalDateTime.now()
+    with DeveloperTestData
+    with FixedClock {
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
   val applicationId = ApplicationId.random
   val clientId      = ClientId("clientId123")
@@ -91,12 +92,12 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         applicationId,
         clientId,
         "An App Name",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        instant,
+        Some(instant),
         None,
         Period.ofDays(547),
         Environment.SANDBOX,
-        state = ApplicationState(State.TESTING, None, None, None, now)
+        state = ApplicationState(State.TESTING, None, None, None, instant)
       )
       val document    = Jsoup.parse(renderPage(application).body)
 
@@ -118,14 +119,14 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
           applicationId,
           clientId,
           "An App Name",
-          LocalDateTime.now(ZoneOffset.UTC),
-          Some(LocalDateTime.now(ZoneOffset.UTC)),
+          instant,
+          Some(instant),
           None,
           grantLength,
           Environment.SANDBOX,
           description = aDescription,
           access = standardAccess,
-          state = ApplicationState(State.TESTING, None, None, None, now)
+          state = ApplicationState(State.TESTING, None, None, None, instant)
         )
       val document               = Jsoup.parse(renderPage(application).body)
 
@@ -141,12 +142,12 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         applicationId,
         clientId,
         "An App Name",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        instant,
+        Some(instant),
         None,
         grantLength,
         Environment.PRODUCTION,
-        state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None, None, now)
+        state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None, None, instant)
       )
       val document    = Jsoup.parse(renderPage(application).body)
 
@@ -159,12 +160,12 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         applicationId,
         clientId,
         "An App Name",
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        instant,
+        Some(instant),
         None,
         grantLength,
         Environment.PRODUCTION,
-        state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None, None, now)
+        state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None, None, instant)
       )
       val document    = Jsoup.parse(renderPage(application).body)
 
@@ -178,12 +179,12 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
           applicationId,
           clientId,
           "An App Name",
-          LocalDateTime.now(ZoneOffset.UTC),
-          Some(LocalDateTime.now(ZoneOffset.UTC)),
+          instant,
+          Some(instant),
           None,
           grantLength,
           Environment.PRODUCTION,
-          state = ApplicationState(State.PRODUCTION, None, None, None, now)
+          state = ApplicationState(State.PRODUCTION, None, None, None, instant)
         )
       val document    = Jsoup.parse(renderPage(application).body)
 

@@ -168,7 +168,7 @@ class IpAllowlistServiceSpec
 
       val cmd = ApplicationCommands.ChangeIpAllowlist(
         Actors.AppCollaborator(standardDeveloper.email),
-        now(),
+        instant,
         true,
         List(CidrBlock("1.1.1.1/24")),
         List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
@@ -231,7 +231,7 @@ class IpAllowlistServiceSpec
 
       val cmd = ApplicationCommands.ChangeIpAllowlist(
         Actors.AppCollaborator(standardDeveloper.email),
-        now(),
+        instant,
         false,
         List(CidrBlock("1.1.1.1/24")),
         List.empty

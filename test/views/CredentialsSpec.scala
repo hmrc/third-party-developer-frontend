@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
@@ -30,6 +30,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
@@ -40,7 +41,8 @@ class CredentialsSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with DeveloperTestData
+    with FixedClock {
 
   trait Setup {
     val credentialsView = app.injector.instanceOf[CredentialsView]
@@ -54,20 +56,19 @@ class CredentialsSpec extends CommonViewSpec
     val request   = FakeRequest().withCSRFToken
     val developer = standardDeveloper.loggedIn
 
-    val now         = LocalDateTime.now()
     val application = Application(
       ApplicationId.random,
       ClientId("Test Application Client ID"),
       "Test Application",
-      now,
-      Some(now),
+      instant,
+      Some(instant),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
-      state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), now),
+      state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant),
       checkInformation = None
     )
 

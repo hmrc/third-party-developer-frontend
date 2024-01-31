@@ -20,9 +20,8 @@ import play.api.libs.json._
 import uk.gov.hmrc.play.json.Union
 
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 
-trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters with LocalDateTimeFormatters {
+trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters {
   implicit val keyReadsQuestionnaireId: KeyReads[Questionnaire.Id]   = key => JsSuccess(Questionnaire.Id(key))
   implicit val keyWritesQuestionnaireId: KeyWrites[Questionnaire.Id] = _.value
 
@@ -50,6 +49,7 @@ trait BaseSubmissionsJsonFormatters extends GroupOfQuestionnairesJsonFormatters 
 
 trait SubmissionsFrontendJsonFormatters extends BaseSubmissionsJsonFormatters {
   import Submission.Status._
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
   implicit val rejectedStatusFormat: OFormat[Declined]                                         = Json.format[Declined]
   implicit val acceptedStatusFormat: OFormat[Granted]                                          = Json.format[Granted]

@@ -57,7 +57,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
 
   "fetchApplicationById" should {
     val applicationId                                                    = ApplicationId.random
-    val application                                                      = Application(applicationId, ClientId("someId"), "someName", now(), None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
+    val application                                                      = Application(applicationId, ClientId("someId"), "someName", instant, None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
     val applicationWithSubscriptionData: ApplicationWithSubscriptionData =
       ApplicationWithSubscriptionData(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
 

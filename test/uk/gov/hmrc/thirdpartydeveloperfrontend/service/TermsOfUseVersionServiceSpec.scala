@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.LocalDateTime
-
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -76,7 +74,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
     }
     "return ToU version OLD_JOURNEY if uplift journey switch is off and application has unrecognised version value" in new Setup {
       givenUpliftJourneySwitchIsOff
-      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("bad.version")))
+      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, instant, Some("bad.version")))
 
       val result = underTest.getForApplication(application)(request)
 
@@ -84,7 +82,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
     }
     "return ToU version NEW_JOURNEY if uplift journey switch is on and application has unrecognised version value in CheckInformation" in new Setup {
       givenUpliftJourneySwitchIsOn
-      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("bad.version")))
+      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, instant, Some("bad.version")))
 
       val result = underTest.getForApplication(application)(request)
 
@@ -93,9 +91,9 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
 
     "return correct ToU version if valid value is present in CheckInformation" in new Setup {
       returnAgreementDetails(
-        TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("1.0")),
-        TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("1.2")),
-        TermsOfUseAgreementDetails(email, None, LocalDateTime.now, Some("2.0"))
+        TermsOfUseAgreementDetails(email, None, instant, Some("1.0")),
+        TermsOfUseAgreementDetails(email, None, instant, Some("1.2")),
+        TermsOfUseAgreementDetails(email, None, instant, Some("2.0"))
       )
       val result = underTest.getForApplication(application)(request)
       result shouldBe TermsOfUseVersion.NEW_JOURNEY

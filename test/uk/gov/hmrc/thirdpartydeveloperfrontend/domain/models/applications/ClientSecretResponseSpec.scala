@@ -22,7 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.{FixedClock, JsonFormattersS
 class ClientSecretResponseSpec extends JsonFormattersSpec with FixedClock {
   val anId             = ClientSecret.Id.random
   val fakeHashedSecret = "blahblahblah"
-  val aClientSecret    = ClientSecretResponse(anId, "bob", now(), None)
+  val aClientSecret    = ClientSecretResponse(anId, "bob", instant, None)
 
   "ClientSecretResponse" should {
     val expectedJsonText = s"""{"name":"bob","createdOn":"$nowAsText","id":"${anId.value}"}"""

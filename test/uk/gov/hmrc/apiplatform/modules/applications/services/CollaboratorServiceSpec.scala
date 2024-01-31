@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.applications.services
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -78,8 +78,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
       productionApplicationId,
       productionClientId,
       "name",
-      LocalDateTime.now(ZoneOffset.UTC),
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,

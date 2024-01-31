@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit.DAYS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -57,7 +57,7 @@ class AddApplicationProductionSwitchSpec
 
   val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
 
-  val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
+  val appCreatedOn  = instant.minus(1, DAYS)
   val appLastAccess = appCreatedOn
 
   val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList

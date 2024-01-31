@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -61,7 +62,7 @@ class CredentialsSpec
   trait ApplicationProvider {
     def createApplication(): Application
   }
-  val productionState: ApplicationState           = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now())
+  val productionState: ApplicationState           = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
   val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
 
   trait BasicApplicationProvider extends ApplicationProvider {
@@ -71,8 +72,8 @@ class CredentialsSpec
         applicationId,
         clientId,
         "App name 1",
-        LocalDateTime.now,
-        Some(LocalDateTime.now),
+        instant,
+        Some(instant),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -93,14 +94,14 @@ class CredentialsSpec
       state: ApplicationState = productionState,
       access: Access = Access.Standard(),
       environment: Environment = Environment.PRODUCTION,
-      createdOn: LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
+      createdOn: Instant = instant
     ): Application =
     Application(
       applicationId,
       clientId,
       "app",
       createdOn,
-      Some(LocalDateTime.now(ZoneOffset.UTC)),
+      Some(instant),
       None,
       grantLength,
       environment,
@@ -232,7 +233,8 @@ class CredentialsSpec
   }
 
   "The server token page" should {
-    val dateBeforeCutoff = Credentials.serverTokenCutoffDate.minusDays(1)
+    val dateBeforeCutoff = Credentials.serverTokenCutoffDate.minus(1, DAYS)
+    val dateAfterCutoff  = Credentials.serverTokenCutoffDate.plus(1, DAYS)
 
     "be displayed for an app" in new Setup {
       def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateBeforeCutoff)
@@ -244,7 +246,7 @@ class CredentialsSpec
     }
 
     "return 404 for new apps" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = LocalDateTime.now(ZoneOffset.UTC))
+      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateAfterCutoff)
 
       val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
 
@@ -405,6 +407,6 @@ class CredentialsSpec
     }
   }
 
-  private def aClientSecret(secretName: String) = ClientSecretResponse(ClientSecret.Id.random, secretName, LocalDateTime.now(ZoneOffset.UTC))
+  private def aClientSecret(secretName: String) = ClientSecretResponse(ClientSecret.Id.random, secretName, instant)
 
 }

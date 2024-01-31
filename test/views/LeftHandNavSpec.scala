@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 import scala.jdk.CollectionConverters._
 
 import org.jsoup.Jsoup
@@ -33,28 +33,30 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocations, ResponsibleIndividual, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
 
-class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder with FixedClock {
 
   val leftHandNavView: LeftHandNav = app.injector.instanceOf[LeftHandNav]
 
   trait Setup {
-    val now: LocalDateTime                                    = LocalDateTime.now(ZoneOffset.UTC)
     val applicationId: ApplicationId                          = ApplicationId.random
     val clientId: ClientId                                    = ClientId("std-client-id")
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val loggedIn: DeveloperSession                   = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
-    val standardApplication: Application                      = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Standard())
+
+    val standardApplication: Application =
+      Application(applicationId, clientId, "name", instant, Some(instant), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Standard())
 
     val privilegedApplication: Application =
-      Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Privileged())
-    val ropcApplication: Application       = Application(applicationId, clientId, "name", now, Some(now), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Ropc())
-    val productionState: ApplicationState  = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), now)
+      Application(applicationId, clientId, "name", instant, Some(instant), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Privileged())
+    val ropcApplication: Application       = Application(applicationId, clientId, "name", instant, Some(instant), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Ropc())
+    val productionState: ApplicationState  = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant)
 
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }

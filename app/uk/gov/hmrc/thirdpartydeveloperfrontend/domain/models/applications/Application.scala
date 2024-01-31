@@ -17,24 +17,17 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import java.time.temporal.ChronoUnit
-import java.time.{LocalDateTime, Period}
+import java.time.{Instant, Period}
 
 import play.api.libs.json.{OFormat, Reads}
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
-  PrivacyPolicyLocation,
-  PrivacyPolicyLocations,
-  TermsAndConditionsLocation,
-  TermsAndConditionsLocations,
-  _
-}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.LocalDateTimeFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
 
 trait BaseApplication {
@@ -43,11 +36,11 @@ trait BaseApplication {
   def id: ApplicationId
   def clientId: ClientId
   def name: String
-  def createdOn: LocalDateTime
-  def lastAccess: Option[LocalDateTime]
+  def createdOn: Instant
+  def lastAccess: Option[Instant]
 
   def grantLength: Period
-  def lastAccessTokenUsage: Option[LocalDateTime]
+  def lastAccessTokenUsage: Option[Instant]
   def deployedTo: Environment
   def description: Option[String]
   def collaborators: Set[Collaborator]
@@ -172,15 +165,15 @@ case class Application(
     id: ApplicationId,
     clientId: ClientId,
     name: String,
-    createdOn: LocalDateTime,
-    lastAccess: Option[LocalDateTime],
-    lastAccessTokenUsage: Option[LocalDateTime] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
+    createdOn: Instant,
+    lastAccess: Option[Instant],
+    lastAccessTokenUsage: Option[Instant] = None, // API-4376: Temporary inclusion whilst Server Token functionality is retired
     grantLength: Period,
     deployedTo: Environment,
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Access.Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
+    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist()
   ) extends BaseApplication
@@ -196,22 +189,23 @@ case class ApplicationWithSubscriptionIds(
     id: ApplicationId,
     clientId: ClientId,
     name: String,
-    createdOn: LocalDateTime,
-    lastAccess: Option[LocalDateTime],
-    lastAccessTokenUsage: Option[LocalDateTime] = None,
+    createdOn: Instant,
+    lastAccess: Option[Instant],
+    lastAccessTokenUsage: Option[Instant] = None,
     grantLength: Period = Period.ofDays(547),
     deployedTo: Environment,
     description: Option[String] = None,
     collaborators: Set[Collaborator] = Set.empty,
     access: Access = Access.Standard(),
-    state: ApplicationState = ApplicationState(updatedOn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)),
+    state: ApplicationState = ApplicationState(updatedOn = Instant.now().truncatedTo(ChronoUnit.MILLIS)),
     checkInformation: Option[CheckInformation] = None,
     ipAllowlist: IpAllowlist = IpAllowlist(),
     subscriptions: Set[ApiIdentifier] = Set.empty
   ) extends BaseApplication
 
-object ApplicationWithSubscriptionIds extends LocalDateTimeFormatters {
+object ApplicationWithSubscriptionIds {
   import play.api.libs.json.Json
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
   implicit val applicationWithSubsIdsReads: Reads[ApplicationWithSubscriptionIds] = Json.reads[ApplicationWithSubscriptionIds]
   implicit val ordering: Ordering[ApplicationWithSubscriptionIds]                 = Ordering.by(_.name)

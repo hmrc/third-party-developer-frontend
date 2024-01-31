@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import java.time.{LocalDateTime, Period}
+import java.time.{Instant, Period}
 
 import uk.gov.hmrc.http.NotFoundException
 
@@ -31,10 +31,10 @@ case class ApplicationSummary(
     role: Collaborator.Role,
     termsOfUseStatus: TermsOfUseStatus,
     state: State,
-    lastAccess: Option[LocalDateTime],
+    lastAccess: Option[Instant],
     grantLength: Period,
     serverTokenUsed: Boolean = false,
-    createdOn: LocalDateTime,
+    createdOn: Instant,
     accessType: AccessType,
     environment: Environment,
     subscriptionIds: Set[ApiIdentifier]

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
-import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
@@ -57,7 +56,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       SubmissionId.random,
       0,
       "App name",
-      LocalDateTime.now(ZoneOffset.UTC),
+      instant,
       ResponsibleIndividualVerificationState.INITIAL
     )
     val responsibleIndividual = ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail)
@@ -117,7 +116,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         SubmissionId.random,
         0,
         "App name",
-        LocalDateTime.now(ZoneOffset.UTC),
+        instant,
         requesterName,
         requesterEmail,
         ResponsibleIndividualVerificationState.INITIAL
@@ -152,7 +151,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         SubmissionId.random,
         0,
         "App name",
-        LocalDateTime.now(ZoneOffset.UTC),
+        instant,
         requesterName,
         requesterEmail,
         ResponsibleIndividualVerificationState.INITIAL
@@ -178,7 +177,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         SubmissionId.random,
         0,
         "App name",
-        LocalDateTime.now(ZoneOffset.UTC),
+        instant,
         responsibleIndividual,
         "Mr Admin",
         "admin@example.com".toLaxEmail,

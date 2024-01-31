@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
@@ -37,8 +37,8 @@ trait SampleApplication
     appId,
     clientId,
     "App name 1",
-    LocalDateTime.now(ZoneOffset.UTC),
-    Some(LocalDateTime.now(ZoneOffset.UTC)),
+    instant,
+    Some(instant),
     None,
     grantLength = Period.ofDays(547),
     Environment.PRODUCTION,

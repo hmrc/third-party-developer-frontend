@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
@@ -117,8 +117,8 @@ class ManageResponsibleIndividualControllerSpec
           ))
         ),
         collaborators = teamMembers.toSet,
-        createdOn = LocalDateTime.parse("2018-04-06T09:00"),
-        lastAccess = Some(LocalDateTime.parse("2018-04-06T09:00"))
+        createdOn = Instant.parse("2018-04-06T09:00:00Z"),
+        lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       )
 
       givenApplicationAction(application, developerSession)
@@ -136,8 +136,8 @@ class ManageResponsibleIndividualControllerSpec
       givenTheApplicationExistWithUserRole(
         List(user),
         List(
-          TermsOfUseAcceptance(ResponsibleIndividual(FullName("Old RI"), "oldri@example.com".toLaxEmail), LocalDateTime.parse("2022-05-01T12:00:00"), SubmissionId.random, 0),
-          TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.parse("2022-07-01T12:00:00"), SubmissionId.random, 0)
+          TermsOfUseAcceptance(ResponsibleIndividual(FullName("Old RI"), "oldri@example.com".toLaxEmail), Instant.parse("2022-05-01T12:00:00Z"), SubmissionId.random, 0),
+          TermsOfUseAcceptance(responsibleIndividual, Instant.parse("2022-07-01T12:00:00Z"), SubmissionId.random, 0)
         )
       )
 

@@ -24,21 +24,21 @@ trait ApplicationStateHelper {
 
   object InState {
 
-    def testing = ApplicationState(State.TESTING, None, None, None, now())
+    def testing = ApplicationState(State.TESTING, None, None, None, instant())
 
     def pendingGatekeeperApproval(requestedByEmail: String, requestedByName: String) =
-      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName), None, now())
+      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(requestedByEmail), Some(requestedByName), None, instant())
 
     def pendingResponsibleIndividualVerification(requestedByEmail: String, requestedByName: String) =
-      ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName), None, now())
+      ApplicationState(State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION, Some(requestedByEmail), Some(requestedByName), None, instant())
 
     def pendingRequesterVerification(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), now())
+      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), instant())
 
     def preProduction(requestedByEmail: String, requestedByName: String) =
-      ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None, now())
+      ApplicationState(State.PRE_PRODUCTION, Some(requestedByEmail), Some(requestedByName), None, instant())
 
     def production(requestedByEmail: String, requestedByName: String, verificationCode: String) =
-      ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), now())
+      ApplicationState(State.PRODUCTION, Some(requestedByEmail), Some(requestedByName), Some(verificationCode), instant())
   }
 }

@@ -52,7 +52,7 @@ class CollaboratorService @Inject() (
       adminsAsUsers <- developerConnector.fetchByEmails(setOfAdminEmails)
       adminsToEmail  = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
       userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail)
-      addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), now())
+      addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), instant())
       response      <- applicationCommandConnector.dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }
@@ -76,7 +76,7 @@ class CollaboratorService @Inject() (
     for {
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
-      removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, now())
+      removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, instant())
       response     <- applicationCommandConnector.dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
   }

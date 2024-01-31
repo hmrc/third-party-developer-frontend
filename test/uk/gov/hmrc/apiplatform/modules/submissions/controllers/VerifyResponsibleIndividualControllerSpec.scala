@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
@@ -116,7 +115,7 @@ class VerifyResponsibleIndividualControllerSpec
       SubmissionId.random,
       0,
       "App name",
-      LocalDateTime.now(ZoneOffset.UTC),
+      instant,
       ResponsibleIndividualVerificationState.INITIAL
     )
 

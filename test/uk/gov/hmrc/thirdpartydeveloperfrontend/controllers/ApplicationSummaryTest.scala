@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker {
+class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker with FixedClock {
 
   "from" should {
     val user = "foo@bar.com".toLaxEmail.asDeveloperCollaborator
@@ -37,9 +38,9 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
         ApplicationId.random,
         ClientId(""),
         "",
-        LocalDateTime.now,
-        Some(LocalDateTime.now),
-        Some(LocalDateTime.now),
+        instant,
+        Some(instant),
+        Some(instant),
         grantLength = Period.ofDays(547),
         Environment.PRODUCTION,
         collaborators = Set(user)
@@ -49,8 +50,8 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
         ApplicationId.random,
         ClientId(""),
         "",
-        LocalDateTime.now,
-        Some(LocalDateTime.now),
+        instant,
+        Some(instant),
         None,
         grantLength = Period.ofDays(547),
         Environment.PRODUCTION,

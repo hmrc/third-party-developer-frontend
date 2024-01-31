@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{LocalDateTime, Period, ZoneOffset}
+import java.time.Period
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
@@ -27,13 +27,15 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
+class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData
+    with FixedClock {
 
   val deleteSubordinateApplicationConfirmView = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
 
@@ -43,19 +45,18 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
     val appId             = ApplicationId.random
     val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
-    val now               = LocalDateTime.now(ZoneOffset.UTC)
     val application       = Application(
       appId,
       clientId,
       "App name 1",
-      now,
-      Some(now),
+      instant,
+      Some(instant),
       None,
       Period.ofDays(547),
       Environment.SANDBOX,
       Some("Description 1"),
       Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now),
+      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
       access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 

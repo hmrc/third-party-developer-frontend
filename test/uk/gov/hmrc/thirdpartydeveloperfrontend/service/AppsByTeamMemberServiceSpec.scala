@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
@@ -73,8 +73,8 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       ApplicationId.random,
       ClientId("cl-id1"),
       "zapplication",
-      LocalDateTime.now,
-      Some(LocalDateTime.now),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
@@ -84,8 +84,8 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       ApplicationId.random,
       ClientId("cl-id2"),
       "application",
-      LocalDateTime.now,
-      Some(LocalDateTime.now),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.SANDBOX,
@@ -95,8 +95,8 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
       ApplicationId.random,
       ClientId("cl-id3"),
       "4pplication",
-      LocalDateTime.now,
-      Some(LocalDateTime.now),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,

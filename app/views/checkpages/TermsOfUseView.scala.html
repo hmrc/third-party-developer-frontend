@@ -20,8 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-@import java.time.format.DateTimeFormatter
-@import java.time.format.FormatStyle
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 
 @this(devMain: DevMainWithFormErrors)
 
@@ -44,11 +43,9 @@
     <div class="govuk-form-group">
       <fieldset class="govuk-fieldset">
         @if(form("termsOfUseAgreed").value.contains("true")) {
-          @defining(DateTimeFormatter.ofPattern("dd MMMM yyyy")) { dateFormatter =>
-            <div class="govuk-inset-text">
-              Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress.text} on @{app.checkInformation.get.termsOfUseAgreements.head.timeStamp.format(dateFormatter)}.
-            </div>
-          }
+          <div class="govuk-inset-text">
+            Terms of use agreed by @{app.checkInformation.get.termsOfUseAgreements.head.emailAddress.text} on @{DateFormatter.formatTwoDigitDay(app.checkInformation.get.termsOfUseAgreements.head.timeStamp)}.
+          </div>
         }
       </fieldset>
     </div>
@@ -59,15 +56,13 @@
       <div class="govuk-form-group govuk-!-margin-top-6 @if(form.errors("termsOfUseAgreed").nonEmpty){govuk-form-group--error}">
         <fieldset class="govuk-fieldset">
           @if(form("termsOfUseAgreed").value.isEmpty || form("termsOfUseAgreed").value.contains("false")) {
-            @defining(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)) { dateFormatter =>
-              @fieldError(form.errors, "termsOfUseAgreed", true)
-              <div class="govuk-checkboxes">
-                <div class="govuk-checkboxes__item">
-                  <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
-                  <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
-                </div>
+            @fieldError(form.errors, "termsOfUseAgreed", true)
+            <div class="govuk-checkboxes">
+              <div class="govuk-checkboxes__item">
+                <input type="checkbox" id="termsOfUseAgreed" class="govuk-checkboxes__input" name="termsOfUseAgreed" value="true"/>
+                <label for="termsOfUseAgreed" class="govuk-label govuk-checkboxes__label">I agree to the terms of use</label>
               </div>
-            }
+            </div>
           }
         </fieldset>
       </div>

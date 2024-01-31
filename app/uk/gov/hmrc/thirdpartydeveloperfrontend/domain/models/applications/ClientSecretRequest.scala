@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 
-case class ClientSecretRequest(actor: Actors.AppCollaborator, timestamp: LocalDateTime)
+case class ClientSecretRequest(actor: Actors.AppCollaborator, timestamp: Instant)
 
 object ClientSecretRequest {
   import play.api.libs.json._

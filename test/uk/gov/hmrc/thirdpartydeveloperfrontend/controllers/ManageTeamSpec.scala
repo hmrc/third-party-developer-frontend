@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -105,8 +105,8 @@ class ManageTeamSpec
       val application   = aStandardApplication.copy(
         id = appId,
         collaborators = collaborators,
-        createdOn = LocalDateTime.parse("2018-04-06T09:00"),
-        lastAccess = Some(LocalDateTime.parse("2018-04-06T09:00"))
+        createdOn = Instant.parse("2018-04-06T09:00:00Z"),
+        lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       )
 
       givenApplicationAction(application, developerSession)

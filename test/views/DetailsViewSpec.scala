@@ -16,8 +16,8 @@
 
 package views
 
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneOffset}
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -64,7 +64,7 @@ class DetailsViewSpec
     lazy val changingAppDetailsAdminList: Element       = body.getElementById("changingAppDetailsAdminList")
   }
 
-  val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", LocalDateTime.now)))
+  val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", instant)))
   val adminEmail          = "admin@example.com".toLaxEmail
 
   implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
@@ -247,10 +247,9 @@ class DetailsViewSpec
 
             "show agreement details and have no link to read when the terms of use have been agreed" in {
               val emailAddress      = "user@example.com".toLaxEmail
-              val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
-              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
-              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withCheckInformation(checkInformation)
@@ -281,10 +280,9 @@ class DetailsViewSpec
 
             "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
               val emailAddress      = "user@example.com".toLaxEmail
-              val timeStamp         = LocalDateTime.now(ZoneOffset.UTC)
-              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").format(timeStamp)
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
-              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, timeStamp, version)))
+              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
 
               val application = anApplication(environment = deployedTo, access = access)
                 .withCheckInformation(checkInformation)

@@ -16,7 +16,6 @@
 
 package views.ppns
 
-import java.time.LocalDateTime
 import scala.jdk.CollectionConverters._
 
 import cats.data.NonEmptyList
@@ -55,7 +54,6 @@ class PushSecretsViewSpec extends CommonViewSpec
   "Push secrets page" should {
     val request = FakeRequest().withCSRFToken
 
-    val now                               = LocalDateTime.now()
     val application                       = sampleApp
     val pushSecrets: NonEmptyList[String] = NonEmptyList.one("the secret")
 

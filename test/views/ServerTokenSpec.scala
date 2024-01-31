@@ -16,7 +16,6 @@
 
 package views
 
-import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 import scala.jdk.CollectionConverters._
 
@@ -32,13 +31,15 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder {
+class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder
+    with FixedClock {
 
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -52,20 +53,19 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val request   = FakeRequest().withCSRFToken
     val developer = buildDeveloperWithRandomId("Test".toLaxEmail, "Test", "Test", None).loggedIn
 
-    val now         = LocalDateTime.now()
     val application = Application(
       ApplicationId.random,
       ClientId("Test Application Client ID"),
       "Test Application",
-      now,
-      Some(now),
+      instant,
+      Some(instant),
       None,
       grantLength,
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
-      state = ApplicationState(updatedOn = now),
+      state = ApplicationState(updatedOn = instant),
       checkInformation = None
     )
 

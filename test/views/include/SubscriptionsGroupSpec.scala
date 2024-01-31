@@ -16,8 +16,6 @@
 
 package views.include
 
-import java.time.{LocalDateTime, ZoneOffset}
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import views.helper.CommonViewSpec
@@ -31,6 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, SubscriptionsBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
@@ -47,19 +46,18 @@ class SubscriptionsGroupSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with DeveloperBuilder
+    with FixedClock {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   val loggedInDeveloper: DeveloperSession = buildDeveloper("givenname.familyname@example.com".toLaxEmail, "Givenname", "Familyname").loggedIn
-  val now: LocalDateTime                  = LocalDateTime.now(ZoneOffset.UTC)
-
-  val applicationId: ApplicationId = ApplicationId.random
-  val clientId: ClientId           = ClientId("clientId123")
-  val applicationName              = "Test Application"
-  val apiName                      = "Test API"
-  val apiContext: ApiContext       = ApiContext("test")
-  val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
+  val applicationId: ApplicationId        = ApplicationId.random
+  val clientId: ClientId                  = ClientId("clientId123")
+  val applicationName                     = "Test Application"
+  val apiName                             = "Test API"
+  val apiContext: ApiContext              = ApiContext("test")
+  val apiVersion: ApiVersionNbr           = ApiVersionNbr("1.0")
 
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
@@ -77,8 +75,8 @@ class SubscriptionsGroupSpec
         applicationId,
         clientId,
         applicationName,
-        now,
-        Some(now),
+        instant,
+        Some(instant),
         None,
         grantLength,
         environment,
@@ -113,11 +111,11 @@ class SubscriptionsGroupSpec
   }
 
   "subscriptionsGroup" when {
-    val productionState                   = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+    val productionState                   = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
     val pendingGatekeeperApprovalState    =
-      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
     val pendingRequesterVerificationState =
-      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), now)
+      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
 
     "logged in as a developer" should {
       val role = Collaborator.Roles.DEVELOPER
@@ -130,7 +128,7 @@ class SubscriptionsGroupSpec
       }
 
       "render enabled toggles for a created production app" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState(updatedOn = now))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState(updatedOn = instant))
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
@@ -169,7 +167,7 @@ class SubscriptionsGroupSpec
       }
 
       "render enabled toggles for a created production app" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState(updatedOn = now))
+        val page = Page(role, Environment.PRODUCTION, ApplicationState(updatedOn = instant))
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None

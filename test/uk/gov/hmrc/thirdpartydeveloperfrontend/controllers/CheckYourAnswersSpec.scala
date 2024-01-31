@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit.MINUTES
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
@@ -64,7 +64,7 @@ class CheckYourAnswersSpec
     with SubscriptionsBuilder
     with FixedClock {
 
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, now())
+  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 
   val appName: String = "app"
   val apiVersion      = ApiVersionNbr("version")
@@ -72,9 +72,9 @@ class CheckYourAnswersSpec
   val anotherCollaboratorEmail               = "collaborator@example.com".toLaxEmail
   val hashedAnotherCollaboratorEmail: String = anotherCollaboratorEmail.text.toSha256
 
-  val testing: ApplicationState         = ApplicationState(State.TESTING, None, None, None, LocalDateTime.now.minusMinutes(1))
-  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), Some("ABCD"), now())
-  val pendingApproval: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), None, now())
+  val testing: ApplicationState         = ApplicationState(State.TESTING, None, None, None, instant.minus(1, MINUTES))
+  val production: ApplicationState      = ApplicationState(State.PRODUCTION, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), Some("ABCD"), instant)
+  val pendingApproval: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("thirdpartydeveloper@example.com"), Some("thirdpartydeveloper"), None, instant)
 
   val appTokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
@@ -228,8 +228,8 @@ class CheckYourAnswersSpec
         appId,
         clientId,
         appName,
-        LocalDateTime.now(ZoneOffset.UTC),
-        Some(LocalDateTime.now(ZoneOffset.UTC)),
+        instant,
+        Some(instant),
         None,
         grantLength,
         Environment.PRODUCTION,
@@ -270,7 +270,7 @@ class CheckYourAnswersSpec
           providedPrivacyPolicyURL = true,
           providedTermsAndConditionsURL = true,
           teamConfirmed = true,
-          termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, now(), "1.0"))
+          termsOfUseAgreements = List(TermsOfUseAgreement("test@example.com".toLaxEmail, instant, "1.0"))
         )
       )
     )

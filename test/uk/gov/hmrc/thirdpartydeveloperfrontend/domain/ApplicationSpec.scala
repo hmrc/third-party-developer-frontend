@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
+import java.time.temporal.ChronoUnit.DAYS
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -27,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
@@ -35,15 +37,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
-class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker {
+class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker with FixedClock {
 
   val developer: Developer                = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
   val administrator: Developer            = adminDeveloper
-  val now: LocalDateTime                  = LocalDateTime.now()
 
-  val productionApplicationState: ApplicationState = ApplicationState(State.PRODUCTION, Some("other email"), Some("name"), Some("123"), now)
-  val testingApplicationState: ApplicationState    = ApplicationState(updatedOn = now)
+  val productionApplicationState: ApplicationState = ApplicationState(State.PRODUCTION, Some("other email"), Some("name"), Some("123"), instant)
+  val testingApplicationState: ApplicationState    = ApplicationState(updatedOn = instant)
   val responsibleIndividual: ResponsibleIndividual = ResponsibleIndividual(FullName("Mr Responsible"), "ri@example.com".toLaxEmail)
 
   val importantSubmissionData: ImportantSubmissionData = ImportantSubmissionData(
@@ -52,7 +53,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     Set(ServerLocation.InUK),
     TermsAndConditionsLocations.InDesktopSoftware,
     PrivacyPolicyLocations.InDesktopSoftware,
-    List(TermsOfUseAcceptance(responsibleIndividual, LocalDateTime.now().minusYears(1), SubmissionId.random, 0))
+    List(TermsOfUseAcceptance(responsibleIndividual, instant.minus(365, DAYS), SubmissionId.random, 0))
   )
 
   describe("Application.canViewCredentials()") {
@@ -277,8 +278,8 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
       ApplicationId.random,
       ClientId("clientId"),
       "app name",
-      LocalDateTime.now(),
-      Some(LocalDateTime.now()),
+      instant,
+      Some(instant),
       None,
       grantLength = Period.ofDays(547),
       environment,

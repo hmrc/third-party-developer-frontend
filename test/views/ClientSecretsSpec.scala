@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 import java.util.UUID
 import scala.jdk.CollectionConverters._
 
@@ -60,25 +60,25 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     val request   = FakeRequest().withCSRFToken
     val developer = standardDeveloper.loggedIn
 
-    val clientSecret1 = ClientSecretResponse(ClientSecret.Id.random, "", now())
-    val clientSecret2 = ClientSecretResponse(ClientSecret.Id.random, "", now())
-    val clientSecret3 = ClientSecretResponse(ClientSecret.Id.random, "", now())
-    val clientSecret4 = ClientSecretResponse(ClientSecret.Id.random, "", now())
-    val clientSecret5 = ClientSecretResponse(ClientSecret.Id.random, "", now())
+    val clientSecret1 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
+    val clientSecret2 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
+    val clientSecret3 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
+    val clientSecret4 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
+    val clientSecret5 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
 
     val application = Application(
       ApplicationId(UUID.randomUUID()),
       ClientId("Test Application Client ID"),
       "Test Application",
-      now(),
-      Some(now()),
+      instant,
+      Some(instant),
       None,
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
       collaborators = Set(developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
-      state = ApplicationState(State.PRODUCTION, Some("requester@test.com"), Some("requester"), Some("verificationCode"), now()),
+      state = ApplicationState(State.PRODUCTION, Some("requester@test.com"), Some("requester"), Some("verificationCode"), instant),
       checkInformation = None
     )
 

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.inject.Singleton
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
@@ -27,7 +27,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 object TermsOfUseService {
-  case class TermsOfUseAgreementDetails(emailAddress: LaxEmailAddress, name: Option[String], date: LocalDateTime, version: Option[String])
+  case class TermsOfUseAgreementDetails(emailAddress: LaxEmailAddress, name: Option[String], date: Instant, version: Option[String])
 }
 
 @Singleton

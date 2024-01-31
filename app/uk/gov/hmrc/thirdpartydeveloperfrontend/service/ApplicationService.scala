@@ -64,7 +64,7 @@ class ApplicationService @Inject() (
   }
 
   def updatePrivacyPolicyLocation(application: Application, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, now(), newLocation)
+    val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant(), newLocation)
     dispatchCmd(application.id, request)
   }
 
@@ -75,7 +75,7 @@ class ApplicationService @Inject() (
       emailAddress: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, now(), fullName, emailAddress)
+    val request = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, instant(), fullName, emailAddress)
     dispatchCmd(application.id, request)
   }
 
@@ -85,17 +85,17 @@ class ApplicationService @Inject() (
       newLocation: TermsAndConditionsLocation
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, now(), newLocation)
+    val request = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant(), newLocation)
     dispatchCmd(application.id, request)
   }
 
   def acceptResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.ChangeResponsibleIndividualToOther(code, now())
+    val request = ApplicationCommands.ChangeResponsibleIndividualToOther(code, instant())
     dispatchCmd(applicationId, request)
   }
 
   def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.DeclineResponsibleIndividual(code, now())
+    val request = ApplicationCommands.DeclineResponsibleIndividual(code, instant())
     dispatchCmd(applicationId, request)
   }
 
@@ -107,7 +107,7 @@ class ApplicationService @Inject() (
       riEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
-    val request = ApplicationCommands.VerifyResponsibleIndividual(userId, now(), requesterName, riName, riEmail)
+    val request = ApplicationCommands.VerifyResponsibleIndividual(userId, instant(), requesterName, riName, riEmail)
     dispatchCmd(application.id, request)
   }
 
@@ -152,7 +152,7 @@ class ApplicationService @Inject() (
                               "appId"                   -> appId.toString(),
                               "requestedByName"         -> requesterName,
                               "requestedByEmailAddress" -> requesterEmail.text,
-                              "timestamp"               -> now().toString
+                              "timestamp"               -> instant().toString
                             )
                           )
       } yield ticketResponse
@@ -171,7 +171,7 @@ class ApplicationService @Inject() (
 
     if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
-      val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, now())
+      val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant())
       dispatchCmd(application.id, deleteRequest)
 
     } else {
@@ -191,7 +191,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(Some(userId), deleteDeveloperTicket)
-      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> now().toString))
+      _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> instant().toString))
     } yield ticketResponse
   }
 
@@ -200,7 +200,7 @@ class ApplicationService @Inject() (
 
     for {
       ticketResponse <- deskproConnector.createTicket(userId, remove2SVTicket)
-      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email.text, "timestamp" -> now().toString))
+      _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email.text, "timestamp" -> instant().toString))
     } yield ticketResponse
   }
 
@@ -220,7 +220,7 @@ class ApplicationService @Inject() (
         "userName"               -> name,
         "satisfactionRating"     -> rating,
         "improvementSuggestions" -> improvementSuggestions,
-        "timestamp"              -> now().toString
+        "timestamp"              -> instant().toString
       )
     )
   }

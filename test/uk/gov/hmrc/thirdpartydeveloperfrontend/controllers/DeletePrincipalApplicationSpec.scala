@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -79,7 +79,7 @@ class DeletePrincipalApplicationSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    private val startOfDay: LocalDateTime = LocalDate.now.atStartOfDay()
+    private val startOfDay: Instant = LocalDate.now.atStartOfDay().asInstant
 
     val application = Application(
       appId,

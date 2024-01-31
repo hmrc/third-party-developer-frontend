@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import java.time.{LocalDateTime, Period}
+import java.time.Period
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividual, TermsOfUseAcceptance, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
-class ApplicationSpec extends HmrcSpec {
+class ApplicationSpec extends HmrcSpec with FixedClock {
   val url            = "http://example.com"
   val standardAccess = Access.Standard()
 
@@ -42,8 +43,8 @@ class ApplicationSpec extends HmrcSpec {
     ApplicationId.random,
     ClientId("client"),
     "name",
-    LocalDateTime.now(),
-    Some(LocalDateTime.now()),
+    instant,
+    Some(instant),
     None,
     Period.ofDays(1),
     Environment.PRODUCTION,

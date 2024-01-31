@@ -16,7 +16,7 @@
 
 package views
 
-import java.time.{Instant, LocalDateTime, ZoneOffset}
+import java.time.temporal.ChronoUnit.DAYS
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -164,7 +164,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     val appName       = "App name 1"
     val appUserRole   = Collaborator.Roles.ADMINISTRATOR
-    val appCreatedOn  = LocalDateTime.now(ZoneOffset.UTC).minusDays(1)
+    val appCreatedOn  = instant.minus(1, DAYS)
     val appLastAccess = Some(appCreatedOn)
 
     val sandboxAppSummaries = Seq(
@@ -251,7 +251,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with outstanding terms of use box" should {
       "work in Qa/Dev with invites to display" in new QaAndDev with Setup {
-        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, instant, instant, instant, None, EMAIL_SENT))
 
         implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites).body)
 
@@ -275,7 +275,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with no outstanding terms of use box" should {
       "work in Qa/Dev with an invite that has granted submissions" in new QaAndDev with Setup {
-        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, instant, instant, instant, None, EMAIL_SENT))
         val submissions: List[Submission]       = List(grantedSubmission)
 
         implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
@@ -290,7 +290,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "show the applications page with review terms of use box" should {
       "work in Qa/Dev with submissions in review" in new QaAndDev with Setup {
-        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, instant, instant, instant, None, EMAIL_SENT))
         val submissions: List[Submission]       = List(submittedSubmission)
 
         implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, submissions).body)
@@ -303,7 +303,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "work in Qa/Dev with no submissions in review" in new QaAndDev with Setup {
-        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, Instant.now(), Instant.now(), Instant.now(), None, EMAIL_SENT))
+        val invites: List[TermsOfUseInvitation] = List(TermsOfUseInvitation(applicationId, instant, instant, instant, None, EMAIL_SENT))
 
         implicit val document: Document = Jsoup.parse(renderPage(sandboxAppSummaries, productionAppSummaries, Set(applicationId), invites, List.empty).body)
 
@@ -325,9 +325,8 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       }
 
       "show the last access and user role" in new ProdAndET with Setup {
-        val datetime: LocalDateTime            = LocalDateTime.now(ZoneOffset.UTC)
-        val datetimeText: String               = DateFormatter.standardFormatter.format(datetime)
-        val calledApp: Seq[ApplicationSummary] = sandboxAppSummaries.map(_.copy(lastAccess = Some(datetime)))
+        val datetimeText: String               = DateFormatter.standardFormatter.format(instant)
+        val calledApp: Seq[ApplicationSummary] = sandboxAppSummaries.map(_.copy(lastAccess = Some(instant)))
         implicit val document: Document        = Jsoup.parse(renderPage(calledApp, Seq.empty, Set(applicationId)).body)
 
         showsAppName(appName)

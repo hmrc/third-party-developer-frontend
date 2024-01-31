@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{LocalDateTime, Period}
+import java.time.{Instant, Period}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
@@ -33,6 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
@@ -40,9 +41,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSug
 class ApplicationCommandConnectorSpec
     extends AsyncHmrcSpec
     with WireMockSugar
-    with GuiceOneAppPerSuite {
+    with GuiceOneAppPerSuite
+    with FixedClock {
 
-  def anApplicationResponse(createdOn: LocalDateTime = LocalDateTime.now(), lastAccess: LocalDateTime = LocalDateTime.now()): Application = {
+  def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): Application = {
     Application(
       ApplicationId.random,
       ClientId("clientid"),
@@ -55,7 +57,7 @@ class ApplicationCommandConnectorSpec
       None,
       Set.empty,
       Access.Privileged(),
-      ApplicationState(State.TESTING, None, None, None, LocalDateTime.now()),
+      ApplicationState(State.TESTING, None, None, None, instant),
       None,
       IpAllowlist(required = false, Set.empty)
     )
@@ -72,7 +74,7 @@ class ApplicationCommandConnectorSpec
   val emailAddressToRemove = "toRemove@example.com".toLaxEmail
   val gatekeeperUserName   = "maxpower"
   val collaborator         = Collaborators.Administrator(UserId.random, emailAddressToRemove)
-  val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, LocalDateTime.now())
+  val command              = ApplicationCommands.RemoveCollaborator(Actors.GatekeeperUser(gatekeeperUserName), collaborator, instant)
 
   val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
   val url           = s"/applications/${applicationId}/dispatch"
