@@ -24,10 +24,12 @@
 @this(
   devMain: DevMainWithFormErrors,
   govukRadios: GovukRadios,
-  govukButton : GovukButton
+  govukButton : GovukButton,
+  govukInput : GovukInput,
+  govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[String], form: Form[NewSupportPageHelpChoiceForm], backUri: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[String], form: Form[NewSupportPageHelpChoiceForm], backUri: String, apiNames: List[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @errors = @{
   if(form.hasErrors) {
@@ -39,6 +41,29 @@
   } else {
     None
   }
+}
+
+@selectItems = @{
+  apiNames.map( api =>
+    SelectItem(
+      value = Some(api),
+      text = api
+    )
+  )
+}
+
+@apiChoiceHtml = {
+  @govukSelect(
+    Select(
+      id = "api-choice",
+      name = "api-choice",
+      items = selectItems,
+      label = Label(
+        content = Text("Select an API")
+      ),
+      classes = "govuk-!-width-two-thirds"
+    )
+  )
 }
 
 @devMain(
@@ -71,7 +96,8 @@
             id = Some("making-an-api-call"),
             content = Text("Making an API call"),
             value = Some("api-call"),
-            hint = None
+            hint = None,
+            conditionalHtml = Some(apiChoiceHtml)
           ), 
           RadioItem(
             id = Some("reporting-documentation"),

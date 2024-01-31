@@ -334,6 +334,7 @@ object SignOutSurveyForm {
 }
 
 final case class SupportEnquiryForm(fullname: String, email: String, comments: String)
+
 object SupportEnquiryForm {
 
   val form: Form[SupportEnquiryForm] = Form(
@@ -346,7 +347,9 @@ object SupportEnquiryForm {
 }
 
 final case class NewSupportPageHelpChoiceForm(helpWithChoice: String)
+
 object NewSupportPageHelpChoiceForm {
+
   val form: Form[NewSupportPageHelpChoiceForm] = Form(
     mapping(
       "helpWithChoice" -> text

@@ -19,19 +19,18 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{ApiPageView, LandingPageView}
+import views.html.support.{ApiSupportPageView, LandingPageView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService}
-import play.api.mvc.Result
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
 @Singleton
 class Support @Inject() (
@@ -43,7 +42,8 @@ class Support @Inject() (
     supportEnquiryView: SupportEnquiryView,
     supportThankyouView: SupportThankyouView,
     landingPageView: LandingPageView,
-    apiPageView: ApiPageView
+    apiSupportPageView: ApiSupportPageView,
+    supportService: SupportService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends BaseController(mcc) with ApplicationLogger {
@@ -80,20 +80,26 @@ class Support @Inject() (
   }
 
   def chooseSupportOption: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderApiSupportPageView = {
+      for {
+        openApis    <- supportService.fetchAllPublicApis()
+        serviceNames = openApis.map(_.name)
+      } yield Ok(
+        apiSupportPageView(
+          fullyloggedInDeveloper.map(_.displayedName),
+          NewSupportPageHelpChoiceForm.form,
+          routes.Support.raiseSupportEnquiry(true).url,
+          serviceNames
+        )
+      )
+    }
+
     def handleValidForm(form: NewSupportPageHelpChoiceForm): Future[Result] = {
       form.helpWithChoice match {
-        case "api" => Future.successful(
-          Ok(
-            apiPageView(
-              fullyloggedInDeveloper.map(_.displayedName),
-              NewSupportPageHelpChoiceForm.form,
-              routes.Support.raiseSupportEnquiry(true).url
-            )
-          )
-        )
-        case "account" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
+        case "api"         => renderApiSupportPageView
+        case "account"     => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
         case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
-        case _ => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
+        case _             => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
       }
     }
 

@@ -146,7 +146,6 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
   }
 
   "fetchApiDefinitionsVisibleToUser" should {
-
     "retrieve a list of service a user can see" in new Setup {
       val userId                     = UserId.random
       val serviceName                = ServiceName("api1")
@@ -156,7 +155,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
           userId,
           s"""[{ "serviceName": "$serviceName", "serviceBaseUrl": "http://serviceBaseUrl", "name": "$name", "description": "", "context": "context", "versions": [], "categories": ["AGENTS", "VAT"] }]"""
         )
-      val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(userId))
+      val result: Seq[ApiDefinition] = await(underTest.fetchApiDefinitionsVisibleToUser(Some(userId)))
       result.head.serviceName shouldBe serviceName
       result.head.name shouldBe name
     }
@@ -166,7 +165,7 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       ApiPlatformMicroserviceStub.stubFetchApiDefinitionsVisibleToUserFailure(userId)
 
       intercept[UpstreamErrorResponse] {
-        await(underTest.fetchApiDefinitionsVisibleToUser(userId))
+        await(underTest.fetchApiDefinitionsVisibleToUser(Some(userId)))
       }
     }
   }
