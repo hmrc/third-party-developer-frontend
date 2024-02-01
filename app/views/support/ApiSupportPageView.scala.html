@@ -19,14 +19,17 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.NewSupportPageHelpChoiceForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 
 @this(
   devMain: DevMainWithFormErrors,
   govukRadios: GovukRadios,
-  govukButton : GovukButton
+  govukButton : GovukButton,
+  govukInput : GovukInput,
+  govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[String], form: Form[NewSupportPageHelpChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[String], form: Form[NewSupportPageHelpChoiceForm], backUri: String, apiNames: List[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @errors = @{
   if(form.hasErrors) {
@@ -40,14 +43,35 @@
   }
 }
 
+@selectItems = @{
+  apiNames.map( api =>
+    SelectItem(
+      value = Some(api),
+      text = api
+    )
+  )
+}
+
+@apiChoiceHtml = {
+  @govukSelect(
+    Select(
+      id = "api-choice",
+      name = "api-choice",
+      items = selectItems,
+      label = Label(
+        content = Text("Select an API")
+      ),
+      classes = "govuk-!-width-two-thirds"
+    )
+  )
+}
+
 @devMain(
   form,
-  title = "What do you need help with?",
+  title = "Which best describes what you need help with?",
   userFullName = loggedIn,
-  breadcrumbs = Seq(
-    Crumb.home
-  ),
-  developerSession = None
+  developerSession = None,
+  back = BackButtonToUrl(backUri)
 ) {
   @helper.form(action = routes.Support.chooseSupportOption) {
     @helper.CSRF.formField
@@ -58,7 +82,7 @@
           Fieldset(
             legend = Some(
               Legend(
-                content = Text("What do you need help with?"),
+                content = Text("Which best describes what you need help with?"),
                 classes = "govuk-fieldset__legend--l",
                 isPageHeading = true
               )
@@ -69,34 +93,29 @@
         name = "helpWithChoice",
         items = Seq(
           RadioItem(
-            id = Some("using-an-api"),
-            content = Text("Using an API"),
-            value = Some("api"),
-            hint = Some(
-              Hint(
-                content = Text("API calls, API documentation, service guides, roadmaps")
-              )
-            )
+            id = Some("making-an-api-call"),
+            content = Text("Making an API call"),
+            value = Some("api-call"),
+            hint = None,
+            conditionalHtml = Some(apiChoiceHtml)
           ), 
           RadioItem(
-            id = Some("signing-into-account"),
-            content = Text("Signing in to my account"),
-            value = Some("account"),
-            hint = Some(
-              Hint(
-                content = Text("Forgotten password, access codes")
-              )
-            )
+            id = Some("reporting-documentation"),
+            content = Text("Reporting documentation for an API that is inaccurate or missing information"),
+            value = Some("reporting-documentation"),
+            hint = None
           ), 
           RadioItem(
-            id = Some("setting-up-application"),
-            content = Text("Setting up or managing an application"),
-            value = Some("application"),
-            hint = Some(
-              Hint(
-                content = Text("Terms of use agreement, giving team members access, general application details")
-              )
-            )
+            id = Some("finding-documentation"),
+            content = Text("Finding documentation for an API"),
+            value = Some("finding-documentation"),
+            hint = None
+          ), 
+          RadioItem(
+            id = Some("private-api-documentation"),
+            content = Text("Getting access to documentation for a private API"),
+            value = Some("private-api-documentation"),
+            hint = None
           )
         )
       )

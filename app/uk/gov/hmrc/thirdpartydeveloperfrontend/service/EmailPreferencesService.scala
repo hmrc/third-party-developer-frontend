@@ -55,7 +55,7 @@ class EmailPreferencesService @Inject() (
       val visibleApis = apmConnector.fetchCombinedApisVisibleToUser(developerSession.developer.userId)
         .flatMap {
           case Right(x) => successful(x)
-          case Left(_)  => apmConnector.fetchApiDefinitionsVisibleToUser(developerSession.developer.userId).map(_.map(y =>
+          case Left(_)  => apmConnector.fetchApiDefinitionsVisibleToUser(Some(developerSession.developer.userId)).map(_.map(y =>
               CombinedApi(y.serviceName, y.name, y.categories, REST_API)
             ))
         }
