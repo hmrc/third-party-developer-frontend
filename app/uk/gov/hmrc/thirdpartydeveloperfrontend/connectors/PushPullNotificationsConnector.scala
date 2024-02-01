@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import akka.actor.ActorSystem
-import akka.pattern.FutureTimeoutSupport
 import cats.data.OptionT
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.HeaderNames
 import play.api.libs.json.{Json, Reads}

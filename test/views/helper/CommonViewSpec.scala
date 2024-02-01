@@ -29,9 +29,9 @@ import play.api.mvc.MessagesControllerComponents
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown with Matchers {
+trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Matchers {
   val mcc                                         = app.injector.instanceOf[MessagesControllerComponents]
   val messagesApi                                 = mcc.messagesApi
   val grantLength: Period                         = Period.ofDays(547)

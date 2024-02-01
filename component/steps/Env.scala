@@ -37,7 +37,6 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
-import uk.gov.hmrc.webdriver.SingletonDriver
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
@@ -67,11 +66,10 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   lazy val driver: WebDriver = createWebDriver()
 
   private lazy val browser           = Properties.propOrElse("browser", "chrome")
-  private lazy val accessibilityTest = Properties.propOrElse("accessibility.test", "false") == "true"
 
   private def createWebDriver(): WebDriver = {
     val driver = browser match {
-      case "chrome"         => if (accessibilityTest) SingletonDriver.getInstance() else createChromeDriver()
+      case "chrome"         => createChromeDriver()
       case "remote-chrome"  => createRemoteChromeDriver()
       case "firefox"        => createFirefoxDriver()
       case "remote-firefox" => createRemoteFirefoxDriver()

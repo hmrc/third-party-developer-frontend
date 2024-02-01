@@ -21,8 +21,8 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import akka.actor.ActorSystem
-import akka.pattern.FutureTimeoutSupport
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.Status.{BAD_REQUEST, CREATED, NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.{JsSuccess, Json}

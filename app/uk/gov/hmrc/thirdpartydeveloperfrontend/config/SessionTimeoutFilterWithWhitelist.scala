@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 
 case class WhitelistedCall(uri: String, method: String)
 
+@Singleton
 class SessionTimeoutFilterWithWhitelist @Inject() (config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, override val mat: Materializer)
     extends SessionTimeoutFilter(config) {
 
@@ -33,8 +34,9 @@ class SessionTimeoutFilterWithWhitelist @Inject() (config: SessionTimeoutFilterC
   val whitelistedCalls: Set[WhitelistedCall] = Set(WhitelistedCall(loginUrl, "GET"), WhitelistedCall(loginUrl, "POST"))
 
   override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    if (whitelistedCalls.contains(WhitelistedCall(rh.path, rh.method))) f(rh)
-    else {
+    if (whitelistedCalls.contains(WhitelistedCall(rh.path, rh.method))) {
+      f(rh)
+    } else {
       super.apply(f)(rh)
     }
   }
