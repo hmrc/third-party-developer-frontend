@@ -82,8 +82,8 @@ class Support @Inject() (
   def chooseSupportOption: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderApiSupportPageView = {
       for {
-        openApis    <- supportService.fetchAllPublicApis()
-        serviceNames = openApis.map(_.name)
+        publicApis  <- supportService.fetchAllPublicApis()
+        serviceNames = publicApis.map(_.name)
       } yield Ok(
         apiSupportPageView(
           fullyloggedInDeveloper.map(_.displayedName),
