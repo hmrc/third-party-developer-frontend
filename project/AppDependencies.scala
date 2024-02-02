@@ -50,5 +50,6 @@ object AppDependencies {
     "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
     "io.cucumber"                 %  "cucumber-java"                      % cucumberVersion,
     "io.cucumber"                 %  "cucumber-junit"                     % cucumberVersion,
+    "com.titusfortner"            %  "selenium-logger"                    % "2.3.0",
   ).map(_ % "component")
 }

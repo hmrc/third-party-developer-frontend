@@ -39,6 +39,7 @@ import play.api.test.TestServer
 import play.core.server.ServerConfig
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import com.titusfortner.logging.SeleniumLogger
 
 trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   var passedTestCount: Int = 0
@@ -65,9 +66,10 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   }
   lazy val driver: WebDriver = createWebDriver()
 
-  private lazy val browser           = Properties.propOrElse("browser", "chrome")
+  private lazy val browser = Properties.propOrElse("browser", "chrome")
 
   private def createWebDriver(): WebDriver = {
+    SeleniumLogger.enable();
     val driver = browser match {
       case "chrome"         => createChromeDriver()
       case "remote-chrome"  => createRemoteChromeDriver()
