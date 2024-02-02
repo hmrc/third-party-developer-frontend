@@ -47,7 +47,7 @@ class DeskproService @Inject() (
     for {
       deskproResult <- deskproConnector.createTicket(userId, ticket)
       // TODO: The Deskpro Horizon creation is included here for proof of concept. This needs to move to a separate service
-      _             <- if (appConfig.useDeskproHorizon) deskproHorizonConnector.createTicket(ticket) else Future.successful(TicketCreated)
+      _             <- if (appConfig.deskproHorizonEnabled) deskproHorizonConnector.createTicket(ticket) else Future.successful(TicketCreated)
     } yield deskproResult
   }
 }
