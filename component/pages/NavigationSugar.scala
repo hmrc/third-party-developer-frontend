@@ -17,8 +17,6 @@
 package pages
 
 import org.mockito.MockitoSugar
-import org.openqa.selenium.WebDriver
-import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{Assertion, Assertions}
@@ -26,8 +24,10 @@ import org.scalatestplus.selenium.WebBrowser
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
+import org.openqa.selenium.WebDriver
+import org.scalatest.concurrent.Eventually
 
-trait NavigationSugar extends WebBrowser with Eventually with Assertions with Matchers with MockitoSugar {
+trait NavigationSugar extends WebBrowser with Assertions with Matchers with Eventually with MockitoSugar {
   private val mockAppConfig = mock[ApplicationConfig]
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
@@ -44,9 +44,7 @@ trait NavigationSugar extends WebBrowser with Eventually with Assertions with Ma
   }
 
   def on(page: WebPage)(implicit webDriver: WebDriver): Assertion = {
-    eventually {
-      find(tagName("body")) // .filter(_ => page.isCurrentPage)
-    }
+    page.bodyText() // find(tagName("body")) // .filter(_ => page.isCurrentPage)
     withClue(s"Currently in page: $currentUrl " + find(tagName("h1")).map(_.text).fold(" - ")(h1 => s", with title '$h1' - ")) {
       assert(page.isCurrentPage, s"Page was not loaded: ${page.url}")
     }

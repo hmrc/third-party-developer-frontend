@@ -16,15 +16,13 @@
 
 package pages
 
-import org.openqa.selenium.WebDriver
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.selenium.{Page, WebBrowser}
-import steps.Env
+import utils.BrowserDriver
 
 case class Link(href: String, text: String)
 
-trait WebLink extends Page with WebBrowser with Matchers {
-  implicit val webDriver: WebDriver = Env.driver
+trait WebLink extends Page with WebBrowser with Matchers with BrowserDriver {
 
   override def toString = this.getClass.getSimpleName
 }
@@ -32,7 +30,7 @@ trait WebLink extends Page with WebBrowser with Matchers {
 trait WebPage extends WebLink {
   def isCurrentPage: Boolean
 
-  def heading = tagName("h1").element.text
+  def heading() = tagName("h1").element.text
 
-  def bodyText = tagName("body").element.text
+  def bodyText() = tagName("body").element.text
 }

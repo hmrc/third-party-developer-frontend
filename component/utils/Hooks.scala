@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package steps
+package utils
 
-import org.openqa.selenium._
-import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
-
-trait PageSugar {
-  implicit val driver: WebDriver
-  val seconds = java.time.Duration.ofSeconds(5)
-
-  def waitForElement(by: By): WebElement = new WebDriverWait(driver, seconds).until(
-    new ExpectedCondition[WebElement] {
-      override def apply(d: WebDriver): WebElement = d.findElement(by)
-    }
-  )
+import io.cucumber.scala.{EN, ScalaDsl}
+import uk.gov.hmrc.selenium.webdriver.Browser
+import uk.gov.hmrc.selenium.webdriver.Driver
+ 
+object Hooks extends ScalaDsl with EN with Browser {
+  Before {
+    startBrowser()
+    Driver.instance.manage().deleteAllCookies()
+  }
+ 
+  After {
+    quitBrowser()
+  }
+ 
 }

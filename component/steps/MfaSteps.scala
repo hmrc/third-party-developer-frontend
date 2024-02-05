@@ -22,7 +22,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{Cookie => SCookie, WebDriver}
+import org.openqa.selenium.{Cookie => SCookie}
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
@@ -36,11 +36,10 @@ import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
+import utils.BrowserDriver
 
-class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
+class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with BrowserDriver
     with CustomMatchers with MfaData {
-
-  implicit val webDriver: WebDriver = Env.driver
 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
@@ -99,11 +98,11 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   Then("""My device session is set$""") { () =>
-    val deviceSessionCookie = webDriver.manage().getCookieNamed(deviceCookieName)
+    val deviceSessionCookie = driver.manage().getCookieNamed(deviceCookieName)
     deviceSessionCookie should not be null
   }
   Then("""My device session is not set$""") { () =>
-    val authCookie = webDriver.manage().getCookieNamed(deviceCookieName)
+    val authCookie = driver.manage().getCookieNamed(deviceCookieName)
     authCookie shouldBe null
   }
 
@@ -157,7 +156,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) = {
-    webDriver.manage().deleteAllCookies()
+    driver.manage().deleteAllCookies()
     val mfaEnabled         = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
@@ -186,7 +185,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   Given("""^I already have a device cookie$""") {
     val cookie = new SCookie(deviceCookieName, deviceCookieValue)
-    webDriver.manage().addCookie(cookie)
+    driver.manage().addCookie(cookie)
   }
 
   def setupLoggedOrPartLoggedInDeveloper(

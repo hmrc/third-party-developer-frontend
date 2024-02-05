@@ -26,9 +26,10 @@ import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.interactions.Actions
-import org.openqa.selenium.{By, WebDriver, WebElement}
+import org.openqa.selenium.{By, WebElement}
 import org.scalatest.matchers.should.Matchers
 import pages._
+import utils.BrowserDriver
 
 object TableMisuseAdapters {
 
@@ -44,8 +45,7 @@ object TableMisuseAdapters {
   }
 }
 
-class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers {
-  implicit val webDriver: WebDriver = Env.driver
+class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with BrowserDriver {
 
   val mfaPages = Map(
     "Authenticator App Start Page"         -> AuthAppStartPage,
@@ -106,12 +106,12 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then("""^the user-nav header contains a '(.*)' link""") { (linkText: String) =>
-    val header = webDriver.findElement(By.id("proposition-links"))
+    val header = driver.findElement(By.id("proposition-links"))
     header.findElement(By.linkText(linkText)).isDisplayed shouldBe true
   }
 
   Then("""^The current page contains link '(.*)' to '(.*)'$""") { (linkText: String, pageName: String) =>
-    val link: WebElement = Env.driver.findElement(By.linkText(linkText))
+    val link: WebElement = driver.findElement(By.linkText(linkText))
     val page             = withClue(s"page not found: $pageName")(pages(pageName))
     link.getAttribute("href") shouldBe page.url
   }
@@ -129,7 +129,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
 
   def verifyData(fieldData: DataTable, f: WebElement => String, selector: String => By): Unit = {
     val keyValues: mutable.Map[String, String] = fieldData.asMap(classOf[String], classOf[String]).asScala
-    val body                                   = Env.driver.findElement(By.tagName("body"))
+    val body                                   = driver.findElement(By.tagName("body"))
     keyValues.foreach(keyValue =>
       withClue(s"The field '${keyValue._1}' does not have value: '${keyValue._2}'") {
         eventually(timeout(1 second)) { f(body.findElement(selector(keyValue._1))) shouldBe keyValue._2 }
@@ -139,35 +139,35 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
 
   Then("""^I see on current page:$""") { (labels: DataTable) =>
     val textsToFind = TableMisuseAdapters.valuesInColumn(0)(labels)
-    Env.driver.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
+    driver.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
   }
 
   When("""^I click on the '(.*)' link$""") { linkText: String =>
-    val link    = webDriver.findElement(By.linkText(linkText))
-    val actions = new Actions(webDriver)
+    val link    = driver.findElement(By.linkText(linkText))
+    val actions = new Actions(driver)
     actions.moveToElement(link)
     actions.click()
     actions.perform()
   }
 
   When("""^I click on the button with id '(.*)'$""") { id: String =>
-    val link    = webDriver.findElement(By.id(id))
-    val actions = new Actions(webDriver)
+    val link    = driver.findElement(By.id(id))
+    val actions = new Actions(driver)
     actions.moveToElement(link)
     actions.click()
     actions.perform()
   }
 
   When("""^I click on the '(.*)' button""") { buttonText: String =>
-    val element = webDriver.findElement(By.xpath(s"//button[text()='$buttonText']"))
-    val actions = new Actions(webDriver)
+    val element = driver.findElement(By.xpath(s"//button[text()='$buttonText']"))
+    val actions = new Actions(driver)
     actions.moveToElement(element)
     actions.click()
     actions.perform()
   }
 
   When("""^I click on the radio button with id '(.*)'""") { id: String =>
-    val button = webDriver.findElement(By.id(id))
+    val button = driver.findElement(By.id(id))
     button.click()
   }
 }

@@ -73,9 +73,9 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings) ++ scalafixConfigSettings(ComponentTest))
   .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
   .settings(
-    ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    // ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
-    ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
+    ComponentTest / unmanagedResourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "features"),
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)

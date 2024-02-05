@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package js
 import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
 import io.cucumber.junit.{Cucumber, CucumberOptions}
 import org.junit.runner.RunWith
-import org.junit.{AfterClass, BeforeClass}
-import steps.Env
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
@@ -32,12 +30,3 @@ import steps.Env
   tags = "not @wip and not @skip"
 )
 class FeatureSuite
-
-object FeatureSuite {
-
-  @BeforeClass
-  def beforeCukesRun() = Env.startServer()
-
-  @AfterClass
-  def afterCukesRun() = Env.shutdown()
-}

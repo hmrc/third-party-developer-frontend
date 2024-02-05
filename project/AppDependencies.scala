@@ -48,9 +48,12 @@ object AppDependencies {
   ).map(_ % testScope) ++
   Seq(
     "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
-    "io.cucumber"                 %  "cucumber-java"                      % cucumberVersion,
     "io.cucumber"                 %  "cucumber-junit"                     % cucumberVersion,
     "com.titusfortner"            %  "selenium-logger"                    % "2.3.0",
-    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0"
+    "junit"                       %  "junit"                              % "4.13.2",
+    "com.novocode"                %  "junit-interface"                    % "0.11",
+    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0",
+    "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36",
+    "com.vladsch.flexmark"        %  "flexmark-all"                       % "0.62.2",
   ).map(_ % "component")
 }

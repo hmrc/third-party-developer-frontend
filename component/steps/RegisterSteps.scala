@@ -30,8 +30,9 @@ import play.api.http.Status
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
+import utils.BrowserDriver
 
-object Form extends WebBrowser {
+object Form extends WebBrowser with BrowserDriver {
 
   def populate(a: Map[String, String])(implicit driver: WebDriver) = a.foreach {
     case (field, value) if field.contains("rememberMe")           =>
@@ -54,9 +55,7 @@ object Form extends WebBrowser {
   }
 }
 
-class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers {
-
-  implicit val webDriver: WebDriver = Env.driver
+class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with BrowserDriver {
 
   Given("""^I enter valid information for all fields:$""") { (registrationDetails: DataTable) =>
     import io.cucumber.scala.Implicits._
@@ -78,10 +77,10 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
   }
 
   When("""^I click on submit$""") { () =>
-    val element = webDriver.findElement(By.id("submit"))
-    val actions = new Actions(webDriver)
-    actions.moveToElement(element)
-    actions.click()
-    actions.perform()
+    val element = driver.findElement(By.id("submit"))
+    new Actions(driver)
+      .moveToElement(element)
+      .click()
+      .perform()
   }
 }
