@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{DeskproConnector, DeskproHorizonConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -33,6 +33,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
 
   val underTest = new DeskproService(
     mock[DeskproConnector],
+    mock[DeskproHorizonConnector],
     mock[ApplicationConfig]
   )
 
@@ -106,6 +107,28 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
 
         verify(underTest.deskproConnector).createTicket(None, expectedData)(hc)
+      }
+    }
+
+    "A valid Deskpro Horizon ticket is created" should {
+      "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro Horizon" in {
+        val title  = "Title"
+        val userId = UserId.random
+        when(underTest.appConfig.title).thenReturn(title)
+        when(underTest.appConfig.deskproHorizonEnabled).thenReturn(true)
+        when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
+        when(underTest.deskproHorizonConnector.createTicket(*)(*)).thenReturn(Future(TicketCreated))
+
+        implicit val fakeRequest = FakeRequest()
+        implicit val hc          = HeaderCarrier()
+
+        val form = SupportEnquiryForm("my name", "myemail@example.com", "my comments")
+
+        await(underTest.submitSupportEnquiry(Some(userId), form))
+
+        val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
+        verify(underTest.deskproConnector).createTicket(Some(userId), expectedData)(hc)
+        verify(underTest.deskproHorizonConnector).createTicket(expectedData)(hc)
       }
     }
   }
