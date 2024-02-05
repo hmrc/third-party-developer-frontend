@@ -11,6 +11,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import bloop.integrations.sbt.BloopDefaults
 
 Global / bloopAggregateSourceDependencies := true
+Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 lazy val appName = "third-party-developer-frontend"
 

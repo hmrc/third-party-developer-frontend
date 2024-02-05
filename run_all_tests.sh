@@ -1,4 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
+
+BROWSER=$1
+ENVIRONMENT=$2
+
 export SBT_OPTS="-XX:+CMSClassUnloadingEnabled -Xmx4G"
-sbt -Dwebdriver.chrome.driver=/usr/bin/chromedriver pre-commit
+
+sbt -Dbrowser="${BROWSER:=chrome}" -Denvironment="${ENVIRONMENT:=local}" pre-commit
+
 unset SBT_OPTS

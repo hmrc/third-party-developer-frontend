@@ -51,5 +51,6 @@ object AppDependencies {
     "io.cucumber"                 %  "cucumber-java"                      % cucumberVersion,
     "io.cucumber"                 %  "cucumber-junit"                     % cucumberVersion,
     "com.titusfortner"            %  "selenium-logger"                    % "2.3.0",
+    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0"
   ).map(_ % "component")
 }
