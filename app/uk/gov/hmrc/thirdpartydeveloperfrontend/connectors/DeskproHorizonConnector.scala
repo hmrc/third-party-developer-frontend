@@ -21,8 +21,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.http.Status.{CREATED, UNAUTHORIZED}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
@@ -30,18 +32,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
-class DeskproHorizonConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+class DeskproHorizonConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger {
 
   lazy val serviceBaseUrl: String = config.deskproHorizonUrl
   val api                         = API("deskpro-horizon")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    http.POST[DeskproHorizonTicket, HttpResponse](
-      requestUrl("/api/v2/tickets"),
-      DeskproHorizonTicket.fromDeskproTicket(deskproTicket),
-      Seq((AUTHORIZATION, config.deskproHorizonApiKey))
-    )
+    http.post(url"${requestUrl("/api/v2/tickets")}")
+      .withProxy
+      .withBody(Json.toJson(DeskproHorizonTicket.fromDeskproTicket(deskproTicket)))
+      .setHeader(AUTHORIZATION.toString() -> config.deskproHorizonApiKey)
+      .execute[HttpResponse]
       .map(response =>
         response.status match {
           case CREATED      =>

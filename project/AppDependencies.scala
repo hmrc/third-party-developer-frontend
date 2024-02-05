@@ -26,7 +26,8 @@ object AppDependencies {
     "com.google.zxing"            %  "core"                               % "3.2.1",
     "commons-validator"           %  "commons-validator"                  % "1.7",
     "uk.gov.hmrc"                 %% "api-platform-api-domain"            % apiDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-application-domain"    % appDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-application-domain"    % appDomainVersion,
+    "uk.gov.hmrc"                 %% "http-verbs-play-28"                 % "14.12.0"
   )
 
   lazy val test =  Seq(
