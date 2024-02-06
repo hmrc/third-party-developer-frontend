@@ -16,21 +16,65 @@
 
 package pages
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.selenium.{Page, WebBrowser}
-import utils.BrowserDriver
+import uk.gov.hmrc.selenium.component.PageObject
+import org.openqa.selenium.By
+import org.openqa.selenium.support.ui.Wait
+import org.openqa.selenium.support.ui.FluentWait
+import uk.gov.hmrc.selenium.webdriver.Driver
+import java.time.Duration
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
+import org.openqa.selenium.support.ui.ExpectedConditions
+import scala.jdk.CollectionConverters._
 
 case class Link(href: String, text: String)
 
-trait WebLink extends Page with WebBrowser with Matchers with BrowserDriver {
+trait WebLink extends PageObject {
+  def url(): String
+  
+  def goTo(): Unit = {
+    get(url())
+    waitForElementToBePresent(By.tagName("body"))
+  }
 
-  override def toString = this.getClass.getSimpleName
+  protected def waitForElementToBePresent(locator: By): WebElement = {
+    fluentWait.until(ExpectedConditions.presenceOfElementLocated(locator))
+  }
+
+  protected def fluentWait: Wait[WebDriver] = new FluentWait[WebDriver](Driver.instance)
+    .withTimeout(Duration.ofSeconds(3))
+    .pollingEvery(Duration.ofSeconds(1))
 }
 
 trait WebPage extends WebLink {
-  def isCurrentPage: Boolean
 
-  def heading() = tagName("h1").element.text
+  val pageHeading: String
 
-  def bodyText() = tagName("body").element.text
+  def heading() = getText(By.tagName("h1"))
+
+  def bodyText() = getText(By.tagName("body"))
+
+  def isCurrentPage(): Boolean = this.heading() == this.pageHeading
+
+  protected def findElements(location: By): List[WebElement] = {
+    Driver.instance.findElements(location).asScala.toList
+  }
+
+  protected def findElement(location: By): Option[WebElement] = {
+    findElements(location).headOption
+  }
+}
+
+object AnyWebPageWithUserLinks extends PageObject {
+  private def findElements(location: By): List[WebElement] = {
+    Driver.instance.findElements(location).asScala.toList
+  }
+
+  def navLinks() = findElements(By.id("user-nav-links")).headOption
+
+  // def signOutLink() = navLinks().flatMap(_.findElements(By.linkText("Sign out")).asScala.headOption)
+
+  // def signInLink() = navLinks().flatMap(_.findElements(By.linkText("Sign in")).asScala.headOption)
+
+  def userLink(userFullName: String) = navLinks().flatMap(_.findElements(By.linkText(userFullName)).asScala.headOption)
 }

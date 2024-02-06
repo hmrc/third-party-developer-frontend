@@ -20,37 +20,36 @@ import org.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{Assertion, Assertions}
-import org.scalatestplus.selenium.WebBrowser
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{EncryptedJson, LocalCrypto, PayloadEncryption}
-import org.openqa.selenium.WebDriver
 import org.scalatest.concurrent.Eventually
+import uk.gov.hmrc.selenium.webdriver.Driver
 
-trait NavigationSugar extends WebBrowser with Assertions with Matchers with Eventually with MockitoSugar {
+trait NavigationSugar extends Assertions with Matchers with Eventually with MockitoSugar {
   private val mockAppConfig = mock[ApplicationConfig]
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(3, Seconds)), interval = scaled(Span(100, Millis)))
   implicit val encryptedJson: EncryptedJson            = new EncryptedJson(new PayloadEncryption()(new LocalCrypto(mockAppConfig)))
 
-  def goOn(page: WebPage)(implicit webDriver: WebDriver): Assertion = {
+  def goOn(page: WebPage): Assertion = {
     go(page)
     on(page)
   }
 
-  def go(page: WebLink)(implicit webDriver: WebDriver): Unit = {
-    WebBrowser.go to page
+  def go(webLink: WebLink): Unit = {
+    webLink.goTo()
   }
 
-  def on(page: WebPage)(implicit webDriver: WebDriver): Assertion = {
-    page.bodyText() // find(tagName("body")) // .filter(_ => page.isCurrentPage)
-    withClue(s"Currently in page: $currentUrl " + find(tagName("h1")).map(_.text).fold(" - ")(h1 => s", with title '$h1' - ")) {
-      assert(page.isCurrentPage, s"Page was not loaded: ${page.url}")
+  def on(page: WebPage): Assertion = {
+    page.bodyText() // Don't care for value just that we can get it
+    withClue(s"Currently in page: ${Driver.instance.getCurrentUrl()}, with title '${page.heading()}' - ") {
+      assert(page.isCurrentPage(), s"Page was not loaded: ${page.url()}")
     }
   }
 
-  def anotherTabIsOpened()(implicit webDriver: WebDriver): Assertion = {
-    webDriver.getWindowHandles.size() shouldBe 2
+  def anotherTabIsOpened(): Assertion = {
+    Driver.instance.getWindowHandles.size() shouldBe 2
   }
 }

@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
-import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
+import org.openqa.selenium.{Dimension, OutputType}
 import org.scalatest.matchers.should.Matchers
 import stubs.AuditStub
 
@@ -30,7 +30,6 @@ import play.api.test.TestServer
 import play.core.server.ServerConfig
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import com.titusfortner.logging.SeleniumLogger
 import uk.gov.hmrc.selenium.webdriver.Browser
 
 object EnvConfig {
@@ -66,7 +65,7 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
     if (server != null) server.stop()
   }
 
-  Before { _: Scenario =>
+  Before(order = 1) { _: Scenario =>
     if (!wireMockServer.isRunning) {
       wireMockServer.start()
     }

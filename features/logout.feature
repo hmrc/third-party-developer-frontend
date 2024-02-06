@@ -10,7 +10,7 @@ Feature:
     @APIS-1467
     Scenario: TPDF should respond properly if logout fails
       Given I navigate to the 'Sign in' page
-      And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
+      And I successfully log in with 'john.smith@example.com' and 'StrongPassword1!' skipping 2SV
       And I am on the 'No Applications' page
       When I attempt to Sign out when the session expires
       Then I am on the 'Logout survey' page

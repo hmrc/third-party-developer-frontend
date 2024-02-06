@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
 import utils.BrowserDriver
 
-object Form extends WebBrowser with BrowserDriver {
+object Form extends WebBrowser {
 
   def populate(a: Map[String, String])(implicit driver: WebDriver) = a.foreach {
     case (field, value) if field.contains("rememberMe")           =>

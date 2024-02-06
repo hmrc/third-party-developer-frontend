@@ -29,7 +29,9 @@ import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.matchers.should.Matchers
 import pages._
+import org.scalatest.OptionValues
 import utils.BrowserDriver
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 object TableMisuseAdapters {
 
@@ -45,7 +47,7 @@ object TableMisuseAdapters {
   }
 }
 
-class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with BrowserDriver {
+class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with NavigationSugar with CustomMatchers with BrowserDriver {
 
   val mfaPages = Map(
     "Authenticator App Start Page"         -> AuthAppStartPage,
@@ -111,9 +113,9 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   }
 
   Then("""^The current page contains link '(.*)' to '(.*)'$""") { (linkText: String, pageName: String) =>
-    val link: WebElement = driver.findElement(By.linkText(linkText))
+    val href = CurrentPage.linkTextHref(linkText)
     val page             = withClue(s"page not found: $pageName")(pages(pageName))
-    link.getAttribute("href") shouldBe page.url
+    href.value shouldBe page.url()
   }
 
   Then("""^I see text in fields:$""") { (fieldData: DataTable) =>
@@ -123,13 +125,13 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
   Then("""^I see:$""") { (labels: DataTable) =>
     val textsToFind: List[String] = TableMisuseAdapters.valuesInColumn(0)(labels)
     eventually {
-      CurrentPage.bodyText should containInOrder(textsToFind)
+      CurrentPage.bodyText() should containInOrder(textsToFind)
     }
   }
 
   def verifyData(fieldData: DataTable, f: WebElement => String, selector: String => By): Unit = {
     val keyValues: mutable.Map[String, String] = fieldData.asMap(classOf[String], classOf[String]).asScala
-    val body                                   = driver.findElement(By.tagName("body"))
+    val body                                   = Driver.instance.findElement(By.tagName("body"))
     keyValues.foreach(keyValue =>
       withClue(s"The field '${keyValue._1}' does not have value: '${keyValue._2}'") {
         eventually(timeout(1 second)) { f(body.findElement(selector(keyValue._1))) shouldBe keyValue._2 }
@@ -139,7 +141,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with NavigationSugar wi
 
   Then("""^I see on current page:$""") { (labels: DataTable) =>
     val textsToFind = TableMisuseAdapters.valuesInColumn(0)(labels)
-    driver.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
+    Driver.instance.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
   }
 
   When("""^I click on the '(.*)' link$""") { linkText: String =>

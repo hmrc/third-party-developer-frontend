@@ -23,7 +23,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{By}
+import org.openqa.selenium.By
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.ApplicationStub.configureUserApplications
@@ -47,7 +47,7 @@ object AppWorld {
   var tokens: Map[String, ApplicationToken]        = Map.empty
 }
 
-class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder with FixedClock with BrowserDriver
+class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with FixedClock with BrowserDriver
     with ApplicationStateHelper {
 
   import java.time.Period
@@ -84,10 +84,10 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
 
-  Then("""^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
-    val link = driver.findElement(By.linkText(linkText))
-    link.getAttribute("href") shouldBe s"${EnvConfig.host}/developer/applications/$applicationId/request-check"
-  }
+  // Then("""^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
+  //   val link = Env.driver.findElement(By.linkText(linkText))
+  //   link.getAttribute("href") shouldBe s"${EnvConfig.host}/developer/applications/$applicationId/request-check"
+  // }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
     ApplicationStub.configureUserApplications(staticUserId)
@@ -180,8 +180,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   When("""^I navigate to the Subscription page for application with id '(.*)'$""") { id: String =>
-    go(SubscriptionLink(id))
-    on(SubscriptionPage(id))
+    SubscriptionLink(id).goTo()
   }
 
 }

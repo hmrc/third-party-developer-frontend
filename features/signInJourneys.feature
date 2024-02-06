@@ -51,15 +51,7 @@ Feature: Sign in
     Then I am on the 'View all applications' page
 
   Scenario: Signing with a valid credentials and no MFA mandated or setup, start using our rest APIs
-    Given I navigate to the 'Sign in' page
-    And I enter all the fields:
-      | email address          | password         |
-      | john.smith@example.com | StrongPassword1! |
-    When I click on the button with id 'submit'
-    Then I am on the 'Recommend Mfa' page
-    When I click on the button with id 'skip'
-    Then I am on the 'Recommend Mfa Skip Acknowledge' page
-    When I click on the button with id 'submit'
+    Given I successfully log in with 'john.smith@example.com' and 'StrongPassword1!' skipping 2SV
     Given I am on the 'No Applications' page
     When I click on the radio button with id 'use-apis'
     And I click on the button with id 'submit'

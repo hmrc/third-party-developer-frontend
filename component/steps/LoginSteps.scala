@@ -47,20 +47,16 @@ object TestContext {
   var sessionIdForMfaMandatingUser: String  = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
 
   private val mobileNumber = "+447890123456"
 
-  Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
-    goOn(SignInPage.default)
-    driver.manage().deleteAllCookies()
-    driver.navigate().refresh()
-    Form.populate(Map("email address" -> email, "password" -> password))
-    click on id("submit")
+  Given("""^I successfully log in with '(.*)' and '(.*)' skipping 2SV$""") { (email: String, password: String) =>
+    SignInPage.default.signInWith(email, password)
     on(RecommendMfaPage)
-    click on waitForElement(By.id("skip")) // Skip the 2SV reminder screen
+    RecommendMfaPage.skip2SVReminder()
     on(RecommendMfaSkipAcknowledgePage)
-    click on waitForElement(By.id("submit")) // Continue past confirmation of skipping 2SV setup
+    RecommendMfaSkipAcknowledgePage.confirmSkip2SV()
   }
 
   Given("""^I am registered with$""") { data: DataTable =>
@@ -115,8 +111,16 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   Then("""^I am logged in as '(.+)'$""") { userFullName: String =>
     val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie should not be null
-    ManageApplicationPage.validateLoggedInAs(userFullName)
+    AnyWebPageWithUserLinks.userLink(userFullName) shouldBe("defined")
   }
+
+    
+  // def validateLoggedInAs(userFullName: String) = {
+  //   val header = findElement(By.id("user-nav-links")).get
+  //   header.findElements(By.linkText("Sign out")) //.asScala.toList.headOption.get.isDisplayed shouldBe true
+  //   header.findElements(By.linkText("Sign in")) //.asScala.toList shouldBe empty
+  // }
+
 
   Then("""^I am not logged in$""") { () =>
     val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
@@ -148,14 +152,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     DeveloperStub.stubResetPasswordJourney(email.toLaxEmail, resetPwdCode)
 
     driver.manage().deleteAllCookies()
-    goTo(s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$resetPwdCode'")
+    (new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$resetPwdCode'" }).goTo()
   }
 
   Given("""^I click on an invalid password reset link for code '(.*)'$""") { invalidResetPwdCode: String =>
     DeveloperStub.stubResetPasswordJourneyFail()
 
     driver.manage().deleteAllCookies()
-    goTo(s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$invalidResetPwdCode'")
+    (new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$invalidResetPwdCode'" }).goTo()
   }
 
   Then("""^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>

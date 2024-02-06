@@ -21,43 +21,38 @@ import steps.{Env, Form}
 import utils.MfaData
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
-import utils.BrowserDriver
+import uk.gov.hmrc.selenium.webdriver.Driver
 import steps.EnvConfig
 
-trait FormPage extends WebPage with ApplicationLogger with BrowserDriver {
-  val pageHeading: String
-
-  override def isCurrentPage: Boolean = find(tagName("h1")).fold(false)({
-    e =>
-      logger.info(s"HEADING: ${e.text}")
-      e.text == pageHeading
-  })
-
+trait FormPage extends WebPage {
   def dataError(name: String) = dataAttribute(s"[data-$name]")
 
   def fieldError(fieldName: String) = dataAttribute(s"[data-field-error-$fieldName]")
 
   def globalError(fieldName: String) = dataAttribute(s"[data-global-error-$fieldName]")
 
-  def validateLoggedInAs(userFullName: String) = {
-    val header = driver.findElement(By.id("user-nav-links"))
-    header.findElement(By.linkText(userFullName)).isDisplayed shouldBe true
-    header.findElement(By.linkText("Sign out")).isDisplayed shouldBe true
-    header.findElements(By.linkText("Sign in")) shouldBe empty
-  }
+  private def dataAttribute(className: String) = findElement(By.cssSelector(className)).get
 
-  private def dataAttribute(className: String) = driver.findElement(By.cssSelector(className))
+  def globalErrors = findElements(By.cssSelector("[data-global-error]"))
 
-  def globalErrors = driver.findElements(By.cssSelector("[data-global-error]"))
+  def hasElementWithId(id: String) = findElements(By.id(id)).size == 1
+}
 
-  def hasElementWithId(id: String) = driver.findElements(By.id(id)).size() == 1
+trait SubmitButton {
+  self: FormPage =>
+
+  protected val submitButton: By = By.id("submit")
 }
 
 object CurrentPage extends FormPage {
   override val url: String = ""
   override val pageHeading = ""
+
+  def linkTextHref(linkText: String) = {
+    val link = findElement(By.linkText(linkText))
+    link.map(_.getAttribute("href"))
+  }
 }
 
 object RegistrationPage extends FormPage {
@@ -114,11 +109,7 @@ object AddApplicationSuccessPage extends FormPage {
   override val pageHeading = "You added"
   override val url: String = s"${EnvConfig.host}/developer/applications/add"
 
-  override def isCurrentPage: Boolean = find(tagName("h1")).fold(false)({
-    e =>
-      logger.info(s"HEADING: ${e.text}")
-      e.text.startsWith(pageHeading)
-  })
+  override def isCurrentPage(): Boolean = heading().startsWith(pageHeading)
 }
 
 case object AccountDeletionConfirmationPage extends FormPage {
@@ -131,8 +122,26 @@ case object AccountDeletionRequestSubmittedPage extends FormPage {
   override val url: String         = s"${EnvConfig.host}/developer/profile/delete"
 }
 
-case class SignInPage(override val pageHeading: String = "Sign in") extends FormPage {
+class SignInPage(override val pageHeading: String) extends FormPage with SubmitButton {
   override val url: String = s"${EnvConfig.host}/developer/login"
+
+  private val emailField = By.name("emailaddress")
+  private val passwordField = By.name("password")
+
+  def signInWith(email: String, password: String): Unit = {
+    goTo()
+    Driver.instance.manage().deleteAllCookies()
+    Driver.instance.navigate().refresh()
+
+    sendKeys(emailField, email)
+    sendKeys(passwordField, password)
+    click(submitButton)
+  }
+}
+
+case object SignInPage {
+  val default       = new SignInPage("Sign in")
+  val passwordReset = new SignInPage("You have reset your password")
 }
 
 case object SelectMfaPage extends FormPage {
@@ -143,30 +152,39 @@ case object SelectMfaPage extends FormPage {
 case object RecommendMfaPage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
   override val url: String         = s"${EnvConfig.host}/developer/login/2sv-recommendation"
+
+  private val skipButton = By.id("skip")
+
+  def skip2SVReminder(): Unit = click(skipButton)
 }
 
 case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"
   override val url: String         = s"${EnvConfig.host}/developer/login/2SV-not-set"
+
+  private val submitButton = By.id("submit")
+
+  def confirmSkip2SV(): Unit = click(submitButton)
 }
 
 case object AuthAppLoginAccessCodePage extends MfaData {
   val page = LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AUTHENTICATOR_APP, "Enter your access code")
 }
 
-case class LoginAccessCodePage(mfaId: String, mfaType: MfaType, headingVal: String) extends FormPage {
-
-  def clickContinue() = {
-    click on id("submit")
-  }
-
+case class LoginAccessCodePage(mfaId: String, mfaType: MfaType, headingVal: String) extends FormPage with SubmitButton {
   override val pageHeading: String = headingVal
   override val url: String         = s"${EnvConfig.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.toString}"
 
+  private val accessCodeField = By.name("accessCode")
+  private val rememberMeCheckbox = By.name("rememberMe")
+  
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
-    val formData = Map("accessCode" -> accessCode, "rememberMe" -> s"$rememberMe")
-
-    Form.populate(formData)
+    sendKeys(accessCodeField, accessCode)
+    if(rememberMe)
+      selectCheckbox(rememberMeCheckbox)
+    else
+      deselectCheckbox(rememberMeCheckbox)
+    click(submitButton)
   }
 }
 
@@ -204,53 +222,55 @@ case object Setup2svQrPage extends FormPage {
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/setup"
 }
 
-case object AuthenticatorAppAccessCodePage extends FormPage {
-
-  def clickContinue() = {
-    click on id("submit")
-  }
+case object AuthenticatorAppAccessCodePage extends FormPage with SubmitButton {
 
   override val pageHeading: String = "Enter your access code"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/access-code"
+  
+  private val accessCodeField = By.name("accessCode")
 
   def enterAccessCode(accessCode: String) = {
-    val formData = Map("accessCode" -> accessCode)
-
-    Form.populate(formData)
+    sendKeys(accessCodeField, accessCode)
+    click(submitButton)
   }
 }
 
-case object SmsAccessCodePage extends FormPage {
+case object SmsAccessCodePage extends FormPage with SubmitButton {
 
   def clickContinue() = {
-    click on id("submit")
+    click(submitButton)
   }
 
   override val pageHeading: String = "Enter the access code"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/access-code"
 
-  def enterAccessCode(accessCode: String) = {
-    val formData = Map("accessCode" -> accessCode)
+  private val accessCodeField = By.name("accessCode")
 
-    Form.populate(formData)
+  def enterAccessCode(accessCode: String) = {
+    sendKeys(accessCodeField, accessCode)
   }
 }
 
 case object CreateNameForAuthAppPage extends FormPage {
-  def enterName(name: String) = Form.populate(Map("name" -> name))(driver)
+
+  private val nameField = By.name("name")
+
+  def enterName(name: String) = sendKeys(nameField, name)
 
   override val pageHeading: String = "Create a name for your authenticator app"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/name"
 }
 
-case object SmsMobileNumberPage extends FormPage {
-  def enterMobileNumber(mobileNumber: String) = Form.populate(Map("mobileNumber" -> mobileNumber))(driver)
+case object SmsMobileNumberPage extends FormPage with SubmitButton {
 
   override val pageHeading: String = "Enter a mobile phone number"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/setup"
-
-  def clickContinue() = {
-    click on id("submit")
+  
+  private val mobileNumberField = By.name("mobileNumber")
+  
+  def enterMobileNumber(mobileNumber: String) = {
+    sendKeys(mobileNumberField, mobileNumber)
+    click(submitButton)
   }
 }
 
@@ -297,11 +317,6 @@ object ResetPasswordLinkNoLongerValidPage extends FormPage {
 case object SignOutSurveyPage extends FormPage {
   override val pageHeading = "Are you sure you want to sign out?"
   override val url: String = s"${EnvConfig.host}/developer/logout/survey"
-}
-
-object SignInPage {
-  val default       = SignInPage("Sign in")
-  val passwordReset = SignInPage("You have reset your password")
 }
 
 case object SignOutPage extends WebLink {
