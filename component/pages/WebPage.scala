@@ -16,22 +16,20 @@
 
 package pages
 
-import uk.gov.hmrc.selenium.component.PageObject
-import org.openqa.selenium.By
-import org.openqa.selenium.support.ui.Wait
-import org.openqa.selenium.support.ui.FluentWait
-import uk.gov.hmrc.selenium.webdriver.Driver
 import java.time.Duration
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebElement
-import org.openqa.selenium.support.ui.ExpectedConditions
 import scala.jdk.CollectionConverters._
+
+import org.openqa.selenium.support.ui.{ExpectedConditions, FluentWait, Wait}
+import org.openqa.selenium.{By, WebDriver, WebElement}
+
+import uk.gov.hmrc.selenium.component.PageObject
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 case class Link(href: String, text: String)
 
 trait WebLink extends PageObject {
   def url(): String
-  
+
   def goTo(): Unit = {
     get(url())
     waitForElementToBePresent(By.tagName("body"))
@@ -66,6 +64,7 @@ trait WebPage extends WebLink {
 }
 
 object AnyWebPageWithUserLinks extends PageObject {
+
   private def findElements(location: By): List[WebElement] = {
     Driver.instance.findElements(location).asScala.toList
   }

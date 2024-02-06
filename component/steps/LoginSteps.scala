@@ -20,11 +20,11 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{By}
+import org.openqa.selenium.By
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.{DeveloperStub, MfaStub, Stubs}
-import utils.ComponentTestDeveloperBuilder
+import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
@@ -32,7 +32,6 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import utils.BrowserDriver
 
 case class MfaSecret(secret: String)
 
@@ -111,16 +110,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   Then("""^I am logged in as '(.+)'$""") { userFullName: String =>
     val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie should not be null
-    AnyWebPageWithUserLinks.userLink(userFullName) shouldBe("defined")
+    AnyWebPageWithUserLinks.userLink(userFullName) shouldBe ("defined")
   }
-
-    
-  // def validateLoggedInAs(userFullName: String) = {
-  //   val header = findElement(By.id("user-nav-links")).get
-  //   header.findElements(By.linkText("Sign out")) //.asScala.toList.headOption.get.isDisplayed shouldBe true
-  //   header.findElements(By.linkText("Sign in")) //.asScala.toList shouldBe empty
-  // }
-
 
   Then("""^I am not logged in$""") { () =>
     val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")

@@ -26,22 +26,21 @@ import org.openqa.selenium.{Cookie => SCookie}
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
-import utils.MfaData
+import utils.{BrowserDriver, MfaData}
 
 import play.api.http.Status._
 import play.api.libs.json.Json
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
-import uk.gov.hmrc.selenium.webdriver.Driver
-import utils.BrowserDriver
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
     with CustomMatchers with MfaData {
-  
+
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)

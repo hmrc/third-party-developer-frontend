@@ -16,11 +16,15 @@
 
 package steps
 
+import java.io.{File, IOException}
+import java.util.Calendar
+
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
-import org.openqa.selenium.{Dimension, OutputType}
+import org.apache.commons.io.FileUtils
+import org.openqa.selenium.{OutputType, TakesScreenshot}
 import org.scalatest.matchers.should.Matchers
 import stubs.AuditStub
 
@@ -28,13 +32,13 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
+import uk.gov.hmrc.selenium.webdriver.{Browser, Driver}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.selenium.webdriver.Browser
 
 object EnvConfig {
-  val port                 = 6001
-  val host                 = s"http://localhost:$port"
+  val port = 6001
+  val host = s"http://localhost:$port"
 }
 
 object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Browser {
@@ -52,9 +56,9 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
 
   val wireMockServer     = new WireMockServer(wireMockConfiguration)
   var server: TestServer = null
-  lazy val windowSize    = new Dimension(1280, 720)
 
   Runtime.getRuntime addShutdownHook new Thread {
+
     override def run(): Unit = {
       shutdown()
     }
@@ -71,7 +75,6 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
     }
     WireMock.configureFor(stubHost, stubPort)
     AuditStub.setupAudit()
-    ()
   }
 
   After(order = 1) { _ =>
@@ -79,16 +82,16 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
   }
 
   After(order = 2) { scenario =>
-    // if (scenario.isFailed) {
-    //   val srcFile: Array[Byte] = Env.driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.BYTES)
-    //   val screenShot: String   = "./target/screenshots/" + Calendar.getInstance().getTime + ".png"
-    //   try {
-    //     FileUtils.copyFile(Env.driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), new File(screenShot))
-    //   } catch {
-    //     case e: IOException => e.printStackTrace()
-    //   }
-    //   scenario.attach(srcFile, "image/png", "attachment")
-    // }
+    if (scenario.isFailed) {
+      val srcFile: Array[Byte] = Driver.instance.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.BYTES)
+      val screenShot: String   = "./target/screenshots/" + Calendar.getInstance().getTime + ".png"
+      try {
+        FileUtils.copyFile(Driver.instance.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), new File(screenShot))
+      } catch {
+        case e: IOException => e.printStackTrace()
+      }
+      scenario.attach(srcFile, "image/png", "attachment")
+    }
     if (scenario.getStatus.equals("passed")) {
       passedTestCount = passedTestCount + 1
     } else if (scenario.getStatus.equals("failed")) {
@@ -112,7 +115,7 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
             "microservice.services.third-party-application-sandbox.port"        -> 11111,
             "microservice.services.api-definition.port"                         -> 11111,
             "microservice.services.api-documentation-frontend.port"             -> 11111,
-            "microservice.services.third-party-developer-frontend.port"         -> 9685,
+            "microservice.services.third-party-developer-frontend.port"         -> 9685, // This is unused but here for the sake of completion
             "microservice.services.deskpro-ticket-queue.port"                   -> 11111,
             "microservice.services.api-subscription-fields-production.port"     -> 11111,
             "microservice.services.api-subscription-fields-sandbox.port"        -> 11111,

@@ -8,15 +8,7 @@ Feature: Sign in
     And I have no application assigned to my email 'john.smith@example.com'
 
   Scenario: Signing with a valid credentials and no MFA mandated or setup, select email preferences
-    Given I navigate to the 'Sign in' page
-    And I enter all the fields:
-      | email address          | password         |
-      | john.smith@example.com | StrongPassword1! |
-    When I click on the button with id 'submit'
-    Then I am on the 'Recommend Mfa' page
-    When I click on the button with id 'skip'
-    Then I am on the 'Recommend Mfa Skip Acknowledge' page
-    When I click on the button with id 'submit'
+    Given I successfully log in with 'john.smith@example.com' and 'StrongPassword1!' skipping 2SV
     Given I am on the 'No Applications' page
     When I click on the radio button with id 'get-emails'
     And I click on the button with id 'submit'

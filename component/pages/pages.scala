@@ -17,13 +17,13 @@
 package pages
 
 import org.openqa.selenium.By
-import steps.{Env, Form}
+import steps.EnvConfig
 import utils.MfaData
+
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
-import uk.gov.hmrc.selenium.webdriver.Driver
-import steps.EnvConfig
 
 trait FormPage extends WebPage {
   def dataError(name: String) = dataAttribute(s"[data-$name]")
@@ -122,11 +122,11 @@ case object AccountDeletionRequestSubmittedPage extends FormPage {
   override val url: String         = s"${EnvConfig.host}/developer/profile/delete"
 }
 
-class SignInPage(override val pageHeading: String) extends FormPage with SubmitButton {
+class SignInPage private (override val pageHeading: String) extends FormPage with SubmitButton {
   override val url: String = s"${EnvConfig.host}/developer/login"
 
-  private val emailField = By.name("emailaddress")
-  private val passwordField = By.name("password")
+  private val emailField    = By.id("emailaddress")
+  private val passwordField = By.id("password")
 
   def signInWith(email: String, password: String): Unit = {
     goTo()
@@ -175,12 +175,12 @@ case class LoginAccessCodePage(mfaId: String, mfaType: MfaType, headingVal: Stri
   override val pageHeading: String = headingVal
   override val url: String         = s"${EnvConfig.host}/developer/login-mfa?mfaId=${mfaId}&mfaType=${mfaType.toString}"
 
-  private val accessCodeField = By.name("accessCode")
+  private val accessCodeField    = By.name("accessCode")
   private val rememberMeCheckbox = By.name("rememberMe")
-  
+
   def enterAccessCode(accessCode: String, rememberMe: Boolean = false) = {
     sendKeys(accessCodeField, accessCode)
-    if(rememberMe)
+    if (rememberMe)
       selectCheckbox(rememberMeCheckbox)
     else
       deselectCheckbox(rememberMeCheckbox)
@@ -226,7 +226,7 @@ case object AuthenticatorAppAccessCodePage extends FormPage with SubmitButton {
 
   override val pageHeading: String = "Enter your access code"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/access-code"
-  
+
   private val accessCodeField = By.name("accessCode")
 
   def enterAccessCode(accessCode: String) = {
@@ -237,10 +237,6 @@ case object AuthenticatorAppAccessCodePage extends FormPage with SubmitButton {
 
 case object SmsAccessCodePage extends FormPage with SubmitButton {
 
-  def clickContinue() = {
-    click(submitButton)
-  }
-
   override val pageHeading: String = "Enter the access code"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/access-code"
 
@@ -248,6 +244,7 @@ case object SmsAccessCodePage extends FormPage with SubmitButton {
 
   def enterAccessCode(accessCode: String) = {
     sendKeys(accessCodeField, accessCode)
+    click(submitButton)
   }
 }
 
@@ -265,9 +262,9 @@ case object SmsMobileNumberPage extends FormPage with SubmitButton {
 
   override val pageHeading: String = "Enter a mobile phone number"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/setup"
-  
+
   private val mobileNumberField = By.name("mobileNumber")
-  
+
   def enterMobileNumber(mobileNumber: String) = {
     sendKeys(mobileNumberField, mobileNumber)
     click(submitButton)

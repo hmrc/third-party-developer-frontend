@@ -17,18 +17,17 @@
 package steps
 
 import io.cucumber.scala.{EN, ScalaDsl}
-import uk.gov.hmrc.selenium.webdriver.Browser
-import uk.gov.hmrc.selenium.webdriver.Driver
- 
+
+import uk.gov.hmrc.selenium.webdriver.{Browser, Driver}
+
 object Hooks extends ScalaDsl with EN with Browser {
   Before(order = 2) {
-    println("Starting browser")
     startBrowser()
     Driver.instance.manage().deleteAllCookies()
   }
- 
+
   After(order = 3) {
     quitBrowser()
   }
- 
+
 }

@@ -19,6 +19,8 @@ package js
 import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
 import io.cucumber.junit.{Cucumber, CucumberOptions}
 import org.junit.runner.RunWith
+import org.junit.{AfterClass, BeforeClass}
+import steps.Env
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
@@ -30,3 +32,12 @@ import org.junit.runner.RunWith
   tags = "not @wip and not @skip"
 )
 class FeatureSuite
+
+object FeatureSuite {
+
+  @BeforeClass
+  def beforeCukesRun() = Env.startServer()
+
+  @AfterClass
+  def afterCukesRun() = Env.shutdown()
+}

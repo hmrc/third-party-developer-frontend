@@ -143,7 +143,6 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         val result = await(underTest.fetchAllAPICategoryDetails())
 
         result.size should be(ApiCategory.values.size)
-        System.out.println(result.head.category)
         result.find(_.category == categoryDisplayDetails.category) should be(Some(categoryDisplayDetails))
       }
     }

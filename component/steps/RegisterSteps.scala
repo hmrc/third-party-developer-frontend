@@ -25,12 +25,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.selenium.WebBrowser
 import pages._
 import stubs.DeveloperStub
+import utils.BrowserDriver
 
 import play.api.http.Status
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
-import utils.BrowserDriver
 
 object Form extends WebBrowser {
 

@@ -28,7 +28,7 @@ import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.ApplicationStub.configureUserApplications
 import stubs._
-import utils.ComponentTestDeveloperBuilder
+import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -40,7 +40,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, _}
-import utils.BrowserDriver
 
 object AppWorld {
   var userApplicationsOnBackend: List[Application] = Nil

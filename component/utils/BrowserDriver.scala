@@ -17,10 +17,11 @@
 package utils
 
 import org.openqa.selenium.remote.RemoteWebDriver
+
 import uk.gov.hmrc.selenium.webdriver.Driver
- 
+
 trait BrowserDriver {
- 
-  implicit val driver: RemoteWebDriver = Driver.instance
- 
+
+  implicit lazy val driver: RemoteWebDriver = Driver.instance
+
 }

@@ -5,7 +5,7 @@ object AppDependencies {
   def apply() : Seq[ModuleID] = compile ++ test
 
   lazy val cucumberVersion = "7.15.0"
-  lazy val seleniumVersion = "4.15.0"
+  lazy val seleniumVersion = "4.14.0"
   lazy val bootstrapVersion = "8.4.0"
   lazy val mongoVersion = "1.7.0"
 <<<<<<< HEAD
@@ -39,7 +39,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-test-play-30"             % bootstrapVersion,
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"            % mongoVersion,
     "org.mockito"                 %% "mockito-scala-scalatest"            % "1.17.29",
-    "com.github.tomakehurst"      %  "wiremock-jre8-standalone"           % "2.35.0",
+    // "com.github.tomakehurst"      %  "wiremock-jre8-standalone"           % "2.35.0",
     "org.jsoup"                   %  "jsoup"                              % "1.13.1",
     "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
@@ -54,6 +54,5 @@ object AppDependencies {
     "com.novocode"                %  "junit-interface"                    % "0.11",
     "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0",
     "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36",
-    "com.vladsch.flexmark"        %  "flexmark-all"                       % "0.62.2",
   ).map(_ % "component")
 }

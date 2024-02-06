@@ -27,10 +27,11 @@ import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebElement}
+import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import pages._
-import org.scalatest.OptionValues
 import utils.BrowserDriver
+
 import uk.gov.hmrc.selenium.webdriver.Driver
 
 object TableMisuseAdapters {
@@ -114,7 +115,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
 
   Then("""^The current page contains link '(.*)' to '(.*)'$""") { (linkText: String, pageName: String) =>
     val href = CurrentPage.linkTextHref(linkText)
-    val page             = withClue(s"page not found: $pageName")(pages(pageName))
+    val page = withClue(s"page not found: $pageName")(pages(pageName))
     href.value shouldBe page.url()
   }
 
