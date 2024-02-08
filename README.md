@@ -19,13 +19,13 @@ sbt test
 ## Component Tests
 Component tests run within a browser to verify the component through various UI flows with mocked backend connections. 
 
-These tests rely on running ASSETS_FRONTEND
+These tests rely on running ASSETS_FRONTEND and the docker-selenium-grid repo (with 6001 mapped and opened in your firewall)
 
 From the command line you can run the tests
 
 ```
 sm --start ASSETS_FRONTEND
-sbt component:test
+sbt -Dbrowser=chrome component:test
 ```
 
 To run an individual feature you need to be running the app in stub mode locally and the glue needs to be set as component.steps in the test config.
