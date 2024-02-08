@@ -8,12 +8,9 @@ object AppDependencies {
   lazy val seleniumVersion = "4.14.0"
   lazy val bootstrapVersion = "8.4.0"
   lazy val mongoVersion = "1.7.0"
-<<<<<<< HEAD
-=======
   lazy val commonDomainVersion = "0.11.0"
->>>>>>> 4d8eac24 (APIS-6756 - WIP Play 3.0)
   lazy val apiDomainVersion = "0.13.0"
-  lazy val appDomainVersion = "0.34.0"
+  lazy val appDomainVersion = "0.35.0"
 
   val testScope = "test, it, component"
 
@@ -39,12 +36,12 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-test-play-30"             % bootstrapVersion,
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"            % mongoVersion,
     "org.mockito"                 %% "mockito-scala-scalatest"            % "1.17.29",
-    // "com.github.tomakehurst"      %  "wiremock-jre8-standalone"           % "2.35.0",
     "org.jsoup"                   %  "jsoup"                              % "1.13.1",
     "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
     "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
-    "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion
   ).map(_ % testScope) ++
   Seq(
     "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
@@ -53,6 +50,6 @@ object AppDependencies {
     "junit"                       %  "junit"                              % "4.13.2",
     "com.novocode"                %  "junit-interface"                    % "0.11",
     "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0",
-    "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36",
+    "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36"
   ).map(_ % "component")
 }
