@@ -51,6 +51,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   private val mobileNumber = "+447890123456"
 
   Given("""^I successfully log in with '(.*)' and '(.*)' skipping 2SV$""") { (email: String, password: String) =>
+    goOn(SignInPage.default)
     SignInPage.default.signInWith(email, password)
     on(RecommendMfaPage)
     RecommendMfaPage.skip2SVReminder()

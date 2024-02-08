@@ -129,7 +129,6 @@ class SignInPage private (override val pageHeading: String) extends FormPage wit
   private val passwordField = By.id("password")
 
   def signInWith(email: String, password: String): Unit = {
-    goTo()
     Driver.instance.manage().deleteAllCookies()
     Driver.instance.navigate().refresh()
 

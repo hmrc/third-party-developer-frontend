@@ -32,7 +32,6 @@ trait WebLink extends PageObject {
 
   def goTo(): Unit = {
     get(url())
-    waitForElementToBePresent(By.tagName("body"))
   }
 
   protected def waitForElementToBePresent(locator: By): WebElement = {
@@ -70,10 +69,6 @@ object AnyWebPageWithUserLinks extends PageObject {
   }
 
   def navLinks() = findElements(By.id("user-nav-links")).headOption
-
-  // def signOutLink() = navLinks().flatMap(_.findElements(By.linkText("Sign out")).asScala.headOption)
-
-  // def signInLink() = navLinks().flatMap(_.findElements(By.linkText("Sign in")).asScala.headOption)
 
   def userLink(userFullName: String) = navLinks().flatMap(_.findElements(By.linkText(userFullName)).asScala.headOption)
 }

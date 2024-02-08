@@ -83,11 +83,6 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
 
-  // Then("""^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
-  //   val link = Env.driver.findElement(By.linkText(linkText))
-  //   link.getAttribute("href") shouldBe s"${EnvConfig.host}/developer/applications/$applicationId/request-check"
-  // }
-
   Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
     ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
