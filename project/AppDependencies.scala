@@ -40,7 +40,7 @@ object AppDependencies {
     "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
     "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
-    "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion,
+    // Transitive dependency to be aware of - "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion
   ).map(_ % testScope) ++
   Seq(
