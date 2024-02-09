@@ -30,9 +30,7 @@ case class Link(href: String, text: String)
 trait WebLink extends PageObject {
   def url(): String
 
-  def goTo(): Unit = {
-    get(url())
-  }
+  def go(): Unit = get(this.url())
 
   protected def waitForElementToBePresent(locator: By): WebElement = {
     fluentWait.until(ExpectedConditions.presenceOfElementLocated(locator))

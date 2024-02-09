@@ -174,7 +174,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   When("""^I navigate to the Subscription page for application with id '(.*)'$""") { id: String =>
-    SubscriptionLink(id).goTo()
+    go(SubscriptionLink(id))
   }
 
 }

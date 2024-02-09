@@ -35,12 +35,12 @@ trait NavigationSugar extends Assertions with Matchers with Eventually with Mock
   implicit val encryptedJson: EncryptedJson            = new EncryptedJson(new PayloadEncryption()(new LocalCrypto(mockAppConfig)))
 
   def goOn(page: WebPage): Assertion = {
-    page.goTo()
+    go(page)
     on(page)
   }
 
   def go(webLink: WebLink): Unit = {
-    webLink.goTo()
+    webLink.go()
   }
 
   def on(page: WebPage): Assertion = {
