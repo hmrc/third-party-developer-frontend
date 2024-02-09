@@ -23,12 +23,12 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.By
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.ApplicationStub.configureUserApplications
 import stubs._
-import utils.ComponentTestDeveloperBuilder
+import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -46,12 +46,10 @@ object AppWorld {
   var tokens: Map[String, ApplicationToken]        = Map.empty
 }
 
-class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with PageSugar with ComponentTestDeveloperBuilder with FixedClock
+class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with FixedClock with BrowserDriver
     with ApplicationStateHelper {
 
   import java.time.Period
-
-  implicit val webDriver: WebDriver = Env.driver
 
   val applicationId: ApplicationId = ApplicationId.random
   val clientId: ClientId           = ClientId("clientId")
@@ -84,11 +82,6 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   }
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
-
-  Then("""^there is a link to submit your application for checking with the text '(.*)'$""") { (linkText: String) =>
-    val link = Env.driver.findElement(By.linkText(linkText))
-    link.getAttribute("href") shouldBe s"${Env.host}/developer/applications/$applicationId/request-check"
-  }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
     ApplicationStub.configureUserApplications(staticUserId)
@@ -160,29 +153,28 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     }
   }
 
-  When("""^I see a link to request account deletion$""") { () => webDriver.findElements(By.cssSelector("[id=account-deletion]")).size() shouldBe 1 }
+  When("""^I see a link to request account deletion$""") { () => driver.findElements(By.cssSelector("[id=account-deletion]")).size() shouldBe 1 }
 
-  When("""^I click on the request account deletion link$""") { () => webDriver.findElement(By.cssSelector("[id=account-deletion]")).click() }
+  When("""^I click on the request account deletion link$""") { () => driver.findElement(By.cssSelector("[id=account-deletion]")).click() }
 
   When("""^I click on the account deletion confirmation submit button$""") { () =>
     DeskproStub.setupTicketCreation()
-    webDriver.findElement(By.cssSelector("[id=submit]")).click()
+    driver.findElement(By.cssSelector("[id=submit]")).click()
   }
 
-  When("""^I select the confirmation option with id '(.*)'$""") { (id: String) => webDriver.findElement(By.cssSelector(s"[id=$id]")).click() }
+  When("""^I select the confirmation option with id '(.*)'$""") { (id: String) => driver.findElement(By.cssSelector(s"[id=$id]")).click() }
 
   When("""^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$""") {
     (id: String, apiName: String, apiContext: String, apiVersion: String) =>
-      webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
+      driver.getCurrentUrl shouldBe s"${EnvConfig.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
   }
 
   When("""^I am on the subscriptions page for application with id '(.*)'$""") { (id: String) =>
-    webDriver.getCurrentUrl shouldBe s"${Env.host}/developer/applications/$id/subscriptions"
+    driver.getCurrentUrl shouldBe s"${EnvConfig.host}/developer/applications/$id/subscriptions"
   }
 
   When("""^I navigate to the Subscription page for application with id '(.*)'$""") { id: String =>
     go(SubscriptionLink(id))
-    on(SubscriptionPage(id))
   }
 
 }

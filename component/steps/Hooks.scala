@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
+package steps
 
-import com.codahale.metrics.SharedMetricRegistries
-import org.scalatest.{BeforeAndAfterAll, Suite}
+import io.cucumber.scala.{EN, ScalaDsl}
 
-trait SharedMetricsClearDown extends BeforeAndAfterAll {
-  self: Suite =>
+import uk.gov.hmrc.selenium.webdriver.{Browser, Driver}
 
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    SharedMetricRegistries.clear()
+object Hooks extends ScalaDsl with EN with Browser {
+  Before(order = 2) {
+    startBrowser()
+    Driver.instance.manage().deleteAllCookies()
   }
 
-  override def afterAll(): Unit = {
-    SharedMetricRegistries.clear()
-    super.afterAll()
+  After(order = 3) {
+    quitBrowser()
   }
 
 }

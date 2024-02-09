@@ -11,6 +11,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import bloop.integrations.sbt.BloopDefaults
 
 Global / bloopAggregateSourceDependencies := true
+Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 lazy val appName = "third-party-developer-frontend"
 
@@ -74,7 +75,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
     ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
-    ComponentTest / unmanagedResourceDirectories += baseDirectory.value / "test",
+    ComponentTest / unmanagedResourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "features"),
     ComponentTest / parallelExecution := false
   )
   .settings(majorVersion := 0)

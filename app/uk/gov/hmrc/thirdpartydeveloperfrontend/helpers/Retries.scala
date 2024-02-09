@@ -21,8 +21,8 @@ import javax.inject.Inject
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-import akka.actor.ActorSystem
-import akka.pattern.FutureTimeoutSupport
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import uk.gov.hmrc.http.BadRequestException
 

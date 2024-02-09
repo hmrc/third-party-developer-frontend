@@ -22,8 +22,8 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
-import akka.actor.{ActorSystem, Scheduler}
-import akka.pattern.FutureTimeoutSupport
+import org.apache.pekko.actor.{ActorSystem, Scheduler}
+import org.apache.pekko.pattern.FutureTimeoutSupport
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
 import play.api.inject.guice.GuiceApplicationBuilder

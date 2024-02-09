@@ -20,11 +20,11 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.By
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.{DeveloperStub, MfaStub, Stubs}
-import utils.ComponentTestDeveloperBuilder
+import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
@@ -46,22 +46,17 @@ object TestContext {
   var sessionIdForMfaMandatingUser: String  = ""
 }
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar with CustomMatchers with ComponentTestDeveloperBuilder {
-
-  implicit val webDriver: WebDriver = Env.driver
+class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
 
   private val mobileNumber = "+447890123456"
 
-  Given("""^I am successfully logged in with '(.*)' and '(.*)'$""") { (email: String, password: String) =>
+  Given("""^I successfully log in with '(.*)' and '(.*)' skipping 2SV$""") { (email: String, password: String) =>
     goOn(SignInPage.default)
-    webDriver.manage().deleteAllCookies()
-    webDriver.navigate().refresh()
-    Form.populate(Map("email address" -> email, "password" -> password))
-    click on id("submit")
+    SignInPage.default.signInWith(email, password)
     on(RecommendMfaPage)
-    click on waitForElement(By.id("skip")) // Skip the 2SV reminder screen
+    RecommendMfaPage.skip2SVReminder()
     on(RecommendMfaSkipAcknowledgePage)
-    click on waitForElement(By.id("submit")) // Continue past confirmation of skipping 2SV setup
+    RecommendMfaSkipAcknowledgePage.confirmSkip2SV()
   }
 
   Given("""^I am registered with$""") { data: DataTable =>
@@ -114,13 +109,13 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Then("""^I am logged in as '(.+)'$""") { userFullName: String =>
-    val authCookie = webDriver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
+    val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie should not be null
-    ManageApplicationPage.validateLoggedInAs(userFullName)
+    AnyWebPageWithUserLinks.userLink(userFullName) shouldBe ("defined")
   }
 
   Then("""^I am not logged in$""") { () =>
-    val authCookie = webDriver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
+    val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie shouldBe null
   }
 
@@ -128,14 +123,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val sessionId = "sessionId"
     Stubs.setupDeleteRequest(s"/session/$sessionId", NOT_FOUND)
     try {
-      val link = webDriver.findElement(By.linkText("Sign out"))
+      val link = driver.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
       case _: NoSuchElementException =>
-        val menu = webDriver.findElement(By.linkText("Menu"))
+        val menu = driver.findElement(By.linkText("Menu"))
         menu.click()
 
-        val link2 = webDriver.findElement(By.linkText("Sign out"))
+        val link2 = driver.findElement(By.linkText("Sign out"))
         link2.click()
     }
   }
@@ -148,15 +143,15 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val email = "bob@example.com"
     DeveloperStub.stubResetPasswordJourney(email.toLaxEmail, resetPwdCode)
 
-    webDriver.manage().deleteAllCookies()
-    goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$resetPwdCode'")
+    driver.manage().deleteAllCookies()
+    go(new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$resetPwdCode'" })
   }
 
   Given("""^I click on an invalid password reset link for code '(.*)'$""") { invalidResetPwdCode: String =>
     DeveloperStub.stubResetPasswordJourneyFail()
 
-    webDriver.manage().deleteAllCookies()
-    goTo(s"http://localhost:${Env.port}/developer/reset-password-link?code='$invalidResetPwdCode'")
+    driver.manage().deleteAllCookies()
+    go(new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$invalidResetPwdCode'" })
   }
 
   Then("""^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>

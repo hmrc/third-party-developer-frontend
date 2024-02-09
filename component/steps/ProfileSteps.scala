@@ -17,7 +17,6 @@
 package steps
 
 import io.cucumber.scala.{EN, ScalaDsl}
-import org.openqa.selenium.WebDriver
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.{DeveloperStub, Stubs}
@@ -27,7 +26,6 @@ import play.api.http.Status._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UpdateProfileRequest
 
 class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
-  implicit val webDriver: WebDriver = Env.driver
 
   Given("""^I want to successfully change my profile$""") { () =>
     // Pulling the user id from the developer in the test context defined in LoginSteps

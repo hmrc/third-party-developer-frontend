@@ -16,23 +16,57 @@
 
 package pages
 
-import org.openqa.selenium.WebDriver
-import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.selenium.{Page, WebBrowser}
-import steps.Env
+import java.time.Duration
+import scala.jdk.CollectionConverters._
+
+import org.openqa.selenium.support.ui.{ExpectedConditions, FluentWait, Wait}
+import org.openqa.selenium.{By, WebDriver, WebElement}
+
+import uk.gov.hmrc.selenium.component.PageObject
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 case class Link(href: String, text: String)
 
-trait WebLink extends Page with WebBrowser with Matchers {
-  implicit val webDriver: WebDriver = Env.driver
+trait WebLink extends PageObject {
+  def url(): String
 
-  override def toString = this.getClass.getSimpleName
+  def go(): Unit = get(this.url())
+
+  protected def waitForElementToBePresent(locator: By): WebElement = {
+    fluentWait.until(ExpectedConditions.presenceOfElementLocated(locator))
+  }
+
+  protected def fluentWait: Wait[WebDriver] = new FluentWait[WebDriver](Driver.instance)
+    .withTimeout(Duration.ofSeconds(3))
+    .pollingEvery(Duration.ofSeconds(1))
 }
 
 trait WebPage extends WebLink {
-  def isCurrentPage: Boolean
 
-  def heading = tagName("h1").element.text
+  val pageHeading: String
 
-  def bodyText = tagName("body").element.text
+  def heading() = getText(By.tagName("h1"))
+
+  def bodyText() = getText(By.tagName("body"))
+
+  def isCurrentPage(): Boolean = this.heading() == this.pageHeading
+
+  protected def findElements(location: By): List[WebElement] = {
+    Driver.instance.findElements(location).asScala.toList
+  }
+
+  protected def findElement(location: By): Option[WebElement] = {
+    findElements(location).headOption
+  }
+}
+
+object AnyWebPageWithUserLinks extends PageObject {
+
+  private def findElements(location: By): List[WebElement] = {
+    Driver.instance.findElements(location).asScala.toList
+  }
+
+  def navLinks() = findElements(By.id("user-nav-links")).headOption
+
+  def userLink(userFullName: String) = navLinks().flatMap(_.findElements(By.linkText(userFullName)).asScala.headOption)
 }

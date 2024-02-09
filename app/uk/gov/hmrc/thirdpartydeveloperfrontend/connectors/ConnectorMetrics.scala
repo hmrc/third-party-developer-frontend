@@ -20,8 +20,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-import com.kenshoo.play.metrics.Metrics
-
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import uk.gov.hmrc.play.http.metrics.common.API
 
 sealed trait Timer {

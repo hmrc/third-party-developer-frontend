@@ -20,7 +20,7 @@ import java.time.{Duration, Instant}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -29,13 +29,13 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, SharedMetricsClearDown}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with SharedMetricsClearDown {
+class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
 
   trait Setup {
     implicit val m: Materializer = app.materializer
-    val config                   = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(1), onlyWipeAuthToken = false)
+    val config                   = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(10), onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
     val whitelistedUrl        = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login.url
@@ -52,9 +52,9 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
       Future.successful(Results.Ok.withSession(headers.session + ("authToken" -> bearerToken)))
     })
 
-    def now                   = Instant.now()
-    def nowInMillis: String   = now.toEpochMilli.toString
-    def twoSecondsAgo: String = now.minusSeconds(2).toEpochMilli.toString
+    def now                      = Instant.now()
+    def nowInMillis: String      = now.toEpochMilli.toString
+    def twentySecondsAgo: String = now.minusSeconds(20).toEpochMilli.toString
   }
 
   "when there is an active session, apply" should {
@@ -109,7 +109,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
 
     "leave the access_uri intact when path in whitelist" in new Setup {
       val request = FakeRequest(method = "GET", path = whitelistedUrl)
-        .withSession("ts" -> twoSecondsAgo, "access_uri" -> accessUri)
+        .withSession("ts" -> twentySecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
@@ -123,29 +123,25 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
     }
 
     "remove the access_uri when path not in whitelist" in new Setup {
-      val request = FakeRequest(method = "GET", path = "/applications")
-        .withSession("ts" -> twoSecondsAgo, "access_uri" -> accessUri)
-
+      val request = FakeRequest(method = "GET", path = otherUrl)
+        .withSession("ts" -> twentySecondsAgo, "access_uri" -> accessUri)
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
-        sessionData.size shouldBe 1
-        sessionData.isDefinedAt("ts") shouldBe true
+        sessionData.keys shouldNot contain("access_uri")
+        sessionData.keys should contain("ts")
       }
-
       verify(nextOperationFunction).apply(*)
     }
 
     "remove the session keys when path in whitelist with different method" in new Setup {
       val request = FakeRequest(method = "POST", path = whitelistedUrl)
-        .withSession("ts" -> twoSecondsAgo, "access_uri" -> accessUri)
+        .withSession("ts" -> twentySecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
         val sessionData = result.session(request).data
-
-        sessionData.size shouldBe 1
-        sessionData.isDefinedAt("ts") shouldBe true
+        sessionData.keys shouldNot contain("access_uri")
+        sessionData.keys should contain("ts")
       }
-
       verify(nextOperationFunction).apply(*)
     }
   }

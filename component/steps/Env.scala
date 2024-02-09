@@ -17,19 +17,14 @@
 package steps
 
 import java.io.{File, IOException}
-import java.net.URL
 import java.util.Calendar
-import scala.util.{Properties, Try}
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import io.cucumber.scala.{EN, ScalaDsl, Scenario}
 import org.apache.commons.io.FileUtils
-import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
-import org.openqa.selenium.remote.RemoteWebDriver
-import org.openqa.selenium.{Dimension, OutputType, TakesScreenshot, WebDriver}
+import org.openqa.selenium.{OutputType, TakesScreenshot}
 import org.scalatest.matchers.should.Matchers
 import stubs.AuditStub
 
@@ -37,17 +32,22 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
-import uk.gov.hmrc.webdriver.SingletonDriver
+import uk.gov.hmrc.selenium.webdriver.{Browser, Driver}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
-trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
+object EnvConfig {
+  val port = 6001
+  val host = s"http://localhost:$port"
+}
+
+object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Browser {
+  import EnvConfig._
+
   var passedTestCount: Int = 0
   var failedTestCount: Int = 0
   // please do not change this port as it is used for acceptance tests
   // when the service is run with "service manager"
-  val port                 = 6001
-  val host                 = s"http://localhost:$port"
   val stubPort             = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
   val stubHost             = "localhost"
   val wireMockUrl          = s"http://$stubHost:$stubPort"
@@ -56,7 +56,6 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
 
   val wireMockServer     = new WireMockServer(wireMockConfiguration)
   var server: TestServer = null
-  lazy val windowSize    = new Dimension(1280, 720)
 
   Runtime.getRuntime addShutdownHook new Thread {
 
@@ -64,74 +63,18 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
       shutdown()
     }
   }
-  lazy val driver: WebDriver = createWebDriver()
-
-  private lazy val browser           = Properties.propOrElse("browser", "chrome")
-  private lazy val accessibilityTest = Properties.propOrElse("accessibility.test", "false") == "true"
-
-  private def createWebDriver(): WebDriver = {
-    val driver = browser match {
-      case "chrome"         => if (accessibilityTest) SingletonDriver.getInstance() else createChromeDriver()
-      case "remote-chrome"  => createRemoteChromeDriver()
-      case "firefox"        => createFirefoxDriver()
-      case "remote-firefox" => createRemoteFirefoxDriver()
-    }
-    driver.manage().deleteAllCookies()
-    driver.manage().window().setSize(new Dimension(1280, 720))
-    driver
-  }
-
-  def createFirefoxDriver(): WebDriver = {
-    val options = new FirefoxOptions().setAcceptInsecureCerts(true)
-    new FirefoxDriver(options)
-  }
-
-  def createRemoteFirefoxDriver() = {
-    val browserOptions = new FirefoxOptions().setAcceptInsecureCerts(true)
-    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), browserOptions)
-  }
-
-  private def createChromeDriver(): WebDriver = {
-    val options = new ChromeOptions()
-    options.addArguments("--headless")
-    options.addArguments("--proxy-server='direct://'")
-    options.addArguments("--proxy-bypass-list=*")
-    options.addArguments("--remote-allow-origins=*")
-    new ChromeDriver(options)
-  }
-
-  private def createRemoteChromeDriver() = {
-    val browserOptions: ChromeOptions = new ChromeOptions()
-    browserOptions.addArguments("--headless")
-    browserOptions.addArguments("--proxy-server='direct://'")
-    browserOptions.addArguments("--proxy-bypass-list=*")
-
-    new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), browserOptions)
-  }
-
-  def javascriptEnabled: Boolean = {
-    val jsEnabled: String = System.getProperty("javascriptEnabled", "true")
-    if (jsEnabled == null) System.getProperties.setProperty("javascriptEnabled", "true")
-    if (jsEnabled != "false") {
-      true
-    } else {
-      false
-    }
-  }
 
   def shutdown() = {
-    Try(driver.quit())
     wireMockServer.stop()
     if (server != null) server.stop()
   }
 
-  Before { _: Scenario =>
+  Before(order = 1) { _: Scenario =>
     if (!wireMockServer.isRunning) {
       wireMockServer.start()
     }
     WireMock.configureFor(stubHost, stubPort)
     AuditStub.setupAudit()
-    driver.manage().deleteAllCookies()
   }
 
   After(order = 1) { _ =>
@@ -140,10 +83,10 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
 
   After(order = 2) { scenario =>
     if (scenario.isFailed) {
-      val srcFile: Array[Byte] = Env.driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.BYTES)
+      val srcFile: Array[Byte] = Driver.instance.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.BYTES)
       val screenShot: String   = "./target/screenshots/" + Calendar.getInstance().getTime + ".png"
       try {
-        FileUtils.copyFile(Env.driver.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), new File(screenShot))
+        FileUtils.copyFile(Driver.instance.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), new File(screenShot))
       } catch {
         case e: IOException => e.printStackTrace()
       }
@@ -172,7 +115,7 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
             "microservice.services.third-party-application-sandbox.port"        -> 11111,
             "microservice.services.api-definition.port"                         -> 11111,
             "microservice.services.api-documentation-frontend.port"             -> 11111,
-            "microservice.services.third-party-developer-frontend.port"         -> 9685,
+            "microservice.services.third-party-developer-frontend.port"         -> 9685, // This is unused but here for the sake of completion
             "microservice.services.deskpro-ticket-queue.port"                   -> 11111,
             "microservice.services.api-subscription-fields-production.port"     -> 11111,
             "microservice.services.api-subscription-fields-sandbox.port"        -> 11111,
@@ -189,5 +132,3 @@ trait Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
     server.start()
   }
 }
-
-object Env extends Env

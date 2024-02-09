@@ -22,14 +22,15 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
-import org.openqa.selenium.{Cookie => SCookie, WebDriver}
+import org.openqa.selenium.{Cookie => SCookie}
 import org.scalatest.matchers.should.Matchers
 import pages._
 import stubs.{DeveloperStub, DeviceSessionStub, MfaStub, Stubs}
-import utils.MfaData
+import utils.{BrowserDriver, MfaData}
 
 import play.api.http.Status._
 import play.api.libs.json.Json
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
@@ -37,60 +38,50 @@ import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
 
-class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with PageSugar
+class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
     with CustomMatchers with MfaData {
-
-  implicit val webDriver: WebDriver = Env.driver
 
   When("""^I enter the correct access code during 2SVSetup with mfaMandated '(.*)'$""") { (mfaMandated: String) =>
     val isMfaMandated = java.lang.Boolean.parseBoolean(mfaMandated)
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
     MfaStub.stubUpliftAuthSession(isMfaMandated)
     AuthenticatorAppAccessCodePage.enterAccessCode(accessCode)
-    AuthenticatorAppAccessCodePage.clickContinue()
   }
 
   When("""^I enter the correct access code during Auth App removal then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
     AuthenticatorAppAccessCodePage.enterAccessCode(accessCode)
-    AuthenticatorAppAccessCodePage.clickContinue()
   }
 
   When("""^I enter the mobile number then click continue$""") {
     SmsMobileNumberPage.enterMobileNumber(mobileNumber)
-    SmsMobileNumberPage.clickContinue()
   }
 
   When("""^I enter the correct Sms access code then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
     SmsAccessCodePage.enterAccessCode(accessCode)
-    SmsAccessCodePage.clickContinue()
   }
 
   When("""^I enter the correct access code for SMS and click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
-    SmsLoginAccessCodePage.page.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
-    SmsLoginAccessCodePage.page.clickContinue()
+    SmsLoginAccessCodePage.page.enterAccessCode(accessCode, rememberMe = true)
   }
 
   When("""^I enter the correct access code SMS and do NOT click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(smsMfaId)
     SmsLoginAccessCodePage.page.enterAccessCode(accessCode)
-    SmsLoginAccessCodePage.page.clickContinue()
   }
 
   When("""^I enter the correct access code for Authenticator App and click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
-    AuthAppLoginAccessCodePage.page.enterAccessCode(accessCode, rememberMe = true)
     DeviceSessionStub.createDeviceSession(staticUserId, CREATED)
-    AuthAppLoginAccessCodePage.page.clickContinue()
+    AuthAppLoginAccessCodePage.page.enterAccessCode(accessCode, rememberMe = true)
   }
 
   When("""^I enter the correct access code Authenticator App and do NOT click remember me for 7 days then click continue$""") {
     MfaStub.stubMfaAccessCodeSuccess(authAppMfaId)
     AuthAppLoginAccessCodePage.page.enterAccessCode(accessCode)
-    AuthAppLoginAccessCodePage.page.clickContinue()
   }
 
   Then("""^I enter an authenticator app name$""") { () =>
@@ -99,11 +90,11 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   Then("""My device session is set$""") { () =>
-    val deviceSessionCookie = webDriver.manage().getCookieNamed(deviceCookieName)
+    val deviceSessionCookie = Driver.instance.manage().getCookieNamed(deviceCookieName)
     deviceSessionCookie should not be null
   }
   Then("""My device session is not set$""") { () =>
-    val authCookie = webDriver.manage().getCookieNamed(deviceCookieName)
+    val authCookie = Driver.instance.manage().getCookieNamed(deviceCookieName)
     authCookie shouldBe null
   }
 
@@ -157,7 +148,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) = {
-    webDriver.manage().deleteAllCookies()
+    driver.manage().deleteAllCookies()
     val mfaEnabled         = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
@@ -186,7 +177,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   Given("""^I already have a device cookie$""") {
     val cookie = new SCookie(deviceCookieName, deviceCookieValue)
-    webDriver.manage().addCookie(cookie)
+    driver.manage().addCookie(cookie)
   }
 
   def setupLoggedOrPartLoggedInDeveloper(

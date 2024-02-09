@@ -5,7 +5,7 @@ Feature: Developer views/updates profile
       | Email address          | Password         | First name | Last name | Mfa Setup |
       | john.smith@example.com | StrongPassword1! | John       | Smith     |           |
     And I have no application assigned to my email 'john.smith@example.com'
-    And I am successfully logged in with 'john.smith@example.com' and 'StrongPassword1!'
+    And I successfully log in with 'john.smith@example.com' and 'StrongPassword1!' skipping 2SV
     Then I am on the 'No Applications' page
     When I click on the 'John Smith' link
     Then I am on the 'Manage profile' page

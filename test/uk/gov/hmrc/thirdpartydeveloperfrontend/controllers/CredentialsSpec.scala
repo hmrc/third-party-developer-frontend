@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit.DAYS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import akka.util.ByteString
+import org.apache.pekko.util.ByteString
 import views.html.editapplication.DeleteClientSecretView
 import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
 

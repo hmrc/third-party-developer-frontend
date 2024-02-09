@@ -18,11 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import java.time.Clock
 
-import akka.pattern.FutureTimeoutSupport
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names.named
-
-import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilter
+import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecretsHashingConfig
 import uk.gov.hmrc.apiplatform.modules.submissions.config.ThirdPartyApplicationSubmissionsConnectorConfigProvider
@@ -36,7 +34,6 @@ class ConfigurationModule extends AbstractModule {
 
   override def configure(): Unit = {
     bind(classOf[ConnectorMetrics]).to(classOf[ConnectorMetricsImpl])
-    bind(classOf[SessionTimeoutFilter]).to(classOf[SessionTimeoutFilterWithWhitelist])
     bind(classOf[FutureTimeoutSupport]).to(classOf[FutureTimeoutSupportImpl])
 
     bind(classOf[SubscriptionFieldsConnector])
