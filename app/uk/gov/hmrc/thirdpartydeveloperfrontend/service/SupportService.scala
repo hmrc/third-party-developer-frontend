@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
@@ -34,4 +34,7 @@ class SupportService @Inject() (
   def fetchAllPublicApis()(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     apmConnector.fetchApiDefinitionsVisibleToUser(None)
   }
+
+  def fetchApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
+    apmConnector.fetchExtendedApiDefinition(serviceName)
 }

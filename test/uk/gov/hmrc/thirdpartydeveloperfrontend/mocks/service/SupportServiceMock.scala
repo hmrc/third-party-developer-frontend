@@ -20,7 +20,7 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, ServiceName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
 
 trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -29,7 +29,15 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
     def aMock: SupportService
 
     object FetchAllPublicApis {
-      def succeeds(apis: List[ApiDefinition]) = when(aMock.fetchAllPublicApis()(*)).thenReturn(successful(apis))
+
+      def succeeds(apis: List[ApiDefinition]) =
+        when(aMock.fetchAllPublicApis()(*)).thenReturn(successful(apis))
+    }
+
+    object fetchApiDefinition {
+
+      def succeeds(apiDefinition: ExtendedApiDefinition) =
+        when(aMock.fetchApiDefinition(*[ServiceName])(*)).thenReturn(successful(Right(apiDefinition)))
     }
   }
 

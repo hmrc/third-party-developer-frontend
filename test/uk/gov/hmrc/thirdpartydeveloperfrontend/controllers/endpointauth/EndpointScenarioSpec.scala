@@ -30,7 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ExtendedApiDefinitionData, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
@@ -148,6 +148,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
   when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
+  when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
 
   import scala.reflect.runtime.universe._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
@@ -323,6 +324,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/profile/security-preferences/select-mfa", _)               => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)              => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("GET", "/developer/login/select-mfa", _)                                      => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
+      case Endpoint("GET", "/developer/new-support/api/choose-api-details", _)                    => Map("apiName" -> "Test+Service+Name")
 
       case _ => Map.empty
     }
@@ -337,7 +339,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/choose", _)                                                                        => Map("helpWithChoice" -> "api")
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> "api")
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Map("helpWithApiChoice" -> "api-call", "apiName" -> "Test Service Name")
+      case Endpoint("POST", "/developer/new-support/api/choose-api-details", _)                                                        =>
+        Map("apiName" -> "Test Service Name", "details" -> "details", "fullName" -> "full name", "emailAddress" -> "fullname@example.com")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)                                  =>
         Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  => Map("email" -> userEmail.text, "role" -> "developer")
@@ -438,6 +443,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/forgot-password", _)                                                                            => Redirect("/developer/applications")
       case Endpoint("GET", "/developer/reset-password-link", _)                                                                        => Redirect("/developer/reset-password")
       case Endpoint("POST", "/developer/support", _)                                                                                   => Redirect("/developer/support/submitted")
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Redirect("/developer/new-support/api/choose-api")
+      case Endpoint("GET", "/developer/new-support/api/choose-api", _)                                                                 => Success()
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Redirect("/developer/new-support/api/choose-api-details?apiName=Test+Service+Name")
+      case Endpoint("POST", "/developer/new-support/api/choose-api-details", _)                                                        => Success()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Redirect(s"/developer/applications/${applicationId}/team-members")
       case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  =>
         Redirect(s"/developer/applications/${applicationId}/request-check/team")

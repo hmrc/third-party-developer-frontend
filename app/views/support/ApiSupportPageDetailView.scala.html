@@ -1,0 +1,149 @@
+@*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+
+@this(
+  devMain: DevMainWithFormErrors,
+  govukButton : GovukButton,
+  govukInput : GovukInput,
+  govukTextarea : GovukTextarea
+)
+
+@(loggedIn: Option[DeveloperSession], form: Form[ApiSupportDetailsForm], backUri: String, apiName: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+
+@devMain(
+  form,
+  title = "Which best describes what you need help with?",
+  userFullName = loggedIn.map(_.displayedName),
+  developerSession = None,
+  back = BackButtonToUrl(backUri)
+) {
+  <span class="govuk-caption-l">Developer Hub support</span>
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @apiName API call you need help with</h1>
+  <p class="govuk-body">Include the following details about the API documentation if you can:</p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
+    <li>The version</li>
+    <li>Page URL</li>
+    <li>The endpoint</li>
+  </ul>
+  <p class="govuk-body">
+    Our Software Developers Support Team (SDST) will get back to you within 2 working days.
+  </p>
+
+  @helper.form(action = routes.Support.apiSupportDetailsAction) {
+    @helper.CSRF.formField
+
+    <input type="hidden" id="apiName" name="apiName" value="@apiName">
+
+    @govukTextarea(
+      Textarea(
+        id = "details",
+        name = "details",
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Details")
+        ),
+        hint = Some(
+          Hint(
+            content = Text("Do not include personal or financial information, like your National Insurance number or credit card details.")
+          )
+        ),
+        errorMessage = if(form("details").hasErrors) {
+          Some(
+            ErrorMessage(
+              content = Text("Enter some details")
+            )
+          )
+        } else { None }
+      )
+    )
+
+    @govukInput(
+      Input(
+        id = "fullName",
+        name = "fullName",
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Full name")
+        ),
+        classes = "govuk-!-width-full",
+        value = loggedIn.map(_.displayedName),
+        errorMessage = if(form("fullName").hasErrors) {
+          Some(
+            ErrorMessage(
+              content = Text("Enter your full name")
+            )
+          )
+        } else { None }
+      )
+    )
+
+    @govukInput(
+      Input(
+        id = "emailAddress",
+        name = "emailAddress",
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Email address")
+        ),
+        hint = Some(
+          Hint(
+            content = Text("We only use your email to respond to you")
+          )
+        ),
+        classes = "govuk-!-width-full",
+        value = loggedIn.map(_.email.text),
+        errorMessage = if(form("emailAddress").hasErrors) {
+          Some(
+            ErrorMessage(
+              content = Text("Enter an email address")
+            )
+          )
+        } else { None }
+      )
+    )
+
+    @govukInput(
+      Input(
+        id = "organisation",
+        name = "organisation",
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Organisation (optional)")
+        ),
+        classes = "govuk-!-width-full"
+      )
+    )
+
+    @govukButton(
+      Button(
+        id = Some("continue"),
+        content = Text("Continue")
+      )
+    )
+  }
+}

@@ -25,6 +25,7 @@ import org.scalatest.matchers.should.Matchers
 import play.api.http.Status._
 import play.api.libs.json.{Json, OFormat, Writes}
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ExtendedApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
@@ -312,6 +313,19 @@ object ApiPlatformMicroserviceStub {
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
+        )
+    )
+  }
+
+  def stubFetchExtendedApiDefinition(serviceName: ServiceName, apiDefintion: ExtendedApiDefinition): StubMapping = {
+    stubFor(
+      get(
+        urlEqualTo(s"/combined-api-definitions/${serviceName.value.replaceAll(" ", "%20")}")
+      )
+        .willReturn(
+          aResponse()
+            .withStatus(OK)
+            .withBody(Json.toJson(apiDefintion).toString())
         )
     )
   }

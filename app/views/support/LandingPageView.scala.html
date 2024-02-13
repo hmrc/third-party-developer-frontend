@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.NewSupportPageHelpChoiceForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -26,30 +27,18 @@
   govukButton : GovukButton
 )
 
-@(loggedIn: Option[String], form: Form[NewSupportPageHelpChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
-
-@errors = @{
-  if(form.hasErrors) {
-    Some(
-      ErrorMessage(
-        content = Text("This is an error message")
-      )
-    )        
-  } else {
-    None
-  }
-}
+@(loggedIn: Option[DeveloperSession], form: Form[NewSupportPageHelpChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
   form,
   title = "What do you need help with?",
-  userFullName = loggedIn,
+  userFullName = loggedIn.map(_.displayedName),
   breadcrumbs = Seq(
     Crumb.home
   ),
   developerSession = None
 ) {
-  @helper.form(action = routes.Support.chooseSupportOption) {
+  @helper.form(action = routes.Support.chooseSupportOptionAction) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -65,7 +54,13 @@
             )
           )
         ),
-        errorMessage = errors,
+        errorMessage = if(form("helpWithChoice").hasErrors) {
+          Some(
+            ErrorMessage(
+              content = Text("Please choose an option")
+            )
+          )
+        } else { None },
         name = "helpWithChoice",
         items = Seq(
           RadioItem(
