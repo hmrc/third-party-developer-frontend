@@ -205,3 +205,9 @@ production.credentials.checklist.error.global = You must complete all questionna
 no.applications.choice.error.required.field = Please select an option
 
 choose.application.to.uplift.error = Select the application you want production credentials for
+
+support.choice.required.field = Provide choose an option
+support.choice.required.global = Provide choose an option
+
+support.details.required.field = Provide details of your problem
+support.details.required.global = Provide details of your problem

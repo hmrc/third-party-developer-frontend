@@ -18,8 +18,10 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.NewSupportPageHelpChoiceForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -29,25 +31,13 @@
   govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[String], form: Form[NewSupportPageHelpChoiceForm], backUri: String, apiNames: List[String])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
-
-@errors = @{
-  if(form.hasErrors) {
-    Some(
-      ErrorMessage(
-        content = Text("This is an error message")
-      )
-    )        
-  } else {
-    None
-  }
-}
+@(loggedIn: Option[DeveloperSession], form: Form[ApiSupportForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @selectItems = @{
-  apiNames.map( api =>
+  apis.map( api =>
     SelectItem(
-      value = Some(api),
-      text = api
+      value = Some(api.serviceName.value),
+      text = api.name
     )
   )
 }
@@ -55,8 +45,8 @@
 @apiChoiceHtml = {
   @govukSelect(
     Select(
-      id = "api-choice",
-      name = "api-choice",
+      id = "apiName",
+      name = "apiName",
       items = selectItems,
       label = Label(
         content = Text("Select an API")
@@ -69,11 +59,11 @@
 @devMain(
   form,
   title = "Which best describes what you need help with?",
-  userFullName = loggedIn,
+  userFullName = loggedIn.map(_.displayedName),
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
-  @helper.form(action = routes.Support.chooseSupportOption) {
+  @helper.form(action = routes.Support.apiSupportAction) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -89,8 +79,14 @@
             )
           )
         ),
-        errorMessage = errors,
-        name = "helpWithChoice",
+        errorMessage = if(form("helpWithApiChoice").hasErrors) {
+          Some(
+            ErrorMessage(
+              content = Text("Choose what kind of help you need")
+            )
+          )
+        } else { None },
+        name = "helpWithApiChoice",
         items = Seq(
           RadioItem(
             id = Some("making-an-api-call"),

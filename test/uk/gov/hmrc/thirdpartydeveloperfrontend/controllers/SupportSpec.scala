@@ -21,7 +21,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 import org.jsoup.Jsoup
-import views.html.support.{ApiSupportPageView, LandingPageView}
+import views.html.support.{ApiSupportPageDetailView, ApiSupportPageView, LandingPageView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.mvc.{Request, Result}
@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ExtendedApiDefinitionData}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -44,10 +44,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
-    val supportEnquiryView     = app.injector.instanceOf[SupportEnquiryView]
-    val supportThankYouView    = app.injector.instanceOf[SupportThankyouView]
-    val supportLandingPageView = app.injector.instanceOf[LandingPageView]
-    val apiSupportPageView     = app.injector.instanceOf[ApiSupportPageView]
+    val supportEnquiryView       = app.injector.instanceOf[SupportEnquiryView]
+    val supportThankYouView      = app.injector.instanceOf[SupportThankyouView]
+    val supportLandingPageView   = app.injector.instanceOf[LandingPageView]
+    val apiSupportPageView       = app.injector.instanceOf[ApiSupportPageView]
+    val apiSupportPageDetailView = app.injector.instanceOf[ApiSupportPageDetailView]
 
     val underTest = new Support(
       mock[DeskproService],
@@ -59,6 +60,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       supportThankYouView,
       supportLandingPageView,
       apiSupportPageView,
+      apiSupportPageDetailView,
       SupportServiceMock.aMock
     )
 
@@ -77,7 +79,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.raiseSupportEnquiry(true))(request)
 
-      status(result) shouldBe 200
+      status(result) shouldBe OK
       val dom = Jsoup.parse(contentAsString(result))
 
       dom.getElementById("using-an-api").attr("value") shouldEqual "api"
@@ -85,7 +87,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       dom.getElementById("setting-up-application").attr("value") shouldEqual "application"
     }
 
-    "render the new API support page when the option is selected" in new Setup {
+    "redirect to the new api support page when the api option is selected" in new Setup {
       val request = FakeRequest()
         .withFormUrlEncodedBody("helpWithChoice" -> "api")
         .withLoggedIn(underTest, implicitly)(sessionId)
@@ -95,12 +97,76 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-      val result = addToken(underTest.chooseSupportOption())(request)
+      val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe 200
-      val dom = Jsoup.parse(contentAsString(result))
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/new-support/api/choose-api")
+    }
 
-      dom.getElementById("making-an-api-call").attr("value") shouldEqual "api-call"
+    "render the new api support select api page" in new Setup {
+      val request = FakeRequest()
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession(sessionParams: _*)
+
+      SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
+
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+
+      val result = addToken(underTest.apiSupportPage)(request)
+
+      status(result) shouldBe OK
+    }
+
+    "redirect to the new api support details page when an api is selected" in new Setup {
+      val apiName = "test-api"
+      val request = FakeRequest()
+        .withFormUrlEncodedBody(
+          "helpWithApiChoice" -> "api-call",
+          "apiName"           -> apiName
+        )
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession(sessionParams: _*)
+
+      SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
+
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+
+      val result = addToken(underTest.apiSupportAction)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/new-support/api/choose-api-details?apiName=$apiName")
+    }
+
+    "return a bad request when no api is selected" in new Setup {
+      val request = FakeRequest()
+        .withFormUrlEncodedBody(
+          "helpWithApiChoice" -> "api-call"
+        )
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession(sessionParams: _*)
+
+      SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
+
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+
+      val result = addToken(underTest.apiSupportAction)(request)
+
+      status(result) shouldBe BAD_REQUEST
+    }
+
+    "render the new api support details page" in new Setup {
+      val apiName = "test-api"
+      val request = FakeRequest()
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession(sessionParams: _*)
+
+      SupportServiceMock.fetchApiDefinition.succeeds(ExtendedApiDefinitionData.extendedApiDefinition)
+
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+
+      val result = addToken(underTest.apiSupportDetailsPage(apiName))(request)
+
+      status(result) shouldBe OK
     }
 
     "render the new account support page when the option is selected" in new Setup {
@@ -111,9 +177,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-      val result = addToken(underTest.chooseSupportOption())(request)
+      val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe 200
+      status(result) shouldBe OK
     }
 
     "render the new application support page when the option is selected" in new Setup {
@@ -124,9 +190,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-      val result = addToken(underTest.chooseSupportOption())(request)
+      val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe 200
+      status(result) shouldBe OK
     }
 
     "support form is prepopulated when user logged in" in new Setup {

@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.time.Period
 
+import org.scalatest.EitherValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.http.Status._
@@ -36,7 +37,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
-class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with ApmConnectorJsonFormatters with FixedClock {
+class ApmConnectorIntegrationSpec
+    extends BaseConnectorIntegrationSpec
+    with GuiceOneAppPerSuite
+    with WireMockExtensions
+    with ApmConnectorJsonFormatters
+    with FixedClock
+    with EitherValues {
 
   private val stubConfig = Configuration(
     "microservice.services.api-platform-microservice.port" -> stubPort
@@ -167,6 +174,19 @@ class ApmConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with Guic
       intercept[UpstreamErrorResponse] {
         await(underTest.fetchApiDefinitionsVisibleToUser(Some(userId)))
       }
+    }
+  }
+
+  "fetchExtendedApiDefinition" should {
+    "retrieve an ExtendedApiDefinition for a given service name" in new Setup {
+      val serviceName = ExtendedApiDefinitionData.extendedApiDefinition.serviceName
+
+      ApiPlatformMicroserviceStub.stubFetchExtendedApiDefinition(serviceName, ExtendedApiDefinitionData.extendedApiDefinition)
+
+      val result: Either[Throwable, ExtendedApiDefinition] = await(underTest.fetchExtendedApiDefinition(serviceName))
+
+      result.isRight shouldBe true
+      result.value.serviceName shouldBe serviceName
     }
   }
 }

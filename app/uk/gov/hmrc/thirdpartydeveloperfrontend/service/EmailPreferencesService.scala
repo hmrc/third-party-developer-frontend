@@ -75,7 +75,7 @@ class EmailPreferencesService @Inject() (
   private def handleGettingApiDetails(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Option[CombinedApi]] = {
     apmConnector.fetchCombinedApi(serviceName).flatMap {
       case Right(x) => successful(Some(x))
-      case Left(_)  => apmConnector.fetchAPIDefinition(serviceName).flatMap {
+      case Left(_)  => apmConnector.fetchExtendedApiDefinition(serviceName).flatMap {
           case Right(y) => successful(Some(CombinedApi(y.serviceName, y.name, y.categories, REST_API)))
           case Left(_)  => successful(None)
         }

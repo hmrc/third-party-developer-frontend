@@ -39,7 +39,6 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_, "/developer/confirmation", _)                                    => Success()
       case Endpoint("GET", "/developer/resend-confirmation", _)                         => Success()
       case Endpoint("GET", "/developer/support/submitted", _)                           => Success()
-      case Endpoint("POST", "/developer/new-support/choose", _)                         => Success()
       case Endpoint("GET", "/developer/verification", _)                                => Success()
       case Endpoint("GET", "/developer/resend-verification", _)                         => BadRequest()
       case Endpoint("GET", "/developer/locked", _)                                      => Locked()
@@ -54,6 +53,11 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_, "/developer/support", _)                                         => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/assets/*file", _)                                => Success()
       case Endpoint(_, "/developer/submissions/responsible-individual-verification", _) => Success()
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                     => Redirect("/developer/new-support/api/choose-api")
+      case Endpoint("GET", "/developer/new-support/api/choose-api", _)                  => Success()
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                 => Redirect("/developer/new-support/api/choose-api-details?apiName=Test+Service+Name")
+      case Endpoint("GET", "/developer/new-support/api/choose-api-details", _)          => Success()
+      case Endpoint("POST", "/developer/new-support/api/choose-api-details", _)         => Success()
       case _                                                                            => Redirect("/developer/login")
     }
   }

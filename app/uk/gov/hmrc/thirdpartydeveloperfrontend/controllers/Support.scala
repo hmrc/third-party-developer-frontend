@@ -19,13 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{ApiSupportPageView, LandingPageView}
+import views.html.support.{ApiSupportPageDetailView, ApiSupportPageView, LandingPageView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
@@ -43,6 +44,7 @@ class Support @Inject() (
     supportThankyouView: SupportThankyouView,
     landingPageView: LandingPageView,
     apiSupportPageView: ApiSupportPageView,
+    apiSupportPageDetailView: ApiSupportPageDetailView,
     supportService: SupportService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
@@ -60,7 +62,7 @@ class Support @Inject() (
       }
 
     if (useNewSupport)
-      Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
+      Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
     else
       Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
   }
@@ -79,35 +81,113 @@ class Support @Inject() (
     )
   }
 
-  def chooseSupportOption: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderApiSupportPageView = {
-      for {
-        publicApis  <- supportService.fetchAllPublicApis()
-        serviceNames = publicApis.map(_.name)
-      } yield Ok(
-        apiSupportPageView(
-          fullyloggedInDeveloper.map(_.displayedName),
-          NewSupportPageHelpChoiceForm.form,
-          routes.Support.raiseSupportEnquiry(true).url,
-          serviceNames
-        )
-      )
-    }
-
+  def chooseSupportOptionAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def handleValidForm(form: NewSupportPageHelpChoiceForm): Future[Result] = {
       form.helpWithChoice match {
-        case "api"         => renderApiSupportPageView
-        case "account"     => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
-        case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form)))
-        case _             => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper.map(_.displayedName), NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
+        case "api"         => Future.successful(Redirect(routes.Support.apiSupportPage))
+        case "account"     => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
+        case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
+        case _             => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[NewSupportPageHelpChoiceForm]): Future[Result] = {
-      Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper.map(_.displayedName), formWithErrors)))
+      Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper, formWithErrors)))
     }
 
     NewSupportPageHelpChoiceForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+  }
+
+  def apiSupportPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    for {
+      apis <- supportService.fetchAllPublicApis()
+    } yield Ok(
+      apiSupportPageView(
+        fullyloggedInDeveloper,
+        ApiSupportForm.form,
+        routes.Support.raiseSupportEnquiry(true).url,
+        apis
+      )
+    )
+  }
+
+  def apiSupportAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderApiSupportPageErrorView(form: Form[ApiSupportForm]) = {
+      for {
+        apis <- supportService.fetchAllPublicApis()
+      } yield BadRequest(
+        apiSupportPageView(
+          fullyloggedInDeveloper,
+          form,
+          routes.Support.raiseSupportEnquiry(true).url,
+          apis
+        )
+      )
+    }
+
+    def handleValidForm(form: ApiSupportForm): Future[Result] =
+      form.helpWithApiChoice match {
+        case "api-call" =>
+          Future.successful(Redirect(routes.Support.apiSupportDetailsPage(form.apiName)))
+        case _          => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
+      }
+
+    def handleInvalidForm(formWithErrors: Form[ApiSupportForm]): Future[Result] =
+      renderApiSupportPageErrorView(formWithErrors)
+
+    ApiSupportForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+  }
+
+  def apiSupportDetailsPage(apiServiceName: String): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderSupportDetailsPage(apiServiceName: String) =
+      Ok(
+        apiSupportPageDetailView(
+          fullyloggedInDeveloper,
+          ApiSupportDetailsForm.form,
+          routes.Support.apiSupportAction.url,
+          apiServiceName
+        )
+      )
+
+    supportService.fetchApiDefinition(ServiceName(apiServiceName)).flatMap {
+      case Right(api) => Future.successful(renderSupportDetailsPage(api.name))
+      case Left(_)    => Future.successful(BadRequest(errorHandler.badRequestTemplate))
+    }
+  }
+
+  def apiSupportDetailsAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderApiSupportDetailsPageErrorView(form: Form[ApiSupportDetailsForm]) = {
+      Future.successful(
+        BadRequest(
+          apiSupportPageDetailView(
+            fullyloggedInDeveloper,
+            form,
+            routes.Support.apiSupportAction.url,
+            form.data.getOrElse("apiName", "UNKNOWN API")
+          )
+        )
+      )
+    }
+
+    def handleValidForm(form: ApiSupportDetailsForm): Future[Result] = {
+      // Return to api support details page for now
+      Future.successful(
+        Ok(
+          apiSupportPageDetailView(
+            fullyloggedInDeveloper,
+            ApiSupportDetailsForm.form,
+            routes.Support.apiSupportAction.url,
+            form.apiName
+          )
+        )
+      )
+    }
+
+    def handleInvalidForm(formWithErrors: Form[ApiSupportDetailsForm]): Future[Result] = {
+      renderApiSupportDetailsPageErrorView(formWithErrors)
+    }
+
+    ApiSupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {

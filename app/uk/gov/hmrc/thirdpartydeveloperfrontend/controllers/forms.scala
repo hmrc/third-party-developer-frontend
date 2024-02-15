@@ -30,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
   TermsAndConditionsLocations
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 // scalastyle:off number.of.types
@@ -352,8 +353,35 @@ object NewSupportPageHelpChoiceForm {
 
   val form: Form[NewSupportPageHelpChoiceForm] = Form(
     mapping(
-      "helpWithChoice" -> text
+      "helpWithChoice" -> textValidator("support.choice.required.field", "support.choice.required.field")
     )(NewSupportPageHelpChoiceForm.apply)(NewSupportPageHelpChoiceForm.unapply)
+  )
+}
+
+final case class ApiSupportForm(helpWithApiChoice: String, apiName: String)
+
+object ApiSupportForm {
+
+  val form: Form[ApiSupportForm] = Form(
+    mapping(
+      "helpWithApiChoice" -> textValidator("support.choice.required.field", "support.choice.required.field"),
+      "apiName"           -> nonEmptyText
+    )(ApiSupportForm.apply)(ApiSupportForm.unapply)
+  )
+}
+
+final case class ApiSupportDetailsForm(apiName: String, details: String, fullName: String, emailAddress: String, organisation: Option[String])
+
+object ApiSupportDetailsForm {
+
+  val form: Form[ApiSupportDetailsForm] = Form(
+    mapping(
+      "apiName"      -> nonEmptyText,
+      "details"      -> textValidator("support.details.required.field", "support.details.required.field"),
+      "fullName"     -> textValidator("fullname.error.required.field", "fullname.error.maxLength.field"),
+      "emailAddress" -> emailValidator(),
+      "organisation" -> optional(text)
+    )(ApiSupportDetailsForm.apply)(ApiSupportDetailsForm.unapply)
   )
 }
 

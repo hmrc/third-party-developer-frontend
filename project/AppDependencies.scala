@@ -9,7 +9,7 @@ object AppDependencies {
   lazy val bootstrapVersion = "8.4.0"
   lazy val mongoVersion = "1.7.0"
   lazy val commonDomainVersion = "0.11.0"
-  lazy val apiDomainVersion = "0.13.0"
+  lazy val apiDomainVersion = "0.14.0"
   lazy val appDomainVersion = "0.35.0"
 
   val testScope = "test, it, component"
