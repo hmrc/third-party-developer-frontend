@@ -21,6 +21,7 @@ import scala.reflect.runtime.universe._
 import cats.Semigroup
 import cats.implicits._
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
@@ -36,6 +37,7 @@ object FlowType {
   case object NEW_APPLICATION_EMAIL_PREFERENCES    extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS           extends FlowType
+  case object SUPPORT_FLOW                         extends FlowType
 
   val values: List[FlowType] = List(
     IP_ALLOW_LIST,
@@ -43,7 +45,8 @@ object FlowType {
     EMAIL_PREFERENCES_V2,
     NEW_APPLICATION_EMAIL_PREFERENCES,
     NEW_APPLICATION_EMAIL_PREFERENCES_V2,
-    GET_PRODUCTION_CREDENTIALS
+    GET_PRODUCTION_CREDENTIALS,
+    SUPPORT_FLOW
   )
 
   def from[A <: Flow: TypeTag]: FlowType = {
@@ -52,6 +55,7 @@ object FlowType {
       case t if t =:= typeOf[IpAllowlistFlow]                      => FlowType.IP_ALLOW_LIST
       case t if t =:= typeOf[NewApplicationEmailPreferencesFlowV2] => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
       case t if t =:= typeOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
+      case t if t =:= typeOf[SupportFlow]                          => FlowType.SUPPORT_FLOW
     }
   }
 
@@ -71,6 +75,11 @@ trait Flow {
   */
 case class IpAllowlistFlow(override val sessionId: String, allowlist: Set[String]) extends Flow {
   override val flowType: FlowType = FlowType.IP_ALLOW_LIST
+}
+case class SupportApi(serviceName: ServiceName, name: String)
+
+case class SupportFlow(override val sessionId: String, entrySelection: String, api: Option[SupportApi] = None) extends Flow {
+  override def flowType: FlowType = FlowType.SUPPORT_FLOW
 }
 
 case class EmailPreferencesFlowV2(

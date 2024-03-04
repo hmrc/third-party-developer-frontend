@@ -370,13 +370,12 @@ object ApiSupportForm {
   )
 }
 
-final case class ApiSupportDetailsForm(apiName: String, details: String, fullName: String, emailAddress: String, organisation: Option[String])
+final case class ApiSupportDetailsForm(details: String, fullName: String, emailAddress: String, organisation: Option[String])
 
 object ApiSupportDetailsForm {
 
   val form: Form[ApiSupportDetailsForm] = Form(
     mapping(
-      "apiName"      -> nonEmptyText,
       "details"      -> textValidator("support.details.required.field", "support.details.required.field"),
       "fullName"     -> textValidator("fullname.error.required.field", "fullname.error.maxLength.field"),
       "emailAddress" -> emailValidator(),

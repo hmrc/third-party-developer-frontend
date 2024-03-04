@@ -36,6 +36,9 @@ trait CookieEncoding {
   private[security] lazy val devicecookieName   = "DEVICE_SESS_ID"
   private[security] lazy val devicecookieMaxAge = Some(604800) // Hardcoded to 7 Days
 
+  private[security] lazy val supportCookieName   = "SUPPORT_SESS_ID"
+  private[security] lazy val supportCookieMaxAge = Some(3600) // Hardcoded to 1 Hour
+
   val cookieSigner: CookieSigner
 
   def createCookie(sessionId: String): Cookie = {
@@ -55,6 +58,18 @@ trait CookieEncoding {
       devicecookieName,
       encodeCookie(sessionId),
       devicecookieMaxAge,
+      cookiePathOption,
+      cookieDomainOption,
+      cookieSecureOption,
+      cookieHttpOnlyOption
+    )
+  }
+
+  def createSupportCookie(sessionId: String): Cookie = {
+    Cookie(
+      supportCookieName,
+      encodeCookie(sessionId),
+      supportCookieMaxAge,
       cookiePathOption,
       cookieDomainOption,
       cookieSecureOption,

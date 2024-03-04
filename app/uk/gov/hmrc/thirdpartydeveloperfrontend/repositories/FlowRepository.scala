@@ -31,7 +31,7 @@ import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow, NewApplicationEmailPreferencesFlowV2}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
 
 @Singleton
@@ -59,6 +59,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
         .forType[EmailPreferencesFlowV2]
         .forType[NewApplicationEmailPreferencesFlowV2]
         .forType[GetProductionCredentialsFlow]
+        .forType[SupportFlow]
         .build
     ) {
 

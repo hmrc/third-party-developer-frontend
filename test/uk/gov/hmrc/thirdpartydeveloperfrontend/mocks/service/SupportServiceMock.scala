@@ -20,7 +20,10 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, ServiceName}
+import uk.gov.hmrc.http.HttpException
+
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
 
 trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -34,10 +37,17 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
         when(aMock.fetchAllPublicApis()(*)).thenReturn(successful(apis))
     }
 
-    object fetchApiDefinition {
+    object GetSupportFlow {
+      def succeeds(flow: SupportFlow = SupportFlow("sessionId", "api")) = when(aMock.getSupportFlow(*)).thenReturn(successful(flow))
+    }
 
-      def succeeds(apiDefinition: ExtendedApiDefinition) =
-        when(aMock.fetchApiDefinition(*[ServiceName])(*)).thenReturn(successful(Right(apiDefinition)))
+    object CreateSupportFlow {
+      def succeeds(flow: SupportFlow = SupportFlow("sessionId", "api")) = when(aMock.createFlow(*, *)).thenReturn(successful(flow))
+    }
+
+    object UpdateApiChoice {
+      def succeeds(flow: SupportFlow = SupportFlow("sessionId", "api")) = when(aMock.updateApiChoice(*, *[ServiceName])(*)).thenReturn(successful(Right(flow)))
+      def fails()                                                       = when(aMock.updateApiChoice(*, *[ServiceName])(*)).thenReturn(successful(Left(new HttpException("", 400))))
     }
   }
 

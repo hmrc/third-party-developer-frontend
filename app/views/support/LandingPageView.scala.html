@@ -64,15 +64,25 @@
         name = "helpWithChoice",
         items = Seq(
           RadioItem(
+            id = Some("finding-an-api"),
+            content = Text("Finding the API need to build my software"),
+            value = Some("find-api"),
+            hint = Some(
+              Hint(
+                content = Text("Finding an API for a tax or scheme")
+              )
+            )
+          ),
+          RadioItem(
             id = Some("using-an-api"),
             content = Text("Using an API"),
             value = Some("api"),
             hint = Some(
               Hint(
-                content = Text("API calls, API documentation, service guides, roadmaps")
+                content = Text("API calls, API documentation, service guides, roadmaps, payloads or schemas")
               )
             )
-          ), 
+          ),
           RadioItem(
             id = Some("signing-into-account"),
             content = Text("Signing in to my account"),
