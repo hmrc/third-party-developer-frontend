@@ -18,11 +18,11 @@ lazy val appName = "third-party-developer-frontend"
 lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-scalaVersion := "2.13.12"
-
-ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / majorVersion := 0
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
@@ -60,25 +60,6 @@ lazy val microservice = Project(appName, file("."))
     Test / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "test-utils"),
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
   )
-  .configs(IntegrationTest)
-  .settings(DefaultBuildSettings.integrationTestSettings())
-  .settings(inConfig(IntegrationTest)(scalafixConfigSettings(IntegrationTest)))
-  .settings(
-    IntegrationTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    IntegrationTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "it", baseDirectory.value / "test-utils"),
-    IntegrationTest / unmanagedResourceDirectories += baseDirectory.value / "test",
-    IntegrationTest / parallelExecution := false
-  )
-  .configs(ComponentTest)
-  .settings(inConfig(ComponentTest)(Defaults.testSettings ++ BloopDefaults.configSettings ++ ScalafmtPlugin.scalafmtConfigSettings) ++ scalafixConfigSettings(ComponentTest))
-  .settings(headerSettings(ComponentTest) ++ automateHeaderSettings(ComponentTest))
-  .settings(
-    ComponentTest / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
-    ComponentTest / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "component", baseDirectory.value / "test-utils"),
-    ComponentTest / unmanagedResourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "features"),
-    ComponentTest / parallelExecution := false
-  )
-  .settings(majorVersion := 0)
   .settings(
       routesImport ++= Seq(
         "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",
@@ -113,14 +94,32 @@ lazy val microservice = Project(appName, file("."))
     "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
     )
   )
-lazy val ComponentTest = config("component") extend Test
+
+lazy val it = (project in file("it"))
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(
+    name := "integration-tests",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    DefaultBuildSettings.itSettings()
+  )
+
+lazy val component = (project in file("component"))
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(
+    name := "component-tests",
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    DefaultBuildSettings.itSettings()
+  )
 
 commands ++= Seq(
-  Command.command("run-all-tests") { state => "test" :: "it:test" :: "component:test" :: state },
-
+  Command.command("cleanAll") { state => "clean" :: "it/clean" :: "component/clean" :: state },
+  Command.command("fmtAll") { state => "scalafmtAll" :: "it/scalafmtAll" :: "component/scalafmtAll" :: state },
+  Command.command("fixAll") { state => "scalafixAll" :: "it/scalafixAll" :: "component/scalafixAll" :: state },
+  Command.command("testAll") { state => "test" :: "it/test" :: "component/test" :: state },
+  Command.command("run-all-tests") { state => "testAll" :: state },
   Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
-
-  // Coverage does not need compile !
-  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "it:test" :: "component:test" :: "coverageOff" :: "testOnly * -- -n ExcludeFromCoverage" :: "coverageReport" :: state }
-
-  )
+  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "run-all-tests" :: "coverageOff" :: "coverageAggregate" :: state }
+)
