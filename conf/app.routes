@@ -35,8 +35,8 @@ GET         /support/submitted                                                  
 POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.chooseSupportOptionAction
 GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportPage
 POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportAction
-GET         /new-support/api/choose-api-details                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportDetailsPage(apiName: String)
-POST        /new-support/api/choose-api-details                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportDetailsAction
+GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsPage
+POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsAction
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked
 

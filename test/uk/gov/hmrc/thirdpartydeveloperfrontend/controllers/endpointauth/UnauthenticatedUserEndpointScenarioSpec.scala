@@ -55,9 +55,9 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_, "/developer/submissions/responsible-individual-verification", _) => Success()
       case Endpoint("POST", "/developer/new-support/api/choose", _)                     => Redirect("/developer/new-support/api/choose-api")
       case Endpoint("GET", "/developer/new-support/api/choose-api", _)                  => Success()
-      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                 => Redirect("/developer/new-support/api/choose-api-details?apiName=Test+Service+Name")
-      case Endpoint("GET", "/developer/new-support/api/choose-api-details", _)          => Success()
-      case Endpoint("POST", "/developer/new-support/api/choose-api-details", _)         => Success()
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                 => Redirect("/developer/new-support/api/details")
+      case Endpoint("GET", "/developer/new-support/api/details", _)                     => Success()
+      case Endpoint("POST", "/developer/new-support/api/details", _)                    => Success()
       case _                                                                            => Redirect("/developer/login")
     }
   }

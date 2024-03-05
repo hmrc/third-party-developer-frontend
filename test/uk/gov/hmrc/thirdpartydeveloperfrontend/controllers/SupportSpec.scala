@@ -21,7 +21,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 import org.jsoup.Jsoup
-import views.html.support.{ApiSupportPageDetailView, ApiSupportPageView, LandingPageView}
+import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageDetailView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.mvc.{Request, Result}
@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ExtendedApiDefinitionData}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -44,11 +44,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
-    val supportEnquiryView       = app.injector.instanceOf[SupportEnquiryView]
-    val supportThankYouView      = app.injector.instanceOf[SupportThankyouView]
-    val supportLandingPageView   = app.injector.instanceOf[LandingPageView]
-    val apiSupportPageView       = app.injector.instanceOf[ApiSupportPageView]
-    val apiSupportPageDetailView = app.injector.instanceOf[ApiSupportPageDetailView]
+    val supportEnquiryView     = app.injector.instanceOf[SupportEnquiryView]
+    val supportThankYouView    = app.injector.instanceOf[SupportThankyouView]
+    val supportLandingPageView = app.injector.instanceOf[LandingPageView]
+    val apiSupportPageView     = app.injector.instanceOf[ApiSupportPageView]
+    val supportPageDetailView  = app.injector.instanceOf[SupportPageDetailView]
 
     val underTest = new Support(
       mock[DeskproService],
@@ -60,7 +60,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       supportThankYouView,
       supportLandingPageView,
       apiSupportPageView,
-      apiSupportPageDetailView,
+      supportPageDetailView,
       SupportServiceMock.aMock
     )
 
@@ -128,13 +128,13 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
         .withSession(sessionParams: _*)
 
       SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
-
+      SupportServiceMock.UpdateApiChoice.succeeds()
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
       val result = addToken(underTest.apiSupportAction)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"/developer/new-support/api/choose-api-details?apiName=$apiName")
+      redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
     }
 
     "return a bad request when no api is selected" in new Setup {
@@ -146,7 +146,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
         .withSession(sessionParams: _*)
 
       SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
-
+      SupportServiceMock.UpdateApiChoice.fails()
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
       val result = addToken(underTest.apiSupportAction)(request)
@@ -155,16 +155,15 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     }
 
     "render the new api support details page" in new Setup {
-      val apiName = "test-api"
       val request = FakeRequest()
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
-      SupportServiceMock.fetchApiDefinition.succeeds(ExtendedApiDefinitionData.extendedApiDefinition)
+      SupportServiceMock.GetSupportFlow.succeeds()
 
       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-      val result = addToken(underTest.apiSupportDetailsPage(apiName))(request)
+      val result = addToken(underTest.supportDetailsPage())(request)
 
       status(result) shouldBe OK
     }

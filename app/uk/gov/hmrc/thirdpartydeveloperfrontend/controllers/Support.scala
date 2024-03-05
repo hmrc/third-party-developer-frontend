@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{ApiSupportPageDetailView, ApiSupportPageView, LandingPageView}
+import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageDetailView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
@@ -27,10 +28,11 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.commentsSpamKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
 @Singleton
@@ -44,11 +46,11 @@ class Support @Inject() (
     supportThankyouView: SupportThankyouView,
     landingPageView: LandingPageView,
     apiSupportPageView: ApiSupportPageView,
-    apiSupportPageDetailView: ApiSupportPageDetailView,
+    apiSupportPageDetailView: SupportPageDetailView,
     supportService: SupportService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends BaseController(mcc) with ApplicationLogger {
+  ) extends BaseController(mcc) with SupportCookie {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
@@ -83,10 +85,13 @@ class Support @Inject() (
 
   def chooseSupportOptionAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def handleValidForm(form: NewSupportPageHelpChoiceForm): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      supportService.createFlow(sessionId, form.helpWithChoice)
       form.helpWithChoice match {
-        case "api"         => Future.successful(Redirect(routes.Support.apiSupportPage))
+        case "api"         => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage), sessionId))
         case "account"     => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
         case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
+        case "find-api"    => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage), sessionId))
         case _             => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
       }
     }
@@ -125,10 +130,17 @@ class Support @Inject() (
       )
     }
 
+    def updateFlowAndRedirect(apiName: String): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      supportService.updateApiChoice(sessionId, ServiceName(apiName)) flatMap {
+        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage), sessionId))
+        case Left(_)  => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
+      }
+    }
+
     def handleValidForm(form: ApiSupportForm): Future[Result] =
       form.helpWithApiChoice match {
-        case "api-call" =>
-          Future.successful(Redirect(routes.Support.apiSupportDetailsPage(form.apiName)))
+        case "api-call" => updateFlowAndRedirect(form.apiName)
         case _          => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
       }
 
@@ -138,38 +150,36 @@ class Support @Inject() (
     ApiSupportForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def apiSupportDetailsPage(apiServiceName: String): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderSupportDetailsPage(apiServiceName: String) =
+  def supportDetailsPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderSupportDetailsPage(flow: SupportFlow) =
       Ok(
         apiSupportPageDetailView(
           fullyloggedInDeveloper,
           ApiSupportDetailsForm.form,
           routes.Support.apiSupportAction.url,
-          apiServiceName
+          flow
         )
       )
 
-    supportService.fetchApiDefinition(ServiceName(apiServiceName)).flatMap {
-      case Right(api) => Future.successful(renderSupportDetailsPage(api.name))
-      case Left(_)    => Future.successful(BadRequest(errorHandler.badRequestTemplate))
-    }
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    supportService.getSupportFlow(sessionId).map(renderSupportDetailsPage)
   }
 
-  def apiSupportDetailsAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderApiSupportDetailsPageErrorView(form: Form[ApiSupportDetailsForm]) = {
+  def supportDetailsAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderApiSupportDetailsPageErrorView(flow: SupportFlow)(form: Form[ApiSupportDetailsForm]) = {
       Future.successful(
         BadRequest(
           apiSupportPageDetailView(
             fullyloggedInDeveloper,
             form,
             routes.Support.apiSupportAction.url,
-            form.data.getOrElse("apiName", "UNKNOWN API")
+            flow
           )
         )
       )
     }
 
-    def handleValidForm(form: ApiSupportDetailsForm): Future[Result] = {
+    def handleValidForm(flow: SupportFlow)(form: ApiSupportDetailsForm): Future[Result] = {
       // Return to api support details page for now
       Future.successful(
         Ok(
@@ -177,17 +187,21 @@ class Support @Inject() (
             fullyloggedInDeveloper,
             ApiSupportDetailsForm.form,
             routes.Support.apiSupportAction.url,
-            form.apiName
+            flow
           )
         )
       )
     }
 
-    def handleInvalidForm(formWithErrors: Form[ApiSupportDetailsForm]): Future[Result] = {
-      renderApiSupportDetailsPageErrorView(formWithErrors)
+    def handleInvalidForm(flow: SupportFlow)(formWithErrors: Form[ApiSupportDetailsForm]): Future[Result] = {
+      renderApiSupportDetailsPageErrorView(flow)(formWithErrors)
     }
 
-    ApiSupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+
+    supportService.getSupportFlow(sessionId).flatMap(flow =>
+      ApiSupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(flow))
+    )
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {

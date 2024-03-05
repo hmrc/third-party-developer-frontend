@@ -21,20 +21,51 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
 class SupportService @Inject() (
-    val apmConnector: ApmConnector
+    val apmConnector: ApmConnector,
+    flowRepository: FlowRepository
   )(implicit val ec: ExecutionContext
   ) extends ApplicationLogger {
+
+  val ET = EitherTHelper.make[Throwable]
+
+  private def fetchSupportFlow(sessionId: String): Future[SupportFlow] = {
+    flowRepository.fetchBySessionIdAndFlowType[SupportFlow](sessionId) map {
+      case Some(flow) => flow
+      case None       => SupportFlow(sessionId, "unknown")
+    }
+  }
+
+  def getSupportFlow(sessionId: String): Future[SupportFlow] = {
+    for {
+      flow      <- fetchSupportFlow(sessionId)
+      savedFlow <- flowRepository.saveFlow(flow)
+    } yield savedFlow
+  }
+
+  def updateApiChoice(sessionId: String, apiChoice: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
+    (
+      for {
+        flow       <- ET.liftF(fetchSupportFlow(sessionId))
+        api        <- ET.fromEitherF(apmConnector.fetchExtendedApiDefinition(apiChoice))
+        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, api.name)))
+        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
+      } yield savedFlow
+    ).value
+  }
+
+  def createFlow(sessionId: String, entrypoint: String): Future[SupportFlow] = {
+    flowRepository.saveFlow(SupportFlow(sessionId, entrypoint))
+  }
 
   def fetchAllPublicApis()(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     apmConnector.fetchApiDefinitionsVisibleToUser(None)
   }
-
-  def fetchApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
-    apmConnector.fetchExtendedApiDefinition(serviceName)
 }

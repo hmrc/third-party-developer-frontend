@@ -20,7 +20,7 @@ import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 
@@ -54,6 +54,24 @@ trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
       def willFailWith(exception: Exception) =
         when(aMock.fetchAllApis(*)(*)).thenReturn(failed(exception))
+    }
+
+    object FetchApiDefinitionsVisibleToUser {
+
+      def willReturn(apis: List[ApiDefinition]) =
+        when(aMock.fetchApiDefinitionsVisibleToUser(*)(*)).thenReturn(successful(apis))
+
+      def willFailWith(exception: Exception) =
+        when(aMock.fetchApiDefinitionsVisibleToUser(*)(*)).thenReturn(failed(exception))
+    }
+
+    object FetchExtendedApiDefinition {
+
+      def willReturn(definition: ExtendedApiDefinition) =
+        when(aMock.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(successful(Right(definition)))
+
+      def willFailWith(exception: Exception) =
+        when(aMock.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(successful(Left(exception)))
     }
 
     object FetchUpliftableSubscriptions {
