@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.{Completed, InProgress}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ExtendedSubmission, NoAnswer, QuestionnaireProgress, SingleChoiceAnswer}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ActualAnswer, ExtendedSubmission, QuestionnaireProgress}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView}
@@ -191,7 +191,7 @@ class CheckAnswersControllerSpec
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
-      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("Yes"))
+      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.SingleChoiceAnswer("Yes"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
@@ -203,7 +203,7 @@ class CheckAnswersControllerSpec
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
-      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, SingleChoiceAnswer("No"))
+      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.SingleChoiceAnswer("No"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 
@@ -215,7 +215,7 @@ class CheckAnswersControllerSpec
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
       when(mockRequestProdCreds.requestProductionCredentials(eqTo(applicationId), *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
-      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, NoAnswer)
+      val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.NoAnswer)
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
 

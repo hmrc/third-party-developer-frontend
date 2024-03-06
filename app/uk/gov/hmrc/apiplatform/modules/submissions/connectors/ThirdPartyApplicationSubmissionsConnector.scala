@@ -28,7 +28,6 @@ import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
@@ -57,10 +56,11 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     val config: ThirdPartyApplicationSubmissionsConnector.Config,
     val metrics: ConnectorMetrics
   )(implicit val ec: ExecutionContext
-  ) extends SubmissionsFrontendJsonFormatters {
+  ) {
 
   import ThirdPartyApplicationSubmissionsConnector._
   import config._
+  import Submission._
 
   val api = API("third-party-application-submissions")
 

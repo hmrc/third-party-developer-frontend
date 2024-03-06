@@ -98,11 +98,11 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     )
   )
   lazy val questionnaireId: Questionnaire.Id                = Questionnaire.Id.random
-  lazy val question: AcknowledgementOnly                    = AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
+  lazy val question: Question.AcknowledgementOnly           = Question.AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
   lazy val questionItem: QuestionItem                       = QuestionItem(question)
   lazy val questionnaire: Questionnaire                     = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
 
-  lazy val questionIdsOfInterest: QuestionIdsOfInterest     = QuestionIdsOfInterest(
+  lazy val questionIdsOfInterest: QuestionIdsOfInterest                  = QuestionIdsOfInterest(
     Question.Id.random,
     Question.Id.random,
     Question.Id.random,
@@ -115,9 +115,9 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     Question.Id.random,
     Question.Id.random
   )
-  lazy val groupOfQuestionnaires: GroupOfQuestionnaires     = GroupOfQuestionnaires("heading", NonEmptyList.one(questionnaire))
-  lazy val answersToQuestions: Map[Question.Id, TextAnswer] = Map(question.id -> TextAnswer("yes"))
-  lazy val submissionInstance: Submission.Instance          = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(instant, "mr jones", None, None)))
+  lazy val groupOfQuestionnaires: GroupOfQuestionnaires                  = GroupOfQuestionnaires("heading", NonEmptyList.one(questionnaire))
+  lazy val answersToQuestions: Map[Question.Id, ActualAnswer.TextAnswer] = Map(question.id -> ActualAnswer.TextAnswer("yes"))
+  lazy val submissionInstance: Submission.Instance                       = Submission.Instance(submissionIndex, answersToQuestions, NonEmptyList.one(Granted(instant, "mr jones", None, None)))
 
   lazy val submission: Submission                       = Submission(
     SubmissionId.random,
