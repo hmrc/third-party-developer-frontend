@@ -4,15 +4,12 @@ import play.sbt.PlayImport._
 object AppDependencies {
   def apply() : Seq[ModuleID] = compile ++ test
 
-  lazy val cucumberVersion = "7.15.0"
   lazy val seleniumVersion = "4.14.0"
   lazy val bootstrapVersion = "8.4.0"
   lazy val mongoVersion = "1.7.0"
   lazy val commonDomainVersion = "0.11.0"
   lazy val apiDomainVersion = "0.14.0"
   lazy val appDomainVersion = "0.35.0"
-
-  val testScope = "test, it, component"
 
   lazy val compile = Seq(
     ws,
@@ -42,14 +39,13 @@ object AppDependencies {
     "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
     // Transitive dependency to be aware of - "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion
-  ).map(_ % testScope) ++
-  Seq(
+  ).map(_ % "test")
+
+  lazy val componentTestDependencies = Seq(
     "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
-    "io.cucumber"                 %  "cucumber-junit"                     % cucumberVersion,
-    "com.titusfortner"            %  "selenium-logger"                    % "2.3.0",
-    "junit"                       %  "junit"                              % "4.13.2",
+    "io.cucumber"                 %  "cucumber-junit"                     % "7.15.0",
     "com.novocode"                %  "junit-interface"                    % "0.11",
     "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0",
     "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36"
-  ).map(_ % "component")
+  ).map(_ % "test")
 }

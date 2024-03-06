@@ -24,7 +24,7 @@ import steps.Env
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-  features = Array("features"),
+  features = Array("component/features"),
   glue = Array("steps"),
   dryRun = false,
   snippets = CAMELCASE,
