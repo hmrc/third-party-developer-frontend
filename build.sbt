@@ -26,6 +26,7 @@ ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" 
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     Concat.groups := Seq(
       "javascripts/apis-app.js" -> group(
@@ -57,8 +58,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     Test / parallelExecution := false,
     Test / fork := false,
-    Test / unmanagedSourceDirectories ++= Seq(baseDirectory.value / "test", baseDirectory.value / "test-utils"),
-    Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT"))
+    Test / unmanagedSourceDirectories += baseDirectory.value / "test-utils",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT")
   )
   .settings(
       routesImport ++= Seq(
@@ -110,7 +111,7 @@ lazy val component = (project in file("component"))
   .settings(
     name := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
-    Test / testOptions := Seq(Tests.Argument(TestFrameworks.ScalaTest, "-eT")),
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
     DefaultBuildSettings.itSettings()
   )
 
