@@ -37,7 +37,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val thirdPartyApplicationSandboxApiKey      = getConfString("third-party-application-sandbox.api-key", "")
   val deskproHorizonEnabled                   = getConfigDefaulted("deskpro-horizon.enabled", false)
   val deskproUrl                              = baseUrl("deskpro-ticket-queue")
-  val deskproHorizonUrl                       = baseUrl("deskpro-horizon")
+  val deskproHorizonUrl                       = getString("deskpro-horizon.uri")
   val deskproHorizonApiKey                    = config.getOptional[String]("deskpro-horizon.api-key").map(key => s"key $key").getOrElse("")
 
   lazy val contactPath = getConfigDefaulted("contactPath", "")
