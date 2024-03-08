@@ -28,11 +28,11 @@ object AnswersViewModel {
   case class ViewModel(appId: ApplicationId, appName: String, submissionId: SubmissionId, questionnaires: List[ViewQuestionnaire])
 
   private def convertAnswer(answer: ActualAnswer): Option[String] = answer match {
-    case SingleChoiceAnswer(value)    => Some(value)
-    case TextAnswer(value)            => Some(value)
-    case MultipleChoiceAnswer(values) => Some(values.mkString)
-    case NoAnswer                     => Some("n/a")
-    case AcknowledgedAnswer           => None
+    case ActualAnswer.SingleChoiceAnswer(value)    => Some(value)
+    case ActualAnswer.TextAnswer(value)            => Some(value)
+    case ActualAnswer.MultipleChoiceAnswer(values) => Some(values.mkString)
+    case ActualAnswer.NoAnswer                     => Some("n/a")
+    case ActualAnswer.AcknowledgedAnswer           => None
   }
 
   private def convertQuestion(submission: Submission)(item: QuestionItem): Option[ViewQuestion] = {

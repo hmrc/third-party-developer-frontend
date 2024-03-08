@@ -22,73 +22,73 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 trait MakeOptional[T <: Question] {
   def makeOptional(text: String, mark: Mark): T
-  def makeOptionalFail: T = makeOptional("Some text", Fail)
-  def makeOptionalWarn: T = makeOptional("Some text", Warn)
-  def makeOptionalPass: T = makeOptional("Some text", Pass)
+  def makeOptionalFail: T = makeOptional("Some text", Mark.Fail)
+  def makeOptionalWarn: T = makeOptional("Some text", Mark.Warn)
+  def makeOptionalPass: T = makeOptional("Some text", Mark.Pass)
 }
 
 trait QuestionBuilder {
 
-  implicit class TextQuestionSyntax(question: TextQuestion) extends MakeOptional[TextQuestion] {
-    def makeOptional(text: String, mark: Mark): TextQuestion = question.copy(absence = Some((text, mark)))
+  implicit class TextQuestionSyntax(question: Question.TextQuestion) extends MakeOptional[Question.TextQuestion] {
+    def makeOptional(text: String, mark: Mark): Question.TextQuestion = question.copy(absence = Some((text, mark)))
   }
 
-  implicit class MultiChoiceQuestionSyntax(question: MultiChoiceQuestion) extends MakeOptional[MultiChoiceQuestion] {
-    def makeOptional(text: String, mark: Mark): MultiChoiceQuestion = question.copy(absence = Some((text, mark)))
+  implicit class MultiChoiceQuestionSyntax(question: Question.MultiChoiceQuestion) extends MakeOptional[Question.MultiChoiceQuestion] {
+    def makeOptional(text: String, mark: Mark): Question.MultiChoiceQuestion = question.copy(absence = Some((text, mark)))
   }
 
-  implicit class YesNoQuestionSyntax(question: YesNoQuestion) extends MakeOptional[YesNoQuestion] {
-    def makeOptional(text: String, mark: Mark): YesNoQuestion = question.copy(absence = Some((text, mark)))
+  implicit class YesNoQuestionSyntax(question: Question.YesNoQuestion) extends MakeOptional[Question.YesNoQuestion] {
+    def makeOptional(text: String, mark: Mark): Question.YesNoQuestion = question.copy(absence = Some((text, mark)))
   }
 
-  implicit class ChooseOneOfQuestionSyntax(question: ChooseOneOfQuestion) extends MakeOptional[ChooseOneOfQuestion] {
-    def makeOptional(text: String, mark: Mark): ChooseOneOfQuestion = question.copy(absence = Some((text, mark)))
+  implicit class ChooseOneOfQuestionSyntax(question: Question.ChooseOneOfQuestion) extends MakeOptional[Question.ChooseOneOfQuestion] {
+    def makeOptional(text: String, mark: Mark): Question.ChooseOneOfQuestion = question.copy(absence = Some((text, mark)))
   }
 
-  def acknowledgementOnly(counter: Int): AcknowledgementOnly =
-    AcknowledgementOnly(
+  def acknowledgementOnly(counter: Int): Question.AcknowledgementOnly =
+    Question.AcknowledgementOnly(
       Question.Id.random,
       Wording(s"Wording$counter"),
       None
     )
 
-  def yesNoQuestion(counter: Int): YesNoQuestion = {
-    YesNoQuestion(
+  def yesNoQuestion(counter: Int): Question.YesNoQuestion = {
+    Question.YesNoQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
       None,
       None,
-      yesMarking = Pass,
-      noMarking = Fail
+      yesMarking = Mark.Pass,
+      noMarking = Mark.Fail
     )
   }
 
-  def chooseOneOfQuestion(counter: Int, choices: String*): ChooseOneOfQuestion = {
-    ChooseOneOfQuestion(
-      Question.Id.random,
-      Wording(s"Wording$counter"),
-      None,
-      None,
-      None,
-      None,
-      marking = choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])((pair, acc) => acc + pair)
-    )
-  }
-
-  def multichoiceQuestion(counter: Int, choices: String*): MultiChoiceQuestion = {
-    MultiChoiceQuestion(
+  def chooseOneOfQuestion(counter: Int, choices: String*): Question.ChooseOneOfQuestion = {
+    Question.ChooseOneOfQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
       None,
       None,
       None,
       None,
-      choices.toList.map(c => (PossibleAnswer(c) -> Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])((pair, acc) => acc + pair)
+      marking = choices.toList.map(c => (PossibleAnswer(c) -> Mark.Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])((pair, acc) => acc + pair)
     )
   }
 
-  def textQuestion(counter: Int): TextQuestion = {
-    TextQuestion(
+  def multichoiceQuestion(counter: Int, choices: String*): Question.MultiChoiceQuestion = {
+    Question.MultiChoiceQuestion(
+      Question.Id.random,
+      Wording(s"Wording$counter"),
+      None,
+      None,
+      None,
+      None,
+      choices.toList.map(c => (PossibleAnswer(c) -> Mark.Pass)).foldRight(ListMap.empty[PossibleAnswer, Mark])((pair, acc) => acc + pair)
+    )
+  }
+
+  def textQuestion(counter: Int): Question.TextQuestion = {
+    Question.TextQuestion(
       Question.Id.random,
       Wording(s"Wording$counter"),
       None

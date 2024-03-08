@@ -27,16 +27,16 @@ import play.api.libs.json.{Json, OFormat, OWrites, Reads}
 import play.api.mvc.{MessagesControllerComponents, _}
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
-object QuestionsController {
+object QuestionsController extends NonEmptyListFormatters {
   case class ErrorMessage(message: String)
   implicit val writesErrorMessage: OWrites[ErrorMessage] = Json.writes[ErrorMessage]
 
@@ -136,8 +136,8 @@ class QuestionsController @Inject() (
         .getOrElse(ErrorInfo(defaultMessage, defaultMessage))
 
       val onFormAnswer = question match {
-        case q: TextQuestion => answers.headOption.map(TextAnswer)
-        case _               => None
+        case q: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer)
+        case _                        => None
       }
 
       showQuestion(submissionId, questionId, onFormAnswer, errorInfo.some)(request)

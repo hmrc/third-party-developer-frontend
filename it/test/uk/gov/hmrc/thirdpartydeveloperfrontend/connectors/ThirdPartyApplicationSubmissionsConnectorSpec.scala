@@ -35,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.services.SubmissionsFrontendJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
@@ -45,10 +44,12 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with WireMockExtensions
     with CollaboratorTracker
     with LocalUserIdTracker
-    with SubmissionsFrontendJsonFormatters
     with TestApplications
     with SubmissionsTestData
     with ApplicationsJsonFormatters {
+
+  import Submission._    
+
   private val apiKey = UUID.randomUUID().toString
   private val code   = "123456789"
 

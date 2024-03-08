@@ -313,7 +313,7 @@ class QuestionControllerSpec
 
       val modifiedAnswersToQuestions = fullyAnsweredSubmission.submission.latestInstance.answersToQuestions -
         OrganisationDetails.question2c.id ++ Map(
-          OrganisationDetails.question2.id -> SingleChoiceAnswer("Unique Taxpayer Reference (UTR)")
+          OrganisationDetails.question2.id -> ActualAnswer.SingleChoiceAnswer("Unique Taxpayer Reference (UTR)")
         )
 
       val modifiedProgress = Map(OrganisationDetails.questionnaire.id ->

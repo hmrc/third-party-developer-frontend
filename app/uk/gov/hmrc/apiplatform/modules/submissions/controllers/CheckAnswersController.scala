@@ -103,8 +103,8 @@ class CheckAnswersController @Inject() (
   private def isRequesterResponsibleIndividual(submission: Submission) = {
     val responsibleIndividualIsRequesterId = submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
     submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
-      case Some(SingleChoiceAnswer(answer)) => answer == "Yes"
-      case _                                => false
+      case Some(ActualAnswer.SingleChoiceAnswer(answer)) => answer == "Yes"
+      case _                                             => false
     }
   }
 
