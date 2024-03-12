@@ -35,9 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 class DeskproHorizonConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
   private val stubConfig = Configuration(
-    "microservice.services.deskpro-horizon.protocol" -> "http",
-    "microservice.services.deskpro-horizon.host"     -> "localhost",
-    "microservice.services.deskpro-horizon.port"     -> stubPort
+    "deskpro-horizon.uri"     -> s"http://localhost:$stubPort"
   )
 
   override def fakeApplication(): Application =
