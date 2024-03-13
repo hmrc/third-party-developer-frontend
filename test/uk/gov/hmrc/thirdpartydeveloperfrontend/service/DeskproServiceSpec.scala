@@ -117,7 +117,7 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         when(underTest.appConfig.title).thenReturn(title)
         when(underTest.appConfig.deskproHorizonEnabled).thenReturn(true)
         when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
-        when(underTest.deskproHorizonConnector.createTicket(*)(*)).thenReturn(Future(TicketCreated))
+        when(underTest.deskproHorizonConnector.createTicket(*[DeskproTicket])(*)).thenReturn(Future(TicketCreated))
 
         implicit val fakeRequest = FakeRequest()
         implicit val hc          = HeaderCarrier()

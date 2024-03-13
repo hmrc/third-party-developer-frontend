@@ -24,21 +24,29 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ExtendedApiDefinitionD
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceNameData.serviceName
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SupportServiceSpec extends AsyncHmrcSpec {
 
-  val sessionId                = "SESSIONID"
-  val entryPoint               = "api"
-  val savedFlow: SupportFlow   = SupportFlow(sessionId, entryPoint)
-  val defaultFlow: SupportFlow = SupportFlow(sessionId, "unknown")
+  val sessionId                        = "SESSIONID"
+  val entryPoint                       = "api"
+  val savedFlow: SupportFlow           = SupportFlow(sessionId, entryPoint)
+  val defaultFlow: SupportFlow         = SupportFlow(sessionId, "unknown")
+  val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  trait Setup extends ApmConnectorMockModule with FlowRepositoryMockModule {
-    val underTest = new SupportService(ApmConnectorMock.aMock, FlowRepositoryMock.aMock)
+  trait Setup extends ApmConnectorMockModule with FlowRepositoryMockModule with DeskproHorizonConnectorMockModule {
+    val underTest        = new SupportService(ApmConnectorMock.aMock, DeskproHorizonConnectorMock.aMock, FlowRepositoryMock.aMock, mockAppConfig)
+    val apiNameConfig    = "5"
+    val entryPointConfig = "7"
+    when(mockAppConfig.deskproHorizonApiName).thenReturn(apiNameConfig)
+    when(mockAppConfig.deskproHorizonEntryPoint).thenReturn(entryPointConfig)
     FlowRepositoryMock.SaveFlow.thenReturnSuccess
   }
 
@@ -86,6 +94,33 @@ class SupportServiceSpec extends AsyncHmrcSpec {
 
       val result = await(underTest.updateApiChoice(sessionId, serviceName))
       result.left.value shouldBe exception
+    }
+
+    "submitTicket with no api should be blank" in new Setup {
+      DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
+      val result = await(underTest.submitTicket(SupportFlow("123", "find-api", None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
+      result shouldBe TicketCreated
+      DeskproHorizonConnectorMock.CreateTicket.verifyCalledWith(DeskproHorizonTicket(
+        person = DeskproHorizonTicketPerson("test name", "email@test.com"),
+        subject = "HMRC Developer Hub: Support Enquiry",
+        message = DeskproHorizonTicketMessage("This is some<br>description"),
+        fields = Map(apiNameConfig -> "", entryPointConfig -> "find-api")
+      ))
+    }
+
+    "submitTicket with api should be name" in new Setup {
+      DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
+      val result = await(underTest.submitTicket(
+        SupportFlow("123", "api", Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
+        ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
+      ))
+      result shouldBe TicketCreated
+      DeskproHorizonConnectorMock.CreateTicket.verifyCalledWith(DeskproHorizonTicket(
+        person = DeskproHorizonTicketPerson("test name", "email@test.com"),
+        subject = "HMRC Developer Hub: Support Enquiry",
+        message = DeskproHorizonTicketMessage("This is some<br>description"),
+        fields = Map(apiNameConfig -> "Hello world", entryPointConfig -> "api")
+      ))
     }
 
   }

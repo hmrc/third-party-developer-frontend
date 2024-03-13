@@ -23,44 +23,46 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig(config) {
-  def getConfigDefaulted[A](key: String, default: A)(implicit loader: ConfigLoader[A]) = config.getOptional[A](key)(loader).getOrElse(default)
+  def getConfigDefaulted[A](key: String, default: A)(implicit loader: ConfigLoader[A]): A = config.getOptional[A](key)(loader).getOrElse(default)
 
-  val contactFormServiceIdentifier            = "API"
-  val betaFeedbackUrl                         = "/contact/beta-feedback"
-  val betaFeedbackUnauthenticatedUrl          = "/contact/beta-feedback-unauthenticated"
-  val thirdPartyDeveloperUrl                  = baseUrl("third-party-developer")
-  val thirdPartyApplicationProductionUrl      = thirdPartyApplicationUrl("third-party-application-production")
-  val thirdPartyApplicationProductionUseProxy = useProxy("third-party-application-production")
-  val thirdPartyApplicationSandboxUrl         = thirdPartyApplicationUrl("third-party-application-sandbox")
-  val thirdPartyApplicationSandboxUseProxy    = useProxy("third-party-application-sandbox")
-  val thirdPartyApplicationProductionApiKey   = getConfString("third-party-application-production.api-key", "")
-  val thirdPartyApplicationSandboxApiKey      = getConfString("third-party-application-sandbox.api-key", "")
-  val deskproHorizonEnabled                   = getConfigDefaulted("deskpro-horizon.enabled", false)
-  val deskproUrl                              = baseUrl("deskpro-ticket-queue")
-  val deskproHorizonUrl                       = getString("deskpro-horizon.uri")
-  val deskproHorizonApiKey                    = config.getOptional[String]("deskpro-horizon.api-key").map(key => s"key $key").getOrElse("")
+  val contactFormServiceIdentifier                     = "API"
+  val betaFeedbackUrl                                  = "/contact/beta-feedback"
+  val betaFeedbackUnauthenticatedUrl                   = "/contact/beta-feedback-unauthenticated"
+  val thirdPartyDeveloperUrl: String                   = baseUrl("third-party-developer")
+  val thirdPartyApplicationProductionUrl: String       = thirdPartyApplicationUrl("third-party-application-production")
+  val thirdPartyApplicationProductionUseProxy: Boolean = useProxy("third-party-application-production")
+  val thirdPartyApplicationSandboxUrl: String          = thirdPartyApplicationUrl("third-party-application-sandbox")
+  val thirdPartyApplicationSandboxUseProxy: Boolean    = useProxy("third-party-application-sandbox")
+  val thirdPartyApplicationProductionApiKey: String    = getConfString("third-party-application-production.api-key", "")
+  val thirdPartyApplicationSandboxApiKey: String       = getConfString("third-party-application-sandbox.api-key", "")
+  val deskproHorizonEnabled: Boolean                   = getConfigDefaulted("deskpro-horizon.enabled", false)
+  val deskproUrl: String                               = baseUrl("deskpro-ticket-queue")
+  val deskproHorizonUrl: String                        = getString("deskpro-horizon.uri")
+  val deskproHorizonApiKey: String                     = config.getOptional[String]("deskpro-horizon.api-key").map(key => s"key $key").getOrElse("")
+  val deskproHorizonApiName: String                    = config.get[String]("deskpro-horizon.api-name")
+  val deskproHorizonEntryPoint: String                 = config.get[String]("deskpro-horizon.entry-point")
 
-  lazy val contactPath = getConfigDefaulted("contactPath", "")
+  lazy val contactPath: String = getConfigDefaulted("contactPath", "")
 
-  lazy val reportAProblemPartialUrl       = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  lazy val reportAProblemNonJSUrl         = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val apiDocumentationFrontendUrl    = buildUrl("platform.internal.frontend").getOrElse(baseUrl("api-documentation-frontend"))
-  lazy val thirdPartyDeveloperFrontendUrl = buildUrl("platform.internal.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
-  lazy val productionApiBaseUrl           = buildUrl("platform.api.production")
-  lazy val sandboxApiBaseUrl              = buildUrl("platform.api.sandbox")
+  lazy val reportAProblemPartialUrl               = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemNonJSUrl                 = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val apiDocumentationFrontendUrl: String    = buildUrl("platform.internal.frontend").getOrElse(baseUrl("api-documentation-frontend"))
+  lazy val thirdPartyDeveloperFrontendUrl: String = buildUrl("platform.internal.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
+  lazy val productionApiBaseUrl: Option[String]   = buildUrl("platform.api.production")
+  lazy val sandboxApiBaseUrl: Option[String]      = buildUrl("platform.api.sandbox")
 
-  lazy val sessionTimeout   = getInt("timeout.timeout")
-  lazy val sessionCountdown = getInt("timeout.countdown")
+  lazy val sessionTimeout: Int   = getInt("timeout.timeout")
+  lazy val sessionCountdown: Int = getInt("timeout.countdown")
 
-  lazy val sessionTimeoutInSeconds = getInt("session.timeoutSeconds")
-  lazy val analyticsToken          = config.getOptional[String]("google-analytics.token").filterNot(_ == "")
-  lazy val analyticsHost           = getConfigDefaulted("google-analytics.host", "auto")
-  lazy val securedCookie           = getConfigDefaulted("cookie.secure", true)
-  lazy val title                   = "HMRC Developer Hub"
-  lazy val jsonEncryptionKey       = getString("json.encryption.key")
-  lazy val hasSandbox              = getConfigDefaulted("hasSandbox", false)
-  lazy val retryCount              = getConfigDefaulted("retryCount", 0)
-  lazy val retryDelayMilliseconds  = getConfigDefaulted("retryDelayMilliseconds", 500)
+  lazy val sessionTimeoutInSeconds: Int   = getInt("session.timeoutSeconds")
+  lazy val analyticsToken: Option[String] = config.getOptional[String]("google-analytics.token").filterNot(_ == "")
+  lazy val analyticsHost: String          = getConfigDefaulted("google-analytics.host", "auto")
+  lazy val securedCookie: Boolean         = getConfigDefaulted("cookie.secure", true)
+  lazy val title                          = "HMRC Developer Hub"
+  lazy val jsonEncryptionKey: String      = getString("json.encryption.key")
+  lazy val hasSandbox: Boolean            = getConfigDefaulted("hasSandbox", false)
+  lazy val retryCount: Int                = getConfigDefaulted("retryCount", 0)
+  lazy val retryDelayMilliseconds: Int    = getConfigDefaulted("retryDelayMilliseconds", 500)
 
   lazy val nameOfPrincipalEnvironment: String   = getConfigDefaulted("features.nameOfPrincipalEnvironment", "Production")
   lazy val nameOfSubordinateEnvironment: String = getConfigDefaulted("features.nameOfSubordinateEnvironment", "Sandbox")
@@ -71,22 +73,22 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
     config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")
 
   // API Subscription Fields
-  val apiSubscriptionFieldsProductionUrl      = apiSubscriptionFieldsUrl("api-subscription-fields-production")
-  val apiSubscriptionFieldsProductionApiKey   = getConfString("api-subscription-fields-production.api-key", "")
-  val apiSubscriptionFieldsProductionUseProxy = useProxy("api-subscription-fields-production")
-  val apiSubscriptionFieldsSandboxUrl         = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxUseProxy    = useProxy("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxApiKey      = getConfString("api-subscription-fields-sandbox.api-key", "")
+  val apiSubscriptionFieldsProductionUrl: String       = apiSubscriptionFieldsUrl("api-subscription-fields-production")
+  val apiSubscriptionFieldsProductionApiKey: String    = getConfString("api-subscription-fields-production.api-key", "")
+  val apiSubscriptionFieldsProductionUseProxy: Boolean = useProxy("api-subscription-fields-production")
+  val apiSubscriptionFieldsSandboxUrl: String          = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
+  val apiSubscriptionFieldsSandboxUseProxy: Boolean    = useProxy("api-subscription-fields-sandbox")
+  val apiSubscriptionFieldsSandboxApiKey: String       = getConfString("api-subscription-fields-sandbox.api-key", "")
 
   // PPNS
-  val ppnsProductionUrl              = pushPullNotificationsApiUrl("push-pull-notifications-api-production")
-  val ppnsProductionApiKey           = getConfString("push-pull-notifications-api-production.api-key", "")
-  val ppnsProductionUseProxy         = useProxy("push-pull-notifications-api-production")
-  val ppnsProductionAuthorizationKey = getConfString("push-pull-notifications-api-production.authorizationKey", "")
-  val ppnsSandboxUrl                 = pushPullNotificationsApiUrl("push-pull-notifications-api-sandbox")
-  val ppnsSandboxUseProxy            = useProxy("push-pull-notifications-api-sandbox")
-  val ppnsSandboxApiKey              = getConfString("push-pull-notifications-api-sandbox.api-key", "")
-  val ppnsSandboxAuthorizationKey    = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
+  val ppnsProductionUrl: String              = pushPullNotificationsApiUrl("push-pull-notifications-api-production")
+  val ppnsProductionApiKey: String           = getConfString("push-pull-notifications-api-production.api-key", "")
+  val ppnsProductionUseProxy: Boolean        = useProxy("push-pull-notifications-api-production")
+  val ppnsProductionAuthorizationKey: String = getConfString("push-pull-notifications-api-production.authorizationKey", "")
+  val ppnsSandboxUrl: String                 = pushPullNotificationsApiUrl("push-pull-notifications-api-sandbox")
+  val ppnsSandboxUseProxy: Boolean           = useProxy("push-pull-notifications-api-sandbox")
+  val ppnsSandboxApiKey: String              = getConfString("push-pull-notifications-api-sandbox.api-key", "")
+  val ppnsSandboxAuthorizationKey: String    = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
 
   private def buildUrl(key: String) = {
     (getConfigDefaulted(s"$key.protocol", ""), getConfigDefaulted(s"$key.host", "")) match {
