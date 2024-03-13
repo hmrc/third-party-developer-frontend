@@ -180,6 +180,7 @@ class Support @Inject() (
     }
 
     def handleValidForm(flow: SupportFlow)(form: ApiSupportDetailsForm): Future[Result] = {
+      supportService.submitTicket(flow, form)
       // Return to api support details page for now
       Future.successful(
         Ok(

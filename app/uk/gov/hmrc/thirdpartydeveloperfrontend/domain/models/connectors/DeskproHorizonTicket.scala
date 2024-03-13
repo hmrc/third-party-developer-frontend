@@ -27,14 +27,20 @@ case class DeskproHorizonTicketPerson(
 
 case class DeskproHorizonTicketMessage(
     message: String,
-    format: String
+    format: String = "html"
   )
+
+object DeskproHorizonTicketMessage {
+  def fromRaw(message: String): DeskproHorizonTicketMessage = DeskproHorizonTicketMessage(message.replaceAll(Properties.lineSeparator, "<br>"))
+
+}
 
 case class DeskproHorizonTicket(
     person: DeskproHorizonTicketPerson,
     subject: String,
     message: DeskproHorizonTicketMessage,
-    brand: Int
+    brand: Int,
+    fields: Map[String, String] = Map.empty
   )
 
 object DeskproHorizonTicket extends FieldTransformer {
@@ -42,11 +48,11 @@ object DeskproHorizonTicket extends FieldTransformer {
   implicit val ticketMessageFormat: OFormat[DeskproHorizonTicketMessage] = Json.format[DeskproHorizonTicketMessage]
   implicit val ticketFormat: OFormat[DeskproHorizonTicket]               = Json.format[DeskproHorizonTicket]
 
-  def fromDeskproTicket(deskproTicket: DeskproTicket): DeskproHorizonTicket =
+  def fromDeskproTicket(deskproTicket: DeskproTicket, brand: Int): DeskproHorizonTicket =
     DeskproHorizonTicket(
       person = DeskproHorizonTicketPerson(deskproTicket.name, deskproTicket.email.text),
       subject = deskproTicket.subject,
-      message = DeskproHorizonTicketMessage(deskproTicket.message.replaceAll(Properties.lineSeparator, "<br>"), "html"),
-      brand = 3
+      brand = brand,
+      message = DeskproHorizonTicketMessage.fromRaw(deskproTicket.message)
     )
 }

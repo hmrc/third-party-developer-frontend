@@ -35,7 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 class DeskproHorizonConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
   private val stubConfig = Configuration(
-    "deskpro-horizon.uri"     -> s"http://localhost:$stubPort"
+    "deskpro-horizon.uri"     -> s"http://localhost:$stubPort",
+    "deskpro-horizon.brand"     -> 5
   )
 
   override def fakeApplication(): Application =
@@ -62,7 +63,7 @@ class DeskproHorizonConnectorIntegrationSpec extends BaseConnectorIntegrationSpe
       implicit val fakeRequest = FakeRequest()
       val supportEnquiryForm   = SupportEnquiryForm("Joe Bloggs", "joe.bloggs@example.com", "I need help please")
       val ticket               = DeskproTicket.createFromSupportEnquiry(supportEnquiryForm, "Test App")
-      val deskproHorizonTicket = DeskproHorizonTicket.fromDeskproTicket(ticket)
+      val deskproHorizonTicket = DeskproHorizonTicket.fromDeskproTicket(ticket, 5)
       val ticketPath           = "/api/v2/tickets"
       val expectedBody         = Json.toJson(deskproHorizonTicket).toString()
 

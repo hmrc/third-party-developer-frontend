@@ -23,14 +23,19 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
 class SupportService @Inject() (
     val apmConnector: ApmConnector,
-    flowRepository: FlowRepository
+    deskproConnector: DeskproHorizonConnector,
+    flowRepository: FlowRepository,
+    config: ApplicationConfig
   )(implicit val ec: ExecutionContext
   ) extends ApplicationLogger {
 
@@ -67,5 +72,15 @@ class SupportService @Inject() (
 
   def fetchAllPublicApis()(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     apmConnector.fetchApiDefinitionsVisibleToUser(None)
+  }
+
+  def submitTicket(supportFlow: SupportFlow, form: ApiSupportDetailsForm)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+    deskproConnector.createTicket(DeskproHorizonTicket(
+      person = DeskproHorizonTicketPerson(form.fullName, form.emailAddress),
+      subject = "HMRC Developer Hub: Support Enquiry",
+      message = DeskproHorizonTicketMessage.fromRaw(form.details),
+      brand = config.deskproHorizonBrand,
+      fields = Map(config.deskproHorizonApiName -> supportFlow.api.map(_.name).getOrElse(""), config.deskproHorizonEntryPoint -> supportFlow.entrySelection)
+    ))
   }
 }

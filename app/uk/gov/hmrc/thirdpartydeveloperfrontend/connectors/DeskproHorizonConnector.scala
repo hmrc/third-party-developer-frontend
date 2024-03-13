@@ -39,10 +39,14 @@ class DeskproHorizonConnector @Inject() (http: HttpClientV2, config: Application
   val api                         = API("deskpro-horizon")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+    createTicket(DeskproHorizonTicket.fromDeskproTicket(deskproTicket, config.deskproHorizonBrand))
+  }
+
+  def createTicket(deskproTicket: DeskproHorizonTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
     http.post(url"${requestUrl("/api/v2/tickets")}")
       .withProxy
-      .withBody(Json.toJson(DeskproHorizonTicket.fromDeskproTicket(deskproTicket)))
-      .setHeader(AUTHORIZATION.toString() -> config.deskproHorizonApiKey)
+      .withBody(Json.toJson(deskproTicket))
+      .setHeader(AUTHORIZATION -> config.deskproHorizonApiKey)
       .execute[HttpResponse]
       .map(response =>
         response.status match {
@@ -53,7 +57,7 @@ class DeskproHorizonConnector @Inject() (http: HttpClientV2, config: Application
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
             logger.error(response.body)
             throw new DeskproTicketCreationFailed("Missing authorization")
-          case status       =>
+          case _            =>
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
             logger.error(response.body)
             throw new DeskproTicketCreationFailed("Unknown reason")
