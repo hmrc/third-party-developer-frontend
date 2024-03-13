@@ -79,6 +79,7 @@ class SupportService @Inject() (
       person = DeskproHorizonTicketPerson(form.fullName, form.emailAddress),
       subject = "HMRC Developer Hub: Support Enquiry",
       message = DeskproHorizonTicketMessage.fromRaw(form.details),
+      brand = config.deskproHorizonBrand,
       fields = Map(config.deskproHorizonApiName -> supportFlow.api.map(_.name).getOrElse(""), config.deskproHorizonEntryPoint -> supportFlow.entrySelection)
     ))
   }

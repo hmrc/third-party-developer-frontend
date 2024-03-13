@@ -39,7 +39,7 @@ class DeskproHorizonConnector @Inject() (http: HttpClientV2, config: Application
   val api                         = API("deskpro-horizon")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    createTicket(DeskproHorizonTicket.fromDeskproTicket(deskproTicket))
+    createTicket(DeskproHorizonTicket.fromDeskproTicket(deskproTicket, config.deskproHorizonBrand))
   }
 
   def createTicket(deskproTicket: DeskproHorizonTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {

@@ -40,6 +40,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val deskproHorizonUrl: String                        = getString("deskpro-horizon.uri")
   val deskproHorizonApiKey: String                     = config.getOptional[String]("deskpro-horizon.api-key").map(key => s"key $key").getOrElse("")
   val deskproHorizonApiName: String                    = config.get[String]("deskpro-horizon.api-name")
+  val deskproHorizonBrand: Int                         = config.get[Int]("deskpro-horizon.brand")
   val deskproHorizonEntryPoint: String                 = config.get[String]("deskpro-horizon.entry-point")
 
   lazy val contactPath: String = getConfigDefaulted("contactPath", "")

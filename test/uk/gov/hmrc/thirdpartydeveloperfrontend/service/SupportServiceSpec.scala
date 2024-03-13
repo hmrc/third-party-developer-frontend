@@ -43,10 +43,12 @@ class SupportServiceSpec extends AsyncHmrcSpec {
 
   trait Setup extends ApmConnectorMockModule with FlowRepositoryMockModule with DeskproHorizonConnectorMockModule {
     val underTest        = new SupportService(ApmConnectorMock.aMock, DeskproHorizonConnectorMock.aMock, FlowRepositoryMock.aMock, mockAppConfig)
+    val brand            = 5
     val apiNameConfig    = "5"
     val entryPointConfig = "7"
     when(mockAppConfig.deskproHorizonApiName).thenReturn(apiNameConfig)
     when(mockAppConfig.deskproHorizonEntryPoint).thenReturn(entryPointConfig)
+    when(mockAppConfig.deskproHorizonBrand).thenReturn(brand)
     FlowRepositoryMock.SaveFlow.thenReturnSuccess
   }
 
@@ -100,12 +102,13 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
       val result = await(underTest.submitTicket(SupportFlow("123", "find-api", None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
       result shouldBe TicketCreated
-      DeskproHorizonConnectorMock.CreateTicket.verifyCalledWith(DeskproHorizonTicket(
+      verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",
         message = DeskproHorizonTicketMessage("This is some<br>description"),
+        brand = brand,
         fields = Map(apiNameConfig -> "", entryPointConfig -> "find-api")
-      ))
+      )))(*)
     }
 
     "submitTicket with api should be name" in new Setup {
@@ -115,12 +118,14 @@ class SupportServiceSpec extends AsyncHmrcSpec {
         ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
       ))
       result shouldBe TicketCreated
-      DeskproHorizonConnectorMock.CreateTicket.verifyCalledWith(DeskproHorizonTicket(
+      verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",
         message = DeskproHorizonTicketMessage("This is some<br>description"),
+        brand = brand,
         fields = Map(apiNameConfig -> "Hello world", entryPointConfig -> "api")
-      ))
+      )))(*)
+
     }
 
   }

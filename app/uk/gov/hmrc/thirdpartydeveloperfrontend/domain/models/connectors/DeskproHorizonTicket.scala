@@ -39,7 +39,7 @@ case class DeskproHorizonTicket(
     person: DeskproHorizonTicketPerson,
     subject: String,
     message: DeskproHorizonTicketMessage,
-    brand: Int = 3,
+    brand: Int,
     fields: Map[String, String] = Map.empty
   )
 
@@ -48,10 +48,11 @@ object DeskproHorizonTicket extends FieldTransformer {
   implicit val ticketMessageFormat: OFormat[DeskproHorizonTicketMessage] = Json.format[DeskproHorizonTicketMessage]
   implicit val ticketFormat: OFormat[DeskproHorizonTicket]               = Json.format[DeskproHorizonTicket]
 
-  def fromDeskproTicket(deskproTicket: DeskproTicket): DeskproHorizonTicket =
+  def fromDeskproTicket(deskproTicket: DeskproTicket, brand: Int): DeskproHorizonTicket =
     DeskproHorizonTicket(
       person = DeskproHorizonTicketPerson(deskproTicket.name, deskproTicket.email.text),
       subject = deskproTicket.subject,
+      brand = brand,
       message = DeskproHorizonTicketMessage.fromRaw(deskproTicket.message)
     )
 }

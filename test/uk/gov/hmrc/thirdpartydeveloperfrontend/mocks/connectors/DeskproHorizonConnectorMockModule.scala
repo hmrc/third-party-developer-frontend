@@ -33,10 +33,6 @@ trait DeskproHorizonConnectorMockModule extends MockitoSugar with ArgumentMatche
       def thenReturnsSuccess() = {
         when(aMock.createTicket(*[DeskproHorizonTicket])(*)).thenReturn(Future.successful(TicketCreated))
       }
-
-      def verifyCalledWith(ticket: DeskproHorizonTicket) = {
-        MockitoSugar.verify(aMock).createTicket(eqTo(ticket))(*)
-      }
     }
   }
 }
