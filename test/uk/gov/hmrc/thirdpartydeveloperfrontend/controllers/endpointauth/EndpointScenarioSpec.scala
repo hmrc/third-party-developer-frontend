@@ -84,6 +84,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
       .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
       .overrides(bind[DeskproConnector].toInstance(deskproConnector))
+      .overrides(bind[DeskproHorizonConnector].toInstance(deskproHorizonConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))
       .overrides(bind[ApmConnector].toInstance(apmConnector))
       .overrides(bind[SandboxSubscriptionFieldsConnector].toInstance(sandboxSubsFieldsConnector))
@@ -145,6 +146,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
   when(deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future.successful(TicketCreated))
   when(deskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(Future.successful(TicketCreated))
+  when(deskproHorizonConnector.createTicket(*[DeskproHorizonTicket])(*)).thenReturn(Future.successful(HorizonTicket("1234")))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
   when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
