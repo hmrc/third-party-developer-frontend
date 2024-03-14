@@ -21,7 +21,7 @@ import scala.concurrent.Future
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproHorizonConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, TicketCreated}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, HorizonTicket}
 
 trait DeskproHorizonConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -31,7 +31,7 @@ trait DeskproHorizonConnectorMockModule extends MockitoSugar with ArgumentMatche
     object CreateTicket {
 
       def thenReturnsSuccess() = {
-        when(aMock.createTicket(*[DeskproHorizonTicket])(*)).thenReturn(Future.successful(TicketCreated))
+        when(aMock.createTicket(*[DeskproHorizonTicket])(*)).thenReturn(Future.successful(HorizonTicket("test")))
       }
     }
   }

@@ -277,11 +277,18 @@ trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
   def maybeCollaborator: Option[Collaborator]             = None
 }
 
-trait HasUserSession extends HasUserWithRole {
+trait HasUserSession extends HasUserWithRole with UpdatesRequest {
   lazy val sessionId   = "my session"
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
   def session: Session = Session(sessionId, developer, loggedInState)
+  implicit val cookieSigner: CookieSigner
+
+  override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
+    request.withCookies(
+      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+    )
+  }
 }
 
 trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
@@ -295,7 +302,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
-      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false),
+      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
     ).withSession(
       ("email", userEmail.text),
       ("emailAddress", userEmail.text),

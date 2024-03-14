@@ -57,7 +57,8 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET", "/developer/new-support/api/choose-api", _)                  => Success()
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                 => Redirect("/developer/new-support/api/details")
       case Endpoint("GET", "/developer/new-support/api/details", _)                     => Success()
-      case Endpoint("POST", "/developer/new-support/api/details", _)                    => Success()
+      case Endpoint("POST", "/developer/new-support/api/details", _)                    => Redirect("/developer/new-support/confirmation")
+      case Endpoint("GET", "/developer/new-support/confirmation", _)                    => Redirect("/developer/support?useNewSupport=true")
       case _                                                                            => Redirect("/developer/login")
     }
   }

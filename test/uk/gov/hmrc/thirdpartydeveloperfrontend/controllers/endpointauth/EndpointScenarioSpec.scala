@@ -451,7 +451,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Redirect("/developer/new-support/api/choose-api")
       case Endpoint("GET", "/developer/new-support/api/choose-api", _)                                                                 => Success()
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Redirect("/developer/new-support/api/details")
-      case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   => Success()
+      case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   => Redirect("/developer/new-support/confirmation")
+      case Endpoint("GET", "/developer/new-support/confirmation", _)                                                                   => Success()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Redirect(s"/developer/applications/${applicationId}/team-members")
       case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  =>
         Redirect(s"/developer/applications/${applicationId}/request-check/team")

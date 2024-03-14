@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson, TicketCreated}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -99,9 +99,9 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     }
 
     "submitTicket with no api should be blank" in new Setup {
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
-      val result = await(underTest.submitTicket(SupportFlow("123", "find-api", None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
-      result shouldBe TicketCreated
+      await(underTest.submitTicket(SupportFlow("123", "find-api", None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",
@@ -112,12 +112,14 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     }
 
     "submitTicket with api should be name" in new Setup {
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
-      val result = await(underTest.submitTicket(
+
+      await(underTest.submitTicket(
         SupportFlow("123", "api", Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
         ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
       ))
-      result shouldBe TicketCreated
+
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",

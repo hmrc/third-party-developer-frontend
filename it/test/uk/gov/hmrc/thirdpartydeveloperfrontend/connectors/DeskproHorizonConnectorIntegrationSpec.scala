@@ -35,8 +35,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 class DeskproHorizonConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
   private val stubConfig = Configuration(
-    "deskpro-horizon.uri"     -> s"http://localhost:$stubPort",
-    "deskpro-horizon.brand"     -> 5
+    "deskpro-horizon.uri"   -> s"http://localhost:$stubPort",
+    "deskpro-horizon.brand" -> 5
   )
 
   override def fakeApplication(): Application =
@@ -67,17 +67,33 @@ class DeskproHorizonConnectorIntegrationSpec extends BaseConnectorIntegrationSpe
       val ticketPath           = "/api/v2/tickets"
       val expectedBody         = Json.toJson(deskproHorizonTicket).toString()
 
+      "create a ticket when DeskPro returns Created (201)" in new Setup {
+        stubFor(
+          post(urlEqualTo(ticketPath)).willReturn(
+            aResponse()
+              .withStatus(CREATED)
+              .withHeader("Content-Type", "application/json")
+              .withBody("""{"data":{"id":12345,"ref":"SDST-1234"}}""")
+          )
+        )
+
+        val resp = await(connector.createTicket(ticket))
+        resp shouldBe TicketCreated
+        verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
+      }
+
       "create a ticket when DeskPro Horizon returns Created (201)" in new Setup {
         stubFor(
           post(urlEqualTo(ticketPath)).willReturn(
             aResponse()
               .withStatus(CREATED)
               .withHeader("Content-Type", "application/json")
-              .withBody("""{"data":{"id":12345}}""")
+              .withBody("""{"data":{"id":12345,"ref":"SDST-1234"}}""")
           )
         )
 
-        await(connector.createTicket(ticket))
+        val resp = await(connector.createTicket(deskproHorizonTicket))
+        resp shouldBe HorizonTicket("SDST-1234")
         verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
       }
 
