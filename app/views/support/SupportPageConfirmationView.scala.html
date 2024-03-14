@@ -32,12 +32,12 @@
 
 
 @devMain(
-  title = "Which best describes what you need help with?",
+  title = "Your support request has been received",
   userFullName = loggedIn.map(_.displayedName),
   developerSession = loggedIn,
 ) {
     @govukPanel(Panel(
-        title = Text("Application complete"),
+        title = Text("Your support request has been received"),
         content = HtmlContent(s"""Your reference number<br><strong>${supportFlow.referenceNumber.getOrElse("Reference Not Found")}</strong>""")
     ))
     <h2 class="govuk-heading-m">What happens next</h2>
