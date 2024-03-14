@@ -78,7 +78,13 @@ case class IpAllowlistFlow(override val sessionId: String, allowlist: Set[String
 }
 case class SupportApi(serviceName: ServiceName, name: String)
 
-case class SupportFlow(override val sessionId: String, entrySelection: String, api: Option[SupportApi] = None) extends Flow {
+case class SupportFlow(
+    override val sessionId: String,
+    entrySelection: String,
+    api: Option[SupportApi] = None,
+    emailAddress: Option[String] = None,
+    referenceNumber: Option[String] = None
+  ) extends Flow {
   override def flowType: FlowType = FlowType.SUPPORT_FLOW
 }
 

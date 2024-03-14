@@ -39,10 +39,12 @@ class DeskproHorizonConnector @Inject() (http: HttpClientV2, config: Application
   val api                         = API("deskpro-horizon")
 
   def createTicket(deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    createTicket(DeskproHorizonTicket.fromDeskproTicket(deskproTicket, config.deskproHorizonBrand))
+    createTicket(DeskproHorizonTicket.fromDeskproTicket(deskproTicket, config.deskproHorizonBrand)) map {
+      case HorizonTicket(_) => TicketCreated
+    }
   }
 
-  def createTicket(deskproTicket: DeskproHorizonTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
+  def createTicket(deskproTicket: DeskproHorizonTicket)(implicit hc: HeaderCarrier): Future[HorizonTicket] = metrics.record(api) {
     http.post(url"${requestUrl("/api/v2/tickets")}")
       .withProxy
       .withBody(Json.toJson(deskproTicket))
@@ -52,7 +54,7 @@ class DeskproHorizonConnector @Inject() (http: HttpClientV2, config: Application
         response.status match {
           case CREATED      =>
             logger.info(s"Deskpro horizon ticket '${deskproTicket.subject}' created successfully")
-            TicketCreated
+            response.json.as[HorizonTicket]
           case UNAUTHORIZED =>
             logger.error(s"Deskpro horizon ticket creation failed for: ${deskproTicket.subject}")
             logger.error(response.body)

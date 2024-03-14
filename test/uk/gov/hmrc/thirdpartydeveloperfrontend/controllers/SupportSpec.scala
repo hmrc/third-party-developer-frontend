@@ -21,7 +21,7 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 import org.jsoup.Jsoup
-import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageDetailView}
+import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageConfirmationView, SupportPageDetailView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.mvc.{Request, Result}
@@ -44,11 +44,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
-    val supportEnquiryView     = app.injector.instanceOf[SupportEnquiryView]
-    val supportThankYouView    = app.injector.instanceOf[SupportThankyouView]
-    val supportLandingPageView = app.injector.instanceOf[LandingPageView]
-    val apiSupportPageView     = app.injector.instanceOf[ApiSupportPageView]
-    val supportPageDetailView  = app.injector.instanceOf[SupportPageDetailView]
+    val supportEnquiryView          = app.injector.instanceOf[SupportEnquiryView]
+    val supportThankYouView         = app.injector.instanceOf[SupportThankyouView]
+    val supportLandingPageView      = app.injector.instanceOf[LandingPageView]
+    val apiSupportPageView          = app.injector.instanceOf[ApiSupportPageView]
+    val supportPageDetailView       = app.injector.instanceOf[SupportPageDetailView]
+    val supportPageConfirmationView = app.injector.instanceOf[SupportPageConfirmationView]
 
     val underTest = new Support(
       mock[DeskproService],
@@ -61,6 +62,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       supportLandingPageView,
       apiSupportPageView,
       supportPageDetailView,
+      supportPageConfirmationView,
       SupportServiceMock.aMock
     )
 

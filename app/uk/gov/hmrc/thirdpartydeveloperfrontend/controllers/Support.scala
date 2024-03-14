@@ -20,7 +20,7 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageDetailView}
+import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageConfirmationView, SupportPageDetailView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
@@ -46,7 +46,8 @@ class Support @Inject() (
     supportThankyouView: SupportThankyouView,
     landingPageView: LandingPageView,
     apiSupportPageView: ApiSupportPageView,
-    apiSupportPageDetailView: SupportPageDetailView,
+    supportPageDetailView: SupportPageDetailView,
+    supportPageConfirmationView: SupportPageConfirmationView,
     supportService: SupportService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
@@ -153,7 +154,7 @@ class Support @Inject() (
   def supportDetailsPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderSupportDetailsPage(flow: SupportFlow) =
       Ok(
-        apiSupportPageDetailView(
+        supportPageDetailView(
           fullyloggedInDeveloper,
           ApiSupportDetailsForm.form,
           routes.Support.apiSupportAction.url,
@@ -169,7 +170,7 @@ class Support @Inject() (
     def renderApiSupportDetailsPageErrorView(flow: SupportFlow)(form: Form[ApiSupportDetailsForm]) = {
       Future.successful(
         BadRequest(
-          apiSupportPageDetailView(
+          supportPageDetailView(
             fullyloggedInDeveloper,
             form,
             routes.Support.apiSupportAction.url,
@@ -179,18 +180,9 @@ class Support @Inject() (
       )
     }
 
-    def handleValidForm(flow: SupportFlow)(form: ApiSupportDetailsForm): Future[Result] = {
-      supportService.submitTicket(flow, form)
-      // Return to api support details page for now
-      Future.successful(
-        Ok(
-          apiSupportPageDetailView(
-            fullyloggedInDeveloper,
-            ApiSupportDetailsForm.form,
-            routes.Support.apiSupportAction.url,
-            flow
-          )
-        )
+    def handleValidForm(sessionId: String, flow: SupportFlow)(form: ApiSupportDetailsForm): Future[Result] = {
+      supportService.submitTicket(flow, form).map(_ =>
+        withSupportCookie(Redirect(routes.Support.supportConfirmationPage), sessionId)
       )
     }
 
@@ -201,8 +193,22 @@ class Support @Inject() (
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
 
     supportService.getSupportFlow(sessionId).flatMap(flow =>
-      ApiSupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(flow))
+      ApiSupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(sessionId, flow))
     )
+  }
+
+  def supportConfirmationPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderSupportConfirmationPage(flow: SupportFlow) =
+      Ok(
+        supportPageConfirmationView(
+          fullyloggedInDeveloper,
+          flow
+        )
+      )
+
+    extractSupportSessionIdFromCookie(request).map(sessionId => supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage)).getOrElse(Future.successful(
+      Redirect(routes.Support.raiseSupportEnquiry(true))
+    ))
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
