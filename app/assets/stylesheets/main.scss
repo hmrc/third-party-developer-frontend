@@ -10,7 +10,7 @@ $hmrc-assets-path: "/developer/assets/lib/hmrc-frontend/hmrc/";
 @import "partials/subscriptions";
 
 // Import FE Styles
-@import "lib/govuk-frontend/govuk/all";
+@import "lib/govuk-frontend/dist/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
 
 // Ad-hoc fixes
