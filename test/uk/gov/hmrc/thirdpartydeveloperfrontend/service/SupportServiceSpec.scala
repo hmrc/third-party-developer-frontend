@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
@@ -23,6 +24,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ExtendedApiDefinitionData.extendedApiDefinition
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceNameData.serviceName
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
@@ -75,8 +77,18 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     "fetchAllPublicApis" in new Setup {
       val apiList: List[ApiDefinition] = List(ApiDefinitionData.apiDefinition)
       ApmConnectorMock.FetchApiDefinitionsVisibleToUser.willReturn(apiList)
-      val result                       = await(underTest.fetchAllPublicApis())
+      val result                       = await(underTest.fetchAllPublicApis(None))
       result shouldBe apiList
+      verify(ApmConnectorMock.aMock).fetchApiDefinitionsVisibleToUser(None)
+    }
+
+    "fetchAllPublicApis with a user" in new Setup {
+      val apiList: List[ApiDefinition]   = List(ApiDefinitionData.apiDefinition)
+      ApmConnectorMock.FetchApiDefinitionsVisibleToUser.willReturn(apiList)
+      private val loggedInUserId: UserId = UserId(UUID.randomUUID())
+      val result                         = await(underTest.fetchAllPublicApis(Some(loggedInUserId)))
+      result shouldBe apiList
+      verify(ApmConnectorMock.aMock).fetchApiDefinitionsVisibleToUser(Some(loggedInUserId))
     }
 
     "updateApiChoice with a found Api" in new Setup {

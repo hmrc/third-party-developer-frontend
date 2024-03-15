@@ -34,7 +34,7 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
     object FetchAllPublicApis {
 
       def succeeds(apis: List[ApiDefinition]) =
-        when(aMock.fetchAllPublicApis()(*)).thenReturn(successful(apis))
+        when(aMock.fetchAllPublicApis(*)(*)).thenReturn(successful(apis))
     }
 
     object GetSupportFlow {
