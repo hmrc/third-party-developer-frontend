@@ -102,6 +102,7 @@ lazy val it = (project in file("it"))
   .settings(
     name := "integration-tests",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    addTestReportOption(Test, "int-test-reports"),
     DefaultBuildSettings.itSettings()
   )
 
@@ -112,6 +113,7 @@ lazy val component = (project in file("component"))
     name := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    addTestReportOption(Test, "component-test-reports"),
     DefaultBuildSettings.itSettings()
   )
 
