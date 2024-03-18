@@ -59,8 +59,9 @@ class SupportService @Inject() (
     (
       for {
         flow       <- ET.liftF(fetchSupportFlow(sessionId))
-        api        <- ET.fromEitherF(apmConnector.fetchExtendedApiDefinition(apiChoice))
-        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, api.name)))
+        apiName    <- if (apiChoice.value == "api-not-in-list") ET.liftF(Future.successful(""))
+                      else ET.fromEitherF(apmConnector.fetchExtendedApiDefinition(apiChoice)).map(_.name)
+        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, apiName)))
         savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
       } yield savedFlow
     ).value

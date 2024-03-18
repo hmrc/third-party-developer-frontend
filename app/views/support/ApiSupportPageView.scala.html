@@ -39,6 +39,9 @@
       value = Some(api.serviceName.value),
       text = api.name
     )
+  ) :+ SelectItem(
+      value = Some("api-not-in-list"),
+      text = "My API isn't in the list"
   )
 }
 
