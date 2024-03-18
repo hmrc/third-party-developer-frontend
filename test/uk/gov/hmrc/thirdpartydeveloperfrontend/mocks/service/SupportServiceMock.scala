@@ -41,6 +41,10 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", "api")) = when(aMock.getSupportFlow(*)).thenReturn(successful(flow))
     }
 
+    object SubmitTicket {
+      def succeeds(flow: SupportFlow = SupportFlow("sessionId", "api")) = when(aMock.submitTicket(*, *)(*)).thenReturn(successful(flow))
+    }
+
     object CreateSupportFlow {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", "api")) = when(aMock.createFlow(*, *)).thenReturn(successful(flow))
     }

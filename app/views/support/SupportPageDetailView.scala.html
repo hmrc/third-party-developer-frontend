@@ -17,6 +17,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{CharacterCount => CC}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
@@ -27,7 +28,7 @@
   devMain: DevMainWithFormErrors,
   govukButton : GovukButton,
   govukInput : GovukInput,
-  govukTextarea : GovukTextarea
+  govukCharacterCount : GovukCharacterCount
 )
 
 @(loggedIn: Option[DeveloperSession], form: Form[ApiSupportDetailsForm], backUri: String, supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
@@ -71,8 +72,7 @@
   @helper.form(action = routes.Support.supportDetailsAction) {
     @helper.CSRF.formField
 
-    @govukTextarea(
-      Textarea(
+    @govukCharacterCount(CC(
         id = "details",
         name = "details",
         label = Label(
@@ -80,6 +80,8 @@
           classes = "govuk-label--s",
           content = Text("Details")
         ),
+        value=form("details").value,
+        maxLength = Some(3000),
         hint = Some(
           Hint(
             content = Text("Do not include personal or financial information, like your National Insurance number or credit card details.")
@@ -105,7 +107,7 @@
           content = Text("Full name")
         ),
         classes = "govuk-!-width-full",
-        value = loggedIn.map(_.displayedName),
+        value = form("fullName").value.orElse(loggedIn.map(_.displayedName)),
         errorMessage = if(form("fullName").hasErrors) {
           Some(
             ErrorMessage(
@@ -131,7 +133,7 @@
           )
         ),
         classes = "govuk-!-width-full",
-        value = loggedIn.map(_.email.text),
+        value = form("emailAddress").value.orElse(loggedIn.map(_.email.text)),
         errorMessage = if(form("emailAddress").hasErrors) {
           Some(
             ErrorMessage(
@@ -146,6 +148,7 @@
       Input(
         id = "organisation",
         name = "organisation",
+        value = form("organisation").value,
         label = Label(
           isPageHeading = true,
           classes = "govuk-label--s",
