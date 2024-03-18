@@ -22,6 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
@@ -71,8 +72,8 @@ class SupportService @Inject() (
     flowRepository.saveFlow(SupportFlow(sessionId, entrypoint))
   }
 
-  def fetchAllPublicApis()(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
-    apmConnector.fetchApiDefinitionsVisibleToUser(None)
+  def fetchAllPublicApis(userId: Option[UserId])(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+    apmConnector.fetchApiDefinitionsVisibleToUser(userId)
   }
 
   def submitTicket(supportFlow: SupportFlow, form: ApiSupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {

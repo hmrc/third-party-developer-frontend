@@ -106,7 +106,7 @@ class Support @Inject() (
 
   def apiSupportPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     for {
-      apis <- supportService.fetchAllPublicApis()
+      apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
     } yield Ok(
       apiSupportPageView(
         fullyloggedInDeveloper,
@@ -120,7 +120,7 @@ class Support @Inject() (
   def apiSupportAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderApiSupportPageErrorView(form: Form[ApiSupportForm]) = {
       for {
-        apis <- supportService.fetchAllPublicApis()
+        apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
       } yield BadRequest(
         apiSupportPageView(
           fullyloggedInDeveloper,
