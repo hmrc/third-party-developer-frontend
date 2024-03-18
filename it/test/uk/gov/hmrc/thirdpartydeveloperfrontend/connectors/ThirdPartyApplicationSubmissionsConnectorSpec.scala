@@ -48,7 +48,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with SubmissionsTestData
     with ApplicationsJsonFormatters {
 
-  import Submission._    
+  import Submission._
 
   private val apiKey = UUID.randomUUID().toString
   private val code   = "123456789"
