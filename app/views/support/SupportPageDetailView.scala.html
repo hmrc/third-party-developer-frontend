@@ -50,6 +50,11 @@
           <li>The type of tax number or reference it uses</li>
       </ul>
   }
+
+  @defaultHeading = {
+      <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Complete this short form to ask a question</h1>
+  }
+
 @devMain(
   form,
   title = "Which best describes what you need help with?",
@@ -62,6 +67,7 @@
   @{supportFlow.entrySelection match {
       case "api"=> apiHeading
       case "find-api"=> findHeading
+      case _ => defaultHeading
   }}
 
   <p class="govuk-body">
