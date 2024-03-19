@@ -29,7 +29,7 @@
 ) {
   <h1 class="govuk-heading-l">Create a new password</h1>
 
-  @helper.form(action = routes.Password.resetPassword) {
+  @helper.form(action = routes.Password.resetPassword()) {
     @helper.CSRF.formField
 
     @passwords("Enter new password", "Confirm new password", form)

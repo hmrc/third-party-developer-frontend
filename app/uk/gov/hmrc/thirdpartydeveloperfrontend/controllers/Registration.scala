@@ -73,7 +73,7 @@ class Registration @Inject() (
           val registration =
             RegistrationModel(userData.firstName.trim, userData.lastName.trim, userData.emailaddress.toLaxEmail, userData.password, userData.organisation)
           connector.register(registration).map {
-            case RegistrationSuccessful => Redirect(routes.Registration.confirmation).addingToSession("email" -> userData.emailaddress)
+            case RegistrationSuccessful => Redirect(routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
             case EmailAlreadyInUse      => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))
           }
         }
@@ -84,7 +84,7 @@ class Registration @Inject() (
     implicit request =>
       request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
         connector.resendVerificationEmail(email.toLaxEmail)
-          .map(_ => Redirect(routes.Registration.confirmation))
+          .map(_ => Redirect(routes.Registration.confirmation()))
           .recover {
             case NonFatal(e) => {
               logger.warn(s"resendVerification failed with ${e.getMessage}")

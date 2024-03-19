@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.Instant
+import java.time.{Clock, Instant}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,7 +35,9 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.State
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
@@ -44,7 +46,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, A
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
@@ -77,6 +78,7 @@ class Details @Inject() (
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
+    val clock: Clock,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     pendingApprovalView: PendingApprovalView,
     detailsView: DetailsView,
@@ -92,7 +94,8 @@ class Details @Inject() (
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with FraudPreventionNavLinkHelper
-    with WithUnsafeDefaultFormBinding {
+    with WithUnsafeDefaultFormBinding
+    with ClockNow {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
@@ -184,8 +187,48 @@ class Details @Inject() (
     Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
   }
 
-  private def updateApplication(updateRequest: UpdateApplicationRequest)(implicit request: ApplicationRequest[AnyContent]): Future[ApplicationUpdateSuccessful] = {
-    applicationService.update(updateRequest)
+  private def deriveCommands(form: EditApplicationForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
+    val application             = request.application
+    val actor                   = Actors.AppCollaborator(request.userRequest.developerSession.email)
+    val access: Access.Standard = (application.access match { case s: Access.Standard => s }) // Only standard apps attempt this function
+
+    val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
+      form.applicationName.trim
+    } else {
+      application.name
+    }
+    val effectiveDescription = form.description.filterNot(_.isBlank())
+
+    List(
+      if (effectiveNewName == application.name)
+        List.empty
+      else List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant(), effectiveNewName)),
+      if (effectiveDescription == application.description) {
+        List.empty
+      } else {
+        if (effectiveDescription.isDefined)
+          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant(), effectiveNewName))
+        else
+          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant()))
+      },
+      if (form.privacyPolicyUrl == access.privacyPolicyUrl) {
+        List.empty
+      } else {
+        form.privacyPolicyUrl match {
+          case Some(ppu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant(), ppu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant()))
+        }
+      },
+      if (form.termsAndConditionsUrl == access.termsAndConditionsUrl) {
+        List.empty
+      } else {
+        form.termsAndConditionsUrl match {
+          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant(), tcu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant()))
+        }
+      }
+    ).flatten
+
   }
 
   def changeDetailsAction(applicationId: ApplicationId): Action[AnyContent] =
@@ -198,12 +241,13 @@ class Details @Inject() (
         applicationService
           .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
           .flatMap({
-
             case Valid =>
-              val updateRequest = UpdateApplicationRequest.from(form, application)
-              for {
-                _ <- updateApplication(updateRequest)
-              } yield Redirect(routes.Details.details(applicationId))
+              val cmds = deriveCommands(form)
+              val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
+
+              futs.map(_ =>
+                Redirect(routes.Details.details(applicationId))
+              )
 
             case invalid: Invalid =>
               def invalidNameCheckForm: Form[EditApplicationForm] =

@@ -80,7 +80,7 @@ class Support @Inject() (
         logSpamSupportRequest(formWithErrors)
         Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors)))
       },
-      formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou.url, SEE_OTHER) }
+      formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.Support.thankyou().url, SEE_OTHER) }
     )
   }
 
@@ -89,10 +89,10 @@ class Support @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       supportService.createFlow(sessionId, form.helpWithChoice)
       form.helpWithChoice match {
-        case "api"         => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage), sessionId))
+        case "api"         => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage()), sessionId))
         case "account"     => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
         case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
-        case "find-api"    => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage), sessionId))
+        case "find-api"    => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
         case _             => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
       }
     }
@@ -134,7 +134,7 @@ class Support @Inject() (
     def updateFlowAndRedirect(apiName: String): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       supportService.updateApiChoice(sessionId, ServiceName(apiName)) flatMap {
-        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage), sessionId))
+        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
         case Left(_)  => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
       }
     }
@@ -157,7 +157,7 @@ class Support @Inject() (
         supportPageDetailView(
           fullyloggedInDeveloper,
           ApiSupportDetailsForm.form,
-          routes.Support.apiSupportAction.url,
+          routes.Support.apiSupportAction().url,
           flow
         )
       )
@@ -173,7 +173,7 @@ class Support @Inject() (
           supportPageDetailView(
             fullyloggedInDeveloper,
             form,
-            routes.Support.apiSupportAction.url,
+            routes.Support.apiSupportAction().url,
             flow
           )
         )
@@ -182,7 +182,7 @@ class Support @Inject() (
 
     def handleValidForm(sessionId: String, flow: SupportFlow)(form: ApiSupportDetailsForm): Future[Result] = {
       supportService.submitTicket(flow, form).map(_ =>
-        withSupportCookie(Redirect(routes.Support.supportConfirmationPage), sessionId)
+        withSupportCookie(Redirect(routes.Support.supportConfirmationPage()), sessionId)
       )
     }
 

@@ -27,7 +27,7 @@ import play.filters.csrf.CSRF
 class CSRFErrorHandler @Inject() (errorHandler: ErrorHandler) extends CSRF.ErrorHandler {
 
   override def handle(req: RequestHeader, msg: String): Future[Result] = {
-    val login = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login
+    val login = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login()
 
     if (req.path == login.url) Future.successful(Redirect(login))
     else {

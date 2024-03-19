@@ -62,7 +62,7 @@ class ManageApplications @Inject() (
       termsOfUseInvites                <- Future.sequence(productionAppSummaries.map(summary => termsOfUseInvitationService.fetchTermsOfUseInvitation(summary.id)).toList).map(_.flatten)
       productionApplicationSubmissions <- Future.sequence(termsOfUseInvites.map(invite => getSubmission(invite.applicationId)).toList).map(_.flatten)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
-      case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage)
+      case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage())
       case _          => Ok(manageApplicationsView(
           ManageApplicationsViewModel(
             sandboxApplicationSummaries,

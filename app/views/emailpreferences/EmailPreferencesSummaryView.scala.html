@@ -67,8 +67,8 @@
       }
     }
     <ul class="govuk-list govuk-!-margin-top-4">
-      <li><a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectCategoriesPage">Edit your preferences or get emails about other APIs</a></li>
-      <li><a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferencesController.unsubscribeAllPage">Unsubscribe from Developer Hub emails</a></li>
+      <li><a class="govuk-link govuk-link--no-visited-state" id="change-apis-link" href="@controllers.profile.routes.EmailPreferencesController.flowSelectCategoriesPage()">Edit your preferences or get emails about other APIs</a></li>
+      <li><a class="govuk-link govuk-link--no-visited-state" id="unsubscribe-link" href="@controllers.profile.routes.EmailPreferencesController.unsubscribeAllPage()">Unsubscribe from Developer Hub emails</a></li>
     </ul>
 
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
@@ -92,7 +92,7 @@
     }
     @EmailPrefsBulletInfoView()
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferencesController.flowStartPage">Set up email preferences</a>
+      <a class="govuk-link govuk-link--no-visited-state" id="setup-emailpreferences-link" href="@controllers.profile.routes.EmailPreferencesController.flowStartPage()">Set up email preferences</a>
     </p>
   }
 
@@ -101,6 +101,6 @@
   </p>
 
   <p class="govuk-body">
-    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@controllers.routes.ManageApplications.manageApps">View all applications</a>
+    <a class="govuk-link govuk-link--no-visited-state" id="view-all-applications-link" href="@controllers.routes.ManageApplications.manageApps()">View all applications</a>
   </p>
 }
