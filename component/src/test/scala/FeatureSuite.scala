@@ -22,16 +22,13 @@ import steps.Env
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-//  features = Array("features"),
-//  glue = Array("steps"),
   dryRun = false,
   snippets = CAMELCASE,
   plugin = Array(
     "pretty",
     "html:target/component-reports/cucumber",
     "json:target/component-reports/cucumber.json"
-  ),
-  tags = "not @wip and not @skip"
+  )
 )
 class FeatureSuite
 

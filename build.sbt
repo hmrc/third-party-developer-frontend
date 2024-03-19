@@ -111,10 +111,9 @@ lazy val component = (project in file("component"))
   .settings(
     name := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a")),
     Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
     DefaultBuildSettings.itSettings(),
-    addTestReportOption(Test, "component-test-reports")
   )
 
 commands ++= Seq(
