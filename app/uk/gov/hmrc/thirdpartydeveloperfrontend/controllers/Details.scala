@@ -207,7 +207,7 @@ class Details @Inject() (
         List.empty
       } else {
         if (effectiveDescription.isDefined)
-          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant(), effectiveNewName))
+          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant(), effectiveDescription.get))
         else
           List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant()))
       },
@@ -223,8 +223,8 @@ class Details @Inject() (
         List.empty
       } else {
         form.termsAndConditionsUrl match {
-          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant(), tcu))
-          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant()))
+          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationTermsAndConditionsUrl(actor, instant(), tcu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationTermsAndConditionsUrl(actor, instant()))
         }
       }
     ).flatten
