@@ -107,12 +107,12 @@ lazy val it = (project in file("it"))
   )
 
 lazy val component = (project in file("component"))
-  .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
   .settings(
     name := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
     DefaultBuildSettings.itSettings(),
     addTestReportOption(Test, "component-test-reports")
   )
