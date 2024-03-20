@@ -47,8 +47,10 @@
 )
 
 @scripts = {
-  <script @CSPNonce.attr src='@routes.Assets.versioned("lib/govuk-frontend/dist/govuk/all.js")'></script>
-  <script @CSPNonce.attr>window.GOVUKFrontend.initAll();</script>
+  <script @CSPNonce.attr type="module">
+    import { initAll } from '@routes.Assets.versioned("lib/govuk-frontend/dist/govuk/govuk-frontend.min.js")'
+    initAll()
+  </script>
   @hmrcTrackingConsentSnippet()
 }
 
