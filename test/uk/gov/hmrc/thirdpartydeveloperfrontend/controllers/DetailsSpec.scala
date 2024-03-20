@@ -364,7 +364,6 @@ class DetailsSpec
 
       await(application.withName(newName).callChangeDetailsAction)
 
-      // verify(underTest.applicationService).update(any[UpdateApplicationRequest])(*)
       verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(*)
       verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(*)
     }

@@ -89,11 +89,8 @@ class Support @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       supportService.createFlow(sessionId, form.helpWithChoice)
       form.helpWithChoice match {
-        case "api"         => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage()), sessionId))
-        case "account"     => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
-        case "application" => Future.successful(Ok(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form)))
-        case "find-api"    => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
-        case _             => Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper, NewSupportPageHelpChoiceForm.form.withError("error", "Error"))))
+        case "api" => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage()), sessionId))
+        case _     => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
       }
     }
 
@@ -142,7 +139,7 @@ class Support @Inject() (
     def handleValidForm(form: ApiSupportForm): Future[Result] =
       form.helpWithApiChoice match {
         case "api-call" => updateFlowAndRedirect(form.apiName)
-        case _          => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
+        case _          => Future.successful(Redirect(routes.Support.supportDetailsPage()))
       }
 
     def handleInvalidForm(formWithErrors: Form[ApiSupportForm]): Future[Result] =

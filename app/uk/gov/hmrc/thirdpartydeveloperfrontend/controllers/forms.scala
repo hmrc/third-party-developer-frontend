@@ -376,8 +376,8 @@ object ApiSupportDetailsForm {
 
   val form: Form[ApiSupportDetailsForm] = Form(
     mapping(
-      "details"      -> textValidator("support.details.required.field", "support.details.required.field"),
-      "fullName"     -> textValidator("fullname.error.required.field", "fullname.error.maxLength.field"),
+      "details"      -> supportRequestValidator("support.details.required.field", "support.details.required.field", 3000),
+      "fullName"     -> fullnameValidator,
       "emailAddress" -> emailValidator(),
       "organisation" -> optional(text)
     )(ApiSupportDetailsForm.apply)(ApiSupportDetailsForm.unapply)

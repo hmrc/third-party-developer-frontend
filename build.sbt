@@ -102,19 +102,18 @@ lazy val it = (project in file("it"))
   .settings(
     name := "integration-tests",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    addTestReportOption(Test, "int-test-reports"),
-    DefaultBuildSettings.itSettings()
+    DefaultBuildSettings.itSettings(),
+    addTestReportOption(Test, "int-test-reports")
   )
 
 lazy val component = (project in file("component"))
-  .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
   .settings(
     name := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    addTestReportOption(Test, "component-test-reports"),
-    DefaultBuildSettings.itSettings()
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a")),
+    Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    DefaultBuildSettings.itSettings(),
   )
 
 commands ++= Seq(
@@ -123,6 +122,6 @@ commands ++= Seq(
   Command.command("fixAll") { state => "scalafixAll" :: "it/scalafixAll" :: "component/scalafixAll" :: state },
   Command.command("testAll") { state => "test" :: "it/test" :: "component/test" :: state },
   Command.command("run-all-tests") { state => "testAll" :: state },
-  Command.command("clean-and-test") { state => "clean" :: "compile" :: "run-all-tests" :: state },
-  Command.command("pre-commit") { state => "clean" :: "scalafmtAll" :: "scalafixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "run-all-tests" :: "coverageOff" :: "coverageAggregate" :: state }
+  Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
+  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "it/test" :: "component/test" :: "coverageOff" :: "testOnly * -- -n ExcludeFromCoverage" :: "coverageAggregate" :: state }
 )

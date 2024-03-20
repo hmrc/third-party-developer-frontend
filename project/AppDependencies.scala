@@ -16,7 +16,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"             % bootstrapVersion,
     "uk.gov.hmrc"                 %% "play-partials-play-30"                  % "9.1.0",
     "uk.gov.hmrc"                 %% "domain-play-30"                         % "9.0.0",
-    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"             % "8.5.0",
+    "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"             % "9.0.0",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"                     % mongoVersion,
     "uk.gov.hmrc"                 %% "crypto-json-play-30"                    % "7.6.0",
     "uk.gov.hmrc"                 %% "http-metrics"                           % "2.8.0",
@@ -37,7 +37,6 @@ object AppDependencies {
     "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
     "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
-    // Transitive dependency to be aware of - "uk.gov.hmrc"                 %% "api-platform-test-common-domain"    % commonDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion
   ).map(_ % "test")
 

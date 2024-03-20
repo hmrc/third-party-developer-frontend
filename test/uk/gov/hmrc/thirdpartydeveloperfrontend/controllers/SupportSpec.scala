@@ -180,7 +180,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/new-support/api/details")
     }
 
     "render the new application support page when the option is selected" in new Setup {
@@ -193,7 +194,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/new-support/api/details")
     }
 
     "support form is prepopulated when user logged in" in new Setup {
@@ -230,6 +232,39 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       assertFullNameAndEmail(result, "", "")
     }
 
+    "submit new request with name, email & comments from form" in new Setup {
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(
+          "fullName"     -> "Peter Smith",
+          "emailAddress" -> "peter@example.com",
+          "details"      -> "A+++, good seller, would buy again, this is a long comment"
+        )
+      SupportServiceMock.GetSupportFlow.succeeds()
+      SupportServiceMock.SubmitTicket.succeeds()
+
+      val result = addToken(underTest.supportDetailsAction())(request)
+
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some("/developer/new-support/confirmation")
+    }
+
+    "submit request with name, email and invalid details returns BAD_REQUEST" in new Setup {
+      val request = FakeRequest()
+        .withSession(sessionParams: _*)
+        .withFormUrlEncodedBody(
+          "fullName"     -> "Peter Smith",
+          "emailAddress" -> "peter@example.com",
+          "details"      -> "A+++, good como  puedo iniciar, would buy again"
+        )
+      SupportServiceMock.GetSupportFlow.succeeds()
+      SupportServiceMock.SubmitTicket.succeeds()
+
+      val result = addToken(underTest.supportDetailsAction())(request)
+
+      status(result) shouldBe 400
+    }
+
     "submit request with name, email & comments from form" in new Setup {
       val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -243,7 +278,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 
-      status(result) shouldBe 303
+      status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/support/submitted")
     }
 
