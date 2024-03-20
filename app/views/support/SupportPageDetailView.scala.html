@@ -68,7 +68,7 @@
     Our Software Developers Support Team (SDST) will get back to you within 2 working days.
   </p>
 
-  @helper.form(action = routes.Support.supportDetailsAction) {
+  @helper.form(action = routes.Support.supportDetailsAction()) {
     @helper.CSRF.formField
 
     @govukTextarea(

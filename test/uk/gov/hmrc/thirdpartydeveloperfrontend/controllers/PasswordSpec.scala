@@ -213,7 +213,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = addToken(underTest.resetPasswordChange())(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) should be(Some(routes.Password.resetPasswordError.url))
+      redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
     }
 
   }

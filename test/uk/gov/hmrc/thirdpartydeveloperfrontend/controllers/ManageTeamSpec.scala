@@ -352,7 +352,7 @@ class ManageTeamSpec
           underTest.removeTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
         CollaboratorServiceMock.RemoveTeamMember.verifyNeverCalled()
       }
     }

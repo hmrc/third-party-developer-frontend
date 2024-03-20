@@ -466,7 +466,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }

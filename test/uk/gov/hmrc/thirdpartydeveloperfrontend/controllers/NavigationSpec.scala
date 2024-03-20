@@ -78,7 +78,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return a sign in link" in new Setup(loggedInState = None) {
-        links(1) shouldBe NavLink("Sign in", routes.UserLoginAccount.login.url)
+        links(1) shouldBe NavLink("Sign in", routes.UserLoginAccount.login().url)
       }
     }
 
@@ -108,7 +108,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
-        links(1) shouldBe NavLink("Sign in", routes.UserLoginAccount.login.url)
+        links(1) shouldBe NavLink("Sign in", routes.UserLoginAccount.login().url)
       }
     }
   }

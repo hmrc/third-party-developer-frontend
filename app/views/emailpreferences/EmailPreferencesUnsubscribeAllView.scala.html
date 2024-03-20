@@ -40,7 +40,7 @@
 
   <h1 id="pageHeading" class="govuk-heading-l">@pageHeading</h1>
   @EmailPrefsBulletInfoView()
-  @helper.form(action = routes.EmailPreferencesController.unsubscribeAllAction, Symbol("class") -> "form", Symbol("id") -> "unsubscribeForm") {
+  @helper.form(action = routes.EmailPreferencesController.unsubscribeAllAction(), Symbol("class") -> "form", Symbol("id") -> "unsubscribeForm") {
     @helper.CSRF.formField
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Unsubscribe</button>

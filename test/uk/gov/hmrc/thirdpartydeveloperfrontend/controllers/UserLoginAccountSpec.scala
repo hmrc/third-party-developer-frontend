@@ -249,7 +249,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
@@ -588,7 +588,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage.url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
@@ -605,7 +605,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage.url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
@@ -646,7 +646,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
@@ -687,7 +687,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = true)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
@@ -793,7 +793,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         private val result = addToken(underTest.login())(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps.url)
+        redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       }
     }
   }

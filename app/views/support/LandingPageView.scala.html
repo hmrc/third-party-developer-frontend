@@ -38,7 +38,7 @@
   ),
   developerSession = None
 ) {
-  @helper.form(action = routes.Support.chooseSupportOptionAction) {
+  @helper.form(action = routes.Support.chooseSupportOptionAction()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
