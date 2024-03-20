@@ -115,7 +115,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = addToken(underTest.validateReset(developerCode))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) should be(Some(routes.Password.resetPasswordError.url))
+      redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
       await(result).newFlash.get.get("error").mkString shouldBe "UnverifiedAccount"
     }
 
@@ -125,7 +125,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
       val result = addToken(underTest.validateReset(developerCode))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) should be(Some(routes.Password.resetPasswordError.url))
+      redirectLocation(result) should be(Some(routes.Password.resetPasswordError().url))
       await(result).newFlash.get.get("error").mkString shouldBe "InvalidResetCode"
     }
 

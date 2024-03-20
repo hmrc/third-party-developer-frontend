@@ -107,7 +107,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       val result = underTest.startUsingYourApplicationAction(app.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps.url)
+      redirectLocation(result) shouldBe Some(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps().url)
     }
 
     "redirect to bad request page when submission service called unsuccessfully" in new Setup {

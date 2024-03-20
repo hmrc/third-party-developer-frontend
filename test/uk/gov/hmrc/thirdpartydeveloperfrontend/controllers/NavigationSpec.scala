@@ -93,7 +93,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
-        links(1) shouldBe NavLink("Sign out", routes.UserLogoutAccount.logoutSurvey.url)
+        links(1) shouldBe NavLink("Sign out", routes.UserLogoutAccount.logoutSurvey().url)
       }
     }
 
