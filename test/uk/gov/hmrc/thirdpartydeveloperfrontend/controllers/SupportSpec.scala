@@ -180,7 +180,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/new-support/api/details")
     }
 
     "render the new application support page when the option is selected" in new Setup {
@@ -193,7 +194,8 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.chooseSupportOptionAction())(request)
 
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/new-support/api/details")
     }
 
     "support form is prepopulated when user logged in" in new Setup {
@@ -276,7 +278,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val result = addToken(underTest.submitSupportEnquiry())(request)
 
-      status(result) shouldBe 303
+      status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/support/submitted")
     }
 
