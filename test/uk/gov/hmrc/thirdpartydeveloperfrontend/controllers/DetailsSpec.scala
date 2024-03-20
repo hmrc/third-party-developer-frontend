@@ -786,9 +786,6 @@ class DetailsSpec
 
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
 
-    // when(underTest.applicationService.update(any[UpdateApplicationRequest])(*))
-    //   .thenReturn(successful(ApplicationUpdateSuccessful))
-
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
@@ -799,12 +796,6 @@ class DetailsSpec
     val loggedOutRequest     = FakeRequest().withSession(sessionParams: _*)
     val loggedInDevRequest   = FakeRequest().withLoggedIn(underTest, implicitly)(devSessionId).withSession(sessionParams: _*)
     val loggedInAdminRequest = FakeRequest().withLoggedIn(underTest, implicitly)(adminSessionId).withSession(sessionParams: _*)
-
-    // def captureUpdatedApplication: UpdateApplicationRequest = {
-    //   val captor = ArgCaptor[UpdateApplicationRequest]
-    //   verify(underTest.applicationService).update(captor)(*)
-    //   captor.value
-    // }
 
     def captureApplicationCmd: ApplicationCommand = {
       val captor = ArgCaptor[ApplicationCommand]
@@ -888,17 +879,6 @@ class DetailsSpec
       )
 
       captureAllApplicationCmds
-
-      // val updatedApplication = captureUpdatedApplication
-      // updatedApplication.name shouldBe newName
-      // updatedApplication.description shouldBe newDescription
-      // updatedApplication.access match {
-      //   case access: Access.Standard =>
-      //     access.termsAndConditionsUrl shouldBe newTermsUrl
-      //     access.privacyPolicyUrl shouldBe newPrivacyUrl
-
-      //   case _ => fail("Expected AccessType of STANDARD")
-      // }
     }
 
     implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
