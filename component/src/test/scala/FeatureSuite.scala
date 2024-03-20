@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package js
-
 import io.cucumber.junit.CucumberOptions.SnippetType.CAMELCASE
 import io.cucumber.junit.{Cucumber, CucumberOptions}
 import org.junit.runner.RunWith
@@ -24,12 +22,13 @@ import steps.Env
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-  features = Array("component/features"),
-  glue = Array("steps"),
   dryRun = false,
   snippets = CAMELCASE,
-  plugin = Array("pretty", "html:target/component-reports/cucumber", "json:target/component-reports/cucumber.json"),
-  tags = "not @wip and not @skip"
+  plugin = Array(
+    "pretty",
+    "html:target/component-reports/cucumber",
+    "json:target/component-reports/cucumber.json"
+  )
 )
 class FeatureSuite
 
