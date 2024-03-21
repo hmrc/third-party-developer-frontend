@@ -47,7 +47,7 @@
 @scripts = {
   <script @CSPNonce.attr type="module">
     import { initAll } from '@routes.Assets.versioned("lib/govuk-frontend/dist/govuk/govuk-frontend.min.js")'
-    initAll()
+    initAll({accordion: {rememberExpanded: false}})
   </script>
   <script @CSPNonce.attr src='@routes.Assets.versioned("javascripts/subscriptions.js")' type="text/javascript"></script>
   @hmrcTrackingConsentSnippet()

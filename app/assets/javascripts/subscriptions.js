@@ -103,5 +103,5 @@
   });
 
   // Overwrite the function responsible for setting the initial accordion closed or open state based on previous interaction.
-  window.GOVUKFrontend.Accordion.prototype.setInitialState = () => {};
+  //window.GOVUKFrontend.Accordion.prototype.setInitialState = () => {};
 })();
