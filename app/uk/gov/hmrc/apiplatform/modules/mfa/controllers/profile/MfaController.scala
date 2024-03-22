@@ -100,8 +100,8 @@ class MfaController @Inject() (
 
   private def setupSelectedMfa(mfaType: String) = {
     MfaType.unsafeApply(mfaType) match {
-      case SMS               => Future.successful(Redirect(routes.MfaController.setupSms))
-      case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart))
+      case SMS               => Future.successful(Redirect(routes.MfaController.setupSms()))
+      case AUTHENTICATOR_APP => Future.successful(Redirect(routes.MfaController.authAppStart()))
     }
   }
 
@@ -184,7 +184,7 @@ class MfaController @Inject() (
       form => Future.successful(BadRequest(nameChangeView(form, mfaId))),
       form => {
         thirdPartyDeveloperMfaConnector.changeName(request.userId, mfaId, form.name) map {
-          case true  => Redirect(routes.MfaController.authAppSetupCompletedPage)
+          case true  => Redirect(routes.MfaController.authAppSetupCompletedPage())
           case false => internalServerErrorTemplate("Failed to change MFA name")
         }
       }
@@ -245,7 +245,7 @@ class MfaController @Inject() (
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
         thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
-        Redirect(routes.MfaController.smsSetupCompletedPage)
+        Redirect(routes.MfaController.smsSetupCompletedPage())
       }
 
       def invalidSmsCode(form: SmsAccessCodeForm): Result = {

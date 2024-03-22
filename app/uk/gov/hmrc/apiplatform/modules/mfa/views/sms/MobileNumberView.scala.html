@@ -39,7 +39,7 @@
 
   <p class="govuk-body" id="paragraph">Include your area code. The UK area code is +44, for example, +448081570192.</p>
 
-  @helper.form(action = routes.MfaController.setupSmsAction){
+  @helper.form(action = routes.MfaController.setupSmsAction()){
     @helper.CSRF.formField
 
     <div class="govuk-form-group @if(form.errors("name").nonEmpty){govuk-form-group--error}">

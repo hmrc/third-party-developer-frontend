@@ -28,17 +28,17 @@ object Crumb {
     Crumb("Home", s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation", Some("data-breadcrumb-home"))
 
   val viewAllApplications =
-    Crumb("Applications", s"${routes.ManageApplications.manageApps}", Some("data-breadcrumb-manage-app"))
+    Crumb("Applications", s"${routes.ManageApplications.manageApps()}", Some("data-breadcrumb-manage-app"))
 
   val securityPreferences =
     Crumb(
       "Security preferences",
-      s"${uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences}",
+      s"${uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.securityPreferences()}",
       Some("data-breadcrumb-security-preferences")
     )
 
   val signIn =
-    Crumb("Sign in", s"${routes.UserLoginAccount.login}", Some("data-breadcrumb-sign-in"))
+    Crumb("Sign in", s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
 
   def application(application: Application) =
     Crumb(s"${application.name}", s"${routes.Details.details(application.id)}", Some("data-breadcrumb-app-name"))

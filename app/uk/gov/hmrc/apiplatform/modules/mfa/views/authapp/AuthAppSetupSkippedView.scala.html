@@ -32,6 +32,6 @@
     <p class="govuk-body" id="paragraph-1">You didn't finish setting up getting access codes by authenticator app.</p>
     <p class="govuk-body" id="paragraph-2">We'll remind you next time you sign in.</p>
 
-    <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps)">
+    <a id="submit" class="govuk-button" href="@request.session.get("access_uri").getOrElse(routes.ManageApplications.manageApps())">
         Continue</a>
 }

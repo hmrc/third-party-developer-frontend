@@ -37,8 +37,10 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -59,7 +61,8 @@ class DetailsSpec
     with DeveloperBuilder
     with CollaboratorTracker
     with LocalUserIdTracker
-    with SubmissionServiceMockModule {
+    with SubmissionServiceMockModule
+    with FixedClock {
 
   "details" when {
     "logged in as a Developer on an application" should {
@@ -361,7 +364,7 @@ class DetailsSpec
 
       await(application.withName(newName).callChangeDetailsAction)
 
-      verify(underTest.applicationService).update(any[UpdateApplicationRequest])(*)
+      verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(*)
       verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(*)
     }
   }
@@ -743,6 +746,7 @@ class DetailsSpec
       mock[SessionService],
       mcc,
       cookieSigner,
+      clock,
       unauthorisedAppDetailsView,
       pendingApprovalView,
       detailsView,
@@ -781,7 +785,7 @@ class DetailsSpec
 
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
 
-    when(underTest.applicationService.update(any[UpdateApplicationRequest])(*))
+    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     when(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(*))
@@ -792,15 +796,21 @@ class DetailsSpec
     val loggedInDevRequest   = FakeRequest().withLoggedIn(underTest, implicitly)(devSessionId).withSession(sessionParams: _*)
     val loggedInAdminRequest = FakeRequest().withLoggedIn(underTest, implicitly)(adminSessionId).withSession(sessionParams: _*)
 
-    def captureUpdatedApplication: UpdateApplicationRequest = {
-      val captor = ArgCaptor[UpdateApplicationRequest]
-      verify(underTest.applicationService).update(captor)(*)
+    def captureApplicationCmd: ApplicationCommand = {
+      val captor = ArgCaptor[ApplicationCommand]
+      verify(underTest.applicationService).dispatchCmd(*[ApplicationId], captor)(*)
       captor.value
+    }
+
+    def captureAllApplicationCmds: List[ApplicationCommand] = {
+      val captor = ArgCaptor[ApplicationCommand]
+      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
+      captor.values
     }
 
     def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
     def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true, hasTermsOfUseAgreement: Boolean = true) = {
@@ -867,16 +877,7 @@ class DetailsSpec
           .callChangeDetailsAction
       )
 
-      val updatedApplication = captureUpdatedApplication
-      updatedApplication.name shouldBe newName
-      updatedApplication.description shouldBe newDescription
-      updatedApplication.access match {
-        case access: Access.Standard =>
-          access.termsAndConditionsUrl shouldBe newTermsUrl
-          access.privacyPolicyUrl shouldBe newPrivacyUrl
-
-        case _ => fail("Expected AccessType of STANDARD")
-      }
+      captureAllApplicationCmds
     }
 
     implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]

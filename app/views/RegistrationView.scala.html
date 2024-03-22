@@ -35,7 +35,7 @@
   <h1 class="govuk-heading-l">Register for a developer account</h1>
 
   <p class="govuk-body">
-    Register for a developer account to start using our <a class="govuk-link" href="/api-documentation/docs/api">RESTful APIs</a> in your applications. Already registered? <a class="govuk-link" href="@routes.UserLoginAccount.login">Sign in</a>.
+    Register for a developer account to start using our <a class="govuk-link" href="/api-documentation/docs/api">RESTful APIs</a> in your applications. Already registered? <a class="govuk-link" href="@routes.UserLoginAccount.login()">Sign in</a>.
   </p>
   <p class="govuk-body">
     You must register separately if you need to work with our <a class="govuk-link" href="https://www.gov.uk/topic/dealing-with-hmrc/software-development">XML APIs</a>.
@@ -132,6 +132,6 @@
     <button id="submit" class="govuk-button" type="submit">Register</button>
   }
   <p class="govuk-body">
-    Already registered? <a class="govuk-link" href="@routes.UserLoginAccount.login">Sign in to your account.</a>
+    Already registered? <a class="govuk-link" href="@routes.UserLoginAccount.login()">Sign in to your account.</a>
   </p>
 }

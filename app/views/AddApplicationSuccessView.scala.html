@@ -28,7 +28,7 @@
   title = "Application added",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("Add an application",s"${controllers.routes.ManageApplications.manageApps}", Some("data-breadcrumb-application-added")),
+    Crumb("Add an application",s"${controllers.routes.ManageApplications.manageApps()}", Some("data-breadcrumb-application-added")),
     Crumb.home
   ),
   leftNav = Some(leftHandNav(None, Option(navSection))),

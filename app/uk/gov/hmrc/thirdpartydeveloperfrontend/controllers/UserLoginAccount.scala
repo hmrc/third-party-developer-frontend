@@ -131,7 +131,7 @@ class UserLoginAccount @Inject() (
         if (userAuthenticationResponse.mfaEnabled) {
           successful(
             withSessionCookie(
-              Redirect(routes.ManageApplications.manageApps, SEE_OTHER).withSession(playSession),
+              Redirect(routes.ManageApplications.manageApps(), SEE_OTHER).withSession(playSession),
               session.sessionId
             )
           )
@@ -310,8 +310,8 @@ class UserLoginAccount @Inject() (
       val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
 
       (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
-        case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage))
-        case (true, SMS)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage))
+        case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
+        case (true, SMS)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
         case _                         => loginSucceeded(request)
       }
     }

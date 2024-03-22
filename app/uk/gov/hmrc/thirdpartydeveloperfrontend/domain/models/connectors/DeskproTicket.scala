@@ -158,7 +158,7 @@ object DeskproTicket extends FieldTransformer {
       email = supportEnquiry.email.toLaxEmail,
       subject = s"$appTitle: Support Enquiry",
       message = message,
-      referrer = routes.Support.submitSupportEnquiry.url,
+      referrer = routes.Support.submitSupportEnquiry().url,
       userAgent = request.headers.get("User-Agent").getOrElse("n/a")
     )
   }

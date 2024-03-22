@@ -97,7 +97,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
           val result = loggedInAction()(request)
 
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+          redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
           verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
         }
       }
@@ -117,7 +117,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
         val result = atLeastPartLoggedInAction()(requestWithNoCookie)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
         verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
       }
 
@@ -125,7 +125,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
         val result = atLeastPartLoggedInAction()(requestWithInvalidCookie)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
         verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
       }
 
@@ -135,7 +135,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
 
         val result = atLeastPartLoggedInAction()(requestWithNoRealSession)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
         verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
       }
     }

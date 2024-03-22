@@ -173,7 +173,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
@@ -199,7 +199,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.unsubscribeAllPage()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesUnsubscribeAllView)
@@ -226,7 +226,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesService)
@@ -250,7 +250,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowStartPage()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesStartView)
     }
@@ -281,7 +281,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesPage()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectCategoriesView)
     }
@@ -325,7 +325,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
@@ -351,7 +351,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
@@ -395,7 +395,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage("anyCategory")(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
@@ -466,7 +466,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
@@ -495,7 +495,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsPage()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
@@ -557,7 +557,7 @@ class EmailPreferencesControllerSpec
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(FakeRequest())
 
       status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
     }

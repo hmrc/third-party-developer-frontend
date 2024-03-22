@@ -81,12 +81,12 @@ class Password @Inject() (
 
   def validateReset(code: String) = Action.async { implicit request =>
     connector.fetchEmailForResetCode(code) map {
-      email => Redirect(routes.Password.resetPasswordChange).addingToSession("email" -> email.text)
+      email => Redirect(routes.Password.resetPasswordChange()).addingToSession("email" -> email.text)
     } recover {
-      case _: InvalidResetCode  => Redirect(routes.Password.resetPasswordError).flashing(
+      case _: InvalidResetCode  => Redirect(routes.Password.resetPasswordError()).flashing(
           "error" -> "InvalidResetCode"
         )
-      case _: UnverifiedAccount => Redirect(routes.Password.resetPasswordError).flashing(
+      case _: UnverifiedAccount => Redirect(routes.Password.resetPasswordError()).flashing(
           "error" -> "UnverifiedAccount"
         )
     }
@@ -96,7 +96,7 @@ class Password @Inject() (
     request.session.get("email") match {
       case None    =>
         logger.warn("email not found in session")
-        Future.successful(Redirect(routes.Password.resetPasswordError).flashing("error" -> "Error"))
+        Future.successful(Redirect(routes.Password.resetPasswordError()).flashing("error" -> "Error"))
       case Some(_) => Future.successful(Ok(resetView(PasswordResetForm.form)))
     }
   }
@@ -158,7 +158,7 @@ trait PasswordChange {
           case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))
             Unauthorized(error(ChangePasswordForm.invalidCredentials(ChangePasswordForm.form)))
-          case _: LockedAccount      => Redirect(routes.UserLoginAccount.accountLocked)
+          case _: LockedAccount      => Redirect(routes.UserLoginAccount.accountLocked())
         }
       }
     )

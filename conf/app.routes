@@ -4,15 +4,15 @@
 
 GET         /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.registration()
 POST        /registration                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.register()
-GET         /confirmation                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.confirmation
+GET         /confirmation                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.confirmation()
 
 GET         /verification                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.verify(code: String)
-GET         /resend-verification                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendVerification
-GET         /resend-confirmation                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendConfirmation
+GET         /resend-verification                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendVerification()
+GET         /resend-confirmation                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Registration.resendConfirmation()
 
-GET         /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.login
+GET         /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.login()
 GET         /login/2sv-recommendation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2svRecommendationPage()
-POST        /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticate
+POST        /login                                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticate()
 GET         /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpConfirmationPage()
 POST        /login/2SV-help                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.confirm2SVHelp()
 GET         /login/2SV-help/complete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVHelpCompletionPage()
@@ -23,34 +23,34 @@ GET         /login-mfa                                                          
 POST        /login-mfa                                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.authenticateAccessCode(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType, userHasMultipleMfa: Boolean)
 GET         /login/2SV-not-set                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.get2SVNotSetPage()
 
-GET         /logout                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logout
+GET         /logout                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logout()
 
-GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey
-POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction
+GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey()
+POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction()
 
 GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.raiseSupportEnquiry(useNewSupport: Boolean ?= false)
-POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.submitSupportEnquiry
-GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.thankyou
+POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.submitSupportEnquiry()
+GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.thankyou()
 
-POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.chooseSupportOptionAction
-GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportPage
-POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportAction
-GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsPage
-POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsAction
-GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportConfirmationPage
+POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.chooseSupportOptionAction()
+GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportPage()
+POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportAction()
+GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsPage()
+POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsAction()
+GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportConfirmationPage()
 
-GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked
+GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked()
 
 GET         /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.showForgotPassword()
 POST        /forgot-password                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.requestReset()
 
 GET         /reset-password-link                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.validateReset(code: String)
 
-GET         /reset-password                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPasswordChange
-POST        /reset-password                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPassword
-GET         /reset-password/error                                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPasswordError
+GET         /reset-password                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPasswordChange()
+POST        /reset-password                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPassword()
+GET         /reset-password/error                                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Password.resetPasswordError()
 
-GET         /applications                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplications.manageApps
+GET         /applications                                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplications.manageApps()
 
 GET         /applications/using-privileged-application-credentials                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
 GET         /applications/access-token                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.accessTokenSwitchPage()
@@ -208,7 +208,7 @@ GET         /applications/:id/push-secrets                                      
 GET         /applications/:id/add/subscriptions                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionsController.addAppSubscriptions(id: ApplicationId)
 
 GET         /application-verification                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationVerification.verifyUplift(code: String)
-GET         /user-navlinks                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Navigation.navLinks
+GET         /user-navlinks                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Navigation.navLinks()
 
 GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial()
 
@@ -216,9 +216,9 @@ GET         /assets/*file                                                       
 
 GET         /keep-alive                                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SessionController.keepAlive()
 
-GET         /no-applications                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsPage
-POST        /no-applications                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsAction
-GET         /no-applications-start                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.startUsingRestApisPage
+GET         /no-applications                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsPage()
+POST        /no-applications                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.noApplicationsAction()
+GET         /no-applications-start                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.startUsingRestApisPage()
 
 GET         /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsPage(id: ApplicationId)
 POST        /applications/:id/confirm-subscriptions                                                      uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.confirmApiSubscriptionsAction(id: ApplicationId)

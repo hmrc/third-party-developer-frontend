@@ -136,7 +136,7 @@ class ManageTeamSpec
       val result: Future[Result] = underTest.manageTeam(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
   }
 
@@ -160,7 +160,7 @@ class ManageTeamSpec
       val result: Future[Result] = underTest.addTeamMember(appId)(loggedOutRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
       CollaboratorServiceMock.AddTeamMember.verifyNeverCalled()
     }
   }
@@ -232,7 +232,7 @@ class ManageTeamSpec
         underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
       CollaboratorServiceMock.AddTeamMember.verifyNeverCalled()
     }
   }
@@ -273,7 +273,7 @@ class ManageTeamSpec
       val result: Future[Result] = underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
     "reject invalid email address" in new Setup {
@@ -352,7 +352,7 @@ class ManageTeamSpec
           underTest.removeTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login.url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
         CollaboratorServiceMock.RemoveTeamMember.verifyNeverCalled()
       }
     }

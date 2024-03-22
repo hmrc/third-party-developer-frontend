@@ -33,7 +33,7 @@
 ) {
   <h1 class="govuk-heading-l">@heading</h1>
 
-  @helper.form(action = routes.UserLoginAccount.authenticate) {
+  @helper.form(action = routes.UserLoginAccount.authenticate()) {
     @helper.CSRF.formField
     <div @if(form.errors("invalidCredentials").nonEmpty){class="govuk-form-group--error"}>
       <span class="govuk-error-message">

@@ -32,13 +32,13 @@
 ) {
   <h1 class="govuk-heading-l">@heading</h1>
 
-  <a href="@routes.UserLogoutAccount.logout" class="govuk-button">Yes, sign me out</a>
+  <a href="@routes.UserLogoutAccount.logout()" class="govuk-button">Yes, sign me out</a>
 
   <hr>
 
   <h2 class="govuk-heading-m">Feedback survey</h2>
 
-  @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction, Symbol("class") -> "form", Symbol("id") -> "feedbackForm") {
+  @helper.form(action = routes.UserLogoutAccount.logoutSurveyAction(), Symbol("class") -> "form", Symbol("id") -> "feedbackForm") {
     @helper.CSRF.formField
 
     <p class="govuk-body">

@@ -67,7 +67,7 @@ class NoApplications @Inject() (
         formData.choice.getOrElse("") match {
           case "get-emails" =>
             Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
-          case "use-apis"   => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage))
+          case "use-apis"   => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage()))
           case _            => Future.successful(InternalServerError(errorHandler.internalServerErrorTemplate))
         }
     )

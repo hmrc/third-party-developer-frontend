@@ -49,7 +49,7 @@
     for answers.
   </p>
 
-  @helper.form(action = routes.Support.submitSupportEnquiry) {
+  @helper.form(action = routes.Support.submitSupportEnquiry()) {
 
     <fieldset class="govuk-fieldset">
       @helper.CSRF.formField

@@ -3,16 +3,16 @@ GET         /change                                                             
 POST        /                                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updateProfile()
 
 GET         /email-preferences                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.emailPreferencesSummaryPage()
-GET         /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllPage
-POST        /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllAction
-GET         /email-preferences/start                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowStartPage
-GET         /email-preferences/categories                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectCategoriesPage
-POST        /email-preferences/categories                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectCategoriesAction
-POST        /email-preferences/no-categories                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectNoCategoriesAction
+GET         /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllPage()
+POST        /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllAction()
+GET         /email-preferences/start                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowStartPage()
+GET         /email-preferences/categories                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectCategoriesPage()
+POST        /email-preferences/categories                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectCategoriesAction()
+POST        /email-preferences/no-categories                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectNoCategoriesAction()
 GET         /email-preferences/apis                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectApisPage(category: String)
-POST        /email-preferences/apis                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectApisAction
+POST        /email-preferences/apis                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectApisAction()
 GET         /email-preferences/topics                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectTopicsPage()
-POST        /email-preferences/topics                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectTopicsAction
+POST        /email-preferences/topics                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.flowSelectTopicsAction()
 
 GET         /email-preferences/apis-from-subscriptions                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsPage(applicationId: ApplicationId)
 POST        /email-preferences/apis-from-subscriptions                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectApisFromSubscriptionsAction(applicationId: ApplicationId)
@@ -20,29 +20,29 @@ POST        /email-preferences/no-apis-from-subscriptions                       
 GET         /email-preferences/topics-from-subscriptions                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsPage(applicationId: ApplicationId)
 POST        /email-preferences/topics-from-subscriptions                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.selectTopicsFromSubscriptionsAction(applicationId: ApplicationId)
 
-GET         /security-preferences                                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.securityPreferences
+GET         /security-preferences                                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.securityPreferences()
 GET         /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaPage(mfaId: Option[uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId], mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction)
 POST        /security-preferences/select-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.selectMfaAction(mfaId: Option[uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId], mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction)
 GET         /security-preferences/remove-mfa                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.removeMfa(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaType: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType)
 GET         /security-preferences/remove-mfa/complete                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.removeMfaCompletedPage()
 
-GET         /security-preferences/auth-app/start                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppStart
-GET         /security-preferences/auth-app/setup                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupAuthApp
+GET         /security-preferences/auth-app/start                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppStart()
+GET         /security-preferences/auth-app/setup                                                 uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupAuthApp()
 GET         /security-preferences/auth-app/access-code                                           uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction, mfaIdForRemoval: Option[uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId])
 POST        /security-preferences/auth-app/access-code                                           uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppAccessCodeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction, mfaIdForRemoval: Option[uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId])
 GET         /security-preferences/auth-app/name                                                  uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.nameChangePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
 POST        /security-preferences/auth-app/name                                                  uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.nameChangeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId)
-GET         /security-preferences/auth-app/setup/complete                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupCompletedPage
-GET         /security-preferences/auth-app/setup/reminder                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupReminderPage
-GET         /security-preferences/auth-app/setup/skip                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupSkippedPage
+GET         /security-preferences/auth-app/setup/complete                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupCompletedPage()
+GET         /security-preferences/auth-app/setup/reminder                                        uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupReminderPage()
+GET         /security-preferences/auth-app/setup/skip                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.authAppSetupSkippedPage()
 
-GET         /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSms
-POST        /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSmsAction
+GET         /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSms()
+POST        /security-preferences/sms/setup                                                     uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.setupSmsAction()
 GET         /security-preferences/sms/access-code                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsAccessCodePage(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction, mfaIdForRemoval: Option[uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId])
 POST        /security-preferences/sms/access-code                                               uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsAccessCodeAction(mfaId: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId, mfaAction: uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction, mfaIdForRemoval: Option[uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId])
-GET         /security-preferences/sms/setup/complete                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupCompletedPage
-GET         /security-preferences/sms/setup/skip                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupSkippedPage
-GET         /security-preferences/sms/setup/reminder                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupReminderPage
+GET         /security-preferences/sms/setup/complete                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupCompletedPage()
+GET         /security-preferences/sms/setup/skip                                                uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupSkippedPage()
+GET         /security-preferences/sms/setup/reminder                                            uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.MfaController.smsSetupReminderPage()
 
 GET         /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.showPasswordPage()
 POST        /password                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updatePassword()

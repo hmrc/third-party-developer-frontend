@@ -33,7 +33,7 @@
     leftNav = Some(leftHandNav(None, None)),
     developerSession = Some(loggedIn)
 ) {
-    @helper.form(action = controllers.noapplications.routes.NoApplications.noApplicationsAction){
+    @helper.form(action = controllers.noapplications.routes.NoApplications.noApplicationsAction()){
         <div class="govuk-form-group">
             @helper.CSRF.formField
             <fieldset class="govuk-fieldset" aria-describedby="no-applications-hint">
