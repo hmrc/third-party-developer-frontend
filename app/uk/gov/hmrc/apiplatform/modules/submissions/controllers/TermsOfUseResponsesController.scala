@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import java.time.Clock
 
 object TermsOfUseResponsesController {
   case class TermsOfUseResponsesViewModel(applicationName: String, answersViewModel: ViewModel)
@@ -50,7 +51,8 @@ class TermsOfUseResponsesController @Inject() (
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    termsOfUseResponsesView: TermsOfUseResponsesView
+    termsOfUseResponsesView: TermsOfUseResponsesView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

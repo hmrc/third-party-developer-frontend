@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDeletion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import java.time.Clock
 
 @Singleton
 class DeleteApplication @Inject() (
@@ -44,7 +45,8 @@ class DeleteApplication @Inject() (
     deletePrincipalApplicationConfirmView: DeletePrincipalApplicationConfirmView,
     deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView,
     deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
-    deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView
+    deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

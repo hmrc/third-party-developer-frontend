@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeam
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import java.time.Clock
 
 @Singleton
 class ManageTeam @Inject() (
@@ -57,7 +58,8 @@ class ManageTeam @Inject() (
     addTeamMemberView: AddTeamMemberView,
     teamMemberAddView: TeamMemberAddView,
     removeTeamMemberView: RemoveTeamMemberView,
-    val fraudPreventionConfig: FraudPreventionConfig
+    val fraudPreventionConfig: FraudPreventionConfig,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

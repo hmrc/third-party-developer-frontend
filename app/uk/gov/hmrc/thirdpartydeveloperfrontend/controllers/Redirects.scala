@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsRedirects
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, RedirectsService, SessionService}
+import java.time.Clock
 
 @Singleton
 class Redirects @Inject() (
@@ -49,7 +50,8 @@ class Redirects @Inject() (
     deleteRedirectConfirmationView: DeleteRedirectConfirmationView,
     changeRedirectView: ChangeRedirectView,
     val fraudPreventionConfig: FraudPreventionConfig,
-    redirectsService: RedirectsService
+    redirectsService: RedirectsService,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {

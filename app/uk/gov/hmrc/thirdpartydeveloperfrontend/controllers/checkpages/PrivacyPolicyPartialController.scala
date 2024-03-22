@@ -29,7 +29,10 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInfo
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.HasUrl._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.UpdateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateResult
 
 trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
   self: ApplicationController with CanUseCheckActions =>
@@ -56,12 +59,21 @@ trait PrivacyPolicyPartialController extends WithUnsafeDefaultFormBinding {
     }
 
     def updateUrl(form: PrivacyPolicyForm) = {
-      val access = app.access match {
-        case s: Access.Standard => s.copy(privacyPolicyUrl = form.privacyPolicyURL, overrides = Set.empty)
-        case other              => other
+      val existingPrivacyPolicyUrl = app.access match {
+        case s: Access.Standard => Some(s.privacyPolicyUrl)
+        case other              => None
       }
 
-      applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, app.name, app.description, access))
+      lazy val actor = Actors.AppCollaborator(request.userRequest.developerSession.email)
+
+      val cmd = (form.privacyPolicyURL, existingPrivacyPolicyUrl) match {
+        case (None, None) => None
+        case (Some(a), Some(b)) if(a == b) => None
+        case (None, _) => Some(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant()))
+        case (Some(newValue), _) => Some(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant(), newValue))
+      }
+
+      cmd.fold[Future[ApplicationUpdateResult]](Future.successful(ApplicationUpdateSuccessful))(c => applicationService.dispatchWithThrow(app.id, c))
     }
 
     def withValidForm(form: PrivacyPolicyForm) = {

@@ -26,10 +26,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
+import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 
 abstract class ApplicationController(mcc: MessagesControllerComponents)
     extends LoggedInController(mcc)
-    with ApplicationActionBuilders {
+    with ApplicationActionBuilders
+    with ClockNow {
 
   val applicationService: ApplicationService
 

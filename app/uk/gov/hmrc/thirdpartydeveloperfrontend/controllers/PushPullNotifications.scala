@@ -31,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.PpnsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.ViewPushSecret
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, PushPullNotificationsService, SessionService}
+import java.time.Clock
 
 @Singleton
 class PushPullNotifications @Inject() (
@@ -41,7 +42,8 @@ class PushPullNotifications @Inject() (
     override val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
     pushSecretsView: PushSecretsView,
-    pushPullNotificationsService: PushPullNotificationsService
+    pushPullNotificationsService: PushPullNotificationsService,
+    val clock: Clock
   )(implicit override val ec: ExecutionContext,
     override val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with PpnsActions {

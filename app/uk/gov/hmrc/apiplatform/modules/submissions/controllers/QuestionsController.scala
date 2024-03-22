@@ -35,6 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import java.time.Clock
 
 object QuestionsController extends NonEmptyListFormatters {
   case class ErrorMessage(message: String)
@@ -65,7 +66,8 @@ class QuestionsController @Inject() (
     val cookieSigner: CookieSigner,
     questionView: QuestionView,
     checkAnswersView: CheckAnswersView,
-    mcc: MessagesControllerComponents
+    mcc: MessagesControllerComponents,
+    val clock: Clock
   )(implicit override val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

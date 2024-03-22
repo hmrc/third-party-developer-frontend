@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseCheckActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import java.time.Clock
 
 object CheckAnswersController {
   case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean, isNewTermsOfUseUplift: Boolean, isGranted: Boolean)
@@ -54,7 +55,8 @@ class CheckAnswersController @Inject() (
     val submissionService: SubmissionService,
     requestProductionCredentials: RequestProductionCredentials,
     checkAnswersView: CheckAnswersView,
-    prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView
+    prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

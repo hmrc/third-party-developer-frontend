@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.CanUseChec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import java.time.Clock
 
 object StartUsingYourApplicationController {
   case class ViewModel(appId: ApplicationId, appName: String, showApiConfig: Boolean)
@@ -50,7 +51,8 @@ class StartUsingYourApplicationController @Inject() (
     val cookieSigner: CookieSigner,
     val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
-    startUsingYourApplicationView: StartUsingYourApplicationView
+    startUsingYourApplicationView: StartUsingYourApplicationView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

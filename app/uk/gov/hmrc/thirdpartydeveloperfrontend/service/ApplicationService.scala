@@ -50,8 +50,9 @@ class ApplicationService @Inject() (
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,
     auditService: AuditService,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
-  ) extends ClockNow {
+  )(implicit val ec: ExecutionContext) extends ClockNow {
+
+  import ApplicationCommandConnector.TYPES._
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     connectorWrapper.forEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
@@ -59,13 +60,27 @@ class ApplicationService @Inject() (
   def update(updateApplicationRequest: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     connectorWrapper.forEnvironment(updateApplicationRequest.environment).thirdPartyApplicationConnector.update(updateApplicationRequest.id, updateApplicationRequest)
 
-  def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def dispatchCmdIgnoringFailure(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     appCmdConnector.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
+  }
+  
+  def dispatchWithThrow(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+    appCmdConnector.dispatchWithThrow(appId, cmd, Set.empty)
+  }
+
+  def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): AppCmdResult = {
+    appCmdConnector.dispatch(appId, cmd, Set.empty)
+  }
+
+  implicit class AppCmdResultSyntax(r: AppCmdResult) {
+    def asSimpleResult: Future[ApplicationUpdateResult] = {
+      r.map(_.fold(_ => ApplicationUpdateFailure, _ => ApplicationUpdateSuccessful))
+    }
   }
 
   def updatePrivacyPolicyLocation(application: Application, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant(), newLocation)
-    dispatchCmd(application.id, request)
+    dispatchCmdIgnoringFailure(application.id, request)
   }
 
   def updateResponsibleIndividual(
@@ -76,7 +91,7 @@ class ApplicationService @Inject() (
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, instant(), fullName, emailAddress)
-    dispatchCmd(application.id, request)
+    dispatchCmdIgnoringFailure(application.id, request)
   }
 
   def updateTermsConditionsLocation(
@@ -86,17 +101,17 @@ class ApplicationService @Inject() (
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant(), newLocation)
-    dispatchCmd(application.id, request)
+    dispatchCmdIgnoringFailure(application.id, request)
   }
 
   def acceptResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeResponsibleIndividualToOther(code, instant())
-    dispatchCmd(applicationId, request)
+    dispatchCmdIgnoringFailure(applicationId, request)
   }
 
   def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.DeclineResponsibleIndividual(code, instant())
-    dispatchCmd(applicationId, request)
+    dispatchCmdIgnoringFailure(applicationId, request)
   }
 
   def verifyResponsibleIndividual(
@@ -108,7 +123,7 @@ class ApplicationService @Inject() (
     )(implicit hc: HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.VerifyResponsibleIndividual(userId, instant(), requesterName, riName, riEmail)
-    dispatchCmd(application.id, request)
+    dispatchCmdIgnoringFailure(application.id, request)
   }
 
   def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
@@ -172,7 +187,7 @@ class ApplicationService @Inject() (
     if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
 
       val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant())
-      dispatchCmd(application.id, deleteRequest)
+      dispatchCmdIgnoringFailure(application.id, deleteRequest)
 
     } else {
       Future.failed(new ForbiddenException("Only standard subordinate applications can be deleted by admins"))

@@ -45,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import java.time.Clock
 
 @Singleton
 class SubscriptionsController @Inject() (
@@ -62,7 +63,8 @@ class SubscriptionsController @Inject() (
     changeSubscriptionConfirmationView: ChangeSubscriptionConfirmationView,
     unsubscribeRequestSubmittedView: UnsubscribeRequestSubmittedView,
     subscribeRequestSubmittedView: SubscribeRequestSubmittedView,
-    fraudPreventionConfig: FraudPreventionConfig
+    fraudPreventionConfig: FraudPreventionConfig,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService

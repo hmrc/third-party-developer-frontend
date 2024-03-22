@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import java.time.Clock
 
 object ManageResponsibleIndividualController {
   case class ResponsibleIndividualHistoryItem(name: String, fromDate: String, toDate: String)
@@ -67,7 +68,8 @@ class ManageResponsibleIndividualController @Inject() (
     responsibleIndividualChangeToSelfView: ResponsibleIndividualChangeToSelfView,
     responsibleIndividualChangeToSelfConfirmedView: ResponsibleIndividualChangeToSelfConfirmedView,
     responsibleIndividualChangeToOtherView: ResponsibleIndividualChangeToOtherView,
-    responsibleIndividualChangeToOtherRequestedView: ResponsibleIndividualChangeToOtherRequestedView
+    responsibleIndividualChangeToOtherRequestedView: ResponsibleIndividualChangeToOtherRequestedView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

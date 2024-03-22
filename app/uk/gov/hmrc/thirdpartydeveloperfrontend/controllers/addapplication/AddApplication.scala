@@ -46,6 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import java.time.Clock
 
 @Singleton
 class AddApplication @Inject() (
@@ -69,7 +70,8 @@ class AddApplication @Inject() (
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
     upliftJourneySwitch: UpliftJourneySwitch,
     beforeYouStartView: BeforeYouStartView,
-    flowService: GetProductionCredentialsFlowService
+    flowService: GetProductionCredentialsFlowService,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService

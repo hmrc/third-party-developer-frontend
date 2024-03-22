@@ -33,6 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsIpAllowlist
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import java.time.Clock
 
 @Singleton
 class IpAllowListController @Inject() (
@@ -53,7 +54,8 @@ class IpAllowListController @Inject() (
     settingUpAllowlistView: SettingUpAllowlistView,
     removeIpAllowlistView: RemoveIpAllowlistView,
     removeIpAllowlistSuccessView: RemoveIpAllowlistSuccessView,
-    removeCidrBlockView: RemoveCidrBlockView
+    removeCidrBlockView: RemoveCidrBlockView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {

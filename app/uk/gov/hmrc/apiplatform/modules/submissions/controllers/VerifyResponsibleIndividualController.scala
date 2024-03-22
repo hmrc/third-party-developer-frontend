@@ -38,6 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import java.time.Clock
 
 object VerifyResponsibleIndividualController {
 
@@ -68,7 +69,8 @@ class VerifyResponsibleIndividualController @Inject() (
     verifyResponsibleIndividualView: VerifyResponsibleIndividualView,
     responsibleIndividualAcceptedView: ResponsibleIndividualAcceptedView,
     responsibleIndividualDeclinedView: ResponsibleIndividualDeclinedView,
-    responsibleIndividualErrorView: ResponsibleIndividualErrorView
+    responsibleIndividualErrorView: ResponsibleIndividualErrorView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

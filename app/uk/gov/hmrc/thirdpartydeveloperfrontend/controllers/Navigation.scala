@@ -26,6 +26,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.UserNavLinks
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import java.time.Clock
 
 @Singleton
 class Navigation @Inject() (
@@ -34,7 +35,8 @@ class Navigation @Inject() (
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     mcc: MessagesControllerComponents,
-    val cookieSigner: CookieSigner
+    val cookieSigner: CookieSigner,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) {

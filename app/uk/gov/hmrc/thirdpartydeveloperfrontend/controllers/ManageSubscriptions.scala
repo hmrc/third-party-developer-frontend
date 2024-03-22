@@ -40,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{NoSubs
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
+import java.time.Clock
 
 object ManageSubscriptions {
 
@@ -81,7 +82,8 @@ class ManageSubscriptions @Inject() (
     editApiMetadataFieldView: EditApiMetadataFieldView,
     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
-    subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
+    subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

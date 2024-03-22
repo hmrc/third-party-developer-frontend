@@ -27,13 +27,18 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
+object ApplicationCommandConnector {
+  val TYPES = new CommandHandlerTypes[DispatchSuccessResult]{}
+}
+
 @Singleton
 class ApplicationCommandConnector @Inject() (
     val http: HttpClient,
     val config: ApmConnector.Config
   )(implicit val ec: ExecutionContext
-  ) extends CommandHandlerTypes[DispatchSuccessResult]
-    with ApplicationLogger {
+  ) extends ApplicationLogger {
+
+  import ApplicationCommandConnector.TYPES._
 
   // TODO - rework code so this is not required
   def dispatchWithThrow(

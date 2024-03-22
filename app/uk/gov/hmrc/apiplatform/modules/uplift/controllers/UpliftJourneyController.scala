@@ -49,6 +49,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseInvitationService}
+import java.time.Clock
 
 object UpliftJourneyController {
 
@@ -94,7 +95,8 @@ class UpliftJourneyController @Inject() (
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
     beforeYouStartView: BeforeYouStartView,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
-    upliftJourneySwitch: UpliftJourneySwitch
+    upliftJourneySwitch: UpliftJourneySwitch,
+    val clock: Clock
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)

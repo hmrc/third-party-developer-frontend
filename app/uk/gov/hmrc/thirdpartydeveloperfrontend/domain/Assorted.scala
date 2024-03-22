@@ -34,7 +34,13 @@ class ApplicationNeedsAdmin extends RuntimeException
 
 case class ApplicationCreatedResponse(id: ApplicationId)
 
-sealed trait ApplicationUpdateSuccessful
+sealed trait ApplicationUpdateResult
+
+sealed trait ApplicationUpdateFailure extends ApplicationUpdateResult
+
+case object ApplicationUpdateFailure extends ApplicationUpdateFailure
+
+sealed trait ApplicationUpdateSuccessful extends ApplicationUpdateResult
 
 case object ApplicationUpdateSuccessful extends ApplicationUpdateSuccessful
 

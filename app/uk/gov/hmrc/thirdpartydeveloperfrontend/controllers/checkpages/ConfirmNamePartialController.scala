@@ -28,6 +28,12 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateResult
 
 trait ConfirmNamePartialController {
   self: ApplicationController with CanUseCheckActions =>
@@ -48,11 +54,13 @@ trait ConfirmNamePartialController {
       Future.successful(BadRequest(confirmNameView(app, form, nameActionRoute(appId))))
     }
 
-    def updateNameIfChanged(form: NameForm) = {
+    def updateNameIfChanged(form: NameForm): Future[ApplicationUpdateSuccessful] = {
       if (app.name != form.applicationName) {
-        applicationService.update(UpdateApplicationRequest(app.id, app.deployedTo, form.applicationName, app.description, app.access))
+        val actor = Actors.AppCollaborator(request.userRequest.developerSession.email)
+        val cmd = ApplicationCommands.ChangeSandboxApplicationName(actor, instant(), app.name.trim())
+        applicationService.dispatchWithThrow(appId, cmd)
       } else {
-        Future.successful(())
+        Future.successful(ApplicationUpdateSuccessful)
       }
     }
 
