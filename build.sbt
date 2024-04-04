@@ -2,21 +2,12 @@ import com.typesafe.sbt.digest.Import._
 import com.typesafe.sbt.uglify.Import._
 import com.typesafe.sbt.web.Import._
 import net.ground5hark.sbt.concat.Import._
-import org.scalafmt.sbt.ScalafmtPlugin
-import sbt.Keys._
-import sbt.{Resolver, _}
 import uk.gov.hmrc.DefaultBuildSettings
-import uk.gov.hmrc.DefaultBuildSettings._
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import bloop.integrations.sbt.BloopDefaults
-
-Global / bloopAggregateSourceDependencies := true
-Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 lazy val appName = "third-party-developer-frontend"
 
-lazy val plugins: Seq[Plugins] = Seq(PlayScala, SbtDistributablesPlugin)
-lazy val playSettings: Seq[Setting[_]] = Seq.empty
+Global / bloopAggregateSourceDependencies := true
+Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 ThisBuild / scalaVersion := "2.13.12"
 ThisBuild / majorVersion := 0
@@ -25,7 +16,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(plugins: _*)
+  .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     Concat.groups := Seq(
@@ -44,10 +35,7 @@ lazy val microservice = Project(appName, file("."))
       uglify
     )
   )
-  .settings(playSettings: _*)
-  .settings(scalaSettings: _*)
-  .settings(defaultSettings(): _*)
-  .settings(ScoverageSettings(): _*)
+  .settings(ScoverageSettings())
   .settings(
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true
@@ -89,10 +77,10 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
     scalacOptions ++= Seq(
-    "-Wconf:cat=unused&src=views/.*\\.scala:s",
-    "-Wconf:cat=unused&src=.*RoutesPrefix\\.scala:s",
-    "-Wconf:cat=unused&src=.*Routes\\.scala:s",
-    "-Wconf:cat=unused&src=.*ReverseRoutes\\.scala:s"
+      "-Wconf:cat=unused&src=views/.*\\.scala:s",
+      // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+      // suppress warnings in generated routes files
+      "-Wconf:src=routes/.*:s"
     )
   )
 
@@ -101,9 +89,7 @@ lazy val it = (project in file("it"))
   .dependsOn(microservice % "test->test")
   .settings(
     name := "integration-tests",
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    DefaultBuildSettings.itSettings(),
-    addTestReportOption(Test, "int-test-reports")
+    DefaultBuildSettings.itSettings()
   )
 
 lazy val component = (project in file("component"))
@@ -111,17 +97,19 @@ lazy val component = (project in file("component"))
   .settings(
     name := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
-    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a")),
     Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
     DefaultBuildSettings.itSettings(),
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
   )
 
 commands ++= Seq(
   Command.command("cleanAll") { state => "clean" :: "it/clean" :: "component/clean" :: state },
   Command.command("fmtAll") { state => "scalafmtAll" :: "it/scalafmtAll" :: "component/scalafmtAll" :: state },
   Command.command("fixAll") { state => "scalafixAll" :: "it/scalafixAll" :: "component/scalafixAll" :: state },
+  Command.command("testAllExceptExcludedFromCoverage") { state => "testOnly * -- -l ExcludeFromCoverage" :: "it/test" :: "component/test" :: state },
+  Command.command("testExcludedFromCoverage") { state => "testOnly * -- -n ExcludeFromCoverage" :: state },
   Command.command("testAll") { state => "test" :: "it/test" :: "component/test" :: state },
   Command.command("run-all-tests") { state => "testAll" :: state },
   Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
-  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "coverage" :: "testOnly * -- -l ExcludeFromCoverage" :: "it/test" :: "component/test" :: "coverageOff" :: "testOnly * -- -n ExcludeFromCoverage" :: "coverageAggregate" :: state }
+  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "testExcludedFromCoverage" :: "coverage" :: "testAllExceptExcludedFromCoverage" :: "coverageOff" :: "coverageAggregate" :: state }
 )
