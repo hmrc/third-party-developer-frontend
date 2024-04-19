@@ -45,11 +45,11 @@
   )
 }
 
-@apiChoiceHtml = {
+@apiChoiceHtml(name: String) = {
   @govukSelect(
     Select(
-      id = "apiName",
-      name = "apiName",
+      id = "api-"+name,
+      name = "api-"+name,
       items = selectItems,
       label = Label(
         content = Text("Select an API")
@@ -94,10 +94,17 @@
           RadioItem(
             id = Some("making-an-api-call"),
             content = Text("Making an API call"),
-            value = Some("api-call"),
+            value = Some("api-call-choice"),
             hint = None,
-            conditionalHtml = Some(apiChoiceHtml)
+            conditionalHtml = Some(apiChoiceHtml("call"))
           ), 
+          RadioItem(
+            id = Some("getting-examples"),
+            content = Text("Getting examples of payloads or schemas"),
+            value = Some("examples-of-choice"),
+            hint = None,
+            conditionalHtml = Some(apiChoiceHtml("example"))
+          ),
           RadioItem(
             id = Some("reporting-documentation"),
             content = Text("Reporting documentation for an API that is inaccurate or missing information"),

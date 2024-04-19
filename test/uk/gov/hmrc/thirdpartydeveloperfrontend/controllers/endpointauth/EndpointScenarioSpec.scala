@@ -174,7 +174,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
   )
   mockFetchBySessionIdAndFlowType[SupportFlow](
-    SupportFlow(sessionId, "api")
+    SupportFlow(sessionId, "api", None)
   )
   when(flowRepository.deleteBySessionIdAndFlowType(*, *)).thenReturn(Future.successful(true))
   when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, "api", None)))
@@ -347,7 +347,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
       case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> "api")
-      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Map("helpWithApiChoice" -> "api-call", "apiName" -> "Test Service Name")
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                =>
+        Map("helpWithApiChoice" -> "api-call-choice", "api-call" -> "Test Service Name", "api-example" -> "Test Service Name")
       case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   =>
         Map("apiName" -> "Test Service Name", "details" -> "details", "fullName" -> "full name", "emailAddress" -> "fullname@example.com")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)                                  =>

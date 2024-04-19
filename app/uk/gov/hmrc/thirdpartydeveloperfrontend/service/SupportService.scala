@@ -45,7 +45,7 @@ class SupportService @Inject() (
   private def fetchSupportFlow(sessionId: String): Future[SupportFlow] = {
     flowRepository.fetchBySessionIdAndFlowType[SupportFlow](sessionId) map {
       case Some(flow) => flow
-      case None       => SupportFlow(sessionId, "unknown")
+      case None       => SupportFlow(sessionId, "unknown", None)
     }
   }
 
@@ -56,20 +56,30 @@ class SupportService @Inject() (
     } yield savedFlow
   }
 
-  def updateApiChoice(sessionId: String, apiChoice: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
+  def clearApiChoice(sessionId: String): Future[Either[Throwable, SupportFlow]] = {
+    (
+      for {
+        flow       <- ET.liftF(fetchSupportFlow(sessionId))
+        updatedFlow = flow.copy(api = None, subSelection = None)
+        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
+      } yield savedFlow
+    ).value
+  }
+
+  def updateApiChoice(sessionId: String, apiChoice: ServiceName, typeOfApiEnquiry: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
     (
       for {
         flow       <- ET.liftF(fetchSupportFlow(sessionId))
         apiName    <- if (apiChoice.value == "api-not-in-list") ET.liftF(Future.successful(""))
                       else ET.fromEitherF(apmConnector.fetchExtendedApiDefinition(apiChoice)).map(_.name)
-        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, apiName)))
+        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, apiName)), subSelection = Some(typeOfApiEnquiry))
         savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
       } yield savedFlow
     ).value
   }
 
   def createFlow(sessionId: String, entrypoint: String): Future[SupportFlow] = {
-    flowRepository.saveFlow(SupportFlow(sessionId, entrypoint))
+    flowRepository.saveFlow(SupportFlow(sessionId, entrypoint, None))
   }
 
   def fetchAllPublicApis(userId: Option[UserId])(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {

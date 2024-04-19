@@ -128,19 +128,29 @@ class Support @Inject() (
       )
     }
 
-    def updateFlowAndRedirect(apiName: String): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      supportService.updateApiChoice(sessionId, ServiceName(apiName)) flatMap {
+    def redirectOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
+      onFlow.flatMap {
         case Right(_) => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
         case Left(_)  => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
       }
+
+    def clearAnyApiChoiceAndRedirect(): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      redirectOnFlow(sessionId, supportService.clearApiChoice(sessionId))
     }
 
-    def handleValidForm(form: ApiSupportForm): Future[Result] =
+    def updateFlowAndRedirect(apiName: String, typeOfApiEnquiry: String): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      redirectOnFlow(sessionId, supportService.updateApiChoice(sessionId, ServiceName(apiName), typeOfApiEnquiry: String))
+    }
+
+    def handleValidForm(form: ApiSupportForm): Future[Result] = {
       form.helpWithApiChoice match {
-        case "api-call" => updateFlowAndRedirect(form.apiName)
-        case _          => Future.successful(Redirect(routes.Support.supportDetailsPage()))
+        case "api-call-choice"    => updateFlowAndRedirect(form.apiNameForCall, "api-call")
+        case "examples-of-choice" => updateFlowAndRedirect(form.apiNameForExamples, "examples-of")
+        case _                    => clearAnyApiChoiceAndRedirect()
       }
+    }
 
     def handleInvalidForm(formWithErrors: Form[ApiSupportForm]): Future[Result] =
       renderApiSupportPageErrorView(formWithErrors)

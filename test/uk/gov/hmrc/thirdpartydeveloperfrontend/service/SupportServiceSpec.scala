@@ -94,9 +94,9 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     "updateApiChoice with a found Api" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       ApmConnectorMock.FetchExtendedApiDefinition.willReturn(extendedApiDefinition)
-
-      val result       = await(underTest.updateApiChoice(sessionId, serviceName))
-      val expectedFlow = savedFlow.copy(api = Some(SupportApi(serviceName, extendedApiDefinition.name)))
+      val subSelection = "some-text"
+      val result       = await(underTest.updateApiChoice(sessionId, serviceName, subSelection))
+      val expectedFlow = savedFlow.copy(api = Some(SupportApi(serviceName, extendedApiDefinition.name)), subSelection = Some(subSelection))
       result.value shouldBe expectedFlow
       FlowRepositoryMock.SaveFlow.verifyCalledWith(expectedFlow)
     }
@@ -106,7 +106,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       val exception = new HttpException("", 400)
       ApmConnectorMock.FetchExtendedApiDefinition.willFailWith(exception)
 
-      val result = await(underTest.updateApiChoice(sessionId, serviceName))
+      val result = await(underTest.updateApiChoice(sessionId, serviceName, "api-call-choice"))
       result.left.value shouldBe exception
     }
 
@@ -128,7 +128,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
 
       await(underTest.submitTicket(
-        SupportFlow("123", "api", Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
+        SupportFlow("123", "api", None, Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
         ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
       ))
 

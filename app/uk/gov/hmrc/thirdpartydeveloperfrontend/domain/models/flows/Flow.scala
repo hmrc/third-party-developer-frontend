@@ -81,6 +81,7 @@ case class SupportApi(serviceName: ServiceName, name: String)
 case class SupportFlow(
     override val sessionId: String,
     entrySelection: String,
+    subSelection: Option[String] = None,
     api: Option[SupportApi] = None,
     emailAddress: Option[String] = None,
     referenceNumber: Option[String] = None

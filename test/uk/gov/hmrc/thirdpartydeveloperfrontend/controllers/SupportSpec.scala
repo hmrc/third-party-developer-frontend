@@ -123,8 +123,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice" -> "api-call",
-          "apiName"           -> apiName
+          "helpWithApiChoice" -> "api-call-choice",
+          "api-call"          -> apiName,
+          "api-example"       -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
@@ -139,10 +140,31 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
     }
 
+    "redirect to the default api support details page and clear api choice in saved flow, when option chosen that does not need an api choosing" in new Setup {
+      val apiName = "test-api"
+      val request = FakeRequest()
+        .withFormUrlEncodedBody(
+          "helpWithApiChoice" -> "some-other-choice",
+          "api-call"          -> apiName,
+          "api-example"       -> apiName
+        )
+        .withLoggedIn(underTest, implicitly)(sessionId)
+        .withSession(sessionParams: _*)
+
+      SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
+      SupportServiceMock.ClearApiChoice.succeeds()
+      fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+
+      val result = addToken(underTest.apiSupportAction)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
+    }
+
     "return a bad request when no api is selected" in new Setup {
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice" -> "api-call"
+          "helpWithApiChoice" -> "api-call-choice"
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
