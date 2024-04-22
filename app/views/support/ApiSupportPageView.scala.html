@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -45,11 +46,11 @@
   )
 }
 
-@apiChoiceHtml(name: String) = {
+@apiNameChoiceHtml(section: String) = {
   @govukSelect(
     Select(
-      id = "api-"+name,
-      name = "api-"+name,
+      id = section + "-api-name-id",
+      name = section + "-api-name",
       items = selectItems,
       label = Label(
         content = Text("Select an API")
@@ -92,35 +93,35 @@
         name = "helpWithApiChoice",
         items = Seq(
           RadioItem(
-            id = Some("making-an-api-call"),
-            content = Text("Making an API call"),
-            value = Some("api-call-choice"),
+            id = Some(Support.MakingAnApiCall.id),
+            content = Text(Support.MakingAnApiCall.text),
+            value = Some(Support.MakingAnApiCall.id),
             hint = None,
-            conditionalHtml = Some(apiChoiceHtml("call"))
+            conditionalHtml = Some(apiNameChoiceHtml(Support.MakingAnApiCall.id))
           ), 
           RadioItem(
-            id = Some("getting-examples"),
-            content = Text("Getting examples of payloads or schemas"),
-            value = Some("examples-of-choice"),
+            id = Some(Support.GettingExamples.id),
+            content = Text(Support.GettingExamples.text),
+            value = Some(Support.GettingExamples.id),
             hint = None,
-            conditionalHtml = Some(apiChoiceHtml("example"))
+            conditionalHtml = Some(apiNameChoiceHtml(Support.GettingExamples.id))
           ),
           RadioItem(
-            id = Some("reporting-documentation"),
-            content = Text("Reporting documentation for an API that is inaccurate or missing information"),
-            value = Some("reporting-documentation"),
+            id = Some(Support.ReportingDocumentation.id),
+            content = Text(Support.ReportingDocumentation.text),
+            value = Some(Support.ReportingDocumentation.id),
             hint = None
           ), 
           RadioItem(
-            id = Some("finding-documentation"),
-            content = Text("Finding documentation for an API"),
-            value = Some("finding-documentation"),
+            id = Some(Support.FindingDocumentation.id),
+            content = Text(Support.FindingDocumentation.text),
+            value = Some(Support.FindingDocumentation.id),
             hint = None
           ), 
           RadioItem(
-            id = Some("private-api-documentation"),
-            content = Text("Getting access to documentation for a private API"),
-            value = Some("private-api-documentation"),
+            id = Some(Support.PrivateApiDocumentation.id),
+            content = Text(Support.PrivateApiDocumentation.text),
+            value = Some(Support.PrivateApiDocumentation.id),
             hint = None
           )
         )

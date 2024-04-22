@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.NewSupportPageHelpChoiceForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -64,9 +65,9 @@
         name = "helpWithChoice",
         items = Seq(
           RadioItem(
-            id = Some("finding-an-api"),
-            content = Text("Finding the API need to build my software"),
-            value = Some("find-api"),
+            id = Some(Support.FindingAnApi.id),
+            content = Text(Support.FindingAnApi.text),
+            value = Some(Support.FindingAnApi.id),
             hint = Some(
               Hint(
                 content = Text("Finding an API for a tax or scheme")
@@ -74,9 +75,9 @@
             )
           ),
           RadioItem(
-            id = Some("using-an-api"),
-            content = Text("Using an API"),
-            value = Some("api"),
+            id = Some(Support.UsingAnApi.id),
+            content = Text(Support.UsingAnApi.text),
+            value = Some(Support.UsingAnApi.id),
             hint = Some(
               Hint(
                 content = Text("API calls, API documentation, service guides, roadmaps, payloads or schemas")
@@ -84,9 +85,9 @@
             )
           ),
           RadioItem(
-            id = Some("signing-into-account"),
-            content = Text("Signing in to my account"),
-            value = Some("account"),
+            id = Some(Support.SigningIn.id),
+            content = Text(Support.SigningIn.text),
+            value = Some(Support.SigningIn.id),
             hint = Some(
               Hint(
                 content = Text("Forgotten password, access codes")
@@ -94,9 +95,9 @@
             )
           ), 
           RadioItem(
-            id = Some("setting-up-application"),
-            content = Text("Setting up or managing an application"),
-            value = Some("application"),
+            id = Some(Support.SettingUpApplication.id),
+            content = Text(Support.SettingUpApplication.text),
+            value = Some(Support.SettingUpApplication.id),
             hint = Some(
               Hint(
                 content = Text("Terms of use agreement, giving team members access, general application details")

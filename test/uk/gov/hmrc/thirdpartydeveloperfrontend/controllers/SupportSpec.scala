@@ -84,14 +84,14 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       status(result) shouldBe OK
       val dom = Jsoup.parse(contentAsString(result))
 
-      dom.getElementById("using-an-api").attr("value") shouldEqual "api"
-      dom.getElementById("signing-into-account").attr("value") shouldEqual "account"
-      dom.getElementById("setting-up-application").attr("value") shouldEqual "application"
+      dom.getElementById(Support.UsingAnApi.id).attr("value") shouldEqual Support.UsingAnApi.id
+      dom.getElementById(Support.SigningIn.id).attr("value") shouldEqual Support.SigningIn.id
+      dom.getElementById(Support.SettingUpApplication.id).attr("value") shouldEqual Support.SettingUpApplication.id
     }
 
     "redirect to the new api support page when the api option is selected" in new Setup {
       val request = FakeRequest()
-        .withFormUrlEncodedBody("helpWithChoice" -> "api")
+        .withFormUrlEncodedBody("helpWithChoice" -> Support.UsingAnApi.id)
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
@@ -123,9 +123,9 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice" -> "api-call-choice",
-          "api-call"          -> apiName,
-          "api-example"       -> apiName
+          "helpWithApiChoice"                      -> Support.MakingAnApiCall.id,
+          Support.MakingAnApiCall.id + "-api-name" -> apiName,
+          Support.GettingExamples.id + "-api-name" -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
@@ -140,13 +140,13 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
     }
 
-    "redirect to the default api support details page and clear api choice in saved flow, when option chosen that does not need an api choosing" in new Setup {
+    "redirect to the default api support details page and clear api choice in saved flow, when `option chosen that does not need an api choosing" in new Setup {
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice" -> "some-other-choice",
-          "api-call"          -> apiName,
-          "api-example"       -> apiName
+          "helpWithApiChoice"                      -> Support.ReportingDocumentation.id,
+          Support.MakingAnApiCall.id + "-api-name" -> apiName,
+          Support.GettingExamples.id + "-api-name" -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
@@ -164,7 +164,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     "return a bad request when no api is selected" in new Setup {
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice" -> "api-call-choice"
+          "helpWithApiChoice" -> Support.MakingAnApiCall.id
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)

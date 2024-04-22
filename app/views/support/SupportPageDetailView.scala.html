@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -78,12 +79,12 @@
   <span class="govuk-caption-l">Developer Hub support</span>
 
   @{supportFlow.entrySelection match {
-      case "api"=> supportFlow.subSelection match {
-        case Some("examples-of") => examplesHeading
-        case Some("api-call") => apiHeading
+      case Support.UsingAnApi.id => supportFlow.subSelection match {
+        case Some(Support.GettingExamples.id) => examplesHeading
+        case Some(Support.MakingAnApiCall.id) => apiHeading
         case _ => defaultHeading
       }
-      case "find-api"=> findHeading
+      case Support.FindingAnApi.id => findHeading
       case _ => defaultHeading
   }}
 

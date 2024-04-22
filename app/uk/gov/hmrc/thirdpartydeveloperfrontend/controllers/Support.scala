@@ -35,6 +35,64 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
+object Support {
+
+  sealed trait PrimaryChoice {
+    def id: String
+    def text: String
+  }
+
+  case object FindingAnApi extends PrimaryChoice {
+    val id   = "finding-an-api"
+    val text = "Finding the API needed to build my software"
+  }
+
+  case object UsingAnApi extends PrimaryChoice {
+    val id   = "using-an-api"
+    val text = "Using an API"
+  }
+
+  case object SigningIn extends PrimaryChoice {
+    val id   = "signing-into-account"
+    val text = "Signing in to my account"
+  }
+
+  case object SettingUpApplication extends PrimaryChoice {
+    val id   = "setting-up-application"
+    val text = "Setting up or managing an application"
+  }
+
+  sealed trait ApiSecondaryChoice {
+    def id: String
+    def text: String
+  }
+
+  case object MakingAnApiCall extends ApiSecondaryChoice {
+    val id   = "making-an-api-call"
+    val text = "Making an API call"
+  }
+
+  case object GettingExamples extends ApiSecondaryChoice {
+    val id   = "getting-examples"
+    val text = "Getting examples of payloads or schemas"
+  }
+
+  case object ReportingDocumentation extends ApiSecondaryChoice {
+    val id   = "reporting-documentation"
+    val text = "Reporting documentation for an API that is inaccurate or missing information"
+  }
+
+  case object FindingDocumentation extends ApiSecondaryChoice {
+    val id   = "finding-documentation"
+    val text = "Finding documentation for an API"
+  }
+
+  case object PrivateApiDocumentation extends ApiSecondaryChoice {
+    val id   = "private-api-documentation"
+    val text = "Getting access to documentation for a private API"
+  }
+}
+
 @Singleton
 class Support @Inject() (
     val deskproService: DeskproService,
@@ -89,8 +147,8 @@ class Support @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       supportService.createFlow(sessionId, form.helpWithChoice)
       form.helpWithChoice match {
-        case "api" => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage()), sessionId))
-        case _     => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
+        case Support.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.Support.apiSupportPage()), sessionId))
+        case _                     => Future.successful(withSupportCookie(Redirect(routes.Support.supportDetailsPage()), sessionId))
       }
     }
 
@@ -139,16 +197,16 @@ class Support @Inject() (
       redirectOnFlow(sessionId, supportService.clearApiChoice(sessionId))
     }
 
-    def updateFlowAndRedirect(apiName: String, typeOfApiEnquiry: String): Future[Result] = {
+    def updateFlowAndRedirect(usingApiSubSelection: String, apiName: String): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      redirectOnFlow(sessionId, supportService.updateApiChoice(sessionId, ServiceName(apiName), typeOfApiEnquiry: String))
+      redirectOnFlow(sessionId, supportService.updateApiChoice(sessionId, ServiceName(apiName), usingApiSubSelection: String))
     }
 
     def handleValidForm(form: ApiSupportForm): Future[Result] = {
       form.helpWithApiChoice match {
-        case "api-call-choice"    => updateFlowAndRedirect(form.apiNameForCall, "api-call")
-        case "examples-of-choice" => updateFlowAndRedirect(form.apiNameForExamples, "examples-of")
-        case _                    => clearAnyApiChoiceAndRedirect()
+        case Support.MakingAnApiCall.id => updateFlowAndRedirect(Support.MakingAnApiCall.id, form.apiNameForCall)
+        case Support.GettingExamples.id => updateFlowAndRedirect(Support.GettingExamples.id, form.apiNameForExamples)
+        case _                          => clearAnyApiChoiceAndRedirect()
       }
     }
 
