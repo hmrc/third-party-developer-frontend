@@ -42,6 +42,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -174,10 +175,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
   )
   mockFetchBySessionIdAndFlowType[SupportFlow](
-    SupportFlow(sessionId, "api")
+    SupportFlow(sessionId, Support.UsingAnApi.id, None)
   )
   when(flowRepository.deleteBySessionIdAndFlowType(*, *)).thenReturn(Future.successful(true))
-  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, "api", None)))
+  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id))))
   when(flowRepository.saveFlow[GetProductionCredentialsFlow](isA[GetProductionCredentialsFlow])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
   when(flowRepository.saveFlow[IpAllowlistFlow](isA[IpAllowlistFlow])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
   when(flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](isA[NewApplicationEmailPreferencesFlowV2])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(
@@ -346,8 +347,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> "api")
-      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Map("helpWithApiChoice" -> "api-call", "apiName" -> "Test Service Name")
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> Support.UsingAnApi.id)
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                =>
+        Map(
+          "helpWithApiChoice"                      -> Support.MakingAnApiCall.id,
+          Support.MakingAnApiCall.id + "-api-name" -> "Test Service Name",
+          Support.GettingExamples.id + "-api-name" -> "Test Service Name"
+        )
       case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   =>
         Map("apiName" -> "Test Service Name", "details" -> "details", "fullName" -> "full name", "emailAddress" -> "fullname@example.com")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)                                  =>

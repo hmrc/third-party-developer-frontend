@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -42,19 +43,31 @@
         <li>The endpoint</li>
     </ul>
 }
-  @findHeading={
-      <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the software that you are building</h1>
-      <p class="govuk-body">If you can't find the API you need by looking at our documentation or service guides, tell us the following details about your software if you can:</p>
-      <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
-          <li>The tax or scheme that it is related to</li>
-          <li>The declaration or return that it sends</li>
-          <li>The type of tax number or reference it uses</li>
-      </ul>
-  }
 
-  @defaultHeading = {
-      <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Complete this short form to ask a question</h1>
-  }
+
+@examplesHeading={
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.map(_.name).getOrElse("")} endpoint you need a payload or data schema for</h1>
+  <p class="govuk-body">Include the following details about the endpoint:</p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
+      <li>The version</li>
+      <li>The environment</li>
+      <li>Page URL of the documentation</li>
+  </ul>
+}
+
+@findHeading={
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the software that you are building</h1>
+    <p class="govuk-body">If you can't find the API you need by looking at our documentation or service guides, tell us the following details about your software if you can:</p>
+    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
+        <li>The tax or scheme that it is related to</li>
+        <li>The declaration or return that it sends</li>
+        <li>The type of tax number or reference it uses</li>
+    </ul>
+}
+
+@defaultHeading = {
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Complete this short form to ask a question</h1>
+}
 
 @devMain(
   form,
@@ -66,8 +79,12 @@
   <span class="govuk-caption-l">Developer Hub support</span>
 
   @{supportFlow.entrySelection match {
-      case "api"=> apiHeading
-      case "find-api"=> findHeading
+      case Support.UsingAnApi.id => supportFlow.subSelection match {
+        case Some(Support.GettingExamples.id) => examplesHeading
+        case Some(Support.MakingAnApiCall.id) => apiHeading
+        case _ => defaultHeading
+      }
+      case Support.FindingAnApi.id => findHeading
       case _ => defaultHeading
   }}
 

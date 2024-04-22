@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApiSupportDetailsForm, Support}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -45,7 +45,7 @@ class SupportService @Inject() (
   private def fetchSupportFlow(sessionId: String): Future[SupportFlow] = {
     flowRepository.fetchBySessionIdAndFlowType[SupportFlow](sessionId) map {
       case Some(flow) => flow
-      case None       => SupportFlow(sessionId, "unknown")
+      case None       => SupportFlow(sessionId, "unknown", None)
     }
   }
 
@@ -56,20 +56,30 @@ class SupportService @Inject() (
     } yield savedFlow
   }
 
-  def updateApiChoice(sessionId: String, apiChoice: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
+  def clearApiChoice(sessionId: String): Future[Either[Throwable, SupportFlow]] = {
+    (
+      for {
+        flow       <- ET.liftF(fetchSupportFlow(sessionId))
+        updatedFlow = flow.copy(api = None, subSelection = None)
+        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
+      } yield savedFlow
+    ).value
+  }
+
+  def updateApiChoice(sessionId: String, apiChoice: ServiceName, usingApiSubSelection: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
     (
       for {
         flow       <- ET.liftF(fetchSupportFlow(sessionId))
         apiName    <- if (apiChoice.value == "api-not-in-list") ET.liftF(Future.successful(""))
                       else ET.fromEitherF(apmConnector.fetchExtendedApiDefinition(apiChoice)).map(_.name)
-        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, apiName)))
+        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, apiName)), subSelection = Some(usingApiSubSelection))
         savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
       } yield savedFlow
     ).value
   }
 
   def createFlow(sessionId: String, entrypoint: String): Future[SupportFlow] = {
-    flowRepository.saveFlow(SupportFlow(sessionId, entrypoint))
+    flowRepository.saveFlow(SupportFlow(sessionId, entrypoint, None))
   }
 
   def fetchAllPublicApis(userId: Option[UserId])(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
@@ -77,12 +87,28 @@ class SupportService @Inject() (
   }
 
   def submitTicket(supportFlow: SupportFlow, form: ApiSupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
+    // Entry point is currently the value of the text on the radio button but may not always be so.
+    def deriveEntryPoint(): String = {
+      (supportFlow.entrySelection, supportFlow.subSelection) match {
+        case (Support.FindingAnApi.id, _)                              => Support.FindingAnApi.text
+        case (Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id)) => Support.MakingAnApiCall.text
+        case (Support.UsingAnApi.id, Some(Support.GettingExamples.id)) => Support.GettingExamples.text
+        case (Support.SigningIn.id, _)                                 => Support.SigningIn.text
+        case (Support.SettingUpApplication.id, _)                      => Support.SettingUpApplication.text
+        case (Support.ReportingDocumentation.id, _)                    => Support.ReportingDocumentation.text
+        case (Support.FindingDocumentation.id, _)                      => Support.FindingDocumentation.text
+        case (Support.PrivateApiDocumentation.id, _)                   => Support.PrivateApiDocumentation.text
+      }
+    }
+
     deskproConnector.createTicket(DeskproHorizonTicket(
       person = DeskproHorizonTicketPerson(form.fullName, form.emailAddress),
       subject = "HMRC Developer Hub: Support Enquiry",
       message = DeskproHorizonTicketMessage.fromRaw(form.details),
       brand = config.deskproHorizonBrand,
-      fields = Map(config.deskproHorizonApiName -> supportFlow.api.map(_.name).getOrElse(""), config.deskproHorizonEntryPoint -> supportFlow.entrySelection)
+      fields = Map(
+        config.deskproHorizonEntryPoint -> deriveEntryPoint()
+      ) ++ supportFlow.api.fold(Map.empty[String, String])(v => Map(config.deskproHorizonApiName -> v.name))
     )).flatMap { result =>
       flowRepository.saveFlow(supportFlow.copy(referenceNumber = Some(result.ref), emailAddress = Some(form.emailAddress)))
     }

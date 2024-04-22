@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApiSupportDetailsForm, Support}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class SupportServiceSpec extends AsyncHmrcSpec {
 
   val sessionId                        = "SESSIONID"
-  val entryPoint                       = "api"
+  val entryPoint                       = Support.UsingAnApi.id
   val savedFlow: SupportFlow           = SupportFlow(sessionId, entryPoint)
   val defaultFlow: SupportFlow         = SupportFlow(sessionId, "unknown")
   val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -94,9 +94,9 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     "updateApiChoice with a found Api" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       ApmConnectorMock.FetchExtendedApiDefinition.willReturn(extendedApiDefinition)
-
-      val result       = await(underTest.updateApiChoice(sessionId, serviceName))
-      val expectedFlow = savedFlow.copy(api = Some(SupportApi(serviceName, extendedApiDefinition.name)))
+      val subSelection = "some-text"
+      val result       = await(underTest.updateApiChoice(sessionId, serviceName, subSelection))
+      val expectedFlow = savedFlow.copy(api = Some(SupportApi(serviceName, extendedApiDefinition.name)), subSelection = Some(subSelection))
       result.value shouldBe expectedFlow
       FlowRepositoryMock.SaveFlow.verifyCalledWith(expectedFlow)
     }
@@ -106,20 +106,20 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       val exception = new HttpException("", 400)
       ApmConnectorMock.FetchExtendedApiDefinition.willFailWith(exception)
 
-      val result = await(underTest.updateApiChoice(sessionId, serviceName))
+      val result = await(underTest.updateApiChoice(sessionId, serviceName, Support.MakingAnApiCall.id))
       result.left.value shouldBe exception
     }
 
-    "submitTicket with no api should be blank" in new Setup {
+    "submitTicket with no api should send no api" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
-      await(underTest.submitTicket(SupportFlow("123", "find-api", None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
+      await(underTest.submitTicket(SupportFlow("123", Support.FindingAnApi.id, None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",
         message = DeskproHorizonTicketMessage("This is some<br>description"),
         brand = brand,
-        fields = Map(apiNameConfig -> "", entryPointConfig -> "find-api")
+        fields = Map(entryPointConfig -> Support.FindingAnApi.text)
       )))(*)
     }
 
@@ -128,7 +128,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
 
       await(underTest.submitTicket(
-        SupportFlow("123", "api", Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
+        SupportFlow("123", Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id), Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
         ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
       ))
 
@@ -137,7 +137,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
         subject = "HMRC Developer Hub: Support Enquiry",
         message = DeskproHorizonTicketMessage("This is some<br>description"),
         brand = brand,
-        fields = Map(apiNameConfig -> "Hello world", entryPointConfig -> "api")
+        fields = Map(apiNameConfig -> "Hello world", entryPointConfig -> Support.MakingAnApiCall.text)
       )))(*)
 
     }

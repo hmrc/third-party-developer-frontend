@@ -358,14 +358,15 @@ object NewSupportPageHelpChoiceForm {
   )
 }
 
-final case class ApiSupportForm(helpWithApiChoice: String, apiName: String)
+final case class ApiSupportForm(helpWithApiChoice: String, apiNameForCall: String, apiNameForExamples: String)
 
 object ApiSupportForm {
 
   val form: Form[ApiSupportForm] = Form(
     mapping(
-      "helpWithApiChoice" -> textValidator("support.choice.required.field", "support.choice.required.field"),
-      "apiName"           -> nonEmptyText
+      "helpWithApiChoice"                      -> textValidator("support.choice.required.field", "support.choice.required.field"),
+      Support.MakingAnApiCall.id + "-api-name" -> nonEmptyText,
+      Support.GettingExamples.id + "-api-name" -> nonEmptyText
     )(ApiSupportForm.apply)(ApiSupportForm.unapply)
   )
 }
