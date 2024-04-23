@@ -30,13 +30,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ErrorHandler, Off, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -66,16 +65,12 @@ class AddApplicationProductionSwitchSpec
       with SessionServiceMock with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
-    val tenDaysWarningView                        = app.injector.instanceOf[TenDaysWarningView]
     val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
-    val addApplicationStartPrincipalView          = app.injector.instanceOf[AddApplicationStartPrincipalView]
     val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
     val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val mockUpliftJourneyConfig                = mock[UpliftJourneyConfig]
-    val sr20UpliftJourneySwitchMock            = new UpliftJourneySwitch(mockUpliftJourneyConfig)
 
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
@@ -94,13 +89,10 @@ class AddApplicationProductionSwitchSpec
       cookieSigner,
       accessTokenSwitchView,
       usingPrivilegedApplicationCredentialsView,
-      tenDaysWarningView,
       addApplicationStartSubordinateView,
-      addApplicationStartPrincipalView,
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      sr20UpliftJourneySwitchMock,
       beforeYouStartView,
       flowServiceMock
     )
@@ -120,7 +112,6 @@ class AddApplicationProductionSwitchSpec
 
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
     when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-    when(mockUpliftJourneyConfig.status).thenReturn(Off)
 
     def shouldShowWhichAppMessage()(implicit results: Future[Result]) = {
       contentAsString(results) should include("Which application do you want production credentials for?")
@@ -168,7 +159,7 @@ class AddApplicationProductionSwitchSpec
       val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsAction(
+      redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(
         summaries.head.id
       ).toString
     }

@@ -20,17 +20,16 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.mvc.{AnyContent, Request}
 
-import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
 @Singleton
-class TermsOfUseVersionService @Inject() (upliftJourneySwitch: UpliftJourneySwitch, termsOfUseService: TermsOfUseService) {
+class TermsOfUseVersionService @Inject() (termsOfUseService: TermsOfUseService) {
 
   def getLatest()(implicit request: Request[AnyContent]): TermsOfUseVersion = {
-    if (upliftJourneySwitch.shouldUseV2) TermsOfUseVersion.latest else TermsOfUseVersion.OLD_JOURNEY
+    TermsOfUseVersion.latest
   }
 
   def getForApplication(application: Application)(implicit request: Request[AnyContent]): TermsOfUseVersion = {

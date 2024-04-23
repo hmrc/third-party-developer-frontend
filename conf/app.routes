@@ -55,8 +55,6 @@ GET         /applications                                                       
 GET         /applications/using-privileged-application-credentials                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
 GET         /applications/access-token                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.accessTokenSwitchPage()
 
-GET         /applications/add/production/10-days                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.tenDaysWarning()
-
 GET         /applications/add/sandbox                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSubordinate()
 GET         /applications/add/production                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationPrincipal()
 GET         /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationProductionSwitch()

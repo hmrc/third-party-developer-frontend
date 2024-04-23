@@ -173,9 +173,9 @@ class UpliftJourneyServiceSpec
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
-      ApmConnectorMock.UpliftApplicationV1.willReturn(productionAppId)
+      ApmConnectorMock.UpliftApplicationV2.willReturn(productionAppId)
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, false))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
 
       result.isRight shouldBe true
       result shouldBe Right(productionAppId)
@@ -184,7 +184,7 @@ class UpliftJourneyServiceSpec
     "fail when missing sell resell..." in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
 
       result.left.value shouldBe "No sell or resell or distribute set"
     }
@@ -192,7 +192,7 @@ class UpliftJourneyServiceSpec
     "fail when missing subscriptions" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, true))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
 
       result.left.value shouldBe "No subscriptions set"
     }
@@ -201,7 +201,7 @@ class UpliftJourneyServiceSpec
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set())
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper, false))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
 
       result.left.value shouldBe "No apis found to subscribe to"
     }

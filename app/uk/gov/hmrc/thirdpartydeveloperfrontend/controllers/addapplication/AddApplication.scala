@@ -30,14 +30,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
-import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{UserRequest, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
@@ -61,13 +59,10 @@ class AddApplication @Inject() (
     val cookieSigner: CookieSigner,
     accessTokenSwitchView: AccessTokenSwitchView,
     usingPrivilegedApplicationCredentialsView: UsingPrivilegedApplicationCredentialsView,
-    tenDaysWarningView: TenDaysWarningView,
     addApplicationStartSubordinateView: AddApplicationStartSubordinateView,
-    addApplicationStartPrincipalView: AddApplicationStartPrincipalView,
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
-    upliftJourneySwitch: UpliftJourneySwitch,
     beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
   )(implicit val ec: ExecutionContext,
@@ -88,14 +83,7 @@ class AddApplication @Inject() (
   }
 
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
-    upliftJourneySwitch.performSwitch(
-      addApplicationProductionSwitch()(request),         // new uplift path
-      successful(Ok(addApplicationStartPrincipalView())) // existing uplift path
-    )
-  }
-
-  def tenDaysWarning(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(tenDaysWarningView()))
+    addApplicationProductionSwitch()(request)
   }
 
   def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
@@ -104,10 +92,7 @@ class AddApplication @Inject() (
   }
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
-    upliftJourneySwitch.performSwitch(
-      successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId))), // new uplift path
-      showConfirmSubscriptionsPage(sandboxAppId)(request)                                                                                   // existing uplift path
-    )
+    successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId)))
   }
 
   def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
@@ -140,16 +125,6 @@ class AddApplication @Inject() (
           case _                                                       => chooseApplicationToUplift(upliftData.upliftableSummaries, upliftData.hasAppsThatCannotBeUplifted)(request)
         }
       }
-    }
-  }
-
-  private def showConfirmSubscriptionsPage(sandboxAppId: ApplicationId)(implicit request: UserRequest[_]) = {
-    for {
-      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
-      apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
-      _                       <- flowService.storeApiSubscriptions(apiSubscriptions, request.developerSession)
-    } yield {
-      Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
     }
   }
 
