@@ -90,14 +90,15 @@ class SupportService @Inject() (
     // Entry point is currently the value of the text on the radio button but may not always be so.
     def deriveEntryPoint(): String = {
       (supportFlow.entrySelection, supportFlow.subSelection) match {
-        case (Support.FindingAnApi.id, _)                              => Support.FindingAnApi.text
-        case (Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id)) => Support.MakingAnApiCall.text
-        case (Support.UsingAnApi.id, Some(Support.GettingExamples.id)) => Support.GettingExamples.text
-        case (Support.SigningIn.id, _)                                 => Support.SigningIn.text
-        case (Support.SettingUpApplication.id, _)                      => Support.SettingUpApplication.text
-        case (Support.ReportingDocumentation.id, _)                    => Support.ReportingDocumentation.text
-        case (Support.FindingDocumentation.id, _)                      => Support.FindingDocumentation.text
-        case (Support.PrivateApiDocumentation.id, _)                   => Support.PrivateApiDocumentation.text
+        case (Support.FindingAnApi.id, _)                                     => Support.FindingAnApi.text
+        case (Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id))        => Support.MakingAnApiCall.text
+        case (Support.UsingAnApi.id, Some(Support.GettingExamples.id))        => Support.GettingExamples.text
+        case (Support.UsingAnApi.id, Some(Support.ReportingDocumentation.id)) => Support.ReportingDocumentation.text
+        case (Support.SigningIn.id, _)                                        => Support.SigningIn.text
+        case (Support.SettingUpApplication.id, _)                             => Support.SettingUpApplication.text
+        case (Support.ReportingDocumentation.id, _)                           => Support.ReportingDocumentation.text
+        case (Support.FindingDocumentation.id, _)                             => Support.FindingDocumentation.text
+        case (Support.PrivateApiDocumentation.id, _)                          => Support.PrivateApiDocumentation.text
       }
     }
 

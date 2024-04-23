@@ -110,7 +110,8 @@
             id = Some(Support.ReportingDocumentation.id),
             content = Text(Support.ReportingDocumentation.text),
             value = Some(Support.ReportingDocumentation.id),
-            hint = None
+            hint = None,
+            conditionalHtml = Some(apiNameChoiceHtml(Support.ReportingDocumentation.id))
           ), 
           RadioItem(
             id = Some(Support.FindingDocumentation.id),

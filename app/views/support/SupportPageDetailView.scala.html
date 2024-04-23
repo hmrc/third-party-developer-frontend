@@ -34,7 +34,7 @@
 
 @(loggedIn: Option[DeveloperSession], form: Form[ApiSupportDetailsForm], backUri: String, supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
-@apiHeading={
+@makingACallHeading={
     <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.map(_.name).getOrElse("")} API call you need help with</h1>
     <p class="govuk-body">Include the following details about the API documentation if you can:</p>
     <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
@@ -44,7 +44,6 @@
     </ul>
 }
 
-
 @examplesHeading={
   <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.map(_.name).getOrElse("")} endpoint you need a payload or data schema for</h1>
   <p class="govuk-body">Include the following details about the endpoint:</p>
@@ -52,6 +51,16 @@
       <li>The version</li>
       <li>The environment</li>
       <li>Page URL of the documentation</li>
+  </ul>
+}
+
+@reportingHeading={
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what is inaccurate or missing from the @{supportFlow.api.map(_.name).getOrElse("")} documentation</h1>
+  <p class="govuk-body">Include the following details about API documentation if you can:</p>
+  <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
+      <li>The version</li>
+      <li>Page URL</li>
+      <li>The endpoint</li>
   </ul>
 }
 
@@ -81,7 +90,8 @@
   @{supportFlow.entrySelection match {
       case Support.UsingAnApi.id => supportFlow.subSelection match {
         case Some(Support.GettingExamples.id) => examplesHeading
-        case Some(Support.MakingAnApiCall.id) => apiHeading
+        case Some(Support.MakingAnApiCall.id) => makingACallHeading
+        case Some(Support.ReportingDocumentation.id) => reportingHeading
         case _ => defaultHeading
       }
       case Support.FindingAnApi.id => findHeading

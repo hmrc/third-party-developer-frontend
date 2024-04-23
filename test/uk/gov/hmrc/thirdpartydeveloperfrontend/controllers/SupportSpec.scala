@@ -123,9 +123,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice"                      -> Support.MakingAnApiCall.id,
-          Support.MakingAnApiCall.id + "-api-name" -> apiName,
-          Support.GettingExamples.id + "-api-name" -> apiName
+          "helpWithApiChoice"                             -> Support.MakingAnApiCall.id,
+          Support.MakingAnApiCall.id + "-api-name"        -> apiName,
+          Support.GettingExamples.id + "-api-name"        -> apiName,
+          Support.ReportingDocumentation.id + "-api-name" -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
@@ -140,13 +141,14 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
     }
 
-    "redirect to the default api support details page and clear api choice in saved flow, when `option chosen that does not need an api choosing" in new Setup {
+    "redirect to the default api support details page and clear api choice in saved flow, when option chosen that does not need an api choosing" in new Setup {
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice"                      -> Support.ReportingDocumentation.id,
-          Support.MakingAnApiCall.id + "-api-name" -> apiName,
-          Support.GettingExamples.id + "-api-name" -> apiName
+          "helpWithApiChoice"                             -> Support.PrivateApiDocumentation.id,
+          Support.MakingAnApiCall.id + "-api-name"        -> apiName,
+          Support.GettingExamples.id + "-api-name"        -> apiName,
+          Support.ReportingDocumentation.id + "-api-name" -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
