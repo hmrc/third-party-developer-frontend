@@ -204,9 +204,10 @@ class Support @Inject() (
 
     def handleValidForm(form: ApiSupportForm): Future[Result] = {
       form.helpWithApiChoice match {
-        case Support.MakingAnApiCall.id => updateFlowAndRedirect(Support.MakingAnApiCall.id, form.apiNameForCall)
-        case Support.GettingExamples.id => updateFlowAndRedirect(Support.GettingExamples.id, form.apiNameForExamples)
-        case _                          => clearAnyApiChoiceAndRedirect()
+        case Support.MakingAnApiCall.id        => updateFlowAndRedirect(Support.MakingAnApiCall.id, form.apiNameForCall)
+        case Support.GettingExamples.id        => updateFlowAndRedirect(Support.GettingExamples.id, form.apiNameForExamples)
+        case Support.ReportingDocumentation.id => updateFlowAndRedirect(Support.ReportingDocumentation.id, form.apiNameForReporting)
+        case _                                 => clearAnyApiChoiceAndRedirect()
       }
     }
 
