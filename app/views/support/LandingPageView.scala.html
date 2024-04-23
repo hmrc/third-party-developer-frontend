@@ -18,9 +18,10 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.NewSupportPageHelpChoiceForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.NewSupportPageHelpChoiceForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -39,7 +40,7 @@
   ),
   developerSession = None
 ) {
-  @helper.form(action = routes.Support.chooseSupportOptionAction()) {
+  @helper.form(action = routes.SupportController.chooseSupportOptionAction()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -65,9 +66,9 @@
         name = "helpWithChoice",
         items = Seq(
           RadioItem(
-            id = Some(Support.FindingAnApi.id),
-            content = Text(Support.FindingAnApi.text),
-            value = Some(Support.FindingAnApi.id),
+            id = Some(SupportData.FindingAnApi.id),
+            content = Text(SupportData.FindingAnApi.text),
+            value = Some(SupportData.FindingAnApi.id),
             hint = Some(
               Hint(
                 content = Text("Finding an API for a tax or scheme")
@@ -75,9 +76,9 @@
             )
           ),
           RadioItem(
-            id = Some(Support.UsingAnApi.id),
-            content = Text(Support.UsingAnApi.text),
-            value = Some(Support.UsingAnApi.id),
+            id = Some(SupportData.UsingAnApi.id),
+            content = Text(SupportData.UsingAnApi.text),
+            value = Some(SupportData.UsingAnApi.id),
             hint = Some(
               Hint(
                 content = Text("API calls, API documentation, service guides, roadmaps, payloads or schemas")
@@ -85,9 +86,9 @@
             )
           ),
           RadioItem(
-            id = Some(Support.SigningIn.id),
-            content = Text(Support.SigningIn.text),
-            value = Some(Support.SigningIn.id),
+            id = Some(SupportData.SigningIn.id),
+            content = Text(SupportData.SigningIn.text),
+            value = Some(SupportData.SigningIn.id),
             hint = Some(
               Hint(
                 content = Text("Forgotten password, access codes")
@@ -95,9 +96,9 @@
             )
           ), 
           RadioItem(
-            id = Some(Support.SettingUpApplication.id),
-            content = Text(Support.SettingUpApplication.text),
-            value = Some(Support.SettingUpApplication.id),
+            id = Some(SupportData.SettingUpApplication.id),
+            content = Text(SupportData.SettingUpApplication.text),
+            value = Some(SupportData.SettingUpApplication.id),
             hint = Some(
               Hint(
                 content = Text("Terms of use agreement, giving team members access, general application details")

@@ -334,30 +334,6 @@ object SignOutSurveyForm {
   )
 }
 
-final case class SupportEnquiryForm(fullname: String, email: String, comments: String)
-
-object SupportEnquiryForm {
-
-  val form: Form[SupportEnquiryForm] = Form(
-    mapping(
-      "fullname"     -> fullnameValidator,
-      "emailaddress" -> emailValidator(),
-      "comments"     -> commentsValidator
-    )(SupportEnquiryForm.apply)(SupportEnquiryForm.unapply)
-  )
-}
-
-final case class NewSupportPageHelpChoiceForm(helpWithChoice: String)
-
-object NewSupportPageHelpChoiceForm {
-
-  val form: Form[NewSupportPageHelpChoiceForm] = Form(
-    mapping(
-      "helpWithChoice" -> textValidator("support.choice.required.field", "support.choice.required.field")
-    )(NewSupportPageHelpChoiceForm.apply)(NewSupportPageHelpChoiceForm.unapply)
-  )
-}
-
 final case class ApiSupportForm(helpWithApiChoice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 
 object ApiSupportForm {
@@ -365,9 +341,9 @@ object ApiSupportForm {
   val form: Form[ApiSupportForm] = Form(
     mapping(
       "helpWithApiChoice"                             -> textValidator("support.choice.required.field", "support.choice.required.field"),
-      Support.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
-      Support.GettingExamples.id + "-api-name"        -> nonEmptyText,
-      Support.ReportingDocumentation.id + "-api-name" -> nonEmptyText
+      SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
+      SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
+      SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText
     )(ApiSupportForm.apply)(ApiSupportForm.unapply)
   )
 }

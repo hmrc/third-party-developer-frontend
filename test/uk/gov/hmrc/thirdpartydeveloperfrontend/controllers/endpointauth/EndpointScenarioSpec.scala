@@ -175,10 +175,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
   )
   mockFetchBySessionIdAndFlowType[SupportFlow](
-    SupportFlow(sessionId, Support.UsingAnApi.id, None)
+    SupportFlow(sessionId, SupportData.UsingAnApi.id, None)
   )
   when(flowRepository.deleteBySessionIdAndFlowType(*, *)).thenReturn(Future.successful(true))
-  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id))))
+  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))))
   when(flowRepository.saveFlow[GetProductionCredentialsFlow](isA[GetProductionCredentialsFlow])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
   when(flowRepository.saveFlow[IpAllowlistFlow](isA[IpAllowlistFlow])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
   when(flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](isA[NewApplicationEmailPreferencesFlowV2])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(
@@ -347,13 +347,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> Support.UsingAnApi.id)
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> SupportData.UsingAnApi.id)
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                =>
         Map(
-          "helpWithApiChoice"                             -> Support.MakingAnApiCall.id,
-          Support.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
-          Support.GettingExamples.id + "-api-name"        -> "Test Service Name",
-          Support.ReportingDocumentation.id + "-api-name" -> "Test Service Name"
+          "helpWithApiChoice"                             -> SupportData.MakingAnApiCall.id,
+          SupportData.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
+          SupportData.GettingExamples.id + "-api-name"        -> "Test Service Name",
+          SupportData.ReportingDocumentation.id + "-api-name" -> "Test Service Name"
         )
       case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   =>
         Map("apiName" -> "Test Service Name", "details" -> "details", "fullName" -> "full name", "emailAddress" -> "fullname@example.com")

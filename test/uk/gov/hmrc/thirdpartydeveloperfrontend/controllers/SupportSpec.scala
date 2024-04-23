@@ -84,14 +84,14 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       status(result) shouldBe OK
       val dom = Jsoup.parse(contentAsString(result))
 
-      dom.getElementById(Support.UsingAnApi.id).attr("value") shouldEqual Support.UsingAnApi.id
-      dom.getElementById(Support.SigningIn.id).attr("value") shouldEqual Support.SigningIn.id
-      dom.getElementById(Support.SettingUpApplication.id).attr("value") shouldEqual Support.SettingUpApplication.id
+      dom.getElementById(SupportData.UsingAnApi.id).attr("value") shouldEqual SupportData.UsingAnApi.id
+      dom.getElementById(SupportData.SigningIn.id).attr("value") shouldEqual SupportData.SigningIn.id
+      dom.getElementById(SupportData.SettingUpApplication.id).attr("value") shouldEqual SupportData.SettingUpApplication.id
     }
 
     "redirect to the new api support page when the api option is selected" in new Setup {
       val request = FakeRequest()
-        .withFormUrlEncodedBody("helpWithChoice" -> Support.UsingAnApi.id)
+        .withFormUrlEncodedBody("helpWithChoice" -> SupportData.UsingAnApi.id)
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
 
@@ -123,10 +123,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice"                             -> Support.MakingAnApiCall.id,
-          Support.MakingAnApiCall.id + "-api-name"        -> apiName,
-          Support.GettingExamples.id + "-api-name"        -> apiName,
-          Support.ReportingDocumentation.id + "-api-name" -> apiName
+          "helpWithApiChoice"                             -> SupportData.MakingAnApiCall.id,
+          SupportData.MakingAnApiCall.id + "-api-name"        -> apiName,
+          SupportData.GettingExamples.id + "-api-name"        -> apiName,
+          SupportData.ReportingDocumentation.id + "-api-name" -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
@@ -145,10 +145,10 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       val apiName = "test-api"
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice"                             -> Support.PrivateApiDocumentation.id,
-          Support.MakingAnApiCall.id + "-api-name"        -> apiName,
-          Support.GettingExamples.id + "-api-name"        -> apiName,
-          Support.ReportingDocumentation.id + "-api-name" -> apiName
+          "helpWithApiChoice"                             -> SupportData.PrivateApiDocumentation.id,
+          SupportData.MakingAnApiCall.id + "-api-name"        -> apiName,
+          SupportData.GettingExamples.id + "-api-name"        -> apiName,
+          SupportData.ReportingDocumentation.id + "-api-name" -> apiName
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)
@@ -166,7 +166,7 @@ class SupportSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     "return a bad request when no api is selected" in new Setup {
       val request = FakeRequest()
         .withFormUrlEncodedBody(
-          "helpWithApiChoice" -> Support.MakingAnApiCall.id
+          "helpWithApiChoice" -> SupportData.MakingAnApiCall.id
         )
         .withLoggedIn(underTest, implicitly)(sessionId)
         .withSession(sessionParams: _*)

@@ -28,16 +28,16 @@ GET         /logout                                                             
 GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey()
 POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction()
 
-GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.raiseSupportEnquiry(useNewSupport: Boolean ?= false)
-POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.submitSupportEnquiry()
-GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.thankyou()
+GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.EnquiryController.raiseSupportEnquiry(useNewSupport: Boolean ?= false)
+POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.EnquiryController.submitSupportEnquiry()
+GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController.thankyou()
 
-POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.chooseSupportOptionAction()
-GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportPage()
-POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.apiSupportAction()
-GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsPage()
-POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportDetailsAction()
-GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support.supportConfirmationPage()
+POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController.chooseSupportOptionAction()
+GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController.apiSupportPage()
+POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController.apiSupportAction()
+GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.DetailsController.supportDetailsPage()
+POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.DetailsController.supportDetailsAction()
+GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController.supportConfirmationPage()
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked()
 
