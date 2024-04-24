@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
@@ -33,7 +33,7 @@
   govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[ApiSupportForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[DeveloperSession], form: Form[HelpWithUsingAnApiForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @selectItems = @{
   apis.map( api =>
@@ -68,7 +68,7 @@
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
-  @helper.form(action = routes.SupportController.apiSupportAction()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.HelpWithUsingAnApiController.apiSupportAction()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -84,14 +84,14 @@
             )
           )
         ),
-        errorMessage = if(form("helpWithApiChoice").hasErrors) {
+        errorMessage = if(form("choice").hasErrors) {
           Some(
             ErrorMessage(
               content = Text("Choose what kind of help you need")
             )
           )
         } else { None },
-        name = "helpWithApiChoice",
+        name = "choice",
         items = Seq(
           RadioItem(
             id = Some(SupportData.MakingAnApiCall.id),

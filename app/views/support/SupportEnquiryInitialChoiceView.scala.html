@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.NewSupportPageHelpChoiceForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.InitialChoiceForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController
@@ -29,7 +29,7 @@
   govukButton : GovukButton
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[NewSupportPageHelpChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[DeveloperSession], form: Form[InitialChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -40,7 +40,7 @@
   ),
   developerSession = None
 ) {
-  @helper.form(action = routes.SupportController.chooseSupportOptionAction()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.SupportEnquiryController.submitInitialChoice()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -56,14 +56,14 @@
             )
           )
         ),
-        errorMessage = if(form("helpWithChoice").hasErrors) {
+        errorMessage = if(form("initialChoice").hasErrors) {
           Some(
             ErrorMessage(
               content = Text("Please choose an option")
             )
           )
         } else { None },
-        name = "helpWithChoice",
+        name = "initialChoice",
         items = Seq(
           RadioItem(
             id = Some(SupportData.FindingAnApi.id),

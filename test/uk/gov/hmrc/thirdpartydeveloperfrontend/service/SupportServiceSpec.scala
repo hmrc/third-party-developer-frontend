@@ -27,7 +27,8 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApiSupportDetailsForm, Support}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
@@ -113,7 +114,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     "submitTicket with no api should send no api" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
-      await(underTest.submitTicket(SupportFlow("123", SupportData.FindingAnApi.id, None), ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
+      await(underTest.submitTicket(SupportFlow("123", SupportData.FindingAnApi.id, None), SupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",
@@ -129,7 +130,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
 
       await(underTest.submitTicket(
         SupportFlow("123", SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id), Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
-        ApiSupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
+        SupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
       ))
 
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(

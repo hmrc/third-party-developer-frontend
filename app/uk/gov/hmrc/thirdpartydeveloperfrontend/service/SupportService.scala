@@ -26,7 +26,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApiSupportDetailsForm, SupportData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -86,7 +87,7 @@ class SupportService @Inject() (
     apmConnector.fetchApiDefinitionsVisibleToUser(userId)
   }
 
-  def submitTicket(supportFlow: SupportFlow, form: ApiSupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
+  def submitTicket(supportFlow: SupportFlow, form: SupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
     // Entry point is currently the value of the text on the radio button but may not always be so.
     def deriveEntryPoint(): String = {
       (supportFlow.entrySelection, supportFlow.subSelection) match {

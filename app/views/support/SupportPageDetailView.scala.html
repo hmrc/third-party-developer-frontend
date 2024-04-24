@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.govukfrontend.views.html.components.{CharacterCount => CC}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
@@ -33,7 +33,7 @@
   govukCharacterCount : GovukCharacterCount
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[ApiSupportDetailsForm], backUri: String, supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[DeveloperSession], form: Form[SupportDetailsForm], supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @makingACallHeading={
     <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.map(_.name).getOrElse("")} API call you need help with</h1>
@@ -103,7 +103,7 @@
     Our Software Developers Support Team (SDST) will get back to you within 2 working days.
   </p>
 
-  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.DetailsController.supportDetailsAction()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.SupportDetailsController.supportDetailsAction()) {
     @helper.CSRF.formField
 
     @govukCharacterCount(CC(

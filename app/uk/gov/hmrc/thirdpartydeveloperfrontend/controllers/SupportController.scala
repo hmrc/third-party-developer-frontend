@@ -20,7 +20,7 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{ApiSupportPageView, LandingPageView, SupportPageConfirmationView, SupportPageDetailView}
+import views.html.support.{HelpWithUsingAnApiView, SupportEnquiryInitialChoiceView, SupportPageConfirmationView, SupportPageDetailView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
@@ -33,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import support.NewSupportPageHelpChoiceForm
 
 @Singleton
 class SupportController @Inject() (
@@ -44,8 +43,8 @@ class SupportController @Inject() (
     val cookieSigner: CookieSigner,
     supportEnquiryView: SupportEnquiryView,
     supportThankyouView: SupportThankyouView,
-    landingPageView: LandingPageView,
-    apiSupportPageView: ApiSupportPageView,
+    landingPageView: SupportEnquiryInitialChoiceView,
+    helpWithUsingAnApiPage: HelpWithUsingAnApiView,
     supportPageDetailView: SupportPageDetailView,
     supportPageConfirmationView: SupportPageConfirmationView,
     supportService: SupportService
@@ -56,94 +55,77 @@ class SupportController @Inject() (
   private def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
     request.developerSession.filter(_.loggedInState.isLoggedIn)
 
-  def chooseSupportOptionAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def handleValidForm(form: NewSupportPageHelpChoiceForm): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      supportService.createFlow(sessionId, form.helpWithChoice)
-      form.helpWithChoice match {
-        case SupportData.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.SupportController.apiSupportPage()), sessionId))
-        case _                     => Future.successful(withSupportCookie(Redirect(support.routes.DetailsController.supportDetailsPage()), sessionId))
-      }
-    }
+  // def initialChoicePage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  //   for {
+  //     apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
+  //   } yield Ok(
+  //     helpWithUsingAnApiPage(
+  //       fullyloggedInDeveloper,
+  //       HelpWithApiForm.form,
+  //       support.routes.SupportEnquiryController.supportEnquiryPage(true).url,
+  //       apis
+  //     )
+  //   )
+  // }
 
-    def handleInvalidForm(formWithErrors: Form[NewSupportPageHelpChoiceForm]): Future[Result] = {
-      Future.successful(BadRequest(landingPageView(fullyloggedInDeveloper, formWithErrors)))
-    }
+  // def apiSupportAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  //   def renderApiSupportPageErrorView(form: Form[HelpWithApiForm]) = {
+  //     for {
+  //       apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
+  //     } yield BadRequest(
+  //       helpWithUsingAnApiPage(
+  //         fullyloggedInDeveloper,
+  //         form,
+  //         support.routes.SupportEnquiryController.supportEnquiryPage(true).url,
+  //         apis
+  //       )
+  //     )
+  //   }
 
-    support.NewSupportPageHelpChoiceForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
-  }
+  //   // def redirectToPrivateApiDocPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
+  //   //   onFlow.flatMap {
+  //   //     case Right(_) => Future.successful(withSupportCookie(Redirect(routes.SupportData.supportPrivateApiDocumentationPage()), sessionId))
+  //   //     case Left(_)  => renderApiSupportPageErrorView(HelpWithApiForm.form.withError("error", "Error"))
+  //   //   }
 
-  def apiSupportPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    for {
-      apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
-    } yield Ok(
-      apiSupportPageView(
-        fullyloggedInDeveloper,
-        ApiSupportForm.form,
-        support.routes.EnquiryController.raiseSupportEnquiry(true).url,
-        apis
-      )
-    )
-  }
+  //   def redirectToDetailsPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
+  //     onFlow.flatMap {
+  //       case Right(_) => Future.successful(withSupportCookie(Redirect(support.routes.SupportDetailsController.supportDetailsPage()), sessionId))
+  //       case Left(_)  => renderApiSupportPageErrorView(HelpWithApiForm.form.withError("error", "Error"))
+  //     }
 
-  def apiSupportAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderApiSupportPageErrorView(form: Form[ApiSupportForm]) = {
-      for {
-        apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
-      } yield BadRequest(
-        apiSupportPageView(
-          fullyloggedInDeveloper,
-          form,
-          support.routes.EnquiryController.raiseSupportEnquiry(true).url,
-          apis
-        )
-      )
-    }
+  //   def clearAnyApiChoiceAndRedirect(): Future[Result] = {
+  //     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+  //     redirectToDetailsPageOnFlow(sessionId, supportService.clearApiChoice(sessionId))
+  //   }
 
-    // def redirectToPrivateApiDocPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
-    //   onFlow.flatMap {
-    //     case Right(_) => Future.successful(withSupportCookie(Redirect(routes.SupportData.supportPrivateApiDocumentationPage()), sessionId))
-    //     case Left(_)  => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
-    //   }
+  //   def updateFlowAndRedirect(usingApiSubSelection: String, apiName: String): Future[Result] = {
+  //     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+  //     redirectToDetailsPageOnFlow(sessionId, supportService.updateApiChoice(sessionId, ServiceName(apiName), usingApiSubSelection))
+  //   }
 
-    def redirectToDetailsPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
-      onFlow.flatMap {
-        case Right(_) => Future.successful(withSupportCookie(Redirect(support.routes.DetailsController.supportDetailsPage()), sessionId))
-        case Left(_)  => renderApiSupportPageErrorView(ApiSupportForm.form.withError("error", "Error"))
-      }
+  //   def handleValidForm(form: HelpWithApiForm): Future[Result] = {
+  //     form.helpWithApiChoice match {
+  //       case SupportData.MakingAnApiCall.id         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
+  //       case SupportData.GettingExamples.id         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
+  //       case SupportData.ReportingDocumentation.id  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
+  //       case SupportData.PrivateApiDocumentation.id => updateFlowAndRedirect(SupportData.PrivateApiDocumentation.id, form.apiNameForReporting)
+  //       case _                                  => clearAnyApiChoiceAndRedirect()
+  //     }
+  //   }
 
-    def clearAnyApiChoiceAndRedirect(): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      redirectToDetailsPageOnFlow(sessionId, supportService.clearApiChoice(sessionId))
-    }
+  //   def handleInvalidForm(formWithErrors: Form[HelpWithApiForm]): Future[Result] =
+  //     renderApiSupportPageErrorView(formWithErrors)
 
-    def updateFlowAndRedirect(usingApiSubSelection: String, apiName: String): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      redirectToDetailsPageOnFlow(sessionId, supportService.updateApiChoice(sessionId, ServiceName(apiName), usingApiSubSelection))
-    }
-
-    def handleValidForm(form: ApiSupportForm): Future[Result] = {
-      form.helpWithApiChoice match {
-        case SupportData.MakingAnApiCall.id         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
-        case SupportData.GettingExamples.id         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
-        case SupportData.ReportingDocumentation.id  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
-        case SupportData.PrivateApiDocumentation.id => updateFlowAndRedirect(SupportData.PrivateApiDocumentation.id, form.apiNameForReporting)
-        case _                                  => clearAnyApiChoiceAndRedirect()
-      }
-    }
-
-    def handleInvalidForm(formWithErrors: Form[ApiSupportForm]): Future[Result] =
-      renderApiSupportPageErrorView(formWithErrors)
-
-    ApiSupportForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
-  }
+  //   HelpWithApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+  // }
 
   // def supportPrivateApiDocumentationPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
   //   def renderPage(flow: SupportFlow) =
   //     Ok(
   //       supportPrivateApiDocumentationView(
   //         fullyloggedInDeveloper,
-  //         ApiSupportDetailsForm.form,
+  //         SupportDetailsForm.form,
   //         routes.SupportController.apiSupportAction().url,
   //         flow
   //       )
@@ -153,22 +135,5 @@ class SupportController @Inject() (
   //   supportService.getSupportFlow(sessionId).map(renderPage)
   // }
 
-  def supportConfirmationPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderSupportConfirmationPage(flow: SupportFlow) =
-      Ok(
-        supportPageConfirmationView(
-          fullyloggedInDeveloper,
-          flow
-        )
-      )
 
-    extractSupportSessionIdFromCookie(request).map(sessionId => supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage)).getOrElse(Future.successful(
-      Redirect(support.routes.EnquiryController.raiseSupportEnquiry(true))
-    ))
-  }
-
-  def thankyou = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val displayName = fullyloggedInDeveloper.map(_.displayedName)
-    Future.successful(Ok(supportThankyouView("Thank you", displayName)))
-  }
 }

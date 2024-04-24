@@ -334,34 +334,6 @@ object SignOutSurveyForm {
   )
 }
 
-final case class ApiSupportForm(helpWithApiChoice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
-
-object ApiSupportForm {
-
-  val form: Form[ApiSupportForm] = Form(
-    mapping(
-      "helpWithApiChoice"                             -> textValidator("support.choice.required.field", "support.choice.required.field"),
-      SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
-      SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
-      SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText
-    )(ApiSupportForm.apply)(ApiSupportForm.unapply)
-  )
-}
-
-final case class ApiSupportDetailsForm(details: String, fullName: String, emailAddress: String, organisation: Option[String])
-
-object ApiSupportDetailsForm {
-
-  val form: Form[ApiSupportDetailsForm] = Form(
-    mapping(
-      "details"      -> supportRequestValidator("support.details.required.field", "support.details.required.field", 3000),
-      "fullName"     -> fullnameValidator,
-      "emailAddress" -> emailValidator(),
-      "organisation" -> optional(text)
-    )(ApiSupportDetailsForm.apply)(ApiSupportDetailsForm.unapply)
-  )
-}
-
 final case class DeletePrincipalApplicationForm(deleteConfirm: Option[String] = Some(""))
 
 object DeletePrincipalApplicationForm {

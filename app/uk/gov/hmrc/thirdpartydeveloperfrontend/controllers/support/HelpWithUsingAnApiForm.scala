@@ -16,17 +16,21 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
+import play.api.data.Form
 import play.api.data.Forms._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
-import play.api.data.Form
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
 
-final case class NewSupportPageHelpChoiceForm(helpWithChoice: String)
+final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 
-object NewSupportPageHelpChoiceForm {
+object HelpWithUsingAnApiForm {
 
-  val form: Form[NewSupportPageHelpChoiceForm] = Form(
+  val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      "helpWithChoice" -> textValidator("support.choice.required.field", "support.choice.required.field")
-    )(NewSupportPageHelpChoiceForm.apply)(NewSupportPageHelpChoiceForm.unapply)
+      "choice"                                            -> textValidator("support.choice.required.field", "support.choice.required.field"),
+      SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
+      SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
+      SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText
+    )(HelpWithUsingAnApiForm.apply)(HelpWithUsingAnApiForm.unapply)
   )
 }

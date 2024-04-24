@@ -42,7 +42,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -347,10 +347,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> SupportData.UsingAnApi.id)
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("initialChoice" -> SupportData.UsingAnApi.id)
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                =>
         Map(
-          "helpWithApiChoice"                             -> SupportData.MakingAnApiCall.id,
+          "choice"                             -> SupportData.MakingAnApiCall.id,
           SupportData.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
           SupportData.GettingExamples.id + "-api-name"        -> "Test Service Name",
           SupportData.ReportingDocumentation.id + "-api-name" -> "Test Service Name"

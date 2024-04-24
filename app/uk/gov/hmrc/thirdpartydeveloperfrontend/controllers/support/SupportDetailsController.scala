@@ -30,17 +30,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 
 import views.html.SupportEnquiryView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
-import views.html.support.SupportPageDetailView
+import views.html.support.{SupportPageDetailView, SupportPageConfirmationView}
 import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportDetailsForm
 import play.api.mvc.Result
 
 @Singleton
-class DetailsController @Inject() (
+class SupportDetailsController @Inject() (
     mcc: MessagesControllerComponents,
     val deskproService: DeskproService,
     supportPageDetailView: SupportPageDetailView,
     supportEnquiryView: SupportEnquiryView,
+    supportPageConfirmationView: SupportPageConfirmationView,   
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
     supportService: SupportService,
@@ -49,17 +49,12 @@ class DetailsController @Inject() (
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) {
 
-  private val apiSupportAction = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SupportController.apiSupportAction()
-  
-  private val supportConfirmationPage = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SupportController.supportConfirmationPage()
-
   def supportDetailsPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderPage(flow: SupportFlow) =
       Ok(
         supportPageDetailView(
           fullyloggedInDeveloper,
-          ApiSupportDetailsForm.form,
-          apiSupportAction.url,
+          SupportDetailsForm.form,
           flow
         )
       )
@@ -69,33 +64,46 @@ class DetailsController @Inject() (
   }
 
   def supportDetailsAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderApiSupportDetailsPageErrorView(flow: SupportFlow)(form: Form[ApiSupportDetailsForm]) = {
+    def renderApiSupportDetailsPageErrorView(flow: SupportFlow)(form: Form[SupportDetailsForm]) = {
       Future.successful(
         BadRequest(
           supportPageDetailView(
             fullyloggedInDeveloper,
             form,
-            apiSupportAction.url,
             flow
           )
         )
       )
     }
 
-    def handleValidForm(sessionId: String, flow: SupportFlow)(form: ApiSupportDetailsForm): Future[Result] = {
+    def handleValidForm(sessionId: String, flow: SupportFlow)(form: SupportDetailsForm): Future[Result] = {
       supportService.submitTicket(flow, form).map(_ =>
-        withSupportCookie(Redirect(supportConfirmationPage), sessionId)
+        withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
       )
     }
 
-    def handleInvalidForm(flow: SupportFlow)(formWithErrors: Form[ApiSupportDetailsForm]): Future[Result] = {
+    def handleInvalidForm(flow: SupportFlow)(formWithErrors: Form[SupportDetailsForm]): Future[Result] = {
       renderApiSupportDetailsPageErrorView(flow)(formWithErrors)
     }
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
 
     supportService.getSupportFlow(sessionId).flatMap(flow =>
-      ApiSupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(sessionId, flow))
+      SupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(sessionId, flow))
     )
+  }
+
+  def supportConfirmationPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderSupportConfirmationPage(flow: SupportFlow) =
+      Ok(
+        supportPageConfirmationView(
+          fullyloggedInDeveloper,
+          flow
+        )
+      )
+
+    extractSupportSessionIdFromCookie(request).map(sessionId => supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage)).getOrElse(Future.successful(
+      Redirect(routes.SupportEnquiryController.supportEnquiryPage(true))
+    ))
   }
 }
