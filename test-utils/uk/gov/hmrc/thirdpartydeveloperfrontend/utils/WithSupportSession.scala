@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
+package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.libs.crypto.CookieSigner
+import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
-final case class InitialChoiceForm(initialChoice: String)
+object WithSupportSession {
 
-object InitialChoiceForm {
+  implicit class SupportSessionFakeRequest[A](fakeRequest: FakeRequest[A]) {
 
-  val form: Form[InitialChoiceForm] = Form(
-    mapping(
-      "initialChoice" -> textValidator("support.choice.required.field", "support.choice.required.field")
-    )(InitialChoiceForm.apply)(InitialChoiceForm.unapply)
-  )
+    def withSupportSession(implicit cookieEncoding: CookieEncoding, cookieSigner: CookieSigner): String => FakeRequest[A] = { id =>
+      fakeRequest.withCookies(cookieEncoding.createSupportCookie(id))
+    }
+  }
 }

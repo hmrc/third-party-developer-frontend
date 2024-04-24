@@ -54,12 +54,12 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) =
         when(aMock.updateApiChoice(*, *[ServiceName], *)(*)).thenReturn(successful(Right(flow)))
-      def fails()                                                                            = when(aMock.updateApiChoice(*, *[ServiceName], *)(*)).thenReturn(successful(Left(new HttpException("", 400))))
+      def fails()                                                                                = when(aMock.updateApiChoice(*, *[ServiceName], *)(*)).thenReturn(successful(Left(new HttpException("", 400))))
     }
 
     object ClearApiChoice {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.clearApiChoice(*)).thenReturn(successful(Right(flow)))
-      def fails()                                                                            = when(aMock.clearApiChoice(*)).thenReturn(successful(Left(new HttpException("", 400))))
+      def fails()                                                                                = when(aMock.clearApiChoice(*)).thenReturn(successful(Left(new HttpException("", 400))))
     }
   }
 

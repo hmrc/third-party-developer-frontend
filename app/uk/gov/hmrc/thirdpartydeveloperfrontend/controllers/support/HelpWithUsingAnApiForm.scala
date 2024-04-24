@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SupportData, textValidator}
 
 final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 

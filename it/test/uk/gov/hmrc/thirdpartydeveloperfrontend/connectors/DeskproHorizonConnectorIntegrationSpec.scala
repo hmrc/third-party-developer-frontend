@@ -28,7 +28,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.DeskproTicketCreationFailed
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 

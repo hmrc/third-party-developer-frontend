@@ -16,25 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html.support.SupportEnquiryInitialChoiceView
+import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SupportData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
-
-import views.html.SupportEnquiryView
-import views.html.support.SupportEnquiryInitialChoiceView
-import play.api.mvc.Result
-import java.util.UUID
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
-import views.html.SupportThankyouView
 
 @Singleton
 class SupportEnquiryController @Inject() (
@@ -46,8 +41,8 @@ class SupportEnquiryController @Inject() (
     supportService: SupportService,
     supportEnquiryInitialChoiceView: SupportEnquiryInitialChoiceView,
     supportEnquiryView: SupportEnquiryView,
-    supportThankyouView: SupportThankyouView,
- )(implicit val ec: ExecutionContext,
+    supportThankyouView: SupportThankyouView
+  )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) {
 
@@ -68,8 +63,8 @@ class SupportEnquiryController @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       supportService.createFlow(sessionId, form.initialChoice)
       form.initialChoice match {
-        case SupportData.UsingAnApi.id  => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.initialChoicePage()), sessionId))
-        case _                          => Future.successful(withSupportCookie(Redirect(routes.SupportDetailsController.supportDetailsPage()), sessionId))
+        case SupportData.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.initialChoicePage()), sessionId))
+        case _                         => Future.successful(withSupportCookie(Redirect(routes.SupportDetailsController.supportDetailsPage()), sessionId))
       }
     }
 
@@ -79,7 +74,7 @@ class SupportEnquiryController @Inject() (
 
     InitialChoiceForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
-  
+
   /* Old route */
   def submitSupportEnquiry() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest()
@@ -99,7 +94,7 @@ class SupportEnquiryController @Inject() (
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
     Future.successful(Ok(supportThankyouView("Thank you", displayName)))
   }
-  
+
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
     form.errors("comments").map((formError: FormError) => {
       if (formError.message == FormKeys.commentsSpamKey) {

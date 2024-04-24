@@ -17,11 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import org.scalatest.matchers.should.Matchers
+
 import play.api.data.Form
 
 trait BuildValidateNoErrors {
   self: Matchers =>
-  
+
   def buildValidateNoErrors[T](bind: Map[String, String] => Form[T])(formData: Map[String, String]): Unit = {
     val boundForm = bind(formData)
     boundForm.errors shouldBe List()

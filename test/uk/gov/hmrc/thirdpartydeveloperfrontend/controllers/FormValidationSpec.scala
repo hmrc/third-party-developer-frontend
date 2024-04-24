@@ -338,8 +338,6 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
     }
   }
 
-
-
   "ProfileForm" should {
     def validateNoErrors = buildValidateNoErrors(ProfileForm.form.bind) _
 

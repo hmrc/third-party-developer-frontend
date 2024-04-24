@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BuildValidateNoErrors
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SupportEnquiryFormSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
-  
+
   "SupportEnquiryForm" should {
     def validateNoErrors = buildValidateNoErrors(SupportEnquiryForm.form.bind) _
 
@@ -82,5 +82,5 @@ class SupportEnquiryFormSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       err.key shouldBe "emailaddress"
       err.messages shouldBe List("emailaddress.error.maxLength.field")
     }
-  } 
+  }
 }

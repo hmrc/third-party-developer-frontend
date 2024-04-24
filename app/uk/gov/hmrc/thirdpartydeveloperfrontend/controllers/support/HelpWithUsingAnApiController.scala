@@ -35,22 +35,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
 @Singleton
-class HelpWithUsingAnApiController @Inject()(
-  val deskproService: DeskproService,
-  val sessionService: SessionService,
-  val errorHandler: ErrorHandler,
-  mcc: MessagesControllerComponents,
-  val cookieSigner: CookieSigner,
-  supportEnquiryView: SupportEnquiryView,
-  supportThankyouView: SupportThankyouView,
-  landingPageView: SupportEnquiryInitialChoiceView,
-  helpWithUsingAnApiView: HelpWithUsingAnApiView,
-  supportPageDetailView: SupportPageDetailView,
-  supportPageConfirmationView: SupportPageConfirmationView,
-  supportService: SupportService
-)(implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends AbstractController(mcc) with SupportCookie {
+class HelpWithUsingAnApiController @Inject() (
+    val deskproService: DeskproService,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    supportEnquiryView: SupportEnquiryView,
+    supportThankyouView: SupportThankyouView,
+    landingPageView: SupportEnquiryInitialChoiceView,
+    helpWithUsingAnApiView: HelpWithUsingAnApiView,
+    supportPageDetailView: SupportPageDetailView,
+    supportPageConfirmationView: SupportPageConfirmationView,
+    supportService: SupportService
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends AbstractController(mcc) with SupportCookie {
 
   def initialChoicePage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     for {
@@ -107,7 +107,7 @@ class HelpWithUsingAnApiController @Inject()(
         case SupportData.GettingExamples.id         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
         case SupportData.ReportingDocumentation.id  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
         case SupportData.PrivateApiDocumentation.id => updateFlowAndRedirect(SupportData.PrivateApiDocumentation.id, form.apiNameForReporting) // TODO <- FIXME
-        case _                                  => clearAnyApiChoiceAndRedirect()
+        case _                                      => clearAnyApiChoiceAndRedirect()
       }
     }
 

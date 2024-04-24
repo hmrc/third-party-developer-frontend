@@ -16,36 +16,33 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html.SupportEnquiryView
+import views.html.support.{SupportPageConfirmationView, SupportPageDetailView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-
-import views.html.SupportEnquiryView
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
-import views.html.support.{SupportPageDetailView, SupportPageConfirmationView}
-import java.util.UUID
-import play.api.mvc.Result
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
 class SupportDetailsController @Inject() (
     mcc: MessagesControllerComponents,
-    val deskproService: DeskproService,
-    supportPageDetailView: SupportPageDetailView,
-    supportEnquiryView: SupportEnquiryView,
-    supportPageConfirmationView: SupportPageConfirmationView,   
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    val deskproService: DeskproService,
     supportService: SupportService,
-    val errorHandler: ErrorHandler
- )(implicit val ec: ExecutionContext,
+    supportPageDetailView: SupportPageDetailView,
+    supportEnquiryView: SupportEnquiryView,
+    supportPageConfirmationView: SupportPageConfirmationView
+  )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) {
 
@@ -102,8 +99,8 @@ class SupportDetailsController @Inject() (
         )
       )
 
-    extractSupportSessionIdFromCookie(request).map(sessionId => supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage)).getOrElse(Future.successful(
-      Redirect(routes.SupportEnquiryController.supportEnquiryPage(true))
-    ))
+    extractSupportSessionIdFromCookie(request)
+      .map(sessionId => supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage))
+      .getOrElse(Future.successful(Redirect(routes.SupportEnquiryController.supportEnquiryPage(true))))
   }
 }

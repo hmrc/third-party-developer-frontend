@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{supportRequestValidator, fullnameValidator, emailValidator}
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{emailValidator, fullnameValidator, supportRequestValidator}
 
 final case class SupportDetailsForm(details: String, fullName: String, emailAddress: String, organisation: Option[String])
 

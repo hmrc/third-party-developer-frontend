@@ -16,21 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 import views.html.support.{HelpWithUsingAnApiView, SupportEnquiryInitialChoiceView, SupportPageConfirmationView, SupportPageDetailView}
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
-import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
@@ -134,6 +130,5 @@ class SupportController @Inject() (
   //   val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
   //   supportService.getSupportFlow(sessionId).map(renderPage)
   // }
-
 
 }

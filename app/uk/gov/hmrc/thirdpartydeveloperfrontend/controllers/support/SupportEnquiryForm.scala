@@ -18,11 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import play.api.data.Form
 import play.api.data.Forms._
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 final case class SupportEnquiryForm(fullname: String, email: String, comments: String)
 
 object SupportEnquiryForm {
+
   val form: Form[SupportEnquiryForm] = Form(
     mapping(
       "fullname"     -> fullnameValidator,
