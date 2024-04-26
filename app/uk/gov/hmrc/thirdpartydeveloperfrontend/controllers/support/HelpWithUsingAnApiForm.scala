@@ -27,7 +27,7 @@ object HelpWithUsingAnApiForm {
 
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      "choice"                                            -> textValidator("support.choice.required.field", "support.choice.required.field"),
+      "choice"                                            -> textValidator("support.choice.required.field", "support.choice.required.field", maxLength = 150),
       SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
       SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
       SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText

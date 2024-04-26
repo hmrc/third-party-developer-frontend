@@ -20,8 +20,7 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{HelpWithUsingAnApiView, SupportEnquiryInitialChoiceView, SupportPageConfirmationView, SupportPageDetailView}
-import views.html.{SupportEnquiryView, SupportThankyouView}
+import views.html.support.HelpWithUsingAnApiView
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -36,23 +35,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionS
 
 @Singleton
 class HelpWithUsingAnApiController @Inject() (
-    val deskproService: DeskproService,
-    val sessionService: SessionService,
-    val errorHandler: ErrorHandler,
-    mcc: MessagesControllerComponents,
-    val cookieSigner: CookieSigner,
-    supportEnquiryView: SupportEnquiryView,
-    supportThankyouView: SupportThankyouView,
-    landingPageView: SupportEnquiryInitialChoiceView,
-    helpWithUsingAnApiView: HelpWithUsingAnApiView,
-    supportPageDetailView: SupportPageDetailView,
-    supportPageConfirmationView: SupportPageConfirmationView,
-    supportService: SupportService
-  )(implicit val ec: ExecutionContext,
-    val appConfig: ApplicationConfig
-  ) extends AbstractController(mcc) with SupportCookie {
+  mcc: MessagesControllerComponents,
+  val cookieSigner: CookieSigner,
+  val sessionService: SessionService,
+  val errorHandler: ErrorHandler,
+  val deskproService: DeskproService,
+  supportService: SupportService,
+  helpWithUsingAnApiView: HelpWithUsingAnApiView
+)(implicit val ec: ExecutionContext,
+  val appConfig: ApplicationConfig
+) extends AbstractController(mcc) with SupportCookie {
 
-  def initialChoicePage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  def helpWithUsingAnApiPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     for {
       apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
     } yield Ok(
@@ -65,8 +59,8 @@ class HelpWithUsingAnApiController @Inject() (
     )
   }
 
-  def apiSupportAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderApiSupportPageErrorView(form: Form[HelpWithUsingAnApiForm]) = {
+  def submitHelpWithUsingAnApi: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderHelpWithUsingAnApiErrorView(form: Form[HelpWithUsingAnApiForm]) = {
       for {
         apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
       } yield BadRequest(
@@ -88,7 +82,7 @@ class HelpWithUsingAnApiController @Inject() (
     def redirectToDetailsPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
       onFlow.flatMap {
         case Right(_) => Future.successful(withSupportCookie(Redirect(routes.SupportDetailsController.supportDetailsPage()), sessionId))
-        case Left(_)  => renderApiSupportPageErrorView(HelpWithUsingAnApiForm.form.withError("error", "Error"))
+        case Left(_)  => renderHelpWithUsingAnApiErrorView(HelpWithUsingAnApiForm.form.withError("error", "Error"))
       }
 
     def clearAnyApiChoiceAndRedirect(): Future[Result] = {
@@ -103,17 +97,19 @@ class HelpWithUsingAnApiController @Inject() (
 
     def handleValidForm(form: HelpWithUsingAnApiForm): Future[Result] = {
       form.choice match {
-        case SupportData.MakingAnApiCall.id         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
-        case SupportData.GettingExamples.id         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
-        case SupportData.ReportingDocumentation.id  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
-        case SupportData.PrivateApiDocumentation.id => updateFlowAndRedirect(SupportData.PrivateApiDocumentation.id, form.apiNameForReporting) // TODO <- FIXME
-        case _                                      => clearAnyApiChoiceAndRedirect()
+        case SupportData.MakingAnApiCall.text         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
+        case SupportData.GettingExamples.text         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
+        case SupportData.ReportingDocumentation.text  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
+        case SupportData.PrivateApiDocumentation.text => updateFlowAndRedirect(SupportData.PrivateApiDocumentation.id, form.apiNameForReporting) // TODO <- FIXME
+        case _                                        => clearAnyApiChoiceAndRedirect()
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[HelpWithUsingAnApiForm]): Future[Result] =
-      renderApiSupportPageErrorView(formWithErrors)
+      renderHelpWithUsingAnApiErrorView(formWithErrors)
 
+      println(request.body)
+      println(HelpWithUsingAnApiForm.form.bindFromRequest())
     HelpWithUsingAnApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

@@ -33,10 +33,10 @@ POST        /support                                                            
 GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.thankyouPage()
 
 POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.submitInitialChoice()
-GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.initialChoicePage()
-POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.apiSupportAction()
+GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.helpWithUsingAnApiPage()
+POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.submitHelpWithUsingAnApi()
 GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportDetailsPage()
-POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportDetailsAction()
+POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.submitSupportDetails()
 GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportConfirmationPage()
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked()

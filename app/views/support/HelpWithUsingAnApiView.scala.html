@@ -68,7 +68,7 @@
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
-  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.HelpWithUsingAnApiController.apiSupportAction()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.HelpWithUsingAnApiController.submitHelpWithUsingAnApi()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(

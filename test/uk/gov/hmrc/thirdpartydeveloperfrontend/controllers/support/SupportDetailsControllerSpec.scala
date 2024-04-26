@@ -51,7 +51,6 @@ class SupportDetailsControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       mock[DeskproService],
       SupportServiceMock.aMock,
       supportPageDetailView,
-      supportEnquiryView,
       supportPageConfirmationView
     )
 
@@ -101,7 +100,7 @@ class SupportDetailsControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       }
     }
 
-    "invoke supportDetailsAction" should {
+    "invoke submitSupportDetails" should {
       "submit new request with name, email & comments from form" in new Setup {
         val request = FakeRequest()
           .withSession(sessionParams: _*)
@@ -113,7 +112,7 @@ class SupportDetailsControllerSpec extends BaseControllerSpec with WithCSRFAddTo
         SupportServiceMock.GetSupportFlow.succeeds()
         SupportServiceMock.SubmitTicket.succeeds()
 
-        val result = addToken(underTest.supportDetailsAction())(request)
+        val result = addToken(underTest.submitSupportDetails())(request)
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("/developer/new-support/confirmation")
@@ -130,7 +129,7 @@ class SupportDetailsControllerSpec extends BaseControllerSpec with WithCSRFAddTo
         SupportServiceMock.GetSupportFlow.succeeds()
         SupportServiceMock.SubmitTicket.succeeds()
 
-        val result = addToken(underTest.supportDetailsAction())(request)
+        val result = addToken(underTest.submitSupportDetails())(request)
 
         status(result) shouldBe 400
       }

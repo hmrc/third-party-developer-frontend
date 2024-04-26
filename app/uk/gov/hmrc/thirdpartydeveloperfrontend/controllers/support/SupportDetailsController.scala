@@ -20,7 +20,6 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.SupportEnquiryView
 import views.html.support.{SupportPageConfirmationView, SupportPageDetailView}
 
 import play.api.data.Form
@@ -40,7 +39,6 @@ class SupportDetailsController @Inject() (
     val deskproService: DeskproService,
     supportService: SupportService,
     supportPageDetailView: SupportPageDetailView,
-    supportEnquiryView: SupportEnquiryView,
     supportPageConfirmationView: SupportPageConfirmationView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
@@ -60,8 +58,8 @@ class SupportDetailsController @Inject() (
     supportService.getSupportFlow(sessionId).map(renderPage)
   }
 
-  def supportDetailsAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderApiSupportDetailsPageErrorView(flow: SupportFlow)(form: Form[SupportDetailsForm]) = {
+  def submitSupportDetails: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderSupportDetailsPageErrorView(flow: SupportFlow)(form: Form[SupportDetailsForm]) = {
       Future.successful(
         BadRequest(
           supportPageDetailView(
@@ -80,7 +78,7 @@ class SupportDetailsController @Inject() (
     }
 
     def handleInvalidForm(flow: SupportFlow)(formWithErrors: Form[SupportDetailsForm]): Future[Result] = {
-      renderApiSupportDetailsPageErrorView(flow)(formWithErrors)
+      renderSupportDetailsPageErrorView(flow)(formWithErrors)
     }
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)

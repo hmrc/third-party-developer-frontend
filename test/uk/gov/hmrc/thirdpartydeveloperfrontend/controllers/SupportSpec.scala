@@ -82,7 +82,7 @@
 
 //       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-//       val result = addToken(underTest.initialChoicePage)(request)
+//       val result = addToken(underTest.helpWithUsingAnApiPage)(request)
 
 //       status(result) shouldBe OK
 //     }
@@ -103,7 +103,7 @@
 //       SupportServiceMock.UpdateApiChoice.succeeds()
 //       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-//       val result = addToken(underTest.apiSupportAction)(request)
+//       val result = addToken(underTest.submitHelpWithUsingAnApi)(request)
 
 //       status(result) shouldBe SEE_OTHER
 //       redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
@@ -125,7 +125,7 @@
 //       SupportServiceMock.ClearApiChoice.succeeds()
 //       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-//       val result = addToken(underTest.apiSupportAction)(request)
+//       val result = addToken(underTest.submitHelpWithUsingAnApi)(request)
 
 //       status(result) shouldBe SEE_OTHER
 //       redirectLocation(result) shouldBe Some(s"/developer/new-support/api/details")
@@ -143,7 +143,7 @@
 //       SupportServiceMock.UpdateApiChoice.fails()
 //       fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
-//       val result = addToken(underTest.apiSupportAction)(request)
+//       val result = addToken(underTest.submitHelpWithUsingAnApi)(request)
 
 //       status(result) shouldBe BAD_REQUEST
 //     }
@@ -201,7 +201,7 @@
 //       SupportServiceMock.GetSupportFlow.succeeds()
 //       SupportServiceMock.SubmitTicket.succeeds()
 
-//       val result = addToken(underTest.supportDetailsAction())(request)
+//       val result = addToken(underTest.submitSupportDetails())(request)
 
 //       status(result) shouldBe 303
 //       redirectLocation(result) shouldBe Some("/developer/new-support/confirmation")
@@ -218,7 +218,7 @@
 //       SupportServiceMock.GetSupportFlow.succeeds()
 //       SupportServiceMock.SubmitTicket.succeeds()
 
-//       val result = addToken(underTest.supportDetailsAction())(request)
+//       val result = addToken(underTest.submitSupportDetails())(request)
 
 //       status(result) shouldBe 400
 //     }

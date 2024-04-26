@@ -51,7 +51,7 @@ class SupportController @Inject() (
   private def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
     request.developerSession.filter(_.loggedInState.isLoggedIn)
 
-  // def initialChoicePage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  // def helpWithUsingAnApiPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
   //   for {
   //     apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
   //   } yield Ok(
@@ -64,7 +64,7 @@ class SupportController @Inject() (
   //   )
   // }
 
-  // def apiSupportAction: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  // def submitHelpWithUsingAnApi: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
   //   def renderApiSupportPageErrorView(form: Form[HelpWithApiForm]) = {
   //     for {
   //       apis <- supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
@@ -122,7 +122,7 @@ class SupportController @Inject() (
   //       supportPrivateApiDocumentationView(
   //         fullyloggedInDeveloper,
   //         SupportDetailsForm.form,
-  //         routes.SupportController.apiSupportAction().url,
+  //         routes.SupportController.submitHelpWithUsingAnApi().url,
   //         flow
   //       )
   //     )
