@@ -34,16 +34,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionS
 
 @Singleton
 class HelpWithUsingAnApiController @Inject() (
-  mcc: MessagesControllerComponents,
-  val cookieSigner: CookieSigner,
-  val sessionService: SessionService,
-  val errorHandler: ErrorHandler,
-  val deskproService: DeskproService,
-  supportService: SupportService,
-  helpWithUsingAnApiView: HelpWithUsingAnApiView
-)(implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends AbstractController(mcc) with SupportCookie {
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    val deskproService: DeskproService,
+    supportService: SupportService,
+    helpWithUsingAnApiView: HelpWithUsingAnApiView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends AbstractController(mcc) with SupportCookie {
 
   def helpWithUsingAnApiPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     for {
@@ -112,6 +112,6 @@ class HelpWithUsingAnApiController @Inject() (
     def handleInvalidForm(formWithErrors: Form[HelpWithUsingAnApiForm]): Future[Result] =
       renderHelpWithUsingAnApiErrorView(formWithErrors)
 
-      HelpWithUsingAnApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    HelpWithUsingAnApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

@@ -16,50 +16,47 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 import views.html.support.ApplyForPrivateApiAccessView
-import scala.concurrent.Future.successful
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import play.api.data.Form
-import scala.concurrent.Future
-import java.util.UUID
-import play.api.mvc.Result
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
-
 
 @Singleton
-class ApplyForPrivateApiAccessController @Inject()(
-  mcc: MessagesControllerComponents,
-  val cookieSigner: CookieSigner,
-  val sessionService: SessionService,
-  val errorHandler: ErrorHandler,
-  val deskproService: DeskproService,
-  supportService: SupportService,
-  applyForPrivateApiAccessView: ApplyForPrivateApiAccessView,
-)(implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends AbstractController(mcc) with SupportCookie {
+class ApplyForPrivateApiAccessController @Inject() (
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    val deskproService: DeskproService,
+    supportService: SupportService,
+    applyForPrivateApiAccessView: ApplyForPrivateApiAccessView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends AbstractController(mcc) with SupportCookie {
 
   def applyForPrivateApiAccessPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderPage(flow: SupportFlow) =
       flow.api.fold(
         Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
       )(api =>
-      Ok(
-        applyForPrivateApiAccessView(
-          fullyloggedInDeveloper,
-          api.serviceName.value,
-          ApplyForPrivateApiAccessForm.form,
-          routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
+        Ok(
+          applyForPrivateApiAccessView(
+            fullyloggedInDeveloper,
+            api.serviceName.value,
+            ApplyForPrivateApiAccessForm.form,
+            routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
+          )
         )
-      ))
+      )
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
     supportService.getSupportFlow(sessionId).map(renderPage)

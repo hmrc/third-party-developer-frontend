@@ -17,32 +17,31 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
 import views.html.support.ChooseAPrivateApiView
-import scala.concurrent.Future.successful
+
+import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import play.api.data.Form
-import scala.concurrent.Future
-import play.api.mvc.Result
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
-  mcc: MessagesControllerComponents,
-  val cookieSigner: CookieSigner,
-  val sessionService: SessionService,
-  val errorHandler: ErrorHandler,
-  val deskproService: DeskproService,
-  supportService: SupportService,
-  chooseAPrivateApiView: ChooseAPrivateApiView,
-)(implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends AbstractController(mcc) with SupportCookie {
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    val deskproService: DeskproService,
+    supportService: SupportService,
+    chooseAPrivateApiView: ChooseAPrivateApiView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends AbstractController(mcc) with SupportCookie {
 
   def chooseAPrivateApiPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     successful(Ok(
@@ -67,8 +66,8 @@ class ChooseAPrivateApiController @Inject() (
 
     def handleValidForm(form: ChooseAPrivateApiForm): Future[Result] = {
       form.chosenApiName match {
-        case SupportData.ChooseBusinessRates.text     => ???
-        case SupportData.ChooseCDS.text               => ???
+        case SupportData.ChooseBusinessRates.text => Future.successful(Ok)
+        case SupportData.ChooseCDS.text           => Future.successful(Ok)
       }
     }
 

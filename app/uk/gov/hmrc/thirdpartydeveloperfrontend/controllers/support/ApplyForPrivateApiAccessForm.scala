@@ -27,8 +27,8 @@ object ApplyForPrivateApiAccessForm {
 
   val form: Form[ApplyForPrivateApiAccessForm] = Form(
     mapping(
-      "emailAddress" -> emailValidator(),
-      "organisation" -> nonEmptyText,
+      "emailAddress"  -> emailValidator(),
+      "organisation"  -> nonEmptyText,
       "applicationId" -> nonEmptyText
     )(ApplyForPrivateApiAccessForm.apply)(ApplyForPrivateApiAccessForm.unapply)
   )

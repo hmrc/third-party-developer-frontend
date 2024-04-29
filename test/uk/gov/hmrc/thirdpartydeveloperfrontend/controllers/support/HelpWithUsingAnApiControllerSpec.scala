@@ -16,26 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import views.html.support.HelpWithUsingAnApiView
+
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import org.jsoup.Jsoup
+
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.support.HelpWithUsingAnApiView
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
-import org.jsoup.nodes.Document
-import play.api.test.FakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val helpWithUsingAnApiView = app.injector.instanceOf[HelpWithUsingAnApiView]
 
@@ -54,12 +58,12 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
     val sessionId                            = "sessionId"
 
     def apiListShouldBeHidden(block: String)(implicit dom: Document) =
-      dom.getElementById("conditional-"+block).classNames should contain("govuk-radios__conditional--hidden")
-    
+      dom.getElementById("conditional-" + block).classNames should contain("govuk-radios__conditional--hidden")
+
     def apiListShouldBeVisible(block: String)(implicit dom: Document) =
-      dom.getElementById("conditional-"+block).classNames should not(contain("govuk-radios__conditional--hidden"))
+      dom.getElementById("conditional-" + block).classNames should not(contain("govuk-radios__conditional--hidden"))
   }
-  
+
   trait IsLoggedIn {
     self: Setup =>
 
