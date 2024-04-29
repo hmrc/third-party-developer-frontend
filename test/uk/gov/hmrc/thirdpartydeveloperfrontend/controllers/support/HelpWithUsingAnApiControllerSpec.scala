@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
 import org.jsoup.nodes.Document
 import play.api.test.FakeRequest
 

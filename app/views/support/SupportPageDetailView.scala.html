@@ -27,8 +27,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportController
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -94,8 +93,8 @@
 
   @{supportFlow.entrySelection match {
       case SupportData.UsingAnApi.id => supportFlow.subSelection match {
-        case Some(SupportData.GettingExamples.id) => examplesHeading
         case Some(SupportData.MakingAnApiCall.id) => makingACallHeading
+        case Some(SupportData.GettingExamples.id) => examplesHeading
         case Some(SupportData.ReportingDocumentation.id) => reportingHeading
         case _ => defaultHeading
       }

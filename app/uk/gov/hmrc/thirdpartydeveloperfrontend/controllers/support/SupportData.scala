@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 object SupportData {
 
@@ -71,5 +71,15 @@ object SupportData {
   case object PrivateApiDocumentation extends ApiSecondaryChoice {
     val id   = "private-api-documentation"
     val text = "Getting access to documentation for a private API"
+  }
+
+  case object ChooseBusinessRates extends ApiSecondaryChoice {
+    val id   = "business-rates"
+    val text = "Business Rates 2.0"
+  }
+
+  case object ChooseCDS extends ApiSecondaryChoice {
+    val id   = "customs-declarations"
+    val text = "Customs Declarations"
   }
 }

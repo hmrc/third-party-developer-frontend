@@ -32,9 +32,12 @@ GET         /support                                                            
 POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.submitSupportEnquiry()
 GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.thankyouPage()
 
+# TODO - rename these when done 
 POST        /new-support/api/choose                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.submitInitialChoice()
 GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.helpWithUsingAnApiPage()
 POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.submitHelpWithUsingAnApi()
+GET         /new-support/api/private-api                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ChooseAPrivateApiController.chooseAPrivateApiPage()
+POST        /new-support/api/private-api                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ChooseAPrivateApiController.submitChoiceOfPrivateApi()
 GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportDetailsPage()
 POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.submitSupportDetails()
 GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportConfirmationPage()

@@ -28,7 +28,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
@@ -73,11 +72,11 @@ class HelpWithUsingAnApiController @Inject() (
       )
     }
 
-    // def redirectToPrivateApiDocPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
-    //   onFlow.flatMap {
-    //     case Right(_) => Future.successful(withSupportCookie(Redirect(routes.SupportData.supportPrivateApiDocumentationPage()), sessionId))
-    //     case Left(_)  => renderApiSupportPageErrorView(HelpWithApiForm.form.withError("error", "Error"))
-    //   }
+    def redirectToChoosePrivateApiPage(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
+      onFlow.flatMap {
+        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage()), sessionId))
+        case Left(_)  => renderHelpWithUsingAnApiErrorView(HelpWithUsingAnApiForm.form.withError("error", "Error"))
+      }
 
     def redirectToDetailsPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
       onFlow.flatMap {
@@ -85,7 +84,12 @@ class HelpWithUsingAnApiController @Inject() (
         case Left(_)  => renderHelpWithUsingAnApiErrorView(HelpWithUsingAnApiForm.form.withError("error", "Error"))
       }
 
-    def clearAnyApiChoiceAndRedirect(): Future[Result] = {
+    def clearAnyApiChoiceAndRedirectToChoosePrivateApiPage(): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      redirectToChoosePrivateApiPage(sessionId, supportService.clearApiChoice(sessionId))
+    }
+
+    def clearAnyApiChoiceAndRedirectToDetailsPage(): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       redirectToDetailsPageOnFlow(sessionId, supportService.clearApiChoice(sessionId))
     }
@@ -100,16 +104,14 @@ class HelpWithUsingAnApiController @Inject() (
         case SupportData.MakingAnApiCall.text         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
         case SupportData.GettingExamples.text         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
         case SupportData.ReportingDocumentation.text  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
-        case SupportData.PrivateApiDocumentation.text => updateFlowAndRedirect(SupportData.PrivateApiDocumentation.id, form.apiNameForReporting) // TODO <- FIXME
-        case _                                        => clearAnyApiChoiceAndRedirect()
+        case SupportData.PrivateApiDocumentation.text => clearAnyApiChoiceAndRedirectToChoosePrivateApiPage()
+        case _                                        => clearAnyApiChoiceAndRedirectToDetailsPage()
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[HelpWithUsingAnApiForm]): Future[Result] =
       renderHelpWithUsingAnApiErrorView(formWithErrors)
 
-      println(request.body)
-      println(HelpWithUsingAnApiForm.form.bindFromRequest())
-    HelpWithUsingAnApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+      HelpWithUsingAnApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

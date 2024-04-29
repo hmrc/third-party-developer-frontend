@@ -28,7 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SupportData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton

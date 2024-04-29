@@ -19,18 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.emailValidator
 
-final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
+final case class ApplyForPrivateApiAccessForm(emailAddress: String, organisation: String, applicationId: String)
 
-object HelpWithUsingAnApiForm {
+object ApplyForPrivateApiAccessForm {
 
-  val form: Form[HelpWithUsingAnApiForm] = Form(
+  val form: Form[ApplyForPrivateApiAccessForm] = Form(
     mapping(
-      "choice"                                             -> textValidator("support.choice.required.field", "support.choice.required.field", maxLength = 150),
-      SupportData.MakingAnApiCall.id + "-api-name"         -> nonEmptyText,
-      SupportData.GettingExamples.id + "-api-name"         -> nonEmptyText,
-      SupportData.ReportingDocumentation.id + "-api-name"  -> nonEmptyText
-    )(HelpWithUsingAnApiForm.apply)(HelpWithUsingAnApiForm.unapply)
+      "emailAddress" -> emailValidator(),
+      "organisation" -> nonEmptyText,
+      "applicationId" -> nonEmptyText
+    )(ApplyForPrivateApiAccessForm.apply)(ApplyForPrivateApiAccessForm.unapply)
   )
 }
