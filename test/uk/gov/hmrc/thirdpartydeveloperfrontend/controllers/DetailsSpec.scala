@@ -23,7 +23,6 @@ import scala.concurrent.Future._
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import views.html._
-import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import play.api.libs.json.{Json, OFormat}
@@ -41,6 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Appli
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -58,6 +58,7 @@ class DetailsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with TestApplications
+    with SubmissionsTestData
     with DeveloperBuilder
     with CollaboratorTracker
     with LocalUserIdTracker
@@ -84,6 +85,7 @@ class DetailsSpec
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
         val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePage(approvedApplication)
       }
 
@@ -93,42 +95,57 @@ class DetailsSpec
 
       "return a redirect when using an application in testing state" in new Setup {
         val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.testing)
-        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         givenApplicationAction(testingApplication, loggedInDeveloper)
 
         val result = testingApplication.callDetails
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${testingApplication.id.value}/request-check")
+        redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${testingApplication.id.value}/production-credentials-checklist")
+      }
+
+      "return a bad request when using an application in testing state for the old journey" in new Setup {
+        val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.testing)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+        givenApplicationAction(testingApplication, loggedInDeveloper)
+
+        val result = testingApplication.callDetails
+
+        status(result) shouldBe BAD_REQUEST
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
         val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingGatekeeperApproval("dont-care", "dont-care"))
-
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
         val result = addToken(underTest.details(pendingApprovalApplication.id))(loggedInDevRequest)
 
-        status(result) shouldBe OK
-
-        val document = Jsoup.parse(contentAsString(result))
-        elementExistsByText(document, "h1", "Credentials requested") shouldBe true
-        elementExistsByText(document, "span", pendingApprovalApplication.name) shouldBe true
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${pendingApprovalApplication.id.value}/view-answers")
       }
 
       "return the credentials requested page on an application pending verification" in new Setup {
         val pendingVerificationApplication =
           anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
-
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
         val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInDevRequest)
 
-        status(result) shouldBe OK
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${pendingVerificationApplication.id.value}/view-answers")
+      }
 
-        val document = Jsoup.parse(contentAsString(result))
-        elementExistsByText(document, "h1", "Credentials requested") shouldBe true
-        elementExistsByText(document, "span", pendingVerificationApplication.name) shouldBe true
+      "return a bad request on an application pending verification for the old journey" in new Setup {
+        val pendingVerificationApplication =
+          anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+        givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
+
+        val result = addToken(underTest.details(pendingVerificationApplication.id))(loggedInDevRequest)
+
+        status(result) shouldBe BAD_REQUEST
       }
 
       "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
@@ -731,7 +748,6 @@ class DetailsSpec
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
     val unauthorisedAppDetailsView              = app.injector.instanceOf[UnauthorisedAppDetailsView]
-    val pendingApprovalView                     = app.injector.instanceOf[PendingApprovalView]
     val detailsView                             = app.injector.instanceOf[DetailsView]
     val changeDetailsView                       = app.injector.instanceOf[ChangeDetailsView]
     val requestChangeOfApplicationNameView      = app.injector.instanceOf[RequestChangeOfApplicationNameView]
@@ -748,7 +764,6 @@ class DetailsSpec
       cookieSigner,
       clock,
       unauthorisedAppDetailsView,
-      pendingApprovalView,
       detailsView,
       changeDetailsView,
       requestChangeOfApplicationNameView,

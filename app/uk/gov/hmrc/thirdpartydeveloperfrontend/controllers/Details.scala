@@ -24,7 +24,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.OptionT
 import cats.instances.future.catsStdInstancesForFuture
 import views.html._
-import views.html.application.PendingApprovalView
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import play.api.data.Form
@@ -44,14 +43,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CheckYourAnswersData, CheckYourAnswersForm, DummyCheckYourAnswersForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -80,7 +77,6 @@ class Details @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
-    pendingApprovalView: PendingApprovalView,
     detailsView: DetailsView,
     changeDetailsView: ChangeDetailsView,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
@@ -102,9 +98,7 @@ class Details @Inject() (
 
   // scalastyle:off cyclomatic.complexity method.length
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    val accessLevel          = DevhubAccessLevel.fromRole(request.role)
-    val checkYourAnswersData = CheckYourAnswersData(accessLevel, request.application, request.subscriptions)
-    def appDetailsPage       = Ok(
+    def appDetailsPage = Ok(
       detailsView(
         applicationViewModelFromApplicationRequest(),
         buildTermsOfUseViewModel(),
@@ -118,12 +112,7 @@ class Details @Inject() (
 
     request.application.state.name match {
       case State.TESTING =>
-        lazy val oldJourney =
-          if (request.role.isAdministrator) {
-            Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes.ApplicationCheck.requestCheckPage(request.application.id))
-          } else {
-            Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
-          }
+        lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
         lazy val newUpliftJourney = (s: Submission) =>
           if (request.role.isAdministrator) {
@@ -139,13 +128,7 @@ class Details @Inject() (
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 
       case State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION | State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
-        lazy val oldJourney =
-          Ok(
-            pendingApprovalView(
-              checkYourAnswersData,
-              CheckYourAnswersForm.form.fillAndValidate(DummyCheckYourAnswersForm("dummy"))
-            )
-          )
+        lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
         lazy val newUpliftJourney = (s: Submission) =>
           Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
