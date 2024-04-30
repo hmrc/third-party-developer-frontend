@@ -66,5 +66,4 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case _                                                                            => Redirect("/developer/login")
     }
   }
-
 }

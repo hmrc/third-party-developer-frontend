@@ -30,6 +30,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
@@ -65,13 +66,22 @@ class ChooseAPrivateApiController @Inject() (
       ))
     }
 
-    def handleValidForm(form: ChooseAPrivateApiForm): Future[Result] = {
+    def redirectToDetailsPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
+      onFlow.flatMap {
+        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
+        case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
+      }
+      
+    def updateFlowAndRedirect(privateApi: String): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      redirectToDetailsPageOnFlow(sessionId, supportService.setPrivateApiChoice(sessionId, privateApi))
+    }
 
+    def handleValidForm(form: ChooseAPrivateApiForm): Future[Result] = {
       form.chosenApiName match {
-        case SupportData.ChooseBusinessRates.text =>
-          Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
-        case SupportData.ChooseCDS.text           => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
+        case SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(SupportData.ChooseBusinessRates.text)
+        case SupportData.ChooseCDS.id           => updateFlowAndRedirect(SupportData.ChooseCDS.text)
+        // case _                                  => renderChooseAPrivateApiErrorView(form.withError(???))
       }
     }
 

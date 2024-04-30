@@ -95,7 +95,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       ApmConnectorMock.FetchExtendedApiDefinition.willReturn(extendedApiDefinition)
       val subSelection = "some-text"
-      val result       = await(underTest.updateApiChoice(sessionId, serviceName, subSelection))
+      val result       = await(underTest.updateApiChoice(sessionId, subSelection, serviceName))
       val expectedFlow = savedFlow.copy(api = Some(SupportApi(serviceName, extendedApiDefinition.name)), subSelection = Some(subSelection))
       result.value shouldBe expectedFlow
       FlowRepositoryMock.SaveFlow.verifyCalledWith(expectedFlow)
@@ -106,7 +106,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       val exception = new HttpException("", 400)
       ApmConnectorMock.FetchExtendedApiDefinition.willFailWith(exception)
 
-      val result = await(underTest.updateApiChoice(sessionId, serviceName, SupportData.MakingAnApiCall.id))
+      val result = await(underTest.updateApiChoice(sessionId, SupportData.MakingAnApiCall.id, serviceName))
       result.left.value shouldBe exception
     }
 

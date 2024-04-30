@@ -83,6 +83,7 @@ case class SupportFlow(
     entrySelection: String,
     subSelection: Option[String] = None,
     api: Option[SupportApi] = None,
+    privateApi: Option[String] = None,
     emailAddress: Option[String] = None,
     referenceNumber: Option[String] = None
   ) extends Flow {

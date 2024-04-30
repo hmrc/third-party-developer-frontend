@@ -96,15 +96,15 @@ class HelpWithUsingAnApiController @Inject() (
 
     def updateFlowAndRedirect(usingApiSubSelection: String, apiName: String): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      redirectToDetailsPageOnFlow(sessionId, supportService.updateApiChoice(sessionId, ServiceName(apiName), usingApiSubSelection))
+      redirectToDetailsPageOnFlow(sessionId, supportService.updateApiChoice(sessionId, usingApiSubSelection, ServiceName(apiName)))
     }
 
     def handleValidForm(form: HelpWithUsingAnApiForm): Future[Result] = {
       form.choice match {
-        case SupportData.MakingAnApiCall.text         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
-        case SupportData.GettingExamples.text         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
-        case SupportData.ReportingDocumentation.text  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
-        case SupportData.PrivateApiDocumentation.text => clearAnyApiChoiceAndRedirectToChoosePrivateApiPage()
+        case SupportData.MakingAnApiCall.id           => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
+        case SupportData.GettingExamples.id           => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
+        case SupportData.ReportingDocumentation.id    => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
+        case SupportData.PrivateApiDocumentation.id   => clearAnyApiChoiceAndRedirectToChoosePrivateApiPage()
         case _                                        => clearAnyApiChoiceAndRedirectToDetailsPage()
       }
     }

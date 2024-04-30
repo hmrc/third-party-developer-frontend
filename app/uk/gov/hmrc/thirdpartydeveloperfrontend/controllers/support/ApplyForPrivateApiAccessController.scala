@@ -47,13 +47,13 @@ class ApplyForPrivateApiAccessController @Inject() (
 
   def applyForPrivateApiAccessPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderPage(flow: SupportFlow) =
-      flow.api.fold(
-        Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage())
-      )(api =>
+      flow.privateApi.fold(
+        Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
+      )(apiName =>
         Ok(
           applyForPrivateApiAccessView(
             fullyloggedInDeveloper,
-            api.serviceName.value,
+            apiName,
             ApplyForPrivateApiAccessForm.form,
             routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
           )
@@ -78,7 +78,11 @@ class ApplyForPrivateApiAccessController @Inject() (
 
     def handleValidForm(form: ApplyForPrivateApiAccessForm): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      Future.successful(withSupportCookie(Ok(""), sessionId))
+
+      for {
+        flow <- supportService.getSupportFlow(sessionId)
+        ticket <- supportService.submitTicket(flow, form)
+      } yield withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
     }
 
     def handleInvalidForm(formWithErrors: Form[ApplyForPrivateApiAccessForm]): Future[Result] =
