@@ -18,12 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.ApplyForPrivateApiAccessView
+import views.html.support.{ApplyForPrivateApiAccessView, ChooseAPrivateApiView}
 
+import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
@@ -38,7 +39,8 @@ class ApplyForPrivateApiAccessController @Inject() (
     val errorHandler: ErrorHandler,
     val deskproService: DeskproService,
     supportService: SupportService,
-    applyForPrivateApiAccessView: ApplyForPrivateApiAccessView
+    applyForPrivateApiAccessView: ApplyForPrivateApiAccessView,
+    chooseAPrivateApiView: ChooseAPrivateApiView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) with SupportCookie {
@@ -46,19 +48,42 @@ class ApplyForPrivateApiAccessController @Inject() (
   def applyForPrivateApiAccessPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderPage(flow: SupportFlow) =
       flow.api.fold(
-        Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
+        Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage())
       )(api =>
         Ok(
           applyForPrivateApiAccessView(
             fullyloggedInDeveloper,
             api.serviceName.value,
             ApplyForPrivateApiAccessForm.form,
-            routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
+            routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
           )
         )
       )
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
     supportService.getSupportFlow(sessionId).map(renderPage)
+  }
+
+  def submitApplyForPrivateApiAccess: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    def renderErrorView(form: Form[ApplyForPrivateApiAccessForm]) = {
+      Future.successful(BadRequest(
+        applyForPrivateApiAccessView(
+          fullyloggedInDeveloper,
+          "Business Rates 2.0", // TODO - change
+          form,
+          routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
+        )
+      ))
+    }
+
+    def handleValidForm(form: ApplyForPrivateApiAccessForm): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      Future.successful(withSupportCookie(Ok(""), sessionId))
+    }
+
+    def handleInvalidForm(formWithErrors: Form[ApplyForPrivateApiAccessForm]): Future[Result] =
+      renderErrorView(formWithErrors)
+
+    ApplyForPrivateApiAccessForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

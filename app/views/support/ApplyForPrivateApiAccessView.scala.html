@@ -41,54 +41,96 @@
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
-  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.ChooseAPrivateApiController.submitChoiceOfPrivateApi()) {
+  <span class="govuk-caption-l">Developer Hub support</span>
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Apply for access to the @{chosenApiName} API</h1>
+
+  <p class="govuk-body">
+    To give you access to the Customs Declaration API documentation, we need the following details: 
+  </p>
+  
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.ApplyForPrivateApiAccessController.submitApplyForPrivateApiAccess()) {
     @helper.CSRF.formField
-    <span class="govuk-caption-l">Developer Hub support</span>
-    @govukRadios(
-      Radios(
-        fieldset = Some(
-          Fieldset(
-            legend = Some(
-              Legend(
-                content = Text("Which private API documentation do you want to access?"),
-                classes = "govuk-fieldset__legend--l",
-                isPageHeading = true
-              )
-            )
-          )
+  
+    @govukInput(
+      Input(
+        id = "fullName",
+        name = "fullName",
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Full name")
         ),
-        errorMessage = if(form("choice").hasErrors) {
+        classes = "govuk-!-width-full",
+        value = form("fullName").value.orElse(loggedIn.map(_.displayedName)),
+        errorMessage = if(form("fullName").hasErrors) {
           Some(
             ErrorMessage(
-              content = Text("Choose which private API documentation you want to access.")
+              content = Text("Enter your full name")
             )
           )
-        } else { None },
-        name = "chosen-api-name",
-        items = Seq(
-          RadioItem(
-            id = Some(SupportData.ChooseBusinessRates.id),
-            content = Text(SupportData.ChooseBusinessRates.text),
-            value = Some(SupportData.ChooseBusinessRates.id),
-            hint = None,
-            conditionalHtml = None
-          ), 
-          RadioItem(
-            id = Some(SupportData.ChooseCDS.id),
-            content = Text(SupportData.ChooseCDS.text),
-            value = Some(SupportData.ChooseCDS.id),
-            hint = None,
-            conditionalHtml = None
+        } else { None }
+      )
+    )
+  
+    @govukInput(
+      Input(
+        id = "emailAddress",
+        name = "emailAddress",
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Email address")
+        ),
+        hint = Some(
+          Hint(
+            content = Text("We only use your email to respond to you")
           )
-        )
+        ),
+        classes = "govuk-!-width-full",
+        value = form("emailAddress").value.orElse(loggedIn.map(_.email.text)),
+        errorMessage = if(form("emailAddress").hasErrors) {
+          Some(
+            ErrorMessage(
+              content = Text("Enter an email address")
+            )
+          )
+        } else { None }
+      )
+    )
+  
+    @govukInput(
+      Input(
+        id = "organisation",
+        name = "organisation",
+        value = form("organisation").value,
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Organisation (optional)")
+        ),
+        classes = "govuk-!-width-full"
       )
     )
 
-    @govukButton(
-      Button(
-        id = Some("continue"),
-        content = Text("Continue")
+    @govukInput(
+      Input(
+        id = "applicationId",
+        name = "applicationId",
+        value = form("applicationId").value,
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Application ID")
+        ),
+        classes = "govuk-!-width-full"
       )
     )
-  }
+     
+      @govukButton(
+        Button(
+          id = Some("continue"),
+          content = Text("Send")
+        )
+      )
+    }
 }

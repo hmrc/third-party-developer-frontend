@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -65,9 +66,12 @@ class ChooseAPrivateApiController @Inject() (
     }
 
     def handleValidForm(form: ChooseAPrivateApiForm): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+
       form.chosenApiName match {
-        case SupportData.ChooseBusinessRates.text => Future.successful(Ok)
-        case SupportData.ChooseCDS.text           => Future.successful(Ok)
+        case SupportData.ChooseBusinessRates.text =>
+          Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
+        case SupportData.ChooseCDS.text           => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
       }
     }
 
