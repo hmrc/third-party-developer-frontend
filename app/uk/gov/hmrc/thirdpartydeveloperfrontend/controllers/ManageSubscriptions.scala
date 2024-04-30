@@ -263,12 +263,7 @@ class ManageSubscriptions @Inject() (
 
   def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
     def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
-      // if (application.deployedTo.isSandbox) {
       Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
-      // } else {
-      //   val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
-      //   applicationService.updateCheckInformation(application, information) map { _ => Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id)) }
-      // }
     }
 
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { implicit request: ApplicationWithSubscriptionFieldPageRequest[AnyContent] =>
