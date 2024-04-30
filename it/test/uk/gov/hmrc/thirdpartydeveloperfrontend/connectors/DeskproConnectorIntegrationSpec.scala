@@ -55,7 +55,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   "DeskproConnector" when {
 
     "Creating a Deskpro ticket" should {
-      val ticket       = DeskproTicket.createForUplift("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, "Test App", ApplicationId.random)
+      val ticket       = DeskproTicket.createForRequestProductionCredentials("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, "Test App", ApplicationId.random)
       val ticketPath   = "/deskpro/ticket"
       val expectedBody = Json.toJson(ticket).toString()
 

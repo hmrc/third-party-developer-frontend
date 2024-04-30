@@ -36,7 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{checkpages => controllercheckpages}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -170,8 +169,8 @@ class AddApplication @Inject() (
           case Valid =>
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               environment match {
-                case Environment.PRODUCTION => Redirect(controllercheckpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
-                case Environment.SANDBOX    =>
+//                case Environment.PRODUCTION => Redirect(controllercheckpages.routes.ApplicationCheck.requestCheckPage(applicationCreatedResponse.id))
+                case Environment.SANDBOX =>
                   Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
               }
             )

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
+import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -32,9 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{
   ThirdPartyApplicationSandboxConnector,
   ThirdPartyDeveloperConnector
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful, UpliftRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound, ApplicationUpliftSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -112,55 +110,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec with LocalUserIdTracker
       val result = ApplicationService.filterSubscriptionsForUplift(Set(apiOk1a, apiOk1b, apiOk2a, apiOk2b))(appsToApis)
 
       result shouldBe Set(app1)
-    }
-  }
-
-  "requestUplift" should {
-    val applicationId   = ApplicationId.random
-    val applicationName = "applicationName"
-
-    val user = standardDeveloper.loggedIn
-
-    "request uplift" in new Setup {
-      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))).thenReturn(successful(TicketCreated))
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(successful(ApplicationUpliftSuccessful))
-      await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
-    }
-
-    "don't propagate error if failed to create deskpro ticket" in new Setup {
-      val testError = new scala.RuntimeException("deskpro error")
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(successful(ApplicationUpliftSuccessful))
-      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))).thenReturn(failed(testError))
-
-      await(applicationService.requestUplift(applicationId, applicationName, user)) shouldBe ApplicationUpliftSuccessful
-    }
-
-    "propagate ApplicationAlreadyExistsResponse from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(failed(new ApplicationAlreadyExists))
-
-      intercept[ApplicationAlreadyExists] {
-        await(applicationService.requestUplift(applicationId, applicationName, user))
-      }
-
-      verifyZeroInteractions(mockDeskproConnector)
-    }
-
-    "propagate ApplicationNotFound from connector" in new Setup {
-      when(mockDeskproConnector.createTicket(*[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
-      when(mockProductionApplicationConnector.requestUplift(applicationId, UpliftRequest(applicationName, user.email)))
-        .thenReturn(failed(new ApplicationNotFound))
-
-      intercept[ApplicationNotFound] {
-        await(applicationService.requestUplift(applicationId, applicationName, user))
-      }
-
-      verifyZeroInteractions(mockDeskproConnector)
     }
   }
 

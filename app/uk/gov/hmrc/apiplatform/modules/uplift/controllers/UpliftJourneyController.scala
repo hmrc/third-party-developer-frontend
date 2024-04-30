@@ -42,7 +42,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
@@ -96,7 +95,6 @@ class UpliftJourneyController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with CanUseCheckActions
     with WithUnsafeDefaultFormBinding {
 
   import UpliftJourneyController._
@@ -252,4 +250,23 @@ class UpliftJourneyController @Inject() (
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
     }
   }
+}
+
+case class DummySubscriptionsForm(hasNonExampleSubscription: Boolean)
+
+object DummySubscriptionsForm {
+
+  def form: Form[DummySubscriptionsForm] = Form(
+    mapping(
+      "hasNonExampleSubscription" -> boolean
+    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+      .verifying("error.must.subscribe", x => x.hasNonExampleSubscription)
+  )
+
+  def form2: Form[DummySubscriptionsForm] = Form(
+    mapping(
+      "hasNonExampleSubscription" -> boolean
+    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+      .verifying("error.turnoffapis.requires.at.least.one", x => x.hasNonExampleSubscription)
+  )
 }

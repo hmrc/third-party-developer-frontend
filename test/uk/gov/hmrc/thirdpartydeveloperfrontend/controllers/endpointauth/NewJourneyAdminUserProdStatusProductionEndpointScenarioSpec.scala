@@ -31,8 +31,6 @@ class NewJourneyAdminUserProdStatusProductionEndpointScenarioSpec extends Endpoi
       case Endpoint("GET", "/developer/applications/:id/add/success", _)                              => NotFound()
       case Endpoint(_, "/developer/applications/:id/details/change", _)                               => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                     => BadRequest()
-      case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                 => getEndpointSuccessResponse(endpoint)
-      case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                  => getEndpointSuccessResponse(endpoint)
       case Endpoint("POST", "/developer/applications/:id/delete-subordinate", _)                      =>
         Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                   =>

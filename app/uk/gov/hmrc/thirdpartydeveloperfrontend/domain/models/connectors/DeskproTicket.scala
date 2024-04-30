@@ -74,23 +74,6 @@ object DeskproTicket extends FieldTransformer {
     )
   }
 
-  def createForUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
-    val message =
-      s"""${requestorEmail.text} submitted the following application for production use on the Developer Hub:
-         |$applicationName
-         |Please check it against our guidelines and send them a response within 2 working days.
-         |HMRC Developer Hub
-         |""".stripMargin
-
-    DeskproTicket(
-      requestorName,
-      requestorEmail,
-      "New application submitted for checking",
-      message,
-      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.routes.ApplicationCheck.requestCheckPage(applicationId).url
-    )
-  }
-
   def createForApiSubscribe(
       requestorName: String,
       requestorEmail: LaxEmailAddress,

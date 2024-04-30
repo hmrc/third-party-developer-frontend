@@ -14,17 +14,16 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
 @import views.html.include.fieldError
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@(app: Application, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean, addTeamMemberPageMode: AddTeamMemberPageMode)(
+@(app: Application, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean)(
   implicit request: play.api.mvc.Request[Any], messages: Messages
 )
 
-@helper.form(action = routes.ManageTeam.addTeamMemberAction(app.id, addTeamMemberPageMode)) {
+@helper.form(action = routes.ManageTeam.addTeamMemberAction(app.id)) {
   @helper.CSRF.formField
 
   <div class="govuk-form-group @if(form.errors("email").nonEmpty) {govuk-form-group--error}">

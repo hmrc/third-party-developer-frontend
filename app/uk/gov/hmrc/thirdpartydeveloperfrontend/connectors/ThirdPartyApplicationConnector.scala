@@ -111,16 +111,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
   }
 
-  def requestUplift(applicationId: ApplicationId, upliftRequest: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpliftSuccessful] = metrics.record(api) {
-    http.POST[UpliftRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}/request-uplift", upliftRequest)
-      .map {
-        case Right(_)                                        => ApplicationUpliftSuccessful
-        case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => throw new ApplicationAlreadyExists
-        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => throw new ApplicationNotFound
-        case Left(err)                                       => throw err
-      }
-  }
-
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
     http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode")
       .map {

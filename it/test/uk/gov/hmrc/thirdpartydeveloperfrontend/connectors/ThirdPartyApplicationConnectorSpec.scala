@@ -312,55 +312,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  "requestUplift" should {
-    val applicationName = "applicationName"
-    val email           = "john.requestor@example.com".toLaxEmail
-    val upliftRequest   = UpliftRequest(applicationName, email)
-    val url             = s"/application/${applicationId}/request-uplift"
-
-    "return success response in case of a 204 NO CONTENT on backend " in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(upliftRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(NO_CONTENT)
-          )
-      )
-      val result = await(connector.requestUplift(applicationId, upliftRequest))
-
-      result shouldEqual ApplicationUpliftSuccessful
-    }
-
-    "return ApplicationAlreadyExistsResponse response in case of a 409 CONFLICT on backend " in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(upliftRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(CONFLICT)
-          )
-      )
-      intercept[ApplicationAlreadyExists] {
-        await(connector.requestUplift(applicationId, upliftRequest))
-      }
-    }
-
-    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(upliftRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound] {
-        await(connector.requestUplift(applicationId, upliftRequest))
-      }
-    }
-  }
-
   "updateApproval" should {
     val updateRequest = CheckInformation(contactDetails = Some(ContactDetails(FullName("name"), "email".toLaxEmail, "telephone")))
     val url           = s"/application/${applicationId}/check-information"
