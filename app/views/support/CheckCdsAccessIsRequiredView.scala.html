@@ -41,7 +41,7 @@
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
-  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.ChooseAPrivateApiController.submitChoiceOfPrivateApi()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.CheckCdsAccessIsRequiredController.submitCdsAccessIsRequired()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -69,14 +69,14 @@
           RadioItem(
             id = Some("yes"),
             content = Text("Yes"),
-            value = Some("yes"),
+            value = Some("true"),
             hint = None,
             conditionalHtml = None
           ), 
           RadioItem(
             id = Some("no"),
             content = Text("No, I want to use third-party software"),
-            value = Some("no"),
+            value = Some("false"),
             hint = None,
             conditionalHtml = None
           )

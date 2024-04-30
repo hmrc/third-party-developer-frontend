@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.{ChooseAPrivateApiView, CheckCdsAccessIsRequiredView}
+import views.html.support.{CheckCdsAccessIsRequiredView, ChooseAPrivateApiView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -30,7 +30,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
@@ -80,7 +79,7 @@ class ChooseAPrivateApiController @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
 
       supportService.setPrivateApiChoice(sessionId, SupportData.ChooseCDS.text).flatMap {
-        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ChooseAPrivateApiController.checkCdsAccessIsRequiredPage()), sessionId))
+        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.CheckCdsAccessIsRequiredController.checkCdsAccessIsRequiredPage()), sessionId))
         case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
       }
     }
@@ -99,13 +98,4 @@ class ChooseAPrivateApiController @Inject() (
     ChooseAPrivateApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def checkCdsAccessIsRequiredPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    successful(Ok(
-      ensureCdsAccessIsRequired(
-        fullyloggedInDeveloper,
-        CheckCdsAccessIsRequiredForm.form,
-        routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
-      )
-    ))
-  }
 }
