@@ -101,7 +101,12 @@ class SupportService @Inject() (
   }
 
   def submitTicket(supportFlow: SupportFlow, form: ApplyForPrivateApiAccessForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
-    submitTicket(supportFlow, form.fullName, form.emailAddress, "???")
+    submitTicket(
+      supportFlow,
+      form.fullName,
+      form.emailAddress,
+      s"Private API documentation access request for Application Id[${form.applicationId}] to ${supportFlow.privateApi.getOrElse("?")} API."
+    )
   }
 
   private def submitTicket(supportFlow: SupportFlow, fullName: String, emailAddress: String, messageContents: String)(implicit hc: HeaderCarrier): Future[SupportFlow] = {

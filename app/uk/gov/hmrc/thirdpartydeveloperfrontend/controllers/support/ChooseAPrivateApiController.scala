@@ -97,5 +97,4 @@ class ChooseAPrivateApiController @Inject() (
 
     ChooseAPrivateApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
-
 }
