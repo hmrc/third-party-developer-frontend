@@ -80,7 +80,7 @@ class ApplyForPrivateApiAccessController @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
 
       for {
-        flow <- supportService.getSupportFlow(sessionId)
+        flow   <- supportService.getSupportFlow(sessionId)
         ticket <- supportService.submitTicket(flow, form)
       } yield withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
     }

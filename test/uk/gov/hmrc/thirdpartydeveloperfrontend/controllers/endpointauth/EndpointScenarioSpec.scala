@@ -364,7 +364,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         )
       case Endpoint("POST", "/developer/new-support/api/private-api", _)                                                               =>
         Map(
-          "chosen-api-name" -> "Business Rates 2.0"
+          "chosen-api-name" -> SupportData.ChooseBusinessRates.id
         )
       case Endpoint("POST", "/developer/new-support/api/private-api/apply", _)                                                         =>
         Map(
@@ -478,7 +478,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Redirect("/developer/new-support/api/details")
       case Endpoint("GET", "/developer/new-support/api/private-api", _)                                                                => Success()
       case Endpoint("POST", "/developer/new-support/api/private-api", _)                                                               => Redirect("/developer/new-support/api/private-api/apply")
-      case Endpoint("GET", "/developer/new-support/api/private-api/apply", _)                                                          => Redirect("/developer/new-support/api/private-api/apply")
+      case Endpoint("GET", "/developer/new-support/api/private-api/apply", _)                                                          => Redirect("/developer/new-support/api/private-api")
+      case Endpoint("POST", "/developer/new-support/api/private-api/apply", _)                                                         => Redirect("/developer/new-support/confirmation")
       case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   => Redirect("/developer/new-support/confirmation")
       case Endpoint("GET", "/developer/new-support/confirmation", _)                                                                   => Success()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Redirect(s"/developer/applications/${applicationId}/team-members")

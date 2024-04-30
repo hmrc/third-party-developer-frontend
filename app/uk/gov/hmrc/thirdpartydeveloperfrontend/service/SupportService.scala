@@ -26,11 +26,10 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{SupportData, SupportDetailsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ApplyForPrivateApiAccessForm
 
 @Singleton
 class SupportService @Inject() (
@@ -100,7 +99,7 @@ class SupportService @Inject() (
   def submitTicket(supportFlow: SupportFlow, form: SupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
     submitTicket(supportFlow, form.fullName, form.emailAddress, form.details)
   }
-  
+
   def submitTicket(supportFlow: SupportFlow, form: ApplyForPrivateApiAccessForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
     submitTicket(supportFlow, form.fullName, form.emailAddress, "???")
   }
@@ -109,15 +108,16 @@ class SupportService @Inject() (
     // Entry point is currently the value of the text on the radio button but may not always be so.
     def deriveEntryPoint(): String = {
       (supportFlow.entrySelection, supportFlow.subSelection) match {
-        case (SupportData.FindingAnApi.id, _)                                           => SupportData.FindingAnApi.text
-        case (SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))          => SupportData.MakingAnApiCall.text
-        case (SupportData.UsingAnApi.id, Some(SupportData.GettingExamples.id))          => SupportData.GettingExamples.text
-        case (SupportData.UsingAnApi.id, Some(SupportData.ReportingDocumentation.id))   => SupportData.ReportingDocumentation.text
-        case (SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id))  => SupportData.PrivateApiDocumentation.text
-        case (SupportData.SigningIn.id, _)                                              => SupportData.SigningIn.text
-        case (SupportData.SettingUpApplication.id, _)                                   => SupportData.SettingUpApplication.text
-        case (SupportData.ReportingDocumentation.id, _)                                 => SupportData.ReportingDocumentation.text
-        case (SupportData.FindingDocumentation.id, _)                                   => SupportData.FindingDocumentation.text
+        case (SupportData.FindingAnApi.id, _)                                          => SupportData.FindingAnApi.text
+        case (SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))         => SupportData.MakingAnApiCall.text
+        case (SupportData.UsingAnApi.id, Some(SupportData.GettingExamples.id))         => SupportData.GettingExamples.text
+        case (SupportData.UsingAnApi.id, Some(SupportData.ReportingDocumentation.id))  => SupportData.ReportingDocumentation.text
+        case (SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id)) => SupportData.PrivateApiDocumentation.text
+        case (SupportData.PrivateApiDocumentation.id, _)                               => SupportData.PrivateApiDocumentation.text // TODO - fix
+        case (SupportData.SigningIn.id, _)                                             => SupportData.SigningIn.text
+        case (SupportData.SettingUpApplication.id, _)                                  => SupportData.SettingUpApplication.text
+        case (SupportData.ReportingDocumentation.id, _)                                => SupportData.ReportingDocumentation.text
+        case (SupportData.FindingDocumentation.id, _)                                  => SupportData.FindingDocumentation.text
       }
     }
 

@@ -23,7 +23,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HttpException
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
 
@@ -42,8 +42,12 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.UsingAnApi.id)) = when(aMock.getSupportFlow(*)).thenReturn(successful(flow))
     }
 
-    object SubmitTicket {
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.UsingAnApi.id)) = when(aMock.submitTicket(*, *)(*)).thenReturn(successful(flow))
+    object SubmitTicket { // TODO - sort two calls
+
+      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.UsingAnApi.id)) = {
+        when(aMock.submitTicket(*, *[ApplyForPrivateApiAccessForm])(*)).thenReturn(successful(flow))
+        when(aMock.submitTicket(*, *[SupportDetailsForm])(*)).thenReturn(successful(flow))
+      }
     }
 
     object CreateSupportFlow {

@@ -28,9 +28,9 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
@@ -71,7 +71,7 @@ class ChooseAPrivateApiController @Inject() (
         case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
         case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
       }
-      
+
     def updateFlowAndRedirect(privateApi: String): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       redirectToDetailsPageOnFlow(sessionId, supportService.setPrivateApiChoice(sessionId, privateApi))

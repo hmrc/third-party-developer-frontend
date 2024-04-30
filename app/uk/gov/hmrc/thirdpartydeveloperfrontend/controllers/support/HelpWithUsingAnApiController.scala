@@ -101,11 +101,11 @@ class HelpWithUsingAnApiController @Inject() (
 
     def handleValidForm(form: HelpWithUsingAnApiForm): Future[Result] = {
       form.choice match {
-        case SupportData.MakingAnApiCall.id           => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
-        case SupportData.GettingExamples.id           => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
-        case SupportData.ReportingDocumentation.id    => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
-        case SupportData.PrivateApiDocumentation.id   => clearAnyApiChoiceAndRedirectToChoosePrivateApiPage()
-        case _                                        => clearAnyApiChoiceAndRedirectToDetailsPage()
+        case SupportData.MakingAnApiCall.id         => updateFlowAndRedirect(SupportData.MakingAnApiCall.id, form.apiNameForCall)
+        case SupportData.GettingExamples.id         => updateFlowAndRedirect(SupportData.GettingExamples.id, form.apiNameForExamples)
+        case SupportData.ReportingDocumentation.id  => updateFlowAndRedirect(SupportData.ReportingDocumentation.id, form.apiNameForReporting)
+        case SupportData.PrivateApiDocumentation.id => clearAnyApiChoiceAndRedirectToChoosePrivateApiPage()
+        case _                                      => clearAnyApiChoiceAndRedirectToDetailsPage()
       }
     }
 

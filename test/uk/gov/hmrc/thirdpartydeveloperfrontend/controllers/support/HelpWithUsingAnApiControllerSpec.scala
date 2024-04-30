@@ -100,7 +100,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         override val request = FakeRequest()
           .withSession(sessionParams: _*)
           .withFormUrlEncodedBody(
-            "choice"                                            -> SupportData.MakingAnApiCall.text,
+            "choice"                                            -> SupportData.MakingAnApiCall.id,
             SupportData.MakingAnApiCall.id + "-api-name"        -> "bob",
             SupportData.GettingExamples.id + "-api-name"        -> "ignore",
             SupportData.ReportingDocumentation.id + "-api-name" -> "ignore"
@@ -120,7 +120,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         override val request = FakeRequest()
           .withSession(sessionParams: _*)
           .withFormUrlEncodedBody(
-            "choice"                                            -> SupportData.GettingExamples.text,
+            "choice"                                            -> SupportData.GettingExamples.id,
             SupportData.MakingAnApiCall.id + "-api-name"        -> "ignore",
             SupportData.GettingExamples.id + "-api-name"        -> "bob",
             SupportData.ReportingDocumentation.id + "-api-name" -> "ignore"
@@ -140,7 +140,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         override val request = FakeRequest()
           .withSession(sessionParams: _*)
           .withFormUrlEncodedBody(
-            "choice"                                            -> SupportData.ReportingDocumentation.text,
+            "choice"                                            -> SupportData.ReportingDocumentation.id,
             SupportData.MakingAnApiCall.id + "-api-name"        -> "ignore",
             SupportData.GettingExamples.id + "-api-name"        -> "ignore",
             SupportData.ReportingDocumentation.id + "-api-name" -> "bob"
