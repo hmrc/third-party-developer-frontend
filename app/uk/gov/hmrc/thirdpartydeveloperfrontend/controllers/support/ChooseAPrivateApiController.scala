@@ -21,16 +21,16 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.ChooseAPrivateApiView
+import views.html.support.{ChooseAPrivateApiView, CheckCdsAccessIsRequiredView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
@@ -40,7 +40,8 @@ class ChooseAPrivateApiController @Inject() (
     val errorHandler: ErrorHandler,
     val deskproService: DeskproService,
     supportService: SupportService,
-    chooseAPrivateApiView: ChooseAPrivateApiView
+    chooseAPrivateApiView: ChooseAPrivateApiView,
+    ensureCdsAccessIsRequired: CheckCdsAccessIsRequiredView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) with SupportCookie {
@@ -66,21 +67,28 @@ class ChooseAPrivateApiController @Inject() (
       ))
     }
 
-    def redirectToDetailsPageOnFlow(sessionId: String, onFlow: => Future[Either[Throwable, SupportFlow]]): Future[Result] =
-      onFlow.flatMap {
+    def updateFlowAndRedirectToApplyPage(): Future[Result] = {
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+
+      supportService.setPrivateApiChoice(sessionId, SupportData.ChooseBusinessRates.text).flatMap {
         case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
         case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
       }
+    }
 
-    def updateFlowAndRedirect(privateApi: String): Future[Result] = {
+    def updateFlowAndRedirectToCheckPage(): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      redirectToDetailsPageOnFlow(sessionId, supportService.setPrivateApiChoice(sessionId, privateApi))
+
+      supportService.setPrivateApiChoice(sessionId, SupportData.ChooseCDS.text).flatMap {
+        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ChooseAPrivateApiController.checkCdsAccessIsRequiredPage()), sessionId))
+        case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
+      }
     }
 
     def handleValidForm(form: ChooseAPrivateApiForm): Future[Result] = {
       form.chosenApiName match {
-        case SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(SupportData.ChooseBusinessRates.text)
-        case SupportData.ChooseCDS.id           => updateFlowAndRedirect(SupportData.ChooseCDS.text)
+        case SupportData.ChooseBusinessRates.id => updateFlowAndRedirectToApplyPage()
+        case SupportData.ChooseCDS.id           => updateFlowAndRedirectToCheckPage()
         // case _                                  => renderChooseAPrivateApiErrorView(form.withError(???))
       }
     }
@@ -89,5 +97,15 @@ class ChooseAPrivateApiController @Inject() (
       renderChooseAPrivateApiErrorView(formWithErrors)
 
     ChooseAPrivateApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+  }
+
+  def checkCdsAccessIsRequiredPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    successful(Ok(
+      ensureCdsAccessIsRequired(
+        fullyloggedInDeveloper,
+        CheckCdsAccessIsRequiredForm.form,
+        routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
+      )
+    ))
   }
 }
