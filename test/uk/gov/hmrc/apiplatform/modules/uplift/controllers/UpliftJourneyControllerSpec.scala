@@ -39,7 +39,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{On, UpliftJourneyConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
@@ -86,9 +85,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val beforeYouStartView: BeforeYouStartView                                 = app.injector.instanceOf[BeforeYouStartView]
     val unauthorisedAppDetailsView: UnauthorisedAppDetailsView                 = app.injector.instanceOf[UnauthorisedAppDetailsView]
 
-    val mockUpliftJourneyConfig: UpliftJourneyConfig = mock[UpliftJourneyConfig]
-    val sr20UpliftJourneySwitchMock                  = new UpliftJourneySwitch(mockUpliftJourneyConfig)
-
     val controller = new UpliftJourneyController(
       mockErrorHandler,
       sessionServiceMock,
@@ -106,8 +102,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       sellResellOrDistributeSoftwareView,
       weWillCheckYourAnswersView,
       beforeYouStartView,
-      unauthorisedAppDetailsView,
-      sr20UpliftJourneySwitchMock
+      unauthorisedAppDetailsView
     )
 
     val appName: String           = "app"
@@ -272,7 +267,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "The selected apis are saved when 'save and continue' clicked" in new Setup {
-      when(mockUpliftJourneyConfig.status).thenReturn(On)
       UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
 
       private val result = controller.confirmApiSubscriptionsAction(appId)(loggedInRequest.withCSRFToken)

@@ -43,6 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Resp
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
@@ -52,7 +53,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, ApplicationUpliftSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -144,7 +144,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
-  when(tpaProductionConnector.requestUplift(*[ApplicationId], *[UpliftRequest])(*)).thenReturn(Future.successful(ApplicationUpliftSuccessful))
   when(deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future.successful(TicketCreated))
   when(deskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(Future.successful(TicketCreated))
   when(deskproHorizonConnector.createTicket(*[DeskproHorizonTicket])(*)).thenReturn(Future.successful(HorizonTicket("1234")))
@@ -277,20 +276,18 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   }
 
   final def getPathParameterValues(): Map[String, String] = Map(
-    "id"                     -> applicationId.toString(),
-    "aid"                    -> applicationId.toString(),
-    "qid"                    -> question.id.value,
-    "sid"                    -> submissionId.toString(),
-    "environment"            -> Environment.PRODUCTION.toString(),
-    "pageNumber"             -> "1",
-    "context"                -> apiContext.value,
-    "version"                -> apiVersion.value,
-    "saveSubsFieldsPageMode" -> "lefthandnavigation",
-    "fieldName"              -> apiFieldName.value,
-    "addTeamMemberPageMode"  -> "applicationcheck",
-    "teamMemberHash"         -> "b4c9a289323b21a01c3e940f150eb9b8c542587f1abfd8f0e1cc1ffc5e475514",
-    "file"                   -> "javascripts/subscriptions.js",
-    "clientSecretId"         -> s1Id.value.toString()
+    "id"             -> applicationId.toString(),
+    "aid"            -> applicationId.toString(),
+    "qid"            -> question.id.value,
+    "sid"            -> submissionId.toString(),
+    "environment"    -> Environment.PRODUCTION.toString(),
+    "pageNumber"     -> "1",
+    "context"        -> apiContext.value,
+    "version"        -> apiVersion.value,
+    "fieldName"      -> apiFieldName.value,
+    "teamMemberHash" -> "b4c9a289323b21a01c3e940f150eb9b8c542587f1abfd8f0e1cc1ffc5e475514",
+    "file"           -> "javascripts/subscriptions.js",
+    "clientSecretId" -> s1Id.value.toString()
   )
 
   final def getQueryParameterValues(endpoint: Endpoint): Map[String, String] = {
@@ -340,54 +337,54 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   final def getBodyParameterValues(endpoint: Endpoint): Map[String, String] = {
     endpoint match {
-      case Endpoint("POST", "/developer/registration", _)                                                                              =>
+      case Endpoint("POST", "/developer/registration", _)                                                      =>
         Map("firstname" -> userFirstName, "lastname" -> userLastName, "emailaddress" -> userEmail.text, "password" -> userPassword, "confirmpassword" -> userPassword)
-      case Endpoint("POST", "/developer/login", _)                                                                                     => Map("emailaddress" -> userEmail.text, "password" -> userPassword)
-      case Endpoint("POST", "/developer/forgot-password", _)                                                                           => Map("emailaddress" -> userEmail.text)
-      case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
-      case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
-      case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("helpWithChoice" -> Support.UsingAnApi.id)
-      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                =>
+      case Endpoint("POST", "/developer/login", _)                                                             => Map("emailaddress" -> userEmail.text, "password" -> userPassword)
+      case Endpoint("POST", "/developer/forgot-password", _)                                                   => Map("emailaddress" -> userEmail.text)
+      case Endpoint("POST", "/developer/login-mfa", _)                                                         => Map("accessCode" -> "123456", "rememberMe" -> "false")
+      case Endpoint("POST", "/developer/reset-password", _)                                                    => Map("password" -> userPassword, "confirmpassword" -> userPassword)
+      case Endpoint("POST", "/developer/support", _)                                                           => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                            => Map("helpWithChoice" -> Support.UsingAnApi.id)
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                        =>
         Map(
           "helpWithApiChoice"                             -> Support.MakingAnApiCall.id,
           Support.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
           Support.GettingExamples.id + "-api-name"        -> "Test Service Name",
           Support.ReportingDocumentation.id + "-api-name" -> "Test Service Name"
         )
-      case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   =>
+      case Endpoint("POST", "/developer/new-support/api/details", _)                                           =>
         Map("apiName" -> "Test Service Name", "details" -> "details", "fullName" -> "full name", "emailAddress" -> "fullname@example.com")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)                                  =>
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)          =>
         Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
-      case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  => Map("email" -> userEmail.text, "role" -> "developer")
-      case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Map("email" -> userEmail.text, "confirm" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/details/change-app-name", _)                                                  => Map("applicationName" -> ("new " + applicationName))
-      case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)                                   =>
+      case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 => Map("email" -> userEmail.text, "role" -> "developer")
+      case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Map("email" -> userEmail.text, "confirm" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/details/change-app-name", _)                          => Map("applicationName" -> ("new " + applicationName))
+      case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)           =>
         Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)                                 =>
+      case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         =>
         Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                                        => Map("redirectUri" -> "https://example.com/redirect")
-      case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                                                     => Map("termsOfUseAgreed" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                                        =>
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                => Map("redirectUri" -> "https://example.com/redirect")
+      case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                             => Map("termsOfUseAgreed" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                =>
         Map("originalRedirectUri" -> redirectUrl.toString(), "newRedirectUri" -> (redirectUrl.toString() + "-new"))
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                                                     => Map("redirectUri" -> redirectUrl.toString(), "deleteRedirectConfirm" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                                         => Map("deleteConfirm" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                                         => Map("ipAddress" -> "1.2.3.4/24")
-      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                                                      => Map("confirm" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self-or-other", _)                              => Map("who" -> "self")
-      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other", _)                                      =>
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Map("redirectUri" -> redirectUrl.toString(), "deleteRedirectConfirm" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                 => Map("deleteConfirm" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                 => Map("ipAddress" -> "1.2.3.4/24")
+      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                              => Map("confirm" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self-or-other", _)      => Map("who" -> "self")
+      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other", _)              =>
         Map("name" -> (responsibleIndividual.fullName.value + " new"), "email" -> ("new" + responsibleIndividual.emailAddress.text))
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                                                      => Map("subscribed" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)                                               => Map("subscribed" -> "true", "confirm" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)                                              => Map("subscribed" -> "true", "confirm" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/add/subscription-configuration/:pageNumber", _)                               => Map(apiFieldName.value -> apiFieldValue.value)
-      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode", _)                   => Map(apiFieldName.value -> apiFieldValue.value)
-      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode", _) =>
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                              => Map("subscribed" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)                       => Map("subscribed" -> "true", "confirm" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)                      => Map("subscribed" -> "true", "confirm" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/add/subscription-configuration/:pageNumber", _)       => Map(apiFieldName.value -> apiFieldValue.value)
+      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version", _)                   => Map(apiFieldName.value -> apiFieldValue.value)
+      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/fields/:fieldName", _) =>
         Map(apiFieldName.value -> apiFieldValue.value)
-      case Endpoint("POST", "/developer/no-applications", _)                                                                           => Map("choice" -> "use-apis")
-      case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions", _)                                                 => Map("ctx-1_0-subscribed" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)                                  => Map("answer" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/request-check", _)                                                            => Map(
+      case Endpoint("POST", "/developer/no-applications", _)                                                   => Map("choice" -> "use-apis")
+      case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions", _)                         => Map("ctx-1_0-subscribed" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)          => Map("answer" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/request-check", _)                                    => Map(
           "apiSubscriptionsComplete"              -> "true",
           "apiSubscriptionConfigurationsComplete" -> "true",
           "contactDetailsComplete"                -> "true",
@@ -397,19 +394,19 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
           "providedTermsAndConditionsURLComplete" -> "true",
           "termsOfUseAgreementComplete"           -> "true"
         )
-      case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)                                       => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                                               => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                                                  => Map("applicationName" -> applicationName)
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/privacy-policy", _)                                        => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/subscriptions", _)                                         => Map()
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                                           => Map("email" -> userEmail.text)
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-of-use", _)                                          => Map("termsOfUseAgreed" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                                                    => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
-      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                                                       => Map("applicationName" -> applicationName)
-      case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                                             => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
-      case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                                                => Map("email" -> userEmail.text)
-      case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                                               => Map("termsOfUseAgreed" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/details/change", _)                                                           => Map(
+      case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)               => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                       => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                          => Map("applicationName" -> applicationName)
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/privacy-policy", _)                => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/subscriptions", _)                 => Map()
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                   => Map("email" -> userEmail.text)
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-of-use", _)                  => Map("termsOfUseAgreed" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                            => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
+      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                               => Map("applicationName" -> applicationName)
+      case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                     => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
+      case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                        => Map("email" -> userEmail.text)
+      case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                       => Map("termsOfUseAgreed" -> "true")
+      case Endpoint("POST", "/developer/applications/:id/details/change", _)                                   => Map(
           "applicationId"         -> applicationId.toString(),
           "applicationName"       -> applicationName,
           "description"           -> "my description",
@@ -417,142 +414,142 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
           "termsAndConditionsUrl" -> termsConditionsUrl,
           "grantLength"           -> "1"
         )
-      case Endpoint("POST", "/developer/applications/add/switch", _)                                                                   => Map("applicationId" -> applicationId.toString())
-      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)                                       =>
+      case Endpoint("POST", "/developer/applications/add/switch", _)                                           => Map("applicationId" -> applicationId.toString())
+      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)               =>
         Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.toString())
-      case Endpoint("POST", "/developer/submissions/responsible-individual-verification", _)                                           => Map("verified" -> "yes")
-      case Endpoint("POST", "/developer/profile/delete", _)                                                                            => Map("confirmation" -> "true")
-      case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                                          => Map("topic[]" -> "BUSINESS_AND_POLICY")
-      case Endpoint("POST", "/developer/profile/", _)                                                                                  => Map("firstname" -> userFirstName, "lastname" -> userLastName, "organisation" -> organisation)
-      case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                                         => Map("selectedApi[]" -> "my api", "applicationId" -> applicationId.toString())
-      case Endpoint("POST", "/developer/profile/password", _)                                                                          =>
+      case Endpoint("POST", "/developer/submissions/responsible-individual-verification", _)                   => Map("verified" -> "yes")
+      case Endpoint("POST", "/developer/profile/delete", _)                                                    => Map("confirmation" -> "true")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                  => Map("topic[]" -> "BUSINESS_AND_POLICY")
+      case Endpoint("POST", "/developer/profile/", _)                                                          => Map("firstname" -> userFirstName, "lastname" -> userLastName, "organisation" -> organisation)
+      case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                 => Map("selectedApi[]" -> "my api", "applicationId" -> applicationId.toString())
+      case Endpoint("POST", "/developer/profile/password", _)                                                  =>
         Map("currentpassword" -> userPassword, "password" -> (userPassword + "new"), "confirmpassword" -> (userPassword + "new"))
-      case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                                            => Map("apiRadio" -> "1", "selectedApi" -> "api1", "currentCategory" -> category)
-      case Endpoint("POST", "/developer/profile/email-preferences/categories", _)                                                      => Map("taxRegime[]" -> "1")
-      case Endpoint("POST", "/developer/submissions/:sid/question/:qid", _)                                                            => Map("submit-action" -> "acknowledgement")
-      case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update", _)                                                     => Map("submit-action" -> "acknowledgement")
-      case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request", _)                                               => Map("submit-action" -> "cancel-request")
-      case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)                                                   => Map("mfaType" -> "SMS")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code", _)                                         => Map("accessCode" -> "123456")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name", _)                                                => Map("name" -> "appName")
-      case Endpoint("POST", "/developer/profile/security-preferences/sms/setup", _)                                                    => Map("mobileNumber" -> "0123456789")
-      case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                                              => Map("accessCode" -> "123456", "mobileNumber" -> "0123456789")
-      case Endpoint("POST", "/developer/login/select-mfa", _)                                                                          => Map("mfaId" -> authAppMfaId.value.toString)
-      case _                                                                                                                           => Map.empty
+      case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                    => Map("apiRadio" -> "1", "selectedApi" -> "api1", "currentCategory" -> category)
+      case Endpoint("POST", "/developer/profile/email-preferences/categories", _)                              => Map("taxRegime[]" -> "1")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid", _)                                    => Map("submit-action" -> "acknowledgement")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update", _)                             => Map("submit-action" -> "acknowledgement")
+      case Endpoint("POST", "/developer/submissions/application/:aid/cancel-request", _)                       => Map("submit-action" -> "cancel-request")
+      case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)                           => Map("mfaType" -> "SMS")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code", _)                 => Map("accessCode" -> "123456")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name", _)                        => Map("name" -> "appName")
+      case Endpoint("POST", "/developer/profile/security-preferences/sms/setup", _)                            => Map("mobileNumber" -> "0123456789")
+      case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                      => Map("accessCode" -> "123456", "mobileNumber" -> "0123456789")
+      case Endpoint("POST", "/developer/login/select-mfa", _)                                                  => Map("mfaId" -> authAppMfaId.value.toString)
+      case _                                                                                                   => Map.empty
     }
   }
 
   def getEndpointSuccessResponse(endpoint: Endpoint): Response = {
     endpoint match {
-      case Endpoint("POST", "/developer/registration", _)                                                                              => Redirect("/developer/confirmation")
-      case Endpoint("GET", "/developer/resend-verification", _)                                                                        => Redirect("/developer/confirmation")
-      case Endpoint("GET", "/developer/login", _)                                                                                      => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/login", _)                                                                                     => Redirect("/developer/login/2sv-recommendation")
-      case Endpoint("GET", "/developer/login/2SV-help", _)                                                                             => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/login/2SV-help", _)                                                                            => Redirect("/developer/applications")
-      case Endpoint("GET", "/developer/login/2SV-help/complete", _)                                                                    => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Redirect("/developer/profile/security-preferences/sms/setup/reminder")
-      case Endpoint("POST", "/developer/logout/survey", _)                                                                             => Redirect("/developer/logout")
-      case Endpoint("GET", "/developer/locked", _)                                                                                     => Locked()
-      case Endpoint("GET", "/developer/forgot-password", _)                                                                            => Redirect("/developer/applications")
-      case Endpoint("GET", "/developer/reset-password-link", _)                                                                        => Redirect("/developer/reset-password")
-      case Endpoint("POST", "/developer/support", _)                                                                                   => Redirect("/developer/support/submitted")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Redirect("/developer/new-support/api/choose-api")
-      case Endpoint("GET", "/developer/new-support/api/choose-api", _)                                                                 => Success()
-      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Redirect("/developer/new-support/api/details")
-      case Endpoint("POST", "/developer/new-support/api/details", _)                                                                   => Redirect("/developer/new-support/confirmation")
-      case Endpoint("GET", "/developer/new-support/confirmation", _)                                                                   => Success()
-      case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                                                      => Redirect(s"/developer/applications/${applicationId}/team-members")
-      case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)                                  =>
-        Redirect(s"/developer/applications/${applicationId}/request-check/team")
-      case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)                                   => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)                                 => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete-confirmation", _)                                        => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                                                     => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                                        => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                                                     => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                                        => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                                         => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                                                      => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/activate")
-      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                                         => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/change")
-      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/remove", _)                                                      => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/setup")
-      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self-or-other", _)                              =>
+      case Endpoint("POST", "/developer/registration", _)                                                      => Redirect("/developer/confirmation")
+      case Endpoint("GET", "/developer/resend-verification", _)                                                => Redirect("/developer/confirmation")
+      case Endpoint("GET", "/developer/login", _)                                                              => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/login", _)                                                             => Redirect("/developer/login/2sv-recommendation")
+      case Endpoint("GET", "/developer/login/2SV-help", _)                                                     => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/login/2SV-help", _)                                                    => Redirect("/developer/applications")
+      case Endpoint("GET", "/developer/login/2SV-help/complete", _)                                            => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/login-mfa", _)                                                         => Redirect("/developer/profile/security-preferences/sms/setup/reminder")
+      case Endpoint("POST", "/developer/logout/survey", _)                                                     => Redirect("/developer/logout")
+      case Endpoint("GET", "/developer/locked", _)                                                             => Locked()
+      case Endpoint("GET", "/developer/forgot-password", _)                                                    => Redirect("/developer/applications")
+      case Endpoint("GET", "/developer/reset-password-link", _)                                                => Redirect("/developer/reset-password")
+      case Endpoint("POST", "/developer/support", _)                                                           => Redirect("/developer/support/submitted")
+      case Endpoint("POST", "/developer/new-support/api/choose", _)                                            => Redirect("/developer/new-support/api/choose-api")
+      case Endpoint("GET", "/developer/new-support/api/choose-api", _)                                         => Success()
+      case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                        => Redirect("/developer/new-support/api/details")
+      case Endpoint("POST", "/developer/new-support/api/details", _)                                           => Redirect("/developer/new-support/confirmation")
+      case Endpoint("GET", "/developer/new-support/confirmation", _)                                           => Success()
+      case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Redirect(s"/developer/applications/${applicationId}/team-members")
+      case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 =>
+        Redirect(s"/developer/applications/${applicationId}/team-members")
+      case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)           => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
+      case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                             => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
+      case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
+      case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                 => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                              => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/activate")
+      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                 => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/change")
+      case Endpoint("POST", "/developer/applications/:id/ip-allowlist/remove", _)                              => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/setup")
+      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self-or-other", _)      =>
         Redirect(s"/developer/applications/${applicationId}/responsible-individual/change/self")
-      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self", _)                                       =>
+      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/self", _)               =>
         Redirect(s"/developer/applications/${applicationId}/responsible-individual/change/self/confirmed")
-      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other", _)                                      =>
+      case Endpoint("POST", "/developer/applications/:id/responsible-individual/change/other", _)              =>
         Redirect(s"/developer/applications/${applicationId}/responsible-individual/change/other/requested")
-      case Endpoint("POST", "/developer/applications/:id/client-secret-new", _)                                                        => Success()
-      case Endpoint("POST", "/developer/applications/:id/client-secret/:clientSecretId/delete", _)                                     => Redirect(s"/developer/applications/${applicationId}/client-secrets")
-      case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                                                  => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/add/subscription-configuration/:pageNumber", _)                               =>
+      case Endpoint("POST", "/developer/applications/:id/client-secret-new", _)                                => Success()
+      case Endpoint("POST", "/developer/applications/:id/client-secret/:clientSecretId/delete", _)             => Redirect(s"/developer/applications/${applicationId}/client-secrets")
+      case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                          => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/add/subscription-configuration/:pageNumber", _)       =>
         Redirect(s"/developer/applications/${applicationId}/add/subscription-configuration-step/1")
-      case Endpoint("GET", "/developer/applications/:id/add/subscription-configuration-step/:pageNumber", _)                           =>
-        Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/:saveSubsFieldsPageMode", _)                   =>
+      case Endpoint("GET", "/developer/applications/:id/add/subscription-configuration-step/:pageNumber", _)   =>
+        Redirect(s"/developer/applications/${applicationId}/add/success")
+      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version", _)                   =>
         Redirect(s"/developer/applications/${applicationId}/api-metadata")
-      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/fields/:fieldName/:saveSubsFieldsPageMode", _) =>
+      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/fields/:fieldName", _) =>
         Redirect(s"/developer/applications/${applicationId}/api-metadata")
-      case Endpoint("POST", "/developer/no-applications", _)                                                                           => Redirect(s"/developer/no-applications-start")
-      case Endpoint("POST", "/developer/applications/:id/confirm-subscriptions", _)                                                    =>
+      case Endpoint("POST", "/developer/no-applications", _)                                                   => Redirect(s"/developer/no-applications-start")
+      case Endpoint("POST", "/developer/applications/:id/confirm-subscriptions", _)                            =>
         Redirect(s"/developer/submissions/application/${applicationId}/production-credentials-checklist")
-      case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions", _)                                                 => Redirect(s"/developer/applications/${applicationId}/confirm-subscriptions")
-      case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)                                  =>
+      case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions", _)                         => Redirect(s"/developer/applications/${applicationId}/confirm-subscriptions")
+      case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)          =>
         Redirect(s"/developer/applications/${applicationId}/confirm-subscriptions")
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                                                      => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("GET", path, _) if path.startsWith("/developer/applications/:id/check-your-answers")                               => Success()
-      case Endpoint("GET", path, _) if path.startsWith("/developer/applications/:id/request-check")                                    => Success()
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers", _)                                                       => Redirect(s"/developer/applications/${applicationId}/request-check/submitted")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team", _)                                                  => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/request-check", _)                                                            => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/request-check/team", _)                                                       => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)                                       => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)                                  =>
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                              => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("GET", path, _) if path.startsWith("/developer/applications/:id/check-your-answers")       => Success()
+      case Endpoint("GET", path, _) if path.startsWith("/developer/applications/:id/request-check")            => Success()
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers", _)                               => Redirect(s"/developer/applications/${applicationId}/request-check/submitted")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team", _)                          => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/request-check", _)                                    => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/request-check/team", _)                               => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)               => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)          =>
         Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                                               => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                                                  => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-of-use", _)                                          => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/privacy-policy", _)                                        => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/subscriptions", _)                                         => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                                           => Redirect(s"/developer/applications/${applicationId}/check-your-answers/team")
-      case Endpoint("POST", "/developer/applications/:id/request-check/subscriptions", _)                                              => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                                                    => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                                                       => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                                             => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                                                => Redirect(s"/developer/applications/${applicationId}/request-check/team")
-      case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                                               => Redirect(s"/developer/applications/${applicationId}/request-check")
-      case Endpoint("POST", "/developer/applications/:id/details/change", _)                                                           => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("GET", "/developer/applications/:id/add/success", _)                                                               =>
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                       => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                          => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-of-use", _)                  => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/privacy-policy", _)                => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/subscriptions", _)                 => Redirect(s"/developer/applications/${applicationId}/check-your-answers")
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                   => Redirect(s"/developer/applications/${applicationId}/check-your-answers/team")
+      case Endpoint("POST", "/developer/applications/:id/request-check/subscriptions", _)                      => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                            => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                               => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                     => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                        => Redirect(s"/developer/applications/${applicationId}/request-check/team")
+      case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                       => Redirect(s"/developer/applications/${applicationId}/request-check")
+      case Endpoint("POST", "/developer/applications/:id/details/change", _)                                   => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("GET", "/developer/applications/:id/add/success", _)                                       =>
         Redirect(s"/developer/profile/email-preferences/apis-from-subscriptions?applicationId=${applicationId}")
-      case Endpoint("GET", "/developer/applications/add/:id", _)                                                                       => Redirect(s"/developer/applications/${applicationId}/before-you-start")
-      case Endpoint("GET", "/developer/applications/add/production", _)                                                                => Redirect(s"/developer/applications/${applicationId}/before-you-start")
-      case Endpoint(_, "/developer/applications/add/switch", _)                                                                        => Redirect(s"/developer/applications/${applicationId}/before-you-start")
-      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)                                       => Redirect(s"/developer/applications/${applicationId}/add/success")
-      case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                                          => Redirect(s"/developer/profile/email-preferences")
-      case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions", _)                                      =>
+      case Endpoint("GET", "/developer/applications/add/:id", _)                                               => Redirect(s"/developer/applications/${applicationId}/before-you-start")
+      case Endpoint("GET", "/developer/applications/add/production", _)                                        => Redirect(s"/developer/applications/${applicationId}/before-you-start")
+      case Endpoint(_, "/developer/applications/add/switch", _)                                                => Redirect(s"/developer/applications/${applicationId}/before-you-start")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)               => Redirect(s"/developer/applications/${applicationId}/add/success")
+      case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                  => Redirect(s"/developer/profile/email-preferences")
+      case Endpoint("POST", "/developer/profile/email-preferences/no-apis-from-subscriptions", _)              =>
         Redirect(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId}")
-      case Endpoint("POST", "/developer/profile/email-preferences/unsubscribe", _)                                                     => Redirect(s"/developer/profile/email-preferences")
-      case Endpoint("POST", "/developer/profile/email-preferences/no-categories", _)                                                   => Redirect(s"/developer/profile/email-preferences/topics")
-      case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                                            => Redirect(s"/developer/profile/email-preferences/topics")
-      case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                                         =>
+      case Endpoint("POST", "/developer/profile/email-preferences/unsubscribe", _)                             => Redirect(s"/developer/profile/email-preferences")
+      case Endpoint("POST", "/developer/profile/email-preferences/no-categories", _)                           => Redirect(s"/developer/profile/email-preferences/topics")
+      case Endpoint("POST", "/developer/profile/email-preferences/apis", _)                                    => Redirect(s"/developer/profile/email-preferences/topics")
+      case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                 =>
         Redirect(s"/developer/profile/email-preferences/topics-from-subscriptions?applicationId=${applicationId}")
-      case Endpoint("POST", "/developer/profile/email-preferences/categories", _)                                                      => Redirect(s"/developer/profile/email-preferences/apis?category=$category")
-      case Endpoint("POST", "/developer/submissions/:sid/question/:qid", _)                                                            =>
+      case Endpoint("POST", "/developer/profile/email-preferences/categories", _)                              => Redirect(s"/developer/profile/email-preferences/apis?category=$category")
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid", _)                                    =>
         Redirect(s"/developer/submissions/application/${applicationId}/production-credentials-checklist")
-      case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update", _)                                                     => Redirect(s"/developer/submissions/application/${applicationId}/check-answers")
-      case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)                                                   => Redirect(s"/developer/profile/security-preferences/sms/setup")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code", _)                                         =>
+      case Endpoint("POST", "/developer/submissions/:sid/question/:qid/update", _)                             => Redirect(s"/developer/submissions/application/${applicationId}/check-answers")
+      case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)                           => Redirect(s"/developer/profile/security-preferences/sms/setup")
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/access-code", _)                 =>
         Redirect(s"/developer/profile/security-preferences/auth-app/name?mfaId=${authAppMfaId.value.toString}")
-      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name", _)                                                => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
-      case Endpoint("POST", "/developer/profile/security-preferences/sms/setup", _)                                                    =>
+      case Endpoint("POST", "/developer/profile/security-preferences/auth-app/name", _)                        => Redirect(s"/developer/profile/security-preferences/auth-app/setup/complete")
+      case Endpoint("POST", "/developer/profile/security-preferences/sms/setup", _)                            =>
         Redirect(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
-      case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                                              => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
-      case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa", _)                                                    =>
+      case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                      => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
+      case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa", _)                            =>
         Redirect(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&mfaAction=REMOVE&mfaIdForRemoval=${authAppMfaId.value.toString}")
-      case Endpoint("POST", "/developer/login/select-mfa", _)                                                                          => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
-      case Endpoint("GET", "/developer/login/select-mfa/try-another-option", _)                                                        => Unexpected(500)
-      case Endpoint("GET", "/developer/applications/terms-of-use", _)                                                                  => Success()
-      case _                                                                                                                           => Success()
+      case Endpoint("POST", "/developer/login/select-mfa", _)                                                  => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
+      case Endpoint("GET", "/developer/login/select-mfa/try-another-option", _)                                => Unexpected(500)
+      case Endpoint("GET", "/developer/applications/terms-of-use", _)                                          => Success()
+      case _                                                                                                   => Success()
 
     }
   }

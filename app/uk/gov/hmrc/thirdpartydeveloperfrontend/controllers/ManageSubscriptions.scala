@@ -29,14 +29,13 @@ import play.api.mvc._
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{NoSubscriptionFieldsRefinerBehaviour, SaveSubsFieldsPageMode}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
@@ -101,7 +100,7 @@ class ManageSubscriptions @Inject() (
       successful(Ok(listApiSubscriptionsView(request.application, details)))
     }
 
-  def editApiMetadataPage(applicationId: ApplicationId, context: ApiContext, version: ApiVersionNbr, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
+  def editApiMetadataPage(applicationId: ApplicationId, context: ApiContext, version: ApiVersionNbr): Action[AnyContent] =
     subFieldsDefinitionsExistActionByApi(applicationId, context, version) { implicit request: ApplicationWithSubscriptionFieldsRequest[AnyContent] =>
       val role = request.role
 
@@ -109,16 +108,12 @@ class ManageSubscriptions @Inject() (
 
       val viewModel = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors = Seq.empty, postedFormValues = Map.empty)
 
-      successful(Ok(editApiMetadataView(request.application, viewModel, mode)))
+      successful(Ok(editApiMetadataView(request.application, viewModel)))
     }
 
-  def saveSubscriptionFields(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersionNbr, mode: SaveSubsFieldsPageMode): Action[AnyContent] =
+  def saveSubscriptionFields(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersionNbr): Action[AnyContent] =
     subFieldsDefinitionsExistActionByApi(applicationId, apiContext, apiVersion) { implicit request: ApplicationWithSubscriptionFieldsRequest[AnyContent] =>
-      import SaveSubsFieldsPageMode._
-      val successRedirectUrl = mode match {
-        case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
-        case CheckYourAnswers   => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
-      }
+      val successRedirectUrl = routes.ManageSubscriptions.listApiSubscriptions(applicationId)
 
       subscriptionConfigurationSave(
         apiContext,
@@ -126,7 +121,7 @@ class ManageSubscriptions @Inject() (
         request.apiSubscription,
         successRedirectUrl,
         viewModel => {
-          editApiMetadataView(request.application, viewModel, mode)
+          editApiMetadataView(request.application, viewModel)
         }
       )
     }
@@ -136,8 +131,7 @@ class ManageSubscriptions @Inject() (
       applicationId: ApplicationId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      fieldNameParam: String,
-      mode: SaveSubsFieldsPageMode
+      fieldNameParam: String
     ): Action[AnyContent] = // TODO - make this FieldName type
     singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) {
       implicit definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
@@ -146,23 +140,18 @@ class ManageSubscriptions @Inject() (
         val viewModel  =
           EditApiConfigurationFieldViewModel.toViewModel(definitionRequest.subscriptionWithSubscriptionField, definitionRequest.role, Seq(), Map(fieldName -> fieldValue))
 
-        successful(Ok(editApiMetadataFieldView(definitionRequest.application, viewModel, mode)))
+        successful(Ok(editApiMetadataFieldView(definitionRequest.application, viewModel)))
     }
 
   def saveApiMetadataFieldPage(
       applicationId: ApplicationId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      fieldNameParam: String,
-      mode: SaveSubsFieldsPageMode
+      fieldNameParam: String
     ): Action[AnyContent] =
     singleSubFieldsWritableDefinitionActionByApi(applicationId, apiContext, apiVersion, fieldNameParam) {
       implicit definitionRequest: ApplicationWithWritableSubscriptionField[AnyContent] =>
-        import SaveSubsFieldsPageMode._
-        val successRedirectUrl = mode match {
-          case LeftHandNavigation => routes.ManageSubscriptions.listApiSubscriptions(applicationId)
-          case CheckYourAnswers   => checkpages.routes.CheckYourAnswers.answersPage(applicationId).withFragment("configurations")
-        }
+        val successRedirectUrl = routes.ManageSubscriptions.listApiSubscriptions(applicationId)
 
         subscriptionConfigurationFieldSave(
           apiContext,
@@ -170,7 +159,7 @@ class ManageSubscriptions @Inject() (
           definitionRequest.subscriptionWithSubscriptionField,
           successRedirectUrl,
           viewModel => {
-            editApiMetadataFieldView(definitionRequest.application, viewModel, mode)
+            editApiMetadataFieldView(definitionRequest.application, viewModel)
           }
         )
     }
@@ -274,12 +263,7 @@ class ManageSubscriptions @Inject() (
 
   def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
     def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
-      if (application.deployedTo.isSandbox) {
-        Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
-      } else {
-        val information = application.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionConfigurationsConfirmed = true)
-        applicationService.updateCheckInformation(application, information) map { _ => Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(application.id)) }
-      }
+      Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
     }
 
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { implicit request: ApplicationWithSubscriptionFieldPageRequest[AnyContent] =>

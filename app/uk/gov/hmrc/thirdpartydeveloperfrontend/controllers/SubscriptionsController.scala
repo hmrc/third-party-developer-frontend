@@ -123,7 +123,6 @@ class SubscriptionsController @Inject() (
 
   private def redirect(redirectTo: String, applicationId: ApplicationId) = SubscriptionRedirect(redirectTo) match {
     case Some(MANAGE_PAGE)            => Redirect(routes.Details.details(applicationId))
-    case Some(APPLICATION_CHECK_PAGE) => Redirect(checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId))
     case Some(API_SUBSCRIPTIONS_PAGE) => Redirect(routes.SubscriptionsController.manageSubscriptions(applicationId))
     case None                         => Redirect(routes.Details.details(applicationId))
   }

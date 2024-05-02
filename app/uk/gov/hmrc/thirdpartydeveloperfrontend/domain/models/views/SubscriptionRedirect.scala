@@ -20,10 +20,9 @@ sealed trait SubscriptionRedirect
 
 object SubscriptionRedirect {
   final case object MANAGE_PAGE            extends SubscriptionRedirect
-  final case object APPLICATION_CHECK_PAGE extends SubscriptionRedirect
   final case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
 
-  val values = List(MANAGE_PAGE, APPLICATION_CHECK_PAGE, API_SUBSCRIPTIONS_PAGE)
+  val values = List(MANAGE_PAGE, API_SUBSCRIPTIONS_PAGE)
 
   def apply(text: String): Option[SubscriptionRedirect] = SubscriptionRedirect.values.find(_.toString() == text.toUpperCase)
 }

@@ -42,7 +42,7 @@ class NewJourneyAdminUserTestingStatusProductionEndpointScenarioSpec extends End
       case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                     => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/request-check/appDetails", _)                    => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/server-token", _)                                => BadRequest()
-      case Endpoint("POST", "/developer/applications/:id/team-members/add/:addTeamMemberPageMode", _)    => getEndpointSuccessResponse(endpoint)
+      case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                           => getEndpointSuccessResponse(endpoint)
       case Endpoint("POST", "/developer/registration", _)                                                => BadRequest()
       case Endpoint("GET", "/developer/registration", _)                                                 => Redirect(s"/developer/applications")
       case Endpoint("GET", "/developer/reset-password/error", _)                                         => BadRequest()

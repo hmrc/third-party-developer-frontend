@@ -20,9 +20,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 import views.helper.IdFormatter
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
@@ -30,7 +29,7 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
@@ -41,10 +40,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, Off, OnDemand, UpliftJourneyConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.{CanUseCheckActions, DummySubscriptionsForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys, checkpages}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
@@ -93,12 +91,10 @@ class UpliftJourneyController @Inject() (
     sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
     beforeYouStartView: BeforeYouStartView,
-    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
-    upliftJourneySwitch: UpliftJourneySwitch
+    unauthorisedAppDetailsView: UnauthorisedAppDetailsView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with CanUseCheckActions
     with WithUnsafeDefaultFormBinding {
 
   import UpliftJourneyController._
@@ -118,14 +114,10 @@ class UpliftJourneyController @Inject() (
     val failed = (msg: String) => successful(BadRequestWithErrorMessage(msg))
 
     val success = (upliftedAppId: ApplicationId) => {
-      upliftJourneySwitch.performSwitch(
-        successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(upliftedAppId))), // new uplift path
-        successful(Redirect(checkpages.routes.ApplicationCheck.requestCheckPage(upliftedAppId))                                                                              // existing uplift path
-          .withSession(request.session - "subscriptions"))
-      )
+      successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(upliftedAppId)))
     }
 
-    upliftJourneyService.confirmAndUplift(sandboxAppId, request.developerSession, upliftJourneySwitch.shouldUseV2).flatMap(_.fold(failed, success))
+    upliftJourneyService.confirmAndUplift(sandboxAppId, request.developerSession).flatMap(_.fold(failed, success))
   }
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
@@ -260,21 +252,21 @@ class UpliftJourneyController @Inject() (
   }
 }
 
-@Singleton
-class UpliftJourneySwitch @Inject() (upliftJourneyConfig: UpliftJourneyConfig) {
+case class DummySubscriptionsForm(hasNonExampleSubscription: Boolean)
 
-  private def upliftJourneyUseOldJourneyInRequestHeader(implicit request: Request[_]): Boolean =
-    request.headers.get("useOldUpliftJourney").fold(false) { setting =>
-      Try(setting.toBoolean).getOrElse(false)
-    }
+object DummySubscriptionsForm {
 
-  def shouldUseV2(implicit request: Request[_]): Boolean =
-    upliftJourneyConfig.status match {
-      case Off                                                   => false
-      case OnDemand if upliftJourneyUseOldJourneyInRequestHeader => false
-      case _                                                     => true
-    }
+  def form: Form[DummySubscriptionsForm] = Form(
+    mapping(
+      "hasNonExampleSubscription" -> boolean
+    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+      .verifying("error.must.subscribe", x => x.hasNonExampleSubscription)
+  )
 
-  def performSwitch(newUpliftPath: => Future[Result], existingUpliftPath: => Future[Result])(implicit request: Request[_]): Future[Result] =
-    if (shouldUseV2) newUpliftPath else existingUpliftPath
+  def form2: Form[DummySubscriptionsForm] = Form(
+    mapping(
+      "hasNonExampleSubscription" -> boolean
+    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+      .verifying("error.turnoffapis.requires.at.least.one", x => x.hasNonExampleSubscription)
+  )
 }

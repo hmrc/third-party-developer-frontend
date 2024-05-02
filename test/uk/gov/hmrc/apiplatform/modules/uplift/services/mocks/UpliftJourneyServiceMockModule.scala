@@ -52,9 +52,9 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     }
 
     object ConfirmAndUplift {
-      def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *, *)(*)).thenReturn(successful(Right(appId)))
+      def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Right(appId)))
 
-      def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *, *)(*)).thenReturn(successful(Left(err)))
+      def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Left(err)))
     }
 
     object ChangeApiSubscriptions {

@@ -20,7 +20,6 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 import play.api.mvc.{AnyContentAsEmpty, Result}
@@ -35,8 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -57,7 +54,6 @@ class ManageTeamSpec
   trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationActionServiceMock {
     val manageTeamView: ManageTeamView             = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView: AddTeamMemberView       = app.injector.instanceOf[AddTeamMemberView]
-    val teamMemberAddView: TeamMemberAddView       = app.injector.instanceOf[TeamMemberAddView]
     val removeTeamMemberView: RemoveTeamMemberView = app.injector.instanceOf[RemoveTeamMemberView]
 
     val underTest = new ManageTeam(
@@ -71,7 +67,6 @@ class ManageTeamSpec
       cookieSigner,
       manageTeamView,
       addTeamMemberView,
-      teamMemberAddView,
       removeTeamMemberView,
       fraudPreventionConfig
     )
@@ -173,7 +168,7 @@ class ManageTeamSpec
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
 
       val result: Future[Result] =
-        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
+        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
@@ -186,7 +181,7 @@ class ManageTeamSpec
       CollaboratorServiceMock.AddTeamMember.teamMemberAlreadyExists()
 
       val result: Future[Result] =
-        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
+        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
 
@@ -198,7 +193,7 @@ class ManageTeamSpec
       CollaboratorServiceMock.AddTeamMember.applicationNotFound()
 
       val result: Future[Result] =
-        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
+        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe NOT_FOUND
 
@@ -210,7 +205,7 @@ class ManageTeamSpec
       CollaboratorServiceMock.AddTeamMember.applicationNotFound()
 
       val result: Future[Result] =
-        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
+        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress", "role" -> role.toString))
 
       status(result) shouldBe BAD_REQUEST
 
@@ -221,7 +216,7 @@ class ManageTeamSpec
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
 
       val result: Future[Result] =
-        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
+        underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe FORBIDDEN
       CollaboratorServiceMock.AddTeamMember.verifyNeverCalled()
@@ -229,7 +224,7 @@ class ManageTeamSpec
 
     "redirect to login page when logged out" in new Setup {
       val result: Future[Result] =
-        underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
+        underTest.addTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
@@ -278,7 +273,7 @@ class ManageTeamSpec
 
     "reject invalid email address" in new Setup {
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
-      val result: Future[Result] = underTest.addTeamMemberAction(appId, ManageTeamMembers)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress"))
+      val result: Future[Result] = underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress"))
 
       status(result) shouldBe BAD_REQUEST
 
@@ -390,14 +385,6 @@ class ManageTeamSpec
       "return a bad request for addTeamMember action" in new PendingApprovalReturnsBadRequest {
         def executeAction: Future[Result] = {
           underTest.addTeamMember(app.id)(loggedInRequest)
-        }
-      }
-
-      "return a bad request for addTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
-        def executeAction: Future[Result] = {
-          val requestWithForm = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "thirdpartydeveloper@example.com", "role" -> "DEVELOPER")
-
-          addToken(underTest.addTeamMemberAction(app.id, AddTeamMemberPageMode.ApplicationCheck))(requestWithForm)
         }
       }
 

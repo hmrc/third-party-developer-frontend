@@ -20,7 +20,6 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneySwitch
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
@@ -32,24 +31,14 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
   trait Setup extends TermsOfUseServiceMock {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val upliftJourneySwitch = mock[UpliftJourneySwitch]
-    val request             = FakeRequest()
-    val email               = "test@example.com".toLaxEmail
-    val application         = buildApplication(email)
-    val underTest           = new TermsOfUseVersionService(upliftJourneySwitch, termsOfUseServiceMock)
-
-    def givenUpliftJourneySwitchIsOff = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(false)
-    def givenUpliftJourneySwitchIsOn  = when(upliftJourneySwitch.shouldUseV2(*)).thenReturn(true)
+    val request     = FakeRequest()
+    val email       = "test@example.com".toLaxEmail
+    val application = buildApplication(email)
+    val underTest   = new TermsOfUseVersionService(termsOfUseServiceMock)
   }
 
   "getLatest" should {
-    "return OLD_JOURNEY if uplift journey switch is off" in new Setup {
-      givenUpliftJourneySwitchIsOff
-      val result = underTest.getLatest()(request)
-      result shouldBe TermsOfUseVersion.OLD_JOURNEY
-    }
     "return NEW_JOURNEY if uplift journey switch is on" in new Setup {
-      givenUpliftJourneySwitchIsOn
       val result = underTest.getLatest()(request)
       result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
@@ -57,31 +46,14 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
 
   "getForApplication" should {
     "return latest ToU version if uplift journey switch is on and no ToU agreements found" in new Setup {
-      givenUpliftJourneySwitchIsOn
       returnAgreementDetails()
 
       val result = underTest.getForApplication(application)(request)
 
       result shouldBe TermsOfUseVersion.latest
     }
-    "return ToU version OLD_JOURNEY if uplift journey switch is off and application has no CheckInformation" in new Setup {
-      givenUpliftJourneySwitchIsOff
-      returnAgreementDetails()
 
-      val result = underTest.getForApplication(application)(request)
-
-      result shouldBe TermsOfUseVersion.OLD_JOURNEY
-    }
-    "return ToU version OLD_JOURNEY if uplift journey switch is off and application has unrecognised version value" in new Setup {
-      givenUpliftJourneySwitchIsOff
-      returnAgreementDetails(TermsOfUseAgreementDetails(email, None, instant, Some("bad.version")))
-
-      val result = underTest.getForApplication(application)(request)
-
-      result shouldBe TermsOfUseVersion.OLD_JOURNEY
-    }
     "return ToU version NEW_JOURNEY if uplift journey switch is on and application has unrecognised version value in CheckInformation" in new Setup {
-      givenUpliftJourneySwitchIsOn
       returnAgreementDetails(TermsOfUseAgreementDetails(email, None, instant, Some("bad.version")))
 
       val result = underTest.getForApplication(application)(request)

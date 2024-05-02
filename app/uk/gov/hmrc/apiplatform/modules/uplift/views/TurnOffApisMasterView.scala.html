@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.checkpages.DummySubscriptionsForm
+@import uk.gov.hmrc.apiplatform.modules.uplift.controllers.DummySubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
@@ -52,8 +52,7 @@
     case Nil => {
       <h1 class="govuk-heading-l">@pageHeading</h1>
 
-      <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. Please
-        <a class="govuk-link govuk-link--no-visited-state" href="@{controllers.checkpages.routes.ApplicationCheck.apiSubscriptionsPage(applicationId)}">try again</a> later
+      <div class="govuk-inset-text">We can’t load your API subscriptions at the moment. 
       </div>
     }
     case _ => {

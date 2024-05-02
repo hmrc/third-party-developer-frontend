@@ -20,7 +20,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.checkpages.applicationcheck.team.TeamMemberAddView
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
 
 import play.api.data.Form
@@ -38,8 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, ApplicationViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
@@ -55,7 +53,6 @@ class ManageTeam @Inject() (
     val cookieSigner: CookieSigner,
     manageTeamView: ManageTeamView,
     addTeamMemberView: AddTeamMemberView,
-    teamMemberAddView: TeamMemberAddView,
     removeTeamMemberView: RemoveTeamMemberView,
     val fraudPreventionConfig: FraudPreventionConfig
   )(implicit val ec: ExecutionContext,
@@ -84,25 +81,16 @@ class ManageTeam @Inject() (
     Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.developerSession, createFraudNavModel(fraudPreventionConfig))))
   }
 
-  def addTeamMemberAction(applicationId: ApplicationId, addTeamMemberPageMode: AddTeamMemberPageMode): Action[AnyContent] =
+  def addTeamMemberAction(applicationId: ApplicationId): Action[AnyContent] =
     canEditTeamMembers(applicationId, alsoAllowTestingState = true) { implicit request =>
-      val successRedirect = addTeamMemberPageMode match {
-        case ManageTeamMembers => routes.ManageTeam.manageTeam(applicationId, None)
-        case ApplicationCheck  => checkpages.routes.ApplicationCheck.team(applicationId)
-        case CheckYourAnswers  => checkpages.routes.CheckYourAnswers.team(applicationId)
-      }
+      val successRedirect = routes.ManageTeam.manageTeam(applicationId, None)
 
       def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds: DeveloperSession) = {
         addTeamMemberView.apply(a, f, ds, createFraudNavModel(fraudPreventionConfig))
       }
 
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): PlayResult = {
-        val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = addTeamMemberPageMode match {
-          case ManageTeamMembers => handleAddTeamMemberView
-          case ApplicationCheck  => teamMemberAddView.apply
-          case CheckYourAnswers  => teamMemberAddView.apply
-
-        }
+        val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = handleAddTeamMemberView
 
         BadRequest(
           viewFunction(

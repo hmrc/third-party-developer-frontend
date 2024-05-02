@@ -25,7 +25,6 @@ import play.api.mvc.{PathBindable, QueryStringBindable}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{AddTeamMemberPageMode, SaveSubsFieldsPageMode}
 
 package object binders {
 
@@ -140,36 +139,6 @@ package object binders {
       env.toString.toLowerCase
     }
   }
-
-  implicit def addTeamMemberPageModePathBinder(implicit textBinder: PathBindable[String]): PathBindable[AddTeamMemberPageMode] =
-    new PathBindable[AddTeamMemberPageMode] {
-
-      override def bind(key: String, value: String): Either[String, AddTeamMemberPageMode] = {
-        for {
-          text <- textBinder.bind(key, value)
-          mode <- AddTeamMemberPageMode.from(text).toRight("Not a valid AddTeamMemberPageMode")
-        } yield mode
-      }
-
-      override def unbind(key: String, mode: AddTeamMemberPageMode): String = {
-        mode.toString.toLowerCase
-      }
-    }
-
-  implicit def saveSubsFieldsPageModePathBinder(implicit textBinder: PathBindable[String]): PathBindable[SaveSubsFieldsPageMode] =
-    new PathBindable[SaveSubsFieldsPageMode] {
-
-      override def bind(key: String, value: String): Either[String, SaveSubsFieldsPageMode] = {
-        for {
-          text <- textBinder.bind(key, value)
-          mode <- SaveSubsFieldsPageMode.from(text).toRight("Not a valid SaveSubsFieldsPageMode")
-        } yield mode
-      }
-
-      override def unbind(key: String, mode: SaveSubsFieldsPageMode): String = {
-        mode.toString.toLowerCase
-      }
-    }
 
   implicit def mfaTypeQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[MfaType] = new QueryStringBindable[MfaType] {
 
