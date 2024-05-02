@@ -29,7 +29,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
@@ -97,28 +96,18 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
 
   "SupportEnquiryController" when {
     "invoking supportEnquiryPage for new support" should {
-      "render the new support enquiry initial choice page when a user is logged in" in new Setup with IsLoggedIn {
+      "redirect to the new support enquiry initial choice page when a user is logged in" in new Setup with IsLoggedIn {
         val result = addToken(underTest.supportEnquiryPage(true))(request)
 
-        status(result) shouldBe OK
-        val dom = Jsoup.parse(contentAsString(result))
-
-        dom.getElementById(SupportData.FindingAnApi.id).attr("value") shouldEqual SupportData.FindingAnApi.id
-        dom.getElementById(SupportData.UsingAnApi.id).attr("value") shouldEqual SupportData.UsingAnApi.id
-        dom.getElementById(SupportData.SigningIn.id).attr("value") shouldEqual SupportData.SigningIn.id
-        dom.getElementById(SupportData.SettingUpApplication.id).attr("value") shouldEqual SupportData.SettingUpApplication.id
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result).value shouldBe "/developer/new-support"
       }
 
-      "render the new support enquiry initial choice page when a user is not logged in" in new Setup with NotLoggedIn {
+      "redirect to the new support enquiry initial choice page when a user is not logged in" in new Setup with NotLoggedIn {
         val result = addToken(underTest.supportEnquiryPage(true))(request)
 
-        status(result) shouldBe OK
-        val dom = Jsoup.parse(contentAsString(result))
-
-        dom.getElementById(SupportData.FindingAnApi.id).attr("value") shouldEqual SupportData.FindingAnApi.id
-        dom.getElementById(SupportData.UsingAnApi.id).attr("value") shouldEqual SupportData.UsingAnApi.id
-        dom.getElementById(SupportData.SigningIn.id).attr("value") shouldEqual SupportData.SigningIn.id
-        dom.getElementById(SupportData.SettingUpApplication.id).attr("value") shouldEqual SupportData.SettingUpApplication.id
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result).value shouldBe "/developer/new-support"
       }
 
     }
@@ -139,40 +128,6 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
         val result = addToken(underTest.supportEnquiryPage(false))(request)
 
         assertFullNameAndEmail(result, "", "")
-      }
-    }
-
-    "invovking submitInitialChoice" should {
-      "redirect to the new help with using an api page when the 'Using an API' option is selected" in new Setup {
-        val request = FakeRequest()
-          .withFormUrlEncodedBody("initialChoice" -> SupportData.UsingAnApi.id)
-          .withLoggedIn(underTest, implicitly)(sessionId)
-          .withSession(sessionParams: _*)
-
-        fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-
-        SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
-
-        val result = addToken(underTest.submitInitialChoice())(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/new-support/api/choose-api")
-      }
-
-      "redirect to the generic support details page when any other option is selected" in new Setup {
-        val request = FakeRequest()
-          .withFormUrlEncodedBody("initialChoice" -> SupportData.FindingAnApi.id)
-          .withLoggedIn(underTest, implicitly)(sessionId)
-          .withSession(sessionParams: _*)
-
-        fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-
-        SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
-
-        val result = addToken(underTest.submitInitialChoice())(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/new-support/api/details")
       }
     }
 

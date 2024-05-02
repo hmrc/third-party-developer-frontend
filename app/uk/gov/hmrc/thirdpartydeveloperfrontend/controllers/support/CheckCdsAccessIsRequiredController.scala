@@ -49,8 +49,8 @@ class CheckCdsAccessIsRequiredController @Inject() (
 
   def checkCdsAccessIsRequiredPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def renderPage(flow: SupportFlow) =
-      flow.privateApi match {
-        case Some(SupportData.ChooseCDS.id) =>
+      flow match {
+        case SupportFlow(_, SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id), _, Some(SupportData.ChooseCDS.text), _, _) =>
           Ok(
             checkCdsAccessIsRequiredView(
               fullyloggedInDeveloper,
@@ -58,7 +58,7 @@ class CheckCdsAccessIsRequiredController @Inject() (
               routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
             )
           )
-        case _                              => Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
+        case _                                                                                                                                  => Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
       }
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
@@ -85,10 +85,11 @@ class CheckCdsAccessIsRequiredController @Inject() (
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
     supportService.getSupportFlow(sessionId).map { flow =>
-      if (flow.entrySelection == SupportData.PrivateApiDocumentation.id && flow.privateApi == Some(SupportData.ChooseCDS.id)) {
-        CheckCdsAccessIsRequiredForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(flow, sessionId))
-      } else {
-        Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
+      flow match {
+        case SupportFlow(_, SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id), _, Some(SupportData.ChooseCDS.text), _, _) =>
+          CheckCdsAccessIsRequiredForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(flow, sessionId))
+        case _                                                                                                                                  =>
+          Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
       }
     }
   }

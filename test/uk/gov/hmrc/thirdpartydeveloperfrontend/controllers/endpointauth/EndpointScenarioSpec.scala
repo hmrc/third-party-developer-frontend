@@ -347,7 +347,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/login-mfa", _)                                                                                 => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                                            => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                                                   => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("initialChoice" -> SupportData.UsingAnApi.id)
+      case Endpoint("POST", "/developer/new-support", _)                                                                               =>
+        Map("initialChoice" -> SupportData.UsingAnApi.id)
+      // case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("initialChoice" -> SupportData.UsingAnApi.id)
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                =>
         Map(
           "choice"                                            -> SupportData.MakingAnApiCall.id,
@@ -477,6 +479,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/forgot-password", _)                                                                            => Redirect("/developer/applications")
       case Endpoint("GET", "/developer/reset-password-link", _)                                                                        => Redirect("/developer/reset-password")
       case Endpoint("POST", "/developer/support", _)                                                                                   => Redirect("/developer/support/submitted")
+      case Endpoint("GET", "/developer/new-support", _)                                                                                => Success()
+      case Endpoint("POST", "/developer/new-support", _)                                                                               => Redirect("/developer/new-support/api/choose-api")
       case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Redirect("/developer/new-support/api/choose-api")
       case Endpoint("GET", "/developer/new-support/api/choose-api", _)                                                                 => Success()
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                                                => Redirect("/developer/new-support/api/details")

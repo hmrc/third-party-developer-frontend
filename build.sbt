@@ -106,10 +106,10 @@ commands ++= Seq(
   Command.command("cleanAll") { state => "clean" :: "it/clean" :: "component/clean" :: state },
   Command.command("fmtAll") { state => "scalafmtAll" :: "it/scalafmtAll" :: "component/scalafmtAll" :: state },
   Command.command("fixAll") { state => "scalafixAll" :: "it/scalafixAll" :: "component/scalafixAll" :: state },
-  Command.command("testAllExceptExcludedFromCoverage") { state => "testOnly * -- -l ExcludeFromCoverage" :: "it/test" :: "component/test" :: state },
-  Command.command("testExcludedFromCoverage") { state => "testOnly * -- -n ExcludeFromCoverage" :: state },
+  Command.command("testAllIncludedInCoverage") { state => "testOnly * -- -l ExcludeFromCoverage" :: "it/test" :: "component/test" :: state },
+  Command.command("testAllExcludedFromCoverage") { state => "testOnly * -- -n ExcludeFromCoverage" :: state },
   Command.command("testAll") { state => "test" :: "it/test" :: "component/test" :: state },
   Command.command("run-all-tests") { state => "testAll" :: state },
   Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
-  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "testExcludedFromCoverage" :: "coverage" :: "testAllExceptExcludedFromCoverage" :: "coverageOff" :: "coverageAggregate" :: state }
+  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "testAllExcludedFromCoverage" :: "coverage" :: "testAllIncludedInCoverage" :: "coverageOff" :: "coverageAggregate" :: state }
 )

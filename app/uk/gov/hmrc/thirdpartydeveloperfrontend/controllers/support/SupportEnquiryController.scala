@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
 
 import views.html.support.SupportEnquiryInitialChoiceView
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
@@ -53,29 +53,11 @@ class SupportEnquiryController @Inject() (
       }
 
     if (useNewSupport)
-      Future.successful(Ok(supportEnquiryInitialChoiceView(fullyloggedInDeveloper, InitialChoiceForm.form)))
+      successful(Redirect(routes.SupportEnquiryInitialChoiceController.page()))
     else
-      Future.successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
+      successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
   }
 
-  def submitInitialChoice(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def handleValidForm(form: InitialChoiceForm): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      supportService.createFlow(sessionId, form.initialChoice)
-      form.initialChoice match {
-        case SupportData.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage()), sessionId))
-        case _                         => Future.successful(withSupportCookie(Redirect(routes.SupportDetailsController.supportDetailsPage()), sessionId))
-      }
-    }
-
-    def handleInvalidForm(formWithErrors: Form[InitialChoiceForm]): Future[Result] = {
-      Future.successful(BadRequest(supportEnquiryInitialChoiceView(fullyloggedInDeveloper, formWithErrors)))
-    }
-
-    InitialChoiceForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
-  }
-
-  /* Old route */
   def submitSupportEnquiry() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest()
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
@@ -84,7 +66,7 @@ class SupportEnquiryController @Inject() (
     requestForm.fold(
       formWithErrors => {
         logSpamSupportRequest(formWithErrors)
-        Future.successful(BadRequest(supportEnquiryView(displayName, formWithErrors)))
+        successful(BadRequest(supportEnquiryView(displayName, formWithErrors)))
       },
       formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.SupportEnquiryController.thankyouPage(), SEE_OTHER) }
     )
@@ -92,7 +74,7 @@ class SupportEnquiryController @Inject() (
 
   def thankyouPage() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val displayName = fullyloggedInDeveloper.map(_.displayedName)
-    Future.successful(Ok(supportThankyouView("Thank you", displayName)))
+    successful(Ok(supportThankyouView("Thank you", displayName)))
   }
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {

@@ -211,7 +211,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
       "handle option 'Private API Documentation'" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.ClearApiChoice.succeeds()
+        SupportServiceMock.UpdateApiSubSelection.succeeds(SupportData.PrivateApiDocumentation.id)
 
         val formRequest = request
           .withFormUrlEncodedBody(

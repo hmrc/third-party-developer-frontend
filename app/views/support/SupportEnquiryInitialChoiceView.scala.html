@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.InitialChoiceForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryInitialChoiceForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
@@ -28,7 +28,7 @@
   govukButton : GovukButton
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[InitialChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[DeveloperSession], form: Form[SupportEnquiryInitialChoiceForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -39,7 +39,7 @@
   ),
   developerSession = None
 ) {
-  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.SupportEnquiryController.submitInitialChoice()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.SupportEnquiryInitialChoiceController.submit()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(

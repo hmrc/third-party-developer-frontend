@@ -60,8 +60,10 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
     val sessionId                            = "sessionId"
-    val basicFlow                            = SupportFlow(sessionId, SupportData.PrivateApiDocumentation.id)
-    val appropriateFlow                      = basicFlow.copy(entrySelection = SupportData.PrivateApiDocumentation.id, privateApi = Some(SupportData.ChooseCDS.id))
+    val basicFlow                            = SupportFlow(sessionId, SupportData.UsingAnApi.id)
+
+    val appropriateFlow =
+      basicFlow.copy(entrySelection = SupportData.UsingAnApi.id, subSelection = Some(SupportData.PrivateApiDocumentation.id), privateApi = Some(SupportData.ChooseCDS.text))
 
     def shouldBeRedirectedToPreviousPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER

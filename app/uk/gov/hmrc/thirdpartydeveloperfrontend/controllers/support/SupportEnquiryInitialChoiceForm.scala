@@ -21,13 +21,13 @@ import play.api.data.Forms._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
 
-final case class InitialChoiceForm(initialChoice: String)
+final case class SupportEnquiryInitialChoiceForm(initialChoice: String)
 
-object InitialChoiceForm {
+object SupportEnquiryInitialChoiceForm {
 
-  val form: Form[InitialChoiceForm] = Form(
+  val form: Form[SupportEnquiryInitialChoiceForm] = Form(
     mapping(
       "initialChoice" -> textValidator("support.choice.required.field", "support.choice.required.field")
-    )(InitialChoiceForm.apply)(InitialChoiceForm.unapply)
+    )(SupportEnquiryInitialChoiceForm.apply)(SupportEnquiryInitialChoiceForm.unapply)
   )
 }

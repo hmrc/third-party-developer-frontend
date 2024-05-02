@@ -60,7 +60,17 @@ class SupportService @Inject() (
     (
       for {
         flow       <- ET.liftF(fetchSupportFlow(sessionId))
-        updatedFlow = flow.copy(api = None, subSelection = None)
+        updatedFlow = flow.copy(api = None)
+        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
+      } yield savedFlow
+    ).value
+  }
+
+  def updateApiSubselection(sessionId: String, usingApiSubSelection: String): Future[Either[Throwable, SupportFlow]] = {
+    (
+      for {
+        flow       <- ET.liftF(fetchSupportFlow(sessionId))
+        updatedFlow = flow.copy(subSelection = Some(usingApiSubSelection), api = None)
         savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
       } yield savedFlow
     ).value
@@ -78,7 +88,7 @@ class SupportService @Inject() (
     ).value
   }
 
-  def setPrivateApiChoice(sessionId: String, apiChoice: String)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
+  def setPrivateApiChoice(sessionId: String, apiChoice: String): Future[Either[Throwable, SupportFlow]] = {
     (
       for {
         flow       <- ET.liftF(fetchSupportFlow(sessionId))
@@ -122,7 +132,6 @@ class SupportService @Inject() (
         case (SupportData.SigningIn.id, _)                                             => SupportData.SigningIn.text
         case (SupportData.SettingUpApplication.id, _)                                  => SupportData.SettingUpApplication.text
         case (SupportData.ReportingDocumentation.id, _)                                => SupportData.ReportingDocumentation.text
-        case (SupportData.FindingDocumentation.id, _)                                  => SupportData.FindingDocumentation.text
       }
     }
 

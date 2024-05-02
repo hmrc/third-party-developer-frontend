@@ -63,22 +63,17 @@ object SupportData {
     val text = "Reporting documentation for an API that is inaccurate or missing information"
   }
 
-  case object FindingDocumentation extends ApiSecondaryChoice {
-    val id   = "finding-documentation"
-    val text = "Finding documentation for an API"
-  }
-
   case object PrivateApiDocumentation extends ApiSecondaryChoice {
     val id   = "private-api-documentation"
     val text = "Getting access to documentation for a private API"
   }
 
-  case object ChooseBusinessRates extends ApiSecondaryChoice {
+  case object ChooseBusinessRates {
     val id   = "business-rates"
     val text = "Business Rates 2.0"
   }
 
-  case object ChooseCDS extends ApiSecondaryChoice {
+  case object ChooseCDS {
     val id   = "customs-declarations"
     val text = "Customs Declarations"
   }

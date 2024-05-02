@@ -94,7 +94,7 @@ class HelpWithUsingAnApiController @Inject() (
 
     def clearAnyApiChoiceAndRedirectToChoosePrivateApiPage(): Future[Result] = {
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-      redirectToChoosePrivateApiPage(sessionId, supportService.clearApiChoice(sessionId))
+      redirectToChoosePrivateApiPage(sessionId, supportService.updateApiSubselection(sessionId, SupportData.PrivateApiDocumentation.id))
     }
 
     def clearAnyApiChoiceAndRedirectToSupportDetailsPage(): Future[Result] = {
@@ -117,8 +117,9 @@ class HelpWithUsingAnApiController @Inject() (
       }
     }
 
-    def handleInvalidForm(formWithErrors: Form[HelpWithUsingAnApiForm]): Future[Result] =
+    def handleInvalidForm(formWithErrors: Form[HelpWithUsingAnApiForm]): Future[Result] = {
       renderHelpWithUsingAnApiErrorView(formWithErrors)
+    }
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
     supportService.getSupportFlow(sessionId).flatMap { flow =>
