@@ -19,13 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-final case class CheckCdsAccessIsRequiredForm(confirmCdsIntegration: Boolean)
+final case class CheckCdsAccessIsRequiredForm(confirmCdsIntegration: String)
 
 object CheckCdsAccessIsRequiredForm {
 
   val form: Form[CheckCdsAccessIsRequiredForm] = Form(
     mapping(
-      "confirmCdsIntegration" -> boolean
+      "confirmCdsIntegration" -> nonEmptyText
     )(CheckCdsAccessIsRequiredForm.apply)(CheckCdsAccessIsRequiredForm.unapply)
   )
 }

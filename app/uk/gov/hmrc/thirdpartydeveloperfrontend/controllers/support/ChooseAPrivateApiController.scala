@@ -28,6 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
@@ -46,13 +47,20 @@ class ChooseAPrivateApiController @Inject() (
   ) extends AbstractController(mcc) with SupportCookie {
 
   def chooseAPrivateApiPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    successful(Ok(
-      chooseAPrivateApiView(
-        fullyloggedInDeveloper,
-        ChooseAPrivateApiForm.form,
-        routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
-      )
-    ))
+    def renderPage(flow: SupportFlow) =
+      if (flow.entrySelection == SupportData.UsingAnApi.id && flow.subSelection == Some(SupportData.PrivateApiDocumentation.id))
+        Ok(
+          chooseAPrivateApiView(
+            fullyloggedInDeveloper,
+            ChooseAPrivateApiForm.form,
+            routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
+          )
+        )
+      else
+        Redirect(routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage())
+
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    supportService.getSupportFlow(sessionId).map(renderPage)
   }
 
   def submitChoiceOfPrivateApi: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
@@ -66,35 +74,38 @@ class ChooseAPrivateApiController @Inject() (
       ))
     }
 
-    def updateFlowAndRedirectToApplyPage(): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-
+    def updateFlowAndRedirectToApplyPage(sessionId: String): Future[Result] = {
       supportService.setPrivateApiChoice(sessionId, SupportData.ChooseBusinessRates.text).flatMap {
         case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
         case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
       }
     }
 
-    def updateFlowAndRedirectToCheckPage(): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-
+    def updateFlowAndRedirectToCheckPage(sessionId: String): Future[Result] = {
       supportService.setPrivateApiChoice(sessionId, SupportData.ChooseCDS.text).flatMap {
         case Right(_) => Future.successful(withSupportCookie(Redirect(routes.CheckCdsAccessIsRequiredController.checkCdsAccessIsRequiredPage()), sessionId))
         case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
       }
     }
 
-    def handleValidForm(form: ChooseAPrivateApiForm): Future[Result] = {
+    def handleValidForm(sessionId: String)(form: ChooseAPrivateApiForm): Future[Result] = {
       form.chosenApiName match {
-        case SupportData.ChooseBusinessRates.id => updateFlowAndRedirectToApplyPage()
-        case SupportData.ChooseCDS.id           => updateFlowAndRedirectToCheckPage()
-        // case _                                  => renderChooseAPrivateApiErrorView(form.withError(???))
+        case SupportData.ChooseBusinessRates.id => updateFlowAndRedirectToApplyPage(sessionId)
+        case SupportData.ChooseCDS.id           => updateFlowAndRedirectToCheckPage(sessionId)
+        case _                                  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
       }
     }
 
     def handleInvalidForm(formWithErrors: Form[ChooseAPrivateApiForm]): Future[Result] =
       renderChooseAPrivateApiErrorView(formWithErrors)
 
-    ChooseAPrivateApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    supportService.getSupportFlow(sessionId).flatMap { flow =>
+      if (flow.entrySelection == SupportData.UsingAnApi.id && flow.subSelection == Some(SupportData.PrivateApiDocumentation.id)) {
+        ChooseAPrivateApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm(sessionId))
+      } else {
+        successful(Redirect(routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage()))
+      }
+    }
   }
 }

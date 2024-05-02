@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
 
 import views.html.support.{CdsAccessIsNotRequiredView, CheckCdsAccessIsRequiredView, ChooseAPrivateApiView}
 
@@ -28,6 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
 
@@ -47,37 +48,49 @@ class CheckCdsAccessIsRequiredController @Inject() (
   ) extends AbstractController(mcc) with SupportCookie {
 
   def checkCdsAccessIsRequiredPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    successful(Ok(
-      checkCdsAccessIsRequiredView(
-        fullyloggedInDeveloper,
-        CheckCdsAccessIsRequiredForm.form,
-        routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
-      )
-    ))
+    def renderPage(flow: SupportFlow) =
+      flow.privateApi match {
+        case Some(SupportData.ChooseCDS.id) =>
+          Ok(
+            checkCdsAccessIsRequiredView(
+              fullyloggedInDeveloper,
+              CheckCdsAccessIsRequiredForm.form,
+              routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
+            )
+          )
+        case _                              => Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
+      }
+
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    supportService.getSupportFlow(sessionId).map(renderPage)
   }
 
   def submitCdsAccessIsRequired(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderChooseAPrivateApiErrorView(form: Form[CheckCdsAccessIsRequiredForm]) = {
-      successful(BadRequest(
+    def handleValidForm(flow: SupportFlow, sessionId: String)(form: CheckCdsAccessIsRequiredForm): Result = {
+      if (form.confirmCdsIntegration == "yes")
+        withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId)
+      else
+        Redirect(routes.CheckCdsAccessIsRequiredController.cdsAccessIsNotRequiredPage())
+    }
+
+    def handleInvalidForm(flow: SupportFlow)(formWithErrors: Form[CheckCdsAccessIsRequiredForm]): Result = {
+      BadRequest(
         checkCdsAccessIsRequiredView(
           fullyloggedInDeveloper,
-          form,
+          formWithErrors,
           routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
         )
-      ))
+      )
     }
 
-    def handleValidForm(form: CheckCdsAccessIsRequiredForm): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-
-      if (form.confirmCdsIntegration) successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
-      else successful(Redirect(routes.CheckCdsAccessIsRequiredController.cdsAccessIsNotRequiredPage()))
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    supportService.getSupportFlow(sessionId).map { flow =>
+      if (flow.entrySelection == SupportData.PrivateApiDocumentation.id && flow.privateApi == Some(SupportData.ChooseCDS.id)) {
+        CheckCdsAccessIsRequiredForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(flow, sessionId))
+      } else {
+        Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
+      }
     }
-
-    def handleInvalidForm(formWithErrors: Form[CheckCdsAccessIsRequiredForm]): Future[Result] =
-      renderChooseAPrivateApiErrorView(formWithErrors)
-
-    CheckCdsAccessIsRequiredForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def cdsAccessIsNotRequiredPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

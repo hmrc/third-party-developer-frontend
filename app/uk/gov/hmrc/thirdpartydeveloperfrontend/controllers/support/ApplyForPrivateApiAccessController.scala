@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.html.support.{ApplyForPrivateApiAccessView, ChooseAPrivateApiView}
@@ -65,29 +66,29 @@ class ApplyForPrivateApiAccessController @Inject() (
   }
 
   def submitApplyForPrivateApiAccess: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderErrorView(form: Form[ApplyForPrivateApiAccessForm]) = {
-      Future.successful(BadRequest(
+    def handleValidForm(flow: SupportFlow, sessionId: String)(form: ApplyForPrivateApiAccessForm): Future[Result] = {
+      supportService.submitTicket(flow, form).map { _ =>
+        withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
+      }
+    }
+
+    def handleInvalidForm(chosenPrivateApi: String)(formWithErrors: Form[ApplyForPrivateApiAccessForm]): Future[Result] = {
+      successful(BadRequest(
         applyForPrivateApiAccessView(
           fullyloggedInDeveloper,
-          "Business Rates 2.0", // TODO - change
-          form,
+          chosenPrivateApi,
+          formWithErrors,
           routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
         )
       ))
     }
 
-    def handleValidForm(form: ApplyForPrivateApiAccessForm): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-
-      for {
-        flow   <- supportService.getSupportFlow(sessionId)
-        ticket <- supportService.submitTicket(flow, form)
-      } yield withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    supportService.getSupportFlow(sessionId).flatMap { flow =>
+      flow.privateApi match {
+        case Some(chosenPrivateApi) => ApplyForPrivateApiAccessForm.form.bindFromRequest().fold(handleInvalidForm(chosenPrivateApi), handleValidForm(flow, sessionId))
+        case _                      => successful(Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage()))
+      }
     }
-
-    def handleInvalidForm(formWithErrors: Form[ApplyForPrivateApiAccessForm]): Future[Result] =
-      renderErrorView(formWithErrors)
-
-    ApplyForPrivateApiAccessForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }
