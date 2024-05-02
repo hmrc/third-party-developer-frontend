@@ -58,6 +58,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
     val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
     val sessionId                            = "sessionId"
     val basicFlow                            = SupportFlow(sessionId, SupportData.PrivateApiDocumentation.id)
+    val appropriateFlow                      = basicFlow.copy(privateApi = Some("xxx"))
 
     def shouldBeRedirectedToPreviousPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
@@ -112,7 +113,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
   "ApplyForPrivateApiAccessController" when {
     "invoke applyForPrivateApiAccessPage" should {
       "render the page when flow has private api present" in new Setup with IsLoggedIn {
-        SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = Some("xxx")))
+        SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.applyForPrivateApiAccessPage())(request)
 
@@ -144,7 +145,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
           "organisation"  -> "org",
           "applicationId" -> "123456"
         )
-        SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = Some("xxx")))
+        SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.SubmitTicket.succeeds()
 
         val result = addToken(underTest.submitApplyForPrivateApiAccess())(formRequest)
@@ -158,7 +159,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
           "emailAddress"  -> "bob@example.com",
           "applicationId" -> "123456"
         )
-        SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = Some("xxx")))
+        SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.submitApplyForPrivateApiAccess())(formRequest)
 

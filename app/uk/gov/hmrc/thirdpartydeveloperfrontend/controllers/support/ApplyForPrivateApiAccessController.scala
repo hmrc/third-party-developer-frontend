@@ -83,6 +83,7 @@ class ApplyForPrivateApiAccessController @Inject() (
       ))
     }
 
+    // TODO - the magic stuff here
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
     supportService.getSupportFlow(sessionId).flatMap { flow =>
       flow.privateApi match {
