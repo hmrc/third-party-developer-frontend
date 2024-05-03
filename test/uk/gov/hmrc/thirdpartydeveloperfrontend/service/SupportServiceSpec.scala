@@ -19,17 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.{HeaderCarrier}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ExtendedApiDefinitionData.extendedApiDefinition
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceNameData.serviceName
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -81,6 +79,11 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       result shouldBe apiList
       verify(ApmConnectorMock.aMock).fetchApiDefinitionsVisibleToUser(None)
     }
+    
+    // TODO - updateWithDelta
+    "updateWithDelta" in new Setup {
+      fail()
+    }
 
     "fetchAllPublicApis with a user" in new Setup {
       val apiList: List[ApiDefinition]   = List(ApiDefinitionData.apiDefinition)
@@ -89,25 +92,6 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       val result                         = await(underTest.fetchAllPublicApis(Some(loggedInUserId)))
       result shouldBe apiList
       verify(ApmConnectorMock.aMock).fetchApiDefinitionsVisibleToUser(Some(loggedInUserId))
-    }
-
-    "updateApiChoice with a found Api" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
-      ApmConnectorMock.FetchExtendedApiDefinition.willReturn(extendedApiDefinition)
-      val subSelection = "some-text"
-      val result       = await(underTest.updateApiChoice(sessionId, subSelection, serviceName))
-      val expectedFlow = savedFlow.copy(api = Some(SupportApi(serviceName, extendedApiDefinition.name)), subSelection = Some(subSelection))
-      result.value shouldBe expectedFlow
-      FlowRepositoryMock.SaveFlow.verifyCalledWith(expectedFlow)
-    }
-
-    "updateApiChoice with a missing Api" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
-      val exception = new HttpException("", 400)
-      ApmConnectorMock.FetchExtendedApiDefinition.willFailWith(exception)
-
-      val result = await(underTest.updateApiChoice(sessionId, SupportData.MakingAnApiCall.id, serviceName))
-      result.left.value shouldBe exception
     }
 
     "submitTicket with no api should send no api" in new Setup {
@@ -128,7 +112,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
 
       await(underTest.submitTicket(
-        SupportFlow("123", SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id), Some(SupportApi(ServiceName("hello-world"), "Hello world"))),
+        SupportFlow("123", SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id), Some("Hello world")),
         SupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
       ))
 

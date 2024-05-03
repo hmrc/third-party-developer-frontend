@@ -21,14 +21,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, EitherTHelper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportApi, SupportFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
@@ -56,36 +56,8 @@ class SupportService @Inject() (
     } yield savedFlow
   }
 
-  def clearApiChoice(sessionId: String): Future[Either[Throwable, SupportFlow]] = {
-    (
-      for {
-        flow       <- ET.liftF(fetchSupportFlow(sessionId))
-        updatedFlow = flow.copy(api = None)
-        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
-      } yield savedFlow
-    ).value
-  }
-
-  def updateApiSubselection(sessionId: String, usingApiSubSelection: String): Future[Either[Throwable, SupportFlow]] = {
-    (
-      for {
-        flow       <- ET.liftF(fetchSupportFlow(sessionId))
-        updatedFlow = flow.copy(subSelection = Some(usingApiSubSelection), api = None)
-        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
-      } yield savedFlow
-    ).value
-  }
-
-  def updateApiChoice(sessionId: String, usingApiSubSelection: String, apiChoice: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, SupportFlow]] = {
-    (
-      for {
-        flow       <- ET.liftF(fetchSupportFlow(sessionId))
-        apiName    <- if (apiChoice.value == "api-not-in-list") ET.liftF(Future.successful(""))
-                      else ET.fromEitherF(apmConnector.fetchExtendedApiDefinition(apiChoice)).map(_.name)
-        updatedFlow = flow.copy(api = Some(SupportApi(apiChoice, apiName)), subSelection = Some(usingApiSubSelection))
-        savedFlow  <- ET.liftF(flowRepository.saveFlow(updatedFlow))
-      } yield savedFlow
-    ).value
+  def updateWithDelta(fn: SupportFlow => SupportFlow)(flow: SupportFlow): Future[SupportFlow] = {
+    flowRepository.saveFlow(fn(flow))
   }
 
   def setPrivateApiChoice(sessionId: String, apiChoice: String): Future[Either[Throwable, SupportFlow]] = {
@@ -142,7 +114,7 @@ class SupportService @Inject() (
       brand = config.deskproHorizonBrand,
       fields = Map(
         config.deskproHorizonEntryPoint -> deriveEntryPoint()
-      ) ++ supportFlow.api.fold(Map.empty[String, String])(v => Map(config.deskproHorizonApiName -> v.name))
+      ) ++ supportFlow.api.fold(Map.empty[String, String])(v => Map(config.deskproHorizonApiName -> v))
     )).flatMap { result =>
       flowRepository.saveFlow(supportFlow.copy(referenceNumber = Some(result.ref), emailAddress = Some(emailAddress)))
     }

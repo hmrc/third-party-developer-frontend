@@ -120,7 +120,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
       "render the page when flow is correct" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.chooseAPrivateApiPage())(request)
+        val result = addToken(underTest.page())(request)
 
         status(result) shouldBe OK
       }
@@ -128,7 +128,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
       "render the previous page when flow is wrong" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(entrySelection = SupportData.UsingAnApi.id))
 
-        val result = addToken(underTest.chooseAPrivateApiPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
@@ -136,7 +136,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
       "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
-        val result = addToken(underTest.chooseAPrivateApiPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
@@ -148,9 +148,9 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
           "chosen-api-name" -> SupportData.ChooseBusinessRates.id
         )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.SetPrivateApiChoice.succeeds(SupportData.ChooseBusinessRates.text)
+        SupportServiceMock.UpdateWithDelta.succeeds()
 
-        val result = addToken(underTest.submitChoiceOfPrivateApi())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToApplyPage(result)
       }
@@ -160,9 +160,9 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
           "chosen-api-name" -> SupportData.ChooseCDS.id
         )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.SetPrivateApiChoice.succeeds(SupportData.ChooseCDS.text)
+        SupportServiceMock.UpdateWithDelta.succeeds()
 
-        val result = addToken(underTest.submitChoiceOfPrivateApi())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToConfirmCdsPage(result)
       }
@@ -173,7 +173,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
         )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.submitChoiceOfPrivateApi())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         status(result) shouldBe BAD_REQUEST
       }
@@ -184,7 +184,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
         )
         SupportServiceMock.GetSupportFlow.succeeds()
 
-        val result = addToken(underTest.submitChoiceOfPrivateApi())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToPreviousPage(result)
       }

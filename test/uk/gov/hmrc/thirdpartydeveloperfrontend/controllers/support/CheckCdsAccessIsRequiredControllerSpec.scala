@@ -47,11 +47,11 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
 
     val underTest = new CheckCdsAccessIsRequiredController(
       mcc,
+      SupportServiceMock.aMock,
       cookieSigner,
       sessionServiceMock,
       mock[ErrorHandler],
       mock[DeskproService],
-      SupportServiceMock.aMock,
       chooseAPrivateApiView,
       checkCdsAccessIsRequiredView,
       cdsAccessIsNotRequiredView
@@ -130,7 +130,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
       "render the page when flow has private api of CDS present" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.checkCdsAccessIsRequiredPage())(request)
+        val result = addToken(underTest.page())(request)
 
         status(result) shouldBe OK
       }
@@ -138,7 +138,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
       "render the previous page when flow has private api that is not CDS" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow.copy(privateApi = Some("I'm not CDS")))
 
-        val result = addToken(underTest.checkCdsAccessIsRequiredPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
@@ -146,7 +146,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
       "render the previous page when flow has no private api present" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow.copy(privateApi = None))
 
-        val result = addToken(underTest.checkCdsAccessIsRequiredPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
@@ -154,13 +154,13 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
       "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
-        val result = addToken(underTest.checkCdsAccessIsRequiredPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
     }
 
-    "invoke submitApplyForPrivateApiAccess" should {
+    "invoke submit" should {
       "submit new valid request from form with CDS" in new Setup with IsLoggedIn {
         val formRequest = request
           .withFormUrlEncodedBody(
@@ -169,7 +169,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.SubmitTicket.succeeds()
 
-        val result = addToken(underTest.submitCdsAccessIsRequired())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToApplyPage(result)
       }
@@ -182,7 +182,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.SubmitTicket.succeeds()
 
-        val result = addToken(underTest.submitCdsAccessIsRequired())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToNotRequiredPage(result)
       }
@@ -194,7 +194,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
           )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.submitCdsAccessIsRequired())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         redirectLocation(result) shouldBe None
         status(result) shouldBe BAD_REQUEST
@@ -208,7 +208,7 @@ class CheckCdsAccessIsRequiredControllerSpec extends BaseControllerSpec with Wit
 
         SupportServiceMock.GetSupportFlow.succeeds()
 
-        val result = addToken(underTest.submitCdsAccessIsRequired())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToPreviousPage(result)
       }

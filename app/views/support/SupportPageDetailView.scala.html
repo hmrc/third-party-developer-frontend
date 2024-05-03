@@ -39,7 +39,7 @@
 @(loggedIn: Option[DeveloperSession], form: Form[SupportDetailsForm], supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @makingACallHeading={
-    <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.map(_.name).getOrElse("")} API call you need help with</h1>
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.getOrElse("")} API call you need help with</h1>
     <p class="govuk-body">Include the following details about the API documentation if you can:</p>
     <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
         <li>The version</li>
@@ -49,7 +49,7 @@
 }
 
 @examplesHeading={
-  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.map(_.name).getOrElse("")} endpoint you need a payload or data schema for</h1>
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.getOrElse("")} endpoint you need a payload or data schema for</h1>
   <p class="govuk-body">Include the following details about the endpoint:</p>
   <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
       <li>The version</li>
@@ -59,7 +59,7 @@
 }
 
 @reportingHeading={
-  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what is inaccurate or missing from the @{supportFlow.api.map(_.name).getOrElse("")} documentation</h1>
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what is inaccurate or missing from the @{supportFlow.api.getOrElse("")} documentation</h1>
   <p class="govuk-body">Include the following details about API documentation if you can:</p>
   <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-6">
       <li>The version</li>

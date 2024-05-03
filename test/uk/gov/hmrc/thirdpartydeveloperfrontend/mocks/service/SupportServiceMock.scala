@@ -20,9 +20,7 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.http.HttpException
-
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
@@ -50,38 +48,14 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
       }
     }
 
+    object UpdateWithDelta {
+      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.updateWithDelta(*)(*)).thenReturn(successful(flow))
+    }
+    
     object CreateSupportFlow {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.createFlow(*, *)).thenReturn(successful(flow))
     }
 
-    object UpdateApiChoice {
-
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) =
-        when(aMock.updateApiChoice(*, *, *[ServiceName])(*)).thenReturn(successful(Right(flow)))
-
-      def succeedsFor(serviceName: String, subSelection: String, flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) =
-        when(aMock.updateApiChoice(*, eqTo(subSelection), eqTo(ServiceName(serviceName)))(*)).thenReturn(successful(Right(flow)))
-
-      def fails() =
-        when(aMock.updateApiChoice(*, *, *[ServiceName])(*)).thenReturn(successful(Left(new HttpException("", 400))))
-    }
-
-    object UpdateApiSubSelection {
-
-      def succeeds(subSelection: String, flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) =
-        when(aMock.updateApiSubselection(*, eqTo(subSelection))).thenReturn(successful(Right(flow)))
-    }
-
-    object ClearApiChoice {
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.clearApiChoice(*)).thenReturn(successful(Right(flow)))
-      def fails()                                                                                = when(aMock.clearApiChoice(*)).thenReturn(successful(Left(new HttpException("", 400))))
-    }
-
-    object SetPrivateApiChoice {
-
-      def succeeds(choice: String, flow: SupportFlow = SupportFlow("sessionId", SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id))) =
-        when(aMock.setPrivateApiChoice(*, eqTo(choice))).thenReturn(successful(Right(flow.copy(privateApi = Some(choice)))))
-    }
   }
 
   object SupportServiceMock extends AbstractSupportServiceMock {

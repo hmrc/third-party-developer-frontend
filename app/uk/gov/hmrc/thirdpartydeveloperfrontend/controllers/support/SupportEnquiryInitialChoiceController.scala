@@ -51,7 +51,7 @@ class SupportEnquiryInitialChoiceController @Inject() (
       val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
       supportService.createFlow(sessionId, form.initialChoice)
       form.initialChoice match {
-        case SupportData.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage()), sessionId))
+        case SupportData.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.page()), sessionId))
         case _                         => Future.successful(withSupportCookie(Redirect(routes.SupportDetailsController.supportDetailsPage()), sessionId))
       }
     }

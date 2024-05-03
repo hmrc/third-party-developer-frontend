@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,12 +24,15 @@ import views.html.support.{CheckCdsAccessIsRequiredView, ChooseAPrivateApiView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
+import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
+import play.api.mvc.Call
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
@@ -44,68 +46,39 @@ class ChooseAPrivateApiController @Inject() (
     ensureCdsAccessIsRequired: CheckCdsAccessIsRequiredView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends AbstractController(mcc) with SupportCookie {
+  ) extends AbstractSupportFlowController[ChooseAPrivateApiForm, Unit](mcc, supportService) with SupportCookie {
 
-  def chooseAPrivateApiPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderPage(flow: SupportFlow) =
-      if (flow.entrySelection == SupportData.UsingAnApi.id && flow.subSelection == Some(SupportData.PrivateApiDocumentation.id))
-        Ok(
-          chooseAPrivateApiView(
-            fullyloggedInDeveloper,
-            ChooseAPrivateApiForm.form,
-            routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
-          )
-        )
-      else
-        Redirect(routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage())
+  def redirectBack(): Result = Redirect(routes.HelpWithUsingAnApiController.page())
 
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-    supportService.getSupportFlow(sessionId).map(renderPage)
+  def filterValidFlow(flow: SupportFlow): Boolean = flow match {
+    case SupportFlow(_, SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id), _, None, _, _) => true
+    case _                                                                                                      => false
   }
 
-  def submitChoiceOfPrivateApi: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderChooseAPrivateApiErrorView(form: Form[ChooseAPrivateApiForm]) = {
-      successful(BadRequest(
-        chooseAPrivateApiView(
-          fullyloggedInDeveloper,
-          form,
-          routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage().url
-        )
-      ))
-    }
+  def pageContents(flow: SupportFlow, form: Form[ChooseAPrivateApiForm], extras: Unit)(implicit request: MaybeUserRequest[AnyContent]): HtmlFormat.Appendable =
+    chooseAPrivateApiView(
+      fullyloggedInDeveloper,
+      form,
+      routes.HelpWithUsingAnApiController.page().url
+    )
 
-    def updateFlowAndRedirectToApplyPage(sessionId: String): Future[Result] = {
-      supportService.setPrivateApiChoice(sessionId, SupportData.ChooseBusinessRates.text).flatMap {
-        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.ApplyForPrivateApiAccessController.applyForPrivateApiAccessPage()), sessionId))
-        case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
-      }
-    }
+  def choose(choice: String)(flow: SupportFlow) =
+    flow.copy(subSelection = Some(choice))
 
-    def updateFlowAndRedirectToCheckPage(sessionId: String): Future[Result] = {
-      supportService.setPrivateApiChoice(sessionId, SupportData.ChooseCDS.text).flatMap {
-        case Right(_) => Future.successful(withSupportCookie(Redirect(routes.CheckCdsAccessIsRequiredController.checkCdsAccessIsRequiredPage()), sessionId))
-        case Left(_)  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
-      }
-    }
-
-    def handleValidForm(sessionId: String)(form: ChooseAPrivateApiForm): Future[Result] = {
-      form.chosenApiName match {
-        case SupportData.ChooseBusinessRates.id => updateFlowAndRedirectToApplyPage(sessionId)
-        case SupportData.ChooseCDS.id           => updateFlowAndRedirectToCheckPage(sessionId)
-        case _                                  => renderChooseAPrivateApiErrorView(ChooseAPrivateApiForm.form.withError("error", "Error"))
-      }
-    }
-
-    def handleInvalidForm(formWithErrors: Form[ChooseAPrivateApiForm]): Future[Result] =
-      renderChooseAPrivateApiErrorView(formWithErrors)
-
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-    supportService.getSupportFlow(sessionId).flatMap { flow =>
-      if (flow.entrySelection == SupportData.UsingAnApi.id && flow.subSelection == Some(SupportData.PrivateApiDocumentation.id)) {
-        ChooseAPrivateApiForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm(sessionId))
-      } else {
-        successful(Redirect(routes.HelpWithUsingAnApiController.helpWithUsingAnApiPage()))
-      }
+  def updateFlowAndRedirect(flowFn: SupportFlow => SupportFlow)(redirectTo: Call)(flow: SupportFlow) = {
+    supportService.updateWithDelta(flowFn)(flow).map { newFlow =>
+      Redirect(redirectTo)
     }
   }
+
+  def onValidForm(flow: SupportFlow, form: ChooseAPrivateApiForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] =
+    form.chosenApiName match {
+      case c@ SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(choose(c))(routes.ApplyForPrivateApiAccessController.page())(flow)
+      case c@ SupportData.ChooseCDS.id           => updateFlowAndRedirect(choose(c))(routes.CheckCdsAccessIsRequiredController.page())(flow)
+    }
+
+  def form(): Form[ChooseAPrivateApiForm] = ChooseAPrivateApiForm.form
+      
+  def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
+
 }

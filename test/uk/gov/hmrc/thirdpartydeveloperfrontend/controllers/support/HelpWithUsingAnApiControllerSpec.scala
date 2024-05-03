@@ -73,7 +73,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
     def shouldBeRedirectedToPreviousPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).value shouldBe "/developer/support?useNewSupport=true"
+      redirectLocation(result).value shouldBe "/developer/new-support"
     }
 
     def shouldBeRedirectedToDetailsPage(result: Future[Result]) = {
@@ -127,11 +127,11 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
   }
 
   "HelpWithUsingAnApiController" when {
-    "invoke helpWithUsingAnApiPage" should {
+    "invoke page" should {
       "render the helpWithUsingAnApi page when flow is appropriate" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.helpWithUsingAnApiPage())(request)
+        val result = addToken(underTest.page())(request)
 
         status(result) shouldBe OK
         implicit val dom: Document = Jsoup.parse(contentAsString(result))
@@ -143,7 +143,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
       "render the previous page when flow is not appropriate" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
-        val result = addToken(underTest.helpWithUsingAnApiPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
@@ -151,16 +151,16 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
       "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = None))
 
-        val result = addToken(underTest.helpWithUsingAnApiPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
     }
 
-    "invoke submitHelpWithUsingAnApi" should {
+    "invoke submit" should {
       "handle option 'Making an API call'" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.UpdateApiChoice.succeedsFor("bob", SupportData.MakingAnApiCall.id)
+        SupportServiceMock.UpdateWithDelta.succeeds()
 
         val formRequest = request
           .withFormUrlEncodedBody(
@@ -170,14 +170,14 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
             SupportData.ReportingDocumentation.id + "-api-name" -> "ignore"
           )
 
-        val result = addToken(underTest.submitHelpWithUsingAnApi)(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToDetailsPage(result)
       }
 
       "handle option 'Getting examples for an API'" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.UpdateApiChoice.succeedsFor("bob", SupportData.GettingExamples.id)
+        SupportServiceMock.UpdateWithDelta.succeeds()
 
         val formRequest = request
           .withFormUrlEncodedBody(
@@ -187,14 +187,13 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
             SupportData.ReportingDocumentation.id + "-api-name" -> "ignore"
           )
 
-        val result = addToken(underTest.submitHelpWithUsingAnApi)(formRequest)
-
+        val result = addToken(underTest.submit())(formRequest)
         shouldBeRedirectedToDetailsPage(result)
       }
 
       "handle option 'Reporting documentation for an API'" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.UpdateApiChoice.succeedsFor("bob", SupportData.ReportingDocumentation.id)
+        SupportServiceMock.UpdateWithDelta.succeeds()
 
         val formRequest = request
           .withFormUrlEncodedBody(
@@ -204,14 +203,14 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
             SupportData.ReportingDocumentation.id + "-api-name" -> "bob"
           )
 
-        val result = addToken(underTest.submitHelpWithUsingAnApi)(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToDetailsPage(result)
       }
 
       "handle option 'Private API Documentation'" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
-        SupportServiceMock.UpdateApiSubSelection.succeeds(SupportData.PrivateApiDocumentation.id)
+        SupportServiceMock.UpdateWithDelta.succeeds()
 
         val formRequest = request
           .withFormUrlEncodedBody(
@@ -221,7 +220,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
             SupportData.ReportingDocumentation.id + "-api-name" -> "ignore"
           )
 
-        val result = addToken(underTest.submitHelpWithUsingAnApi)(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToChoosePrivateApiPage(result)
       }
@@ -231,7 +230,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
         val formRequest = request.withFormUrlEncodedBody("choice" -> "random stuff")
 
-        val result = addToken(underTest.submitHelpWithUsingAnApi)(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         status(result) shouldBe BAD_REQUEST
       }
@@ -246,7 +245,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
-        val result = addToken(underTest.submitHelpWithUsingAnApi())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToPreviousPage(result)
       }

@@ -16,80 +16,57 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.html.support.{ApplyForPrivateApiAccessView, ChooseAPrivateApiView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
+import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
+import scala.concurrent.Future.successful
 
 @Singleton
 class ApplyForPrivateApiAccessController @Inject() (
     mcc: MessagesControllerComponents,
+    supportService: SupportService,
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
     val deskproService: DeskproService,
-    supportService: SupportService,
     applyForPrivateApiAccessView: ApplyForPrivateApiAccessView,
     chooseAPrivateApiView: ChooseAPrivateApiView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends AbstractController(mcc) with SupportCookie {
+  ) extends AbstractSupportFlowController[ApplyForPrivateApiAccessForm, Unit](mcc, supportService) with SupportCookie {
 
-  def applyForPrivateApiAccessPage: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def renderPage(flow: SupportFlow) =
-      flow.privateApi.fold(
-        Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage())
-      )(apiName =>
-        Ok(
-          applyForPrivateApiAccessView(
-            fullyloggedInDeveloper,
-            apiName,
-            ApplyForPrivateApiAccessForm.form,
-            routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
-          )
-        )
-      )
+  def redirectBack(): Result = Redirect(routes.ChooseAPrivateApiController.page())
 
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-    supportService.getSupportFlow(sessionId).map(renderPage)
+  def filterValidFlow(flow: SupportFlow): Boolean = flow.privateApi.isDefined
+
+  def form() = ApplyForPrivateApiAccessForm.form
+
+  def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
+
+  def pageContents(flow: SupportFlow, form: Form[ApplyForPrivateApiAccessForm], extras: Unit)(implicit request: MaybeUserRequest[AnyContent]): HtmlFormat.Appendable = {
+    applyForPrivateApiAccessView(
+      fullyloggedInDeveloper,
+      flow.privateApi.get,
+      form,
+      routes.ChooseAPrivateApiController.page().url
+    )
   }
 
-  def submitApplyForPrivateApiAccess: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    def handleValidForm(flow: SupportFlow, sessionId: String)(form: ApplyForPrivateApiAccessForm): Future[Result] = {
-      supportService.submitTicket(flow, form).map { _ =>
-        withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
-      }
-    }
-
-    def handleInvalidForm(chosenPrivateApi: String)(formWithErrors: Form[ApplyForPrivateApiAccessForm]): Future[Result] = {
-      successful(BadRequest(
-        applyForPrivateApiAccessView(
-          fullyloggedInDeveloper,
-          chosenPrivateApi,
-          formWithErrors,
-          routes.ChooseAPrivateApiController.chooseAPrivateApiPage().url
-        )
-      ))
-    }
-
-    // TODO - the magic stuff here
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
-    supportService.getSupportFlow(sessionId).flatMap { flow =>
-      flow.privateApi match {
-        case Some(chosenPrivateApi) => ApplyForPrivateApiAccessForm.form.bindFromRequest().fold(handleInvalidForm(chosenPrivateApi), handleValidForm(flow, sessionId))
-        case _                      => successful(Redirect(routes.ChooseAPrivateApiController.chooseAPrivateApiPage()))
-      }
+  def onValidForm(flow: SupportFlow, form: ApplyForPrivateApiAccessForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
+    supportService.submitTicket(flow, form).map { _ =>
+      Redirect(routes.SupportDetailsController.supportConfirmationPage())
     }
   }
 }

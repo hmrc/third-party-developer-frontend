@@ -45,11 +45,11 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
 
     val underTest = new ApplyForPrivateApiAccessController(
       mcc,
+      SupportServiceMock.aMock,
       cookieSigner,
       sessionServiceMock,
       mock[ErrorHandler],
       mock[DeskproService],
-      SupportServiceMock.aMock,
       applyForPrivateApiAccessView,
       chooseAPrivateApiView
     )
@@ -111,11 +111,11 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
   }
 
   "ApplyForPrivateApiAccessController" when {
-    "invoke applyForPrivateApiAccessPage" should {
+    "invoke page" should {
       "render the page when flow has private api present" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.applyForPrivateApiAccessPage())(request)
+        val result = addToken(underTest.page())(request)
 
         status(result) shouldBe OK
       }
@@ -123,7 +123,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
       "render the previous page when flow has no private api present" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = None))
 
-        val result = addToken(underTest.applyForPrivateApiAccessPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
@@ -131,13 +131,13 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
       "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = None))
 
-        val result = addToken(underTest.applyForPrivateApiAccessPage())(request)
+        val result = addToken(underTest.page())(request)
 
         shouldBeRedirectedToPreviousPage(result)
       }
     }
 
-    "invoke submitApplyForPrivateApiAccess" should {
+    "invoke submit" should {
       "submit new valid request from form" in new Setup with IsLoggedIn {
         val formRequest = request.withFormUrlEncodedBody(
           "fullName"      -> "Bob",
@@ -148,7 +148,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.SubmitTicket.succeeds()
 
-        val result = addToken(underTest.submitApplyForPrivateApiAccess())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToConfirmationPage(result)
       }
@@ -161,7 +161,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
-        val result = addToken(underTest.submitApplyForPrivateApiAccess())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         status(result) shouldBe BAD_REQUEST
       }
@@ -175,7 +175,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         )
         SupportServiceMock.GetSupportFlow.succeeds()
 
-        val result = addToken(underTest.submitApplyForPrivateApiAccess())(formRequest)
+        val result = addToken(underTest.submit())(formRequest)
 
         shouldBeRedirectedToPreviousPage(result)
       }
