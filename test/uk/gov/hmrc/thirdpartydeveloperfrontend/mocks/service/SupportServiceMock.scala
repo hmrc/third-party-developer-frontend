@@ -20,7 +20,7 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
@@ -51,7 +51,7 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
     object UpdateWithDelta {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.updateWithDelta(*)(*)).thenReturn(successful(flow))
     }
-    
+
     object CreateSupportFlow {
       def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.createFlow(*, *)).thenReturn(successful(flow))
     }

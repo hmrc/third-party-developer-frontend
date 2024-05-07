@@ -97,8 +97,9 @@ class SupportDetailsController @Inject() (
         )
       )
 
-    extractSupportSessionIdFromCookie(request)
-      .map(sessionId => supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage))
-      .getOrElse(Future.successful(Redirect(routes.SupportEnquiryController.supportEnquiryPage(true))))
+    extractSupportSessionIdFromCookie(request).map(sessionId => 
+      supportService.getSupportFlow(sessionId).map(renderSupportConfirmationPage)
+    )
+    .getOrElse(Future.successful(Redirect(routes.SupportEnquiryController.supportEnquiryPage(true))))
   }
 }

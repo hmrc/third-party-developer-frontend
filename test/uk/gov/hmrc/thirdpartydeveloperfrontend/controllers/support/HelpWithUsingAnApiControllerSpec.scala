@@ -42,6 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+  val sessionId = "sessionId"
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val helpWithUsingAnApiView = app.injector.instanceOf[HelpWithUsingAnApiView]
@@ -58,7 +59,6 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val sessionId                            = "sessionId"
     val basicFlow                            = SupportFlow(sessionId, "unknown")
     val appropriateFlow                      = basicFlow.copy(entrySelection = SupportData.UsingAnApi.id)
 
@@ -127,6 +127,52 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
   }
 
   "HelpWithUsingAnApiController" when {
+    "using the delta functions" should {
+      "work for chooseMakingCall" in {
+        val form = HelpWithUsingAnApiForm("ignored", apiNameForCall = "bob", "", "")
+        val flow = SupportFlow(sessionId, "untouched")
+
+        val result = HelpWithUsingAnApiController.chooseMakingCall(form)(flow)
+
+        result.entrySelection shouldBe "untouched"
+        result.subSelection.value shouldBe SupportData.MakingAnApiCall.id
+        result.api.value shouldBe "bob"
+      }
+
+      "work for chooseGettingExamples" in {
+        val form = HelpWithUsingAnApiForm("ignored", "", apiNameForExamples = "bob", "")
+        val flow = SupportFlow(sessionId, "untouched")
+
+        val result = HelpWithUsingAnApiController.chooseGettingExamples(form)(flow)
+
+        result.entrySelection shouldBe "untouched"
+        result.subSelection.value shouldBe SupportData.GettingExamples.id
+        result.api.value shouldBe "bob"
+      }
+
+      "work for chooseReporting" in {
+        val form = HelpWithUsingAnApiForm("ignored", "", "", apiNameForReporting = "bob")
+        val flow = SupportFlow(sessionId, "untouched")
+
+        val result = HelpWithUsingAnApiController.chooseReporting(form)(flow)
+
+        result.entrySelection shouldBe "untouched"
+        result.subSelection.value shouldBe SupportData.ReportingDocumentation.id
+        result.api.value shouldBe "bob"
+      }
+
+      "work for choosePrivateApi" in {
+        val form = HelpWithUsingAnApiForm("ignored", "", "", "")
+        val flow = SupportFlow(sessionId, "untouched")
+
+        val result = HelpWithUsingAnApiController.choosePrivateApi(form)(flow)
+
+        result.entrySelection shouldBe "untouched"
+        result.subSelection.value shouldBe SupportData.PrivateApiDocumentation.id
+        result.api shouldBe None
+      }
+    }
+
     "invoke page" should {
       "render the helpWithUsingAnApi page when flow is appropriate" in new Setup with IsLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)

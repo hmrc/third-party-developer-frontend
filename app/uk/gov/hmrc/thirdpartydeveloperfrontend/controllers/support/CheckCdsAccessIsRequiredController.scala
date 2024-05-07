@@ -70,7 +70,7 @@ class CheckCdsAccessIsRequiredController @Inject() (
   }
 
   def form() = CheckCdsAccessIsRequiredForm.form
-    
+
   def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
 
   def cdsAccessIsNotRequiredPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

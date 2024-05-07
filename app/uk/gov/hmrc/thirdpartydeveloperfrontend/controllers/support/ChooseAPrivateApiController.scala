@@ -24,7 +24,7 @@ import views.html.support.{CheckCdsAccessIsRequiredView, ChooseAPrivateApiView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, Call, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import play.api.mvc.Call
 
 @Singleton
 class ChooseAPrivateApiController @Inject() (
@@ -73,12 +72,12 @@ class ChooseAPrivateApiController @Inject() (
 
   def onValidForm(flow: SupportFlow, form: ChooseAPrivateApiForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] =
     form.chosenApiName match {
-      case c@ SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(choose(c))(routes.ApplyForPrivateApiAccessController.page())(flow)
-      case c@ SupportData.ChooseCDS.id           => updateFlowAndRedirect(choose(c))(routes.CheckCdsAccessIsRequiredController.page())(flow)
+      case c @ SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(choose(c))(routes.ApplyForPrivateApiAccessController.page())(flow)
+      case c @ SupportData.ChooseCDS.id           => updateFlowAndRedirect(choose(c))(routes.CheckCdsAccessIsRequiredController.page())(flow)
     }
 
   def form(): Form[ChooseAPrivateApiForm] = ChooseAPrivateApiForm.form
-      
+
   def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
 
 }

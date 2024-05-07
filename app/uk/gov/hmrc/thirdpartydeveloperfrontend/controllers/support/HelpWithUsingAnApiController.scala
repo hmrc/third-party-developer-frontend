@@ -17,23 +17,45 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.html.support.HelpWithUsingAnApiView
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, Call, MessagesControllerComponents, Result}
+import play.twirl.api.HtmlFormat
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
-import play.twirl.api.HtmlFormat
-import play.api.mvc.Call
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
+
+object HelpWithUsingAnApiController {
+
+  def chooseMakingCall(form: HelpWithUsingAnApiForm)(flow: SupportFlow) =
+    flow.copy(
+      subSelection = Some(SupportData.MakingAnApiCall.id),
+      api = Some(form.apiNameForCall)
+    )
+
+  def chooseGettingExamples(form: HelpWithUsingAnApiForm)(flow: SupportFlow) =
+    flow.copy(
+      subSelection = Some(SupportData.GettingExamples.id),
+      api = Some(form.apiNameForExamples)
+    )
+
+  def chooseReporting(form: HelpWithUsingAnApiForm)(flow: SupportFlow) =
+    flow.copy(
+      subSelection = Some(SupportData.ReportingDocumentation.id),
+      api = Some(form.apiNameForReporting)
+    )
+
+  def choosePrivateApi(form: HelpWithUsingAnApiForm)(flow: SupportFlow) =
+    flow.copy(subSelection = Some(SupportData.PrivateApiDocumentation.id))
+}
 
 @Singleton
 class HelpWithUsingAnApiController @Inject() (
@@ -48,11 +70,13 @@ class HelpWithUsingAnApiController @Inject() (
     val appConfig: ApplicationConfig
   ) extends AbstractSupportFlowController[HelpWithUsingAnApiForm, List[ApiDefinition]](mcc, supportService) with SupportCookie {
 
+  import HelpWithUsingAnApiController._
+
   def redirectBack(): Result = Redirect(routes.SupportEnquiryInitialChoiceController.page())
 
   def filterValidFlow(flow: SupportFlow): Boolean = flow match {
     case SupportFlow(_, SupportData.UsingAnApi.id, _, _, _, _, _) => true
-    case _ => false
+    case _                                                        => false
   }
 
   def pageContents(flow: SupportFlow, form: Form[HelpWithUsingAnApiForm], extras: List[ApiDefinition])(implicit request: MaybeUserRequest[AnyContent]): HtmlFormat.Appendable =
@@ -62,30 +86,6 @@ class HelpWithUsingAnApiController @Inject() (
       routes.SupportEnquiryController.supportEnquiryPage(true).url,
       extras
     )
-
-  def chooseMakingCall(form: HelpWithUsingAnApiForm)(flow: SupportFlow) = 
-    flow.copy(
-      subSelection = Some(SupportData.MakingAnApiCall.id),
-      api = Some(form.apiNameForCall)
-    )
-  
-  def chooseGettingExamples(form: HelpWithUsingAnApiForm)(flow: SupportFlow) = 
-    flow.copy(
-      subSelection = Some(SupportData.GettingExamples.id),
-      api = Some(form.apiNameForExamples)
-    )
-  
-  def chooseReporting(form: HelpWithUsingAnApiForm)(flow: SupportFlow) = 
-    flow.copy(
-      subSelection = Some(SupportData.ReportingDocumentation.id),
-      api = Some(form.apiNameForReporting)
-    )
-  
-  def choosePrivateApi(form: HelpWithUsingAnApiForm)(flow: SupportFlow) = 
-    flow.copy(subSelection = Some(SupportData.PrivateApiDocumentation.id))
-  
-  def choose(choice: String)(flow: SupportFlow) =
-    flow.copy(subSelection = Some(choice))
 
   def updateFlowAndRedirect(flowFn: SupportFlow => SupportFlow)(redirectTo: Call)(flow: SupportFlow) = {
     supportService.updateWithDelta(flowFn)(flow).map { newFlow =>
@@ -99,7 +99,6 @@ class HelpWithUsingAnApiController @Inject() (
       case SupportData.GettingExamples.id         => updateFlowAndRedirect(chooseGettingExamples(form))(routes.SupportDetailsController.supportDetailsPage())(flow)
       case SupportData.ReportingDocumentation.id  => updateFlowAndRedirect(chooseReporting(form))(routes.SupportDetailsController.supportDetailsPage())(flow)
       case SupportData.PrivateApiDocumentation.id => updateFlowAndRedirect(choosePrivateApi(form))(routes.ChooseAPrivateApiController.page())(flow)
-      case c                                      => updateFlowAndRedirect(choose(c))(routes.SupportDetailsController.supportDetailsPage())(flow)
     }
   }
 

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.html.support.{ApplyForPrivateApiAccessView, ChooseAPrivateApiView}
@@ -31,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{DeskproService, SessionService, SupportService}
-import scala.concurrent.Future.successful
 
 @Singleton
 class ApplyForPrivateApiAccessController @Inject() (

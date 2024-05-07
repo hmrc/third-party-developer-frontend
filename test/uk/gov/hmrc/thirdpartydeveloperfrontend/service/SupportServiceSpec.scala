@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import uk.gov.hmrc.http.{HeaderCarrier}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockM
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{SupportData, SupportDetailsForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{SupportFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -79,10 +79,11 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       result shouldBe apiList
       verify(ApmConnectorMock.aMock).fetchApiDefinitionsVisibleToUser(None)
     }
-    
-    // TODO - updateWithDelta
+
     "updateWithDelta" in new Setup {
-      fail()
+      val result = await(underTest.updateWithDelta(f => f.copy(sessionId = "New"))(SupportFlow("Old", "?")))
+
+      result shouldBe SupportFlow("New", "?")
     }
 
     "fetchAllPublicApis with a user" in new Setup {
