@@ -50,8 +50,8 @@ class ChooseAPrivateApiController @Inject() (
   def redirectBack(): Result = Redirect(routes.HelpWithUsingAnApiController.page())
 
   def filterValidFlow(flow: SupportFlow): Boolean = flow match {
-    case SupportFlow(_, SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id), _, None, _, _) => true
-    case _                                                                                                      => false
+    case SupportFlow(_, SupportData.UsingAnApi.id, Some(SupportData.PrivateApiDocumentation.id), _, _, _, _) => true
+    case _                                                                                                   => false
   }
 
   def pageContents(flow: SupportFlow, form: Form[ChooseAPrivateApiForm], extras: Unit)(implicit request: MaybeUserRequest[AnyContent]): HtmlFormat.Appendable =
@@ -62,7 +62,7 @@ class ChooseAPrivateApiController @Inject() (
     )
 
   def choose(choice: String)(flow: SupportFlow) =
-    flow.copy(subSelection = Some(choice))
+    flow.copy(privateApi = Some(choice))
 
   def updateFlowAndRedirect(flowFn: SupportFlow => SupportFlow)(redirectTo: Call)(flow: SupportFlow) = {
     supportService.updateWithDelta(flowFn)(flow).map { newFlow =>
@@ -70,14 +70,16 @@ class ChooseAPrivateApiController @Inject() (
     }
   }
 
+  def chooseBusinessRates(flow: SupportFlow) = choose(SupportData.ChooseBusinessRates.text)(flow)
+  def chooseCDS(flow: SupportFlow)           = choose(SupportData.ChooseCDS.text)(flow)
+
   def onValidForm(flow: SupportFlow, form: ChooseAPrivateApiForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] =
     form.chosenApiName match {
-      case c @ SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(choose(c))(routes.ApplyForPrivateApiAccessController.page())(flow)
-      case c @ SupportData.ChooseCDS.id           => updateFlowAndRedirect(choose(c))(routes.CheckCdsAccessIsRequiredController.page())(flow)
+      case c @ SupportData.ChooseBusinessRates.id => updateFlowAndRedirect(chooseBusinessRates)(routes.ApplyForPrivateApiAccessController.page())(flow)
+      case c @ SupportData.ChooseCDS.id           => updateFlowAndRedirect(chooseCDS)(routes.CheckCdsAccessIsRequiredController.page())(flow)
     }
 
   def form(): Form[ChooseAPrivateApiForm] = ChooseAPrivateApiForm.form
 
   def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
-
 }
