@@ -25,7 +25,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{DeskproConnector, DeskproHorizonConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{SignOutSurveyForm, SupportEnquiryForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId, TicketResult}
 
 @Singleton

@@ -17,10 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
 
 @this(devMain: DevMainWithFormErrors)
 
-@(loggedIn: Option[String], form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[String], form: Form[SupportEnquiryForm])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
   form,
@@ -49,7 +50,7 @@
     for answers.
   </p>
 
-  @helper.form(action = routes.Support.submitSupportEnquiry()) {
+  @helper.form(action = controllers.support.routes.SupportEnquiryController.submitSupportEnquiry()) {
 
     <fieldset class="govuk-fieldset">
       @helper.CSRF.formField

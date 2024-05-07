@@ -23,6 +23,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collabora
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
 
 case class DeskproTicket(
     name: String,
@@ -141,7 +142,7 @@ object DeskproTicket extends FieldTransformer {
       email = supportEnquiry.email.toLaxEmail,
       subject = s"$appTitle: Support Enquiry",
       message = message,
-      referrer = routes.Support.submitSupportEnquiry().url,
+      referrer = support.routes.SupportEnquiryController.submitSupportEnquiry().url,
       userAgent = request.headers.get("User-Agent").getOrElse("n/a")
     )
   }

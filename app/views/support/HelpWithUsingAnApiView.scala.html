@@ -18,11 +18,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApiSupportForm
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
 @this(
   devMain: DevMainWithFormErrors,
@@ -32,7 +32,7 @@
   govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[ApiSupportForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[DeveloperSession], form: Form[HelpWithUsingAnApiForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @selectItems = @{
   apis.map( api =>
@@ -67,7 +67,7 @@
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
-  @helper.form(action = routes.Support.apiSupportAction()) {
+  @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.HelpWithUsingAnApiController.submit()) {
     @helper.CSRF.formField
     <span class="govuk-caption-l">Developer Hub support</span>
     @govukRadios(
@@ -83,46 +83,40 @@
             )
           )
         ),
-        errorMessage = if(form("helpWithApiChoice").hasErrors) {
+        errorMessage = if(form("choice").hasErrors) {
           Some(
             ErrorMessage(
               content = Text("Choose what kind of help you need")
             )
           )
         } else { None },
-        name = "helpWithApiChoice",
+        name = "choice",
         items = Seq(
           RadioItem(
-            id = Some(Support.MakingAnApiCall.id),
-            content = Text(Support.MakingAnApiCall.text),
-            value = Some(Support.MakingAnApiCall.id),
+            id = Some(SupportData.MakingAnApiCall.id),
+            content = Text(SupportData.MakingAnApiCall.text),
+            value = Some(SupportData.MakingAnApiCall.id),
             hint = None,
-            conditionalHtml = Some(apiNameChoiceHtml(Support.MakingAnApiCall.id))
+            conditionalHtml = Some(apiNameChoiceHtml(SupportData.MakingAnApiCall.id))
           ), 
           RadioItem(
-            id = Some(Support.GettingExamples.id),
-            content = Text(Support.GettingExamples.text),
-            value = Some(Support.GettingExamples.id),
+            id = Some(SupportData.GettingExamples.id),
+            content = Text(SupportData.GettingExamples.text),
+            value = Some(SupportData.GettingExamples.id),
             hint = None,
-            conditionalHtml = Some(apiNameChoiceHtml(Support.GettingExamples.id))
+            conditionalHtml = Some(apiNameChoiceHtml(SupportData.GettingExamples.id))
           ),
           RadioItem(
-            id = Some(Support.ReportingDocumentation.id),
-            content = Text(Support.ReportingDocumentation.text),
-            value = Some(Support.ReportingDocumentation.id),
+            id = Some(SupportData.ReportingDocumentation.id),
+            content = Text(SupportData.ReportingDocumentation.text),
+            value = Some(SupportData.ReportingDocumentation.id),
             hint = None,
-            conditionalHtml = Some(apiNameChoiceHtml(Support.ReportingDocumentation.id))
+            conditionalHtml = Some(apiNameChoiceHtml(SupportData.ReportingDocumentation.id))
           ), 
           RadioItem(
-            id = Some(Support.FindingDocumentation.id),
-            content = Text(Support.FindingDocumentation.text),
-            value = Some(Support.FindingDocumentation.id),
-            hint = None
-          ), 
-          RadioItem(
-            id = Some(Support.PrivateApiDocumentation.id),
-            content = Text(Support.PrivateApiDocumentation.text),
-            value = Some(Support.PrivateApiDocumentation.id),
+            id = Some(SupportData.PrivateApiDocumentation.id),
+            content = Text(SupportData.PrivateApiDocumentation.text),
+            value = Some(SupportData.PrivateApiDocumentation.id),
             hint = None
           )
         )
