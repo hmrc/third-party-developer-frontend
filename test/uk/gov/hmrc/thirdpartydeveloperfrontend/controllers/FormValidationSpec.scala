@@ -16,18 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import play.api.data.{Form, FormError}
+import play.api.data.FormError
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class FormValidationSpec extends AsyncHmrcSpec {
-
-  private def buildValidateNoErrors[T](bind: Map[String, String] => Form[T])(formData: Map[String, String]): Unit = {
-    val boundForm = bind(formData)
-    boundForm.errors shouldBe List()
-    boundForm.globalErrors shouldBe List()
-  }
+class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
 
   "ForgotPasswordForm " should {
     val validForgotPasswordForm = Map("emailaddress" -> "john.smith@example.com")
@@ -341,69 +335,6 @@ class FormValidationSpec extends AsyncHmrcSpec {
         error.key shouldBe "rating"
         error.messages shouldBe List(err)
       }))
-    }
-  }
-
-  "SupportEnquiryForm" should {
-    def validateNoErrors = buildValidateNoErrors(SupportEnquiryForm.form.bind) _
-
-    val validFormData = Map("fullname" -> "Terry Jones", "emailaddress" -> "test@example.com", "comments" -> "this is fine")
-
-    "accept valid form" in {
-      validateNoErrors(validFormData)
-    }
-
-    "accept comments with up to 3000 chars." in {
-      val formData = validFormData + ("comments" -> "a" * 3000)
-      validateNoErrors(formData)
-    }
-
-    "reject when comments with more than 3000 charaters" in {
-      val formData  = validFormData + ("comments" -> "a" * 3001)
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err       = boundForm.errors.head
-      err.key shouldBe "comments"
-      err.messages shouldBe List("comments.error.maxLength.field")
-    }
-
-    "reject a form that has missing comments" in {
-      val formData  = validFormData - "comments"
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err       = boundForm.errors.head
-      err.key shouldBe "comments"
-      err.messages shouldBe List("error.required")
-    }
-
-    "reject a form that has missing name" in {
-      val formData  = validFormData - "fullname"
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err       = boundForm.errors.head
-      err.key shouldBe "fullname"
-      err.messages shouldBe List("error.required")
-    }
-
-    "reject a form that when the name is too long" in {
-      val formData  = validFormData + ("fullname" -> "a" * 101)
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err       = boundForm.errors.head
-      err.key shouldBe "fullname"
-      err.messages shouldBe List("fullname.error.maxLength.field")
-    }
-
-    "reject a form that has missing email address" in {
-      val formData  = validFormData - "emailaddress"
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err       = boundForm.errors.head
-      err.key shouldBe "emailaddress"
-      err.messages shouldBe List("error.required")
-    }
-
-    "reject a form that when the email is too long" in {
-      val formData  = validFormData + ("emailaddress" -> s"${"a" * 320}@example.com")
-      val boundForm = SupportEnquiryForm.form.bind(formData)
-      val err       = boundForm.errors.head
-      err.key shouldBe "emailaddress"
-      err.messages shouldBe List("emailaddress.error.maxLength.field")
     }
   }
 

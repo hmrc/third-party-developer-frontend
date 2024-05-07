@@ -42,7 +42,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Support
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -174,10 +174,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
   )
   mockFetchBySessionIdAndFlowType[SupportFlow](
-    SupportFlow(sessionId, Support.UsingAnApi.id, None)
+    SupportFlow(sessionId, SupportData.UsingAnApi.id, None)
   )
   when(flowRepository.deleteBySessionIdAndFlowType(*, *)).thenReturn(Future.successful(true))
-  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, Support.UsingAnApi.id, Some(Support.MakingAnApiCall.id))))
+  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))))
   when(flowRepository.saveFlow[GetProductionCredentialsFlow](isA[GetProductionCredentialsFlow])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
   when(flowRepository.saveFlow[IpAllowlistFlow](isA[IpAllowlistFlow])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
   when(flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](isA[NewApplicationEmailPreferencesFlowV2])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(
@@ -344,16 +344,38 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/login-mfa", _)                                                         => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                    => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/support", _)                                                           => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
-      case Endpoint("POST", "/developer/new-support/api/choose", _)                                            => Map("helpWithChoice" -> Support.UsingAnApi.id)
+      case Endpoint("POST", "/developer/new-support", _)                                                       =>
+        Map("initialChoice" -> SupportData.UsingAnApi.id)
+      // case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("initialChoice" -> SupportData.UsingAnApi.id)
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                        =>
         Map(
-          "helpWithApiChoice"                             -> Support.MakingAnApiCall.id,
-          Support.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
-          Support.GettingExamples.id + "-api-name"        -> "Test Service Name",
-          Support.ReportingDocumentation.id + "-api-name" -> "Test Service Name"
+          "choice"                                            -> SupportData.MakingAnApiCall.id,
+          SupportData.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
+          SupportData.GettingExamples.id + "-api-name"        -> "Test Service Name",
+          SupportData.ReportingDocumentation.id + "-api-name" -> "Test Service Name"
         )
       case Endpoint("POST", "/developer/new-support/api/details", _)                                           =>
-        Map("apiName" -> "Test Service Name", "details" -> "details", "fullName" -> "full name", "emailAddress" -> "fullname@example.com")
+        Map(
+          "apiName"      -> "Test Service Name",
+          "details"      -> "details",
+          "fullName"     -> "full name",
+          "emailAddress" -> "fullname@example.com"
+        )
+      case Endpoint("POST", "/developer/new-support/api/private-api", _)                                       =>
+        Map(
+          "chosen-api-name" -> SupportData.ChooseBusinessRates.id
+        )
+      case Endpoint("POST", "/developer/new-support/api/private-api/apply", _)                                 =>
+        Map(
+          "fullName"      -> "full name",
+          "emailAddress"  -> "fullname@example.com",
+          "organisation"  -> "an org",
+          "applicationId" -> ApplicationId.random.toString()
+        )
+      case Endpoint("POST", "/developer/new-support/api/private-api/cds-check", _)                             =>
+        Map(
+          "confirmCdsIntegration" -> "no"
+        )
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)          =>
         Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 => Map("email" -> userEmail.text, "role" -> "developer")
@@ -454,9 +476,17 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/forgot-password", _)                                                    => Redirect("/developer/applications")
       case Endpoint("GET", "/developer/reset-password-link", _)                                                => Redirect("/developer/reset-password")
       case Endpoint("POST", "/developer/support", _)                                                           => Redirect("/developer/support/submitted")
+      case Endpoint("GET", "/developer/new-support", _)                                                        => Success()
+      case Endpoint("POST", "/developer/new-support", _)                                                       => Redirect("/developer/new-support/api/choose-api")
       case Endpoint("POST", "/developer/new-support/api/choose", _)                                            => Redirect("/developer/new-support/api/choose-api")
       case Endpoint("GET", "/developer/new-support/api/choose-api", _)                                         => Success()
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                        => Redirect("/developer/new-support/api/details")
+      case Endpoint("GET", "/developer/new-support/api/private-api", _)                                        => Redirect("/developer/new-support/api/choose-api")
+      case Endpoint("POST", "/developer/new-support/api/private-api", _)                                       => Redirect("/developer/new-support/api/choose-api")
+      case Endpoint("GET", "/developer/new-support/api/private-api/apply", _)                                  => Redirect("/developer/new-support/api/private-api")
+      case Endpoint("POST", "/developer/new-support/api/private-api/apply", _)                                 => Redirect("/developer/new-support/api/private-api")
+      case Endpoint("GET", "/developer/new-support/api/private-api/cds-check", _)                              => Redirect("/developer/new-support/api/private-api")
+      case Endpoint("POST", "/developer/new-support/api/private-api/cds-check", _)                             => Redirect("/developer/new-support/api/private-api")
       case Endpoint("POST", "/developer/new-support/api/details", _)                                           => Redirect("/developer/new-support/confirmation")
       case Endpoint("GET", "/developer/new-support/confirmation", _)                                           => Success()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Redirect(s"/developer/applications/${applicationId}/team-members")

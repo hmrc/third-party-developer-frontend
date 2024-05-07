@@ -82,7 +82,8 @@ case class SupportFlow(
     override val sessionId: String,
     entrySelection: String,
     subSelection: Option[String] = None,
-    api: Option[SupportApi] = None,
+    api: Option[String] = None,
+    privateApi: Option[String] = None,
     emailAddress: Option[String] = None,
     referenceNumber: Option[String] = None
   ) extends Flow {

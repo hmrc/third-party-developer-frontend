@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
   TermsAndConditionsLocations
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 // scalastyle:off number.of.types
@@ -331,58 +330,6 @@ object SignOutSurveyForm {
       "email"                  -> text(0, 100),
       "isJavascript"           -> boolean
     )(SignOutSurveyForm.apply)(SignOutSurveyForm.unapply)
-  )
-}
-
-final case class SupportEnquiryForm(fullname: String, email: String, comments: String)
-
-object SupportEnquiryForm {
-
-  val form: Form[SupportEnquiryForm] = Form(
-    mapping(
-      "fullname"     -> fullnameValidator,
-      "emailaddress" -> emailValidator(),
-      "comments"     -> commentsValidator
-    )(SupportEnquiryForm.apply)(SupportEnquiryForm.unapply)
-  )
-}
-
-final case class NewSupportPageHelpChoiceForm(helpWithChoice: String)
-
-object NewSupportPageHelpChoiceForm {
-
-  val form: Form[NewSupportPageHelpChoiceForm] = Form(
-    mapping(
-      "helpWithChoice" -> textValidator("support.choice.required.field", "support.choice.required.field")
-    )(NewSupportPageHelpChoiceForm.apply)(NewSupportPageHelpChoiceForm.unapply)
-  )
-}
-
-final case class ApiSupportForm(helpWithApiChoice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
-
-object ApiSupportForm {
-
-  val form: Form[ApiSupportForm] = Form(
-    mapping(
-      "helpWithApiChoice"                             -> textValidator("support.choice.required.field", "support.choice.required.field"),
-      Support.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
-      Support.GettingExamples.id + "-api-name"        -> nonEmptyText,
-      Support.ReportingDocumentation.id + "-api-name" -> nonEmptyText
-    )(ApiSupportForm.apply)(ApiSupportForm.unapply)
-  )
-}
-
-final case class ApiSupportDetailsForm(details: String, fullName: String, emailAddress: String, organisation: Option[String])
-
-object ApiSupportDetailsForm {
-
-  val form: Form[ApiSupportDetailsForm] = Form(
-    mapping(
-      "details"      -> supportRequestValidator("support.details.required.field", "support.details.required.field", 3000),
-      "fullName"     -> fullnameValidator,
-      "emailAddress" -> emailValidator(),
-      "organisation" -> optional(text)
-    )(ApiSupportDetailsForm.apply)(ApiSupportDetailsForm.unapply)
   )
 }
 
