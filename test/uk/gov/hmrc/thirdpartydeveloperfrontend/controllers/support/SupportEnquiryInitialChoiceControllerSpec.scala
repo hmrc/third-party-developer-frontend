@@ -140,7 +140,7 @@ class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with 
         val result = addToken(underTest.submit())(formRequest)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/new-support/api/details")
+        redirectLocation(result) shouldBe Some("/developer/new-support/details")
       }
 
       "submit invalid request returns BAD_REQUEST" in new Setup with IsLoggedIn {

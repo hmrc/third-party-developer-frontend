@@ -17,22 +17,23 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import javax.inject.{Inject, Singleton}
-
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import play.api.libs.crypto.CookieSigner
-import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import play.api.mvc.Result
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
-import play.api.data.Form
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
-import play.twirl.api.HtmlFormat
-import scala.concurrent.Future
 import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.support.HelpWithSigningInView
 
+import play.api.data.Form
+import play.api.libs.crypto.CookieSigner
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
+import play.twirl.api.HtmlFormat
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+
 object HelpWithSigningInController {
+
   def choose(form: HelpWithSigningInForm)(flow: SupportFlow) =
     flow.copy(
       subSelection = Some(form.choice)
@@ -41,17 +42,16 @@ object HelpWithSigningInController {
 
 @Singleton
 class HelpWithSigningInController @Inject() (
-  mcc: MessagesControllerComponents,
-  val cookieSigner: CookieSigner,
-  val sessionService: SessionService,
-  val errorHandler: ErrorHandler,
-  val deskproService: DeskproService,
-  supportService: SupportService,
-  helpWithSigningInView: HelpWithSigningInView
-)(
-  implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends AbstractSupportFlowController[HelpWithSigningInForm, Unit](mcc, supportService) {
+    mcc: MessagesControllerComponents,
+    val cookieSigner: CookieSigner,
+    val sessionService: SessionService,
+    val errorHandler: ErrorHandler,
+    val deskproService: DeskproService,
+    supportService: SupportService,
+    helpWithSigningInView: HelpWithSigningInView
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends AbstractSupportFlowController[HelpWithSigningInForm, Unit](mcc, supportService) {
 
   import HelpWithSigningInController.choose
 
@@ -66,7 +66,7 @@ class HelpWithSigningInController @Inject() (
     helpWithSigningInView(
       fullyloggedInDeveloper,
       form,
-      routes.HelpWithUsingAnApiController.page().url
+      routes.HelpWithSigningInController.page().url
     )
 
   def onValidForm(flow: SupportFlow, form: HelpWithSigningInForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] =
