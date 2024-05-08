@@ -52,6 +52,7 @@ class SupportEnquiryInitialChoiceController @Inject() (
       supportService.createFlow(sessionId, form.initialChoice)
       form.initialChoice match {
         case SupportData.UsingAnApi.id => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.page()), sessionId))
+        case SupportData.SigningIn.id  => Future.successful(withSupportCookie(Redirect(routes.HelpWithSigningInController.page()), sessionId))
         case _                         => Future.successful(withSupportCookie(Redirect(routes.SupportDetailsController.supportDetailsPage()), sessionId))
       }
     }

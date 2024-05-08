@@ -68,6 +68,16 @@ object SupportData {
     val text = "Getting access to documentation for a private API"
   }
 
+  case object ForgottenPassword extends ApiSecondaryChoice {
+    val id = "forgotten-password"
+    val text = "I've forgotten my password"
+  }
+
+  case object AccessCodes extends ApiSecondaryChoice {
+    val id = "access-codes"
+    val text = "I can't get access codes to login"
+  }
+
   case object ChooseBusinessRates {
     val id   = "business-rates"
     val text = "Business Rates 2.0"
