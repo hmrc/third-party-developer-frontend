@@ -44,8 +44,10 @@ POST        /new-support/api/private-api/apply                                  
 GET         /new-support/api/private-api/cds-check                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.CheckCdsAccessIsRequiredController.page()
 POST        /new-support/api/private-api/cds-check                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.CheckCdsAccessIsRequiredController.submit()
 GET         /new-support/api/private-api/cds-access-not-required                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.CheckCdsAccessIsRequiredController.cdsAccessIsNotRequiredPage()
-GET         /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportDetailsPage()
-POST        /new-support/api/details                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.submitSupportDetails()
+GET         /new-support/details                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportDetailsPage()
+POST        /new-support/details                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.submitSupportDetails()
+GET         /new-support/signing-in                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.page()
+POST        /new-support/signing-in                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.submit()
 GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportConfirmationPage()
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked()
