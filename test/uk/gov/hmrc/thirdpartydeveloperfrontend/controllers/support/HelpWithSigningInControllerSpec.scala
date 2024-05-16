@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import views.html.support.HelpWithSigningInView
+import views.html.support.{HelpWithSigningInView, RemoveAccessCodesView}
 
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -41,6 +41,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val helpWithUsingAnApiView = app.injector.instanceOf[HelpWithSigningInView]
+    val removeAccessCodesView  = app.injector.instanceOf[RemoveAccessCodesView]
 
     val underTest                            = new HelpWithSigningInController(
       mcc,
@@ -49,7 +50,8 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
       mock[ErrorHandler],
       mock[DeskproService],
       SupportServiceMock.aMock,
-      helpWithUsingAnApiView
+      helpWithUsingAnApiView,
+      removeAccessCodesView
     )
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
@@ -65,6 +67,11 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
     def shouldBeRedirectedToNextPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe "/developer/new-support/details"
+    }
+
+    def shouldBeRedirectedToRemoveAccessCodesPage(result: Future[Result]) = {
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result).value shouldBe "/developer/new-support/signing-in/remove-access-codes"
     }
   }
 
@@ -134,7 +141,17 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
       }
     }
 
-    "invoke submitChoiceOfPrivateApi" should {
+    "invoking removeAccessCodesPage()" should {
+      "render the RemoveAccessCodesView" in new Setup() with NotLoggedIn {
+        SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
+
+        val result = addToken(underTest.removeAccessCodesPage())(request)
+
+        status(result) shouldBe OK
+      }
+    }
+
+    "invoke submit" should {
       "submit new valid request from form for 'Forgotten Password' choice" in new Setup with IsLoggedIn {
         val formRequest = request.withFormUrlEncodedBody(
           "choice" -> SupportData.ForgottenPassword.id
@@ -156,7 +173,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
 
         val result = addToken(underTest.submit())(formRequest)
 
-        shouldBeRedirectedToNextPage(result)
+        shouldBeRedirectedToRemoveAccessCodesPage(result)
       }
 
       "submit invalid request returns BAD_REQUEST" in new Setup with IsLoggedIn {
