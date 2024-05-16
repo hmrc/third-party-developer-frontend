@@ -48,6 +48,7 @@ GET         /new-support/details                                                
 POST        /new-support/details                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.submitSupportDetails()
 GET         /new-support/signing-in                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.page()
 POST        /new-support/signing-in                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.submit()
+GET         /new-support/signing-in/remove-access-codes                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.removeAccessCodesPage()
 GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportConfirmationPage()
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked()

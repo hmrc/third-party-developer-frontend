@@ -20,11 +20,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.HelpWithSigningInView
+import views.html.support.{HelpWithSigningInView, RemoveAccessCodesView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -48,7 +48,8 @@ class HelpWithSigningInController @Inject() (
     val errorHandler: ErrorHandler,
     val deskproService: DeskproService,
     supportService: SupportService,
-    helpWithSigningInView: HelpWithSigningInView
+    helpWithSigningInView: HelpWithSigningInView,
+    removeAccessCodesView: RemoveAccessCodesView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractSupportFlowController[HelpWithSigningInForm, Unit](mcc, supportService) {
@@ -69,13 +70,27 @@ class HelpWithSigningInController @Inject() (
       routes.HelpWithSigningInController.page().url
     )
 
-  def onValidForm(flow: SupportFlow, form: HelpWithSigningInForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] =
-    supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
-      Redirect(routes.SupportDetailsController.supportDetailsPage())
+  def onValidForm(flow: SupportFlow, form: HelpWithSigningInForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
+    form.choice match {
+      case SupportData.AccessCodes.id => successful(Redirect(routes.HelpWithSigningInController.removeAccessCodesPage()))
+      case _                          =>
+        supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
+          Redirect(routes.SupportDetailsController.supportDetailsPage())
+        }
     }
+  }
 
   def form(): Form[HelpWithSigningInForm] = HelpWithSigningInForm.form
 
   // Typically can be successful(Unit) if nothing is needed (see HelpWithUsingAnApiController for use to get api list)
   def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
+
+  def removeAccessCodesPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    successful(Ok(
+      removeAccessCodesView(
+        fullyloggedInDeveloper,
+        routes.HelpWithSigningInController.page().url
+      )
+    ))
+  }
 }
