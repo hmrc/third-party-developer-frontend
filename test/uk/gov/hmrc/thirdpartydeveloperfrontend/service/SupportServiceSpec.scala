@@ -47,7 +47,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     val apiNameConfig    = "5"
     val entryPointConfig = "7"
     when(mockAppConfig.deskproHorizonApiName).thenReturn(apiNameConfig)
-    when(mockAppConfig.deskproHorizonEntryPoint).thenReturn(entryPointConfig)
+    when(mockAppConfig.deskproHorizonSupportReason).thenReturn(entryPointConfig)
     when(mockAppConfig.deskproHorizonBrand).thenReturn(brand)
     FlowRepositoryMock.SaveFlow.thenReturnSuccess
   }
@@ -98,7 +98,23 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     "submitTicket with no api should send no api" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
-      await(underTest.submitTicket(SupportFlow("123", SupportData.FindingAnApi.id, None), SupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)))
+      await(
+        underTest.submitTicket(
+          SupportFlow(
+            "123",
+            SupportData.FindingAnApi.id,
+            None
+          ),
+          SupportDetailsForm(
+            "This is some\ndescription",
+            "test name",
+            "email@test.com",
+            None,
+            None
+          )
+        )
+      )
+
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),
         subject = "HMRC Developer Hub: Support Enquiry",
@@ -112,10 +128,23 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(savedFlow)
       DeskproHorizonConnectorMock.CreateTicket.thenReturnsSuccess()
 
-      await(underTest.submitTicket(
-        SupportFlow("123", SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id), Some("Hello world")),
-        SupportDetailsForm("This is some\ndescription", "test name", "email@test.com", None)
-      ))
+      await(
+        underTest.submitTicket(
+          SupportFlow(
+            "123",
+            SupportData.UsingAnApi.id,
+            Some(SupportData.MakingAnApiCall.id),
+            Some("Hello world")
+          ),
+          SupportDetailsForm(
+            "This is some\ndescription",
+            "test name",
+            "email@test.com",
+            None,
+            None
+          )
+        )
+      )
 
       verify(DeskproHorizonConnectorMock.aMock).createTicket(eqTo(DeskproHorizonTicket(
         person = DeskproHorizonTicketPerson("test name", "email@test.com"),

@@ -185,6 +185,20 @@
 
     @govukInput(
       Input(
+        id = "teamMemberEmailAddress",
+        name = "teamMemberEmailAddress",
+        value = form("teamMemberEmailAddress").value,
+        label = Label(
+          isPageHeading = true,
+          classes = "govuk-label--s",
+          content = Text("Team member's email address (optional)")
+        ),
+        classes = "govuk-!-width-full"
+      )
+    )
+
+    @govukInput(
+      Input(
         id = "organisation",
         name = "organisation",
         value = form("organisation").value,

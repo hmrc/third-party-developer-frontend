@@ -79,21 +79,39 @@ class SupportService @Inject() (
   }
 
   def submitTicket(supportFlow: SupportFlow, form: SupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
-    submitTicket(supportFlow, form.fullName, form.emailAddress, form.details)
+    val deskproTicket = buildTicket(
+      supportFlow,
+      form.fullName,
+      form.emailAddress,
+      form.details
+    )
+
+    submitTicket(
+      supportFlow,
+      deskproTicket.copy(
+        fields =
+          deskproTicket.fields
+            ++ form.organisation.fold(Map.empty[String, String])(v => Map(config.deskproHorizonOrganisation -> v))
+            ++ form.teamMemberEmailAddress.fold(Map.empty[String, String])(v => Map(config.deskproHorizonTeamMemberEmail -> v))
+      )
+    )
   }
 
   def submitTicket(supportFlow: SupportFlow, form: ApplyForPrivateApiAccessForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
     submitTicket(
       supportFlow,
-      form.fullName,
-      form.emailAddress,
-      s"Private API documentation access request for Application Id[${form.applicationId}] to ${supportFlow.privateApi.getOrElse("?")} API."
+      buildTicket(
+        supportFlow,
+        form.fullName,
+        form.emailAddress,
+        s"Private API documentation access request for Application Id[${form.applicationId}] to ${supportFlow.privateApi.getOrElse("?")} API."
+      )
     )
   }
 
-  private def submitTicket(supportFlow: SupportFlow, fullName: String, emailAddress: String, messageContents: String)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
+  private def buildTicket(supportFlow: SupportFlow, fullName: String, emailAddress: String, messageContents: String): DeskproHorizonTicket = {
     // Entry point is currently the value of the text on the radio button but may not always be so.
-    def deriveEntryPoint(): String = {
+    def deriveSupportReason(): String = {
       (supportFlow.entrySelection, supportFlow.subSelection) match {
         case (SupportData.FindingAnApi.id, _)                                          => SupportData.FindingAnApi.text
         case (SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))         => SupportData.MakingAnApiCall.text
@@ -107,16 +125,22 @@ class SupportService @Inject() (
       }
     }
 
-    deskproConnector.createTicket(DeskproHorizonTicket(
+    DeskproHorizonTicket(
       person = DeskproHorizonTicketPerson(fullName, emailAddress),
       subject = "HMRC Developer Hub: Support Enquiry",
       message = DeskproHorizonTicketMessage.fromRaw(messageContents),
       brand = config.deskproHorizonBrand,
       fields = Map(
-        config.deskproHorizonEntryPoint -> deriveEntryPoint()
+        config.deskproHorizonSupportReason -> deriveSupportReason()
       ) ++ supportFlow.api.fold(Map.empty[String, String])(v => Map(config.deskproHorizonApiName -> v))
-    )).flatMap { result =>
-      flowRepository.saveFlow(supportFlow.copy(referenceNumber = Some(result.ref), emailAddress = Some(emailAddress)))
+    )
+  }
+
+  private def submitTicket(supportFlow: SupportFlow, ticket: DeskproHorizonTicket)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
+    deskproConnector.createTicket(
+      ticket
+    ).flatMap { result =>
+      flowRepository.saveFlow(supportFlow.copy(referenceNumber = Some(result.ref), emailAddress = Some(ticket.person.email)))
     }
   }
 }
