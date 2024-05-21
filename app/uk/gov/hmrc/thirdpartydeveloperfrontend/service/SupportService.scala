@@ -122,7 +122,7 @@ class SupportService @Inject() (
         case (SupportData.SigningIn.id, _)                                             => SupportData.SigningIn.text
         case (SupportData.SettingUpApplication.id, _)                                  => SupportData.SettingUpApplication.text
         case (SupportData.ReportingDocumentation.id, _)                                => SupportData.ReportingDocumentation.text
-        case (SupportData.NoneOfTheAbove.id, _)                                        => SupportData.NoneOfTheAbove.text
+        case (SupportData.NoneOfTheAbove.id, _)                                        => "General Issue"
       }
     }
 
