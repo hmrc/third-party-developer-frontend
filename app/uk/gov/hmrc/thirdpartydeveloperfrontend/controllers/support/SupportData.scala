@@ -43,6 +43,11 @@ object SupportData {
     val text = "Setting up or managing an application"
   }
 
+  case object NoneOfTheAbove extends PrimaryChoice {
+    val id   = "none-of-the-above"
+    val text = "None of the above"
+  }
+
   sealed trait ApiSecondaryChoice {
     def id: String
     def text: String

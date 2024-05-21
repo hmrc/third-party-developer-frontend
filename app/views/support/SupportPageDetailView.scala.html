@@ -78,6 +78,10 @@
   </ul>
 }
 
+@noneOfTheAboveHeading={
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what you need help with</h1>
+}
+
 @defaultHeading = {
     <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Complete this short form to ask a question</h1>
 }
@@ -100,12 +104,13 @@
       }
       case SupportData.FindingAnApi.id => findHeading
       // TODO - needs design input
-      case SupportData.SigningIn.id => defaultHeading   
+      case SupportData.SigningIn.id => defaultHeading
+      case SupportData.NoneOfTheAbove.id => noneOfTheAboveHeading
       case _ => defaultHeading
   }}
 
   <p class="govuk-body">
-    Our Software Developers Support Team (SDST) will get back to you within 2 working days.
+    Our support team will get back to you within 2 working days.
   </p>
 
   @helper.form(action = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.routes.SupportDetailsController.submitSupportDetails()) {
