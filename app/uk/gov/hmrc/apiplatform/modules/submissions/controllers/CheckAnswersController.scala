@@ -86,10 +86,8 @@ class CheckAnswersController @Inject() (
     RoleFilter.isAdminRole,
     SubmissionStatusFilter.answeredCompletely
   )(redirectToGetProdCreds(productionAppId))(productionAppId) { implicit request =>
-    val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(request.submission)
-    val isNewTouUplift                   = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
     requestProductionCredentials
-      .requestProductionCredentials(productionAppId, request.developerSession, requesterIsResponsibleIndividual, isNewTouUplift)
+      .requestProductionCredentials(productionAppId, request.developerSession, request.application, request.submission)
       .map(_ match {
         case Right(app)                 => {
           Redirect(routes.CheckAnswersController.requestReceivedPage(productionAppId))
@@ -98,18 +96,10 @@ class CheckAnswersController @Inject() (
       })
   }
 
-  private def isRequesterResponsibleIndividual(submission: Submission) = {
-    val responsibleIndividualIsRequesterId = submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
-    submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
-      case Some(ActualAnswer.SingleChoiceAnswer(answer)) => answer == "Yes"
-      case _                                             => false
-    }
-  }
-
   def requestReceivedPage(
       productionAppId: ApplicationId
     ) = withApplicationSubmission(ApplicationStateFilter.pendingApprovalOrProduction, RoleFilter.isAdminRole)(productionAppId) { implicit request =>
-    val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(request.submission)
+    val requesterIsResponsibleIndividual = requestProductionCredentials.isRequesterResponsibleIndividual(request.submission)
     val isNewTouUplift                   = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
     val isGranted                        = request.submission.status.isGranted
     val viewModel                        = ProdCredsRequestReceivedViewModel(productionAppId, requesterIsResponsibleIndividual, isNewTouUplift, isGranted)

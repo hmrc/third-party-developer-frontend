@@ -16,16 +16,21 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import cats.data.{NonEmptyList, OptionT, Validated}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
@@ -33,19 +38,61 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Develope
 @Singleton
 class RequestProductionCredentials @Inject() (
     tpaConnector: ThirdPartyApplicationSubmissionsConnector,
-    deskproConnector: DeskproConnector
+    deskproConnector: DeskproConnector,
+    applicationCommandConnector: ApplicationCommandConnector,
+    val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) {
+  ) extends ClockNow {
 
-  private val ET = EitherTHelper.make[ErrorDetails]
 
   def requestProductionCredentials(
+      applicationId: ApplicationId,
+      requestedBy: DeveloperSession,
+      app: Application,
+      submission: Submission
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[ErrorDetails, Application]] = {
+    val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(submission)
+    val isNewTouUplift                   = submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
+    if (isNewTouUplift) {
+      requestTermsOfUseApproval(applicationId, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift)
+    } else {
+      requestProductionCredentialsApproval(applicationId, requestedBy, app, requesterIsResponsibleIndividual, isNewTouUplift)
+    }
+  }
+
+  def isRequesterResponsibleIndividual(submission: Submission) = {
+    val responsibleIndividualIsRequesterId = submission.questionIdsOfInterest.responsibleIndividualIsRequesterId
+    submission.latestInstance.answersToQuestions.get(responsibleIndividualIsRequesterId) match {
+      case Some(ActualAnswer.SingleChoiceAnswer(answer)) => answer == "Yes"
+      case _                                             => false
+    }
+  }
+
+  private def requestProductionCredentialsApproval(
+      applicationId: ApplicationId,
+      requestedBy: DeveloperSession,
+      app: Application,
+      requesterIsResponsibleIndividual: Boolean,
+      isNewTouUplift: Boolean
+    )(implicit hc: HeaderCarrier
+    ): Future[ApplicationUpdateSuccessful] = {
+    val cmd = ApplicationCommands.SubmitApplicationApprovalRequest(Actors.AppCollaborator(requestedBy.email), instant(), requestedBy.displayedName, requestedBy.email)
+      for {
+        result     <- applicationCommandConnector.dispatch(applicationId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
+        _          <- createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift, false)
+      } yield result
+  }
+
+  private def requestTermsOfUseApproval(
       applicationId: ApplicationId,
       requestedBy: DeveloperSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean
     )(implicit hc: HeaderCarrier
     ): Future[Either[ErrorDetails, Application]] = {
+
+    val ET = EitherTHelper.make[ErrorDetails]
     (
       for {
         app        <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
