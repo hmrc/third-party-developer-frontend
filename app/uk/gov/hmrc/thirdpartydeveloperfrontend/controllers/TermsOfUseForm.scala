@@ -21,6 +21,7 @@ import play.api.data.Forms.{boolean, mapping}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.termsOfUseAgreeKey
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 
 case class TermsOfUseForm(termsOfUseAgreed: Boolean)
 

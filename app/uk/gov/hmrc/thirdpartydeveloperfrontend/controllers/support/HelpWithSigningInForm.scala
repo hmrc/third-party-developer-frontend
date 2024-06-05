@@ -20,6 +20,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 final case class HelpWithSigningInForm(choice: String)
 
@@ -27,7 +28,7 @@ object HelpWithSigningInForm {
 
   val form: Form[HelpWithSigningInForm] = Form(
     mapping(
-      "choice" -> textValidator("support.choice.required.field", "support.choice.required.field")
+      "choice" -> textValidator(FormKeys.supportSigningInChoiceRequiredKey, FormKeys.supportSigningInChoiceRequiredKey)
     )(HelpWithSigningInForm.apply)(HelpWithSigningInForm.unapply)
   )
 }

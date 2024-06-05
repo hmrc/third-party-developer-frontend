@@ -50,7 +50,7 @@ class Profile @Inject() (
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) with PasswordChange {
 
-  import ErrorFormBuilder.GlobalError
+  import ErrorFormBuilder.CommonGlobalErrorsSyntax
   import play.api.data._
 
   val profileForm: Form[ProfileForm]             = ProfileForm.form

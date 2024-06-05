@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{emailValidator, fullnameValidator, supportRequestValidator}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, emailValidator, fullnameValidator, supportRequestValidator}
 
 final case class SupportDetailsForm(details: String, fullName: String, emailAddress: String, organisation: Option[String], teamMemberEmailAddress: Option[String])
 
@@ -27,7 +27,7 @@ object SupportDetailsForm {
 
   val form: Form[SupportDetailsForm] = Form(
     mapping(
-      "details"                -> supportRequestValidator("support.details.required.field", "support.details.required.field", 3000),
+      "details"                -> supportRequestValidator(FormKeys.supportDetailsRequiredKey, FormKeys.supportDetailsMaxLengthKey, 3000),
       "fullName"               -> fullnameValidator,
       "emailAddress"           -> emailValidator(),
       "organisation"           -> optional(text),

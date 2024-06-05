@@ -19,25 +19,32 @@ package views.helper
 object GlobalSection {
 
   import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FieldNameKey
+  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GlobalMessageKey
 
-  private def a(em: String)(found: String => String, notFound: () => String) = {
-    (globalKeys.contains(em), globalToField.get(em)) match {
-      case (true, Some(s)) => found(s)
-      case _               => notFound()
-    }
+  private def a(rawErrorMessageKeyOrMessageText: String)(found: FieldNameKey => String, notFound: () => String) = {
+    globalKeys.find(_.value == rawErrorMessageKeyOrMessageText).fold(
+      notFound()
+    )( key =>
+      globalToField.get(key).fold(
+        notFound()
+      )(
+        field => found(field)
+      )
+    )
   }
 
-  def dataAttribute(errorMessage: String): String = a(errorMessage)(
+  def dataAttribute(rawErrorMessageKeyOrMessageText: String): String = a(rawErrorMessageKeyOrMessageText)(
     k => s"data-global-error-$k",
     () => "data-global-error-undefined"
   )
 
-  def errorField(errorMessage: String): String = a(errorMessage)(
+  def errorField(rawErrorMessageKeyOrMessageText: String): String = a(rawErrorMessageKeyOrMessageText)(
     k => s"$k",
     () => "#section-undefined"
   )
 
-  def anchor(errorMessage: String): String = a(errorMessage)(
+  def anchor(rawErrorMessageKeyOrMessageText: String): String = a(rawErrorMessageKeyOrMessageText)(
     k => s"#$k",
     () => "#section-undefined"
   )

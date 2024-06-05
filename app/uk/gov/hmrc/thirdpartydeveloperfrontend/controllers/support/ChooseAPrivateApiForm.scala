@@ -20,6 +20,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 final case class ChooseAPrivateApiForm(chosenApiName: String)
 
@@ -27,7 +28,7 @@ object ChooseAPrivateApiForm {
 
   val form: Form[ChooseAPrivateApiForm] = Form(
     mapping(
-      "chosen-api-name" -> textValidator("support.choice.required.field", "support.choice.required.field")
+      "chosen-api-name" -> textValidator(FormKeys.supportChoseAPrivateApiNameRequiredKey, FormKeys.supportChoseAPrivateApiNameRequiredKey)
     )(ChooseAPrivateApiForm.apply)(ChooseAPrivateApiForm.unapply)
   )
 }

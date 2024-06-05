@@ -196,9 +196,9 @@ footer.links.terms_and_conditions.text = Terms and conditions
 footer.links.help_page.text = Help using GOV.UK
 footer.links.accessibility.text = Accessibility statement
 
-responsible_individual_fullname.error.required.field=Provide a full name
-responsible_individual_emailaddress.error.required.field=Provide an email address
-responsible_individual.error.nochange=This person is already the responsible individual for the application
+responsible_individual_fullname.error.required.field = Provide a full name
+responsible_individual_emailaddress.error.required.field = Provide an email address
+responsible_individual.error.nochange = This person is already the responsible individual for the application
 
 production.credentials.checklist.error.global = You must complete all questionnaires
 
@@ -206,8 +206,22 @@ no.applications.choice.error.required.field = Please select an option
 
 choose.application.to.uplift.error = Select the application you want production credentials for
 
-support.choice.required.field = Provide choose an option
-support.choice.required.global = Provide choose an option
+support.choice.required.field = Please select an option
+support.choice.required.global = Please select an option
 
-support.details.required.field = Provide details of your problem
-support.details.required.global = Provide details of your problem
+support.details.error.required.field = Provide details of your problem
+support.details.error.maxLength.field = You entered too much text - keep it under 3,000 characters
+support.details.error.required.global = Provide details of your problem
+support.details.error.maxLength.global = You entered too much text in details - keep it under 3,000 characters
+
+support.enquiry.initialchoice.error.required.field = Please select an option
+support.enquiry.initialchoice.error.required.global = Please select an option
+
+support.chooseaprivateapiname.error.required.field = Select API Name
+support.chooseaprivateapiname.error.required.global = Select API Name
+
+support.signinginchoice.error.required.field = Please select an option
+support.signinginchoice.error.required.global = Please select an option
+
+support.helpusingapichoice.error.required.field = Please select an option
+support.helpusingapichoice.error.required.global = Please select an option

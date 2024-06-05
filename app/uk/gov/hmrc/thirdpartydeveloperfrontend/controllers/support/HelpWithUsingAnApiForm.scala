@@ -20,6 +20,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 
@@ -27,7 +28,7 @@ object HelpWithUsingAnApiForm {
 
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      "choice"                                            -> textValidator("support.choice.required.field", "support.choice.required.field", maxLength = 150),
+      "choice"                                            -> textValidator(FormKeys.supportHelpUsingApiChoiceRequiredKey, FormKeys.supportHelpUsingApiChoiceRequiredKey, maxLength = 150),
       SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
       SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
       SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText

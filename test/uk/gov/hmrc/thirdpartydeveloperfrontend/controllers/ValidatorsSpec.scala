@@ -199,7 +199,7 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
     for ((k, v) <- invalidCases) {
       s"reject redirect uri for $k url" in {
         val result = form.fillAndValidate(v)
-        result.errors.map(_.message) shouldBe Seq(FormKeys.redirectUriInvalidKey)
+        result.errors.map(_.message) shouldBe Seq(FormKeys.redirectUriInvalidKey.value)
       }
     }
 

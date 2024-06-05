@@ -67,7 +67,7 @@ object UpliftJourneyController {
 
     def form: Form[SellResellOrDistributeForm] = Form(
       mapping(
-        "answer" -> optional(text).verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey, s => s.isDefined)
+        "answer" -> optional(text).verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey.value, s => s.isDefined)
       )(SellResellOrDistributeForm.apply)(SellResellOrDistributeForm.unapply)
     )
   }

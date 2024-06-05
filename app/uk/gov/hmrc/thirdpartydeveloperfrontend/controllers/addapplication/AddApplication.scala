@@ -172,7 +172,7 @@ class AddApplication @Inject() (
             )
 
           case invalid: Invalid =>
-            def invalidApplicationNameForm = requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+            def invalidApplicationNameForm = requestForm.withError(appNameField.value, invalid.validationErrorMessageKey.value)
 
             successful(BadRequest(addApplicationNameView(invalidApplicationNameForm, environment)))
         }

@@ -30,6 +30,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormExtensions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object NoApplications {
@@ -37,8 +38,10 @@ object NoApplications {
 
   object NoApplicationsChoiceForm {
 
+    // def optional[A](mapping: Mapping[A]): Mapping[Option[A]] = OptionalMapping(mapping)
+
     def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
-      .verifying(FormKeys.noApplicationsChoiceRequiredKey, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply))
+      .verifying(FormKeys.noApplicationsChoiceRequiredKey.value, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply))
 
   }
 }

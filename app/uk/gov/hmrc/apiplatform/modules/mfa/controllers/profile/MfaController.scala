@@ -43,6 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 
 @Singleton
 class MfaController @Inject() (
