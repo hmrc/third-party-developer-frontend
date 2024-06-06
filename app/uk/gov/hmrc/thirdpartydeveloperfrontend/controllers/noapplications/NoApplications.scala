@@ -30,7 +30,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormExtensions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object NoApplications {

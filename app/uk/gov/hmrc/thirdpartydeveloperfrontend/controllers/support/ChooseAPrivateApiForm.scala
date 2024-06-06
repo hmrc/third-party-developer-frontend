@@ -19,8 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, textValidator}
 
 final case class ChooseAPrivateApiForm(chosenApiName: String)
 

@@ -18,9 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.data.{Form, Mapping}
 
-
 object FormExtensions {
+
   implicit class MappingSyntax[T](mapping: Mapping[T]) {
+
     def verifying(error: => FieldMessageKey, constraint: (T => Boolean)): Mapping[T] = {
       mapping.verifying(error.value, constraint)
     }
@@ -67,8 +68,8 @@ object ErrorFormBuilder {
       val errors = form.globalErrors.filter(_.messages.last == passwordNoMatchGlobalKey.value)
       errors match {
         case _ :: Nil => form
-                            .withError(passwordField, passwordNoMatchKey)
-                            .withError(confirmapasswordField, passwordNoMatchKey)
+            .withError(passwordField, passwordNoMatchKey)
+            .withError(confirmapasswordField, passwordNoMatchKey)
         case _        => form
       }
     }
@@ -77,8 +78,8 @@ object ErrorFormBuilder {
       form.errors
         .filter(_.key == field.value)
         .lastOption
-        .map(_.message)                       // w.x.y.z
-        .flatMap(FormKeys.findFieldKeys(_))   // wxyz Keys
+        .map(_.message)                     // w.x.y.z
+        .flatMap(FormKeys.findFieldKeys(_)) // wxyz Keys
         .map(_._2)
         .map(globalKey => form.withGlobalError(globalKey))
         .getOrElse(form)

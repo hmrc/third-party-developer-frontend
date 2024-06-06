@@ -25,12 +25,10 @@ object GlobalSection {
   private def a(rawErrorMessageKeyOrMessageText: String)(found: FieldNameKey => String, notFound: () => String) = {
     globalKeys.find(_.value == rawErrorMessageKeyOrMessageText).fold(
       notFound()
-    )( key =>
+    )(key =>
       globalToField.get(key).fold(
         notFound()
-      )(
-        field => found(field)
-      )
+      )(field => found(field))
     )
   }
 
