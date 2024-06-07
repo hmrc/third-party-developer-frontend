@@ -37,8 +37,6 @@ object NoApplications {
 
   object NoApplicationsChoiceForm {
 
-    // def optional[A](mapping: Mapping[A]): Mapping[Option[A]] = OptionalMapping(mapping)
-
     def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
       .verifying(FormKeys.noApplicationsChoiceRequiredKey.value, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply))
 
