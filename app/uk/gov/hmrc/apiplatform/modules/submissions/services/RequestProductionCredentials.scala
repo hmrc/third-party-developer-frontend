@@ -16,44 +16,76 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.services
 
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+
+import cats.data.NonEmptyList
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
+import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @Singleton
 class RequestProductionCredentials @Inject() (
+    apmConnector: ApmConnector,
     tpaConnector: ThirdPartyApplicationSubmissionsConnector,
-    deskproConnector: DeskproConnector
+    applicationCommandConnector: ApplicationCommandConnector,
+    deskproConnector: DeskproConnector,
+    val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) {
-
-  private val ET = EitherTHelper.make[ErrorDetails]
+  ) extends ClockNow with ApplicationLogger {
 
   def requestProductionCredentials(
-      applicationId: ApplicationId,
+      application: Application,
       requestedBy: DeveloperSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean
     )(implicit hc: HeaderCarrier
     ): Future[Either[ErrorDetails, Application]] = {
-    (
-      for {
-        app        <- ET.fromEitherF(tpaConnector.requestApproval(applicationId, requestedBy.displayedName, requestedBy.email))
-        submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(applicationId), ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}"))
+
+    def getCommand() = {
+      if (isNewTouUplift) {
+        ApplicationCommands.SubmitTermsOfUseApproval(Actors.AppCollaborator(requestedBy.email), instant(), requestedBy.displayedName, requestedBy.email)
+      } else {
+        ApplicationCommands.SubmitApplicationApprovalRequest(Actors.AppCollaborator(requestedBy.email), instant(), requestedBy.displayedName, requestedBy.email)
+      }
+    }
+
+    def handleCmdSuccess(app: Application) = {
+      val ET = EitherTHelper.make[ErrorDetails]
+      (for {
+        submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
         _          <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift, submission.status.isGranted))
-      } yield app
-    )
-      .value
+      } yield app).value
+
+    }
+
+    def handleCmdResult(app: Application, dispatchResult: Either[NonEmptyList[CommandFailure], DispatchSuccessResult]) = {
+      dispatchResult match {
+        case Right(_)                                   => handleCmdSuccess(app)
+        case Left(errors: NonEmptyList[CommandFailure]) =>
+          errors.map(error => logger.warn(s"commmand failure: ${error.toString()}"))
+          val errString = errors.toList.map(_.toString()).mkString(", ")
+          successful(Left(ErrorDetails("submitSubmission001", s"Submission failed for ${app.id} - $errString")))
+      }
+    }
+
+    for {
+      dispatchResult <- applicationCommandConnector.dispatch(application.id, getCommand(), Set.empty)
+      result         <- handleCmdResult(application, dispatchResult) // if passed then continue else deal with errors
+
+    } yield result
+
   }
 
   private def createDeskproTicketIfNeeded(
