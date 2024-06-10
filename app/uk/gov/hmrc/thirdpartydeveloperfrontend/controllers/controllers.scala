@@ -263,10 +263,6 @@ package object controllers {
 
   def lastnameValidator: Mapping[String] = textValidator(lastnameRequiredKey, lastnameMaxLengthKey)
 
-  def fullnameValidator: Mapping[String] = textValidator(fullnameRequiredKey, fullnameMaxLengthKey, 100)
-
-  def telephoneValidator: Mapping[String] = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
-
   def cidrBlockValidator: Mapping[String] = {
     val privateNetworkRanges = Set(
       new SubnetUtils("10.0.0.0/8"),
@@ -293,13 +289,6 @@ package object controllers {
 
   def textValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] =
     Forms.text.verifying(requiredFieldMessageKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
-
-  def commentsValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] = {
-    val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
-
-    textValidator(requiredFieldMessageKey, maxLengthKey, maxLength)
-      .verifying(commentsSpamKey, s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)
-  }
 
   def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320): Mapping[String] = {
 
