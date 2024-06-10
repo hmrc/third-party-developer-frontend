@@ -145,7 +145,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
     "invoke submitChoiceOfPrivateApi" should {
       "submit new valid request from form for business rates choice" in new Setup with IsLoggedIn {
         val formRequest = request.withFormUrlEncodedBody(
-          "chosen-api-name" -> SupportData.ChooseBusinessRates.id
+          "apiName" -> SupportData.ChooseBusinessRates.id
         )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()
@@ -157,7 +157,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
 
       "submit new valid request from form for CDS choice" in new Setup with IsLoggedIn {
         val formRequest = request.withFormUrlEncodedBody(
-          "chosen-api-name" -> SupportData.ChooseCDS.id
+          "apiName" -> SupportData.ChooseCDS.id
         )
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()
@@ -180,7 +180,7 @@ class ChooseAPrivateApiControllerSpec extends BaseControllerSpec with WithCSRFAd
 
       "submit valid request but no session" in new Setup with NoSupportSessionExists {
         val formRequest = request.withFormUrlEncodedBody(
-          "chosen-api-name" -> SupportData.ChooseCDS.id
+          "apiName" -> SupportData.ChooseCDS.id
         )
         SupportServiceMock.GetSupportFlow.succeeds()
 

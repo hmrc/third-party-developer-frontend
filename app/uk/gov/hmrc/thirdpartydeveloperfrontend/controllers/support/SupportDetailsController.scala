@@ -83,9 +83,9 @@ class SupportDetailsController @Inject() (
 
     val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
 
-    supportService.getSupportFlow(sessionId).flatMap(flow =>
+    supportService.getSupportFlow(sessionId).flatMap { flow =>
       SupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(sessionId, flow))
-    )
+    }
   }
 
   def supportConfirmationPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

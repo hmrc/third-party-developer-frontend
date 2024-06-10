@@ -110,10 +110,10 @@ package object controllers {
 
     val environmentInvalidKey = FieldMessageKey("environment.error.required.field")
 
-    val teamMemberEmailRequired = "team.member.error.emailAddress.required.field"
-    val teamMemberAlreadyExists = "team.member.error.emailAddress.already.exists.field"
+    val teamMemberEmailRequired = FieldMessageKey("team.member.error.emailAddress.required.field")
+    val teamMemberAlreadyExists = FieldMessageKey("team.member.error.emailAddress.already.exists.field")
 
-    val teamMemberRoleRequired             = "roles.error.answer.required.field.content"
+    val teamMemberRoleRequired             = FieldMessageKey("roles.error.answer.required.field.content")
     val removeTeamMemberConfirmNoChoiceKey = FieldMessageKey("remove.team.member.confirmation.no.choice.field")
 
     val firstnameRequiredGlobalKey        = GlobalMessageKey("firstname.error.required.global")
@@ -137,9 +137,9 @@ package object controllers {
     val redirectUriInvalidGlobalKey            = GlobalMessageKey("redirect.uri.invalid.global")
     val privacyPolicyUrlInvalidGlobalKey       = GlobalMessageKey("privacy.policy.url.invalid.global")
     val tNcUrlInvalidGlobalKey                 = GlobalMessageKey("terms.conditions.url.invalid.global")
-    val clientSecretLimitExceeded              = "client.secret.limit.exceeded"
-    val productionCannotDeleteOnlyClientSecret = "production.cannot.delete.only.client.secret"
-    val sandboxCannotDeleteOnlyClientSecret    = "sandbox.cannot.delete.only.client.secret"
+    val clientSecretLimitExceeded              = GlobalMessageKey("client.secret.limit.exceeded")
+    val productionCannotDeleteOnlyClientSecret = GlobalMessageKey("production.cannot.delete.only.client.secret")
+    val sandboxCannotDeleteOnlyClientSecret    = GlobalMessageKey("sandbox.cannot.delete.only.client.secret")
 
     val deleteApplicationConfirmNoChoiceKey   = FieldMessageKey("delete.application.confirmation.no.choice.field")
     val deleteClientSecretsConfirmNoChoiceKey = FieldMessageKey("delete.client.secrets.confirmation.no.choice.field")
@@ -194,57 +194,36 @@ package object controllers {
 
     val noApplicationsChoiceRequiredKey = FieldMessageKey("no.applications.choice.error.required.field")
 
-    val supportDetailsRequiredKey        = FieldMessageKey("support.details.error.required.field")
-    val supportDetailsMaxLengthKey       = FieldMessageKey("support.details.error.maxLength.field")
-    val supportDetailsRequiredGlobalKey  = GlobalMessageKey("support.details.error.required.global")
-    val supportDetailsMaxLengthGlobalKey = GlobalMessageKey("support.details.error.maxLength.global")
-
-    val supportEnquiryIntialChoiceRequiredKey       = FieldMessageKey("support.enquiry.initialchoice.error.required.field")
-    val supportEnquiryIntialChoiceRequiredGlobalKey = GlobalMessageKey("support.enquiry.initialchoice.error.required.global")
-
-    val supportChoseAPrivateApiNameRequiredKey       = FieldMessageKey("support.chooseaprivateapiname.error.required.field")
-    val supportChoseAPrivateApiNameRequiredGlobalKey = GlobalMessageKey("support.chooseaprivateapiname.error.required.global")
-
-    val supportSigningInChoiceRequiredKey       = FieldMessageKey("support.signinginchoice.error.required.field")
-    val supportSigningInChoiceRequiredGlobalKey = GlobalMessageKey("support.signinginchoice.error.required.global")
-
-    val supportHelpUsingApiChoiceRequiredKey       = FieldMessageKey("support.helpusingapichoice.error.required.field")
-    val supportHelpUsingApiChoiceRequiredGlobalKey = GlobalMessageKey("support.helpusingapichoice.error.required.global")
-
     val formKeysMap: Map[FieldMessageKey, GlobalMessageKey] = Map(
-      supportHelpUsingApiChoiceRequiredKey   -> supportHelpUsingApiChoiceRequiredGlobalKey,
-      supportChoseAPrivateApiNameRequiredKey -> supportChoseAPrivateApiNameRequiredGlobalKey,
-      supportDetailsRequiredKey              -> supportDetailsRequiredGlobalKey,
-      supportDetailsMaxLengthKey             -> supportDetailsMaxLengthGlobalKey,
-      firstnameRequiredKey                   -> firstnameRequiredGlobalKey,
-      firstnameMaxLengthKey                  -> firstnameMaxLengthGlobalKey,
-      lastnameRequiredKey                    -> lastnameRequiredGlobalKey,
-      lastnameMaxLengthKey                   -> lastnameMaxLengthGlobalKey,
-      emailaddressRequiredKey                -> emailaddressRequiredGlobalKey,
-      emailaddressNotValidKey                -> emailaddressNotValidGlobalKey,
-      emailMaxLengthKey                      -> emailMaxLengthGlobalKey,
-      emailalreadyInUseKey                   -> emailaddressAlreadyInUseGlobalKey,
-      passwordNotValidKey                    -> passwordNotValidGlobalKey,
-      passwordRequiredKey                    -> passwordRequiredGlobalKey,
-      passwordNoMatchKey                     -> passwordNoMatchGlobalKey,
-      accountUnverifiedKey                   -> accountUnverifiedGlobalKey,
-      invalidCredentialsKey                  -> invalidCredentialsGlobalKey,
-      invalidPasswordKey                     -> invalidPasswordGlobalKey,
-      accountLockedKey                       -> accountLockedGlobalKey,
-      currentPasswordRequiredKey             -> currentPasswordRequiredGlobalKey,
-      currentPasswordInvalidKey              -> currentPasswordInvalidGlobalKey,
-      redirectUriInvalidKey                  -> redirectUriInvalidGlobalKey,
-      privacyPolicyUrlInvalidKey             -> privacyPolicyUrlInvalidGlobalKey,
-      tNcUrlInvalidKey                       -> tNcUrlInvalidGlobalKey,
-      termsOfUseAgreeKey                     -> termsOfUseAgreeGlobalKey,
-      accessCodeInvalidKey                   -> accessCodeInvalidGlobalKey,
-      accessCodeErrorKey                     -> accessCodeErrorGlobalKey,
-      selectedCategoryNonSelectedKey         -> selectedCategoryNonSelectedGlobalKey,
-      selectedApisNonSelectedKey             -> selectedApisNonSelectedGlobalKey,
-      selectedApiRadioKey                    -> selectedApiRadioGlobalKey,
-      selectedTopicsNonSelectedKey           -> selectedTopicsNonSelectedGlobalKey,
-      mobileNumberInvalidKey                 -> mobileNumberInvalidGlobalKey,
-      mobileNumberTooShortKey                -> mobileNumberTooShortGlobalKey
+      firstnameRequiredKey           -> firstnameRequiredGlobalKey,
+      firstnameMaxLengthKey          -> firstnameMaxLengthGlobalKey,
+      lastnameRequiredKey            -> lastnameRequiredGlobalKey,
+      lastnameMaxLengthKey           -> lastnameMaxLengthGlobalKey,
+      emailaddressRequiredKey        -> emailaddressRequiredGlobalKey,
+      emailaddressNotValidKey        -> emailaddressNotValidGlobalKey,
+      emailMaxLengthKey              -> emailMaxLengthGlobalKey,
+      emailalreadyInUseKey           -> emailaddressAlreadyInUseGlobalKey,
+      passwordNotValidKey            -> passwordNotValidGlobalKey,
+      passwordRequiredKey            -> passwordRequiredGlobalKey,
+      passwordNoMatchKey             -> passwordNoMatchGlobalKey,
+      accountUnverifiedKey           -> accountUnverifiedGlobalKey,
+      invalidCredentialsKey          -> invalidCredentialsGlobalKey,
+      invalidPasswordKey             -> invalidPasswordGlobalKey,
+      accountLockedKey               -> accountLockedGlobalKey,
+      currentPasswordRequiredKey     -> currentPasswordRequiredGlobalKey,
+      currentPasswordInvalidKey      -> currentPasswordInvalidGlobalKey,
+      redirectUriInvalidKey          -> redirectUriInvalidGlobalKey,
+      privacyPolicyUrlInvalidKey     -> privacyPolicyUrlInvalidGlobalKey,
+      tNcUrlInvalidKey               -> tNcUrlInvalidGlobalKey,
+      termsOfUseAgreeKey             -> termsOfUseAgreeGlobalKey,
+      accessCodeInvalidKey           -> accessCodeInvalidGlobalKey,
+      accessCodeErrorKey             -> accessCodeErrorGlobalKey,
+      selectedCategoryNonSelectedKey -> selectedCategoryNonSelectedGlobalKey,
+      selectedApisNonSelectedKey     -> selectedApisNonSelectedGlobalKey,
+      selectedApiRadioKey            -> selectedApiRadioGlobalKey,
+      selectedTopicsNonSelectedKey   -> selectedTopicsNonSelectedGlobalKey,
+      mobileNumberInvalidKey         -> mobileNumberInvalidGlobalKey,
+      mobileNumberTooShortKey        -> mobileNumberTooShortGlobalKey
     )
 
     def findFieldKeys(rawMessage: String): Option[(FieldMessageKey, GlobalMessageKey)] = {
@@ -288,8 +267,6 @@ package object controllers {
 
   def telephoneValidator: Mapping[String] = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
 
-  def commentsValidator: Mapping[String] = supportRequestValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
-
   def cidrBlockValidator: Mapping[String] = {
     val privateNetworkRanges = Set(
       new SubnetUtils("10.0.0.0/8"),
@@ -317,7 +294,7 @@ package object controllers {
   def textValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] =
     Forms.text.verifying(requiredFieldMessageKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
 
-  def supportRequestValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] = {
+  def commentsValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] = {
     val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
 
     textValidator(requiredFieldMessageKey, maxLengthKey, maxLength)

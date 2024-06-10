@@ -356,14 +356,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         )
       case Endpoint("POST", "/developer/new-support/details", _)                                               =>
         Map(
-          "apiName"      -> "Test Service Name",
           "details"      -> "details",
           "fullName"     -> "full name",
           "emailAddress" -> "fullname@example.com"
         )
       case Endpoint("POST", "/developer/new-support/api/private-api", _)                                       =>
         Map(
-          "chosen-api-name" -> SupportData.ChooseBusinessRates.id
+          "apiName" -> SupportData.ChooseBusinessRates.id
         )
       case Endpoint("POST", "/developer/new-support/api/private-api/apply", _)                                 =>
         Map(
