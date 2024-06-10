@@ -25,7 +25,8 @@ import cats.data.NonEmptyList
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult, _}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures.{DuplicateApplicationName, InvalidApplicationName}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -71,12 +72,20 @@ class RequestProductionCredentials @Inject() (
     }
 
     def handleCmdResult(app: Application, dispatchResult: Either[NonEmptyList[CommandFailure], DispatchSuccessResult]) = {
+      def mapCmdFailureToString(failure: CommandFailure) = {
+        failure match {
+          case DuplicateApplicationName(name) => s"An application already exists for the name '$name'"
+          case InvalidApplicationName(name)   => s"The application name '$name' contains words that are prohibited"
+          case _                              => CommandFailures.describe(failure)
+        }
+      }
+
       dispatchResult match {
         case Right(_)                                   => handleCmdSuccess(app)
         case Left(errors: NonEmptyList[CommandFailure]) =>
-          errors.map(error => logger.warn(s"commmand failure: ${error.toString()}"))
-          val errString = errors.toList.map(_.toString()).mkString(", ")
-          successful(Left(ErrorDetails("submitSubmission001", s"Submission failed for ${app.id} - $errString")))
+          val errString = errors.toList.map(mapCmdFailureToString).mkString(", ")
+          logger.warn(s"Command failure for ${app.id}: ${errString.toString()}")
+          successful(Left(ErrorDetails("submitSubmission001", s"Submission failed - $errString")))
       }
     }
 

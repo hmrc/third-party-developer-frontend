@@ -135,7 +135,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
       val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
       result.isLeft shouldBe true
-      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed for ${applicationId} - App is not in TESTING state")
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - App is not in TESTING state")
 
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
@@ -155,14 +155,24 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "fails to create a ticket if application already exists" in new Setup {
       val app = anApplication(appId = applicationId, developerEmail = email)
-      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.GenericFailure("New name is a duplicate"))
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.DuplicateApplicationName("New app name"))
 
       val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
       result.isLeft shouldBe true
-      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed for ${applicationId} - New name is a duplicate")
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - An application already exists for the name 'New app name'")
 
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
 
+    "fails to create a ticket if application name is invalid" in new Setup {
+      val app = anApplication(appId = applicationId, developerEmail = email)
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.InvalidApplicationName("Rude word name"))
+
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      result.isLeft shouldBe true
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - The application name 'Rude word name' contains words that are prohibited")
+
+      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+    }
   }
 }
