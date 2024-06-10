@@ -159,7 +159,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
       val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
       result.isLeft shouldBe true
-      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - An application already exists for the name 'New app name'")
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - An application already exists for the name 'New app name' ")
 
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
