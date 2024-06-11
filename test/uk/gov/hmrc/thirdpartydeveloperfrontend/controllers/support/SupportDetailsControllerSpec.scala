@@ -133,6 +133,23 @@ class SupportDetailsControllerSpec extends BaseControllerSpec with WithCSRFAddTo
 
         status(result) shouldBe 400
       }
+
+      "submit request with name, email, details and invalid team member email returns BAD_REQUEST" in new Setup {
+        val request = FakeRequest()
+          .withSession(sessionParams: _*)
+          .withFormUrlEncodedBody(
+            "fullName"               -> "Peter Smith",
+            "emailAddress"           -> "peter@example.com",
+            "details"                -> "Blah blah blah",
+            "teamMemberEmailAddress" -> "abc"
+          )
+        SupportServiceMock.GetSupportFlow.succeeds()
+        SupportServiceMock.SubmitTicket.succeeds()
+
+        val result = addToken(underTest.submitSupportDetails())(request)
+
+        status(result) shouldBe 400
+      }
     }
 
     "invoke supportConfirmationPage" should {

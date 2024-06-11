@@ -58,7 +58,7 @@
         errorMessage = if(form("initialChoice").hasErrors) {
           Some(
             ErrorMessage(
-              content = Text("Please choose an option")
+              content = Text(messages("please.select.an.option"))
             )
           )
         } else { None },

@@ -20,8 +20,8 @@ import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
 
 class TermsOfUseVersionSpec extends HmrcSpec {
   "fromVersionString" should {

@@ -82,12 +82,16 @@ abstract class AbstractSupportFlowController[F, E](
     }
   }
 
+  def otherValidation(flow: SupportFlow, extraData: E, form: Form[F]): Form[F] = {
+    form
+  }
+
   final def submit(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     lookupFlow.flatMap { flow =>
       extraData().flatMap { extras =>
         performAsyncActionIfFlowValid(flow) { validFlow =>
           def handleInvalidForm(formWithErrors: Form[F]) = successful(BadRequest(pageContents(validFlow, formWithErrors, extras)))
-          form().bindFromRequest().fold(handleInvalidForm, form => onValidForm(validFlow, form)(request))
+          otherValidation(flow, extras, form().bindFromRequest()).fold(handleInvalidForm, form => onValidForm(validFlow, form)(request))
         }
       }
     }

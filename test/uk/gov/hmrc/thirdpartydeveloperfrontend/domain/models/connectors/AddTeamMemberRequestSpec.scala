@@ -20,8 +20,7 @@ import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.utils.JsonFormattersSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.utils.{HmrcSpec, JsonFormattersSpec}
 
 class AddTeamMemberRequestSpec extends HmrcSpec with JsonFormattersSpec {
 

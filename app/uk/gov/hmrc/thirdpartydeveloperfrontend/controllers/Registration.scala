@@ -51,7 +51,7 @@ class Registration @Inject() (
     val appConfig: ApplicationConfig
   ) extends LoggedOutController(mcc) with ApplicationLogger with WithUnsafeDefaultFormBinding {
 
-  import ErrorFormBuilder.GlobalError
+  import ErrorFormBuilder.CommonGlobalErrorsSyntax
   import play.api.data._
 
   val regForm: Form[RegisterForm] = RegistrationForm.form

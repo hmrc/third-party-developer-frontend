@@ -346,24 +346,22 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/support", _)                                                           => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
       case Endpoint("POST", "/developer/new-support", _)                                                       =>
         Map("initialChoice" -> SupportData.UsingAnApi.id)
-      // case Endpoint("POST", "/developer/new-support/api/choose", _)                                                                    => Map("initialChoice" -> SupportData.UsingAnApi.id)
       case Endpoint("POST", "/developer/new-support/api/choose-api", _)                                        =>
         Map(
           "choice"                                            -> SupportData.MakingAnApiCall.id,
-          SupportData.MakingAnApiCall.id + "-api-name"        -> "Test Service Name",
-          SupportData.GettingExamples.id + "-api-name"        -> "Test Service Name",
-          SupportData.ReportingDocumentation.id + "-api-name" -> "Test Service Name"
+          SupportData.MakingAnApiCall.id + "-api-name"        -> ApiDefinitionData.apiDefinition.serviceName.value,
+          SupportData.GettingExamples.id + "-api-name"        -> ApiDefinitionData.apiDefinition.serviceName.value,
+          SupportData.ReportingDocumentation.id + "-api-name" -> ApiDefinitionData.apiDefinition.serviceName.value
         )
       case Endpoint("POST", "/developer/new-support/details", _)                                               =>
         Map(
-          "apiName"      -> "Test Service Name",
           "details"      -> "details",
           "fullName"     -> "full name",
           "emailAddress" -> "fullname@example.com"
         )
       case Endpoint("POST", "/developer/new-support/api/private-api", _)                                       =>
         Map(
-          "chosen-api-name" -> SupportData.ChooseBusinessRates.id
+          "apiName" -> SupportData.ChooseBusinessRates.id
         )
       case Endpoint("POST", "/developer/new-support/api/private-api/apply", _)                                 =>
         Map(

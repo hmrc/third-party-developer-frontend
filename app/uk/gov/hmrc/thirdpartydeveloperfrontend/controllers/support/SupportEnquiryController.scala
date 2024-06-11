@@ -79,7 +79,7 @@ class SupportEnquiryController @Inject() (
 
   private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
     form.errors("comments").map((formError: FormError) => {
-      if (formError.message == FormKeys.commentsSpamKey) {
+      if (formError.message == FormKeys.commentsSpamKey.value) {
         logger.info("Spam support request attempted")
       }
     })

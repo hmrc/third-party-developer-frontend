@@ -30,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
   TermsAndConditionsLocations
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 // scalastyle:off number.of.types

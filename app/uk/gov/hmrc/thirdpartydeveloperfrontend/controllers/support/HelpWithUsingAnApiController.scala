@@ -93,6 +93,20 @@ class HelpWithUsingAnApiController @Inject() (
     }
   }
 
+  override def otherValidation(flow: SupportFlow, extraData: List[ApiDefinition], form: Form[HelpWithUsingAnApiForm]): Form[HelpWithUsingAnApiForm] = {
+    def validate(fieldName: String) = {
+      val formFieldValue = form(fieldName).value.getOrElse("")
+      val matchesApiName = extraData.find(_.serviceName.value == formFieldValue).isDefined
+      if (matchesApiName) form else form.withGlobalError("please.select.a.valid.api")
+    }
+
+    form("choice").value match {
+      case Some(SupportData.PrivateApiDocumentation.id) => form
+      case Some(fieldPrefix)                            => validate(s"$fieldPrefix-api-name")
+      case _                                            => form
+    }
+  }
+
   def onValidForm(flow: SupportFlow, form: HelpWithUsingAnApiForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
     form.choice match {
       case SupportData.MakingAnApiCall.id         => updateFlowAndRedirect(chooseMakingCall(form))(routes.SupportDetailsController.supportDetailsPage())(flow)

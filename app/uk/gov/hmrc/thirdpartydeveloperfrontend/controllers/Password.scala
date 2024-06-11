@@ -57,7 +57,7 @@ class Password @Inject() (
     val appConfig: ApplicationConfig
   ) extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUnsafeDefaultFormBinding {
 
-  import ErrorFormBuilder.GlobalError
+  import ErrorFormBuilder.CommonGlobalErrorsSyntax
 
   def showForgotPassword() = loggedOutAction { implicit request =>
     Future.successful(Ok(forgotPasswordView(ForgotPasswordForm.form)))
@@ -133,7 +133,7 @@ class Password @Inject() (
 trait PasswordChange {
   self: FrontendBaseController =>
 
-  import ErrorFormBuilder.GlobalError
+  import ErrorFormBuilder.CommonGlobalErrorsSyntax
 
   val connector: ThirdPartyDeveloperConnector
   val auditService: AuditService

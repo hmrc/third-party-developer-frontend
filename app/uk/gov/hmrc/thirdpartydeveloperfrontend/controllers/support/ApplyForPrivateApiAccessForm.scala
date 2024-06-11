@@ -19,18 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{emailValidator, fullnameValidator}
-
 final case class ApplyForPrivateApiAccessForm(fullName: String, emailAddress: String, organisation: String, applicationId: String)
 
-object ApplyForPrivateApiAccessForm {
+object ApplyForPrivateApiAccessForm extends FormValidation {
+  private val prefix = "apply.for.private.access"
 
   val form: Form[ApplyForPrivateApiAccessForm] = Form(
     mapping(
-      "fullName"      -> fullnameValidator,
-      "emailAddress"  -> emailValidator(),
-      "organisation"  -> nonEmptyText,
-      "applicationId" -> nonEmptyText
+      prefix ~> "fullName"      ~> requiredLimitedTextValidator(100),
+                "emailAddress"  ~> emailValidator,
+      prefix ~> "organisation"  ~> requiredLimitedTextValidator(300),
+      prefix ~> "applicationId" ~> requiredLimitedTextValidator(48)
     )(ApplyForPrivateApiAccessForm.apply)(ApplyForPrivateApiAccessForm.unapply)
   )
 }

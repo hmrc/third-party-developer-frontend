@@ -21,11 +21,11 @@ import play.api.data.Forms._
 
 final case class CheckCdsAccessIsRequiredForm(confirmCdsIntegration: String)
 
-object CheckCdsAccessIsRequiredForm {
+object CheckCdsAccessIsRequiredForm extends FormValidation {
 
   val form: Form[CheckCdsAccessIsRequiredForm] = Form(
     mapping(
-      "confirmCdsIntegration" -> nonEmptyText
+      "confirmCdsIntegration" -> oneOf("yes", "no")
     )(CheckCdsAccessIsRequiredForm.apply)(CheckCdsAccessIsRequiredForm.unapply)
   )
 }
