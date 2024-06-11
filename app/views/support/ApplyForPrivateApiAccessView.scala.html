@@ -62,13 +62,7 @@
         ),
         classes = "govuk-!-width-full",
         value = form("fullName").value.orElse(loggedIn.map(_.displayedName)),
-        errorMessage = if(form("fullName").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Enter your full name")
-            )
-          )
-        } else { None }
+        errorMessage = form.error("fullName").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
   

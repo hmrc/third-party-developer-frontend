@@ -208,10 +208,20 @@ choose.application.to.uplift.error=Select the application you want production cr
 
 
 
-supportdetails.details.error.required.field=Provide details of your problem
+supportdetails.details.error.required.field=Enter details of your problem
 supportdetails.details.error.maxLength.field=You entered too much text - keep it under 3,000 characters
 supportdetails.details.error.spam.field=Your request looks like spam so cannot be submitted
+
+supportdetails.fullname.error.required.field=Enter your full name
+supportdetails.fullname.error.maxLength.field=Enter a name with fewer than 100 characters
+
+supportdetails.emailaddress.error.required.field=Enter your email address
+supportdetails.emailaddress.error.maxLength.field=Enter your email address with fewer than 320 characters
+supportdetails.emailaddress.error.invalid.field=Enter your email address in the correct format, like name@example.com
+
 choose.private.api.apiname.error.required.field=Select API Name
 help.with.signing.in.choice.error.required.field=Please select an option
 help.with.using.api.choice.error.required.field=Please select an option
 support.enquiry.initialchoice.error.required.field=Please select an option
+
+please.select.an.option=Please select an option

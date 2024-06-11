@@ -46,14 +46,14 @@ trait FormValidation {
 
   def requiredLimitedTextValidator(maxLength: Int)(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] =
     (
-      fieldName -> text
+      fieldName -> default(text, "")
         .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= maxLength)
     )
 
   def emailValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] =
     (
-      fieldName -> text
+      fieldName -> default(text, "")
         .verifying(s"$messagePrefix.error.invalid.field", s => EmailAddress.isValid(s) || s.length == 0)
         .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 320)

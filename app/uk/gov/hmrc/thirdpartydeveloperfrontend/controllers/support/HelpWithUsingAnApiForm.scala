@@ -26,7 +26,7 @@ object HelpWithUsingAnApiForm extends FormValidation {
 
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      formPrefix ~> "choice" ~> requiredLimitedTextValidator(150),
+      formPrefix ~> "choice" ~> requiredLimitedTextValidator(150), // TODO - one of the options or else
       // TODO - review the naming below
       SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
       SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,

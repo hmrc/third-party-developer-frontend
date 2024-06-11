@@ -26,7 +26,7 @@ object SupportEnquiryForm extends FormValidation {
   private def commentsValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] = {
     val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
     (
-      fieldName -> text
+      fieldName -> default(text, "")
         .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 3000)
         .verifying(s"$messagePrefix.error.spam.field", s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)

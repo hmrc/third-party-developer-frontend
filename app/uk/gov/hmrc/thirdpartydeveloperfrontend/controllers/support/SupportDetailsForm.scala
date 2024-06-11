@@ -27,7 +27,7 @@ object SupportDetailsForm extends FormValidation {
   private def detailsValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] = {
     val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
     (
-      fieldName -> text
+      fieldName -> default(text, "")
         .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 3000)
         .verifying(s"$messagePrefix.error.spam.field", s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)
@@ -37,8 +37,8 @@ object SupportDetailsForm extends FormValidation {
   val form: Form[SupportDetailsForm] = Form(
     mapping(
       formPrefix ~> "details" ~> detailsValidator,
-      "fullName" ~> requiredLimitedTextValidator(100),
-      "emailAddress" ~> emailValidator,
+      formPrefix ~> "fullName" ~> requiredLimitedTextValidator(100),
+      formPrefix ~> "emailAddress" ~> emailValidator,
       "organisation"           -> optional(text),
       "teamMemberEmailAddress" -> optional(text)
     )(SupportDetailsForm.apply)(SupportDetailsForm.unapply)
