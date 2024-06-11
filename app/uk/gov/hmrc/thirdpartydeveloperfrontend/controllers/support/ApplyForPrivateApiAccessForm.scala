@@ -22,13 +22,14 @@ import play.api.data.Forms._
 final case class ApplyForPrivateApiAccessForm(fullName: String, emailAddress: String, organisation: String, applicationId: String)
 
 object ApplyForPrivateApiAccessForm extends FormValidation {
+  private val prefix = "apply.for.private.access"
 
   val form: Form[ApplyForPrivateApiAccessForm] = Form(
     mapping(
-      "fullName" ~> requiredLimitedTextValidator(100),
+      prefix ~> "fullName" ~> requiredLimitedTextValidator(100),
       "emailAddress" ~> emailValidator,
-      "organisation"  -> nonEmptyText,
-      "applicationId" -> nonEmptyText
+      prefix ~> "organisation"  ~> requiredLimitedTextValidator(300),
+      prefix ~> "applicationId" ~> requiredLimitedTextValidator(48)
     )(ApplyForPrivateApiAccessForm.apply)(ApplyForPrivateApiAccessForm.unapply)
   )
 }

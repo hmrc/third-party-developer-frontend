@@ -54,10 +54,22 @@ trait FormValidation {
   def emailValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] =
     (
       fieldName -> default(text, "")
-        .verifying(s"$messagePrefix.error.invalid.field", s => EmailAddress.isValid(s) || s.length == 0)
+        .verifying(s"$messagePrefix.error.not.valid.field", s => EmailAddress.isValid(s) || s.length == 0)
         .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 320)
     )
+
+  def optionalEmailValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[Option[String]]] =
+    (
+      fieldName -> optional(text)
+        .verifying(s"$messagePrefix.error.not.valid.field", s => s.fold(true)(EmailAddress.isValid))
+        .verifying(s"$messagePrefix.error.maxLength.field", s => s.fold(true)(_.trim.length <= 320))
+    )
+    
+  def oneOf(options: String*) =
+    default(text, "")
+      .verifying("please.select.an.option", s => options.contains(s))
+
 }
 
 object FormValidation extends FormValidation

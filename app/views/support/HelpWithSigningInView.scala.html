@@ -57,13 +57,7 @@
             )
           )
         ),
-        errorMessage = if(form("choice").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Choose which option you need help with.")
-            )
-          )
-        } else { None },
+        errorMessage = form.error("choice").map(e => ErrorMessage(content = Text(messages(e.message)))),
         name = "choice",
         items = Seq(
           RadioItem(

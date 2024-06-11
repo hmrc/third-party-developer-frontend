@@ -180,7 +180,8 @@
           classes = "govuk-label--s",
           content = Text("Team member's email address (optional)")
         ),
-        classes = "govuk-!-width-full"
+        classes = "govuk-!-width-full",
+        errorMessage = form.error("teamMemberEmailAddress").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
 

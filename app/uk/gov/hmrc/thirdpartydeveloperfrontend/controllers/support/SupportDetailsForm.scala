@@ -40,7 +40,7 @@ object SupportDetailsForm extends FormValidation {
       formPrefix ~> "fullName" ~> requiredLimitedTextValidator(100),
       formPrefix ~> "emailAddress" ~> emailValidator,
       "organisation"           -> optional(text),
-      "teamMemberEmailAddress" -> optional(text)
+      formPrefix ~> "teamMemberEmailAddress" ~> optionalEmailValidator
     )(SupportDetailsForm.apply)(SupportDetailsForm.unapply)
   )
 }

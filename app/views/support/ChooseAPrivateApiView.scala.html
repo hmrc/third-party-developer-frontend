@@ -57,13 +57,7 @@
             )
           )
         ),
-        errorMessage = if(form("choice").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Choose which private API documentation you want to access.")
-            )
-          )
-        } else { None },
+        errorMessage = form.error("apiName").map(e => ErrorMessage(content = Text(messages(e.message)))),
         name = "apiName",
         items = Seq(
           RadioItem(

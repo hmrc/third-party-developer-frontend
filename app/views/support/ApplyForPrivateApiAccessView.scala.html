@@ -82,13 +82,7 @@
         ),
         classes = "govuk-!-width-full",
         value = form("emailAddress").value.orElse(loggedIn.map(_.email.text)),
-        errorMessage = if(form("emailAddress").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Enter an email address")
-            )
-          )
-        } else { None }
+        errorMessage = form.error("emailAddress").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
   
@@ -102,7 +96,8 @@
           classes = "govuk-label--s",
           content = Text("Organisation")
         ),
-        classes = "govuk-!-width-full"
+        classes = "govuk-!-width-full",
+        errorMessage = form.error("organisation").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
 
@@ -116,15 +111,16 @@
           classes = "govuk-label--s",
           content = Text("Application ID")
         ),
-        classes = "govuk-!-width-full"
+        classes = "govuk-!-width-full",
+        errorMessage = form.error("applicationId").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
      
-      @govukButton(
-        Button(
-          id = Some("continue"),
-          content = Text("Send")
-        )
+    @govukButton(
+      Button(
+        id = Some("continue"),
+        content = Text("Send")
       )
-    }
+    )
+  }
 }

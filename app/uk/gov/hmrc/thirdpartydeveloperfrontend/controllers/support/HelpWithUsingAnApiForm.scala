@@ -18,19 +18,21 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import play.api.data.Form
 import play.api.data.Forms._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.MakingAnApiCall
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.GettingExamples
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.ReportingDocumentation
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.PrivateApiDocumentation
 
 final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 
 object HelpWithUsingAnApiForm extends FormValidation {
-  private val formPrefix = "help.with.using.api"
-
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      formPrefix ~> "choice" ~> requiredLimitedTextValidator(150), // TODO - one of the options or else
+      "choice" -> oneOf(MakingAnApiCall.id, GettingExamples.id, ReportingDocumentation.id, PrivateApiDocumentation.id),
       // TODO - review the naming below
-      SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
-      SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
-      SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText
+      MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
+      GettingExamples.id + "-api-name"        -> nonEmptyText,
+      ReportingDocumentation.id + "-api-name" -> nonEmptyText
     )(HelpWithUsingAnApiForm.apply)(HelpWithUsingAnApiForm.unapply)
   )
 }

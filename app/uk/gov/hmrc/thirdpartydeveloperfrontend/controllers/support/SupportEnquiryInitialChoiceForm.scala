@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import play.api.data.Form
 import play.api.data.Forms._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData._
 
 final case class SupportEnquiryInitialChoiceForm(initialChoice: String)
 
@@ -25,7 +26,7 @@ object SupportEnquiryInitialChoiceForm extends FormValidation {
 
   val form: Form[SupportEnquiryInitialChoiceForm] = Form(
     mapping(
-      "support.enquiry" ~> "initialChoice" ~> textValidator
+      "initialChoice" -> oneOf(FindingAnApi.id, UsingAnApi.id, SigningIn.id, SettingUpApplication.id, NoneOfTheAbove.id )
     )(SupportEnquiryInitialChoiceForm.apply)(SupportEnquiryInitialChoiceForm.unapply)
   )
 }
