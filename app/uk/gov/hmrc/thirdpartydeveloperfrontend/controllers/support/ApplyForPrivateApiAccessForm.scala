@@ -28,7 +28,7 @@ object ApplyForPrivateApiAccessForm extends FormValidation {
     mapping(
       prefix ~> "fullName" ~> requiredLimitedTextValidator(100),
       "emailAddress" ~> emailValidator,
-      prefix ~> "organisation"  ~> requiredLimitedTextValidator(300),
+      prefix ~> "organisation" ~> requiredLimitedTextValidator(300),
       prefix ~> "applicationId" ~> requiredLimitedTextValidator(48)
     )(ApplyForPrivateApiAccessForm.apply)(ApplyForPrivateApiAccessForm.unapply)
   )

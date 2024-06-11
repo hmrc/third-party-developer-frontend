@@ -18,17 +18,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import play.api.data.Form
 import play.api.data.Forms._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.MakingAnApiCall
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.GettingExamples
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.ReportingDocumentation
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.PrivateApiDocumentation
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.{GettingExamples, MakingAnApiCall, PrivateApiDocumentation, ReportingDocumentation}
 
 final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 
 object HelpWithUsingAnApiForm extends FormValidation {
+
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      "choice" -> oneOf(MakingAnApiCall.id, GettingExamples.id, ReportingDocumentation.id, PrivateApiDocumentation.id),
+      "choice"                                -> oneOf(MakingAnApiCall.id, GettingExamples.id, ReportingDocumentation.id, PrivateApiDocumentation.id),
       // TODO - review the naming below
       MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
       GettingExamples.id + "-api-name"        -> nonEmptyText,

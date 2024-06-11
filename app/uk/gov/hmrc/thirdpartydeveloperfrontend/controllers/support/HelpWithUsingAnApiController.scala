@@ -95,14 +95,15 @@ class HelpWithUsingAnApiController @Inject() (
 
   override def otherValidation(flow: SupportFlow, extraData: List[ApiDefinition], form: Form[HelpWithUsingAnApiForm]): Form[HelpWithUsingAnApiForm] = {
     def validate(fieldName: String) = {
-      val matchesApiName = extraData.find(_.serviceName.value == form(fieldName)).isDefined
-      if(matchesApiName) form else form.withGlobalError("Please choose a valid api name")
+      val formFieldValue = form(fieldName).value.getOrElse("")
+      val matchesApiName = extraData.find(_.serviceName.value == formFieldValue).isDefined
+      if (matchesApiName) form else form.withGlobalError("Please choose a valid api name")
     }
-    
+
     form("choice").value match {
       case Some(SupportData.PrivateApiDocumentation.id) => form
-      case Some(fieldPrefix) => validate(s"$fieldPrefix-api-name")
-      case _ => form
+      case Some(fieldPrefix)                            => validate(s"$fieldPrefix-api-name")
+      case _                                            => form
     }
   }
 

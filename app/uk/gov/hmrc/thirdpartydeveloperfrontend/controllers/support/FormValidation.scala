@@ -65,7 +65,7 @@ trait FormValidation {
         .verifying(s"$messagePrefix.error.not.valid.field", s => s.fold(true)(EmailAddress.isValid))
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.fold(true)(_.trim.length <= 320))
     )
-    
+
   def oneOf(options: String*) =
     default(text, "")
       .verifying("please.select.an.option", s => options.contains(s))

@@ -138,9 +138,9 @@ class SupportDetailsControllerSpec extends BaseControllerSpec with WithCSRFAddTo
         val request = FakeRequest()
           .withSession(sessionParams: _*)
           .withFormUrlEncodedBody(
-            "fullName"     -> "Peter Smith",
-            "emailAddress" -> "peter@example.com",
-            "details"      -> "Blah blah blah",
+            "fullName"               -> "Peter Smith",
+            "emailAddress"           -> "peter@example.com",
+            "details"                -> "Blah blah blah",
             "teamMemberEmailAddress" -> "abc"
           )
         SupportServiceMock.GetSupportFlow.succeeds()
