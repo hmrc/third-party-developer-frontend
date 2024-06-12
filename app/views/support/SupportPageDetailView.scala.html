@@ -131,13 +131,7 @@
             content = Text("Do not include personal or financial information, like your National Insurance number or credit card details.")
           )
         ),
-        errorMessage = if(form("details").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Enter some details")
-            )
-          )
-        } else { None }
+        errorMessage = form.error("details").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
 
@@ -152,13 +146,7 @@
         ),
         classes = "govuk-!-width-full",
         value = form("fullName").value.orElse(loggedIn.map(_.displayedName)),
-        errorMessage = if(form("fullName").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Enter your full name")
-            )
-          )
-        } else { None }
+        errorMessage = form.error("fullName").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
 
@@ -178,13 +166,7 @@
         ),
         classes = "govuk-!-width-full",
         value = form("emailAddress").value.orElse(loggedIn.map(_.email.text)),
-        errorMessage = if(form("emailAddress").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Enter an email address")
-            )
-          )
-        } else { None }
+        errorMessage = form.error("emailAddress").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
 
@@ -198,7 +180,8 @@
           classes = "govuk-label--s",
           content = Text("Team member's email address (optional)")
         ),
-        classes = "govuk-!-width-full"
+        classes = "govuk-!-width-full",
+        errorMessage = form.error("teamMemberEmailAddress").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
 

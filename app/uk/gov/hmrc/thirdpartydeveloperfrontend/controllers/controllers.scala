@@ -31,159 +31,170 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 package object controllers {
 
+  case class FieldNameKey(value: String)     extends AnyVal { override def toString(): String = value }
+  case class GlobalMessageKey(value: String) extends AnyVal { override def toString(): String = value }
+  case class FieldMessageKey(value: String)  extends AnyVal { override def toString(): String = value }
+
+  object Conversions {
+    implicit def fromFieldNameKeyToString(in: FieldNameKey): String         = in.value
+    implicit def fromGlobalMessageKeyToString(in: GlobalMessageKey): String = in.value
+    implicit def fromFieldMessageKeyToString(in: FieldMessageKey): String   = in.value
+  }
+
   object FormKeys {
 
-    val firstnameField        = "firstname"
-    val lastnameField         = "lastname"
-    val fullnameField         = "fullname"
-    val emailaddressField     = "emailaddress"
-    val passwordField         = "password"
-    val loginPasswordField    = "loginpassword"
-    val currentPasswordField  = "currentpassword"
-    val confirmapasswordField = "confirmpassword"
-    val appNameField          = "applicationName"
-    val appDescriptionField   = "description"
-    val deleteSelectField     = "deleteSelect"
+    val firstnameField               = FieldNameKey("firstname")
+    val lastnameField                = FieldNameKey("lastname")
+    val fullnameField                = FieldNameKey("fullname")
+    val emailaddressField            = FieldNameKey("emailaddress")
+    val passwordField                = FieldNameKey("password")
+    val loginPasswordField           = FieldNameKey("loginpassword")
+    val currentPasswordField         = FieldNameKey("currentpassword")
+    val confirmapasswordField        = FieldNameKey("confirmpassword")
+    val appNameField                 = FieldNameKey("applicationName")
+    val appDescriptionField          = FieldNameKey("description")
+    val deleteSelectField            = FieldNameKey("deleteSelect")
+    val selectedApisNonSelectedField = FieldNameKey("errorSelectedApisNonselectedField")
 
-    val firstnameRequiredKey                = "firstname.error.required.field"
-    val firstnameMaxLengthKey               = "firstname.error.maxLength.field"
-    val lastnameRequiredKey                 = "lastname.error.required.field"
-    val lastnameMaxLengthKey                = "lastname.error.maxLength.field"
-    val fullnameRequiredKey                 = "fullname.error.required.field"
-    val fullnameMaxLengthKey                = "fullname.error.maxLength.field"
-    val commentsRequiredKey                 = "comments.error.required.field"
-    val commentsMaxLengthKey                = "comments.error.maxLength.field"
-    val commentsSpamKey                     = "comments.error.spam.field"
-    val ipAllowlistAddAnotherNoChoiceKey    = "ipAllowlist.addAnother.confirmation.no.choice.field"
-    val ipAllowlistInvalidCidrBlockKey      = "ipAllowlist.cidrBlock.invalid"
-    val ipAllowlistPrivateCidrBlockKey      = "ipAllowlist.cidrBlock.invalid.private"
-    val ipAllowlistInvalidCidrBlockRangeKey = "ipAllowlist.cidrBlock.invalid.range"
-    val telephoneRequiredKey                = "telephone.error.required.field"
-    val emailaddressRequiredKey             = "emailaddress.error.required.field"
-    val emailaddressNotValidKey             = "emailaddress.error.not.valid.field"
-    val emailMaxLengthKey                   = "emailaddress.error.maxLength.field"
-    val detailsRequiredKey                  = "details.error.required.field"
-    val detailsMaxLengthKey                 = "details.error.maxLength.field"
+    val firstnameRequiredKey                = FieldMessageKey("firstname.error.required.field")
+    val firstnameMaxLengthKey               = FieldMessageKey("firstname.error.maxLength.field")
+    val lastnameRequiredKey                 = FieldMessageKey("lastname.error.required.field")
+    val lastnameMaxLengthKey                = FieldMessageKey("lastname.error.maxLength.field")
+    val fullnameRequiredKey                 = FieldMessageKey("fullname.error.required.field")
+    val fullnameMaxLengthKey                = FieldMessageKey("fullname.error.maxLength.field")
+    val commentsRequiredKey                 = FieldMessageKey("comments.error.required.field")
+    val commentsMaxLengthKey                = FieldMessageKey("comments.error.maxLength.field")
+    val commentsSpamKey                     = FieldMessageKey("comments.error.spam.field")
+    val ipAllowlistAddAnotherNoChoiceKey    = FieldMessageKey("ipAllowlist.addAnother.confirmation.no.choice.field")
+    val ipAllowlistInvalidCidrBlockKey      = FieldMessageKey("ipAllowlist.cidrBlock.invalid")
+    val ipAllowlistPrivateCidrBlockKey      = FieldMessageKey("ipAllowlist.cidrBlock.invalid.private")
+    val ipAllowlistInvalidCidrBlockRangeKey = FieldMessageKey("ipAllowlist.cidrBlock.invalid.range")
+    val telephoneRequiredKey                = FieldMessageKey("telephone.error.required.field")
+    val emailaddressRequiredKey             = FieldMessageKey("emailaddress.error.required.field")
+    val emailaddressNotValidKey             = FieldMessageKey("emailaddress.error.not.valid.field")
+    val emailMaxLengthKey                   = FieldMessageKey("emailaddress.error.maxLength.field")
+    val detailsRequiredKey                  = FieldMessageKey("details.error.required.field")
+    val detailsMaxLengthKey                 = FieldMessageKey("details.error.maxLength.field")
 
-    val termsOfUseAgreeKey       = "termsofuse.error.required.field"
-    val termsOfUseAgreeGlobalKey = "termsofuse.error.required.global"
+    val termsOfUseAgreeKey       = FieldMessageKey("termsofuse.error.required.field")
+    val termsOfUseAgreeGlobalKey = GlobalMessageKey("termsofuse.error.required.global")
 
-    val passwordNotValidKey = "password.error.not.valid.field"
-    val passwordRequiredKey = "password.error.required.field"
-    val passwordNoMatchKey  = "password.error.no.match.field"
+    val passwordNotValidKey = FieldMessageKey("password.error.not.valid.field")
+    val passwordRequiredKey = FieldMessageKey("password.error.required.field")
+    val passwordNoMatchKey  = FieldMessageKey("password.error.no.match.field")
 
-    val loginPasswordRequiredKey = "loginpassword.error.required.field"
+    val loginPasswordRequiredKey = FieldMessageKey("loginpassword.error.required.field")
 
-    val emailalreadyInUseKey  = "emailaddress.already.registered.field"
-    val emailalreadyInUse2Key = "emailaddress.already.registered.2.field"
+    val emailalreadyInUseKey  = FieldMessageKey("emailaddress.already.registered.field")
+    val emailalreadyInUse2Key = FieldMessageKey("emailaddress.already.registered.2.field")
 
-    val accountUnverifiedKey        = "account.unverified.field"
-    val invalidCredentialsKey       = "invalid.credentials.field"
-    val invalidPasswordKey          = "invalid.password.field"
-    val accountLockedKey            = "account.locked.field"
-    val accountLocked2Key           = "account.locked.2.field"
-    val currentPasswordRequiredKey  = "currentpassword.error.required.field"
-    val currentPasswordInvalidKey   = "currentpassword.invalid.field"
-    val redirectUriInvalidKey       = "redirect.uri.invalid.field"
-    val privacyPolicyUrlRequiredKey = "privacy.policy.url.required.field"
-    val privacyPolicyUrlInvalidKey  = "privacy.policy.url.invalid.field"
-    val privacyPolicyUrlNoChoiceKey = "privacy.policy.url.no.choice.field"
-    val tNcUrlInvalidKey            = "terms.conditions.url.invalid.field"
-    val tNcUrlNoChoiceKey           = "terms.conditions.url.no.choice.field"
-    val tNcUrlRequiredKey           = "terms.conditions.url.required.field"
+    val accountUnverifiedKey        = FieldMessageKey("account.unverified.field")
+    val invalidCredentialsKey       = FieldMessageKey("invalid.credentials.field")
+    val invalidPasswordKey          = FieldMessageKey("invalid.password.field")
+    val accountLockedKey            = FieldMessageKey("account.locked.field")
+    val accountLocked2Key           = FieldMessageKey("account.locked.2.field")
+    val currentPasswordRequiredKey  = FieldMessageKey("currentpassword.error.required.field")
+    val currentPasswordInvalidKey   = FieldMessageKey("currentpassword.invalid.field")
+    val redirectUriInvalidKey       = FieldMessageKey("redirect.uri.invalid.field")
+    val privacyPolicyUrlRequiredKey = FieldMessageKey("privacy.policy.url.required.field")
+    val privacyPolicyUrlInvalidKey  = FieldMessageKey("privacy.policy.url.invalid.field")
+    val privacyPolicyUrlNoChoiceKey = FieldMessageKey("privacy.policy.url.no.choice.field")
+    val tNcUrlInvalidKey            = FieldMessageKey("terms.conditions.url.invalid.field")
+    val tNcUrlNoChoiceKey           = FieldMessageKey("terms.conditions.url.no.choice.field")
+    val tNcUrlRequiredKey           = FieldMessageKey("terms.conditions.url.required.field")
 
     val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
 
-    val applicationNameInvalidKey       = "application.name.invalid.name"
-    val applicationNameAlreadyExistsKey = "application.name.already.exists.field"
+    val applicationNameInvalidKey       = FieldMessageKey("application.name.invalid.name")
+    val applicationNameAlreadyExistsKey = FieldMessageKey("application.name.already.exists.field")
 
-    val environmentInvalidKey = "environment.error.required.field"
+    val environmentInvalidKey = FieldMessageKey("environment.error.required.field")
 
-    val teamMemberEmailRequired = "team.member.error.emailAddress.required.field"
-    val teamMemberAlreadyExists = "team.member.error.emailAddress.already.exists.field"
+    val teamMemberEmailRequired = FieldMessageKey("team.member.error.emailAddress.required.field")
+    val teamMemberAlreadyExists = FieldMessageKey("team.member.error.emailAddress.already.exists.field")
 
-    val teamMemberRoleRequired             = "roles.error.answer.required.field.content"
-    val removeTeamMemberConfirmNoChoiceKey = "remove.team.member.confirmation.no.choice.field"
+    val teamMemberRoleRequired             = FieldMessageKey("roles.error.answer.required.field.content")
+    val removeTeamMemberConfirmNoChoiceKey = FieldMessageKey("remove.team.member.confirmation.no.choice.field")
 
-    val firstnameRequiredGlobalKey        = "firstname.error.required.global"
-    val firstnameMaxLengthGlobalKey       = "firstname.error.maxLength.global"
-    val lastnameRequiredGlobalKey         = "lastname.error.required.global"
-    val lastnameMaxLengthGlobalKey        = "lastname.error.maxLength.global"
-    val emailaddressRequiredGlobalKey     = "emailaddress.error.required.global"
-    val emailaddressNotValidGlobalKey     = "emailaddress.error.not.valid.global"
-    val emailMaxLengthGlobalKey           = "emailaddress.error.maxLength.global"
-    val passwordNotValidGlobalKey         = "password.error.not.valid.global"
-    val passwordRequiredGlobalKey         = "password.error.required.global"
-    val passwordNoMatchGlobalKey          = "password.error.no.match.global"
-    val emailaddressAlreadyInUseGlobalKey = "emailaddress.already.registered.global"
+    val firstnameRequiredGlobalKey        = GlobalMessageKey("firstname.error.required.global")
+    val firstnameMaxLengthGlobalKey       = GlobalMessageKey("firstname.error.maxLength.global")
+    val lastnameRequiredGlobalKey         = GlobalMessageKey("lastname.error.required.global")
+    val lastnameMaxLengthGlobalKey        = GlobalMessageKey("lastname.error.maxLength.global")
+    val emailaddressRequiredGlobalKey     = GlobalMessageKey("emailaddress.error.required.global")
+    val emailaddressNotValidGlobalKey     = GlobalMessageKey("emailaddress.error.not.valid.global")
+    val emailMaxLengthGlobalKey           = GlobalMessageKey("emailaddress.error.maxLength.global")
+    val passwordNotValidGlobalKey         = GlobalMessageKey("password.error.not.valid.global")
+    val passwordRequiredGlobalKey         = GlobalMessageKey("password.error.required.global")
+    val passwordNoMatchGlobalKey          = GlobalMessageKey("password.error.no.match.global")
+    val emailaddressAlreadyInUseGlobalKey = GlobalMessageKey("emailaddress.already.registered.global")
 
-    val accountUnverifiedGlobalKey             = "account.unverified.global"
-    val accountLockedGlobalKey                 = "account.locked.global"
-    val invalidCredentialsGlobalKey            = "invalid.credentials.global"
-    val invalidPasswordGlobalKey               = "invalid.password.global"
-    val currentPasswordRequiredGlobalKey       = "currentpassword.error.required.global"
-    val currentPasswordInvalidGlobalKey        = "currentpassword.invalid.global"
-    val redirectUriInvalidGlobalKey            = "redirect.uri.invalid.global"
-    val privacyPolicyUrlInvalidGlobalKey       = "privacy.policy.url.invalid.global"
-    val tNcUrlInvalidGlobalKey                 = "terms.conditions.url.invalid.global"
-    val clientSecretLimitExceeded              = "client.secret.limit.exceeded"
-    val productionCannotDeleteOnlyClientSecret = "production.cannot.delete.only.client.secret"
-    val sandboxCannotDeleteOnlyClientSecret    = "sandbox.cannot.delete.only.client.secret"
+    val accountUnverifiedGlobalKey             = GlobalMessageKey("account.unverified.global")
+    val accountLockedGlobalKey                 = GlobalMessageKey("account.locked.global")
+    val invalidCredentialsGlobalKey            = GlobalMessageKey("invalid.credentials.global")
+    val invalidPasswordGlobalKey               = GlobalMessageKey("invalid.password.global")
+    val currentPasswordRequiredGlobalKey       = GlobalMessageKey("currentpassword.error.required.global")
+    val currentPasswordInvalidGlobalKey        = GlobalMessageKey("currentpassword.invalid.global")
+    val redirectUriInvalidGlobalKey            = GlobalMessageKey("redirect.uri.invalid.global")
+    val privacyPolicyUrlInvalidGlobalKey       = GlobalMessageKey("privacy.policy.url.invalid.global")
+    val tNcUrlInvalidGlobalKey                 = GlobalMessageKey("terms.conditions.url.invalid.global")
+    val clientSecretLimitExceeded              = GlobalMessageKey("client.secret.limit.exceeded")
+    val productionCannotDeleteOnlyClientSecret = GlobalMessageKey("production.cannot.delete.only.client.secret")
+    val sandboxCannotDeleteOnlyClientSecret    = GlobalMessageKey("sandbox.cannot.delete.only.client.secret")
 
-    val deleteApplicationConfirmNoChoiceKey   = "delete.application.confirmation.no.choice.field"
-    val deleteClientSecretsConfirmNoChoiceKey = "delete.client.secrets.confirmation.no.choice.field"
-    val subscriptionConfirmationNoChoiceKey   = "subscription.confirmation.no.choice.field"
-    val unsubscribeConfirmationNoChoiceKey    = "unsubscribe.confirmation.no.choice.field"
-    val changeSubscriptionNoChoiceKey         = "subscription.change.no.choice.field"
-    val accountDeleteConfirmationRequiredKey  = "developer.delete.error.required.field"
-    val remove2SVConfirmNoChoiceKey           = "remove.2SV.confirmation.no.choice.field"
+    val deleteApplicationConfirmNoChoiceKey   = FieldMessageKey("delete.application.confirmation.no.choice.field")
+    val deleteClientSecretsConfirmNoChoiceKey = FieldMessageKey("delete.client.secrets.confirmation.no.choice.field")
+    val subscriptionConfirmationNoChoiceKey   = FieldMessageKey("subscription.confirmation.no.choice.field")
+    val unsubscribeConfirmationNoChoiceKey    = FieldMessageKey("unsubscribe.confirmation.no.choice.field")
+    val changeSubscriptionNoChoiceKey         = FieldMessageKey("subscription.change.no.choice.field")
+    val accountDeleteConfirmationRequiredKey  = FieldMessageKey("developer.delete.error.required.field")
+    val remove2SVConfirmNoChoiceKey           = FieldMessageKey("remove.2SV.confirmation.no.choice.field")
 
-    val deleteRedirectConfirmationNoChoiceKey = "delete.redirect.confirmation.no.choice.field"
+    val deleteRedirectConfirmationNoChoiceKey = FieldMessageKey("delete.redirect.confirmation.no.choice.field")
 
-    val sellResellOrDistributeConfirmNoChoiceKey = "sell.resell.distribute.confirmation.no.choice.field"
+    val sellResellOrDistributeConfirmNoChoiceKey = FieldMessageKey("sell.resell.distribute.confirmation.no.choice.field")
 
-    val verifyPasswordInvalidKey       = "verify.password.error.required.field"
-    val verifyPasswordInvalidGlobalKey = "verify.password.error.required.global"
+    val verifyPasswordInvalidKey       = FieldMessageKey("verify.password.error.required.field")
+    val verifyPasswordInvalidGlobalKey = GlobalMessageKey("verify.password.error.required.global")
 
-    val selectAClientSecretKey      = "select.client.secret.field"
-    val selectFewerClientSecretsKey = "select.fewer.client.secrets.field"
+    val selectAClientSecretKey      = FieldMessageKey("select.client.secret.field")
+    val selectFewerClientSecretsKey = FieldMessageKey("select.fewer.client.secrets.field")
 
-    val accessCodeInvalidKey       = "accessCode.invalid.number.field"
-    val accessCodeInvalidGlobalKey = "accessCode.invalid.number.global"
+    val accessCodeInvalidKey       = FieldMessageKey("accessCode.invalid.number.field")
+    val accessCodeInvalidGlobalKey = GlobalMessageKey("accessCode.invalid.number.global")
 
-    val accessCodeErrorKey       = "accessCode.error.field"
-    val accessCodeErrorGlobalKey = "accessCode.error.global"
+    val accessCodeErrorKey       = FieldMessageKey("accessCode.error.field")
+    val accessCodeErrorGlobalKey = GlobalMessageKey("accessCode.error.global")
 
-    val selectMfaInvalidKey       = "selectMfa.invalid.mfaType.field"
-    val selectMfaInvalidGlobalKey = "selectMfa.invalid.mfaType.global"
+    val selectMfaInvalidKey       = FieldMessageKey("selectMfa.invalid.mfaType.field")
+    val selectMfaInvalidGlobalKey = GlobalMessageKey("selectMfa.invalid.mfaType.global")
 
-    val mfaNameChangeInvalidKey       = "mfaName.invalid.name.field"
-    val mfaNameChangeInvalidGlobalKey = "mfaName.invalid.name.global"
+    val mfaNameChangeInvalidKey       = FieldMessageKey("mfaName.invalid.name.field")
+    val mfaNameChangeInvalidGlobalKey = GlobalMessageKey("mfaName.invalid.name.global")
 
-    val mobileNumberInvalidKey       = "mobileNumber.invalid.number.field"
-    val mobileNumberInvalidGlobalKey = "mobileNumber.invalid.number.global"
+    val mobileNumberInvalidKey       = FieldMessageKey("mobileNumber.invalid.number.field")
+    val mobileNumberInvalidGlobalKey = GlobalMessageKey("mobileNumber.invalid.number.global")
 
-    val mobileNumberTooShortKey       = "mobileNumber.too.short.number.field"
-    val mobileNumberTooShortGlobalKey = "mobileNumber.too.short.number.global"
+    val mobileNumberTooShortKey       = FieldMessageKey("mobileNumber.too.short.number.field")
+    val mobileNumberTooShortGlobalKey = GlobalMessageKey("mobileNumber.too.short.number.global")
 
-    val selectedCategoryNonSelectedKey       = "error.selectedcategories.nonselected.field"
-    val selectedCategoryNonSelectedGlobalKey = "error.selectedcategories.nonselected.global"
+    val selectedCategoryNonSelectedKey       = FieldMessageKey("error.selectedcategories.nonselected.field")
+    val selectedCategoryNonSelectedGlobalKey = GlobalMessageKey("error.selectedcategories.nonselected.global")
 
-    val selectedApiRadioKey       = "error.select.apiradio.nonselected.field"
-    val selectedApiRadioGlobalKey = "error.select.apiradio.nonselected.global"
+    val selectedApiRadioKey       = FieldMessageKey("error.select.apiradio.nonselected.field")
+    val selectedApiRadioGlobalKey = GlobalMessageKey("error.select.apiradio.nonselected.global")
 
-    val selectedApisNonSelectedKey       = "error.selectedapis.nonselected.field"
-    val selectedApisNonSelectedGlobalKey = "error.selectedapis.nonselected.global"
+    val selectedApisNonSelectedKey       = FieldMessageKey("error.selectedapis.nonselected.field")
+    val selectedApisNonSelectedGlobalKey = GlobalMessageKey("error.selectedapis.nonselected.global")
 
-    val selectedTopicsNonSelectedKey       = "error.selectedtopics.nonselected.field"
-    val selectedTopicsNonSelectedGlobalKey = "error.selectedtopics.nonselected.global"
+    val selectedTopicsNonSelectedKey       = FieldMessageKey("error.selectedtopics.nonselected.field")
+    val selectedTopicsNonSelectedGlobalKey = GlobalMessageKey("error.selectedtopics.nonselected.global")
 
-    val responsibleIndividualFullnameRequiredKey     = "responsible_individual_fullname.error.required.field"
-    val responsibleIndividualEmailAddressRequiredKey = "responsible_individual_emailaddress.error.required.field"
+    val responsibleIndividualFullnameRequiredKey     = FieldMessageKey("responsible_individual_fullname.error.required.field")
+    val responsibleIndividualEmailAddressRequiredKey = FieldMessageKey("responsible_individual_emailaddress.error.required.field")
 
-    val noApplicationsChoiceRequiredKey = "no.applications.choice.error.required.field"
+    val noApplicationsChoiceRequiredKey = FieldMessageKey("no.applications.choice.error.required.field")
 
-    val formKeysMap: Map[String, String] = Map(
+    val formKeysMap: Map[FieldMessageKey, GlobalMessageKey] = Map(
       firstnameRequiredKey           -> firstnameRequiredGlobalKey,
       firstnameMaxLengthKey          -> firstnameMaxLengthGlobalKey,
       lastnameRequiredKey            -> lastnameRequiredGlobalKey,
@@ -215,48 +226,42 @@ package object controllers {
       mobileNumberTooShortKey        -> mobileNumberTooShortGlobalKey
     )
 
-    val globalKeys: Seq[String] = formKeysMap.values.toSeq
+    def findFieldKeys(rawMessage: String): Option[(FieldMessageKey, GlobalMessageKey)] = {
+      formKeysMap.find(_._1.value == rawMessage)
+    }
 
-    val globalToField: Map[String, String] = Map(
-      firstnameRequiredGlobalKey           -> firstnameField,
-      firstnameMaxLengthGlobalKey          -> firstnameField,
-      lastnameRequiredGlobalKey            -> lastnameField,
-      lastnameMaxLengthGlobalKey           -> lastnameField,
-      emailaddressRequiredGlobalKey        -> emailaddressField,
-      emailaddressNotValidGlobalKey        -> emailaddressField,
-      emailaddressAlreadyInUseGlobalKey    -> emailaddressField,
-      passwordNotValidGlobalKey            -> passwordField,
-      passwordRequiredGlobalKey            -> passwordField,
-      passwordNoMatchGlobalKey             -> passwordField,
-      accountLockedGlobalKey               -> currentPasswordField,
-      emailaddressAlreadyInUseGlobalKey    -> emailaddressField,
-      accountUnverifiedGlobalKey           -> emailaddressField,
-      invalidCredentialsGlobalKey          -> emailaddressField,
-      invalidPasswordGlobalKey             -> passwordField,
-      currentPasswordRequiredGlobalKey     -> currentPasswordField,
-      currentPasswordInvalidGlobalKey      -> currentPasswordField,
-      emailMaxLengthGlobalKey              -> emailaddressField,
-      accessCodeInvalidGlobalKey           -> accessCodeInvalidKey,
-      selectedCategoryNonSelectedGlobalKey -> selectedCategoryNonSelectedKey,
-      selectedApisNonSelectedGlobalKey     -> selectedApisNonSelectedKey,
-      selectedApiRadioGlobalKey            -> selectedApiRadioKey,
-      selectedTopicsNonSelectedGlobalKey   -> selectedTopicsNonSelectedKey,
-      mobileNumberInvalidGlobalKey         -> mobileNumberInvalidKey,
-      mobileNumberTooShortGlobalKey        -> mobileNumberTooShortKey
+    val globalKeys: Seq[GlobalMessageKey] = formKeysMap.values.toSeq
+
+    val globalToField: Map[GlobalMessageKey, FieldNameKey] = Map(
+      firstnameRequiredGlobalKey        -> firstnameField,
+      firstnameMaxLengthGlobalKey       -> firstnameField,
+      lastnameRequiredGlobalKey         -> lastnameField,
+      lastnameMaxLengthGlobalKey        -> lastnameField,
+      emailaddressRequiredGlobalKey     -> emailaddressField,
+      emailaddressNotValidGlobalKey     -> emailaddressField,
+      emailaddressAlreadyInUseGlobalKey -> emailaddressField,
+      passwordNotValidGlobalKey         -> passwordField,
+      passwordRequiredGlobalKey         -> passwordField,
+      passwordNoMatchGlobalKey          -> passwordField,
+      accountLockedGlobalKey            -> currentPasswordField,
+      emailaddressAlreadyInUseGlobalKey -> emailaddressField,
+      accountUnverifiedGlobalKey        -> emailaddressField,
+      invalidCredentialsGlobalKey       -> emailaddressField,
+      invalidPasswordGlobalKey          -> passwordField,
+      currentPasswordRequiredGlobalKey  -> currentPasswordField,
+      currentPasswordInvalidGlobalKey   -> currentPasswordField,
+      emailMaxLengthGlobalKey           -> emailaddressField,
+      selectedApisNonSelectedGlobalKey  -> selectedApisNonSelectedField
     )
   }
 
   import FormKeys._
 
+  import Conversions._
+
   def firstnameValidator: Mapping[String] = textValidator(firstnameRequiredKey, firstnameMaxLengthKey)
 
   def lastnameValidator: Mapping[String] = textValidator(lastnameRequiredKey, lastnameMaxLengthKey)
-
-  def fullnameValidator: Mapping[String] = textValidator(fullnameRequiredKey, fullnameMaxLengthKey, 100)
-
-  def telephoneValidator: Mapping[String] = Forms.text.verifying(telephoneRequiredKey, telephone => telephone.length > 0)
-
-  def commentsValidator: Mapping[String] = supportRequestValidator(commentsRequiredKey, commentsMaxLengthKey, 3000)
 
   def cidrBlockValidator: Mapping[String] = {
     val privateNetworkRanges = Set(
@@ -282,15 +287,8 @@ package object controllers {
     Forms.text.verifying(Constraint[String](validateCidrBlock(_)))
   }
 
-  def textValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30): Mapping[String] =
-    Forms.text.verifying(requiredKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
-
-  def supportRequestValidator(requiredKey: String, maxLengthKey: String, maxLength: Int = 30): Mapping[String] = {
-    val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
-
-    textValidator(requiredKey, maxLengthKey, maxLength)
-      .verifying(commentsSpamKey, s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)
-  }
+  def textValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] =
+    Forms.text.verifying(requiredFieldMessageKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
 
   def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320): Mapping[String] = {
 
@@ -315,7 +313,7 @@ package object controllers {
   }
 
   def passwordsMatch: Constraint[ConfirmPassword] = Constraint[ConfirmPassword](passwordNoMatchKey) {
-    case rf if rf.password != rf.confirmPassword => Invalid(ValidationError(passwordNoMatchGlobalKey))
+    case rf if rf.password != rf.confirmPassword => Invalid(ValidationError(passwordNoMatchGlobalKey.value))
     case _                                       => Valid
   }
 

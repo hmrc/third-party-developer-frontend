@@ -20,11 +20,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.TermsOfUseServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{HmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker {
 

@@ -19,15 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.{AccessCodes, ForgottenPassword}
 
 final case class HelpWithSigningInForm(choice: String)
 
-object HelpWithSigningInForm {
+object HelpWithSigningInForm extends FormValidation {
 
   val form: Form[HelpWithSigningInForm] = Form(
     mapping(
-      "choice" -> textValidator("support.choice.required.field", "support.choice.required.field")
+      "choice" -> oneOf(ForgottenPassword.id, AccessCodes.id)
     )(HelpWithSigningInForm.apply)(HelpWithSigningInForm.unapply)
   )
 }

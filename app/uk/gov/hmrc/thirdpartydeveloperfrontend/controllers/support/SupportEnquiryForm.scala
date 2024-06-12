@@ -16,20 +16,28 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import play.api.data.Form
 import play.api.data.Forms._
-
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import play.api.data.{Form, Mapping}
 
 final case class SupportEnquiryForm(fullname: String, email: String, comments: String)
 
-object SupportEnquiryForm {
+object SupportEnquiryForm extends FormValidation {
+
+  private def commentsValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] = {
+    val spambotCommentRegex = """(?i).*Como.+puedo.+iniciar.*""".r
+    (
+      fieldName -> default(text, "")
+        .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
+        .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 3000)
+        .verifying(s"$messagePrefix.error.spam.field", s => spambotCommentRegex.findFirstMatchIn(s).isEmpty)
+    )
+  }
 
   val form: Form[SupportEnquiryForm] = Form(
     mapping(
-      "fullname"     -> fullnameValidator,
-      "emailaddress" -> emailValidator(),
-      "comments"     -> commentsValidator
+      "fullname" ~> requiredLimitedTextValidator(100),
+      "emailaddress" ~> emailValidator,
+      "comments" ~> commentsValidator
     )(SupportEnquiryForm.apply)(SupportEnquiryForm.unapply)
   )
 }

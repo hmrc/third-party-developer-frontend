@@ -48,7 +48,7 @@ class SupportEnquiryFormSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err       = boundForm.errors.head
       err.key shouldBe "comments"
-      err.messages shouldBe List("error.required")
+      err.messages shouldBe List("comments.error.required.field")
     }
 
     "reject a form that has missing name" in {
@@ -56,7 +56,7 @@ class SupportEnquiryFormSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err       = boundForm.errors.head
       err.key shouldBe "fullname"
-      err.messages shouldBe List("error.required")
+      err.messages shouldBe List("fullname.error.required.field")
     }
 
     "reject a form that when the name is too long" in {
@@ -72,7 +72,7 @@ class SupportEnquiryFormSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       val boundForm = SupportEnquiryForm.form.bind(formData)
       val err       = boundForm.errors.head
       err.key shouldBe "emailaddress"
-      err.messages shouldBe List("error.required")
+      err.messages shouldBe List("emailaddress.error.required.field")
     }
 
     "reject a form that when the email is too long" in {

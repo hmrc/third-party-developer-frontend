@@ -161,8 +161,8 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     }
 
     "render the form errors on the page when they exist" in new Setup {
-      when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
-      when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey, "message")))
+      when(form.errors).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey.value, "message")))
+      when(form.errors(any[String])).thenReturn(Seq(FormError.apply(FormKeys.selectedApisNonSelectedKey.value, "message")))
 
       val selectedApis = emailpreferencesFlow.selectedAPIs.getOrElse(currentCategory.category, Set.empty)
 

@@ -19,18 +19,18 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.data.Forms._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.textValidator
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData.{GettingExamples, MakingAnApiCall, PrivateApiDocumentation, ReportingDocumentation}
 
 final case class HelpWithUsingAnApiForm(choice: String, apiNameForCall: String, apiNameForExamples: String, apiNameForReporting: String)
 
-object HelpWithUsingAnApiForm {
+object HelpWithUsingAnApiForm extends FormValidation {
 
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
-      "choice"                                            -> textValidator("support.choice.required.field", "support.choice.required.field", maxLength = 150),
-      SupportData.MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
-      SupportData.GettingExamples.id + "-api-name"        -> nonEmptyText,
-      SupportData.ReportingDocumentation.id + "-api-name" -> nonEmptyText
+      "choice"                                -> oneOf(MakingAnApiCall.id, GettingExamples.id, ReportingDocumentation.id, PrivateApiDocumentation.id),
+      MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
+      GettingExamples.id + "-api-name"        -> nonEmptyText,
+      ReportingDocumentation.id + "-api-name" -> nonEmptyText
     )(HelpWithUsingAnApiForm.apply)(HelpWithUsingAnApiForm.unapply)
   )
 }

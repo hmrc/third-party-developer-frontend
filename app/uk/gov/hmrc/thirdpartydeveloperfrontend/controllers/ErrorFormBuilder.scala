@@ -16,22 +16,43 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import play.api.data.{Form, FormError}
+import play.api.data.{Form, Mapping}
+
+object FormExtensions {
+
+  implicit class MappingSyntax[T](mapping: Mapping[T]) {
+
+    def verifying(error: => FieldMessageKey, constraint: (T => Boolean)): Mapping[T] = {
+      mapping.verifying(error.value, constraint)
+    }
+  }
+
+  implicit class FieldErrorSyntax[T](form: Form[T]) {
+    def withError(fieldName: FieldNameKey, fieldMessageKey: FieldMessageKey, args: Any*) = form.withError(fieldName.value, fieldMessageKey.value, args: _*)
+
+    def withGlobalError(fieldMessageKey: GlobalMessageKey, args: Any*) = form.withGlobalError(fieldMessageKey.value, args: _*)
+
+    def verifying(error: => FieldMessageKey, constraint: (T => Boolean)): Mapping[T] = {
+      form.mapping.verifying(error.value, constraint)
+    }
+  }
+}
 
 object ErrorFormBuilder {
 
-  implicit class GlobalError[T](form: Form[T]) {
-
+  implicit class CommonGlobalErrorsSyntax[T](form: Form[T]) {
+    import FormExtensions._
     import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
 
     // to test it
     def emailAddressAlreadyInUse =
-      form.withError("submissionError", "true").withError(emailaddressField, emailalreadyInUseKey, routes.UserLoginAccount.login()).withGlobalError(
-        emailaddressAlreadyInUseGlobalKey
-      )
+      form
+        .withError("submissionError", "true")
+        .withError(emailaddressField, emailalreadyInUseKey, routes.UserLoginAccount.login())
+        .withGlobalError(emailaddressAlreadyInUseGlobalKey)
 
     def isEmailAddressAlreadyUse: Boolean =
-      form.errors(emailaddressField).flatMap(_.messages) == List(emailalreadyInUseKey)
+      form.errors(emailaddressField.value).flatMap(_.messages) == List(emailalreadyInUseKey.value)
 
     def firstnameGlobal() = buildGlobal(firstnameField)
 
@@ -44,19 +65,24 @@ object ErrorFormBuilder {
     def currentPasswordGlobal() = buildGlobal(currentPasswordField)
 
     def passwordNoMatchField(): Form[T] = {
-      val errors = form.globalErrors.filter(_.messages.last == passwordNoMatchGlobalKey)
+      val errors = form.globalErrors.filter(_.messages.last == passwordNoMatchGlobalKey.value)
       errors match {
-        case _ :: Nil => form.withError(passwordField, passwordNoMatchKey).withError(confirmapasswordField, passwordNoMatchKey)
+        case _ :: Nil => form
+            .withError(passwordField, passwordNoMatchKey)
+            .withError(confirmapasswordField, passwordNoMatchKey)
         case _        => form
       }
     }
 
-    private def buildGlobal(field: String) = {
-      val errors: Seq[FormError] = form.errors.filter(_.key == field)
-      errors match {
-        case s if s.nonEmpty => formKeysMap.get(s.last.message).map(form.withGlobalError(_)).getOrElse(form)
-        case _               => form
-      }
+    private def buildGlobal(field: FieldNameKey): Form[T] = {
+      form.errors
+        .filter(_.key == field.value)
+        .lastOption
+        .map(_.message)
+        .flatMap(FormKeys.findFieldKeys)
+        .map(_._2)
+        .map(globalKey => form.withGlobalError(globalKey))
+        .getOrElse(form)
     }
   }
 

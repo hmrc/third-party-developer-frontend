@@ -22,6 +22,7 @@ import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, text}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)

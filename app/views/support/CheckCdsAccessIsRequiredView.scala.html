@@ -57,13 +57,7 @@
             )
           )
         ),
-        errorMessage = if(form("choice").hasErrors) {
-          Some(
-            ErrorMessage(
-              content = Text("Choose an option.")
-            )
-          )
-        } else { None },
+        errorMessage = form.error("confirmCdsIntegration").map(e => ErrorMessage(content = Text(messages(e.message)))),
         name = "confirmCdsIntegration",
         items = Seq(
           RadioItem(

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.HmrcSpec
+import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
 
 class FieldSpec extends HmrcSpec {
 
