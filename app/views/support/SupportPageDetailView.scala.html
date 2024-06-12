@@ -78,6 +78,10 @@
   </ul>
 }
 
+@completingTermsOfUseAgreement={
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the terms of use agreement you need help with</h1>
+}
+
 @noneOfTheAboveHeading={
   <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what you need help with</h1>
 }
@@ -100,6 +104,10 @@
         case Some(SupportData.MakingAnApiCall.id) => makingACallHeading
         case Some(SupportData.GettingExamples.id) => examplesHeading
         case Some(SupportData.ReportingDocumentation.id) => reportingHeading
+        case _ => defaultHeading
+      }
+      case SupportData.SettingUpApplication.id => supportFlow.subSelection match {
+        case Some(SupportData.CompletingTermsOfUseAgreement.id) => completingTermsOfUseAgreement
         case _ => defaultHeading
       }
       case SupportData.FindingAnApi.id => findHeading

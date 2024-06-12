@@ -50,7 +50,7 @@
           Fieldset(
             legend = Some(
               Legend(
-                content = Text("What do you need help with?"),
+                content = Text("Which best describes what you need help with?"),
                 classes = "govuk-fieldset__legend--l",
                 isPageHeading = true
               )
@@ -61,16 +61,23 @@
         name = "choice",
         items = Seq(
           RadioItem(
-            id = Some(SupportData.ForgottenPassword.id),
-            content = Text(SupportData.ForgottenPassword.text),
-            value = Some(SupportData.ForgottenPassword.id),
+            id = Some(SupportData.CompletingTermsOfUseAgreement.id),
+            content = Text(SupportData.CompletingTermsOfUseAgreement.text),
+            value = Some(SupportData.CompletingTermsOfUseAgreement.id),
             hint = None,
             conditionalHtml = None
           ), 
           RadioItem(
-            id = Some(SupportData.AccessCodes.id),
-            content = Text(SupportData.AccessCodes.text),
-            value = Some(SupportData.AccessCodes.id),
+            id = Some(SupportData.GivingTeamMemberAccess.id),
+            content = Text(SupportData.GivingTeamMemberAccess.text),
+            value = Some(SupportData.GivingTeamMemberAccess.id),
+            hint = None,
+            conditionalHtml = None
+          ), 
+          RadioItem(
+            id = Some(SupportData.GeneralApplicationDetails.id),
+            content = Text(SupportData.GeneralApplicationDetails.text),
+            value = Some(SupportData.GeneralApplicationDetails.id),
             hint = None,
             conditionalHtml = None
           )

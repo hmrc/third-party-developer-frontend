@@ -31,8 +31,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
+
+object HelpWithApplicationsController {
+
+  def choose(form: HelpWithApplicationsForm)(flow: SupportFlow) =
+    flow.copy(
+      subSelection = Some(form.choice)
+    )
+}
 
 @Singleton
 class HelpWithApplicationsController @Inject() (
@@ -45,45 +52,35 @@ class HelpWithApplicationsController @Inject() (
     helpWithApplicationsView: HelpWithApplicationsView
 )(implicit val ec: ExecutionContext,
   val appConfig: ApplicationConfig
-) extends BaseController(mcc) with SupportCookie {
-  final def page(): Action[AnyContent] = ???
-  final def submit(): Action[AnyContent] = ???
-   //extends AbstractSupportFlowController[HelpWithApplicationsForm, Unit](mcc, supportService) {
+) extends AbstractSupportFlowController[HelpWithApplicationsForm, Unit](mcc, supportService) with SupportCookie {
   
-  // def redirectBack(): Result = Redirect(routes.SupportEnquiryInitialChoiceController.page())
+  import HelpWithApplicationsController._
 
-  // def filterValidFlow(flow: SupportFlow): Boolean = flow match {
-  //   case SupportFlow(_, SupportData.SigningIn.id, _, _, _, _, _) => true
-  //   case _                                                       => false
-  // }
+  def redirectBack(): Result = Redirect(routes.SupportEnquiryInitialChoiceController.page())
 
-  // def pageContents(flow: SupportFlow, form: Form[HelpWithApplicationsForm], extras: Unit)(implicit request: MaybeUserRequest[AnyContent]): HtmlFormat.Appendable =
-  //   helpWithApplicationsView(
-  //     fullyloggedInDeveloper,
-  //     form,
-  //     routes.HelpWithApplicationsController.page().url
-  //   )
+  def filterValidFlow(flow: SupportFlow): Boolean = flow match {
+    case SupportFlow(_, SupportData.SettingUpApplication.id, _, _, _, _, _) => true
+    case _                                                                  => false
+  }
 
-  // def onValidForm(flow: SupportFlow, form: HelpWithApplicationsForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
-  //   form.choice match {
-  //     case _                          =>
-  //       supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
-  //         Redirect(routes.SupportDetailsController.supportDetailsPage())
-  //       }
-  //   }
-  // }
+  def pageContents(flow: SupportFlow, form: Form[HelpWithApplicationsForm], extras: Unit)(implicit request: MaybeUserRequest[AnyContent]): HtmlFormat.Appendable =
+    helpWithApplicationsView(
+      fullyloggedInDeveloper,
+      form,
+      routes.HelpWithApplicationsController.page().url
+    )
 
-  // def form(): Form[HelpWithApplicationsForm] = HelpWithApplicationsForm.form
+  def onValidForm(flow: SupportFlow, form: HelpWithApplicationsForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
+    form.choice match {
+      case _                          =>
+        supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
+          Redirect(routes.SupportDetailsController.supportDetailsPage())
+        }
+    }
+  }
 
-  // // Typically can be successful(Unit) if nothing is needed (see HelpWithUsingAnApiController for use to get api list)
-  // def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
+  def form(): Form[HelpWithApplicationsForm] = HelpWithApplicationsForm.form
 
-  // def removeAccessCodesPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-  //   successful(Ok(
-  //     helpWithApplicationsView(
-  //       fullyloggedInDeveloper,
-  //       routes.HelpWithApplicationsController.page().url
-  //     )
-  //   ))
-  // }
+  // Typically can be successful(Unit) if nothing is needed (see HelpWithUsingAnApiController for use to get api list)
+  def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
 }
