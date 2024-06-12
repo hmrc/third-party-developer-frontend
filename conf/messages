@@ -233,3 +233,4 @@ apply.for.private.access.applicationid.error.required.field=Enter your applicati
 apply.for.private.access.applicationid.error.maxLength.field=Enter your applicationId with fewer than 48 characters
 
 please.select.an.option=Please select an option
+please.select.a.valid.api=Please select a valid API name

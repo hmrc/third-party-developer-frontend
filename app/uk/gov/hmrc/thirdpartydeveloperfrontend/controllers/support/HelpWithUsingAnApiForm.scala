@@ -28,7 +28,6 @@ object HelpWithUsingAnApiForm extends FormValidation {
   val form: Form[HelpWithUsingAnApiForm] = Form(
     mapping(
       "choice"                                -> oneOf(MakingAnApiCall.id, GettingExamples.id, ReportingDocumentation.id, PrivateApiDocumentation.id),
-      // TODO - review the naming below
       MakingAnApiCall.id + "-api-name"        -> nonEmptyText,
       GettingExamples.id + "-api-name"        -> nonEmptyText,
       ReportingDocumentation.id + "-api-name" -> nonEmptyText

@@ -97,7 +97,7 @@ class HelpWithUsingAnApiController @Inject() (
     def validate(fieldName: String) = {
       val formFieldValue = form(fieldName).value.getOrElse("")
       val matchesApiName = extraData.find(_.serviceName.value == formFieldValue).isDefined
-      if (matchesApiName) form else form.withGlobalError("Please choose a valid api name")
+      if (matchesApiName) form else form.withGlobalError("please.select.a.valid.api")
     }
 
     form("choice").value match {

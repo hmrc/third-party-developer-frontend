@@ -78,8 +78,8 @@ object ErrorFormBuilder {
       form.errors
         .filter(_.key == field.value)
         .lastOption
-        .map(_.message)                     // w.x.y.z
-        .flatMap(FormKeys.findFieldKeys(_)) // wxyz Keys
+        .map(_.message)
+        .flatMap(FormKeys.findFieldKeys)
         .map(_._2)
         .map(globalKey => form.withGlobalError(globalKey))
         .getOrElse(form)

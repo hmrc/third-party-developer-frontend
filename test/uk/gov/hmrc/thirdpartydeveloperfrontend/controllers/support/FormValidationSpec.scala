@@ -47,7 +47,7 @@ class FormValidationSpec extends HmrcSpec {
     }
   }
 
-  "extended case should work" should {
+  "extended case" should {
     val v = "xxx" ~> "aaa" ~> testValidator
     v._1 shouldBe "aaa"
 
@@ -62,7 +62,7 @@ class FormValidationSpec extends HmrcSpec {
     }
   }
 
-  "super extended case should work" should {
+  "super extended case" should {
     val v = "yyy" ~> "xxx" ~> "aaa" ~> testValidator
     v._1 shouldBe "aaa"
 
