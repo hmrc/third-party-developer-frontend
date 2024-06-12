@@ -23,15 +23,17 @@ import org.mockito.captor.ArgCaptor
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationAlreadyExists, ApplicationNotFound}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, LocalUserIdTracker, TestApplications}
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec
@@ -40,7 +42,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with TestApplications
     with SubmissionsTestData {
 
-  trait Setup {
+  trait Setup extends ApmConnectorMockModule with ApplicationCommandConnectorMockModule with FixedClock {
     implicit val hc: HeaderCarrier                                          = HeaderCarrier()
     val applicationId                                                       = ApplicationId.random
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
@@ -59,16 +61,16 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     when(developerSession.displayedName).thenReturn(name)
 
     val mockDeskproConnector = mock[DeskproConnector]
-    val underTest            = new RequestProductionCredentials(mockSubmissionsConnector, mockDeskproConnector)
+    val underTest            = new RequestProductionCredentials(ApmConnectorMock.aMock, mockSubmissionsConnector, ApplicationCommandConnectorMock.aMock, mockDeskproConnector, clock)
   }
 
   "requestProductionCredentials" should {
     "successfully create a ticket if requester is responsible individual" in new Setup {
       val app    = anApplication(appId = applicationId, developerEmail = email)
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -85,10 +87,10 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
       val app    = anApplication(appId = applicationId, developerEmail = email)
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, true))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -105,9 +107,9 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {
       val app    = anApplication(appId = applicationId, developerEmail = email)
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, true))
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, true))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -117,9 +119,9 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "not create a ticket if requester is not responsible individual" in new Setup {
       val app    = anApplication(appId = applicationId, developerEmail = email)
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, false, false))
+      val result = await(underTest.requestProductionCredentials(app, developerSession, false, false))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -127,21 +129,23 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
 
-    "fails to create a ticket if the application is not found" in new Setup {
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationNotFound())
+    "fails to create a ticket if the application is not in the correct state" in new Setup {
+      val app = anApplication(appId = applicationId, developerEmail = email)
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.GenericFailure("App is not in TESTING state"))
 
-      intercept[ApplicationNotFound] {
-        await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
-      }
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      result.isLeft shouldBe true
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - App is not in TESTING state")
+
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
 
     "fails to create a ticket if the submission is not found" in new Setup {
       val app = anApplication(appId = applicationId, developerEmail = email)
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenReturn(successful(Right(app)))
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(None))
 
-      val result = await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
 
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}")
@@ -150,13 +154,25 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     }
 
     "fails to create a ticket if application already exists" in new Setup {
-      when(mockSubmissionsConnector.requestApproval(eqTo(applicationId), eqTo(name), eqTo(email))(*)).thenThrow(new ApplicationAlreadyExists())
+      val app = anApplication(appId = applicationId, developerEmail = email)
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.DuplicateApplicationName("New app name"))
 
-      intercept[ApplicationAlreadyExists] {
-        await(underTest.requestProductionCredentials(applicationId, developerSession, true, false))
-      }
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      result.isLeft shouldBe true
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - An application already exists for the name 'New app name' ")
+
       verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
     }
 
+    "fails to create a ticket if application name is invalid" in new Setup {
+      val app = anApplication(appId = applicationId, developerEmail = email)
+      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.InvalidApplicationName("Rude word name"))
+
+      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      result.isLeft shouldBe true
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - The application name 'Rude word name' contains words that are prohibited")
+
+      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+    }
   }
 }
