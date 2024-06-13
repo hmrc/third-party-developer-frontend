@@ -24,7 +24,7 @@ import views.html.support.HelpWithApplicationsView
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}

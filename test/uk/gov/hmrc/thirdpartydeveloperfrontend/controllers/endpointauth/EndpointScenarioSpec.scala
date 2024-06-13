@@ -378,6 +378,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         Map(
           "choice" -> SupportData.ForgottenPassword.id
         )
+      case Endpoint("POST", "/developer/new-support/app", _)                                                   =>
+        Map(
+          "choice" -> SupportData.CompletingTermsOfUseAgreement.id
+        )
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-and-conditions", _)          =>
         Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 => Map("email" -> userEmail.text, "role" -> "developer")
@@ -491,6 +495,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/new-support/api/private-api/cds-check", _)                             => Redirect("/developer/new-support/api/private-api")
       case Endpoint("GET", "/developer/new-support/signing-in", _)                                             => Redirect("/developer/new-support")
       case Endpoint("POST", "/developer/new-support/signing-in", _)                                            => Redirect("/developer/new-support")
+      case Endpoint("GET", "/developer/new-support/app", _)                                                    => Redirect("/developer/new-support")
+      case Endpoint("POST", "/developer/new-support/app", _)                                                   => Redirect("/developer/new-support")
       case Endpoint("POST", "/developer/new-support/details", _)                                               => Redirect("/developer/new-support/confirmation")
       case Endpoint("GET", "/developer/new-support/confirmation", _)                                           => Success()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Redirect(s"/developer/applications/${applicationId}/team-members")
