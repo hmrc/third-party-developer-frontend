@@ -217,6 +217,28 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
     }
   }
 
+  "AddApplicationNameForm" should {
+    val validAddApplicationNameForm = Map("applicationName" -> "Application name")
+
+    "validate a valid form" in {
+      val boundForm = AddApplicationNameForm.form.bind(validAddApplicationNameForm)
+      boundForm.errors shouldBe List()
+      boundForm.globalErrors shouldBe List()
+    }
+
+    "validate name and generate error when an name is to short" in {
+      val boundForm = AddApplicationNameForm.form.bind(validAddApplicationNameForm + ("applicationName" -> "a"))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.or.characters")))
+      boundForm.globalErrors shouldBe List()
+    }
+
+    "validate name and generate error when app name has invalid characters" in {
+      val boundForm = AddApplicationNameForm.form.bind(validAddApplicationNameForm + ("applicationName" -> "<html>"))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.or.characters")))
+      boundForm.globalErrors shouldBe List()
+    }
+  }
+
   "EditApplicationForm " should {
     val validEditApplicationForm = Map(
       "applicationId"           -> java.util.UUID.randomUUID.toString,
@@ -235,9 +257,15 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       boundForm.globalErrors shouldBe List()
     }
 
-    "validate name in wrong format and generate error when an name is not valid" in {
+    "validate name and generate error when app name is too short" in {
       val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("applicationName" -> "a"))
-      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.or.characters")))
+      boundForm.globalErrors shouldBe List()
+    }
+
+    "validate name and generate error when app name has invalid characters" in {
+      val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("applicationName" -> "<html>"))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.or.characters")))
       boundForm.globalErrors shouldBe List()
     }
 
@@ -251,25 +279,24 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
     }
   }
 
-  "SubmitApplicationNameForm" should {
-    val validSubmitApplicationNameForm =
-      Map("applicationId" -> "Application ID", "applicationName" -> "Application name", "originalApplicationName" -> "Application name", "password" -> "A2@wwwwwwwww")
+  "ChangeOfApplicationNameForm" should {
+    val validChangeOfApplicationNameForm = Map("applicationName" -> "Application name")
 
     "validate a valid form" in {
-      val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm)
+      val boundForm = ChangeOfApplicationNameForm.form.bind(validChangeOfApplicationNameForm)
       boundForm.errors shouldBe List()
       boundForm.globalErrors shouldBe List()
     }
 
-    "validate name in wrong format and generate error when an name is not valid" in {
-      val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("applicationName" -> "a"))
-      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
+    "validate name and generate error when an name is to short" in {
+      val boundForm = ChangeOfApplicationNameForm.form.bind(validChangeOfApplicationNameForm + ("applicationName" -> "a"))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.or.characters")))
       boundForm.globalErrors shouldBe List()
     }
 
-    "validate password and generate error if empty" in {
-      val boundForm = SubmitApplicationNameForm.form.bind(validSubmitApplicationNameForm + ("password" -> ""))
-      boundForm.errors shouldBe List(FormError("password", List("error.required")))
+    "validate name and generate error when app name has invalid characters" in {
+      val boundForm = ChangeOfApplicationNameForm.form.bind(validChangeOfApplicationNameForm + ("applicationName" -> "<html>"))
+      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.or.characters")))
       boundForm.globalErrors shouldBe List()
     }
   }

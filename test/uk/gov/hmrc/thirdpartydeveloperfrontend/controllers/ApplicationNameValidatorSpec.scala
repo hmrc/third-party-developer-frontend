@@ -20,11 +20,11 @@ import play.api.data.{Form, FormError}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
+class ApplicationNameValidatorSpec extends AsyncHmrcSpec {
 
   "applicationNameValidator" should {
-    val testForm                                     = Form("name" -> applicationNameValidator)
-    val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
+    val testForm                                    = Form("name" -> applicationNameValidator)
+    val applicationNameInvalidLengthOrCharactersKey = "application.name.invalid.length.or.characters"
 
     "generate no error when valid" in {
       val res = testForm.bind(Map("name" -> "Parsley App"))
@@ -44,7 +44,7 @@ class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
     }
 
     "generate an error when empty, or one character long" in {
-      val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
+      val expectedErrors = List(FormError("name", applicationNameInvalidLengthOrCharactersKey))
 
       testForm.bind(Map("name" -> "")).errors shouldBe expectedErrors
       testForm.bind(Map("name" -> "a")).errors shouldBe expectedErrors
@@ -52,7 +52,7 @@ class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
 
     "generate an error when max length exceeded" in {
       val name           = "a" * 51
-      val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
+      val expectedErrors = List(FormError("name", applicationNameInvalidLengthOrCharactersKey))
 
       val res = testForm.bind(Map("name" -> name))
       res.errors shouldBe expectedErrors
@@ -60,9 +60,18 @@ class ApplicationDetailsValidationSpec extends AsyncHmrcSpec {
 
     "generate an error when non ASCII characters are used" in {
       val name           = "ddɐ ʎǝlsɹɐԀ"
-      val expectedErrors = List(FormError("name", applicationNameInvalidKeyLengthAndCharacters))
+      val expectedErrors = List(FormError("name", applicationNameInvalidLengthOrCharactersKey))
       val res            = testForm.bind(Map("name" -> name))
       res.errors shouldBe expectedErrors
+    }
+
+    "generate an error when disallowed ASCII special characters are used" in {
+      List('<', '>', '/', '\\', '"', '\'', '`').foreach(c => {
+        val name           = s"badchar-$c"
+        val expectedErrors = List(FormError("name", applicationNameInvalidLengthOrCharactersKey))
+        val res            = testForm.bind(Map("name" -> name))
+        res.errors shouldBe expectedErrors
+      })
     }
   }
 }

@@ -306,19 +306,6 @@ object EditApplicationForm {
   }
 }
 
-case class SubmitApplicationNameForm(applicationName: String, originalApplicationName: String, password: String = "") extends PasswordConfirmation
-
-object SubmitApplicationNameForm {
-
-  val form: Form[SubmitApplicationNameForm] = Form(
-    mapping(
-      "applicationName"         -> applicationNameValidator,
-      "originalApplicationName" -> nonEmptyText,
-      "password"                -> nonEmptyText
-    )(SubmitApplicationNameForm.apply)(SubmitApplicationNameForm.unapply)
-  )
-}
-
 case class SignOutSurveyForm(rating: Option[Int], improvementSuggestions: String, name: String, email: String, isJavascript: Boolean)
 
 object SignOutSurveyForm {

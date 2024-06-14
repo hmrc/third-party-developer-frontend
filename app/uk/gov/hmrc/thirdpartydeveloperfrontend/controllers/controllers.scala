@@ -103,7 +103,7 @@ package object controllers {
     val tNcUrlNoChoiceKey           = FieldMessageKey("terms.conditions.url.no.choice.field")
     val tNcUrlRequiredKey           = FieldMessageKey("terms.conditions.url.required.field")
 
-    val applicationNameInvalidKeyLengthAndCharacters = "application.name.invalid.length.and.characters"
+    val applicationNameInvalidLengthOrCharactersKey = "application.name.invalid.length.or.characters"
 
     val applicationNameInvalidKey       = FieldMessageKey("application.name.invalid.name")
     val applicationNameAlreadyExistsKey = FieldMessageKey("application.name.already.exists.field")
@@ -325,10 +325,9 @@ package object controllers {
 
   def applicationNameValidator: Mapping[String] = {
     def isAcceptedAscii(s: String) = {
-      !s.toCharArray.exists(c => 32 > c || c > 126)
+      s.toCharArray.forall(c => (32 <= c && c <= 126) && !"""<>/\"'`""".contains(c))
     }
-    // This does 1 & 2 above
-    Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
+    Forms.text.verifying(applicationNameInvalidLengthOrCharactersKey, s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
   }
 
   def environmentValidator: Mapping[Option[String]] = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
