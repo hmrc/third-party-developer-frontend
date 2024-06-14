@@ -43,7 +43,7 @@ object AppDependencies {
     "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
     "io.cucumber"                 %  "cucumber-junit"                     % "7.15.0",
     "com.novocode"                %  "junit-interface"                    % "0.11",
-    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.16.0",
+    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.31.0",
     "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36"
   ).map(_ % "test")
 }
