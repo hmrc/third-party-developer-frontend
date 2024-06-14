@@ -85,6 +85,7 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
     if (scenario.isFailed) {
       val srcFile: Array[Byte] = Driver.instance.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.BYTES)
       val screenShot: String   = "./target/screenshots/" + Calendar.getInstance().getTime + ".png"
+
       try {
         FileUtils.copyFile(Driver.instance.asInstanceOf[TakesScreenshot].getScreenshotAs(OutputType.FILE), new File(screenShot))
       } catch {
@@ -92,6 +93,7 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
       }
       scenario.attach(srcFile, "image/png", "attachment")
     }
+
     if (scenario.getStatus.equals("passed")) {
       passedTestCount = passedTestCount + 1
     } else if (scenario.getStatus.equals("failed")) {

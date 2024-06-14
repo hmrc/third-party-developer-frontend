@@ -26,9 +26,9 @@ object ApplyForPrivateApiAccessForm extends FormValidation {
 
   val form: Form[ApplyForPrivateApiAccessForm] = Form(
     mapping(
-      prefix ~> "fullName"      ~> requiredLimitedTextValidator(100),
-                "emailAddress"  ~> emailValidator,
-      prefix ~> "organisation"  ~> requiredLimitedTextValidator(300),
+      prefix ~> "fullName" ~> requiredLimitedTextValidator(100),
+      "emailAddress" ~> emailValidator,
+      prefix ~> "organisation" ~> requiredLimitedTextValidator(300),
       prefix ~> "applicationId" ~> requiredLimitedTextValidator(48)
     )(ApplyForPrivateApiAccessForm.apply)(ApplyForPrivateApiAccessForm.unapply)
   )
