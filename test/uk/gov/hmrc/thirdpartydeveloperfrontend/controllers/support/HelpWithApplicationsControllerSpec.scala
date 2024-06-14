@@ -19,6 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+import views.html.support.HelpWithApplicationsView
+
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -34,7 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import views.html.support.HelpWithApplicationsView
 
 class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 

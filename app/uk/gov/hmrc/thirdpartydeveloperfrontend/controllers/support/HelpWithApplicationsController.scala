@@ -30,8 +30,8 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object HelpWithApplicationsController {
 
@@ -50,10 +50,10 @@ class HelpWithApplicationsController @Inject() (
     val deskproService: DeskproService,
     supportService: SupportService,
     helpWithApplicationsView: HelpWithApplicationsView
-)(implicit val ec: ExecutionContext,
-  val appConfig: ApplicationConfig
-) extends AbstractSupportFlowController[HelpWithApplicationsForm, Unit](mcc, supportService) with SupportCookie {
-  
+  )(implicit val ec: ExecutionContext,
+    val appConfig: ApplicationConfig
+  ) extends AbstractSupportFlowController[HelpWithApplicationsForm, Unit](mcc, supportService) with SupportCookie {
+
   import HelpWithApplicationsController._
 
   def redirectBack(): Result = Redirect(routes.SupportEnquiryInitialChoiceController.page())
@@ -72,7 +72,7 @@ class HelpWithApplicationsController @Inject() (
 
   def onValidForm(flow: SupportFlow, form: HelpWithApplicationsForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
     form.choice match {
-      case _                          =>
+      case _ =>
         supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
           Redirect(routes.SupportDetailsController.supportDetailsPage())
         }
