@@ -200,6 +200,6 @@ GET         /new-support/signing-in/remove-access-codes                         
 GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportConfirmationPage()
 GET         /new-support/app                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.page()
 POST        /new-support/app                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.submit()
-GET         /new-support/gtma                                                                            uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.givingTeamMembersAccess()
+GET         /new-support/app/giving-team-member-access                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.givingTeamMembersAccess()
 
 ->          /hmrc-frontend        hmrcfrontend.Routes

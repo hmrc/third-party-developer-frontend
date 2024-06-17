@@ -20,12 +20,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.HelpWithApplicationsView
+import views.html.support.{GivingTeamMemberAccessView, HelpWithApplicationsView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -33,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MaybeUserRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.support.{GivingTeamMembersAccessView}
 
 object HelpWithApplicationsController {
 
@@ -52,7 +50,7 @@ class HelpWithApplicationsController @Inject() (
     val deskproService: DeskproService,
     supportService: SupportService,
     helpWithApplicationsView: HelpWithApplicationsView,
-    givingTeamMembersAccessView: GivingTeamMembersAccessView
+    givingTeamMemberAccessView: GivingTeamMemberAccessView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractSupportFlowController[HelpWithApplicationsForm, Unit](mcc, supportService) with SupportCookie {
@@ -76,7 +74,8 @@ class HelpWithApplicationsController @Inject() (
   def onValidForm(flow: SupportFlow, form: HelpWithApplicationsForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
     form.choice match {
       case SupportData.GivingTeamMemberAccess.id => successful(Redirect(routes.HelpWithApplicationsController.givingTeamMembersAccess()))
-      case _ =>
+      case SupportData.CompletingTermsOfUseAgreement.id |
+          SupportData.GeneralApplicationDetails.id =>
         supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
           Redirect(routes.SupportDetailsController.supportDetailsPage())
         }
@@ -90,7 +89,7 @@ class HelpWithApplicationsController @Inject() (
 
   def givingTeamMembersAccess(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     successful(Ok(
-      givingTeamMembersAccessView(
+      givingTeamMemberAccessView(
         fullyloggedInDeveloper,
         routes.HelpWithApplicationsController.page().url,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login().url

@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import views.html.support.HelpWithApplicationsView
+import views.html.support.{GivingTeamMemberAccessView, HelpWithApplicationsView}
 
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -40,7 +40,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCS
 class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
-    val helpWithApplicationsView = app.injector.instanceOf[HelpWithApplicationsView]
+    val helpWithApplicationsView    = app.injector.instanceOf[HelpWithApplicationsView]
+    val givingTeamMembersAccessView = app.injector.instanceOf[GivingTeamMemberAccessView]
 
     val underTest                            = new HelpWithApplicationsController(
       mcc,
@@ -49,7 +50,8 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
       mock[ErrorHandler],
       mock[DeskproService],
       SupportServiceMock.aMock,
-      helpWithApplicationsView
+      helpWithApplicationsView,
+      givingTeamMembersAccessView
     )
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
@@ -103,6 +105,14 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
   }
 
   "HelpWithApplicationsController" when {
+    "invoking givingTeamMembersAccess()" should {
+      "render the giving team members access page" in new Setup() with NotLoggedIn {
+        val result = addToken(underTest.givingTeamMembersAccess())(request)
+
+        status(result) shouldBe OK
+      }
+    }
+
     "invoking page()" should {
       "render the HelpWithApplicationsView" in new Setup() with NotLoggedIn {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
@@ -133,6 +143,32 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
       "redirect to the generic support details page when Completing Terms Of Use Agreement is selected" in new Setup with IsLoggedIn {
         val formRequest = request
           .withFormUrlEncodedBody("choice" -> SupportData.CompletingTermsOfUseAgreement.id)
+
+        SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
+        SupportServiceMock.UpdateWithDelta.succeeds()
+
+        val result = addToken(underTest.submit())(formRequest)
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/new-support/details")
+      }
+
+      "redirect to the giving team member access page when Giving a Team Member Access  is selected" in new Setup with IsLoggedIn {
+        val formRequest = request
+          .withFormUrlEncodedBody("choice" -> SupportData.GivingTeamMemberAccess.id)
+
+        SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
+        SupportServiceMock.UpdateWithDelta.succeeds()
+
+        val result = addToken(underTest.submit())(formRequest)
+
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/developer/new-support/app/giving-team-member-access")
+      }
+
+      "redirect to the generic support details page when General Application Details is selected" in new Setup with IsLoggedIn {
+        val formRequest = request
+          .withFormUrlEncodedBody("choice" -> SupportData.GeneralApplicationDetails.id)
 
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()

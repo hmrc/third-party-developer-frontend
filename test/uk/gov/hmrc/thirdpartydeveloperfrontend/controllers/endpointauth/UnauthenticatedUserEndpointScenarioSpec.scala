@@ -69,6 +69,7 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET", "/developer/new-support/signing-in/remove-access-codes", _)          => Success()
       case Endpoint("GET", "/developer/new-support/app", _)                                     => Redirect("/developer/new-support")
       case Endpoint("POST", "/developer/new-support/app", _)                                    => Redirect("/developer/new-support")
+      case Endpoint("GET", "/developer/new-support/app/giving-team-member-access", _)           => Success()
       case Endpoint("GET", "/developer/new-support/details", _)                                 => Success()
       case Endpoint("POST", "/developer/new-support/details", _)                                => Redirect("/developer/new-support/confirmation")
       case Endpoint("GET", "/developer/new-support/confirmation", _)                            => Redirect("/developer/support?useNewSupport=true")
