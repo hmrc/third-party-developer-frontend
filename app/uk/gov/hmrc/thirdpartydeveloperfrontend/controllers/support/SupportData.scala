@@ -83,6 +83,21 @@ object SupportData {
     val text = "I can't get access codes to login"
   }
 
+  case object CompletingTermsOfUseAgreement extends ApiSecondaryChoice {
+    val id   = "completing-terms-of-use"
+    val text = "Completing the terms of use agreement"
+  }
+
+  case object GivingTeamMemberAccess extends ApiSecondaryChoice {
+    val id   = "giving-team-member-access"
+    val text = "Giving a team member access to an application"
+  }
+
+  case object GeneralApplicationDetails extends ApiSecondaryChoice {
+    val id   = "general-application-details"
+    val text = "General application details"
+  }
+
   case object ChooseBusinessRates {
     val id   = "business-rates"
     val text = "Business Rates 2.0"
