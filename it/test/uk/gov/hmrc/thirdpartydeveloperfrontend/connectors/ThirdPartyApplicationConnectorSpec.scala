@@ -376,11 +376,16 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(Some(ApplicationNameValidationJson.Errors(invalidName = true, duplicateName = false))))
+              .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(Some(ApplicationNameValidationJson.Errors(
+                invalidName = true,
+                duplicateName = false,
+                invalidLength = false,
+                invalidChars = false
+              ))))
           )
       )
       val result = await(connector.validateName(applicationName, None))
-      result shouldBe Invalid(invalidName = true, duplicateName = false)
+      result shouldBe Invalid(invalidName = true, duplicateName = false, invalidLength = false, invalidChars = false)
     }
 
   }

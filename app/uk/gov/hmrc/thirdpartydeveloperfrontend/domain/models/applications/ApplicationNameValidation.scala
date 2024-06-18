@@ -17,7 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FieldMessageKey
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{
+  applicationNameAlreadyExistsKey,
+  applicationNameInvalidCharactersKey,
+  applicationNameInvalidKey,
+  applicationNameInvalidLengthKey
+}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 
 sealed trait ApplicationNameValidation
@@ -28,23 +33,27 @@ object ApplicationNameValidation {
 
   def apply(applicationNameValidationResult: ApplicationNameValidationResult): ApplicationNameValidation = {
     applicationNameValidationResult.errors match {
-      case Some(errors) => Invalid(errors.invalidName, errors.duplicateName)
+      case Some(errors) => Invalid(errors.invalidName, errors.duplicateName, errors.invalidLength, errors.invalidChars)
       case None         => Valid
     }
   }
 }
 
-case class Invalid(invalidName: Boolean, duplicateName: Boolean) extends ApplicationNameValidation {
+case class Invalid(invalidName: Boolean, duplicateName: Boolean, invalidLength: Boolean, invalidChars: Boolean) extends ApplicationNameValidation {
 
   def validationErrorMessageKey: FieldMessageKey = {
-    (invalidName, duplicateName) match {
-      case (true, _) => applicationNameInvalidKey
-      case _         => applicationNameAlreadyExistsKey
+    (invalidName, duplicateName, invalidLength, invalidChars) match {
+      case (true, _, _, _) => applicationNameInvalidKey
+      case (_, true, _, _) => applicationNameAlreadyExistsKey
+      case (_, _, true, _) => applicationNameInvalidLengthKey
+      case (_, _, _, true) => applicationNameInvalidCharactersKey
     }
   }
 }
 
 object Invalid {
-  def invalidName   = Invalid(invalidName = true, duplicateName = false)
-  def duplicateName = Invalid(invalidName = false, duplicateName = true)
+  def invalidName   = Invalid(invalidName = true, duplicateName = false, invalidLength = false, invalidChars = false)
+  def duplicateName = Invalid(invalidName = false, duplicateName = true, invalidLength = false, invalidChars = false)
+  def invalidLength = Invalid(invalidName = false, duplicateName = false, invalidLength = true, invalidChars = false)
+  def invalidChars  = Invalid(invalidName = false, duplicateName = false, invalidLength = false, invalidChars = true)
 }

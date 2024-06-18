@@ -278,30 +278,68 @@ class DetailsSpec
       status(result) shouldBe BAD_REQUEST
     }
 
-    "not pass when application is updated with invalid name" in new Setup {
-      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
-      givenApplicationAction(application, loggedInDeveloper)
-
-      val result = application.withName("a").callChangeDetailsAction
-
-      status(result) shouldBe BAD_REQUEST
-    }
-
-    "update name which contain HMRC should fail" in new Setup {
+    "fail when updating to a name which contains HMRC" in new Setup {
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
       val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
       givenApplicationAction(application, loggedInDeveloper)
+      val invalidName = "my invalid HMRC application name"
 
-      val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
+      val result = application.withName(invalidName).callChangeDetailsAction
 
       status(result) shouldBe BAD_REQUEST
 
-      verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
+      verify(underTest.applicationService).isApplicationNameValid(eqTo(invalidName), eqTo(application.deployedTo), eqTo(Some(application.id)))(*)
+    }
+
+    "fail when updating to a name which is already used" in new Setup {
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid.duplicateName))
+
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
+      val invalidName = "duplicate name"
+
+      val result = application.withName(invalidName).callChangeDetailsAction
+
+      status(result) shouldBe BAD_REQUEST
+
+      verify(underTest.applicationService).isApplicationNameValid(eqTo(invalidName), eqTo(application.deployedTo), eqTo(Some(application.id)))(
         *
       )
     }
+
+    "fail when updating to a name which has an invalid length" in new Setup {
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid.invalidLength))
+
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
+      val invalidName = "a"
+
+      val result = application.withName(invalidName).callChangeDetailsAction
+
+      status(result) shouldBe BAD_REQUEST
+
+      verify(underTest.applicationService).isApplicationNameValid(eqTo(invalidName), eqTo(application.deployedTo), eqTo(Some(application.id)))(*)
+    }
+
+    "fail when updating to a name which has invalid characters" in new Setup {
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid.invalidChars))
+
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      givenApplicationAction(application, loggedInDeveloper)
+      val invalidName = "<script>"
+
+      val result = application.withName(invalidName).callChangeDetailsAction
+
+      status(result) shouldBe BAD_REQUEST
+
+      verify(underTest.applicationService).isApplicationNameValid(eqTo(invalidName), eqTo(application.deployedTo), eqTo(Some(application.id)))(*)
+    }
+
   }
 
   "changeDetailsAction for production app in testing state" should {
@@ -427,7 +465,7 @@ class DetailsSpec
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
-        .thenReturn(Future.successful(Invalid(true, false)))
+        .thenReturn(Future.successful(Invalid(true, false, false, false)))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name")
 
@@ -440,8 +478,10 @@ class DetailsSpec
     "show error if application name is too short" in new Setup {
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+        .thenReturn(Future.successful(Invalid(false, false, true, false)))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "a")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 

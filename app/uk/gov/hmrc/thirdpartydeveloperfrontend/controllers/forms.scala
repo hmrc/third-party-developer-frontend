@@ -257,7 +257,7 @@ object AddApplicationNameForm {
 
   val form: Form[AddApplicationNameForm] = Form(
     mapping(
-      "applicationName" -> applicationNameValidator
+      "applicationName" -> nonEmptyText
     )(AddApplicationNameForm.apply)(AddApplicationNameForm.unapply)
   )
 }
@@ -276,7 +276,7 @@ object EditApplicationForm {
   val form: Form[EditApplicationForm] = Form(
     mapping(
       "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.toString()),
-      "applicationName"       -> applicationNameValidator,
+      "applicationName"       -> nonEmptyText,
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
       "termsAndConditionsUrl" -> optional(tNcUrlValidator),
@@ -539,7 +539,7 @@ object ChangeOfApplicationNameForm {
 
   val form: Form[ChangeOfApplicationNameForm] = Form(
     mapping(
-      "applicationName" -> applicationNameValidator
+      "applicationName" -> nonEmptyText
     )(ChangeOfApplicationNameForm.apply)(ChangeOfApplicationNameForm.unapply)
   )
 

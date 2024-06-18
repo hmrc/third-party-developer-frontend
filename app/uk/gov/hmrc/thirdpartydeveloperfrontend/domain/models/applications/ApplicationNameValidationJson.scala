@@ -30,7 +30,7 @@ object ApplicationNameValidationJson {
 
   case class ApplicationNameValidationResult(errors: Option[Errors])
 
-  case class Errors(invalidName: Boolean, duplicateName: Boolean)
+  case class Errors(invalidName: Boolean, duplicateName: Boolean, invalidLength: Boolean, invalidChars: Boolean)
 
   object ApplicationNameValidationResult {
     implicit val formatErrors: OFormat[Errors]                    = Json.format[Errors]

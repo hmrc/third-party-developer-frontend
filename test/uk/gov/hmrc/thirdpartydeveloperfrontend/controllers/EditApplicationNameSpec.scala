@@ -148,7 +148,7 @@ class EditApplicationNameSpec
       "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
 
-        givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
+        givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false, invalidLength = false, invalidChars = false))
 
         private val request = loggedInRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", ""))
@@ -204,7 +204,7 @@ class EditApplicationNameSpec
       "and it contains HMRC it shows an error page and lets you re-submit the name" in new Setup {
         private val invalidApplicationName = "invalidApplicationName"
 
-        givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
+        givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false, invalidLength = false, invalidChars = false))
 
         private val request = loggedInRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", ""))
@@ -224,7 +224,7 @@ class EditApplicationNameSpec
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
         private val applicationName = "duplicate name"
 
-        givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true))
+        givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true, invalidLength = false, invalidChars = false))
 
         private val request = loggedInRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", ""))
