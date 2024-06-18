@@ -20,11 +20,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html.support.HelpWithApplicationsView
+import views.html.support.{GivingTeamMemberAccessView, HelpWithApplicationsView}
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -49,7 +49,8 @@ class HelpWithApplicationsController @Inject() (
     val errorHandler: ErrorHandler,
     val deskproService: DeskproService,
     supportService: SupportService,
-    helpWithApplicationsView: HelpWithApplicationsView
+    helpWithApplicationsView: HelpWithApplicationsView,
+    givingTeamMemberAccessView: GivingTeamMemberAccessView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractSupportFlowController[HelpWithApplicationsForm, Unit](mcc, supportService) with SupportCookie {
@@ -67,12 +68,14 @@ class HelpWithApplicationsController @Inject() (
     helpWithApplicationsView(
       fullyloggedInDeveloper,
       form,
-      routes.HelpWithApplicationsController.page().url
+      routes.SupportEnquiryInitialChoiceController.page().url
     )
 
   def onValidForm(flow: SupportFlow, form: HelpWithApplicationsForm)(implicit request: MaybeUserRequest[AnyContent]): Future[Result] = {
     form.choice match {
-      case _ =>
+      case SupportData.GivingTeamMemberAccess.id => successful(Redirect(routes.HelpWithApplicationsController.givingTeamMembersAccess()))
+      case SupportData.CompletingTermsOfUseAgreement.id |
+          SupportData.GeneralApplicationDetails.id =>
         supportService.updateWithDelta(choose(form))(flow).map { newFlow =>
           Redirect(routes.SupportDetailsController.supportDetailsPage())
         }
@@ -83,4 +86,14 @@ class HelpWithApplicationsController @Inject() (
 
   // Typically can be successful(Unit) if nothing is needed (see HelpWithUsingAnApiController for use to get api list)
   def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[Unit] = successful(())
+
+  def givingTeamMembersAccess(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+    successful(Ok(
+      givingTeamMemberAccessView(
+        fullyloggedInDeveloper,
+        routes.HelpWithApplicationsController.page().url,
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login().url
+      )
+    ))
+  }
 }
