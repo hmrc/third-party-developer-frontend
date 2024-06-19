@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend
 import java.net.URL
 import scala.util.{Failure, Try}
 
+import cats.data.Validated
 import org.apache.commons.net.util.SubnetUtils
 
 import play.api.data.Forms.{optional, text}
@@ -26,10 +27,8 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, Va
 import play.api.data.{Forms, Mapping}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{RedirectUri, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
-import cats.data.Validated
 
 package object controllers {
 

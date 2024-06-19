@@ -188,7 +188,7 @@ class Details @Inject() (
         List.empty
       else {
         val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
-        if (validateAppName.isValid)                          // This has already been validated
+        if (validateAppName.isValid) // This has already been validated
           List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant(), validateAppName.toOption.get))
         else
           List.empty

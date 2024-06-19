@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -37,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Deskpro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
 
 @Singleton
 class ApplicationService @Inject() (
