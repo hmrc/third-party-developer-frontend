@@ -87,6 +87,10 @@
   </ul>
 }
 
+@generalApplicationQuery={
+  <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what you need help with</h1>
+}
+
 @noneOfTheAboveHeading={
   <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us what you need help with</h1>
 }
@@ -113,6 +117,7 @@
       }
       case SupportData.SettingUpApplication.id => supportFlow.subSelection match {
         case Some(SupportData.CompletingTermsOfUseAgreement.id) => completingTermsOfUseAgreement
+        case Some(SupportData.GeneralApplicationDetails.id) => generalApplicationQuery
         case _ => defaultHeading
       }
       case SupportData.FindingAnApi.id => findHeading
