@@ -37,6 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Deskpro
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
 
 @Singleton
 class ApplicationService @Inject() (
@@ -197,6 +198,10 @@ class ApplicationService @Inject() (
   }
 
   def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    if (ValidatedApplicationName.validate(name).isInvalid) {
+      Future.successful(Invalid(true, false))
+    }
+
     environment match {
       case Environment.PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
       case Environment.SANDBOX    => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)

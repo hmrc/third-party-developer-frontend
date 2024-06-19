@@ -28,6 +28,8 @@ import uk.gov.hmrc.emailaddress.EmailAddress
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
+import cats.data.Validated
 
 package object controllers {
 
@@ -324,11 +326,14 @@ package object controllers {
   def tNcUrlValidator: Mapping[String] = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
   def applicationNameValidator: Mapping[String] = {
-    def isAcceptedAscii(s: String) = {
-      !s.toCharArray.exists(c => 32 > c || c > 126)
+    Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => ValidatedApplicationName.validate(s).isValid)
+  }
+
+  val applicationNameContraint: Constraint[String] = Constraint("constraints.applicationname") { plainText =>
+    ValidatedApplicationName.validate(plainText) match {
+      case Validated.Invalid(e) => Invalid(Seq(ValidationError(applicationNameInvalidKeyLengthAndCharacters)))
+      case Validated.Valid(e)   => Valid
     }
-    // This does 1 & 2 above
-    Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
   }
 
   def environmentValidator: Mapping[Option[String]] = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))
