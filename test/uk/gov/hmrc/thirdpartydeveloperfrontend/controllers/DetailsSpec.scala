@@ -446,7 +446,19 @@ class DetailsSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe BAD_REQUEST
-      contentAsString(result) should include("Application name must be between 2 and 50 characters")
+      contentAsString(result) should include("Application name must be between 2 and 50 characters and only use ASCII characters excluding")
+    }
+
+    "show error if application name contains non-allowed chars" in new Setup {
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      givenApplicationAction(approvedApplication, loggedInAdmin)
+
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "name£")
+
+      val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Application name must be between 2 and 50 characters and only use ASCII characters excluding")
     }
 
     "show error if new application name is the same as the old one" in new Setup {
