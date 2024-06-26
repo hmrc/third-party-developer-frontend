@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend
 import java.net.URL
 import scala.util.{Failure, Try}
 
+import cats.data.Validated
 import org.apache.commons.net.util.SubnetUtils
 
 import play.api.data.Forms.{optional, text}
@@ -26,7 +27,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, Va
 import play.api.data.{Forms, Mapping}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{RedirectUri, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 package object controllers {
@@ -324,11 +325,14 @@ package object controllers {
   def tNcUrlValidator: Mapping[String] = Forms.text.verifying(tNcUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 
   def applicationNameValidator: Mapping[String] = {
-    def isAcceptedAscii(s: String) = {
-      !s.toCharArray.exists(c => 32 > c || c > 126)
+    Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => ValidatedApplicationName.validate(s).isValid)
+  }
+
+  val applicationNameContraint: Constraint[String] = Constraint("constraints.applicationname") { plainText =>
+    ValidatedApplicationName.validate(plainText) match {
+      case Validated.Invalid(e) => Invalid(Seq(ValidationError(applicationNameInvalidKeyLengthAndCharacters)))
+      case Validated.Valid(e)   => Valid
     }
-    // This does 1 & 2 above
-    Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => s.length >= 2 && s.length <= 50 && isAcceptedAscii(s))
   }
 
   def environmentValidator: Mapping[Option[String]] = optional(text).verifying(environmentInvalidKey, s => s.fold(false)(isValidEnvironment))

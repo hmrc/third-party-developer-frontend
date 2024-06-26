@@ -276,7 +276,7 @@ object EditApplicationForm {
   val form: Form[EditApplicationForm] = Form(
     mapping(
       "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.toString()),
-      "applicationName"       -> applicationNameValidator,
+      "applicationName"       -> nonEmptyText.verifying(applicationNameContraint),
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
       "termsAndConditionsUrl" -> optional(tNcUrlValidator),

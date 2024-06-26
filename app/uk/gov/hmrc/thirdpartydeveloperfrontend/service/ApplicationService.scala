@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -197,6 +197,10 @@ class ApplicationService @Inject() (
   }
 
   def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+    if (ValidatedApplicationName.validate(name).isInvalid) {
+      Future.successful(Invalid(true, false))
+    }
+
     environment match {
       case Environment.PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
       case Environment.SANDBOX    => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)

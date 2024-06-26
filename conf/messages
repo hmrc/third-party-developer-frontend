@@ -86,7 +86,7 @@ invalid.password.global=Provide a valid password
 password.used.before.global =Choose a password you have no used before
 password.used.before.field =Choose a password you have no used before
 
-application.name.invalid.length.and.characters=Application name must be between 2 and 50 characters
+application.name.invalid.length.and.characters=Application name must be between 2 and 50 characters and only use ASCII characters excluding <>/\\"'`
 application.name.invalid.name=Application name must not include HMRC or HM Revenue and Customs
 application.name.already.exists.field=That application name already exists. Enter a unique name for your application.
 application.name.unchanged.error=The application already has the specified name.
