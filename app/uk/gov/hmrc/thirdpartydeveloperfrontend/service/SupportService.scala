@@ -79,7 +79,7 @@ class SupportService @Inject() (
   }
 
   def submitTicket(supportFlow: SupportFlow, form: SupportDetailsForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
-    val deskproTicket = buildTicket(
+    val baseDeskproTicket = buildTicket(
       supportFlow,
       form.fullName,
       form.emailAddress,
@@ -88,9 +88,9 @@ class SupportService @Inject() (
 
     submitTicket(
       supportFlow,
-      deskproTicket.copy(
+      baseDeskproTicket.copy(
         fields =
-          deskproTicket.fields
+          baseDeskproTicket.fields
             ++ form.organisation.fold(Map.empty[String, String])(v => Map(config.deskproHorizonOrganisation -> v))
             ++ form.teamMemberEmailAddress.fold(Map.empty[String, String])(v => Map(config.deskproHorizonTeamMemberEmail -> v))
       )
@@ -98,13 +98,22 @@ class SupportService @Inject() (
   }
 
   def submitTicket(supportFlow: SupportFlow, form: ApplyForPrivateApiAccessForm)(implicit hc: HeaderCarrier): Future[SupportFlow] = {
+    val baseDeskproTicket = buildTicket(
+      supportFlow,
+      form.fullName,
+      form.emailAddress,
+      s"Private API documentation access request for Application Id[${form.applicationId}] to ${supportFlow.privateApi.getOrElse("?")} API."
+    )
+
     submitTicket(
       supportFlow,
-      buildTicket(
-        supportFlow,
-        form.fullName,
-        form.emailAddress,
-        s"Private API documentation access request for Application Id[${form.applicationId}] to ${supportFlow.privateApi.getOrElse("?")} API."
+      baseDeskproTicket.copy(
+        fields =
+          baseDeskproTicket.fields
+            ++ Map(
+              config.deskproHorizonOrganisation  -> form.organisation,
+              config.deskproHorizonApplicationId -> form.applicationId
+            )
       )
     )
   }
