@@ -66,21 +66,22 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
   "requestProductionCredentials" should {
     "successfully create a ticket if requester is responsible individual" in new Setup {
-      val app    = anApplication(appId = applicationId, developerEmail = email)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
+      val app             = anApplication(appId = applicationId, developerEmail = email)
+      val appAfterCommand = app.copy(name = "New app name")
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(appAfterCommand)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      val result          = await(underTest.requestProductionCredentials(app, developerSession, true, false))
 
       result.isRight shouldBe true
-      result shouldBe Right(app)
+      result shouldBe Right(appAfterCommand)
 
       val ticketCapture = ArgCaptor[DeskproTicket]
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], ticketCapture.capture)(*)
       ticketCapture.value.subject shouldBe "New application submitted for checking"
       ticketCapture.value.name shouldBe name
       ticketCapture.value.email shouldBe email
-      ticketCapture.value.message should include(app.name)
+      ticketCapture.value.message should include(appAfterCommand.name)
       ticketCapture.value.message should include("submitted the following application for production use on the Developer Hub")
       ticketCapture.value.referrer should include(s"/application/${app.id.value}/check-answers")
     }
