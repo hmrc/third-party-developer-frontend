@@ -72,7 +72,7 @@ class RequestProductionCredentials @Inject() (
 
     def handleCmdResult(app: Application, dispatchResult: Either[NonEmptyList[CommandFailure], DispatchSuccessResult]) = {
       dispatchResult match {
-        case Right(_)                                   => handleCmdSuccess(app)
+        case Right(successResult)                       => handleCmdSuccess(successResult.applicationResponse)
         case Left(errors: NonEmptyList[CommandFailure]) =>
           val errString = errors.toList.map(error => CommandFailures.describe(error)).mkString(", ")
           logger.warn(s"Command failure for ${app.id}: ${errString.toString()}")
