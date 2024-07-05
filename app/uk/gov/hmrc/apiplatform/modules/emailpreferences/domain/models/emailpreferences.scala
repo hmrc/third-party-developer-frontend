@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
+package uk.gov.hmrc.apiplatform.modules.emailpreferences.domain.models
 
 import play.api.libs.json.{Json, OFormat}
-
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
 case class TaxRegimeInterests(regime: String, services: Set[String]) {
   def addService(serviceName: String): TaxRegimeInterests = copy(services = services ++ Set(serviceName))
@@ -78,18 +76,4 @@ object EmailTopic {
   import play.api.libs.json.Format
   import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
   implicit val format: Format[EmailTopic] = SealedTraitJsonFormatting.createFormatFor[EmailTopic]("Email Topic", EmailTopic.apply)
-}
-
-// TODO - make category an APICategory
-case class APICategoryDisplayDetails(category: String, name: String) {
-
-  def toAPICategory(): ApiCategory = {
-    ApiCategory.unsafeApply(category)
-  }
-}
-
-object APICategoryDisplayDetails {
-  implicit val formatApiCategory: OFormat[APICategoryDisplayDetails] = Json.format[APICategoryDisplayDetails]
-
-  def from(category: ApiCategory): APICategoryDisplayDetails = APICategoryDisplayDetails(category.toString, category.displayText)
 }
