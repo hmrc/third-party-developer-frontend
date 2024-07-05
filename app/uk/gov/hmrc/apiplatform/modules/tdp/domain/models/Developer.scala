@@ -21,8 +21,8 @@ import play.api.libs.json.{Format, JsPath, Json, Reads}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.emailpreferences.domain.models._
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetailFormats._
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaDetail
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaDetailFormats._
 
 case class Developer(
     userId: UserId,

@@ -24,7 +24,7 @@ import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.mfa.models.DeviceSession
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.DeviceSession
 
 object DeviceSessionStub {
   val staticDeviceSessionId = UUID.fromString("69fc10f6-9193-42b4-97f2-87886c972ad4")

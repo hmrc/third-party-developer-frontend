@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.mfa.models
+package uk.gov.hmrc.apiplatform.modules.mfa.domain.models
 
 import java.time.Instant
 import java.util.UUID

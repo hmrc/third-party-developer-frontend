@@ -24,7 +24,7 @@ import views.helper.CommonViewSpec
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.QrCodeView
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}

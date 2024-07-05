@@ -27,10 +27,10 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaAction.{CREATE, REMOVE}
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms._
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction.{CREATE, REMOVE}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._

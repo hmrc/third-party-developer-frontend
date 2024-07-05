@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
 
 trait MfaDetailBuilder {
   val verifiedAuthenticatorAppMfaDetail = buildAuthenticatorAppMfaDetail(name = "Auth App", verified = true)

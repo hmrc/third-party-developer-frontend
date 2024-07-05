@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.utils
 
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, MfaType, SmsMfaDetailSummary}
 
 object MfaDetailHelper {
 

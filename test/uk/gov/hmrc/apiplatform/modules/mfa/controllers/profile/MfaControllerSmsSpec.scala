@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterSmsFailureResponse
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse
 
 class MfaControllerSmsSpec extends MfaControllerBaseSpec {

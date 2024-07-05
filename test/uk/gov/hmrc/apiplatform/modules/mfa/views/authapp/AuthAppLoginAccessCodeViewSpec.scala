@@ -25,8 +25,8 @@ import views.helper.CommonViewSpec
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
+import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
