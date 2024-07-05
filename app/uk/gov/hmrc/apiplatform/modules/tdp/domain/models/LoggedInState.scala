@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
 
 sealed trait LoggedInState {
   def isLoggedIn: Boolean                = this == LoggedInState.LOGGED_IN

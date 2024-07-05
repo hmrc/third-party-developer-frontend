@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaDetail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Developer
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
 

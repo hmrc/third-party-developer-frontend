@@ -29,13 +29,13 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Developer, LoggedInState, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService

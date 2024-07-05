@@ -22,9 +22,9 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfO
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToSelfOrOtherForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.inputExistsWithValue
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 

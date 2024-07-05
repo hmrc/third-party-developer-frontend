@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.mvc.MessagesControllerComponents
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
 
 abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc) {
   implicit def developerSessionFromRequest(implicit request: UserRequest[_]): DeveloperSession = request.developerSession

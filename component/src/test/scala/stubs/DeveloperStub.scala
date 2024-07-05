@@ -23,11 +23,11 @@ import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Developer, Registration, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest}
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 

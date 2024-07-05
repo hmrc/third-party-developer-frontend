@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 
 abstract class AbstractController(

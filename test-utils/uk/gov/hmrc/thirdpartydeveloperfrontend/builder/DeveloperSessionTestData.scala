@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
 trait DeveloperSessionTestData extends DeveloperSessionBuilder with DeveloperTestData {

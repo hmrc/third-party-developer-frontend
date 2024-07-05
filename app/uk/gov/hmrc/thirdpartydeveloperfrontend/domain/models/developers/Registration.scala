@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
 
 import play.api.libs.json._
 

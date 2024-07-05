@@ -24,8 +24,8 @@ import views.html.emailpreferences.FlowStartView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class FlowStartViewSpec extends CommonViewSpec

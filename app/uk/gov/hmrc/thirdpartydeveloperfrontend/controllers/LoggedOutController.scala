@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import play.api.mvc.{Headers, MessagesControllerComponents, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
 
 trait HeaderEnricher {

@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import java.util.UUID
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Developer, DeveloperSession, LoggedInState}
 
 trait DeveloperSessionBuilder {
 

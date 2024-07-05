@@ -28,9 +28,8 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Registration => RegistrationModel, RegistrationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.RegistrationSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 
 class RegistrationSpec extends BaseControllerSpec {
@@ -80,7 +79,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("organisation", "org")
       )
 
-      val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
+      val requestCaptor: ArgumentCaptor[RegistrationModel] = ArgumentCaptor.forClass(classOf[RegistrationModel])
       when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
 
       val result = underTest.register()(request)
@@ -103,7 +102,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("confirmpassword", "VALID@1q2w3e")
       )
 
-      val requestCaptor: ArgumentCaptor[developers.Registration] = ArgumentCaptor.forClass(classOf[developers.Registration])
+      val requestCaptor: ArgumentCaptor[RegistrationModel] = ArgumentCaptor.forClass(classOf[RegistrationModel])
       when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
 
       await(underTest.register()(request))

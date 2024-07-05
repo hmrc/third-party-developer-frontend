@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Developer, DeveloperSession, LoggedInState, Session}
 
 trait SampleSession {
   self: DeveloperBuilder =>

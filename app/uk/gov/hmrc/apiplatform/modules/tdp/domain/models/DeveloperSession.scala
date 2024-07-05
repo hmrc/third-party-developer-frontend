@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets

@@ -20,7 +20,7 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Session
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Session
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {

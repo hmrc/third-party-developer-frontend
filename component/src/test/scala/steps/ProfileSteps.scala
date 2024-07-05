@@ -23,7 +23,7 @@ import stubs.{DeveloperStub, Stubs}
 
 import play.api.http.Status._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 
 class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
 
