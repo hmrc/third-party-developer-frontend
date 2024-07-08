@@ -23,7 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   APISubscriptionStatus,
   APISubscriptionStatusWithSubscriptionFields,

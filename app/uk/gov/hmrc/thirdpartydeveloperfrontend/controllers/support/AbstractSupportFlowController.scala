@@ -24,7 +24,7 @@ import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie

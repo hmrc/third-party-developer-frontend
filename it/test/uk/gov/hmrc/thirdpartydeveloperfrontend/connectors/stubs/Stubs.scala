@@ -28,7 +28,8 @@ import play.api.libs.json.{Json, OFormat, Writes}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ExtendedApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Developer, Registration, Session, UpdateProfileRequest}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Developer, Registration, UpdateProfileRequest}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.Session
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData}

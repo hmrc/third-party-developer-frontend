@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.emailpreferences.domain.models
 
-
-
 sealed trait EmailTopic {
   lazy val displayOrder = EmailTopic.displayOrder(this)
   lazy val displayName  = EmailTopic.displayName(this)

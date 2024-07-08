@@ -41,7 +41,8 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{UpdateProfileRequest, User}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData

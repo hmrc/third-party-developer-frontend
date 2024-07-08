@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector

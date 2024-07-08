@@ -41,6 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndi
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._

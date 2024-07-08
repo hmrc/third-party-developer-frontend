@@ -22,7 +22,7 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfV
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}

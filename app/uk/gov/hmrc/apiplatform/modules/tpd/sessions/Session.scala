@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
+package uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models
 
 import play.api.libs.json._
+
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Developer
 
 case class Session(sessionId: String, developer: Developer, loggedInState: LoggedInState)
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
+package uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets
 import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Developer
 
 case class DeveloperSession(session: Session) {
   val developer: Developer         = session.developer
