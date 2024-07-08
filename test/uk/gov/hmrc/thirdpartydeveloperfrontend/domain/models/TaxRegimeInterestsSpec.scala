@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import uk.gov.hmrc.apiplatform.modules.emailpreferences.domain.models.TaxRegimeInterests
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.TaxRegimeInterests
 
 class TaxRegimeInterestsSpec extends AnyWordSpec with Matchers {
   val regime = "A Regime"

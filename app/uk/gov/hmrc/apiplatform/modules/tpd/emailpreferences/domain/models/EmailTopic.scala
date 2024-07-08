@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.emailpreferences.domain.models
+package uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models
 
 sealed trait EmailTopic {
   lazy val displayOrder = EmailTopic.displayOrder(this)
