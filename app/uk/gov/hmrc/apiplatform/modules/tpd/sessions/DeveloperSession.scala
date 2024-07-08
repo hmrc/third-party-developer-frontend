@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets
 import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
 
 case class DeveloperSession(session: Session) {
   val developer: Developer         = session.developer
