@@ -25,8 +25,8 @@ import views.html.SelectLoginMfaView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
-import uk.gov.hmrc.apiplatform.modules.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectLoginMfaForm
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
