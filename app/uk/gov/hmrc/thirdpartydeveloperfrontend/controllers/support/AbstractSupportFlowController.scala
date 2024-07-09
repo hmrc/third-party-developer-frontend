@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
@@ -26,6 +25,7 @@ import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
@@ -62,7 +62,7 @@ abstract class AbstractSupportFlowController[F, E](
   }
 
   private final def lookupFlow(implicit request: MaybeUserRequest[AnyContent]): Future[SupportFlow] = {
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(SupportSessionId.random)
     supportService.getSupportFlow(sessionId)
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models
+package uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models
 
-import play.api.libs.json.{Json, OFormat}
+import java.{util => ju}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-
-case class DeviceSession(deviceSessionId: DeviceSessionId, userId: UserId)
-
-object DeviceSession {
-  implicit val forma: OFormat[DeviceSession] = Json.format[DeviceSession]
-
+trait SessionId {
+  def value: ju.UUID
 }
-
-class DeviceSessionInvalid(message: Option[String] = None) extends RuntimeException(message.orNull)

@@ -37,6 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceN
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
@@ -51,8 +52,8 @@ class FlowRepositoryISpec extends AnyWordSpec
     with FutureAwaits
     with BeforeAndAfterEach {
 
-  private val currentSession = "session 1"
-  private val anotherSession = "session 2"
+  private val currentSession = UserSessionId.random
+  private val anotherSession = UserSessionId.random
 
   private val flowRepository = app.injector.instanceOf[FlowRepository]
 
@@ -78,8 +79,8 @@ class FlowRepositoryISpec extends AnyWordSpec
     await(flowRepository.saveFlow(flowOfDifferentType))
     await(flowRepository.collection.countDocuments().toFuture()) shouldBe 3
 
-    def fetchLastUpdated(flow: Flow): Instant = {
-      val query = Document("sessionId" -> Codecs.toBson(flow.sessionId), "flowType" -> Codecs.toBson(flow.flowType))
+    def fetchLastUpdated[F <: Flow](flow: F): Instant = {
+      val query = Document("sessionId" -> flow.sessionId.toString, "flowType" -> Codecs.toBson(flow.flowType))
 
       await(flowRepository.collection.aggregate[BsonValue](
         Seq(
@@ -100,7 +101,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
         await(flowRepository.saveFlow(flow))
 
-        val result = await(flowRepository.collection.find(Filters.equal("sessionId", currentSession)).headOption())
+        val result = await(flowRepository.collection.find(Filters.equal("sessionId", currentSession.toString)).headOption())
         result match {
           case Some(savedFlow: IpAllowlistFlow) =>
             savedFlow.sessionId shouldBe currentSession
@@ -122,7 +123,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
         await(flowRepository.saveFlow(flow))
 
-        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first().toFuture())
+        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", currentSession.toString)).first().toFuture())
         val castResult   = result.asInstanceOf[EmailPreferencesFlowV2]
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
@@ -142,7 +143,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
         await(flowRepository.saveFlow(flow))
 
-        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", Codecs.toBson(currentSession))).first().toFuture())
+        val result: Flow = await(flowRepository.collection.find(Filters.equal("sessionId", currentSession.toString)).first().toFuture())
         val castResult   = result.asInstanceOf[GetProductionCredentialsFlow]
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe GET_PRODUCTION_CREDENTIALS
@@ -161,7 +162,7 @@ class FlowRepositoryISpec extends AnyWordSpec
 
         result shouldBe updatedFlow
         val updatedDocument: IpAllowlistFlow = await(flowRepository.collection
-          .find(Document("sessionId" -> currentSession, "flowType" -> FlowType.IP_ALLOW_LIST.toString)).map(_.asInstanceOf[IpAllowlistFlow]).head())
+          .find(Document("sessionId" -> currentSession.toString, "flowType" -> FlowType.IP_ALLOW_LIST.toString)).map(_.asInstanceOf[IpAllowlistFlow]).head())
 
         updatedDocument.allowlist shouldBe Set("new IP")
       }
@@ -177,7 +178,7 @@ class FlowRepositoryISpec extends AnyWordSpec
       }
 
       "return false if it did not have anything to delete" in {
-        val result: Boolean = await(flowRepository.deleteBySessionIdAndFlowType("session 1", FlowType.IP_ALLOW_LIST))
+        val result: Boolean = await(flowRepository.deleteBySessionIdAndFlowType(currentSession, FlowType.IP_ALLOW_LIST))
 
         result shouldBe true
       }
@@ -200,7 +201,7 @@ class FlowRepositoryISpec extends AnyWordSpec
       }
 
       "return None when the query does not match any data" in {
-        val result = await(flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow]("session 1"))
+        val result = await(flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](currentSession))
 
         result shouldBe None
       }

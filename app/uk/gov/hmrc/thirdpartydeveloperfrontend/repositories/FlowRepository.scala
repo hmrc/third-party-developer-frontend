@@ -29,6 +29,7 @@ import org.mongodb.scala.model.{IndexModel, IndexOptions, UpdateOptions, Updates
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
@@ -64,7 +65,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
     ) {
 
   def saveFlow[A <: Flow](flow: A): Future[A] = {
-    val query = and(equal("sessionId", flow.sessionId), equal("flowType", Codecs.toBson(flow.flowType)))
+    val query = and(equal("sessionId", flow.sessionId.toString), equal("flowType", Codecs.toBson(flow.flowType)))
 
     collection.find(query).headOption() flatMap {
       case Some(_: Flow) =>
@@ -85,20 +86,20 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
     }
   }
 
-  def deleteBySessionIdAndFlowType(sessionId: String, flowType: FlowType): Future[Boolean] = {
-    collection.deleteOne(and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType))))
+  def deleteBySessionIdAndFlowType(sessionId: SessionId, flowType: FlowType): Future[Boolean] = {
+    collection.deleteOne(and(equal("sessionId", sessionId.toString), equal("flowType", Codecs.toBson(flowType))))
       .toFuture()
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: String)(implicit tt: TypeTag[A], ct: ClassTag[A]): Future[Option[A]] = {
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: A#Type)(implicit tt: TypeTag[A], ct: ClassTag[A]): Future[Option[A]] = {
     val flowType = FlowType.from[A]
-    collection.find[A](and(equal("sessionId", sessionId), equal("flowType", Codecs.toBson(flowType)))).headOption()
+    collection.find[A](and(equal("sessionId", sessionId.toString), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }
 
-  def updateLastUpdated(sessionId: String): Future[Unit] = {
+  def updateLastUpdated(sessionId: SessionId): Future[Unit] = {
     collection.updateMany(
-      filter = equal("sessionId", sessionId),
+      filter = equal("sessionId", sessionId.toString),
       update = Updates.currentDate("lastUpdated"),
       options = new UpdateOptions().upsert(false)
     ).toFuture()

@@ -16,8 +16,6 @@
 
 package steps
 
-import java.util.UUID
-
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -35,8 +33,8 @@ import uk.gov.hmrc.selenium.webdriver.Driver
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
@@ -148,7 +146,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   }
 
-  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) = {
+  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[DeviceSessionId], deviceSessionFound: Boolean) = {
     driver.manage().deleteAllCookies()
     val mfaEnabled         = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
@@ -185,11 +183,11 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
       developer: Developer,
       password: String,
       loggedInState: LoggedInState,
-      deviceSessionId: Option[UUID],
+      deviceSessionId: Option[DeviceSessionId],
       accessCodeRequired: Boolean,
       mfaEnabled: Boolean
-    ): String = {
-    val sessionId = "sessionId_" + loggedInState.toString
+    ): UserSessionId = {
+    val sessionId = UserSessionId.random
 
     val session = Session(sessionId, developer, loggedInState)
 

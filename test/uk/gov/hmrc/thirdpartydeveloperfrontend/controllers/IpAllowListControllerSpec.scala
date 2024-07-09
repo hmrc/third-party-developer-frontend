@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.IpAllowli
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -75,7 +75,7 @@ class IpAllowListControllerSpec
       app.injector.instanceOf[RemoveCidrBlockView]
     )
 
-    val sessionId       = "sessionId"
+    val sessionId       = UserSessionId.random
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
     val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)

@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, MaybeUserRequest, UserRequest, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
@@ -87,13 +87,12 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
 
   private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
     (for {
-      cookie    <- request.cookies.get(cookieName)
-      sessionId <- decodeCookie(cookie.value)
+      sessionId <- extractUserSessionIdFromCookie(request)
     } yield fetchDeveloperSession(sessionId))
       .getOrElse(Future.successful(None))
   }
 
-  private def fetchDeveloperSession[A](sessionId: String)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
+  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
     sessionService
       .fetch(sessionId)
       .map(maybeSession => maybeSession.map(DeveloperSession(_)))
@@ -117,27 +116,20 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
     Future.successful(Redirect(uri).withNewSession)
   }
 
-  def withSessionCookie(result: Result, sessionId: String): Result = {
-    result.withCookies(createCookie(sessionId))
+  def withSessionCookie(result: Result, sessionId: UserSessionId): Result = {
+    result.withCookies(createUserCookie(sessionId))
   }
 
-  def withSessionAndDeviceCookies(result: Result, sessionId: String, deviceSessionId: String): Result = {
-    result.withCookies(createCookie(sessionId), createDeviceCookie(deviceSessionId))
+  def withSessionAndDeviceCookies(result: Result, sessionId: UserSessionId, deviceSessionId: String): Result = {
+    result.withCookies(createUserCookie(sessionId), createDeviceCookie(deviceSessionId))
   }
 
-  def extractSessionIdFromCookie(request: RequestHeader): Option[String] = {
-    request.cookies.get(cookieName) match {
-      case Some(cookie) => decodeCookie(cookie.value)
-      case _            => None
-    }
-  }
-
-  def destroySession(request: RequestHeader)(implicit hc: HeaderCarrier): Option[Future[Int]] = {
-    extractSessionIdFromCookie(request)
+  def destroyUserSession(request: RequestHeader)(implicit hc: HeaderCarrier): Option[Future[Int]] = {
+    extractUserSessionIdFromCookie(request)
       .map(sessionId => sessionService.destroy(sessionId))
   }
 
-  def removeSessionCookieFromResult(result: Result): Result = {
+  def removeUserSessionCookieFromResult(result: Result): Result = {
     result.discardingCookies(DiscardingCookie(cookieName))
   }
 

@@ -42,7 +42,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Envi
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -791,8 +791,8 @@ class DetailsSpec
 
     val developer      = buildDeveloper()
     val admin          = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
-    val devSessionId   = "dev sessionId"
-    val adminSessionId = "admin sessionId"
+    val devSessionId   = UserSessionId.random
+    val adminSessionId = UserSessionId.random
     val devSession     = Session(devSessionId, developer, LoggedInState.LOGGED_IN)
     val adminSession   = Session(adminSessionId, admin, LoggedInState.LOGGED_IN)
 

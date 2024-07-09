@@ -19,9 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import java.security.MessageDigest
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.Cookie
+import play.api.mvc.{Cookie, RequestHeader}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.DeviceSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 
 trait CookieEncoding {
   implicit val appConfig: ApplicationConfig
@@ -41,10 +45,10 @@ trait CookieEncoding {
 
   val cookieSigner: CookieSigner
 
-  def createCookie(sessionId: String): Cookie = {
+  def createUserCookie(sessionId: SessionId): Cookie = {
     Cookie(
       cookieName,
-      encodeCookie(sessionId),
+      encodeCookie(sessionId.toString()),
       cookieMaxAge,
       cookiePathOption,
       cookieDomainOption,
@@ -53,10 +57,10 @@ trait CookieEncoding {
     )
   }
 
-  def createDeviceCookie(sessionId: String): Cookie = {
+  def createDeviceCookie(deviceSessionId: String): Cookie = {
     Cookie(
       devicecookieName,
-      encodeCookie(sessionId),
+      encodeCookie(deviceSessionId),
       devicecookieMaxAge,
       cookiePathOption,
       cookieDomainOption,
@@ -65,10 +69,10 @@ trait CookieEncoding {
     )
   }
 
-  def createSupportCookie(sessionId: String): Cookie = {
+  def createSupportCookie(sessionId: SessionId): Cookie = {
     Cookie(
       supportCookieName,
-      encodeCookie(sessionId),
+      encodeCookie(sessionId.toString()),
       supportCookieMaxAge,
       cookiePathOption,
       cookieDomainOption,
@@ -81,7 +85,18 @@ trait CookieEncoding {
     cookieSigner.sign(token) + token
   }
 
-  def decodeCookie(token: String): Option[String] = {
+  def extractUserSessionIdFromCookie(request: RequestHeader): Option[UserSessionId]       = decodeCookie(request, cookieName).flatMap(UserSessionId.apply)
+  def extractSupportSessionIdFromCookie(request: RequestHeader): Option[SupportSessionId] = decodeCookie(request, supportCookieName).flatMap(SupportSessionId.apply)
+  def extractDeviceSessionIdFromCookie(request: RequestHeader): Option[DeviceSessionId]   = decodeCookie(request, devicecookieName).flatMap(DeviceSessionId.apply)
+
+  private def decodeCookie(request: RequestHeader, theCookieName: String): Option[String] = {
+    for {
+      cookie       <- request.cookies.get(theCookieName)
+      decodedValue <- decodeCookieValue(cookie.value)
+    } yield decodedValue
+  }
+
+  private def decodeCookieValue(token: String): Option[String] = {
     val (hmac, value) = token.splitAt(40)
 
     val signedValue = cookieSigner.sign(value)

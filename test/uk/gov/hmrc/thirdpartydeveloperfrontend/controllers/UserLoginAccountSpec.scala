@@ -37,8 +37,8 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccess
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -61,8 +61,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val developerWithAuthAppAndSmsMfa                = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
     val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId                                     = verifiedSmsMfaDetail.id
-    val sessionWithAuthAppMfa                        = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
-    val sessionWithSmsMfa                            = Session(UUID.randomUUID().toString, developerWithSmsMfa, LoggedInState.LOGGED_IN)
+    val sessionWithAuthAppMfa                        = Session(UserSessionId.random, developerWithAuthAppMfa, LoggedInState.LOGGED_IN)
+    val sessionWithSmsMfa                            = Session(UserSessionId.random, developerWithSmsMfa, LoggedInState.LOGGED_IN)
     val sessionContainsDeveloperWithAuthAppAndSmsMfa = sessionWithAuthAppMfa.copy(developer = developerWithAuthAppAndSmsMfa)
     val user                                         = DeveloperSession(sessionWithAuthAppMfa)
     val emailFieldName: String                       = "emailaddress"
@@ -71,10 +71,10 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val accessCode                                   = "123456"
     val nonce                                        = "ABC-123"
 
-    val deviceSessionId     = UUID.randomUUID()
+    val deviceSessionId     = DeviceSessionId.random
     val deviceSessionCookie = createDeviceCookie(deviceSessionId.toString)
 
-    val sessionId         = "sessionId"
+    val sessionId         = UserSessionId.random
     val loggedInDeveloper = buildDeveloper()
 
     val signInView                    = app.injector.instanceOf[SignInView]
@@ -194,7 +194,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   }
 
   trait SetupWithUserAuthResRequiringMfaEnablement extends Setup {
-    val sessionPartLoggedInEnablingMfa = Session(UUID.randomUUID().toString, developerWithAuthAppMfa, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+    val sessionPartLoggedInEnablingMfa = Session(UserSessionId.random, developerWithAuthAppMfa, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
     val userAuthRespRequiringMfaEnablement = UserAuthenticationResponse(
       accessCodeRequired = false,

@@ -112,15 +112,15 @@ class EmailPreferencesControllerSpec
         mockSelectTopicsFromSubscriptionsView
       )
 
-    val emailPreferences: EmailPreferences                   = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
-    val developer: Developer                                 = buildDeveloper()
-    val developerWithEmailPrefences: Developer               = developer.copy(emailPreferences = emailPreferences)
-    val sessionId: String                                    = "sessionId"
-    val session: Session                                     = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
-    val sessionNoEMailPrefences: Session                     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    val loggedInDeveloper: DeveloperSession                  = DeveloperSession(session)
-    private val sessionParams: Seq[(String, String)]         = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val emailPreferences: EmailPreferences                        = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
+    val developer: Developer                                      = buildDeveloper()
+    val developerWithEmailPrefences: Developer                    = developer.copy(emailPreferences = emailPreferences)
+    val sessionId                                                 = UserSessionId.random
+    val session: Session                                          = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
+    val sessionNoEMailPrefences: Session                          = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val loggedInDeveloper: DeveloperSession                       = DeveloperSession(session)
+    private val sessionParams: Seq[(String, String)]              = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
   "emailPreferencesSummaryPage" should {
@@ -158,6 +158,7 @@ class EmailPreferencesControllerSpec
 
     "return emailPreferencesSummaryView page and set the view data correctly when the flash data value `unsubscribed` is true" in new Setup {
       fetchSessionByIdReturns(sessionId, sessionNoEMailPrefences)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.fetchAllAPICategoryDetails()).thenReturn(Future.successful(apiCategoryDetails))
       when(mockEmailPreferencesService.fetchAPIDetails(eqTo(Set.empty))(*)).thenReturn(Future.successful(List.empty))
@@ -186,6 +187,7 @@ class EmailPreferencesControllerSpec
 
     "return emailPreferencesUnsubcribeAllPage page for logged in user" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val result: Future[Result] = controllerUnderTest.unsubscribeAllPage()(loggedInRequest)
       status(result) mustBe OK
@@ -213,6 +215,7 @@ class EmailPreferencesControllerSpec
 
     "call unsubscribe all emailpreferences service and redirect to the summary page with session value set" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
@@ -239,6 +242,7 @@ class EmailPreferencesControllerSpec
   "flowStartPage" should {
     "render the static start page" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val result: Future[Result] = controllerUnderTest.flowStartPage()(loggedInRequest)
 
@@ -263,6 +267,7 @@ class EmailPreferencesControllerSpec
 
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.fetchCategoriesVisibleToUser(*, *)(*)).thenReturn(Future.successful(apiCategories))
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)))
@@ -299,6 +304,8 @@ class EmailPreferencesControllerSpec
       val categories                                               = Set("a1", "a2", "a3")
 
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
+
       val flow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper).copy(selectedCategories = categories)
 
       when(mockEmailPreferencesService.updateCategories(eqTo(loggedInDeveloper), *)).thenReturn(Future.successful(flow))
@@ -310,6 +317,7 @@ class EmailPreferencesControllerSpec
 
     "redirect back to self if form data is empty" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.fetchCategoriesVisibleToUser(*, *)(*)).thenReturn(Future.successful(apiCategories))
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)))
@@ -337,6 +345,7 @@ class EmailPreferencesControllerSpec
 
     "update categories in flow object and redirect to topics page" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.updateCategories(eqTo(loggedInDeveloper), *))
         .thenReturn(Future.successful(EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)))
@@ -452,6 +461,8 @@ class EmailPreferencesControllerSpec
         .copy(selectedCategories = Set(apiCategory1.category, apiCategory2.category), visibleApis = visibleApis)
 
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
+
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
       when(mockEmailPreferencesService.apiCategoryDetails(*)).thenReturn(Future.successful(Some(apiCategory1)))
 
@@ -478,6 +489,7 @@ class EmailPreferencesControllerSpec
 
     "render the page correctly when the user is logged in" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val expectedSelectedTopics: Set[String] = session.developer.emailPreferences.topics.map(_.toString)
       val emailFlow: EmailPreferencesFlowV2   = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
@@ -508,6 +520,7 @@ class EmailPreferencesControllerSpec
 
     "update email preferences then delete flow object when update is successful. Then redirect to summary page" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
@@ -527,6 +540,7 @@ class EmailPreferencesControllerSpec
 
     "update email preferences then do not delete flow object when update fails. Then redirect to topics page" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(loggedInDeveloper)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
@@ -546,6 +560,7 @@ class EmailPreferencesControllerSpec
 
     "return 400 and re-display topics page when form is empty" in new Setup {
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(loggedInRequest)
 
@@ -579,6 +594,7 @@ class EmailPreferencesControllerSpec
       )
 
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
       when(mockEmailPreferencesService.updateMissingSubscriptions(*, *[ApplicationId], *)).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
@@ -629,6 +645,7 @@ class EmailPreferencesControllerSpec
       )
 
       fetchSessionByIdReturns(sessionId, session)
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
       when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.userId), *)(*)).thenReturn(Future.successful(true))

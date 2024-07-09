@@ -24,6 +24,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellRes
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -43,7 +44,7 @@ class GetProductionCredentialsFlowServiceSpec
   trait Setup extends MockitoSugar {
     val loggedInDeveloper        = standardDeveloper.loggedIn
     val underTest                = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
-    val sessionId                = "sessionId"
+    val sessionId                = UserSessionId.random
     val sellResellOrDistribute   = SellResellOrDistribute("answer")
     val responsibleIndividual    = ResponsibleIndividual(FullName("oldname"), "old@example.com".toLaxEmail)
     val apiSubscriptions         = ApiSubscriptions()
@@ -54,7 +55,7 @@ class GetProductionCredentialsFlowServiceSpec
 
   "fetchFlow" should {
     "return the correct credentials flow if one already exists" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(loggedInDeveloper.session.sessionId)(flow)
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[GetProductionCredentialsFlow](loggedInDeveloper.session.sessionId)(flow)
       val result = await(underTest.fetchFlow(loggedInDeveloper))
 
       result shouldBe flow

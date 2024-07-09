@@ -97,7 +97,7 @@ class UserLoginAccount @Inject() (
 
   def accountLocked: Action[AnyContent] = Action.async { implicit request =>
     for {
-      _ <- extractSessionIdFromCookie(request)
+      _ <- extractUserSessionIdFromCookie(request)
              .map(sessionService.destroy)
              .getOrElse(successful(()))
     } yield Locked(accountLockedView())
@@ -234,7 +234,7 @@ class UserLoginAccount @Inject() (
       errors => successful(BadRequest(signInView("Sign in", errors))),
       loginForm =>
         {
-          val deviceSessionId = request.cookies.get("DEVICE_SESS_ID").flatMap(x => decodeCookie(x.value)).map(UUID.fromString)
+          val deviceSessionId = extractDeviceSessionIdFromCookie(request)
           for {
             (userAuthenticationResponse, userId) <- sessionService.authenticate(loginForm.emailaddress.toLaxEmail, loginForm.password, deviceSessionId)
             response                             <- routeToLoginOr2SV(loginForm, userAuthenticationResponse, request.session, userId)

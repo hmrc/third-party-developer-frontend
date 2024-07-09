@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -75,7 +75,7 @@ class ManageTeamSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer: Developer = buildDeveloper()
-    val sessionId            = "sessionId"
+    val sessionId            = UserSessionId.random
     val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)

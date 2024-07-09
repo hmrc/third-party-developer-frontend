@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.util.UUID
-
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, UserSessionId}
 
 trait DeveloperSessionBuilder {
 
@@ -30,7 +28,7 @@ trait DeveloperSessionBuilder {
 
   private def buildDeveloperSession(loggedInState: LoggedInState, developer: Developer): DeveloperSession = {
 
-    val sessionId: String = UUID.randomUUID().toString
+    val sessionId = UserSessionId.random
 
     DeveloperSession(
       loggedInState,

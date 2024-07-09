@@ -31,7 +31,7 @@ import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 
 case class MfaSecret(secret: String)
@@ -43,8 +43,8 @@ object MfaSecret {
 object TestContext {
   var developer: Developer = _
 
-  var sessionIdForloggedInDeveloper: String = ""
-  var sessionIdForMfaMandatingUser: String  = ""
+  var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
+  var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
 }
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
@@ -121,7 +121,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   When("""^I attempt to Sign out when the session expires""") {
-    val sessionId = "sessionId"
+    val sessionId = UserSessionId.random
     Stubs.setupDeleteRequest(s"/session/$sessionId", NOT_FOUND)
     try {
       val link = driver.findElement(By.linkText("Sign out"))
@@ -161,8 +161,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
-    val sessionId = "sessionId_" + loggedInState.toString
+  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): UserSessionId = {
+    val sessionId = UserSessionId.random
 
     val session                    = Session(sessionId, developer, loggedInState)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))

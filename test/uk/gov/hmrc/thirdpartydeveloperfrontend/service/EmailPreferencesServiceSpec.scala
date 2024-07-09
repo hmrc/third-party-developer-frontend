@@ -43,7 +43,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     val emailPreferences                       = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
     val developer: Developer                   = buildDeveloper()
     val developerWithEmailPrefences: Developer = developer.copy(emailPreferences = emailPreferences)
-    val sessionId                              = "sessionId"
+    val sessionId                              = UserSessionId.random
     val session: Session                       = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
     val sessionNoEMailPrefences: Session       = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val loggedInDeveloper: DeveloperSession    = DeveloperSession(session)
@@ -184,7 +184,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
         when(mockApmConnector.fetchCombinedApi(api1Name)).thenReturn(Future.successful(Right(api1)))
         when(mockApmConnector.fetchCombinedApi(api2Name)).thenReturn(Future.successful(Right(api2)))
 
-        FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(sessionId)(existingFlowObject)
+        FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[NewApplicationEmailPreferencesFlowV2](sessionId)(existingFlowObject)
         FlowRepositoryMock.SaveFlow.thenReturnSuccess[NewApplicationEmailPreferencesFlowV2]
 
         val result = await(underTest.updateNewApplicationSelectedApis(loggedInDeveloper, applicationId, Set(api1Name, api2Name)))

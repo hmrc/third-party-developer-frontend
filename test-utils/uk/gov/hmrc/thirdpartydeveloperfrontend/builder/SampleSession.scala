@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 
 trait SampleSession {
   self: DeveloperBuilder =>
@@ -25,9 +25,9 @@ trait SampleSession {
   lazy val developer: Developer                = buildDeveloper()
   lazy val session: Session                    = Session(sessionId, developer, LoggedInState.LOGGED_IN)
   lazy val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-  lazy val sessionId                           = "sessionId"
+  lazy val sessionId                           = UserSessionId.random
 
-  val partLoggedInSessionId             = "partLoggedInSessionId"
+  val partLoggedInSessionId             = UserSessionId.random
   lazy val partLoggedInSession: Session = Session(partLoggedInSessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
 }

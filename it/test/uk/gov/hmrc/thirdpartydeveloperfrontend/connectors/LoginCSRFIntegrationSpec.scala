@@ -37,6 +37,7 @@ import play.filters.csrf.CSRF
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
@@ -74,7 +75,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   override val stubHost       = "localhost"
   override val wireMockUrl    = s"http://$stubHost:$stubPort"
   override val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
-  val sessionId               = "1234567890"
+  val sessionId               = UserSessionId.random
 
   private val contentType                = "Content-Type"
   private val contentTypeApplicationJson = "application/json"
@@ -145,7 +146,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                              |  "accessCodeRequired": false,
                              |  "mfaEnabled": false,
                              |  "session": {
-                             |    "sessionId": "$sessionId",
+                             |    "sessionId": "${sessionId.toString}",
                              |    "loggedInState": "LOGGED_IN",
                              |    "developer": {
                              |      "userId":"$userId",

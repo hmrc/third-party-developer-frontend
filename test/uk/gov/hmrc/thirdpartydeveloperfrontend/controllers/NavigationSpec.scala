@@ -22,7 +22,7 @@ import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.Profile
@@ -45,7 +45,7 @@ class NavigationSpec extends BaseControllerSpec with DeveloperBuilder with Local
     )
 
     val developer         = buildDeveloper()
-    val sessionId         = "sessionId"
+    val sessionId         = UserSessionId.random
     val session           = Session(sessionId, developer, LoggedInState.LOGGED_IN)
     val loggedInDeveloper = DeveloperSession(session)
 

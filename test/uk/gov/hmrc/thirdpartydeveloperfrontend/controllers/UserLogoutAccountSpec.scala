@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -29,7 +28,7 @@ import play.filters.csrf.CSRF._
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
@@ -42,7 +41,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
 
   trait Setup extends SessionServiceMock {
     val developer = buildDeveloper()
-    val sessionId = UUID.randomUUID().toString
+    val sessionId = UserSessionId.random
     val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
 
     val developerSession: DeveloperSession = DeveloperSession(session)

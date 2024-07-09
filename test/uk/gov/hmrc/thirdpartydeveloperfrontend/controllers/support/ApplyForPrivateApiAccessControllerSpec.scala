@@ -24,13 +24,11 @@ import views.html.support._
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
@@ -43,6 +41,11 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
     val applyForPrivateApiAccessView = app.injector.instanceOf[ApplyForPrivateApiAccessView]
     val chooseAPrivateApiView        = app.injector.instanceOf[ChooseAPrivateApiView]
 
+    lazy val request = FakeRequest()
+      .withSupport(underTest, cookieSigner)(supportSessionId)
+
+    fetchSessionByIdReturnsNone()
+
     val underTest = new ApplyForPrivateApiAccessController(
       mcc,
       SupportServiceMock.aMock,
@@ -54,11 +57,9 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
       chooseAPrivateApiView
     )
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val sessionId                            = "sessionId"
-    val basicFlow                            = SupportFlow(sessionId, SupportData.PrivateApiDocumentation.id)
-    val appropriateFlow                      = basicFlow.copy(privateApi = Some("xxx"))
+    val supportSessionId = SupportSessionId.random
+    val basicFlow        = SupportFlow(supportSessionId, SupportData.PrivateApiDocumentation.id)
+    val appropriateFlow  = basicFlow.copy(privateApi = Some("xxx"))
 
     def shouldBeRedirectedToPreviousPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
@@ -71,48 +72,9 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
     }
   }
 
-  trait IsLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-  }
-
-  trait NoSupportSessionExists {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait NotLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait IsPartLoggedInEnablingMFA {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
-  }
-
   "ApplyForPrivateApiAccessController" when {
     "invoke page" should {
-      "render the page when flow has private api present" in new Setup with IsLoggedIn {
+      "render the page when flow has private api present" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.page())(request)
@@ -120,7 +82,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         status(result) shouldBe OK
       }
 
-      "render the previous page when flow has no private api present" in new Setup with IsLoggedIn {
+      "render the previous page when flow has no private api present" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = None))
 
         val result = addToken(underTest.page())(request)
@@ -128,7 +90,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         shouldBeRedirectedToPreviousPage(result)
       }
 
-      "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
+      "render the previous page when there is no flow" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = None))
 
         val result = addToken(underTest.page())(request)
@@ -138,7 +100,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
     }
 
     "invoke submit" should {
-      "submit new valid request from form" in new Setup with IsLoggedIn {
+      "submit new valid request from form" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "fullName"      -> "Bob",
           "emailAddress"  -> "bob@example.com",
@@ -153,7 +115,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         shouldBeRedirectedToConfirmationPage(result)
       }
 
-      "submit invalid request returns BAD_REQUEST" in new Setup with IsLoggedIn {
+      "submit invalid request returns BAD_REQUEST" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "fullName"      -> "Bob",
           "emailAddress"  -> "bob@example.com",
@@ -166,7 +128,7 @@ class ApplyForPrivateApiAccessControllerSpec extends BaseControllerSpec with Wit
         status(result) shouldBe BAD_REQUEST
       }
 
-      "submit valid request but no session" in new Setup with NoSupportSessionExists {
+      "submit valid request but no session" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "fullName"      -> "Bob",
           "emailAddress"  -> "bob@example.com",

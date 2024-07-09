@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import java.util.UUID
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
@@ -29,8 +27,8 @@ class DevelopersSessionSpec extends AsyncHmrcSpec with DeveloperBuilder with Loc
   val lastName  = "Doe"
   val developer = buildDeveloper(emailAddress = email, firstName = firstName, lastName = lastName)
 
-  val loggedInSession     = Session(UUID.randomUUID().toString, developer, LoggedInState.LOGGED_IN)
-  val partLoggedInSession = Session(UUID.randomUUID().toString, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+  val loggedInSession     = Session(UserSessionId.random, developer, LoggedInState.LOGGED_IN)
+  val partLoggedInSession = Session(UserSessionId.random, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
 
   "Developer.apply" should {
     "create a Developer when passed in a Session" in {

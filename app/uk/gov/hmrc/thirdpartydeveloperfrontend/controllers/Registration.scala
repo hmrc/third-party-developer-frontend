@@ -95,7 +95,7 @@ class Registration @Inject() (
   }
 
   def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
-    extractSessionIdFromCookie(request)
+    extractUserSessionIdFromCookie(request)
       .map(sessionService.destroy)
       .getOrElse(Future.successful(()))
   }

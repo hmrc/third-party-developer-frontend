@@ -29,7 +29,7 @@ import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
@@ -52,16 +52,16 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
     when(appConfig.securedCookie).thenReturn(false)
 
     val underTest = new TestDevHubAuthorization(mcc)
-    val sessionId = "sessionId"
+    val sessionId = UserSessionId.random
 
     val loggedInAction = underTest.loggedInAction { _ => Future.successful(Ok(EmptyContent())) }
 
     val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ => Future.successful(Ok(EmptyContent())) }
 
-    val request                  = FakeRequest().withCookies(underTest.createCookie(sessionId))
+    val request                  = FakeRequest().withCookies(underTest.createUserCookie(sessionId))
     val requestWithNoCookie      = FakeRequest()
     val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", "InvalidCookieValue"))
-    val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
+    val requestWithNoRealSession = FakeRequest().withCookies(underTest.createUserCookie(sessionId))
 
     when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(developerSession.map(ds => ds.session)))
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))

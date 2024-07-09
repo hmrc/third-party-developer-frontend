@@ -23,11 +23,11 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{Format, Json, OFormat, OWrites, Reads}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http.{HttpClient, SessionId => _, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.{Developer, SessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models._
@@ -163,7 +163,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def updateSessionLoggedInState(sessionId: String, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+  def updateSessionLoggedInState(sessionId: SessionId, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
     http.PUT[String, Option[Session]](s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
       .map {
         case Some(session) => session
@@ -226,7 +226,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def fetchSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
+  def fetchSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Session] = metrics.record(api) {
     http.GET[Option[Session]](s"$serviceBaseUrl/session/$sessionId")
       .map {
         case Some(session) => session
@@ -234,7 +234,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def deleteSession(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def deleteSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/session/$sessionId")
       .map {
         case Right(response)                                 => response.status

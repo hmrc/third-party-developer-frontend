@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -50,7 +49,7 @@ class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder wit
     "reset the session if logged in" in new Setup {
 
       val developer                            = buildDeveloper()
-      val sessionId                            = UUID.randomUUID().toString
+      val sessionId                            = UserSessionId.random
       val session                              = Session(sessionId, developer, LoggedInState.LOGGED_IN)
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 

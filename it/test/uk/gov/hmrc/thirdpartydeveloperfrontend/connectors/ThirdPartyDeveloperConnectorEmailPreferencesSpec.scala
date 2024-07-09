@@ -32,6 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, Us
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest}
@@ -55,7 +56,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
     val userEmail: LaxEmailAddress                                 = "thirdpartydeveloper@example.com".toLaxEmail
     val userPassword                                               = "password1!"
-    val sessionId                                                  = "sessionId"
+    val sessionId                                                  = UserSessionId.random
     val loginRequest: LoginRequest                                 = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
     val accessCode                                                 = "123456"
     val nonce                                                      = "ABC-123"

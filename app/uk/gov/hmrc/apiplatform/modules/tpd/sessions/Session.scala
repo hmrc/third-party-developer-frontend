@@ -20,7 +20,8 @@ import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
 
-case class Session(sessionId: String, developer: Developer, loggedInState: LoggedInState)
+// TODO rename
+case class Session(sessionId: UserSessionId, developer: Developer, loggedInState: LoggedInState)
 
 object Session {
   implicit val formatSession: OFormat[Session] = Json.format[Session]

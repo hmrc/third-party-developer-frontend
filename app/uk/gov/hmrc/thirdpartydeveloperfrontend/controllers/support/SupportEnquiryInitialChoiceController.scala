@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,6 +26,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -48,7 +48,7 @@ class SupportEnquiryInitialChoiceController @Inject() (
 
   def submit(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     def handleValidForm(form: SupportEnquiryInitialChoiceForm): Future[Result] = {
-      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+      val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(SupportSessionId.random)
       supportService.createFlow(sessionId, form.initialChoice)
       form.initialChoice match {
         case SupportData.UsingAnApi.id           => Future.successful(withSupportCookie(Redirect(routes.HelpWithUsingAnApiController.page()), sessionId))

@@ -45,6 +45,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
@@ -280,15 +281,16 @@ trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
 }
 
 trait HasUserSession extends HasUserWithRole with UpdatesRequest {
-  lazy val sessionId   = "my session"
+  lazy val sessionId        = UserSessionId.random
+  lazy val supportSessionId = SupportSessionId.random
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
-  def session: Session = Session(sessionId, developer, loggedInState)
+  def session: Session      = Session(sessionId, developer, loggedInState)
   implicit val cookieSigner: CookieSigner
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
-      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId.toString) + sessionId.toString, None, "path", None, false, false)
     )
   }
 }
@@ -304,8 +306,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
-      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false),
-      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId.toString) + sessionId.toString, None, "path", None, false, false),
+      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(supportSessionId.toString) + supportSessionId.toString, None, "path", None, false, false)
     ).withSession(
       ("email", userEmail.text),
       ("emailAddress", userEmail.text),

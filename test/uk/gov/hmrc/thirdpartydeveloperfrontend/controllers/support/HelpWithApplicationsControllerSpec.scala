@@ -24,13 +24,11 @@ import views.html.support.{GivingTeamMemberAccessView, HelpWithApplicationsView}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
@@ -43,7 +41,12 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
     val helpWithApplicationsView    = app.injector.instanceOf[HelpWithApplicationsView]
     val givingTeamMembersAccessView = app.injector.instanceOf[GivingTeamMemberAccessView]
 
-    val underTest                            = new HelpWithApplicationsController(
+    lazy val request = FakeRequest()
+      .withSupport(underTest, cookieSigner)(supportSessionId)
+
+    fetchSessionByIdReturnsNone()
+
+    val underTest        = new HelpWithApplicationsController(
       mcc,
       cookieSigner,
       sessionServiceMock,
@@ -53,11 +56,9 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
       helpWithApplicationsView,
       givingTeamMembersAccessView
     )
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val sessionId                            = "sessionId"
-    val basicFlow                            = SupportFlow(sessionId, "?")
-    val appropriateFlow                      = basicFlow.copy(entrySelection = SupportData.SettingUpApplication.id)
+    val supportSessionId = SupportSessionId.random
+    val basicFlow        = SupportFlow(supportSessionId, "?")
+    val appropriateFlow  = basicFlow.copy(entrySelection = SupportData.SettingUpApplication.id)
 
     def shouldBeRedirectedToPreviousPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
@@ -75,38 +76,9 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
     }
   }
 
-  trait IsLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-  }
-
-  trait NoSupportSessionExists {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait NotLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
   "HelpWithApplicationsController" when {
     "invoking givingTeamMembersAccess()" should {
-      "render the giving team members access page" in new Setup() with NotLoggedIn {
+      "render the giving team members access page" in new Setup() {
         val result = addToken(underTest.givingTeamMembersAccess())(request)
 
         status(result) shouldBe OK
@@ -114,7 +86,7 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
     }
 
     "invoking page()" should {
-      "render the HelpWithApplicationsView" in new Setup() with NotLoggedIn {
+      "render the HelpWithApplicationsView" in new Setup() {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.page())(request)
@@ -122,7 +94,7 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
         status(result) shouldBe OK
       }
 
-      "render the previous page when flow is wrong" in new Setup with IsLoggedIn {
+      "render the previous page when flow is wrong" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(entrySelection = "Something else"))
 
         val result = addToken(underTest.page())(request)
@@ -130,7 +102,7 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
         shouldBeRedirectedToPreviousPage(result)
       }
 
-      "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
+      "render the previous page when there is no flow" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
         val result = addToken(underTest.page())(request)
@@ -140,7 +112,7 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
     }
 
     "invoke submit" should {
-      "redirect to the generic support details page when Completing Terms Of Use Agreement is selected" in new Setup with IsLoggedIn {
+      "redirect to the generic support details page when Completing Terms Of Use Agreement is selected" in new Setup {
         val formRequest = request
           .withFormUrlEncodedBody("choice" -> SupportData.CompletingTermsOfUseAgreement.id)
 
@@ -153,7 +125,7 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
         redirectLocation(result) shouldBe Some("/developer/new-support/details")
       }
 
-      "redirect to the giving team member access page when Giving a Team Member Access  is selected" in new Setup with IsLoggedIn {
+      "redirect to the giving team member access page when Giving a Team Member Access  is selected" in new Setup {
         val formRequest = request
           .withFormUrlEncodedBody("choice" -> SupportData.GivingTeamMemberAccess.id)
 
@@ -166,7 +138,7 @@ class HelpWithApplicationControllerSpec extends BaseControllerSpec with WithCSRF
         redirectLocation(result) shouldBe Some("/developer/new-support/app/giving-team-member-access")
       }
 
-      "redirect to the generic support details page when General Application Details is selected" in new Setup with IsLoggedIn {
+      "redirect to the generic support details page when General Application Details is selected" in new Setup {
         val formRequest = request
           .withFormUrlEncodedBody("choice" -> SupportData.GeneralApplicationDetails.id)
 

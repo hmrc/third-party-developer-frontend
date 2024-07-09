@@ -22,6 +22,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
 
@@ -37,23 +38,23 @@ trait SupportServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
     }
 
     object GetSupportFlow {
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.UsingAnApi.id)) = when(aMock.getSupportFlow(*)).thenReturn(successful(flow))
+      def succeeds(flow: SupportFlow = SupportFlow(SupportSessionId.random, SupportData.UsingAnApi.id)) = when(aMock.getSupportFlow(*)).thenReturn(successful(flow))
     }
 
     object SubmitTicket { // TODO - sort two calls
 
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.UsingAnApi.id)) = {
+      def succeeds(flow: SupportFlow = SupportFlow(SupportSessionId.random, SupportData.UsingAnApi.id)) = {
         when(aMock.submitTicket(*, *[ApplyForPrivateApiAccessForm])(*)).thenReturn(successful(flow))
         when(aMock.submitTicket(*, *[SupportDetailsForm])(*)).thenReturn(successful(flow))
       }
     }
 
     object UpdateWithDelta {
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.updateWithDelta(*)(*)).thenReturn(successful(flow))
+      def succeeds(flow: SupportFlow = SupportFlow(SupportSessionId.random, SupportData.MakingAnApiCall.id)) = when(aMock.updateWithDelta(*)(*)).thenReturn(successful(flow))
     }
 
     object CreateSupportFlow {
-      def succeeds(flow: SupportFlow = SupportFlow("sessionId", SupportData.MakingAnApiCall.id)) = when(aMock.createFlow(*, *)).thenReturn(successful(flow))
+      def succeeds(flow: SupportFlow = SupportFlow(SupportSessionId.random, SupportData.MakingAnApiCall.id)) = when(aMock.createFlow(*, *)).thenReturn(successful(flow))
     }
 
   }

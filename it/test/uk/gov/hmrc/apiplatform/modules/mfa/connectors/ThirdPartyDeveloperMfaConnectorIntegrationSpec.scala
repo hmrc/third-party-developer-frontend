@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 
-import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -30,7 +28,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, DeviceSessionInvalid, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, DeviceSessionId, DeviceSessionInvalid, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
@@ -59,9 +58,9 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val mfaId     = MfaId.random
 
     val userPassword           = "password1!"
-    val sessionId              = "sessionId"
+    val sessionId              = UserSessionId.random
     val loginRequest           = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val deviceSessionId        = UUID.randomUUID()
+    val deviceSessionId        = DeviceSessionId.random
     val deviceSession          = DeviceSession(deviceSessionId, userId)
     val createDeviceSessionUrl = s"/device-session/user/$userId"
     val fetchDeviceSessionUrl  = s"/device-session/$deviceSessionId/user/$userId"

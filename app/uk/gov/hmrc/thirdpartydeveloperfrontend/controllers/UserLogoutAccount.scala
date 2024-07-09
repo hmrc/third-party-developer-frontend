@@ -75,9 +75,9 @@ class UserLogoutAccount @Inject() (
   }
 
   def logout = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    destroySession(request)
+    destroyUserSession(request)
       .getOrElse(Future.successful(()))
       .map(_ => Ok(logoutConfirmationView()).withNewSession)
-      .map(removeSessionCookieFromResult)
+      .map(removeUserSessionCookieFromResult)
   }
 }

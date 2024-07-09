@@ -47,11 +47,11 @@ object DeveloperSession {
 
   def apply(
       loggedInState: LoggedInState,
-      sessionId: String,
+      sessionId: UserSessionId,
       developer: Developer
     ): DeveloperSession = {
     new DeveloperSession(
-      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState)
+      Session(sessionId, developer = developer, loggedInState = loggedInState)
     )
   }
 }

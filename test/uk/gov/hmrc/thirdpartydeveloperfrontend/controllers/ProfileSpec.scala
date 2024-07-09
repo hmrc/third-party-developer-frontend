@@ -31,7 +31,7 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -73,7 +73,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
     )
 
     val loggedInDeveloper: Developer = buildDeveloper()
-    val sessionId                    = "sessionId"
+    val sessionId                    = UserSessionId.random
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken

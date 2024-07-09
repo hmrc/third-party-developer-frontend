@@ -22,6 +22,7 @@ import scala.reflect.runtime.universe._
 import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
@@ -37,15 +38,15 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     object FetchBySessionIdAndFlowType {
       def thenReturn[A <: Flow](flow: A)(implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt), *)).thenReturn(successful(Some(flow)))
 
-      def thenReturn[A <: Flow](sessionId: String)(flow: A)(implicit tt: TypeTag[A]) =
+      def thenReturn[A <: Flow](sessionId: A#Type)(flow: A)(implicit tt: TypeTag[A]) =
         when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)).thenReturn(successful(Some(flow)))
 
       def thenReturnNothing[A <: Flow](implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt), *)).thenReturn(successful(None))
 
-      def thenReturnNothing[A <: Flow](sessionId: String)(implicit tt: TypeTag[A]) =
+      def thenReturnNothing[A <: Flow](sessionId: A#Type)(implicit tt: TypeTag[A]) =
         when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)).thenReturn(successful(None))
 
-      def verifyCalledWith[A <: Flow](sessionId: String)(implicit tt: TypeTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)
+      def verifyCalledWith[A <: Flow](sessionId: A#Type)(implicit tt: TypeTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)
     }
 
     object SaveFlow {
@@ -55,9 +56,9 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     }
 
     object DeleteBySessionIdAndFlowType {
-      def thenReturnSuccess(sessionId: String, flowType: FlowType) = when(aMock.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))).thenReturn(successful(true))
+      def thenReturnSuccess(sessionId: SessionId, flowType: FlowType) = when(aMock.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))).thenReturn(successful(true))
 
-      def verifyCalledWith(sessionId: String, flowType: FlowType) = verify.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))
+      def verifyCalledWith(sessionId: SessionId, flowType: FlowType) = verify.deleteBySessionIdAndFlowType(eqTo(sessionId), eqTo(flowType))
     }
   }
 

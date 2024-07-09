@@ -157,7 +157,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 
   def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit tt: TypeTag[A]) = {
-    when(flowRepository.fetchBySessionIdAndFlowType[A](*[String])(eqTo(tt), *)).thenReturn(
+    when(flowRepository.fetchBySessionIdAndFlowType[A](*[A#Type])(eqTo(tt), *)).thenReturn(
       Future.successful(Some(a))
     )
   }
@@ -175,10 +175,14 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
   )
   mockFetchBySessionIdAndFlowType[SupportFlow](
-    SupportFlow(sessionId, SupportData.UsingAnApi.id, None)
+    SupportFlow(supportSessionId, SupportData.UsingAnApi.id, None)
   )
   when(flowRepository.deleteBySessionIdAndFlowType(*, *)).thenReturn(Future.successful(true))
-  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))))
+  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(
+    supportSessionId,
+    SupportData.UsingAnApi.id,
+    Some(SupportData.MakingAnApiCall.id)
+  )))
   when(flowRepository.saveFlow[GetProductionCredentialsFlow](isA[GetProductionCredentialsFlow])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
   when(flowRepository.saveFlow[IpAllowlistFlow](isA[IpAllowlistFlow])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
   when(flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](isA[NewApplicationEmailPreferencesFlowV2])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(

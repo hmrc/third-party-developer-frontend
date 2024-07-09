@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -53,7 +53,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
   trait Setup extends SessionServiceMock {
     val secret            = "ABCDEFGH"
     val issuer            = "HMRC Developer Hub"
-    val sessionId         = "sessionId"
+    val sessionId         = UserSessionId.random
     val authAppMfaId      = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId          = verifiedSmsMfaDetail.id
     val loggedInDeveloper = buildDeveloper()
@@ -119,12 +119,12 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     }
 
     def createRequestWithInvalidSession(formFieldMap: Map[String, String] = Map.empty) = {
-      val invalidSessionId = "notASessionId"
-      when(underTest.sessionService.fetch(eqTo(invalidSessionId))(*))
+      val notPresentSessionId = UserSessionId.random
+      when(underTest.sessionService.fetch(eqTo(notPresentSessionId))(*))
         .thenReturn(Future.successful(None))
 
       val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(invalidSessionId)
+        .withLoggedIn(underTest, implicitly)(notPresentSessionId)
         .withCSRFToken
 
       if (formFieldMap.isEmpty) request else request.withFormUrlEncodedBody(formFieldMap.toSeq: _*)

@@ -28,6 +28,7 @@ import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
@@ -153,7 +154,7 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environment is Production" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
       val myAppId   = summaries.head.id
@@ -168,7 +169,7 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environment is QA" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
       val summaries = sandboxAppSummaries.take(1)
       val myAppId   = summaries.head.id
@@ -184,7 +185,7 @@ class AddApplicationStartSpec
       "and we have only 1 application" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
         val summaries = sandboxAppSummaries.take(1)
         val myAppId   = summaries.head.id
@@ -200,7 +201,7 @@ class AddApplicationStartSpec
       "and we have more than 1 application" in new Setup {
         when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
         when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow("", None, None)))
+        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
         val summaries = sandboxAppSummaries.take(2)
         aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)

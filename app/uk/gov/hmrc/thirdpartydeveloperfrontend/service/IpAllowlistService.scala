@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CidrBlock
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -43,7 +44,7 @@ class IpAllowlistService @Inject() (
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
-  private def fetchIpAllowListFlow(sessionId: String, app: Option[Application], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
+  private def fetchIpAllowListFlow(sessionId: UserSessionId, app: Option[Application], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
     flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](sessionId) map { maybeFlow =>
       (maybeFlow, app, createIfNotFound) match {
         case (Some(flow: IpAllowlistFlow), _, _)  => flow
@@ -54,18 +55,18 @@ class IpAllowlistService @Inject() (
 
   }
 
-  def getIpAllowlistFlow(app: Application, sessionId: String): Future[IpAllowlistFlow] = {
+  def getIpAllowlistFlow(app: Application, sessionId: UserSessionId): Future[IpAllowlistFlow] = {
     for {
       flow      <- fetchIpAllowListFlow(sessionId, Some(app))
       savedFlow <- flowRepository.saveFlow(flow)
     } yield savedFlow
   }
 
-  def discardIpAllowlistFlow(sessionId: String): Future[Boolean] = {
+  def discardIpAllowlistFlow(sessionId: UserSessionId): Future[Boolean] = {
     flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
   }
 
-  def addCidrBlock(cidrBlock: String, app: Application, sessionId: String): Future[IpAllowlistFlow] = {
+  def addCidrBlock(cidrBlock: String, app: Application, sessionId: UserSessionId): Future[IpAllowlistFlow] = {
     for {
       flow                        <- fetchIpAllowListFlow(sessionId, Some(app))
       updatedFlow: IpAllowlistFlow = flow.copy(allowlist = flow.allowlist + cidrBlock)
@@ -73,14 +74,14 @@ class IpAllowlistService @Inject() (
     } yield savedFlow
   }
 
-  def removeCidrBlock(cidrBlock: String, sessionId: String): Future[IpAllowlistFlow] = {
+  def removeCidrBlock(cidrBlock: String, sessionId: UserSessionId): Future[IpAllowlistFlow] = {
     for {
       flow      <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       savedFlow <- flowRepository.saveFlow(flow.copy(allowlist = flow.allowlist - cidrBlock))
     } yield savedFlow
   }
 
-  def activateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def activateIpAllowlist(app: Application, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     for {
       flow     <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       _         = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
@@ -96,7 +97,7 @@ class IpAllowlistService @Inject() (
     } yield response
   }
 
-  def deactivateIpAllowlist(app: Application, sessionId: String, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deactivateIpAllowlist(app: Application, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     if (app.ipAllowlist.required) {
       Future.failed(new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"))
     } else {
