@@ -54,9 +54,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenApplicationNameIsInvalid(invalid: Invalid) =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(invalid))
 
-  def givenApplicationUpdateSucceeds() =
-    when(applicationServiceMock.update(any[UpdateApplicationRequest])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
-
   def givenUpdateCheckInformationSucceeds(app: Application) =
     when(applicationServiceMock.updateCheckInformation(eqTo(app), *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
@@ -64,11 +61,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenUpdateCheckInformationSucceeds(app: Application, checkInfo: CheckInformation) =
     when(applicationServiceMock.updateCheckInformation(eqTo(app), eqTo(checkInfo))(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
-
-  def updateApplicationSuccessful() = {
-    when(applicationServiceMock.update(any[UpdateApplicationRequest])(*))
-      .thenReturn(successful(ApplicationUpdateSuccessful))
-  }
 
   def givenApplicationExists(application: Application): Unit = givenApplicationExists(ApplicationWithSubscriptionData(application, Set.empty, Map.empty))
 
