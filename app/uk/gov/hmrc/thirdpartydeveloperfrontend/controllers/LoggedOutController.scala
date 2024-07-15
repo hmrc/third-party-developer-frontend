@@ -19,8 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import play.api.mvc.{Headers, MessagesControllerComponents, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 trait HeaderEnricher {
 
@@ -30,8 +32,11 @@ trait HeaderEnricher {
       case _         => hc
     }
 
-  def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession): HeaderCarrier =
-    hc.withExtraHeaders("X-email-address" -> user.email.text, "X-name" -> user.displayedNameEncoded)
+  def enrichHeaders(hc: HeaderCarrier, user: DeveloperSession): HeaderCarrier = {
+    val displayedNameEncoded: String = URLEncoder.encode(user.displayedName, StandardCharsets.UTF_8.toString)
+
+    hc.withExtraHeaders("X-email-address" -> user.email.text, "X-name" -> displayedNameEncoded)
+  }
 
   implicit class RequestWithAjaxSupport(h: Headers) {
     def isAjaxRequest: Boolean = h.get("X-Requested-With").contains("XMLHttpRequest")

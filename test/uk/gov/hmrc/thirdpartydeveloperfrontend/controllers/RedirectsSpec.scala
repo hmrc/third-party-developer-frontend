@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule, SessionServiceMock}
@@ -52,7 +52,7 @@ class RedirectsSpec
 
     val developer = buildDeveloper()
     val sessionId = UserSessionId.random
-    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val loggedInDeveloper = DeveloperSession(session)
 

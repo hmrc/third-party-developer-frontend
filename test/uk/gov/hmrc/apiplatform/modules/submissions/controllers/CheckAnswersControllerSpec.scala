@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ActualAnswer, 
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound

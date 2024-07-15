@@ -29,7 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -76,7 +76,7 @@ class UpliftJourneyServiceSpec
 
     val developer = buildDeveloper()
     val sessionId = UserSessionId.random
-    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val loggedInDeveloper = DeveloperSession(session)
 

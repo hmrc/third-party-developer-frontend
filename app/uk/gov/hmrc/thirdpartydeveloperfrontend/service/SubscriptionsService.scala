@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}

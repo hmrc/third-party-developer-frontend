@@ -42,7 +42,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, Resp
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaAction, MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
@@ -115,7 +115,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   )))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
+  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
   when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
   when(tpaSandboxConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))

@@ -33,11 +33,11 @@ import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaAction, MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
@@ -79,7 +79,7 @@ class MfaController @Inject() (
 
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
-      case Some(developer: Developer) => Ok(securityPreferencesView(developer.mfaDetails.filter(_.verified)))
+      case Some(developer: User) => Ok(securityPreferencesView(developer.mfaDetails.filter(_.verified)))
       case None                       => internalServerErrorTemplate("Unable to obtain User information")
     }
   }
@@ -122,7 +122,7 @@ class MfaController @Inject() (
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
       case None                       => Future.successful(internalServerErrorTemplate("Unable to obtain user information"))
-      case Some(developer: Developer) =>
+      case Some(developer: User) =>
         val mfaType                = MfaType.unsafeApply(mfaTypeForAuthentication)
         val mfaIdForAuthentication = getMfaDetailByType(mfaType, developer.mfaDetails).id
         authenticateToRemoveMfa(mfaType, mfaIdForAuthentication)
@@ -203,7 +203,7 @@ class MfaController @Inject() (
 
   def authAppSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
-      case Some(developer: Developer) => Ok(authAppSetupCompletedView(!isSmsMfaVerified(developer.mfaDetails)))
+      case Some(developer: User) => Ok(authAppSetupCompletedView(!isSmsMfaVerified(developer.mfaDetails)))
       case None                       => internalServerErrorTemplate("Unable to obtain user information")
     }
   }
@@ -270,14 +270,14 @@ class MfaController @Inject() (
 
   def smsSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
-      case Some(developer: Developer) => Ok(smsSetupCompletedView(!isAuthAppMfaVerified(developer.mfaDetails)))
+      case Some(developer: User) => Ok(smsSetupCompletedView(!isAuthAppMfaVerified(developer.mfaDetails)))
       case None                       => internalServerErrorTemplate("Unable to obtain User information")
     }
   }
 
   def removeMfa(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = loggedInAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).flatMap {
-      case Some(developer: Developer) =>
+      case Some(developer: User) =>
         (isMfaDetailVerified(mfaId, developer.mfaDetails), hasVerifiedSmsAndAuthApp(developer.mfaDetails)) match {
           case (true, false) => removeMfaUserWithOneMfaMethod(mfaId, mfaType, request.userId)
           case (true, true)  => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))

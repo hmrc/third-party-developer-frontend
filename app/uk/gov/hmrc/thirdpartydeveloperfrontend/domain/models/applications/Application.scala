@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, SupportsDetails, ViewPushSecret}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, ProductionAndDeveloper, SandboxOnly, SandboxOrAdmin}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.Digest
@@ -61,11 +61,11 @@ trait BaseApplication {
 
   def hasCapability(capability: Capability): Boolean = capability.hasCapability(this)
 
-  def allows(capability: Capability, developer: Developer, permission: Permission): Boolean = {
+  def allows(capability: Capability, developer: User, permission: Permission): Boolean = {
     hasCapability(capability) && permits(developer, permission)
   }
 
-  def permits(developer: Developer, permission: Permission = SandboxOrAdmin): Boolean = {
+  def permits(developer: User, permission: Permission = SandboxOrAdmin): Boolean = {
     permission.hasPermissions(this, developer)
   }
 
@@ -98,19 +98,19 @@ trait BaseApplication {
     case _                                                                                                        => TermsAndConditionsLocations.NoneProvided
   }
 
-  def isPermittedToEditAppDetails(developer: Developer): Boolean = allows(SupportsDetails, developer, SandboxOnly)
+  def isPermittedToEditAppDetails(developer: User): Boolean = allows(SupportsDetails, developer, SandboxOnly)
 
-  def isPermittedToEditProductionAppDetails(developer: Developer): Boolean   = allows(SupportsDetails, developer, ProductionAndAdmin)
-  def isProductionAppButEditDetailsNotAllowed(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndDeveloper)
+  def isPermittedToEditProductionAppDetails(developer: User): Boolean   = allows(SupportsDetails, developer, ProductionAndAdmin)
+  def isProductionAppButEditDetailsNotAllowed(developer: User): Boolean = allows(SupportsDetails, developer, ProductionAndDeveloper)
 
-  def isPermittedToAgreeToTermsOfUse(developer: Developer): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
+  def isPermittedToAgreeToTermsOfUse(developer: User): Boolean = allows(SupportsDetails, developer, ProductionAndAdmin)
 
   /*
   Allows access to at least one of (client id, client secrets and server token) (where appropriate)
    */
-  def canChangeClientCredentials(developer: Developer): Boolean = allows(ChangeClientSecret, developer, SandboxOrAdmin)
+  def canChangeClientCredentials(developer: User): Boolean = allows(ChangeClientSecret, developer, SandboxOrAdmin)
 
-  def canPerformApprovalProcess(developer: Developer): Boolean = {
+  def canPerformApprovalProcess(developer: User): Boolean = {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
@@ -122,7 +122,7 @@ trait BaseApplication {
     }
   }
 
-  def canViewServerToken(developer: Developer): Boolean = {
+  def canViewServerToken(developer: User): Boolean = {
     import Collaborator.Roles._
 
     (deployedTo, access.accessType, state.name, role(developer.email)) match {
@@ -132,7 +132,7 @@ trait BaseApplication {
     }
   }
 
-  def canViewPushSecret(developer: Developer): Boolean = {
+  def canViewPushSecret(developer: User): Boolean = {
     allows(ViewPushSecret, developer, SandboxOrAdmin)
   }
 

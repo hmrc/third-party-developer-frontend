@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -42,15 +42,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.AuthFakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class MfaControllerBaseSpec extends BaseControllerSpec
     with WithCSRFAddToken
-    with DeveloperBuilder
-    with LocalUserIdTracker
     with MfaDetailBuilder
     with MfaViewsValidator {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup
+    extends DeveloperBuilder
+    with LocalUserIdTracker
+    with FixedClock
+    with SessionServiceMock {
+
     val secret            = "ABCDEFGH"
     val issuer            = "HMRC Developer Hub"
     val sessionId         = UserSessionId.random
@@ -108,7 +112,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
       override val qrCode: QRCode = mock[QRCode]
     }
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val registerSmsResponse: RegisterSmsSuccessResponse = RegisterSmsSuccessResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)

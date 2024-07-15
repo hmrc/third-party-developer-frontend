@@ -24,7 +24,7 @@ import play.api.data.Form
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ForgotPasswordForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._

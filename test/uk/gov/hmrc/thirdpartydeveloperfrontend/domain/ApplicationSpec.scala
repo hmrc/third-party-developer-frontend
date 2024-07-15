@@ -29,7 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
@@ -39,9 +39,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker with FixedClock {
 
-  val developer: Developer                = standardDeveloper
+  val developer: User                = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
-  val administrator: Developer            = adminDeveloper
+  val administrator: User            = adminDeveloper
 
   val productionApplicationState: ApplicationState = ApplicationState(State.PRODUCTION, Some("other email"), Some("name"), Some("123"), instant)
   val testingApplicationState: ApplicationState    = ApplicationState(updatedOn = instant)
@@ -57,7 +57,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
   )
 
   describe("Application.canViewCredentials()") {
-    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+    val data: Seq[(Environment, Access, User, Boolean)] = Seq(
       (Environment.SANDBOX, Access.Standard(), developer, true),
       (Environment.SANDBOX, Access.Standard(), administrator, true),
       (Environment.PRODUCTION, Access.Standard(), developer, false),
@@ -76,7 +76,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
   }
 
   describe("Application.isPermittedToEditAppDetails") {
-    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+    val data: Seq[(Environment, Access, User, Boolean)] = Seq(
       (Environment.SANDBOX, Access.Standard(), developer, true),
       (Environment.SANDBOX, Access.Standard(), administrator, true),
       (Environment.PRODUCTION, Access.Standard(), developer, false),
@@ -95,7 +95,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
   }
 
   describe("Application.isPermittedToEditProductionAppDetails") {
-    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+    val data: Seq[(Environment, Access, User, Boolean)] = Seq(
       (Environment.SANDBOX, Access.Standard(), developer, false),
       (Environment.SANDBOX, Access.Standard(), administrator, false),
       (Environment.PRODUCTION, Access.Standard(), developer, false),
@@ -114,7 +114,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
   }
 
   describe("Application.isPermittedToAgreeToTermsOfUse") {
-    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+    val data: Seq[(Environment, Access, User, Boolean)] = Seq(
       (Environment.SANDBOX, Access.Standard(), developer, false),
       (Environment.SANDBOX, Access.Standard(), administrator, false),
       (Environment.PRODUCTION, Access.Standard(), developer, false),
@@ -133,7 +133,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
   }
 
   describe("Application.allows(ChangeClientSecret,user, SandboxOrAdmin)") {
-    val data: Seq[(Environment, Access, Developer, Boolean)] = Seq(
+    val data: Seq[(Environment, Access, User, Boolean)] = Seq(
       (Environment.SANDBOX, Access.Standard(), developer, true),
       (Environment.SANDBOX, Access.Standard(), administrator, true),
       (Environment.PRODUCTION, Access.Standard(), developer, false),
@@ -291,7 +291,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     app
   }
 
-  def runTableTests(data: Seq[(Environment, Access, Developer, Boolean)], defaultApplicationState: ApplicationState)(fn: (Application, Developer) => Boolean): Unit = {
+  def runTableTests(data: Seq[(Environment, Access, User, Boolean)], defaultApplicationState: ApplicationState)(fn: (Application, User) => Boolean): Unit = {
 
     data.zipWithIndex.foreach {
       case ((environment, applicationType, user, accessAllowed), index) =>
@@ -312,7 +312,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData wi
     }
   }
 
-  private def createTestName(environment: Environment, applicationType: Access, user: Developer, accessAllowed: Boolean, index: Int) = {
+  private def createTestName(environment: Environment, applicationType: Access, user: User, accessAllowed: Boolean, index: Int) = {
     val padSize = 10
 
     f"Row ${index + 1}%2d - " +

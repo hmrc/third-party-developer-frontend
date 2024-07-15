@@ -94,7 +94,7 @@ class QuestionsController @Inject() (
         flowItem <- fromOption(oQuestion, "Question not found in questionnaire")
         question  = oQuestion.get
       } yield {
-        errorInfo.fold(
+        errorInfo.fold[Result](
           Ok(questionView(question, applicationId, submitAction, persistedAnswer, None))
         )(ei => BadRequest(questionView(question, applicationId, submitAction, onFormAnswer, Some(ViewErrorInfo(ei)))))
       }

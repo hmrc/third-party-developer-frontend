@@ -18,10 +18,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaDetail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import java.time.Instant
+
 
 trait DeveloperBuilder extends CollaboratorTracker {
   self: UserIdTracker =>
@@ -44,15 +47,21 @@ trait DeveloperBuilder extends CollaboratorTracker {
       organisation: Option[String] = None,
       mfaDetails: List[MfaDetail] = List.empty,
       emailPreferences: EmailPreferences = EmailPreferences.noPreferences
-    ): Developer = {
-    Developer(
-      idOf(emailAddress),
+    ): User = {
+    User(
       emailAddress,
       firstName,
       lastName,
+      Instant.now,
+      Instant.now,
+      true,
+     accountSetup =  None,
       organisation,
+      mfaEnabled = true,
       mfaDetails,
-      emailPreferences
+      nonce = None,
+      emailPreferences,
+      idOf(emailAddress)
     )
   }
 }

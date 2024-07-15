@@ -34,7 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collabora
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividual, TermsOfUseAcceptance, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
@@ -90,7 +90,7 @@ class ManageResponsibleIndividualControllerSpec
     )
     val developer        = buildDeveloper()
     val sessionId        = UserSessionId.random
-    val session          = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session          = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
     val developerSession = DeveloperSession(session)
 
     fetchSessionByIdReturns(sessionId, session)

@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, SessionInvalid, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, SessionInvalid, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
@@ -52,7 +52,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalU
     val developer                  = buildDeveloper(emailAddress = email)
     val sessionId                  = UserSessionId.random
     val deviceSessionId            = DeviceSessionId.random
-    val session                    = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session                    = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
     val applicationId       = ApplicationId.random

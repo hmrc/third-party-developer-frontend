@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CidrBlock
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application

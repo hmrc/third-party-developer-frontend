@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")
@@ -75,7 +76,7 @@ class CancelRequestController @Inject() (
   import SubmissionActionBuilders.ApplicationStateFilter
 
   private val exec   = ec
-  private val ET     = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val ET     = EitherTHelper.make[Result]
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
@@ -83,7 +84,7 @@ class CancelRequestController @Inject() (
   }
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
-    lazy val goBackToRegularPage =
+    lazy val goBackToRegularPage: Result =
       if (request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
       } else {
@@ -93,7 +94,7 @@ class CancelRequestController @Inject() (
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
     val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val reasons                            = "DevHub user cancelled request for production credentials"
-    val instigator                         = request.userId
+    val instigator: UserId                 = request.userId
     val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant())
 
     val x =

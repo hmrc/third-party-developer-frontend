@@ -36,8 +36,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
@@ -69,9 +69,9 @@ class TermsOfUseSpec
       clock
     )
 
-    val loggedInDeveloper: Developer         = buildDeveloper()
+    val loggedInDeveloper: User         = buildDeveloper()
     val sessionId                            = UserSessionId.random
-    val session: Session                     = Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN)
+    val session: UserSession                     = UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper)
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developerSession: DeveloperSession   = DeveloperSession(session)
 

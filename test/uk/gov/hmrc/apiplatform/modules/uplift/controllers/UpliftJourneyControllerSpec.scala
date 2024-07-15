@@ -35,8 +35,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -109,9 +109,9 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val appName: String           = "app"
     val apiVersion: ApiVersionNbr = ApiVersionNbr("version")
 
-    val developer: Developer = buildDeveloper()
+    val developer: User = buildDeveloper()
     val sessionId            = UserSessionId.random
-    val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session: UserSession     = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
     val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)

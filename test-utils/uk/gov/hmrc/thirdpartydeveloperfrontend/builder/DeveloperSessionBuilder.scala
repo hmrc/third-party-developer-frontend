@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSessionId}
 
 trait DeveloperSessionBuilder {
 
-  implicit class DeveloperSyntax(developer: Developer) {
+  implicit class DeveloperSyntax(developer: User) {
     def loggedIn: DeveloperSession                = buildDeveloperSession(LoggedInState.LOGGED_IN, developer)
     def partLoggedInEnablingMFA: DeveloperSession = buildDeveloperSession(LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)
   }
 
-  private def buildDeveloperSession(loggedInState: LoggedInState, developer: Developer): DeveloperSession = {
+  private def buildDeveloperSession(loggedInState: LoggedInState, developer: User): DeveloperSession = {
 
     val sessionId = UserSessionId.random
 

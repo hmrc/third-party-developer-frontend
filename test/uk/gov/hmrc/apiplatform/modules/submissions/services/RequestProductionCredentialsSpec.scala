@@ -30,8 +30,8 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerificationId}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
@@ -53,7 +53,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     val firstName: String    = "bob"
     val lastName: String     = "example"
     val name: String         = s"$firstName $lastName"
-    val developer: Developer = Developer(userId, email, firstName, lastName)
+    val developer: User = User(userId, email, firstName, lastName)
 
     val developerSession: DeveloperSession = mock[DeveloperSession]
 

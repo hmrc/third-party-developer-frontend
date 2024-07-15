@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository

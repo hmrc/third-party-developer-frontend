@@ -23,7 +23,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
@@ -35,7 +35,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuil
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   val developer                                   = buildDeveloper()
-  val session                                     = Session(UserSessionId.random, developer, LoggedInState.LOGGED_IN)
+  val session                                     = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
   implicit val developerSession: DeveloperSession = DeveloperSession(session)
 
   private def renderPage(isAdminOnProductionApp: Boolean): Html = {

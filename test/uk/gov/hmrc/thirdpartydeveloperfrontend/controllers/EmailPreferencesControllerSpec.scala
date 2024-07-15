@@ -34,9 +34,9 @@ import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
@@ -50,19 +50,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class EmailPreferencesControllerSpec
     extends PlaySpec
     with GuiceOneAppPerSuite
     with SessionServiceMock
-    with ErrorHandlerMock
-    with DeveloperBuilder
-    with LocalUserIdTracker {
+    with ErrorHandlerMock {
 
   val category1 = ApiCategory.INCOME_TAX_MTD
   val category2 = ApiCategory.VAT
 
-  trait Setup {
+  trait Setup extends DeveloperBuilder with LocalUserIdTracker with FixedClock {
     val mockEmailPreferencesService: EmailPreferencesService = mock[EmailPreferencesService]
 
     implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
@@ -113,11 +112,11 @@ class EmailPreferencesControllerSpec
       )
 
     val emailPreferences: EmailPreferences                        = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
-    val developer: Developer                                      = buildDeveloper()
-    val developerWithEmailPrefences: Developer                    = developer.copy(emailPreferences = emailPreferences)
+    val developer: User                                      = buildDeveloper()
+    val developerWithEmailPrefences: User                    = developer.copy(emailPreferences = emailPreferences)
     val sessionId                                                 = UserSessionId.random
-    val session: Session                                          = Session(sessionId, developerWithEmailPrefences, LoggedInState.LOGGED_IN)
-    val sessionNoEMailPrefences: Session                          = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val session: UserSession                                          = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
+    val sessionNoEMailPrefences: UserSession                          = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
     val loggedInDeveloper: DeveloperSession                       = DeveloperSession(session)
     private val sessionParams: Seq[(String, String)]              = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)

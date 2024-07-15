@@ -34,7 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver

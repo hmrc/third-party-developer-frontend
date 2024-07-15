@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, Us
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest}

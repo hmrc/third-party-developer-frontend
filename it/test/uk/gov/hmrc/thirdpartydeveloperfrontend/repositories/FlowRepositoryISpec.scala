@@ -37,7 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceN
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi

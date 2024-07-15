@@ -18,17 +18,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
 sealed trait Permission {
-  def hasPermissions(app: BaseApplication, developer: Developer): Boolean
+  def hasPermissions(app: BaseApplication, developer: User): Boolean
 }
 
 object Permissions {
 
   case object SandboxOrAdmin extends Permission {
 
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.SANDBOX, _)                    => true
         case (_, Some(Collaborator.Roles.ADMINISTRATOR)) => true
@@ -38,7 +38,7 @@ object Permissions {
 
   case object ProductionAndAdmin extends Permission {
 
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.PRODUCTION, Some(Collaborator.Roles.ADMINISTRATOR)) => true
         case _                                                                => false
@@ -47,7 +47,7 @@ object Permissions {
 
   case object ProductionAndDeveloper extends Permission {
 
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
       (app.deployedTo, app.role(developer.email)) match {
         case (Environment.PRODUCTION, Some(Collaborator.Roles.DEVELOPER)) => true
         case _                                                            => false
@@ -56,7 +56,7 @@ object Permissions {
 
   case object SandboxOnly extends Permission {
 
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
       app.deployedTo match {
         case Environment.SANDBOX => true
         case _                   => false
@@ -65,17 +65,17 @@ object Permissions {
 
   case object AdministratorOnly extends Permission {
 
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
       app.role(developer.email).contains(Collaborator.Roles.ADMINISTRATOR)
   }
 
   case object TeamMembersOnly extends Permission {
 
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean =
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
       app.role(developer.email).isDefined
   }
 
   case object Unrestricted extends Permission {
-    override def hasPermissions(app: BaseApplication, developer: Developer): Boolean = true
+    override def hasPermissions(app: BaseApplication, developer: User): Boolean = true
   }
 }

@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json._
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
 
 case class UpdateLoggedInStateRequest(loggedInState: LoggedInState)
 

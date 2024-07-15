@@ -25,7 +25,7 @@ import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding

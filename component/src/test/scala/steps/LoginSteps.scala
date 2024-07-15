@@ -31,7 +31,7 @@ import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, Session, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 
 case class MfaSecret(secret: String)

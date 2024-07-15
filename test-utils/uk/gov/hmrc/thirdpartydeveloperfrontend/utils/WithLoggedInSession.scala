@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 

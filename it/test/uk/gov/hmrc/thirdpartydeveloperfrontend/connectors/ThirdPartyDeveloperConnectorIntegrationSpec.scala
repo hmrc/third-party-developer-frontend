@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, SessionInvalid, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, SessionInvalid, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
@@ -111,7 +111,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe Session(sessionId, buildDeveloper(userEmail), loggedInState = LoggedInState.LOGGED_IN)
+      result shouldBe UserSession(sessionId, buildDeveloper(userEmail), loggedInState = LoggedInState.LOGGED_IN)
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -170,7 +170,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     "update session logged in state" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
       val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session: Session                                       = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+      val session: UserSession                                       = UserSession(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
 
       stubFor(
         put(urlEqualTo(url))
@@ -450,7 +450,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
         mfaEnabled = false,
-        session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN))
+        session = Some(UserSession(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN))
       )
     }
 
@@ -564,10 +564,10 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      val result: Session = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
+      val result: UserSession = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe Session(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
+      result shouldBe UserSession(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

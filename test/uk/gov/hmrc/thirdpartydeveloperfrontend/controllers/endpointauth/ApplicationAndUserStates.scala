@@ -38,11 +38,11 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
@@ -50,7 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
-trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
+trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock{
   val applicationId: ApplicationId = ApplicationId.random
   val submissionId: SubmissionId   = SubmissionId.random
   val clientId: ClientId           = ClientId.random
@@ -244,14 +244,20 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
 
   def describeUserRole: String
 
-  def developer: Developer = Developer(
-    userId,
+  def developer: User = User(
     userEmail,
     userFirstName,
     userLastName,
-    None,
-    List(verifiedAuthenticatorAppMfaDetail),
-    EmailPreferences.noPreferences
+    Instant.now(),
+    Instant.now(),
+    verified = true,
+    accountSetup = None,
+    organisation = None,
+    nonce = None, 
+    mfaEnabled = true,
+    mfaDetails =  List(verifiedAuthenticatorAppMfaDetail),
+    emailPreferences = EmailPreferences.noPreferences,
+    userId = userId
   )
   def maybeCollaborator: Option[Collaborator]
 }
@@ -285,7 +291,7 @@ trait HasUserSession extends HasUserWithRole with UpdatesRequest {
   lazy val supportSessionId = SupportSessionId.random
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
-  def session: Session      = Session(sessionId, developer, loggedInState)
+  def session: UserSession      = UserSession(sessionId,  loggedInState, developer)
   implicit val cookieSigner: CookieSigner
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {

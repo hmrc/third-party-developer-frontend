@@ -38,10 +38,10 @@ import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{getMfaDetailBy
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -156,7 +156,7 @@ class UserLoginAccount @Inject() (
       case (None, true) =>
         // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
         thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
-          case Some(developer: Developer) => handleMfaChoices(developer, playSession, login.emailaddress.toLaxEmail, userAuthenticationResponse.nonce.getOrElse(""))
+          case Some(developer: User) => handleMfaChoices(developer, playSession, login.emailaddress.toLaxEmail, userAuthenticationResponse.nonce.getOrElse(""))
           case None                       => throw new UserNotFound
         }
 
@@ -185,7 +185,7 @@ class UserLoginAccount @Inject() (
       .withSession(session + ("userId" -> userId.value.toString)))
   }
 
-  private def handleMfaChoices(developer: Developer, playSession: PlaySession, emailAddress: LaxEmailAddress, nonce: String)(implicit hc: HeaderCarrier) = {
+  private def handleMfaChoices(developer: User, playSession: PlaySession, emailAddress: LaxEmailAddress, nonce: String)(implicit hc: HeaderCarrier) = {
     val session: PlaySession = playSession + ("emailAddress" -> emailAddress.text) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
@@ -213,7 +213,7 @@ class UserLoginAccount @Inject() (
       val userId = UserId(UUID.fromString(request.session.get("userId").get))
 
       thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
-        case Some(developer: Developer) =>
+        case Some(developer: User) =>
           getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails)
             .map(mfaDetail => handleSelectedMfa(userId, mfaDetail))
             .getOrElse(successful(InternalServerError("Access code required but mfa not set up")))
@@ -271,7 +271,7 @@ class UserLoginAccount @Inject() (
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId)
       .flatMap {
-        case Some(developer: Developer) =>
+        case Some(developer: User) =>
           {}
           if (hasVerifiedSmsAndAuthApp(developer.mfaDetails)) {
             val authAppMfaId = getMfaDetailByType(MfaType.AUTHENTICATOR_APP, developer.mfaDetails)
@@ -297,17 +297,17 @@ class UserLoginAccount @Inject() (
     }
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId).map {
-      case Some(developer: Developer) => handleMfaType(hasMultipleMfaMethods(developer))
+      case Some(developer: User) => handleMfaType(hasMultipleMfaMethods(developer))
       case None                       => handleMfaType(false)
     }
   }
 
-  private def hasMultipleMfaMethods(developer: Developer): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
+  private def hasMultipleMfaMethods(developer: User): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
 
   def authenticateAccessCode(mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean): Action[AnyContent] = Action.async { implicit request =>
     val email: LaxEmailAddress = request.session.get("emailAddress").get.toLaxEmail
 
-    def handleMfaSetupReminder(session: Session) = {
+    def handleMfaSetupReminder(session: UserSession) = {
       val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
 
       (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
@@ -317,7 +317,7 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    def handleRememberMe(form: MfaAccessCodeForm, session: Session): Future[Result] = {
+    def handleRememberMe(form: MfaAccessCodeForm, session: UserSession): Future[Result] = {
 
       if (form.rememberMe) {
         thirdPartyDeveloperMfaConnector.createDeviceSession(session.developer.userId) flatMap {
@@ -391,7 +391,7 @@ class UserLoginAccount @Inject() (
       } yield developer).value
     }
 
-    def getFullName(developer: Option[Developer]) = developer.map(d => s"${d.firstName} ${d.lastName}").getOrElse("Unknown")
+    def getFullName(developer: Option[User]) = developer.map(d => s"${d.firstName} ${d.lastName}").getOrElse("Unknown")
 
     for {
       developer <- findDeveloper

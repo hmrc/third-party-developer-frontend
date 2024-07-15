@@ -29,9 +29,9 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -43,10 +43,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChang
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends DeveloperBuilder with LocalUserIdTracker with FixedClock with ApplicationServiceMock with SessionServiceMock {
     val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
     val profileView                   = app.injector.instanceOf[ProfileView]
     val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]
@@ -72,7 +73,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       profileDeleteSubmittedView
     )
 
-    val loggedInDeveloper: Developer = buildDeveloper()
+    val loggedInDeveloper: User = buildDeveloper()
     val sessionId                    = UserSessionId.random
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
@@ -88,7 +89,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
-      fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))
+      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(underTest.connector.updateProfile(eqTo(loggedInDeveloper.userId), requestCaptor.capture())(*))
@@ -110,7 +111,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*))
-        .thenReturn(Future.successful(Some(Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))))
+        .thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))))
       when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
         .thenReturn(failed(new InvalidCredentials()))
 
@@ -130,7 +131,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))))
       when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
         .thenReturn(Future.successful(OK))
 

@@ -50,8 +50,8 @@ class CollaboratorService @Inject() (
 
     for {
       adminsAsUsers <- developerConnector.fetchByEmails(setOfAdminEmails)
-      adminsToEmail  = adminsAsUsers.filter(_.verified.contains(true)).map(_.email).toSet
-      userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail)
+      adminsToEmail  = adminsAsUsers.filter(_.verified).map(_.email).toSet
+      userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail) // TODO - if we adding an admin, check they are registered and verified.
       addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), instant())
       response      <- applicationCommandConnector.dispatch(app.id, addCommand, adminsToEmail)
     } yield response
@@ -75,7 +75,7 @@ class CollaboratorService @Inject() (
     val collaboratorToRemove = app.collaborators.filter(_.emailAddress == teamMemberToRemove).head
     for {
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
-      adminsToEmail = otherAdmins.filter(_.verified.contains(true)).map(_.email).toSet
+      adminsToEmail = otherAdmins.filter(_.verified).map(_.email).toSet
       removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, instant())
       response     <- applicationCommandConnector.dispatch(app.id, removeCommand, adminsToEmail)
     } yield response

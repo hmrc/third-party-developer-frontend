@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CidrBloc
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector

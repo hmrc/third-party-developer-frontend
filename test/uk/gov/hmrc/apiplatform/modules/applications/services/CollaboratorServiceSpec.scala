@@ -28,7 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._

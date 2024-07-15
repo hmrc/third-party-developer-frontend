@@ -9,6 +9,7 @@ object AppDependencies {
   lazy val mongoVersion = "1.7.0"
   lazy val apiDomainVersion = "0.16.0"
   lazy val appDomainVersion = "0.52.0"
+  lazy val tpdDomainVersion = "0.1.0-SNAPSHOT"
 
   lazy val compile = Seq(
     ws,
@@ -25,7 +26,8 @@ object AppDependencies {
     "com.google.zxing"            %  "core"                                   % "3.2.1",
     "commons-validator"           %  "commons-validator"                      % "1.7",
     "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion
   )
 
   lazy val test =  Seq(
@@ -36,7 +38,8 @@ object AppDependencies {
     "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
     "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
     "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
-    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"       % tpdDomainVersion
   ).map(_ % "test")
 
   lazy val componentTestDependencies = Seq(

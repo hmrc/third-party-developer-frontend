@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{Session, SessionInvalid, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, SessionInvalid, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
@@ -47,11 +47,11 @@ class SessionService @Inject() (
     } yield (response, coreUser.id)
   }
 
-  def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Session] = {
+  def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[UserSession] = {
     thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(emailAddress, accessCode, nonce, mfaId))
   }
 
-  def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[Session]] =
+  def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)
       .map(Some(_))
       .recover {

@@ -26,7 +26,7 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.QrCodeView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 

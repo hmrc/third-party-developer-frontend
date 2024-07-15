@@ -25,17 +25,18 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
-class AuditServiceSpec extends AsyncHmrcSpec with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData {
+class AuditServiceSpec extends AsyncHmrcSpec {
 
-  val developer: DeveloperSession = standardDeveloper.loggedIn
-
-  trait Setup {
+  trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData with FixedClock {
+  
+    val developer: DeveloperSession = standardDeveloper.loggedIn
 
     implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(
       "X-email-address" -> developer.email.text,

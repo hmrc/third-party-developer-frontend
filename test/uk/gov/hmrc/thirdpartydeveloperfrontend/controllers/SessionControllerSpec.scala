@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -50,7 +50,7 @@ class SessionControllerSpec extends BaseControllerSpec with DeveloperBuilder wit
 
       val developer                            = buildDeveloper()
       val sessionId                            = UserSessionId.random
-      val session                              = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+      val session                              = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
       val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
       fetchSessionByIdReturns(sessionId, session)

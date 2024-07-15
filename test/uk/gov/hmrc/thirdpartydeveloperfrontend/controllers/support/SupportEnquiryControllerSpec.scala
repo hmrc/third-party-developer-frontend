@@ -31,7 +31,7 @@ import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
@@ -74,7 +74,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, developer))
   }
 
   trait NotLoggedIn {
@@ -93,7 +93,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer))
   }
 
   "SupportEnquiryController" when {

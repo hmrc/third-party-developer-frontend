@@ -29,7 +29,7 @@ import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}

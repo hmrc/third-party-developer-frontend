@@ -20,16 +20,16 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val sessionServiceMock = mock[SessionService]
 
-  private def fetchSessionById(sessionId: UserSessionId, returns: Option[Session]) =
+  private def fetchSessionById(sessionId: UserSessionId, returns: Option[UserSession]) =
     when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(returns))
 
-  def fetchSessionByIdReturns(sessionId: UserSessionId, returns: Session) =
+  def fetchSessionByIdReturns(sessionId: UserSessionId, returns: UserSession) =
     fetchSessionById(sessionId, Some(returns))
 
   def fetchSessionByIdReturnsNone(sessionId: UserSessionId) =

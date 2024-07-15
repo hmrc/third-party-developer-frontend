@@ -20,7 +20,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
@@ -35,7 +35,7 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding w
 
   val developer = buildDeveloper()
   val sessionId = UserSessionId.random
-  val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+  val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
   fetchSessionByIdReturns(sessionId, session)
   updateUserFlowSessionsReturnsSuccessfully(sessionId)

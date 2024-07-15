@@ -23,7 +23,7 @@ import play.api.mvc.{Cookie, RequestHeader}
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.DeviceSessionId
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 

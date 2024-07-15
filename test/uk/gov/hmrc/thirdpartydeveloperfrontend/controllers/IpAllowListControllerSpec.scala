@@ -31,8 +31,8 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.IpAllowlist
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.sessions.domain.models.{DeveloperSession, LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
@@ -78,14 +78,14 @@ class IpAllowListControllerSpec
     val sessionId       = UserSessionId.random
     val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
-    val admin: Developer     = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
-    val developer: Developer = buildDeveloper(emailAddress = "developer@example.com".toLaxEmail)
+    val admin: User     = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
+    val developer: User = buildDeveloper(emailAddress = "developer@example.com".toLaxEmail)
 
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
     val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
 
-    def givenTheUserIsLoggedInAs(user: Developer): DeveloperSession = {
-      val session = Session(sessionId, user, LoggedInState.LOGGED_IN)
+    def givenTheUserIsLoggedInAs(user: User): DeveloperSession = {
+      val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       DeveloperSession(session)
