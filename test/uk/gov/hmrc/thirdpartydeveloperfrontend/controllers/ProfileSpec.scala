@@ -29,6 +29,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
@@ -43,7 +44,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChang
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
@@ -74,7 +74,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     val loggedInDeveloper: User = buildDeveloper()
-    val sessionId                    = UserSessionId.random
+    val sessionId               = UserSessionId.random
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken

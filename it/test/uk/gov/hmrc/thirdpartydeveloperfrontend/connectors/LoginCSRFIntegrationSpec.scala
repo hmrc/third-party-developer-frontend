@@ -36,6 +36,7 @@ import play.filters.csrf.CSRF
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
@@ -46,7 +47,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
-    with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
+    with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder with FixedClock {
 
   private lazy val config = Configuration(
     "play.filters.csrf.token.sign"                                      -> false,
@@ -150,9 +151,14 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                              |    "loggedInState": "LOGGED_IN",
                              |    "developer": {
                              |      "userId":"$userId",
-                             |      "email":"$userEmail",
+                             |      "email":"${userEmail.text}",
                              |      "firstName":"John",
                              |      "lastName": "Doe",
+                             |      "registrationTime": "${nowAsText}",
+                             |      "lastModified": "${nowAsText}",
+                             |      "verified": true,
+                             |      "mfaEnabled": false,
+                             |      "mfaDetails": [],
                              |      "emailPreferences": { "interests" : [], "topics": [] }
                              |    }
                              |  }

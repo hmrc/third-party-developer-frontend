@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa
 
-import play.api.libs.json.{Json, OFormat}
+import scala.collection.immutable.ListSet
 
-case class EmailPreferences(interests: List[TaxRegimeInterests], topics: Set[EmailTopic])
+sealed trait MfaAction
 
-object EmailPreferences {
-  implicit val format: OFormat[EmailPreferences] = Json.format[EmailPreferences]
+object MfaAction {
+  case object CREATE extends MfaAction
+  case object REMOVE extends MfaAction
 
-  def noPreferences: EmailPreferences = EmailPreferences(List.empty, Set.empty)
+  val values: ListSet[MfaAction] = ListSet(CREATE, REMOVE)
+
+  def apply(text: String): Option[MfaAction] = MfaAction.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): MfaAction   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaAction"))
 }

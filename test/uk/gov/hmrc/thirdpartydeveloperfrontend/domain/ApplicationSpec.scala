@@ -39,9 +39,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker with FixedClock {
 
-  val developer: User                = standardDeveloper
+  val developer: User                     = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
-  val administrator: User            = adminDeveloper
+  val administrator: User                 = adminDeveloper
 
   val productionApplicationState: ApplicationState = ApplicationState(State.PRODUCTION, Some("other email"), Some("name"), Some("123"), instant)
   val testingApplicationState: ApplicationState    = ApplicationState(updatedOn = instant)

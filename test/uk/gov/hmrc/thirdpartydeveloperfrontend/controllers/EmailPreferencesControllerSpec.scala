@@ -34,6 +34,7 @@ import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
@@ -50,7 +51,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class EmailPreferencesControllerSpec
     extends PlaySpec
@@ -112,11 +112,11 @@ class EmailPreferencesControllerSpec
       )
 
     val emailPreferences: EmailPreferences                        = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
-    val developer: User                                      = buildDeveloper()
-    val developerWithEmailPrefences: User                    = developer.copy(emailPreferences = emailPreferences)
+    val developer: User                                           = buildDeveloper()
+    val developerWithEmailPrefences: User                         = developer.copy(emailPreferences = emailPreferences)
     val sessionId                                                 = UserSessionId.random
-    val session: UserSession                                          = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
-    val sessionNoEMailPrefences: UserSession                          = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session: UserSession                                      = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
+    val sessionNoEMailPrefences: UserSession                      = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
     val loggedInDeveloper: DeveloperSession                       = DeveloperSession(session)
     private val sessionParams: Seq[(String, String)]              = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)

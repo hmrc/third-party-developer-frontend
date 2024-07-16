@@ -74,9 +74,9 @@ class ManageTeamSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer: User = buildDeveloper()
+    val developer: User      = buildDeveloper()
     val sessionId            = UserSessionId.random
-    val session: UserSession     = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
 

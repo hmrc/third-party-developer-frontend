@@ -32,9 +32,9 @@ import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
@@ -146,7 +146,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   }
 
-  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[DeviceSessionId], deviceSessionFound: Boolean) = {
+  def setUpDeveloperStub(developer: User, mfaId: MfaId, password: String, deviceSessionId: Option[DeviceSessionId], deviceSessionFound: Boolean) = {
     driver.manage().deleteAllCookies()
     val mfaEnabled         = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
@@ -180,7 +180,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   def setupLoggedOrPartLoggedInDeveloper(
-      developer: Developer,
+      developer: User,
       password: String,
       loggedInState: LoggedInState,
       deviceSessionId: Option[DeviceSessionId],
@@ -189,7 +189,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     ): UserSessionId = {
     val sessionId = UserSessionId.random
 
-    val session = Session(sessionId, developer, loggedInState)
+    val session = UserSession(sessionId, loggedInState, developer)
 
     val actualSession = if (accessCodeRequired) None else Some(session)
 

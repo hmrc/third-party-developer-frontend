@@ -34,15 +34,16 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaAction, MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
@@ -80,7 +81,7 @@ class MfaController @Inject() (
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: User) => Ok(securityPreferencesView(developer.mfaDetails.filter(_.verified)))
-      case None                       => internalServerErrorTemplate("Unable to obtain User information")
+      case None                  => internalServerErrorTemplate("Unable to obtain User information")
     }
   }
 
@@ -121,7 +122,7 @@ class MfaController @Inject() (
     }
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
-      case None                       => Future.successful(internalServerErrorTemplate("Unable to obtain user information"))
+      case None                  => Future.successful(internalServerErrorTemplate("Unable to obtain user information"))
       case Some(developer: User) =>
         val mfaType                = MfaType.unsafeApply(mfaTypeForAuthentication)
         val mfaIdForAuthentication = getMfaDetailByType(mfaType, developer.mfaDetails).id
@@ -204,7 +205,7 @@ class MfaController @Inject() (
   def authAppSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: User) => Ok(authAppSetupCompletedView(!isSmsMfaVerified(developer.mfaDetails)))
-      case None                       => internalServerErrorTemplate("Unable to obtain user information")
+      case None                  => internalServerErrorTemplate("Unable to obtain user information")
     }
   }
 
@@ -271,7 +272,7 @@ class MfaController @Inject() (
   def smsSetupCompletedPage: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperConnector.fetchDeveloper(request.userId).map {
       case Some(developer: User) => Ok(smsSetupCompletedView(!isAuthAppMfaVerified(developer.mfaDetails)))
-      case None                       => internalServerErrorTemplate("Unable to obtain User information")
+      case None                  => internalServerErrorTemplate("Unable to obtain User information")
     }
   }
 
@@ -283,7 +284,7 @@ class MfaController @Inject() (
           case (true, true)  => Future.successful(Redirect(routes.MfaController.selectMfaPage(Some(mfaId), MfaAction.REMOVE)))
           case (_, _)        => Future.successful(internalServerErrorTemplate("MFA setup not valid"))
         }
-      case None                       => Future.successful(internalServerErrorTemplate("Unable to obtain User information"))
+      case None                  => Future.successful(internalServerErrorTemplate("Unable to obtain User information"))
     }
   }
 

@@ -157,19 +157,19 @@ class UserLoginAccount @Inject() (
         // TODO: delete device session cookie --- If Device cookie is going to be refreshed / recreated do we need to delete it?
         thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
           case Some(developer: User) => handleMfaChoices(developer, playSession, login.emailaddress.toLaxEmail, userAuthenticationResponse.nonce.getOrElse(""))
-          case None                       => throw new UserNotFound
+          case None                  => throw new UserNotFound
         }
 
     }
   }
 
-  private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetailSummary, session: PlaySession) = {
+  private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetail, session: PlaySession) = {
     successful(
       Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session + ("userId" -> userId.value.toString))
     )
   }
 
-  private def handleSmsFlow(userId: UserId, smsMfaDetail: SmsMfaDetailSummary, session: PlaySession)(implicit hc: HeaderCarrier) = {
+  private def handleSmsFlow(userId: UserId, smsMfaDetail: SmsMfaDetail, session: PlaySession)(implicit hc: HeaderCarrier) = {
     thirdPartyDeveloperMfaConnector.sendSms(userId, smsMfaDetail.id).map {
       case true =>
         Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
@@ -189,10 +189,10 @@ class UserLoginAccount @Inject() (
     val session: PlaySession = playSession + ("emailAddress" -> emailAddress.text) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {
-      case (None, None)                                                                            => successful(InternalServerError("Access code required but mfa not set up"))
-      case (Some(x: AuthenticatorAppMfaDetailSummary), None)                                       => handleAuthAppFlow(developer.userId, x, session)
-      case (None, Some(x: SmsMfaDetailSummary))                                                    => handleSmsFlow(developer.userId, x, session)
-      case (Some(authAppMfa: AuthenticatorAppMfaDetailSummary), Some(smsMfa: SmsMfaDetailSummary)) =>
+      case (None, None)                                                              => successful(InternalServerError("Access code required but mfa not set up"))
+      case (Some(x: AuthenticatorAppMfaDetail), None)                                => handleAuthAppFlow(developer.userId, x, session)
+      case (None, Some(x: SmsMfaDetail))                                             => handleSmsFlow(developer.userId, x, session)
+      case (Some(authAppMfa: AuthenticatorAppMfaDetail), Some(smsMfa: SmsMfaDetail)) =>
         handleMfaChoiceFlow(developer.userId, authAppMfa.id, smsMfa.id, session)
     }
   }
@@ -204,8 +204,8 @@ class UserLoginAccount @Inject() (
   def selectLoginMfaAction(): Action[AnyContent] = Action.async { implicit request =>
     def handleSelectedMfa(userId: UserId, mfaDetail: MfaDetail) = {
       mfaDetail match {
-        case x: AuthenticatorAppMfaDetailSummary => handleAuthAppFlow(userId, x, request.session)
-        case x: SmsMfaDetailSummary              => handleSmsFlow(userId, x, request.session)
+        case x: AuthenticatorAppMfaDetail => handleAuthAppFlow(userId, x, request.session)
+        case x: SmsMfaDetail              => handleSmsFlow(userId, x, request.session)
       }
     }
 
@@ -217,7 +217,7 @@ class UserLoginAccount @Inject() (
           getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails)
             .map(mfaDetail => handleSelectedMfa(userId, mfaDetail))
             .getOrElse(successful(InternalServerError("Access code required but mfa not set up")))
-        case None                       => successful(NotFound("User not found"))
+        case None                  => successful(NotFound("User not found"))
       }
     }
 
@@ -298,7 +298,7 @@ class UserLoginAccount @Inject() (
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId).map {
       case Some(developer: User) => handleMfaType(hasMultipleMfaMethods(developer))
-      case None                       => handleMfaType(false)
+      case None                  => handleMfaType(false)
     }
   }
 

@@ -26,12 +26,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
@@ -41,19 +41,20 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with TestApplications
-    with SubmissionsTestData {
+    with SubmissionsTestData
+    with DeveloperTestData {
 
-  trait Setup extends ApmConnectorMockModule with ApplicationCommandConnectorMockModule with FixedClock {
+  trait Setup extends ApmConnectorMockModule with ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier                                          = HeaderCarrier()
     val applicationId                                                       = ApplicationId.random
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
-    val userId: UserId       = UserId.random
-    val email                = "test@example.com".toLaxEmail
-    val firstName: String    = "bob"
-    val lastName: String     = "example"
-    val name: String         = s"$firstName $lastName"
-    val developer: User = User(userId, email, firstName, lastName)
+    val userId: UserId    = UserId.random
+    val email             = "test@example.com".toLaxEmail
+    val firstName: String = "bob"
+    val lastName: String  = "example"
+    val name: String      = s"$firstName $lastName"
+    val developer: User   = standardDeveloper
 
     val developerSession: DeveloperSession = mock[DeveloperSession]
 

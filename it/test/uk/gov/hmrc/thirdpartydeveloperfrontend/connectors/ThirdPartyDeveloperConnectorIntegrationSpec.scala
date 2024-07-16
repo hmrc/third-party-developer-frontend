@@ -28,16 +28,17 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, SessionInvalid, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-    with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+    with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions with FixedClock {
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
@@ -98,20 +99,25 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withBody(s"""{
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
-                           |  "developer": {
-                           |    "userId":"$userId",
-                           |    "email":"${userEmail.text}",
-                           |    "firstName":"John",
-                           |    "lastName": "Doe",
-                           |    "emailPreferences": { "interests" : [], "topics": [] }
-                           |  }
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
                            |}""".stripMargin)
           )
       )
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe UserSession(sessionId, buildDeveloper(userEmail), loggedInState = LoggedInState.LOGGED_IN)
+      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LOGGED_IN, buildDeveloper(userEmail))
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -170,7 +176,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     "update session logged in state" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
       val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session: UserSession                                       = UserSession(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildDeveloper())
 
       stubFor(
         put(urlEqualTo(url))
@@ -437,6 +443,11 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |      "email":"${userEmail.text}",
                            |      "firstName":"John",
                            |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
                            |      "emailPreferences": { "interests" : [], "topics": [] }
                            |    }
                            |  }
@@ -450,7 +461,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
         mfaEnabled = false,
-        session = Some(UserSession(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN))
+        session = Some(UserSession(sessionId, LoggedInState.LOGGED_IN, buildDeveloper(userEmail)))
       )
     }
 
@@ -553,13 +564,18 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |{
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
-                           |  "developer": {
-                           |    "userId":"$userId",
-                           |    "email":"${userEmail.text}",
-                           |    "firstName":"John",
-                           |    "lastName": "Doe",
-                           |    "emailPreferences": { "interests" : [], "topics": [] }
-                           |  }
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
                            |}""".stripMargin)
           )
       )
@@ -567,7 +583,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserSession = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe UserSession(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
+      result shouldBe UserSession(sessionId, LoggedInState.LOGGED_IN, buildDeveloper(emailAddress = userEmail))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

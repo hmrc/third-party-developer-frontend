@@ -23,12 +23,11 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
 case class DeveloperSession(session: UserSession) {
-  lazy val developer: User         = session.developer
+  lazy val developer: User              = session.developer
   lazy val email: LaxEmailAddress       = developer.email
   lazy val loggedInState: LoggedInState = session.loggedInState
 
   lazy val displayedName: String = developer.displayedName
-
 
   lazy val loggedInName: Option[String] =
     if (loggedInState.isLoggedIn) {

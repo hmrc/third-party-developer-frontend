@@ -69,9 +69,9 @@ class TermsOfUseSpec
       clock
     )
 
-    val loggedInDeveloper: User         = buildDeveloper()
+    val loggedInDeveloper: User              = buildDeveloper()
     val sessionId                            = UserSessionId.random
-    val session: UserSession                     = UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper)
+    val session: UserSession                 = UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper)
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developerSession: DeveloperSession   = DeveloperSession(session)
 

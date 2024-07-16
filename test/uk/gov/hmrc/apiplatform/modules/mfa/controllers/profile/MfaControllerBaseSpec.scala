@@ -26,6 +26,7 @@ import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.MfaViewsValidator
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
@@ -42,7 +43,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.AuthFakeRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class MfaControllerBaseSpec extends BaseControllerSpec
     with WithCSRFAddToken
@@ -50,10 +50,10 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     with MfaViewsValidator {
 
   trait Setup
-    extends DeveloperBuilder
-    with LocalUserIdTracker
-    with FixedClock
-    with SessionServiceMock {
+      extends DeveloperBuilder
+      with LocalUserIdTracker
+      with FixedClock
+      with SessionServiceMock {
 
     val secret            = "ABCDEFGH"
     val issuer            = "HMRC Developer Hub"

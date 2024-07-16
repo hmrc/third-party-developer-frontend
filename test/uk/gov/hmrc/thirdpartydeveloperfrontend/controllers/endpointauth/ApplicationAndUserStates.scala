@@ -50,7 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
-trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock{
+trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock {
   val applicationId: ApplicationId = ApplicationId.random
   val submissionId: SubmissionId   = SubmissionId.random
   val clientId: ClientId           = ClientId.random
@@ -253,9 +253,9 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
     verified = true,
     accountSetup = None,
     organisation = None,
-    nonce = None, 
+    nonce = None,
     mfaEnabled = true,
-    mfaDetails =  List(verifiedAuthenticatorAppMfaDetail),
+    mfaDetails = List(verifiedAuthenticatorAppMfaDetail),
     emailPreferences = EmailPreferences.noPreferences,
     userId = userId
   )
@@ -291,7 +291,7 @@ trait HasUserSession extends HasUserWithRole with UpdatesRequest {
   lazy val supportSessionId = SupportSessionId.random
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
-  def session: UserSession      = UserSession(sessionId,  loggedInState, developer)
+  def session: UserSession  = UserSession(sessionId, loggedInState, developer)
   implicit val cookieSigner: CookieSigner
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {

@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 trait DeveloperTestData extends DeveloperBuilder {
   self: UserIdTracker =>

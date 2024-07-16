@@ -22,12 +22,12 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSessi
 trait SampleSession {
   self: DeveloperBuilder =>
 
-  lazy val developer: User                = buildDeveloper()
-  lazy val session: UserSession                    = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+  lazy val developer: User                     = buildDeveloper()
+  lazy val session: UserSession                = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
   lazy val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
   lazy val sessionId                           = UserSessionId.random
 
-  val partLoggedInSessionId             = UserSessionId.random
+  val partLoggedInSessionId                 = UserSessionId.random
   lazy val partLoggedInSession: UserSession = UserSession(partLoggedInSessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)
 
 }

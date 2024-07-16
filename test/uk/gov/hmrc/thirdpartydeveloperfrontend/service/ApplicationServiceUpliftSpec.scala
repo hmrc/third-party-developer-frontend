@@ -38,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
-class ApplicationServiceUpliftSpec extends AsyncHmrcSpec{
+class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
 
   trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData with FixedClock with ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()

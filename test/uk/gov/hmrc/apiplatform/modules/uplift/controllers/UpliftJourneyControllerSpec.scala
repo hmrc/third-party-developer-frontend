@@ -109,9 +109,9 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val appName: String           = "app"
     val apiVersion: ApiVersionNbr = ApiVersionNbr("version")
 
-    val developer: User = buildDeveloper()
+    val developer: User      = buildDeveloper()
     val sessionId            = UserSessionId.random
-    val session: UserSession     = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
     val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)

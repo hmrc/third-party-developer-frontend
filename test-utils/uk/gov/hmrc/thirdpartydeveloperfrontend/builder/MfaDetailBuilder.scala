@@ -19,17 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetailSummary, MfaId, SmsMfaDetailSummary}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaId, SmsMfaDetail}
 
 trait MfaDetailBuilder {
   val verifiedAuthenticatorAppMfaDetail = buildAuthenticatorAppMfaDetail(name = "Auth App", verified = true)
   val verifiedSmsMfaDetail              = buildSmsMfaDetail(name = "Text Message", mobileNumber = "0123456789", verified = true)
 
   def buildAuthenticatorAppMfaDetail(name: String, verified: Boolean, createdOn: Instant = Instant.now().truncatedTo(ChronoUnit.MILLIS)) = {
-    AuthenticatorAppMfaDetailSummary(MfaId.random, name, createdOn, verified)
+    AuthenticatorAppMfaDetail(MfaId.random, name, createdOn, verified)
   }
 
   def buildSmsMfaDetail(name: String, mobileNumber: String, verified: Boolean, createdOn: Instant = Instant.now().truncatedTo(ChronoUnit.MILLIS)) = {
-    SmsMfaDetailSummary(MfaId.random, name, createdOn, mobileNumber, verified)
+    SmsMfaDetail(MfaId.random, name, createdOn, mobileNumber, verified)
   }
 }

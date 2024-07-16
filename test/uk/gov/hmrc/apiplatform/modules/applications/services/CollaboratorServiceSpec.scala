@@ -28,7 +28,6 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -50,8 +49,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
   val grantLength = Period.ofDays(547)
 
   trait Setup
-      extends FixedClock
-      with ThirdPartyDeveloperConnectorMockModule
+      extends ThirdPartyDeveloperConnectorMockModule
       with ApplicationCommandConnectorMockModule {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -65,6 +63,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
       TPDMock.aMock,
       FixedClock.clock
     )
+
   }
 
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
@@ -133,7 +132,6 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     }
 
     "remove teamMember determines admins to email" in new Setup {
-      import cats.syntax.option._
       val verifiedAdmin      = "verified@example.com".toLaxEmail.asAdministratorCollaborator
       val unverifiedAdmin    = "unverified@example.com".toLaxEmail.asAdministratorCollaborator
       val removerAdmin       = "admin.email@example.com".toLaxEmail.asAdministratorCollaborator
@@ -143,7 +141,10 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
 
       val notExcluded = Set(verifiedAdmin, unverifiedAdmin).map(_.emailAddress)
 
-      TPDMock.FetchByEmails.returnsSuccessFor(notExcluded)(Seq(User(verifiedAdmin.emailAddress, true.some), User(unverifiedAdmin.emailAddress, false.some)))
+      TPDMock.FetchByEmails.returnsSuccessFor(notExcluded)(Seq(
+        adminDeveloper.copy(email = verifiedAdmin.emailAddress),
+        adminDeveloper.copy(email = unverifiedAdmin.emailAddress, verified = false)
+      ))
       val mockResponse = mock[Application]
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)

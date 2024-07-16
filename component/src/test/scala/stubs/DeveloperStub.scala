@@ -23,7 +23,7 @@ import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Registration, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
@@ -99,7 +99,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def setupGettingDeveloperByUserId(developer: Developer): Unit = {
+  def setupGettingDeveloperByUserId(developer: User): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
       .withQueryParam("developerId", equalTo(developer.userId.toString()))
       .willReturn(aResponse()

@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
@@ -34,21 +35,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.Combined
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
   trait SetUp extends DeveloperBuilder with LocalUserIdTracker with FixedClock with CombinedApiTestDataHelper with FlowRepositoryMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val emailPreferences                       = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
-    val developer: User                   = buildDeveloper()
-    val developerWithEmailPrefences: User = developer.copy(emailPreferences = emailPreferences)
-    val sessionId                              = UserSessionId.random
-    val session: UserSession                   = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
-    val sessionNoEMailPrefences: UserSession   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-    val loggedInDeveloper: DeveloperSession    = DeveloperSession(session)
-    val applicationId                          = ApplicationId.random
+    val emailPreferences                     = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+    val developer: User                      = buildDeveloper()
+    val developerWithEmailPrefences: User    = developer.copy(emailPreferences = emailPreferences)
+    val sessionId                            = UserSessionId.random
+    val session: UserSession                 = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
+    val sessionNoEMailPrefences: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val loggedInDeveloper: DeveloperSession  = DeveloperSession(session)
+    val applicationId                        = ApplicationId.random
 
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
     val mockApmConnector                 = mock[ApmConnector]

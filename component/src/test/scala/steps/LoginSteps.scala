@@ -30,8 +30,8 @@ import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, Session, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
 
 case class MfaSecret(secret: String)
@@ -41,7 +41,7 @@ object MfaSecret {
 }
 
 object TestContext {
-  var developer: Developer = _
+  var developer: User = _
 
   var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
   var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
@@ -161,10 +161,10 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): UserSessionId = {
+  def setupLoggedOrPartLoggedInDeveloper(developer: User, password: String, loggedInState: LoggedInState): UserSessionId = {
     val sessionId = UserSessionId.random
 
-    val session                    = Session(sessionId, developer, loggedInState)
+    val session                    = UserSession(sessionId, loggedInState, developer)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA

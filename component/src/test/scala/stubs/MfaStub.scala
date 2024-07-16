@@ -25,9 +25,9 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.{ChangeMfaNameRequest, CreateMfaSmsRequest}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.Developer
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, VerifyMfaRequest}
 
@@ -37,7 +37,7 @@ object MfaStub {
   val nonce              = "iamanoncevalue"
 
   def stubMfaAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
-    val session = Session(TestContext.sessionIdForloggedInDeveloper, TestContext.developer, LoggedInState.LOGGED_IN)
+    val session = UserSession(TestContext.sessionIdForloggedInDeveloper, LoggedInState.LOGGED_IN, TestContext.developer)
 
     stubFor(
       post(urlEqualTo("/authenticate-mfa"))
@@ -50,7 +50,7 @@ object MfaStub {
     )
   }
 
-  def stubMfaAuthAppNameChange(developer: Developer, mfaId: MfaId, authAppName: String): Unit = {
+  def stubMfaAuthAppNameChange(developer: User, mfaId: MfaId, authAppName: String): Unit = {
     stubFor(
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/name"))
         .withRequestBody(equalTo(Json.toJson(ChangeMfaNameRequest(authAppName)).toString()))
@@ -59,7 +59,7 @@ object MfaStub {
     )
   }
 
-  def setupVerificationOfAccessCode(developer: Developer, mfaId: MfaId): Unit = {
+  def setupVerificationOfAccessCode(developer: User, mfaId: MfaId): Unit = {
     stubFor(
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/verification"))
         .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
@@ -68,7 +68,7 @@ object MfaStub {
     )
   }
 
-  def stubRemoveMfaById(developer: Developer, mfaId: MfaId): Unit = {
+  def stubRemoveMfaById(developer: User, mfaId: MfaId): Unit = {
     stubFor(
       delete(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId"))
         .willReturn(aResponse()
@@ -76,7 +76,7 @@ object MfaStub {
     )
   }
 
-  def stubSendSms(developer: Developer, mfaId: MfaId): Unit = {
+  def stubSendSms(developer: User, mfaId: MfaId): Unit = {
     stubFor(
       post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/send-sms"))
         .willReturn(aResponse()
@@ -84,7 +84,7 @@ object MfaStub {
     )
   }
 
-  def setupSmsAccessCode(developer: Developer, mfaId: MfaId, mobileNumber: String): Unit = {
+  def setupSmsAccessCode(developer: User, mfaId: MfaId, mobileNumber: String): Unit = {
     import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerSmsSuccessResponseFormat
 
     stubFor(
@@ -96,7 +96,7 @@ object MfaStub {
     )
   }
 
-  def setupGettingMfaSecret(developer: Developer, mfaId: MfaId): Unit = {
+  def setupGettingMfaSecret(developer: User, mfaId: MfaId): Unit = {
     import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerAuthAppResponseFormat
 
     stubFor(
@@ -109,13 +109,13 @@ object MfaStub {
 
   def stubUpliftAuthSession(isMfaMandated: Boolean) = {
     val sessionId = if (isMfaMandated) TestContext.sessionIdForMfaMandatingUser else TestContext.sessionIdForloggedInDeveloper
-    val session   = Session(sessionId, TestContext.developer, LoggedInState.LOGGED_IN)
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, TestContext.developer)
 
     Stubs.setupPutRequest(s"/session/$sessionId/loggedInState/LOGGED_IN", OK, Json.toJson(session).toString())
   }
 
   def setupMfaMandated() = {
-    val session = Session(TestContext.sessionIdForMfaMandatingUser, TestContext.developer, LoggedInState.LOGGED_IN)
+    val session = UserSession(TestContext.sessionIdForMfaMandatingUser, LoggedInState.LOGGED_IN, TestContext.developer)
 
     Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK)

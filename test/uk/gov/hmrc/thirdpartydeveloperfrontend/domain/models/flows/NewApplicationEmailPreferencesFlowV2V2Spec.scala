@@ -44,8 +44,8 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
   val sessionId     = UserSessionId.random
 
   def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
-    val developer: User = buildDeveloper(emailPreferences = emailPreferences)
-    val session: UserSession     = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val developer: User      = buildDeveloper(emailPreferences = emailPreferences)
+    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
     DeveloperSession(session)
   }
 
