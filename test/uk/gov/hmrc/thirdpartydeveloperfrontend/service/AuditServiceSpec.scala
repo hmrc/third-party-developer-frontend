@@ -26,17 +26,17 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class AuditServiceSpec extends AsyncHmrcSpec {
 
-  trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData with FixedClock {
+  trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with FixedClock {
 
     val developer: DeveloperSession = standardDeveloper.loggedIn
 

@@ -50,7 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class CredentialsSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with UserBuilder
@@ -147,7 +147,7 @@ class CredentialsSpec
 
     givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper)
     fetchCredentialsReturns(application, appTokens)
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
 

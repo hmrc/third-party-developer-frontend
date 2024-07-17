@@ -51,7 +51,7 @@ class SubscriptionsSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with UserBuilder
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplications
     with SubscriptionTestHelperSugar
     with FixedClock {
@@ -92,7 +92,7 @@ class SubscriptionsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
@@ -536,7 +536,7 @@ class SubscriptionsSpec
     "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
       val alteredActiveApplication = activeApplication.copy(collaborators = Set("randomEmail".toLaxEmail.asAdministratorCollaborator))
 
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(userSession)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)
       givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
 

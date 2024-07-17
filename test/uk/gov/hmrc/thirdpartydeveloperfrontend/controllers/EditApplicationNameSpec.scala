@@ -49,7 +49,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class EditApplicationNameSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -96,7 +96,7 @@ class EditApplicationNameSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)

@@ -22,7 +22,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplications extends SampleApplication {
-  self: SampleSession with CollaboratorTracker =>
+  self: SampleDeveloperSession with CollaboratorTracker =>
 
   val activeApplication: Application = sampleApp
 

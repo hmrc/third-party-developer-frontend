@@ -45,7 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class ManageApplicationsSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -75,7 +75,7 @@ class ManageApplicationsSpec
       SubmissionServiceMock.aMock
     )
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

@@ -33,10 +33,10 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ActualAnswer, 
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SampleDeveloperSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
@@ -48,7 +48,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class CheckAnswersControllerSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -63,7 +63,7 @@ class CheckAnswersControllerSpec
   trait HasSessionDeveloperFlow {
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
 
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }

@@ -16,19 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 
-trait SampleSession {
+trait SampleDeveloperSession extends SampleUserSession {
   self: UserBuilder =>
 
-  lazy val developer: User                     = buildTrackedUser()
-  lazy val session: UserSession                = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-  lazy val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-  lazy val sessionId                           = UserSessionId.random
-
-  val partLoggedInSessionId                 = UserSessionId.random
-  lazy val partLoggedInSession: UserSession = UserSession(partLoggedInSessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)
-
+  lazy val loggedInDeveloper: DeveloperSession = DeveloperSession(userSession)
 }

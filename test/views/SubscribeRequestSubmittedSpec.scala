@@ -25,11 +25,10 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -43,7 +42,7 @@ class SubscribeRequestSubmittedSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserBuilder
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication {
 
   "Subscribe request submitted page" should {

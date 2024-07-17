@@ -22,16 +22,16 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOther
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class ResponsibleIndividualChangeToOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications with DeveloperTestData {
+    with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications with UserTestData {
 
   "Responsible Individual Change To Other View" should {
     val application = anApplication()

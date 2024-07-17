@@ -28,7 +28,7 @@ class APISubscriptionsSpec
     extends AsyncHmrcSpec
     with LocalUserIdTracker
     with UserBuilder
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar {
 

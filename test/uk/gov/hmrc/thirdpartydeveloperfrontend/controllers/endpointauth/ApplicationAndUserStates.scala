@@ -38,12 +38,12 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._

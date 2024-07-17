@@ -34,9 +34,9 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Appli
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
@@ -50,14 +50,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationComma
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
     with ApplicationBuilder
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with UserTestData {
 
   val versionOne  = ApiVersionNbr("1.0")
   val versionTwo  = ApiVersionNbr("2.0")

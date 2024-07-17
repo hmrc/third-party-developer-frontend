@@ -28,23 +28,22 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class CollaboratorServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
     with ApplicationBuilder
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData
+    with UserTestData
     with CollaboratorsTestData {
 
   val versionOne  = ApiVersionNbr("1.0")

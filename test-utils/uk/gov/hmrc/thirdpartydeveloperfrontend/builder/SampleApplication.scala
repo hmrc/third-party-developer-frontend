@@ -29,7 +29,7 @@ trait SampleApplication
     extends FixedClock
     with ApplicationStateHelper
     with CollaboratorTracker {
-  self: SampleSession =>
+  self: SampleDeveloperSession =>
 
   val appId    = ApplicationId.random
   val clientId = ClientId("myClientId")

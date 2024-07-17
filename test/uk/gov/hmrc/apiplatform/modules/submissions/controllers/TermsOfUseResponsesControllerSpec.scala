@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.TermsOfUseResponsesView
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationStateHelper, SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationStateHelper, SampleApplication, SampleDeveloperSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -41,7 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class TermsOfUseResponsesControllerSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -58,7 +58,7 @@ class TermsOfUseResponsesControllerSpec
   trait HasSessionDeveloperFlow {
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
 
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }

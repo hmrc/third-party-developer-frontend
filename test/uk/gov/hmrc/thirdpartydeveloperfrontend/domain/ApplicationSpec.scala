@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
@@ -38,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
-class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock {
+class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock {
 
   val developer: User                     = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator

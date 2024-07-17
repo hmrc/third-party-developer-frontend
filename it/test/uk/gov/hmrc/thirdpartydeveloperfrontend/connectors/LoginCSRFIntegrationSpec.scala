@@ -37,15 +37,14 @@ import play.filters.csrf.CSRF
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDeveloperStub.fetchDeveloper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.MfaDetailBuilder
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
     with BeforeAndAfterEach with UserBuilder with LocalUserIdTracker with MfaDetailBuilder with FixedClock {

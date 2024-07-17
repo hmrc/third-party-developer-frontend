@@ -29,16 +29,16 @@ import play.twirl.api.HtmlFormat
 
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsAccessCodeView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SmsAccessCodeViewSpec extends CommonViewSpec
-    with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with StubMessagesFactory {
+    with WithCSRFAddToken with UserTestData with DeveloperSessionBuilder with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val flash: Flash                                 = Flash(Map("mobileNumber" -> "0123456789"))
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

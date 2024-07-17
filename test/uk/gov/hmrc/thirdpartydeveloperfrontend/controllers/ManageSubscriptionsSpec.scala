@@ -54,7 +54,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRF
 class ManageSubscriptionsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with TestApplications
@@ -130,7 +130,7 @@ class ManageSubscriptionsSpec
       subscriptionConfigurationStepPageView
     )
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchAppsByTeamMemberReturns(Environment.PRODUCTION)(Seq(ApplicationWithSubscriptionIds.from(application)))
@@ -194,7 +194,7 @@ class ManageSubscriptionsSpec
           subsFields
         )
 
-        val app: Application = aStandardPendingApprovalApplication(developer.email)
+        val app: Application = aStandardPendingApprovalApplication(user.email)
 
         givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
 

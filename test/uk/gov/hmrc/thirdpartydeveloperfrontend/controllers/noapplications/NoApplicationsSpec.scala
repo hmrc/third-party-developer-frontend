@@ -28,7 +28,7 @@ import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SampleSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SampleDeveloperSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -38,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class NoApplicationsSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -61,7 +61,7 @@ class NoApplicationsSpec
       mcc
     )
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

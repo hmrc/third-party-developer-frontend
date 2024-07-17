@@ -38,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
 class CancelRequestControllerSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleDeveloperSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -54,7 +54,7 @@ class CancelRequestControllerSpec
   trait HasSessionDeveloperFlow {
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
 
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }

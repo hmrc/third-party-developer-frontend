@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,17 @@
 
 package uk.gov.hmrc.apiplatform.modules.tpd.test.data
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.UserIdTracker
 
-trait DeveloperTestData extends UserBuilder {
-  self: UserIdTracker =>
+trait SampleUserSession {
+  self: UserBuilder =>
 
-  lazy val adminDeveloper = buildTrackedUser("admin@example.com".toLaxEmail, "firstName1", "lastName1")
-  lazy val JoeBloggs      = buildTrackedUser("developer@example.com".toLaxEmail, "Joe", "Bloggs")
-  val standardDeveloper   = buildTrackedUser("developer@example.com".toLaxEmail, "firstName2", "lastName2")
+  lazy val user: User = buildTrackedUser()
+  lazy val sessionId  = UserSessionId.random
+
+  val partLoggedInSessionId                 = UserSessionId.random
+  lazy val partLoggedInSession: UserSession = UserSession(partLoggedInSessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, user)
+  lazy val userSession: UserSession         = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
 }

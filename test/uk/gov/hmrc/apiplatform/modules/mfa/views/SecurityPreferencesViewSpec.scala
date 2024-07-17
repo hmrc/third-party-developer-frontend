@@ -24,14 +24,14 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaId, SmsMfaDetail}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
-class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with FixedClock {
+class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken with UserTestData with DeveloperSessionBuilder with LocalUserIdTracker with FixedClock {
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
   val securityPreferencesView: SecurityPreferencesView      = app.injector.instanceOf[SecurityPreferencesView]
 

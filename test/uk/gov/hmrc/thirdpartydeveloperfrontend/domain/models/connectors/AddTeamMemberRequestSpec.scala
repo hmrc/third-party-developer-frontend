@@ -20,9 +20,9 @@ import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.utils.{HmrcSpec, JsonFormattersSpec}
+import uk.gov.hmrc.apiplatform.modules.common.utils.{BaseJsonFormattersSpec, HmrcSpec}
 
-class AddTeamMemberRequestSpec extends HmrcSpec with JsonFormattersSpec {
+class AddTeamMemberRequestSpec extends HmrcSpec with BaseJsonFormattersSpec {
 
   "AddTeamMemberRequest" should {
     val request = AddTeamMemberRequest(LaxEmailAddress("bob@example.com"), Collaborator.Roles.DEVELOPER, None)
