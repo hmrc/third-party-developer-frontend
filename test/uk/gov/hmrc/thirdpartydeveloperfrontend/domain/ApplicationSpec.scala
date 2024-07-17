@@ -30,8 +30,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._

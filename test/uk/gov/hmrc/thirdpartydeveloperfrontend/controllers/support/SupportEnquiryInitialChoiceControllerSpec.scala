@@ -25,8 +25,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId

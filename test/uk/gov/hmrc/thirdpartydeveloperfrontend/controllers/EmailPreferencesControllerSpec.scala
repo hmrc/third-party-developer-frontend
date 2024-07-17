@@ -35,11 +35,11 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController

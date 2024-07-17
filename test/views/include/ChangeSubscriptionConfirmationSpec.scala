@@ -28,10 +28,10 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel

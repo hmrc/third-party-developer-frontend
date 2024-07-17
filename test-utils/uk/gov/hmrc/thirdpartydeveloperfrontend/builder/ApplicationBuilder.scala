@@ -24,7 +24,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collabor
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.UserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.UserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker

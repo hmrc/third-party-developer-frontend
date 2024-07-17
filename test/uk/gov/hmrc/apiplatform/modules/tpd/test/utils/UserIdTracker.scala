@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.utils
+package uk.gov.hmrc.apiplatform.modules.tpd.test.utils
 
 import scala.collection.mutable
 

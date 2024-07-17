@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.builder
+package uk.gov.hmrc.apiplatform.modules.tpd.test.builders
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit

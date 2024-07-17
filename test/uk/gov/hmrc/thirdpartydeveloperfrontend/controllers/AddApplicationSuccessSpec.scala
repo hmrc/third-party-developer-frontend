@@ -31,8 +31,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView

@@ -29,12 +29,13 @@ import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationState
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class PushSecretsViewSpec extends CommonViewSpec
     with WithCSRFAddToken

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.tpd.builder
+package uk.gov.hmrc.apiplatform.modules.tpd.test.builders
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
@@ -22,7 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaDetail
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.UserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.UserIdTracker
 
 trait UserBuilder extends FixedClock {
   self: UserIdTracker =>

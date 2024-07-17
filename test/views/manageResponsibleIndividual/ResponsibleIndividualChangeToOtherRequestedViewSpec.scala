@@ -22,12 +22,13 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOther
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionTestData, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionTestData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementIdentifiedByIdContainsText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class ResponsibleIndividualChangeToOtherRequestedViewSpec extends CommonViewSpec with WithCSRFAddToken
     with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications with CollaboratorTracker with DeveloperTestData {

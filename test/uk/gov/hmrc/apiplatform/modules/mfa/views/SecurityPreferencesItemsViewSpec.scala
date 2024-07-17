@@ -29,9 +29,9 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.LocalDateConversionSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaDetail, MfaId, SmsMfaDetail}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {

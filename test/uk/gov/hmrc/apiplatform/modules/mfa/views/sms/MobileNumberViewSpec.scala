@@ -25,10 +25,10 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.MobileNumberView
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder

@@ -29,11 +29,11 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions

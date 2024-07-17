@@ -29,16 +29,16 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.tpd.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedApisEmailPreferencesForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.DeveloperTestData
 
 class FlowSelectApiViewSpec extends CommonViewSpec
     with WithCSRFAddToken
