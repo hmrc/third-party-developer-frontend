@@ -79,7 +79,7 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
     document.getElementById("description").text shouldBe "This is how you get your access codes."
     val mfaTypeField = Option(document.getElementById(s"mfaType-$rowId"))
     mfaTypeField should not be None
-    mfaTypeField.get.text shouldBe mfaDetail.mfaType.asText
+    mfaTypeField.get.text shouldBe mfaDetail.mfaType.displayText
 
     if (shouldShowCreatedDate) {
       document.getElementById(s"date-hint-$rowId").text shouldBe s"Added ${DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").withZone(ZoneOffset.UTC).format(mfaDetail.createdOn)}"

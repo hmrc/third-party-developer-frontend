@@ -48,7 +48,6 @@ trait ComponentTestDeveloperBuilder extends FixedClock {
       true,
       None,
       organisation,
-      true,
       mfaDetails,
       None,
       emailPreferences,

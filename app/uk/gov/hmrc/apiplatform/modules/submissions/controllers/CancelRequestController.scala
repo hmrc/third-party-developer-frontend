@@ -74,7 +74,6 @@ class CancelRequestController @Inject() (
   import cats.instances.future.catsStdInstancesForFuture
   import SubmissionActionBuilders.ApplicationStateFilter
 
-  private val exec   = ec
   private val ET     = EitherTHelper.make[Result]
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 

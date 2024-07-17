@@ -254,7 +254,6 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
     accountSetup = None,
     organisation = None,
     nonce = None,
-    mfaEnabled = true,
     mfaDetails = List(verifiedAuthenticatorAppMfaDetail),
     emailPreferences = EmailPreferences.noPreferences,
     userId = userId

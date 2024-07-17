@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessi
 
 object ThirdPartyDeveloperMfaConnector {
 
-  trait RegisterSmsResponse
+  sealed trait RegisterSmsResponse
   case class RegisterSmsSuccessResponse(mfaId: MfaId, mobileNumber: String) extends RegisterSmsResponse
   case class RegisterSmsFailureResponse()                                   extends RegisterSmsResponse
 

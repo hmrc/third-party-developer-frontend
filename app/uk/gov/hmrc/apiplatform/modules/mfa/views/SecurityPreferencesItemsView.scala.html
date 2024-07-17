@@ -28,7 +28,7 @@
         <tbody class="govuk-table__body">
         @for((mfaDetail, idx) <- mfaDetails.zipWithIndex) {
             <tr class="govuk-table__row">
-                <td class="govuk-table__cell" id="mfaType-@{idx}"><strong>@{mfaDetail.mfaType.asText}</strong></td>
+                <td class="govuk-table__cell" id="mfaType-@{idx}"><strong>@{mfaDetail.mfaType.displayText}</strong></td>
                 <td class="govuk-table__cell govuk-!-width-one-half" id="nameAndCreatedOn-@{idx}">
 
                     @if(mfaDetail.name != "AUTHENTICATOR_APP"){

@@ -90,7 +90,7 @@ class AddApplication @Inject() (
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
-  def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+  def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
     successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId)))
   }
 

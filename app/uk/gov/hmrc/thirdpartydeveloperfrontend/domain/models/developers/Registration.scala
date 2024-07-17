@@ -26,7 +26,7 @@ object Registration {
   implicit val registrationFmt: OFormat[Registration] = Json.format[Registration]
 }
 
-trait RegistrationDownstreamResponse
+sealed trait RegistrationDownstreamResponse
 
 case object RegistrationSuccessful extends RegistrationDownstreamResponse
 

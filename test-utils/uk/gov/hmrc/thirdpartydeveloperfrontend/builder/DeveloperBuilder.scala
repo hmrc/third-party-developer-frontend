@@ -55,7 +55,6 @@ trait DeveloperBuilder extends CollaboratorTracker with FixedClock {
       true,
       accountSetup = None,
       organisation,
-      mfaEnabled = mfaDetails.nonEmpty,
       mfaDetails,
       nonce = None,
       emailPreferences,
