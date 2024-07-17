@@ -30,8 +30,10 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
@@ -39,7 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{PushPullNotificationsService, SessionService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
 
 class PushPullNotificationsSpec
     extends BaseControllerSpec
@@ -49,7 +51,7 @@ class PushPullNotificationsSpec
     with SubscriptionTestHelperSugar
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker
     with GuiceOneAppPerSuite {
 
@@ -137,7 +139,7 @@ class PushPullNotificationsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer = buildDeveloper()
+    val developer = buildTrackedUser()
     val sessionId = UserSessionId.random
     val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 

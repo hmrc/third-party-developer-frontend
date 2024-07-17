@@ -30,20 +30,21 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with TestApplications
     with ErrorHandlerMock
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
@@ -71,7 +72,7 @@ class DeletePrincipalApplicationSpec
     val clientId        = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
-    val developer = buildDeveloper()
+    val developer = buildTrackedUser()
     val sessionId = UserSessionId.random
     val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 

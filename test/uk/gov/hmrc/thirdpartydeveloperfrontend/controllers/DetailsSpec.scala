@@ -42,8 +42,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Envi
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
@@ -52,14 +53,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
 
 class DetailsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with TestApplications
     with SubmissionsTestData
-    with DeveloperBuilder
+    with UserBuilder
     with CollaboratorTracker
     with LocalUserIdTracker
     with SubmissionServiceMockModule
@@ -789,8 +790,8 @@ class DetailsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer      = buildDeveloper()
-    val admin          = buildDeveloper(emailAddress = "admin@example.com".toLaxEmail)
+    val developer      = buildTrackedUser()
+    val admin          = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
     val devSessionId   = UserSessionId.random
     val adminSessionId = UserSessionId.random
     val devSession     = UserSession(devSessionId, LoggedInState.LOGGED_IN, developer)

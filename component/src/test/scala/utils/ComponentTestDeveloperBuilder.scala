@@ -31,7 +31,7 @@ trait ComponentTestDeveloperBuilder extends FixedClock {
   val authenticatorAppMfaDetails = AuthenticatorAppMfaDetail(MfaId(UUID.fromString("13eae037-7b76-4bfd-8f77-feebd0611ebb")), "name", instant, verified = true)
   val smsMfaDetails              = SmsMfaDetail(MfaId(UUID.fromString("6a3b98f1-a2c0-488b-bf0b-cfc86ccfe24d")), "name", instant, "+447890123456", verified = true)
 
-  def buildDeveloper(
+  def buildUser(
       emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",

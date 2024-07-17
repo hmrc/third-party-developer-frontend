@@ -23,16 +23,17 @@ import views.html.ProfileDeleteSubmittedView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ProfileDeleteSubmittedSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder {
+    with UserBuilder {
 
   "Profile delete submitted page" should {
     val profileDeleteSubmittedView = app.injector.instanceOf[ProfileDeleteSubmittedView]
@@ -40,7 +41,7 @@ class ProfileDeleteSubmittedSpec extends CommonViewSpec
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = buildDeveloperWithRandomId("Test".toLaxEmail, "Test", "Test", None).loggedIn
+      val developer = buildTrackedUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
 
       val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")

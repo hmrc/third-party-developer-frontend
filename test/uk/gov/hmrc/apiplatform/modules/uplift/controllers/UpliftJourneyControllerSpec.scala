@@ -35,8 +35,10 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -47,8 +49,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Appli
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleSession
@@ -57,7 +59,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SubmissionsTestData
     with WithCSRFAddToken
     with SubscriptionsBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup
@@ -109,7 +111,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val appName: String           = "app"
     val apiVersion: ApiVersionNbr = ApiVersionNbr("version")
 
-    val developer: User      = buildDeveloper()
+    val developer: User      = buildTrackedUser()
     val sessionId            = UserSessionId.random
     val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 

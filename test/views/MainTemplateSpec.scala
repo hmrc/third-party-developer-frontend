@@ -23,17 +23,17 @@ import views.html.include.Main
 import play.api.test.FakeRequest
 import play.twirl.api.{Html, HtmlFormat}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsById
 
-class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
+class MainTemplateSpec extends CommonViewSpec with UserBuilder with LocalUserIdTracker {
 
   "MainTemplateSpec" should {
     val mainView                  = app.injector.instanceOf[Main]
-    val developer                 = buildDeveloper()
+    val developer                 = buildTrackedUser()
     val session                   = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
     implicit val developerSession = DeveloperSession(session)
     implicit val request          = FakeRequest()

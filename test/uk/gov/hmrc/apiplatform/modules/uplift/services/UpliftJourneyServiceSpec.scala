@@ -29,7 +29,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -37,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelpe
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class UpliftJourneyServiceSpec
     extends AsyncHmrcSpec
@@ -46,7 +48,7 @@ class UpliftJourneyServiceSpec
     with SubmissionsTestData
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup
@@ -74,7 +76,7 @@ class UpliftJourneyServiceSpec
     val appName: String = "app"
     val apiVersion      = ApiVersionNbr("version")
 
-    val developer = buildDeveloper()
+    val developer = buildTrackedUser()
     val sessionId = UserSessionId.random
     val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 

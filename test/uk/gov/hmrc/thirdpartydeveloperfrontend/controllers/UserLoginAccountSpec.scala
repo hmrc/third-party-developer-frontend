@@ -36,10 +36,11 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{MfaDetailBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
@@ -49,16 +50,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with CollaboratorTracker with CookieEncoding with MfaDetailBuilder with FixedClock {
+    with UserBuilder with LocalUserIdTracker with CollaboratorTracker with CookieEncoding with MfaDetailBuilder with FixedClock {
 
   trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule with AppsByTeamMemberServiceMock {
 
-    val developerWithAuthAppMfa                      = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
-    val developerWithSmsMfa                          = buildDeveloper(mfaDetails = List(verifiedSmsMfaDetail))
-    val developerWithAuthAppAndSmsMfa                = buildDeveloper(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
+    val developerWithAuthAppMfa                      = buildTrackedUser(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+    val developerWithSmsMfa                          = buildTrackedUser(mfaDetails = List(verifiedSmsMfaDetail))
+    val developerWithAuthAppAndSmsMfa                = buildTrackedUser(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
     val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId                                     = verifiedSmsMfaDetail.id
     val sessionWithAuthAppMfa                        = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developerWithAuthAppMfa)
@@ -75,7 +76,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val deviceSessionCookie = createDeviceCookie(deviceSessionId.toString)
 
     val sessionId         = UserSessionId.random
-    val loggedInDeveloper = buildDeveloper()
+    val loggedInDeveloper = buildTrackedUser()
 
     val signInView                    = app.injector.instanceOf[SignInView]
     val accountLockedView             = app.injector.instanceOf[AccountLockedView]

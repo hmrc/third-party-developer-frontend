@@ -25,7 +25,9 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -39,7 +41,7 @@ class SubscribeRequestSubmittedSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with SampleSession
     with SampleApplication {
 
@@ -52,7 +54,7 @@ class SubscribeRequestSubmittedSpec
       val apiName     = "Test API"
       val apiVersion  = ApiVersionNbr("1.0")
       val clientId    = ClientId("clientId123")
-      val developer   = buildDeveloperWithRandomId("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
+      val developer   = buildUser("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
       val application = sampleApp
 
       val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]

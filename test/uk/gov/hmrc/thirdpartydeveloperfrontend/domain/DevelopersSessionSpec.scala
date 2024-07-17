@@ -17,15 +17,16 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class DevelopersSessionSpec extends AsyncHmrcSpec with DeveloperBuilder with LocalUserIdTracker {
+class DevelopersSessionSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker {
   val email     = "thirdpartydeveloper@example.com".toLaxEmail
   val firstName = "John"
   val lastName  = "Doe"
-  val developer = buildDeveloper(emailAddress = email, firstName = firstName, lastName = lastName)
+  val developer = buildTrackedUser(emailAddress = email, firstName = firstName, lastName = lastName)
 
   val loggedInSession     = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
   val partLoggedInSession = UserSession(UserSessionId.random, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)

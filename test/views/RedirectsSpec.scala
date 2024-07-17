@@ -26,18 +26,20 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with CollaboratorTracker with DeveloperBuilder
+class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with CollaboratorTracker with UserBuilder
     with SampleSession with SampleApplication {
 
-  val loggedInDeveloper1: DeveloperSession = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
-  val loggedInDeveloper2: DeveloperSession = buildDeveloperWithRandomId("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
+  val loggedInDeveloper1: DeveloperSession = buildTrackedUser("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
+  val loggedInDeveloper2: DeveloperSession = buildTrackedUser("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
 
   "redirects page" should {
     val redirectLimit = 5

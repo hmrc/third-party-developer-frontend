@@ -35,10 +35,11 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController
@@ -49,7 +50,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.AP
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class EmailPreferencesControllerSpec
@@ -61,7 +61,7 @@ class EmailPreferencesControllerSpec
   val category1 = ApiCategory.INCOME_TAX_MTD
   val category2 = ApiCategory.VAT
 
-  trait Setup extends DeveloperBuilder with LocalUserIdTracker with FixedClock {
+  trait Setup extends UserBuilder with LocalUserIdTracker with FixedClock {
     val mockEmailPreferencesService: EmailPreferencesService = mock[EmailPreferencesService]
 
     implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
@@ -112,7 +112,7 @@ class EmailPreferencesControllerSpec
       )
 
     val emailPreferences: EmailPreferences                        = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
-    val developer: User                                           = buildDeveloper()
+    val developer: User                                           = buildTrackedUser()
     val developerWithEmailPrefences: User                         = developer.copy(emailPreferences = emailPreferences)
     val sessionId                                                 = UserSessionId.random
     val session: UserSession                                      = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)

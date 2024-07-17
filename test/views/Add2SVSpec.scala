@@ -23,18 +23,20 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperBuilder with DeveloperSessionBuilder with LocalUserIdTracker with DeveloperTestData {
+class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with UserBuilder with DeveloperSessionBuilder with LocalUserIdTracker with DeveloperTestData {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
   implicit val loggedInDeveloper: DeveloperSession          = adminDeveloper.loggedIn
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-  val developer                                   = buildDeveloper()
+  val developer                                   = buildTrackedUser()
   val session                                     = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
   implicit val developerSession: DeveloperSession = DeveloperSession(session)
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
+package uk.gov.hmrc.apiplatform.modules.tpd.utils
 
 import scala.collection.mutable
 
@@ -34,13 +34,4 @@ trait LocalUserIdTracker extends UserIdTracker {
 
 // Use this when you want to share the map across files like component tests where
 // fixture setup is spread over different classes/objects
-object GlobalUserIdTracker extends LocalUserIdTracker {
-
-  // def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = Collaborator(email, role, idOf(email))
-
-  // implicit class CollaboratorSyntax(email: LaxEmailAddress) {
-  //   def asAdministratorCollaborator             = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)
-  //   def asDeveloperCollaborator                 = collaboratorOf(email, Collaborator.Roles.DEVELOPER)
-  //   def asCollaborator(role: Collaborator.Role) = collaboratorOf(email, role)
-  // }
-}
+object GlobalUserIdTracker extends LocalUserIdTracker

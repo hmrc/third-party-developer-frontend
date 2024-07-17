@@ -30,8 +30,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
@@ -43,14 +44,14 @@ class RedirectsSpec
     with WithCSRFAddToken
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with RedirectsServiceMockModule {
     val applicationId = "1234"
     val clientId      = ClientId("clientId123")
 
-    val developer = buildDeveloper()
+    val developer = buildTrackedUser()
     val sessionId = UserSessionId.random
     val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 

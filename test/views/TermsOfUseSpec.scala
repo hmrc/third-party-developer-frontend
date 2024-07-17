@@ -30,19 +30,19 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUseForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with FixedClock {
 
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
@@ -58,7 +58,7 @@ class TermsOfUseSpec extends CommonViewSpec
 
   "Terms of use view" when {
     implicit val request    = FakeRequest().withCSRFToken
-    implicit val loggedIn   = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
+    implicit val loggedIn   = buildUser("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
     implicit val navSection = "details"
 
     val id          = ApplicationId.random

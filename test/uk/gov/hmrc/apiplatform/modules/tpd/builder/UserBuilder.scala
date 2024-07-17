@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
+package uk.gov.hmrc.apiplatform.modules.tpd.builder
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
@@ -22,23 +22,40 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaDetail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.UserIdTracker
 
-trait DeveloperBuilder extends FixedClock {
+trait UserBuilder extends FixedClock {
   self: UserIdTracker =>
 
-  def buildDeveloperWithRandomId(
+  def buildUser(
       emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",
       organisation: Option[String] = None,
       mfaDetails: List[MfaDetail] = List.empty,
       emailPreferences: EmailPreferences = EmailPreferences.noPreferences
-    ) = {
-    buildDeveloper(emailAddress, firstName, lastName, organisation, mfaDetails, emailPreferences).copy(userId = UserId.random)
+    ): User = {
+    User(
+      emailAddress,
+      firstName,
+      lastName,
+      instant,
+      instant,
+      true,
+      accountSetup = None,
+      organisation,
+      mfaDetails,
+      nonce = None,
+      emailPreferences,
+      UserId.random
+    )
   }
 
-  def buildDeveloper(
+  /*
+   * Builds a user than can be referred to by email or id in other places and it will all "hang"
+   * together through any mocked fetching users etc.
+   */
+  def buildTrackedUser(
       emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",

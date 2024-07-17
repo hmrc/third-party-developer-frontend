@@ -23,19 +23,19 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.Profile
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class NavigationSpec extends BaseControllerSpec {
 
   class Setup(loggedInState: Option[LoggedInState])
-      extends DeveloperBuilder
+      extends UserBuilder
       with LocalUserIdTracker
       with FixedClock
       with ApplicationServiceMock
@@ -51,7 +51,7 @@ class NavigationSpec extends BaseControllerSpec {
       cookieSigner
     )
 
-    val developer         = buildDeveloper()
+    val developer         = buildTrackedUser()
     val sessionId         = UserSessionId.random
     val session           = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
     val loggedInDeveloper = DeveloperSession(session)

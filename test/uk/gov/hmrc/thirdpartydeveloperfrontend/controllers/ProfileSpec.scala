@@ -30,10 +30,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
@@ -42,12 +43,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePa
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends DeveloperBuilder with LocalUserIdTracker with FixedClock with ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends UserBuilder with LocalUserIdTracker with FixedClock with ApplicationServiceMock with SessionServiceMock {
     val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
     val profileView                   = app.injector.instanceOf[ProfileView]
     val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]
@@ -73,7 +74,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       profileDeleteSubmittedView
     )
 
-    val loggedInDeveloper: User = buildDeveloper()
+    val loggedInDeveloper: User = buildTrackedUser()
     val sessionId               = UserSessionId.random
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =

@@ -34,13 +34,14 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{I
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
-class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder with FixedClock {
+class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with UserBuilder with FixedClock {
 
   val leftHandNavView: LeftHandNav = app.injector.instanceOf[LeftHandNav]
 
@@ -48,7 +49,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val applicationId: ApplicationId                          = ApplicationId.random
     val clientId: ClientId                                    = ClientId("std-client-id")
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val loggedIn: DeveloperSession                   = buildDeveloperWithRandomId("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
+    implicit val loggedIn: DeveloperSession                   = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
 
     val standardApplication: Application =
       Application(applicationId, clientId, "name", instant, Some(instant), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Standard())

@@ -24,10 +24,12 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesView
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaId, SmsMfaDetail}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperTestData with DeveloperSessionBuilder with LocalUserIdTracker with FixedClock {
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -36,7 +38,7 @@ class SecurityPreferencesViewSpec extends CommonViewSpec with WithCSRFAddToken w
   "SecurityPreferences view" should {
     val authAppMfaDetail                            = AuthenticatorAppMfaDetail(MfaId(java.util.UUID.randomUUID()), "name", instant, verified = true)
     val smsMfaDetail                                = SmsMfaDetail(MfaId(java.util.UUID.randomUUID()), "name", instant, mobileNumber = "1234567890", verified = true)
-    implicit val developerSession: DeveloperSession = buildDeveloper().partLoggedInEnablingMFA
+    implicit val developerSession: DeveloperSession = buildTrackedUser().partLoggedInEnablingMFA
 
     "show suggest 'Get access codes by text message' and display auth app details when developer has only auth app set up" in {
       val mainView = securityPreferencesView.apply(List(authAppMfaDetail))

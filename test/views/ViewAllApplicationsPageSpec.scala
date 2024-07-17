@@ -34,8 +34,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Envi
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.builder.{DeveloperSessionBuilder, UserBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
@@ -43,13 +43,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfU
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with FixedClock
     with SubmissionsTestData {
 
@@ -148,7 +148,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         productionApplicationSubmissions: List[Submission] = List.empty
       ) = {
       val request                = FakeRequest()
-      val loggedIn               = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
+      val loggedIn               = buildUser("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
       manageApplicationsView.render(
@@ -385,7 +385,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     def renderPage(appSummaries: Seq[ApplicationSummary]) = {
       val request                                = FakeRequest().withCSRFToken
-      val loggedIn                               = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
+      val loggedIn                               = buildUser("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
 
       addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)

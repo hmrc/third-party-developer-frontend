@@ -64,7 +64,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
     val password  = result("Password")
-    val developer = buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"))
+    val developer = buildUser(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"))
 
     val mfaSetup = result("Mfa Setup")
 
