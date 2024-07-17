@@ -22,9 +22,9 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaDetail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, UserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.UserIdTracker
 
-trait DeveloperBuilder extends CollaboratorTracker with FixedClock {
+trait DeveloperBuilder extends FixedClock {
   self: UserIdTracker =>
 
   def buildDeveloperWithRandomId(

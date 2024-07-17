@@ -42,6 +42,7 @@ class CancelRequestControllerSpec
     with WithCSRFAddToken
     with DeveloperBuilder
     with LocalUserIdTracker
+    with CollaboratorTracker
     with SubmissionsTestData {
 
   trait HasSubscriptions {

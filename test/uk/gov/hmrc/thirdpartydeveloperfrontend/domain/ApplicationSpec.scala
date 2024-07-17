@@ -35,9 +35,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker}
 
-class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker with FixedClock {
+class ApplicationSpec extends AnyFunSpec with Matchers with DeveloperTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock {
 
   val developer: User                     = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator

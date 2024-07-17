@@ -30,11 +30,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSessi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.GlobalUserIdTracker.CollaboratorSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperBuilder
+class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with CollaboratorTracker with DeveloperBuilder
     with SampleSession with SampleApplication {
 
   val loggedInDeveloper1: DeveloperSession = buildDeveloperWithRandomId("developer@example.com".toLaxEmail, "John", "Doe").loggedIn

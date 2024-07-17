@@ -49,10 +49,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, WithCSRFAddToken}
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
-    with DeveloperBuilder with LocalUserIdTracker with CookieEncoding with MfaDetailBuilder with FixedClock {
+    with DeveloperBuilder with LocalUserIdTracker with CollaboratorTracker with CookieEncoding with MfaDetailBuilder with FixedClock {
 
   trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule with AppsByTeamMemberServiceMock {
 

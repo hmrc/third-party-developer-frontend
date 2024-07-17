@@ -27,8 +27,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplication
     extends FixedClock
-    with ApplicationStateHelper {
-  self: SampleSession with CollaboratorTracker =>
+    with ApplicationStateHelper
+    with CollaboratorTracker {
+  self: SampleSession =>
 
   val appId    = ApplicationId.random
   val clientId = ClientId("myClientId")
