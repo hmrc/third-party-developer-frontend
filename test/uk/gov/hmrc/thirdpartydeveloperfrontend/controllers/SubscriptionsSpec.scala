@@ -92,7 +92,6 @@ class SubscriptionsSpec
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    givenApplicationUpdateSucceeds()
     fetchByApplicationIdReturns(activeApplication.id, activeApplication)
 
     val subsData = List(

@@ -25,8 +25,10 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
@@ -35,8 +37,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
 
 class UpliftJourneyServiceSpec
@@ -50,12 +52,11 @@ class UpliftJourneyServiceSpec
     with LocalUserIdTracker {
 
   trait Setup
-      extends ApplicationServiceMock
-      with ApplicationActionServiceMock
+      extends ApplicationCommandConnectorMockModule
       with ApmConnectorMockModule
       with GetProductionCredentialsFlowServiceMockModule
-      with UpliftJourneyServiceMockModule
-      with SessionServiceMock {
+      with SessionServiceMock
+      with FixedClock {
 
     val sandboxAppId = ApplicationId.random
     val prodAppId    = ApplicationId.random
@@ -66,9 +67,10 @@ class UpliftJourneyServiceSpec
 
     val underTest = new UpliftJourneyService(
       GPCFlowServiceMock.aMock,
-      ApplicationServiceMock.applicationServiceMock,
       ApmConnectorMock.aMock,
-      mockSubmissionsConnector
+      mockSubmissionsConnector,
+      ApplicationCommandConnectorMock.aMock,
+      clock
     )
 
     val appName: String = "app"
@@ -258,8 +260,9 @@ class UpliftJourneyServiceSpec
     "return the new submission when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
-      ApplicationServiceMock.updateApplicationSuccessful()
       when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
+      val cmd             = ApplicationCommands.ChangeApplicationSellResellOrDistribute(Actors.AppCollaborator(loggedInDeveloper.email), instant, sellResellOrDistribute)
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(sampleApp)
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
 

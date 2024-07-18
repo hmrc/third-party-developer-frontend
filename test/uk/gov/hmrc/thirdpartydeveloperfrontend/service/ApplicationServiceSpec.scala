@@ -37,7 +37,6 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -194,41 +193,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
     )
-  }
-
-  "Update" should {
-    val applicationId   = ApplicationId.random
-    val clientId        = ClientId("clientId")
-    val applicationName = "applicationName"
-    val application     = Application(
-      applicationId,
-      clientId,
-      applicationName,
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      None
-    )
-
-    "truncate the description to 250 characters on update request" in new Setup {
-      private val longDescription     = "abcde" * 100
-      private val editApplicationForm = EditApplicationForm(applicationId, "name", Some(longDescription), grantLength = "12 months")
-
-      UpdateApplicationRequest.from(editApplicationForm, application).description.get.length shouldBe 250
-    }
-
-    "update application" in new Setup {
-      private val editApplicationForm = EditApplicationForm(applicationId, "name", grantLength = "12 months")
-      when(mockProductionApplicationConnector.update(eqTo(applicationId), any[UpdateApplicationRequest])(*))
-        .thenReturn(successful(ApplicationUpdateSuccessful))
-
-      private val updateApplicationRequest = UpdateApplicationRequest.from(editApplicationForm, application)
-
-      private val result = await(applicationService.update(updateApplicationRequest))
-      result shouldBe ApplicationUpdateSuccessful
-    }
   }
 
   "Update Privacy Policy Location" should {
