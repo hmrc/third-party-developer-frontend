@@ -60,10 +60,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       http.POST[CreateApplicationRequest, Application](s"$serviceBaseUrl/application", request).map(a => ApplicationCreatedResponse(a.id))
     }
 
-  def update(applicationId: ApplicationId, request: UpdateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[UpdateApplicationRequest, ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}", request).map(throwOr(ApplicationUpdateSuccessful))
-  }
-
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
     if (isEnabled) {
       metrics.record(api) {

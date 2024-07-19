@@ -74,14 +74,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   trait BaseSetup {
     def connector: ThirdPartyApplicationConnector
 
-    lazy val updateApplicationRequest = new UpdateApplicationRequest(
-      ApplicationId.random,
-      connector.environment,
-      "My Application",
-      Some("Description"),
-      Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy"))
-    )
-
     lazy val createApplicationRequest = new CreateApplicationRequest(
       "My Application",
       connector.environment,
@@ -140,26 +132,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       val result = await(connector.create(createApplicationRequest))
 
       result shouldBe ApplicationCreatedResponse(applicationId)
-    }
-  }
-
-  "update application" should {
-    val url = s"/application/${applicationId}"
-
-    "successfully update an application" in new Setup {
-
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(updateApplicationRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-
-      val result = await(connector.update(applicationId, updateApplicationRequest))
-
-      result shouldBe ApplicationUpdateSuccessful
     }
   }
 

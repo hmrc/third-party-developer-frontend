@@ -101,8 +101,6 @@ class EditApplicationNameSpec
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
 
-    givenApplicationUpdateSucceeds()
-
     givenApplicationNameIsValid()
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()

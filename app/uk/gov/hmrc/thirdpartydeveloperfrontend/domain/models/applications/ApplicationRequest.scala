@@ -56,38 +56,3 @@ object CreateApplicationRequest extends ApplicationRequest {
     collaborators = List(Collaborator(user.email, Collaborator.Roles.ADMINISTRATOR, user.developer.userId))
   )
 }
-
-case class UpdateApplicationRequest(
-    id: ApplicationId,
-    environment: Environment,
-    name: String,
-    description: Option[String],
-    access: Access
-  )
-
-object UpdateApplicationRequest extends ApplicationRequest {
-  import play.api.libs.json.{Json, OFormat}
-
-  implicit val format: OFormat[UpdateApplicationRequest] = Json.format[UpdateApplicationRequest]
-
-  def from(form: EditApplicationForm, application: Application) = {
-    val name = if (application.isInTesting || application.deployedTo.isSandbox) {
-      form.applicationName.trim
-    } else {
-      application.name
-    }
-
-    val access = application.access.asInstanceOf[Access.Standard]
-
-    UpdateApplicationRequest(
-      application.id,
-      application.deployedTo,
-      name,
-      normalizeDescription(form.description),
-      access.copy(
-        termsAndConditionsUrl = form.termsAndConditionsUrl.map(_.trim),
-        privacyPolicyUrl = form.privacyPolicyUrl.map(_.trim)
-      )
-    )
-  }
-}

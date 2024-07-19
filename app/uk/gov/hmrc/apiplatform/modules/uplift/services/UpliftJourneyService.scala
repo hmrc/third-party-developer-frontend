@@ -16,33 +16,35 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.services
 
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, SellResellOrDistribute}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
+import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    applicationService: ApplicationService,
     apmConnector: ApmConnector,
-    thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector
+    thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
+    appCmdConnector: ApplicationCommandConnector,
+    val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) extends EitherTHelper[String] {
+  ) extends ClockNow with EitherTHelper[String] {
   import cats.instances.future.catsStdInstancesForFuture
 
   def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
@@ -136,7 +138,7 @@ class UpliftJourneyService @Inject() (
 
         // Need to update the application with possible new value of sellResellOrDistribute,
         // but don't change app apart from that.
-        _ <- liftF(updateSellResellOrDistributeIfNeeded(application, sellResellOrDistribute))
+        _ <- liftF(updateSellResellOrDistributeIfNeeded(application, sellResellOrDistribute, developerSession))
 
         submission <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, developerSession.email), "No submission returned")
       } yield submission
@@ -144,21 +146,12 @@ class UpliftJourneyService @Inject() (
       .value
   }
 
-  private def updateSellResellOrDistributeIfNeeded(application: Application, sellResellOrDistribute: SellResellOrDistribute)(implicit hc: HeaderCarrier) = {
-    def updatedAccess(existing: Application, sellResell: SellResellOrDistribute): Access =
-      existing.access match {
-        case stdAccess: Access.Standard => stdAccess.copy(sellResellOrDistribute = Some(sellResell))
-        case _                          => existing.access
-      }
-
-    def createUpdateApplicationRequest(app: Application, sellResell: SellResellOrDistribute) = UpdateApplicationRequest(
-      app.id,
-      app.deployedTo,
-      app.name,
-      app.description,
-      updatedAccess(app, sellResell)
-    )
-
+  private def updateSellResellOrDistributeIfNeeded(
+      application: Application,
+      sellResellOrDistribute: SellResellOrDistribute,
+      developerSession: DeveloperSession
+    )(implicit hc: HeaderCarrier
+    ) = {
     def existingSellResellOrDistribute = application.access match {
       case Access.Standard(_, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
       case _                                                      => None
@@ -166,7 +159,12 @@ class UpliftJourneyService @Inject() (
 
     // Only save if the value is different
     if (Some(sellResellOrDistribute) != existingSellResellOrDistribute) {
-      applicationService.update(createUpdateApplicationRequest(application, sellResellOrDistribute))
+      val cmd = ApplicationCommands.ChangeApplicationSellResellOrDistribute(
+        Actors.AppCollaborator(developerSession.email),
+        instant(),
+        sellResellOrDistribute
+      )
+      appCmdConnector.dispatch(application.id, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
     } else {
       Future.successful(ApplicationUpdateSuccessful)
     }
