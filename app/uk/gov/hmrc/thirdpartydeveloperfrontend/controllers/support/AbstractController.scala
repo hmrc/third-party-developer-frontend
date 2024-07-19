@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 

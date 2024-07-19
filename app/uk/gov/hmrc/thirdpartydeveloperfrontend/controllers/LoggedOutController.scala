@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets
 import play.api.mvc.{Headers, MessagesControllerComponents, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
 
 trait HeaderEnricher {

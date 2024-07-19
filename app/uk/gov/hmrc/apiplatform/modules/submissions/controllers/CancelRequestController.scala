@@ -34,6 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 
 object CancelRequestController {
   case class DummyForm(dummy: String = "dummy")

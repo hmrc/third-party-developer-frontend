@@ -41,7 +41,8 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalComplete
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{DeveloperSession, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
