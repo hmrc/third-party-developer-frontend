@@ -20,9 +20,7 @@ import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 
 case class DeveloperSession(session: UserSession) {
   lazy val developer: User              = session.developer

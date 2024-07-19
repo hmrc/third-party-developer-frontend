@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.mvc.MessagesControllerComponents
+
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 
 abstract class LoggedInController(mcc: MessagesControllerComponents) extends BaseController(mcc) {
