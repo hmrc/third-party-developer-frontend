@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 
 @this(
@@ -28,12 +28,12 @@
         govukPanel : GovukPanel
 )
 
-@(loggedIn: Option[DeveloperSession], supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[UserSession], supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 
 @devMain(
   title = "Your support request has been received",
-  userFullName = loggedIn.map(_.displayedName),
+  userFullName = loggedIn.map(_.developer.displayedName),
   developerSession = loggedIn,
 ) {
     @govukPanel(Panel(

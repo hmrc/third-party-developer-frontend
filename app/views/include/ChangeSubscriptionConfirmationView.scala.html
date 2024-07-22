@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, Crumb}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
@@ -24,7 +24,7 @@
 
 @(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: ApiVersionNbr, subscribed: Boolean, redirectTo: String, formAction: Call)(
   implicit request: play.api.mvc.Request[Any],
-  loggedIn: DeveloperSession,
+  loggedIn: UserSession,
   messagesProvider: MessagesProvider,
   applicationConfig: ApplicationConfig,
   navSection: String = "subscriptions"

@@ -52,8 +52,8 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
   }
 
   "Server token page" should {
-    val request   = FakeRequest().withCSRFToken
-    val developer = buildUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
+    val request          = FakeRequest().withCSRFToken
+    val developerSession = buildUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
 
     val application = Application(
       ApplicationId.random,
@@ -65,7 +65,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
       grantLength,
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(developer.email.asAdministratorCollaborator),
+      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
       state = ApplicationState(updatedOn = instant),
       checkInformation = None
@@ -73,7 +73,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
     "render" in new Setup {
       val serverTokenView = app.injector.instanceOf[ServerTokenView]
-      val page: Html      = serverTokenView.render(application, randomUUID.toString, request, developer, messagesProvider, appConfig)
+      val page: Html      = serverTokenView.render(application, randomUUID.toString, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

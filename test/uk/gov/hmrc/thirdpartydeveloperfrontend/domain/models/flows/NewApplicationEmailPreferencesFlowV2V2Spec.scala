@@ -28,7 +28,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 
 class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matchers with CombinedApiTestDataHelper with UserBuilder with LocalUserIdTracker {
 
@@ -44,10 +43,9 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
   val applicationId = ApplicationId.random
   val sessionId     = UserSessionId.random
 
-  def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
-    val developer: User      = buildTrackedUser(emailPreferences = emailPreferences)
-    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-    DeveloperSession(session)
+  def developerSession(emailPreferences: EmailPreferences): UserSession = {
+    val developer: User = buildTrackedUser(emailPreferences = emailPreferences)
+    UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
   }
 
   def newApplicationEmailPreferencesFlow(selectedApis: Set[CombinedApi], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlowV2 = {

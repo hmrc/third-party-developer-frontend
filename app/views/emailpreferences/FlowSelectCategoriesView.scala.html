@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
@@ -25,7 +25,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
   "Which API categories are you interested in?"

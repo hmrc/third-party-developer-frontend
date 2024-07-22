@@ -33,7 +33,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -46,7 +45,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
     val sessionId = UserSessionId.random
     val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
-    val developerSession: DeveloperSession = DeveloperSession(session)
+    val developerSession: UserSession = session
 
     val signoutSurveyView      = app.injector.instanceOf[SignoutSurveyView]
     val logoutConfirmationView = app.injector.instanceOf[LogoutConfirmationView]
@@ -159,7 +158,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
           Some(2),
           "no suggestions",
           s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
-          developerSession.email.text,
+          developerSession.developer.email.text,
           isJavascript = true
         )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(

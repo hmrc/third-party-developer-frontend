@@ -16,13 +16,13 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.PluralizeHelper
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 
 @this(devMain: DevMain)
 
-@(isAdminOnProductionApp: Boolean)(implicit messagesProvider: MessagesProvider, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(isAdminOnProductionApp: Boolean)(implicit messagesProvider: MessagesProvider, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   title = "Add 2-step verification",

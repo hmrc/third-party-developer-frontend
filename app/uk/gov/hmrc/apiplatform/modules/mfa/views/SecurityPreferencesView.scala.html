@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaDetail
 @import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.{isAuthAppMfaVerified, isSmsMfaVerified}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesNoItemsView
 @import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
@@ -25,7 +25,7 @@
 
 @this(devMain: DevMain, itemsView: SecurityPreferencesItemsView, noItemsView :SecurityPreferencesNoItemsView)
 
-@(mfaDetails: List[MfaDetail])( implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@(mfaDetails: List[MfaDetail])( implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
     title = "Your security preferences",

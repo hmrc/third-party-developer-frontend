@@ -38,6 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
@@ -46,7 +47,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
@@ -54,7 +54,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with SubmissionsTestData
@@ -116,8 +116,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sessionId            = UserSessionId.random
     val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
-    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-    val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)
+    val testingApp: Application = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -193,7 +192,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     fetchByApplicationIdReturns(appId, testingApp)
     givenApplicationAction(
       ApplicationWithSubscriptionData(testingApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-      loggedInDeveloper,
+      session,
       List(testAPISubscriptionStatus1)
     )
 
@@ -403,7 +402,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-        loggedInDeveloper,
+        session,
         List(testAPISubscriptionStatus1)
       )
       UpliftJourneyServiceMock.CreateNewSubmission.thenReturns(aSubmission)
@@ -440,7 +439,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-        loggedInDeveloper,
+        session,
         List(testAPISubscriptionStatus1)
       )
 

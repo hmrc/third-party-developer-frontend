@@ -98,7 +98,7 @@ class ManageResponsibleIndividualController @Inject() (
         val responsibleIndividualHistoryItems = buildResponsibleIndividualHistoryItems(termsOfUseAcceptances).reverse
         val allowChanges                      = request.role.isAdministrator
         val adminEmails                       = request.application.collaborators.filter(_.isAdministrator).map(_.emailAddress.text).toList
-        val userIsResponsibleIndividual       = request.developerSession.email == responsibleIndividual.emailAddress
+        val userIsResponsibleIndividual       = request.userSession.developer.email == responsibleIndividual.emailAddress
         val viewModel                         = ViewModel(environment, responsibleIndividual.fullName.value, responsibleIndividualHistoryItems, allowChanges, adminEmails, userIsResponsibleIndividual)
         successful(Ok(responsibleIndividualDetailsView(request.application, viewModel)))
       }
@@ -131,7 +131,7 @@ class ManageResponsibleIndividualController @Inject() (
   }
 
   def responsibleIndividualChangeToSelfAction(applicationId: ApplicationId) = canUpdateResponsibleIndividualDetailsAction(applicationId) { implicit request =>
-    applicationService.updateResponsibleIndividual(request.application, request.userId, request.developerSession.displayedName, request.developerSession.email)
+    applicationService.updateResponsibleIndividual(request.application, request.userId, request.userSession.developer.displayedName, request.userSession.developer.email)
       .map(_ => Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfConfirmed(applicationId)))
   }
 
@@ -159,7 +159,7 @@ class ManageResponsibleIndividualController @Inject() (
               ResponsibleIndividualChangeToOtherForm.form().fill(form).withGlobalError("responsible_individual.error.nochange")
             )))
           } else {
-            applicationService.verifyResponsibleIndividual(request.application, request.userId, request.developerSession.displayedName, form.name, form.email.toLaxEmail)
+            applicationService.verifyResponsibleIndividual(request.application, request.userId, request.userSession.developer.displayedName, form.name, form.email.toLaxEmail)
               .map(_ =>
                 Redirect(routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOtherRequested(applicationId)).flashing(flashKeyNewRiName -> form.name)
               )

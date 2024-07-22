@@ -30,14 +30,13 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collabor
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, SubscriptionsBuilder}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
@@ -54,13 +53,13 @@ class SubscriptionsGroupSpec
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-  val loggedInDeveloper: DeveloperSession = buildTrackedUser("givenname.familyname@example.com".toLaxEmail, "Givenname", "Familyname").loggedIn
-  val applicationId: ApplicationId        = ApplicationId.random
-  val clientId: ClientId                  = ClientId("clientId123")
-  val applicationName                     = "Test Application"
-  val apiName                             = "Test API"
-  val apiContext: ApiContext              = ApiContext("test")
-  val apiVersion: ApiVersionNbr           = ApiVersionNbr("1.0")
+  val loggedInDeveloper: UserSession = buildTrackedUser("givenname.familyname@example.com".toLaxEmail, "Givenname", "Familyname").loggedIn
+  val applicationId: ApplicationId   = ApplicationId.random
+  val clientId: ClientId             = ClientId("clientId123")
+  val applicationName                = "Test Application"
+  val apiName                        = "Test API"
+  val apiContext: ApiContext         = ApiContext("test")
+  val apiVersion: ApiVersionNbr      = ApiVersionNbr("1.0")
 
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
@@ -84,7 +83,7 @@ class SubscriptionsGroupSpec
         grantLength,
         environment,
         Some("Description 1"),
-        Set(loggedInDeveloper.email.asCollaborator(role)),
+        Set(loggedInDeveloper.developer.email.asCollaborator(role)),
         state = state,
         access = Access.Standard(
           redirectUris = List("https://red1.example.com", "https://red2.example.con").map(RedirectUri.unsafeApply),
@@ -114,11 +113,11 @@ class SubscriptionsGroupSpec
   }
 
   "subscriptionsGroup" when {
-    val productionState                   = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
+    val productionState                   = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
     val pendingGatekeeperApprovalState    =
-      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
+      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
     val pendingRequesterVerificationState =
-      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
+      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
 
     "logged in as a developer" should {
       val role = Collaborator.Roles.DEVELOPER

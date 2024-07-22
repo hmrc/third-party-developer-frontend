@@ -30,11 +30,11 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, TestApplications}
 
@@ -57,11 +57,11 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     val name: String      = s"$firstName $lastName"
     val developer: User   = standardDeveloper
 
-    val developerSession: DeveloperSession = mock[DeveloperSession]
+    val userSession: UserSession = mock[UserSession]
 
-    when(developerSession.developer).thenReturn(developer)
-    when(developerSession.email).thenReturn(email)
-    when(developerSession.displayedName).thenReturn(name)
+    when(userSession.developer).thenReturn(developer)
+    when(userSession.developer.email).thenReturn(email)
+    when(userSession.developer.displayedName).thenReturn(name)
 
     val mockDeskproConnector = mock[DeskproConnector]
     val underTest            = new RequestProductionCredentials(ApmConnectorMock.aMock, mockSubmissionsConnector, ApplicationCommandConnectorMock.aMock, mockDeskproConnector, clock)
@@ -74,7 +74,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(appAfterCommand)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
-      val result          = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      val result          = await(underTest.requestProductionCredentials(app, userSession, true, false))
 
       result.isRight shouldBe true
       result shouldBe Right(appAfterCommand)
@@ -94,7 +94,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, true))
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, true))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -113,7 +113,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val app    = anApplication(appId = applicationId, developerEmail = email)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, true))
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, true))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -125,7 +125,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val app    = anApplication(appId = applicationId, developerEmail = email)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
-      val result = await(underTest.requestProductionCredentials(app, developerSession, false, false))
+      val result = await(underTest.requestProductionCredentials(app, userSession, false, false))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
@@ -137,7 +137,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val app = anApplication(appId = applicationId, developerEmail = email)
       ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.GenericFailure("App is not in TESTING state"))
 
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, false))
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - App is not in TESTING state")
 
@@ -149,7 +149,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(None))
 
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, false))
 
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}")
@@ -161,7 +161,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val app = anApplication(appId = applicationId, developerEmail = email)
       ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.DuplicateApplicationName("New app name"))
 
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, false))
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - An application already exists for the name 'New app name' ")
 
@@ -172,7 +172,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val app = anApplication(appId = applicationId, developerEmail = email)
       ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.InvalidApplicationName("Rude word name"))
 
-      val result = await(underTest.requestProductionCredentials(app, developerSession, true, false))
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, false))
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - The application name 'Rude word name' contains words that are prohibited")
 

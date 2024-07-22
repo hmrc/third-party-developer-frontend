@@ -29,7 +29,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.LoggedInRequestTestHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
@@ -55,7 +54,7 @@ class ActionBuildersSpec extends BaseControllerSpec
     with LoggedInRequestTestHelper {
 
   trait Setup {
-    val loggedInDeveloper = DeveloperSession(session)
+    val loggedInDeveloper = session
 
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 

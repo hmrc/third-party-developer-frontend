@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -41,7 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken, _}
 
 class DetailsViewSpec
@@ -70,10 +69,10 @@ class DetailsViewSpec
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", instant)))
   val adminEmail          = "admin@example.com".toLaxEmail
 
-  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
+  implicit val loggedIn: UserSession = JoeBloggs.loggedIn
 
   trait LoggedInUserIsAdmin {
-    implicit val loggedIn: DeveloperSession = adminDeveloper.loggedIn
+    implicit val loggedIn: UserSession = adminDeveloper.loggedIn
   }
 
   "Application details view" when {

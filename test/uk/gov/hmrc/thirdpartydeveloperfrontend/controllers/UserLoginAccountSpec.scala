@@ -45,7 +45,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TicketCreated, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{AppsByTeamMemberServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
@@ -66,7 +65,6 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val sessionWithAuthAppMfa                        = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developerWithAuthAppMfa)
     val sessionWithSmsMfa                            = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developerWithSmsMfa)
     val sessionContainsDeveloperWithAuthAppAndSmsMfa = sessionWithAuthAppMfa.copy(developer = developerWithAuthAppAndSmsMfa)
-    val user                                         = DeveloperSession(sessionWithAuthAppMfa)
     val emailFieldName: String                       = "emailaddress"
     val passwordFieldName: String                    = "password"
     val userPassword                                 = "Password1!"
@@ -130,25 +128,25 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
           None,
           grantLength,
           Environment.PRODUCTION,
-          collaborators = Set(user.email.asAdministratorCollaborator),
+          collaborators = Set(sessionWithAuthAppMfa.developer.email.asAdministratorCollaborator),
           subscriptions = Set.empty
         )
       )
 
     val sessionParams: Seq[(String, String)] = Seq(
-      "userId"    -> user.developer.userId.value.toString,
+      "userId"    -> sessionWithAuthAppMfa.developer.userId.value.toString,
       "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
     )
 
     val testRequest = FakeRequest()
       .withSession(sessionParams
-        :+ "userId"       -> user.developer.userId.value.toString
-        :+ "emailAddress" -> user.email.text :+ "nonce" -> nonce: _*)
+        :+ "userId"       -> sessionWithAuthAppMfa.developer.userId.value.toString
+        :+ "emailAddress" -> sessionWithAuthAppMfa.developer.email.text :+ "nonce" -> nonce: _*)
 
     def mockAuthenticate(email: LaxEmailAddress, password: String, result: Future[UserAuthenticationResponse], resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
 
       when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(*))
-        .thenReturn(result.map(x => (x, user.developer.userId)))
+        .thenReturn(result.map(x => (x, sessionWithAuthAppMfa.developer.userId)))
     }
 
     def mockAuthenticateAccessCode(email: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId, result: Future[UserSession]): Unit =
@@ -174,13 +172,13 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val userAuthRespNotRequiringMfa = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(sessionWithAuthAppMfa))
 
     def testWhenMfaMandatedIs(mfaMandated: Boolean) = {
-      mockAuthenticate(user.email, userPassword, successful(userAuthRespNotRequiringMfa), resultShowAdminMfaMandateMessage = successful(mfaMandated))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespNotRequiringMfa), resultShowAdminMfaMandateMessage = successful(mfaMandated))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       val result = underTest.authenticate()(request)
 
@@ -190,7 +188,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
   }
@@ -239,13 +237,13 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "authenticate with username and password" should {
 
     "display list applications page after successfully logging in with MFA enabled but access code not required" in new SetupWithUserAuthRespRequiringMfaAndMfaEnabled {
-      mockAuthenticate(user.email, userPassword, successful(userAuthRespNotRequiringMfaAndMfaEnabled), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespNotRequiringMfaAndMfaEnabled), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = underTest.authenticate()(request)
 
@@ -255,7 +253,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -268,13 +266,13 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "display the 2-step start page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthResRequiringMfaEnablement {
-      mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaEnablement), resultShowAdminMfaMandateMessage = successful(true))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaEnablement), resultShowAdminMfaMandateMessage = successful(true))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = underTest.authenticate()(request)
 
@@ -284,14 +282,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "display the enter access code page after successfully logging in with MFA configured as AUTHENTICATOR_APP" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppMfa))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -301,15 +299,15 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "display the enter access code page after successfully logging in with MFA configured as SMS" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithSmsMfa))
-      TPDMFAMock.SendSms.thenReturn(user.developer.userId, smsMfaId)(flag = true)
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithSmsMfa))
+      TPDMFAMock.SendSms.thenReturn(sessionWithAuthAppMfa.developer.userId, smsMfaId)(flag = true)
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -319,15 +317,15 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return error when MFA configured as SMS and it fails to send the sms" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithSmsMfa))
-      TPDMFAMock.SendSms.thenReturn(user.developer.userId, smsMfaId)(flag = false)
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithSmsMfa))
+      TPDMFAMock.SendSms.thenReturn(sessionWithAuthAppMfa.developer.userId, smsMfaId)(flag = false)
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -335,14 +333,14 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "display select MFA method page after successful login with both MFA methods configured" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
-        .withSession(("userId" -> user.developer.userId.value.toString) +: sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withSession(("userId" -> sessionWithAuthAppMfa.developer.userId.value.toString) +: sessionParams: _*)
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -352,13 +350,13 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "display the login page when fetch developer fails" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(None)
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -368,12 +366,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "default case" in new SetupWithUserAuthRespWithInconsistentState {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespWithInconsistentState), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespWithInconsistentState), successful(false))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -384,21 +382,21 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, "wrongPassword1!"))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, "wrongPassword1!"))
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidPassword),
-        eqTo(Map("developerEmail" -> user.email.text))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
 
     "return the login page when the password is invalid" in new Setup {
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, " "))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, " "))
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -424,26 +422,26 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return to the login page when the account is unverified" in new Setup {
-      mockAuthenticate(user.developer.email, userPassword, failed(new UnverifiedAccount), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, failed(new UnverifiedAccount), successful(false))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe FORBIDDEN
       contentAsString(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
-      await(result).session(request).get("email").mkString shouldBe user.email.text
+      await(result).session(request).get("email").mkString shouldBe sessionWithAuthAppMfa.developer.email.text
     }
 
     "display the Account locked page when the account is locked" in new Setup {
-      mockAuthenticate(user.developer.email, userPassword, failed(new LockedAccount), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, failed(new LockedAccount), successful(false))
 
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams: _*)
-        .withFormUrlEncodedBody((emailFieldName, user.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -451,7 +449,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You've entered details that do not match our records. Reset your password to sign in.")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToLockedAccount),
-        eqTo(Map("developerEmail" -> user.email.text))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
   }
@@ -459,7 +457,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "selectLoginAccessPage" should {
 
     "display both SMS and Authenticator App MFA methods to select for login" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = FakeRequest()
@@ -481,7 +479,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "selectLoginMfaAction" should {
 
     "return Authenticator App access code page when mfa method is AUTHENTICATOR_APP" in new Setup {
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
@@ -493,8 +491,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return Sms access code page when mfa method is SMS" in new Setup {
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
-      TPDMFAMock.SendSms.thenReturn(user.developer.userId, smsMfaId)(flag = true)
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+      TPDMFAMock.SendSms.thenReturn(sessionWithAuthAppMfa.developer.userId, smsMfaId)(flag = true)
 
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", smsMfaId.value.toString))
@@ -506,7 +504,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return error when user is not found" in new Setup {
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(None)
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(None)
 
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
@@ -518,7 +516,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return error when mfaId is not valid" in new Setup {
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", ""))
@@ -530,7 +528,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return error when mfaDetail not found against the mfaId" in new Setup {
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString))
@@ -545,9 +543,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "loginAccessCodePage" should {
 
     "display the enter access code page for Authenticator App" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithAuthAppMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppMfa))
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -560,9 +558,9 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "display the enter access code page for SMS" in new SetupWithUserAuthRespRequiringMfaAccessCode {
-      mockAuthenticate(user.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
+      mockAuthenticate(sessionWithAuthAppMfa.developer.email, userPassword, successful(userAuthRespRequiringMfaAccessCode), successful(false))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
-      TPDMock.FetchDeveloper.thenReturn(user.developer.userId)(Some(developerWithSmsMfa))
+      TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithSmsMfa))
 
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
@@ -581,7 +579,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "authenticateAccessCode" should {
 
     "return the Sms Setup Reminder page when the credentials are correct and mfa method is AUTHENTICATOR_APP" in new Setup {
-      mockAuthenticateAccessCode(user.email, accessCode, nonce, authAppMfaId, successful(sessionWithAuthAppMfa))
+      mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, authAppMfaId, successful(sessionWithAuthAppMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
@@ -593,12 +591,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
     "return the AuthApp Setup Reminder page when the credentials are correct and mfa method is SMS" in new Setup {
-      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(sessionWithSmsMfa))
+      mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, smsMfaId, successful(sessionWithSmsMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
@@ -610,7 +608,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -624,7 +622,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode),
-        eqTo(Map("developerEmail" -> user.email.text))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
 
@@ -639,7 +637,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return the manage Applications page when the credentials are correct and mfa method is SMS" in new Setup {
-      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(sessionWithAuthAppMfa))
+      mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, smsMfaId, successful(sessionWithAuthAppMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
@@ -651,7 +649,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -665,7 +663,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode),
-        eqTo(Map("developerEmail" -> user.email.text))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
 
@@ -680,7 +678,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return the manage Applications page when user have both MFA methods setup and selected mfa method is SMS" in new Setup {
-      mockAuthenticateAccessCode(user.email, accessCode, nonce, smsMfaId, successful(sessionContainsDeveloperWithAuthAppAndSmsMfa))
+      mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, smsMfaId, successful(sessionContainsDeveloperWithAuthAppAndSmsMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
@@ -692,7 +690,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> user.email.text, "developerFullName" -> user.displayedName))
+        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
   }
@@ -727,12 +725,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return 2-step removal request completed page on submission" in new Setup {
 
-      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> user.email.text: _*)
+      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> sessionWithAuthAppMfa.developer.email.text: _*)
 
       val userId = UserId.random
-      TPDMock.FindUserId.thenReturn(user.email)(userId)
+      TPDMock.FindUserId.thenReturn(sessionWithAuthAppMfa.developer.email)(userId)
       TPDMock.FetchDeveloper.thenReturn(userId)(Some(developerWithAuthAppMfa))
-      when(underTest.applicationService.request2SVRemoval(*[Option[UserId]], *, eqTo(user.email))(*))
+      when(underTest.applicationService.request2SVRemoval(*[Option[UserId]], *, eqTo(sessionWithAuthAppMfa.developer.email))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
@@ -742,7 +740,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       body should include("We have received your request to remove 2-step verification from your account")
       body should include("Request submitted")
-      verify(underTest.applicationService).request2SVRemoval(*[Option[UserId]], *, eqTo(user.email))(*)
+      verify(underTest.applicationService).request2SVRemoval(*[Option[UserId]], *, eqTo(sessionWithAuthAppMfa.developer.email))(*)
     }
   }
 
@@ -803,7 +801,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   "get2svRecommendationPage" when {
     "a user for whom MFA will be mandated in the future logs in" should {
       "show the MFA recommendation" in new LoggedIn {
-        fetchProductionSummariesByAdmin(user.developer.userId, applicationsWhereUserIsAdminInProduction)
+        fetchProductionSummariesByAdmin(sessionWithAuthAppMfa.developer.userId, applicationsWhereUserIsAdminInProduction)
 
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 
@@ -817,7 +815,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "a user for whom MFA is already mandated logs in" should {
       "not show MFA recommendation" in new LoggedIn {
-        fetchProductionSummariesByAdmin(user.developer.userId, applicationsWhereUserIsAdminInProduction)
+        fetchProductionSummariesByAdmin(sessionWithAuthAppMfa.developer.userId, applicationsWhereUserIsAdminInProduction)
 
         private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
 

@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
@@ -36,7 +36,7 @@
   govukCharacterCount : GovukCharacterCount
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[SupportDetailsForm], supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[UserSession], form: Form[SupportDetailsForm], supportFlow: SupportFlow)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @makingACallHeading={
     <h1 class="govuk-heading-l govuk-!-margin-bottom-6">Tell us about the @{supportFlow.api.getOrElse("")} API call you need help with</h1>
@@ -102,7 +102,7 @@
 @devMain(
   form,
   title = "Which best describes what you need help with?",
-  userFullName = loggedIn.map(_.displayedName),
+  userFullName = loggedIn.map(_.developer.displayedName),
   developerSession = None,
     back = BackButtonWithJavaScript,
 ) {
@@ -163,7 +163,7 @@
           content = Text("Full name")
         ),
         classes = "govuk-!-width-full",
-        value = form("fullName").value.orElse(loggedIn.map(_.displayedName)),
+        value = form("fullName").value.orElse(loggedIn.map(_.developer.displayedName)),
         errorMessage = form.error("fullName").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
@@ -183,7 +183,7 @@
           )
         ),
         classes = "govuk-!-width-full",
-        value = form("emailAddress").value.orElse(loggedIn.map(_.email.text)),
+        value = form("emailAddress").value.orElse(loggedIn.map(_.developer.email.text)),
         errorMessage = form.error("emailAddress").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )

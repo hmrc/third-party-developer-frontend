@@ -25,7 +25,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullNam
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.{SampleUserSession, UserTestData}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class GetProductionCredentialsFlowServiceSpec
     extends AsyncHmrcSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder
@@ -44,7 +44,7 @@ class GetProductionCredentialsFlowServiceSpec
     with LocalUserIdTracker with DeveloperSessionBuilder with UserTestData {
 
   trait Setup extends MockitoSugar {
-    val loggedInDeveloper        = standardDeveloper.loggedIn
+    val userSession              = standardDeveloper.loggedIn
     val underTest                = new GetProductionCredentialsFlowService(FlowRepositoryMock.aMock)
     val sessionId                = UserSessionId.random
     val sellResellOrDistribute   = SellResellOrDistribute("answer")
@@ -57,8 +57,8 @@ class GetProductionCredentialsFlowServiceSpec
 
   "fetchFlow" should {
     "return the correct credentials flow if one already exists" in new Setup {
-      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[GetProductionCredentialsFlow](loggedInDeveloper.session.sessionId)(flow)
-      val result = await(underTest.fetchFlow(loggedInDeveloper))
+      FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[GetProductionCredentialsFlow](userSession.sessionId)(flow)
+      val result = await(underTest.fetchFlow(userSession))
 
       result shouldBe flow
     }
@@ -66,9 +66,9 @@ class GetProductionCredentialsFlowServiceSpec
     "return a new credentials flow if one does not already exist" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[GetProductionCredentialsFlow]
       FlowRepositoryMock.SaveFlow.thenReturnSuccess
-      val result = await(underTest.fetchFlow(loggedInDeveloper))
+      val result = await(underTest.fetchFlow(userSession))
 
-      result.sessionId shouldBe loggedInDeveloper.session.sessionId
+      result.sessionId shouldBe userSession.sessionId
     }
   }
 
@@ -77,7 +77,7 @@ class GetProductionCredentialsFlowServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess
 
-      val result = await(underTest.storeSellResellOrDistribute(sellResellOrDistribute, loggedInDeveloper))
+      val result = await(underTest.storeSellResellOrDistribute(sellResellOrDistribute, userSession))
 
       result.sellResellOrDistribute shouldBe Some(sellResellOrDistribute)
     }
@@ -87,7 +87,7 @@ class GetProductionCredentialsFlowServiceSpec
     "return the correct details" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
 
-      val result = await(underTest.findSellResellOrDistribute(loggedInDeveloper))
+      val result = await(underTest.findSellResellOrDistribute(userSession))
 
       result shouldBe Some(sellResellOrDistribute)
     }
@@ -98,7 +98,7 @@ class GetProductionCredentialsFlowServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess
 
-      val result = await(underTest.storeApiSubscriptions(apiSubscriptions, loggedInDeveloper))
+      val result = await(underTest.storeApiSubscriptions(apiSubscriptions, userSession))
 
       result.apiSubscriptions shouldBe Some(apiSubscriptions)
     }
@@ -107,9 +107,9 @@ class GetProductionCredentialsFlowServiceSpec
   "resetFlow" should {
     "remove details correctly" in new Setup {
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn(flow)
-      FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(loggedInDeveloper.session.sessionId, flowType)
+      FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(userSession.sessionId, flowType)
 
-      val result = await(underTest.resetFlow(loggedInDeveloper))
+      val result = await(underTest.resetFlow(userSession))
 
       result shouldBe flow
     }

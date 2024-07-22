@@ -17,13 +17,13 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[MobileNumberForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[MobileNumberForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig)
 
 @devMain(
   form,

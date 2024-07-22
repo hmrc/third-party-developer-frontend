@@ -23,11 +23,10 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppSetupCompletedView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class AuthAppSetupCompletedViewSpec extends CommonViewSpec
@@ -38,7 +37,7 @@ class AuthAppSetupCompletedViewSpec extends CommonViewSpec
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession                  = JoeBloggs.loggedIn
+  implicit val loggedIn: UserSession                       = JoeBloggs.loggedIn
   val authAppSetupCompletedView: AuthAppSetupCompletedView = app.injector.instanceOf[AuthAppSetupCompletedView]
 
   "AuthAppSetupCompletedView" should {

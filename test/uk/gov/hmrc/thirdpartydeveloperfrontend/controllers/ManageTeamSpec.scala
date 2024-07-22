@@ -34,11 +34,11 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
@@ -47,7 +47,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRF
 
 class ManageTeamSpec
     extends BaseControllerSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -81,8 +81,6 @@ class ManageTeamSpec
     val sessionId            = UserSessionId.random
     val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
-    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     CollaboratorServiceMock.AddTeamMember.succeeds()
@@ -98,9 +96,7 @@ class ManageTeamSpec
         additionalTeamMembers: Seq[Collaborator] = Seq()
       ): Application = {
 
-      val developerSession = DeveloperSession(session)
-
-      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(developerSession.email.asCollaborator(userRole))
+      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(session.developer.email.asCollaborator(userRole))
       val application   = aStandardApplication.copy(
         id = appId,
         collaborators = collaborators,
@@ -108,7 +104,7 @@ class ManageTeamSpec
         lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       )
 
-      givenApplicationAction(application, developerSession)
+      givenApplicationAction(application, session)
       fetchCredentialsReturns(application, tokens())
 
       application
@@ -177,7 +173,7 @@ class ManageTeamSpec
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
 
-      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, loggedInDeveloper.email)
+      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, session.developer.email)
     }
 
     "check if team member already exists on the application" in new Setup {
@@ -189,7 +185,7 @@ class ManageTeamSpec
 
       status(result) shouldBe BAD_REQUEST
 
-      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, loggedInDeveloper.email)
+      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, session.developer.email)
     }
 
     "check if application exists" in new Setup {
@@ -201,7 +197,7 @@ class ManageTeamSpec
 
       status(result) shouldBe NOT_FOUND
 
-      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, loggedInDeveloper.email)
+      CollaboratorServiceMock.AddTeamMember.verifyCalledFor(email, role, session.developer.email)
     }
 
     "reject invalid email address" in new Setup {
@@ -297,7 +293,7 @@ class ManageTeamSpec
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.ManageTeam.manageTeam(appId, None).url)
 
-        CollaboratorServiceMock.RemoveTeamMember.verifyCalledFor(application, teamMemberEmail, loggedInDeveloper.email)
+        CollaboratorServiceMock.RemoveTeamMember.verifyCalledFor(application, teamMemberEmail, session.developer.email)
       }
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
@@ -372,7 +368,7 @@ class ManageTeamSpec
 
         val app: Application = aStandardPendingApprovalApplication(developer.email)
 
-        givenApplicationAction(app, loggedInDeveloper)
+        givenApplicationAction(app, session)
 
         val result: Future[Result] = executeAction
 

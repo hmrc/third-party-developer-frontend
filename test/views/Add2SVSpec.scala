@@ -28,22 +28,21 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with UserBuilder with DeveloperSessionBuilder with LocalUserIdTracker with UserTestData {
 
   val add2SVView = app.injector.instanceOf[Add2SVView]
 
-  implicit val loggedInDeveloper: DeveloperSession          = adminDeveloper.loggedIn
+  implicit val loggedInDeveloper: UserSession               = adminDeveloper.loggedIn
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-  val developer                                   = buildTrackedUser()
-  val session                                     = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
-  implicit val developerSession: DeveloperSession = DeveloperSession(session)
+  val developer                         = buildTrackedUser()
+  val session                           = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
+  implicit val userSession: UserSession = session
 
   private def renderPage(isAdminOnProductionApp: Boolean): Html = {
-    add2SVView.render(isAdminOnProductionApp, messagesProvider, developerSession, request, appConfig)
+    add2SVView.render(isAdminOnProductionApp, messagesProvider, userSession, request, appConfig)
   }
 
   "I Cant do this right now" should {

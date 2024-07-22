@@ -30,8 +30,9 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.TermsOfUseResponsesView
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationStateHelper, SampleApplication, SampleDeveloperSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationStateHelper, SampleApplication}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
@@ -41,7 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class TermsOfUseResponsesControllerSpec
     extends BaseControllerSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -83,7 +84,7 @@ class TermsOfUseResponsesControllerSpec
           asSubscriptions(List(aSubscription)),
           asFields(List.empty)
         ),
-        loggedInDeveloper,
+        userSession,
         List(aSubscription)
       )
 

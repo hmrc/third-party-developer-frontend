@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSe
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -45,7 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class ManageApplicationsSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -90,7 +91,7 @@ class ManageApplicationsSpec
   "manageApps" should {
 
     "return the manage Applications page with the user logged in" in new Setup {
-      val prodSummary = ApplicationSummary.from(sampleApp, loggedInDeveloper.developer.userId)
+      val prodSummary = ApplicationSummary.from(sampleApp, userSession.developer.userId)
       aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
@@ -101,7 +102,7 @@ class ManageApplicationsSpec
       private val result = manageApplicationsController.manageApps()(loggedInRequest)
 
       status(result) shouldBe OK
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include("App name 1")
       contentAsString(result) should not include "Sign in"

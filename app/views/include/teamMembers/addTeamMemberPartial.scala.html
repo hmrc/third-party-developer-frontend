@@ -16,10 +16,10 @@
 
 @import views.html.include.fieldError
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@(app: Application, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: DeveloperSession, submitText: String, showCancel: Boolean)(
+@(app: Application, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: UserSession, submitText: String, showCancel: Boolean)(
   implicit request: play.api.mvc.Request[Any], messages: Messages
 )
 

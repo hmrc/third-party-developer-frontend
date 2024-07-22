@@ -15,14 +15,14 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.emailpreferences.EmailPreferencesSummaryViewData
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 @this(devMain: DevMain)
 
-@(viewData: EmailPreferencesSummaryViewData)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(viewData: EmailPreferencesSummaryViewData)(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
   if(viewData.unsubscribed) "You are unsubscribed" else "Manage your Developer Hub email preferences"

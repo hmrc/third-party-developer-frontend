@@ -50,7 +50,7 @@ class FlowSelectCategoriesViewSpec extends CommonViewSpec
     val developerSessionWithoutEmailPreferences = standardDeveloper.loggedIn
 
     val emailPreferencesFlow                                  =
-      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
+      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.sessionId, Set("api1", "api2"), Map.empty, Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectCategoriesView = app.injector.instanceOf[FlowSelectCategoriesView]

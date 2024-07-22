@@ -34,13 +34,12 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{I
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with UserBuilder with FixedClock {
@@ -51,7 +50,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val applicationId: ApplicationId                          = ApplicationId.random
     val clientId: ClientId                                    = ClientId("std-client-id")
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val loggedIn: DeveloperSession                   = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
+    implicit val loggedIn: UserSession                        = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
 
     val standardApplication: Application =
       Application(applicationId, clientId, "name", instant, Some(instant), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Standard())
@@ -103,7 +102,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
-      val application: Application = standardApplication.copy(collaborators = Set(loggedIn.email.asAdministratorCollaborator), state = productionState)
+      val application: Application = standardApplication.copy(collaborators = Set(loggedIn.developer.email.asAdministratorCollaborator), state = productionState)
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -113,7 +112,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
       val application: Application =
-        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator), state = productionState)
+        standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.developer.email.asDeveloperCollaborator), state = productionState)
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -122,8 +121,8 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include link to push secrets when the application has PPNS fields and the user is an admin or the application is sandbox" in new Setup {
-      val prodAppAsAdmin: Application  = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
-      val sandboxAppAsDev: Application = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
+      val prodAppAsAdmin: Application  = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.developer.email.asAdministratorCollaborator))
+      val sandboxAppAsDev: Application = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.developer.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document  =
         Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
@@ -135,9 +134,9 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "not include link to push secrets when the application does not have PPNS fields, or it does, but the user is only a developer for a production app" in new Setup {
-      val prodAppAsAdmin: Application  = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asAdministratorCollaborator))
-      val sandboxAppAsDev: Application = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
-      val prodAppAsDev: Application    = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.email.asDeveloperCollaborator))
+      val prodAppAsAdmin: Application  = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.developer.email.asAdministratorCollaborator))
+      val sandboxAppAsDev: Application = standardApplication.copy(deployedTo = Environment.SANDBOX, collaborators = Set(loggedIn.developer.email.asDeveloperCollaborator))
+      val prodAppAsDev: Application    = standardApplication.copy(deployedTo = Environment.PRODUCTION, collaborators = Set(loggedIn.developer.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document  =
         Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)

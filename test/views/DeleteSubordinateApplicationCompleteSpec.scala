@@ -58,8 +58,8 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
         grantLength,
         Environment.SANDBOX,
         Some("Description 1"),
-        Set(loggedInDeveloper.email.asAdministratorCollaborator),
-        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
+        Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
+        state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
         access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
       )
 

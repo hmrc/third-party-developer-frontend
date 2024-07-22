@@ -26,10 +26,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, MaybeUserRequest, UserRequest, routes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
@@ -40,7 +39,7 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
   val sessionService: SessionService
 
   object DeveloperSessionFilter {
-    type Type = DeveloperSession => Boolean
+    type Type = UserSession => Boolean
 
     val alwaysTrueFilter: DeveloperSessionFilter.Type         = _ => true
     val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LOGGED_IN
@@ -58,10 +57,10 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
         OptionT(loadSession)
           .filter(filter)
           .toRight(loginRedirect)
-          .flatMap(ds => {
+          .flatMap(userSession => {
             EitherT.liftF[Future, Result, UserRequest[A]](
-              sessionService.updateUserFlowSessions(ds.session.sessionId)
-                .map(_ => new UserRequest(ds, msgRequest))
+              sessionService.updateUserFlowSessions(userSession.sessionId)
+                .map(_ => new UserRequest(userSession, msgRequest))
             )
           })
           .value
@@ -86,17 +85,15 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
     result.discardingCookies(DiscardingCookie(devicecookieName))
   }
 
-  private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[DeveloperSession]] = {
+  private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[UserSession]] = {
     (for {
       sessionId <- extractUserSessionIdFromCookie(request)
     } yield fetchDeveloperSession(sessionId))
       .getOrElse(Future.successful(None))
   }
 
-  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[DeveloperSession]] = {
-    sessionService
-      .fetch(sessionId)
-      .map(maybeSession => maybeSession.map(DeveloperSession(_)))
+  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[UserSession]] = {
+    sessionService.fetch(sessionId)
   }
 }
 

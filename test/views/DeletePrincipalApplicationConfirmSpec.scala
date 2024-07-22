@@ -58,8 +58,8 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
+      Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
+      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
       access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 

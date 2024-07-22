@@ -36,7 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, S
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
@@ -44,7 +44,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInCo
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction.{CREATE, REMOVE}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
@@ -137,7 +136,7 @@ class MfaController @Inject() (
 
   def setupAuthApp: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
     thirdPartyDeveloperMfaConnector.createMfaAuthApp(request.userId).map(registerAuthAppResponse => {
-      val uri   = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.developerSession.email.text)
+      val uri   = otpAuthUri(registerAuthAppResponse.secret.toLowerCase, "HMRC Developer Hub", request.userSession.developer.email.text)
       val qrImg = qrCode.generateDataImageBase64(uri.toString)
       Ok(qrCodeView(registerAuthAppResponse.secret.toLowerCase().grouped(4).mkString(" "), qrImg, registerAuthAppResponse.mfaId))
     })
@@ -310,7 +309,7 @@ class MfaController @Inject() (
       mfaIdToVerify: MfaId,
       mfaIdForRemoval: Option[MfaId]
     )(implicit request: Request[_],
-      loggedIn: DeveloperSession
+      loggedIn: UserSession
     ): Future[Result] = {
     mfaIdForRemoval match {
       case Some(mfaId) =>

@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
 @this(
@@ -30,11 +30,11 @@
   govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[DeveloperSession], backUri: String, signInUri: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[UserSession], backUri: String, signInUri: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
   title = "Adding team members to an application",
-  userFullName = loggedIn.map(_.displayedName),
+  userFullName = loggedIn.map(_.developer.displayedName),
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {

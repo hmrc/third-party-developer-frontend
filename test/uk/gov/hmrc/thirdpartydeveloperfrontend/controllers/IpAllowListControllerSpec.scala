@@ -38,7 +38,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -86,11 +85,10 @@ class IpAllowListControllerSpec
     val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
     val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
 
-    def givenTheUserIsLoggedInAs(user: User): DeveloperSession = {
+    def givenTheUserIsLoggedInAs(user: User): UserSession = {
       val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      DeveloperSession(session)
     }
 
     def verifyIpAllowlistSurveyIsPresent(body: String): Assertion = {

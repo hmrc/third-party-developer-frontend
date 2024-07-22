@@ -21,14 +21,14 @@
 @import include.teamMembers._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 @(applicationView: ApplicationViewModel, role: Collaborator.Role, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
-        implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: DeveloperSession)
+        implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: UserSession)
 
 @app = @{applicationView.application}
 

@@ -173,7 +173,7 @@ class Details @Inject() (
 
   private def deriveCommands(form: EditApplicationForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
     val application             = request.application
-    val actor                   = Actors.AppCollaborator(request.userRequest.developerSession.email)
+    val actor                   = Actors.AppCollaborator(request.userRequest.developer.email)
     val access: Access.Standard = (application.access match { case s: Access.Standard => s }) // Only standard apps attempt this function
 
     val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
@@ -368,11 +368,11 @@ class Details @Inject() (
               for {
                 _ <-
                   applicationService.requestProductonApplicationNameChange(
-                    request.developerSession.developer.userId,
+                    request.userSession.developer.userId,
                     application,
                     newApplicationName,
-                    request.developerSession.displayedName,
-                    request.developerSession.email
+                    request.userSession.developer.displayedName,
+                    request.userSession.developer.email
                   )
               } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), newApplicationName))
 

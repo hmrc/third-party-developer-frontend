@@ -15,7 +15,7 @@
  *@
 
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import play.api.mvc.Call
@@ -24,7 +24,7 @@
 
 @this(devMain: DevMain)(implicit applicationConfig: ApplicationConfig)
 
-@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ViewErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: DeveloperSession)
+@(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ViewErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: UserSession)
 
 @pageHeading = @{ question.wording.value }
 

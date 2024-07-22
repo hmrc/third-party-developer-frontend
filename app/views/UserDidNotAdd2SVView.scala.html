@@ -15,13 +15,13 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.html.include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
 
-@()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@()(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   title = "2-step verification not set",

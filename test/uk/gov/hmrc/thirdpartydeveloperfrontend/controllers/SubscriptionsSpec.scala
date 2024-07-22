@@ -36,6 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
@@ -51,7 +52,7 @@ class SubscriptionsSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with UserBuilder
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplications
     with SubscriptionTestHelperSugar
     with FixedClock {
@@ -111,21 +112,21 @@ class SubscriptionsSpec
   "manage subscriptions" should {
     "return the ROPC page for a ROPC app" in new Setup {
       fetchByApplicationIdReturns(appId, ropcApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
       val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId, privilegedApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
       val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
       val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
@@ -135,21 +136,21 @@ class SubscriptionsSpec
   "add app subscriptions" should {
     "return the ROPC page for a ROPC app" in new Setup {
       fetchByApplicationIdReturns(appId, ropcApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
       fetchByApplicationIdReturns(appId, privilegedApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
       fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
@@ -159,7 +160,7 @@ class SubscriptionsSpec
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
       fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
+      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(subsData), asFields(subsData)), userSession, subsData)
 
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -171,7 +172,7 @@ class SubscriptionsSpec
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
       fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(subsData), asFields(subsData)), loggedInDeveloper, subsData)
+      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(subsData), asFields(subsData)), userSession, subsData)
 
       val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
       status(result) shouldBe OK
@@ -190,7 +191,7 @@ class SubscriptionsSpec
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
 
         val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
 
@@ -207,7 +208,7 @@ class SubscriptionsSpec
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.SubscribeToApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -227,7 +228,7 @@ class SubscriptionsSpec
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -247,7 +248,7 @@ class SubscriptionsSpec
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -268,7 +269,7 @@ class SubscriptionsSpec
         ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.SubscribeToApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -289,7 +290,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -310,7 +311,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
@@ -343,7 +344,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -372,7 +373,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isFalse(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -390,7 +391,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -425,7 +426,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
@@ -443,7 +444,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -464,9 +465,9 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isFalse(app.id, apiIdentifier)
-        SubscriptionsServiceMock.RequestApiSubscription.succeedsFor(loggedInDeveloper, app, apiName, apiVersion)
+        SubscriptionsServiceMock.RequestApiSubscription.succeedsFor(userSession, app, apiName, apiVersion)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
@@ -484,9 +485,9 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
-        SubscriptionsServiceMock.RequestApiUnsubscribe.succeedsFor(loggedInDeveloper, app, apiName, apiVersion)
+        SubscriptionsServiceMock.RequestApiUnsubscribe.succeedsFor(userSession, app, apiName, apiVersion)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
@@ -504,7 +505,7 @@ class SubscriptionsSpec
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -537,7 +538,7 @@ class SubscriptionsSpec
 
       when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(userSession)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(List.empty), asFields(List.empty)), loggedInDeveloper, List.empty)
+      givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
 
       val request: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest("GET", s"developer/applications/$appId/subscribe?context=${apiContext.value}&version=${apiVersion.value}&accessType=$apiAccessType&tab=subscriptions")

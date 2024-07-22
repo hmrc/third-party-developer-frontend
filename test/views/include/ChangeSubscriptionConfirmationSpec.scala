@@ -68,8 +68,8 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
+    Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
     access =
       Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )

@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.helper.EnvironmentNameService
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ManageApplicationsViewModel, ApplicationSummary}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
@@ -29,7 +29,7 @@
 @this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
 
 
-@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
+@(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
 
 @principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
 @subordinateWording = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}

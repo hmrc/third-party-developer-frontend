@@ -46,7 +46,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UserAuthenticationResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
@@ -57,8 +56,8 @@ trait Auditing {
     auditService.audit(auditAction, data)
   }
 
-  def audit(auditAction: AuditAction, developer: DeveloperSession)(implicit hc: HeaderCarrier): Future[AuditResult] = {
-    auditService.audit(auditAction, Map("developerEmail" -> developer.email.text, "developerFullName" -> developer.displayedName))
+  def audit(auditAction: AuditAction, userSession: UserSession)(implicit hc: HeaderCarrier): Future[AuditResult] = {
+    auditService.audit(auditAction, Map("developerEmail" -> userSession.developer.email.text, "developerFullName" -> userSession.developer.displayedName))
   }
 }
 
@@ -128,7 +127,7 @@ class UserLoginAccount @Inject() (
     // In each case retain the Play session so that 'access_uri' query param, if set, is used at the end of the 2SV reminder flow
     (userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired) match {
       case (Some(session), false) if session.loggedInState.isLoggedIn =>
-        audit(LoginSucceeded, DeveloperSession.apply(session))
+        audit(LoginSucceeded, session)
         // If "remember me" was ticked on a previous login, MFA will be enabled but the access code is not required
         if (userAuthenticationResponse.mfaEnabled) {
           successful(
@@ -331,7 +330,7 @@ class UserLoginAccount @Inject() (
     def handleAuthentication(email: LaxEmailAddress, form: MfaAccessCodeForm, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
       (for {
         session <- sessionService.authenticateAccessCode(email, form.accessCode, request.session.get("nonce").get, mfaId)
-        _       <- audit(LoginSucceeded, DeveloperSession.apply(session))
+        _       <- audit(LoginSucceeded, session)
         result  <- handleRememberMe(form, session)
       } yield result)
         .recover {

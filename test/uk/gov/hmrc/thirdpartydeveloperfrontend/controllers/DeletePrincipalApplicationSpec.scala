@@ -35,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
@@ -73,11 +72,9 @@ class DeletePrincipalApplicationSpec
     val clientId        = ClientId("clientIdzzz")
     val appName: String = "Application Name"
 
-    val developer = buildTrackedUser()
-    val sessionId = UserSessionId.random
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-
-    val loggedInDeveloper = DeveloperSession(session)
+    val developer   = buildTrackedUser()
+    val sessionId   = UserSessionId.random
+    val userSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -93,14 +90,14 @@ class DeletePrincipalApplicationSpec
       grantLength,
       Environment.PRODUCTION,
       Some("Description 1"),
-      Set(loggedInDeveloper.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), startOfDay),
+      Set(userSession.developer.email.asAdministratorCollaborator),
+      state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), startOfDay),
       access =
         Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
     )
 
-    givenApplicationAction(application, loggedInDeveloper)
-    fetchSessionByIdReturns(sessionId, session)
+    givenApplicationAction(application, userSession)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams   = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -139,7 +136,7 @@ class DeletePrincipalApplicationSpec
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(loggedInDeveloper), eqTo(application))(*))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(userSession), eqTo(application))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       val result = addToken(underTest.requestDeletePrincipalApplicationAction(application.id))(requestWithFormBody)
@@ -148,7 +145,7 @@ class DeletePrincipalApplicationSpec
       val body = contentAsString(result)
 
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(loggedInDeveloper), eqTo(application))(*)
+      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(userSession), eqTo(application))(*)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
@@ -165,9 +162,9 @@ class DeletePrincipalApplicationSpec
 
   "return not found if non-approved app" when {
     trait UnapprovedApplicationSetup extends Setup {
-      val nonApprovedApplication = aStandardNonApprovedApplication(loggedInDeveloper.email)
+      val nonApprovedApplication = aStandardNonApprovedApplication(userSession.developer.email)
 
-      givenApplicationAction(nonApprovedApplication, loggedInDeveloper)
+      givenApplicationAction(nonApprovedApplication, userSession)
 
       when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
         .thenReturn(Future.successful(TicketCreated))

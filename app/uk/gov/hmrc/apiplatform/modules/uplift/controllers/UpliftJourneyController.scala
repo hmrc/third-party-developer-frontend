@@ -106,7 +106,7 @@ class UpliftJourneyController @Inject() (
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      (data, canChange) <- upliftJourneyService.apiSubscriptionData(sandboxAppId, request.developerSession, request.subscriptions)
+      (data, canChange) <- upliftJourneyService.apiSubscriptionData(sandboxAppId, request.userSession, request.subscriptions)
     } yield Ok(confirmApisView(sandboxAppId, data, canChange))
   }
 
@@ -117,12 +117,12 @@ class UpliftJourneyController @Inject() (
       successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(upliftedAppId)))
     }
 
-    upliftJourneyService.confirmAndUplift(sandboxAppId, request.developerSession).flatMap(_.fold(failed, success))
+    upliftJourneyService.confirmAndUplift(sandboxAppId, request.userSession).flatMap(_.fold(failed, success))
   }
 
   def changeApiSubscriptions(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      updatedSubscriptions <- upliftJourneyService.changeApiSubscriptions(sandboxAppId, request.developerSession, request.subscriptions)
+      updatedSubscriptions <- upliftJourneyService.changeApiSubscriptions(sandboxAppId, request.userSession, request.subscriptions)
     } yield Ok(turnOffApisMasterView(request.application.id, request.role, APISubscriptions.groupSubscriptionsByServiceName(updatedSubscriptions), DummySubscriptionsForm.form))
   }
 
@@ -151,12 +151,12 @@ class UpliftJourneyController @Inject() (
                                 case (id, onOff) => apiLookups(id) -> onOff
                               }
                             )
-        _                 = flowService.storeApiSubscriptions(newFlow, request.developerSession)
+        _                 = flowService.storeApiSubscriptions(newFlow, request.userSession)
       } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(sandboxAppId))
     } else {
       val errorForm = DummySubscriptionsForm.form.withError(FormError("apiSubscriptions", "error.turnoffapis.requires.at.least.one"))
       for {
-        flow                 <- flowService.fetchFlow(request.developerSession)
+        flow                 <- flowService.fetchFlow(request.userSession)
         upliftableApiIds     <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
         subscriptionFlow      = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
         sandboxSubscribedApis = request.subscriptions
@@ -168,7 +168,7 @@ class UpliftJourneyController @Inject() (
 
   def sellResellOrDistributeYourSoftware(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
-      sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.developerSession)
+      sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.userSession)
       form                    =
         sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
     } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
@@ -177,14 +177,14 @@ class UpliftJourneyController @Inject() (
   def sellResellOrDistributeYourSoftwareAction(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     def storeResultAndGotoApiSubscriptionsPage(ans: String) =
       for {
-        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
-        _ <- upliftJourneyService.storeDefaultSubscriptionsInFlow(appId, request.developerSession)
+        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.userSession)
+        _ <- upliftJourneyService.storeDefaultSubscriptionsInFlow(appId, request.userSession)
       } yield Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(appId))
 
     def createSubmissionAndGotoQuestionnairePage(ans: String) =
       for {
-        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.developerSession)
-        _ <- upliftJourneyService.createNewSubmission(appId, request.application, request.developerSession)
+        _ <- flowService.storeSellResellOrDistribute(SellResellOrDistribute(ans), request.userSession)
+        _ <- upliftJourneyService.createNewSubmission(appId, request.application, request.userSession)
       } yield Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(appId))
 
     def handleInvalidForm(formWithErrors: Form[SellResellOrDistributeForm]) =

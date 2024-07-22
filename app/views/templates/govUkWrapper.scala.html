@@ -17,7 +17,6 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, BackButtonToUrl, BackButtonWithJavaScript, FeedbackBanner, NoBackButton}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
@@ -59,7 +58,6 @@
   breadcrumbs: Seq[Crumb] = Seq.empty,
   back: BackButton = NoBackButton,
   fullWidthContent: Boolean = false,
-  developerSession: Option[DeveloperSession],
   navLinks: Seq[NavLink] = Seq.empty,
   bodyEndBlock: Option[Html] = None,
   feedbackBanner: Option[FeedbackBanner] = None,

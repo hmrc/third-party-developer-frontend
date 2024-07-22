@@ -32,6 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collabora
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
@@ -49,7 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -57,12 +58,12 @@ class AddApplicationProductionSwitchSpec
     with LocalUserIdTracker
     with ApplicationBuilder {
 
-  val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
+  val collaborator: Collaborator = userSession.developer.email.asAdministratorCollaborator
 
   val appCreatedOn  = instant.minus(1, DAYS)
   val appLastAccess = appCreatedOn
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(userSession.developer.email)).map(ApplicationSummary.from(_, userSession.developer.userId)).toList
 
   trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock
       with SessionServiceMock with EmailPreferencesServiceMock {

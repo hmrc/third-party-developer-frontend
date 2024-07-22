@@ -15,7 +15,7 @@
  *@
 
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
@@ -23,7 +23,7 @@
 @this(devMain: DevMainWithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeOfApplicationNameForm], model: ApplicationNameModel)(
-  implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
+  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
 )
 
 @devMain(

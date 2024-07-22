@@ -24,7 +24,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{Email
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 
 class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuilder with LocalUserIdTracker {
   val category1                   = "CATEGORY_1"
@@ -36,10 +35,9 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuil
 
   val sessionId = UserSessionId.random
 
-  def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
-    val developer: User      = buildTrackedUser(emailPreferences = emailPreferences)
-    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-    DeveloperSession(session)
+  def developerSession(emailPreferences: EmailPreferences): UserSession = {
+    val developer: User = buildTrackedUser(emailPreferences = emailPreferences)
+    UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
   }
 
   def emailPreferencesFlow(selectedCategories: Set[String], selectedAPIs: Map[String, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlowV2 = {

@@ -76,7 +76,7 @@ class TermsOfUse @Inject() (
         val information        = app.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
           termsOfUseAgreements =
-            information.termsOfUseAgreements :+ TermsOfUseAgreement(request.developerSession.email, instant(), termsOfUseVersionService.getLatest().toString)
+            information.termsOfUseAgreements :+ TermsOfUseAgreement(request.userSession.developer.email, instant(), termsOfUseVersionService.getLatest().toString)
         )
 
         applicationService

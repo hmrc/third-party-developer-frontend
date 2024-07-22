@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
@@ -47,7 +48,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class AddApplicationStartSpec
     extends BaseControllerSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -55,9 +56,9 @@ class AddApplicationStartSpec
     with LocalUserIdTracker
     with ApplicationBuilder {
 
-  val collaborator: Collaborator = loggedInDeveloper.email.asAdministratorCollaborator
+  val collaborator: Collaborator = userSession.developer.email.asAdministratorCollaborator
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(loggedInDeveloper.email)).map(ApplicationSummary.from(_, loggedInDeveloper.developer.userId)).toList
+  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(userSession.developer.email)).map(ApplicationSummary.from(_, userSession.developer.userId)).toList
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock
       with EmailPreferencesServiceMock {
@@ -118,7 +119,7 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to the sandbox")
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should not include "Sign in"
     }
@@ -130,7 +131,7 @@ class AddApplicationStartSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to development")
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should not include "Sign in"
     }
 

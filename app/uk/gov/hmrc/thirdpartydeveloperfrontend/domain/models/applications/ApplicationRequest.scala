@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 
 case class UpliftData(
     sellResellOrDistribute: SellResellOrDistribute,
@@ -49,10 +49,10 @@ object CreateApplicationRequest extends ApplicationRequest {
   import play.api.libs.json.{Json, OFormat}
   implicit val format: OFormat[CreateApplicationRequest] = Json.format[CreateApplicationRequest]
 
-  def fromAddApplicationJourney(user: DeveloperSession, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
+  def fromAddApplicationJourney(loggedInDeveloper: User, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
     name = form.applicationName.trim,
     environment = environment,
     description = None,
-    collaborators = List(Collaborator(user.email, Collaborator.Roles.ADMINISTRATOR, user.developer.userId))
+    collaborators = List(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId))
   )
 }

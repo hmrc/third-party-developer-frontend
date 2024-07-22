@@ -15,12 +15,12 @@
  *@
 
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMain)
 
-@()(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@()(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @devMain(
   title = "Switch to an OAuth 2.0 access token",

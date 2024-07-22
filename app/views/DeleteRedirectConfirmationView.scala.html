@@ -17,13 +17,13 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteRedirectConfirmationForm
 
 @this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
-@(applicationViewModel: ApplicationViewModel, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(applicationViewModel: ApplicationViewModel, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @application = @{applicationViewModel.application}
 

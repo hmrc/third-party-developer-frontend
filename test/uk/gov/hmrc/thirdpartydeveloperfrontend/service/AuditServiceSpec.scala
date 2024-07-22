@@ -26,11 +26,11 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -38,11 +38,11 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
   trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with FixedClock {
 
-    val developer: DeveloperSession = standardDeveloper.loggedIn
+    val developerSession: UserSession = standardDeveloper.loggedIn
 
     implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(
-      "X-email-address" -> developer.email.text,
-      "X-name"          -> developer.displayedName
+      "X-email-address" -> developerSession.developer.email.text,
+      "X-name"          -> developerSession.developer.displayedName
     )
 
     val mockAuditConnector = mock[AuditConnector]
@@ -60,7 +60,7 @@ class AuditServiceSpec extends AsyncHmrcSpec {
         detail = Map()
       )
 
-      underTest.audit(PasswordChangeFailedDueToInvalidCredentials(developer.email))
+      underTest.audit(PasswordChangeFailedDueToInvalidCredentials(developerSession.developer.email))
 
       verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(*, any[ExecutionContext])
     }
@@ -75,8 +75,8 @@ class AuditServiceSpec extends AsyncHmrcSpec {
         auditType = "ApplicationUpliftRequestDeniedDueToInvalidCredentials",
         tags = Map(
           "transactionName"   -> "Application uplift to production request has been denied, due to invalid credentials",
-          "developerFullName" -> developer.displayedName,
-          "developerEmail"    -> developer.email.text
+          "developerFullName" -> developerSession.developer.displayedName,
+          "developerEmail"    -> developerSession.developer.email.text
         ),
         detail = Map(
           "applicationId" -> "123456"
@@ -92,14 +92,14 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
     "send an event when the password change fails due to invalid credentials for a user who is logged in" in new Setup {
 
-      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email.text, "developerFullName" -> developer.displayedName))
+      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developerSession.developer.email.text, "developerFullName" -> developerSession.developer.displayedName))
     }
 
     "send an event when the password change fails due to invalid credentials for a user who is not logged in" in new Setup {
 
       implicit override val hc: HeaderCarrier = HeaderCarrier()
 
-      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developer.email.text))
+      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developerSession.developer.email.text))
     }
   }
 

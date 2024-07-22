@@ -22,9 +22,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
@@ -33,32 +33,32 @@ class GetProductionCredentialsFlowService @Inject() (
   )(implicit val ec: ExecutionContext
   ) {
 
-  def fetchFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
-    flowRepository.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](developerSession.session.sessionId) flatMap {
+  def fetchFlow(session: UserSession): Future[GetProductionCredentialsFlow] =
+    flowRepository.fetchBySessionIdAndFlowType[GetProductionCredentialsFlow](session.sessionId) flatMap {
       case Some(flow) => flow.pure[Future]
       case None       =>
-        val newFlowObject = GetProductionCredentialsFlow.create(developerSession.session.sessionId)
+        val newFlowObject = GetProductionCredentialsFlow.create(session.sessionId)
         flowRepository.saveFlow[GetProductionCredentialsFlow](newFlowObject)
     }
 
-  def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
+  def storeSellResellOrDistribute(sellResellOrDistribute: SellResellOrDistribute, session: UserSession): Future[GetProductionCredentialsFlow] = {
     for {
-      existingFlow <- fetchFlow(developerSession)
+      existingFlow <- fetchFlow(session)
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(sellResellOrDistribute = Some(sellResellOrDistribute)))
     } yield savedFlow
   }
 
-  def findSellResellOrDistribute(developerSession: DeveloperSession): Future[Option[SellResellOrDistribute]] =
-    fetchFlow(developerSession).map(_.sellResellOrDistribute)
+  def findSellResellOrDistribute(session: UserSession): Future[Option[SellResellOrDistribute]] =
+    fetchFlow(session).map(_.sellResellOrDistribute)
 
-  def storeApiSubscriptions(apiSubscriptions: ApiSubscriptions, developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] = {
+  def storeApiSubscriptions(apiSubscriptions: ApiSubscriptions, session: UserSession): Future[GetProductionCredentialsFlow] = {
     for {
-      existingFlow <- fetchFlow(developerSession)
+      existingFlow <- fetchFlow(session)
       savedFlow    <- flowRepository.saveFlow[GetProductionCredentialsFlow](existingFlow.copy(apiSubscriptions = Some(apiSubscriptions)))
     } yield savedFlow
   }
 
-  def resetFlow(developerSession: DeveloperSession): Future[GetProductionCredentialsFlow] =
-    flowRepository.deleteBySessionIdAndFlowType(developerSession.session.sessionId, FlowType.GET_PRODUCTION_CREDENTIALS)
-      .flatMap(_ => fetchFlow(developerSession))
+  def resetFlow(session: UserSession): Future[GetProductionCredentialsFlow] =
+    flowRepository.deleteBySessionIdAndFlowType(session.sessionId, FlowType.GET_PRODUCTION_CREDENTIALS)
+      .flatMap(_ => fetchFlow(session))
 }

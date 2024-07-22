@@ -16,7 +16,7 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
@@ -24,7 +24,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SmsAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId])(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(form: Form[SmsAccessCodeForm], mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId])(implicit flash: Flash, messages: Messages, request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig)
 
 @devMain(
     form,

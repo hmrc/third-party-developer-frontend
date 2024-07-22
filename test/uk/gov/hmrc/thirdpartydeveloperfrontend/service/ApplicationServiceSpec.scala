@@ -430,8 +430,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
           adminRequester.developer.userId,
           productionApplication,
           applicationName,
-          adminRequester.displayedName,
-          adminRequester.email
+          adminRequester.developer.displayedName,
+          adminRequester.developer.email
         ))
 
       result shouldBe TicketCreated

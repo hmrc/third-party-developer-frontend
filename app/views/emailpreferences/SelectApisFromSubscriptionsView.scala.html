@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
@@ -25,7 +25,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SelectApisFromSubscriptionsForm], apis: List[CombinedApi], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
+@(form: Form[SelectApisFromSubscriptionsForm], apis: List[CombinedApi], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
 @pageHeading = @{
   "Do you want to receive emails about the APIs you have subscribed to?"

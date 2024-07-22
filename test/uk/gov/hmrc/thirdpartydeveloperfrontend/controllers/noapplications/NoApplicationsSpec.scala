@@ -27,8 +27,9 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SampleDeveloperSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -38,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class NoApplicationsSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -81,7 +82,7 @@ class NoApplicationsSpec
         private val result = noApplicationsController.noApplicationsPage()(loggedInRequest)
 
         status(result) shouldBe OK
-        contentAsString(result) should include(loggedInDeveloper.displayedName)
+        contentAsString(result) should include(userSession.developer.displayedName)
         contentAsString(result) should include("Sign out")
         contentAsString(result) should include("Using the Developer Hub")
         contentAsString(result) should not include "Sign in"

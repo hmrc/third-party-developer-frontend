@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -23,7 +23,7 @@
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
 @(applicationView: ApplicationViewModel, name: String, version: ApiVersionNbr)(
-implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
+implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "subscriptions")
 
 @app = @{applicationView.application}
 

@@ -28,10 +28,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
@@ -41,18 +41,18 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
     when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*))
       .thenReturn(OptionT.none[Future, ApplicationRequest[A]])
 
-  def givenApplicationAction[A](application: Application, developerSession: DeveloperSession): Unit =
-    givenApplicationAction[A](ApplicationWithSubscriptionData(application, Set.empty, Map.empty), developerSession)
+  def givenApplicationAction[A](application: Application, userSession: UserSession): Unit =
+    givenApplicationAction[A](ApplicationWithSubscriptionData(application, Set.empty, Map.empty), userSession)
 
   def givenApplicationAction[A](
       appData: ApplicationWithSubscriptionData,
-      developerSession: DeveloperSession,
+      userSession: UserSession,
       subscriptions: List[APISubscriptionStatus] = List.empty,
       openAccessApis: List[ApiDefinition] = List.empty
     ): Unit = {
 
     def createReturn(req: UserRequest[A]): OptionT[Future, ApplicationRequest[A]] = {
-      appData.application.role(developerSession.developer.email) match {
+      appData.application.role(userSession.developer.email) match {
         case None       => OptionT.none[Future, ApplicationRequest[A]]
         case Some(role) => OptionT.pure[Future](
             new ApplicationRequest(

@@ -33,13 +33,14 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ActualAnswer, 
 import uk.gov.hmrc.apiplatform.modules.submissions.services.RequestProductionCredentials
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, ProductionCredentialsRequestReceivedView}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SampleDeveloperSession}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
@@ -48,7 +49,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class CheckAnswersControllerSpec
     extends BaseControllerSpec
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -77,7 +78,7 @@ class CheckAnswersControllerSpec
         asSubscriptions(List(aSubscription)),
         asFields(List.empty)
       ),
-      loggedInDeveloper,
+      userSession,
       List(aSubscription)
     )
 
@@ -173,7 +174,7 @@ class CheckAnswersControllerSpec
 
   "checkAnswersAction" should {
     "succeed when production credentials are requested successfully" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
@@ -183,7 +184,7 @@ class CheckAnswersControllerSpec
     }
 
     "fail when production credentials are not requested successfully" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[DeveloperSession], *, *)(*)).thenReturn(failed(new ApplicationNotFound))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(failed(new ApplicationNotFound))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress())
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
@@ -192,7 +193,7 @@ class CheckAnswersControllerSpec
     }
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
       val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.SingleChoiceAnswer("Yes"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
@@ -204,7 +205,7 @@ class CheckAnswersControllerSpec
     }
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
       val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.SingleChoiceAnswer("No"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
@@ -216,7 +217,7 @@ class CheckAnswersControllerSpec
     }
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[DeveloperSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
       val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.NoAnswer)
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)

@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
@@ -41,7 +42,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -81,7 +81,7 @@ class SubscriptionsController @Inject() (
   def manageSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
-      request.developerSession,
+      request.userSession,
       (role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
         manageSubscriptionsView(
           role,
@@ -100,7 +100,7 @@ class SubscriptionsController @Inject() (
   def addAppSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
     renderSubscriptions(
       request.application,
-      request.developerSession,
+      request.userSession,
       (role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
         addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
       }
@@ -109,7 +109,7 @@ class SubscriptionsController @Inject() (
 
   def renderSubscriptions(
       application: Application,
-      user: DeveloperSession,
+      userSession: UserSession,
       renderHtml: (Collaborator.Role, PageData, Form[EditApplicationForm]) => Html
     )(implicit request: ApplicationRequest[AnyContent]
     ): Future[Result] = {
@@ -130,7 +130,7 @@ class SubscriptionsController @Inject() (
   def changeApiSubscription(applicationId: ApplicationId, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     whenTeamMemberOnApp(applicationId) { implicit request =>
       val apiIdentifier   = ApiIdentifier(apiContext, apiVersion)
-      val requestingEmail = request.developerSession.email
+      val requestingEmail = request.userSession.developer.email
 
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
@@ -212,11 +212,11 @@ class SubscriptionsController @Inject() (
       def requestChangeSubscription(subscribed: Boolean) = {
         if (subscribed) {
           subscriptionsService
-            .requestApiUnsubscribe(request.developerSession, request.application, apiName, apiVersion)
+            .requestApiUnsubscribe(request.userSession, request.application, apiName, apiVersion)
             .map(_ => Ok(unsubscribeRequestSubmittedView(applicationViewModelFromApplicationRequest(), apiName, apiVersion)))
         } else {
           subscriptionsService
-            .requestApiSubscription(request.developerSession, request.application, apiName, apiVersion)
+            .requestApiSubscription(request.userSession, request.application, apiName, apiVersion)
             .map(_ => Ok(subscribeRequestSubmittedView(applicationViewModelFromApplicationRequest(), apiName, apiVersion)))
         }
       }

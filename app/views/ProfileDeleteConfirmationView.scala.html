@@ -16,14 +16,14 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
 
 @this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
-@(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
+@(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
 @devMain(
   form,

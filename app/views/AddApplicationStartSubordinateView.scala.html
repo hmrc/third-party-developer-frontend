@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, messages: Messages, appConfig: ApplicationConfig, environmentNameService: EnvironmentNameService)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{environmentNameService.subordinateWording}
 @pageHeading = @{s"Add an application to ${subordinateEnvName}"}

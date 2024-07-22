@@ -48,7 +48,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
@@ -70,33 +69,33 @@ class DetailsSpec
   "details" when {
     "logged in as a Developer on an application" should {
       "return the view for a standard production app with no change link" in new Setup {
-        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.developer.email)
         detailsShouldRenderThePage(approvedApplication, hasChangeButton = false)
       }
 
       "return the view for a standard production app with terms of use not agreed" in new Setup {
-        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+        val approvedApplication = anApplication(developerEmail = loggedInDeveloper.developer.email)
         detailsShouldRenderThePage(approvedApplication, hasChangeButton = false, hasTermsOfUseAgreement = false)
       }
 
       "return the view for a developer on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.email), hasTermsOfUseAgreement = false)
+        detailsShouldRenderThePage(aSandboxApplication(developerEmail = loggedInDeveloper.developer.email), hasTermsOfUseAgreement = false)
       }
     }
 
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
-        val approvedApplication = anApplication(adminEmail = loggedInDeveloper.email)
+        val approvedApplication = anApplication(adminEmail = loggedInDeveloper.developer.email)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePage(approvedApplication)
       }
 
       "return the view for an admin on a sandbox app" in new Setup {
-        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.email), hasTermsOfUseAgreement = false)
+        detailsShouldRenderThePage(aSandboxApplication(adminEmail = loggedInDeveloper.developer.email), hasTermsOfUseAgreement = false)
       }
 
       "return a redirect when using an application in testing state" in new Setup {
-        val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.testing)
+        val testingApplication = anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.testing)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         givenApplicationAction(testingApplication, loggedInDeveloper)
 
@@ -107,7 +106,7 @@ class DetailsSpec
       }
 
       "return a bad request when using an application in testing state for the old journey" in new Setup {
-        val testingApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.testing)
+        val testingApplication = anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.testing)
         SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         givenApplicationAction(testingApplication, loggedInDeveloper)
 
@@ -117,7 +116,7 @@ class DetailsSpec
       }
 
       "return the credentials requested page on an application pending approval" in new Setup {
-        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingGatekeeperApproval("dont-care", "dont-care"))
+        val pendingApprovalApplication = anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.pendingGatekeeperApproval("dont-care", "dont-care"))
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         givenApplicationAction(pendingApprovalApplication, loggedInDeveloper)
 
@@ -129,7 +128,7 @@ class DetailsSpec
 
       "return the credentials requested page on an application pending verification" in new Setup {
         val pendingVerificationApplication =
-          anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
+          anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
@@ -141,7 +140,7 @@ class DetailsSpec
 
       "return a bad request on an application pending verification for the old journey" in new Setup {
         val pendingVerificationApplication =
-          anApplication(adminEmail = loggedInDeveloper.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
+          anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.pendingRequesterVerification("dont-care", "dont-care", "dont-care"))
         SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         givenApplicationAction(pendingVerificationApplication, loggedInDeveloper)
 
@@ -152,7 +151,7 @@ class DetailsSpec
 
       "redirect to the Start Using Your Application page on an application in pre-production state" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.preProduction(userEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.preProduction(userEmail, "name"))
 
         givenApplicationAction(preProdApplication, loggedInDeveloper)
 
@@ -166,7 +165,7 @@ class DetailsSpec
 
       "display the Application Details page for an application in pre-production state when the forceAppDetails parameter is used" in new Setup {
         val userEmail          = "test@example.con"
-        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.email, state = InState.preProduction(userEmail, "name"))
+        val preProdApplication = anApplication(adminEmail = loggedInDeveloper.developer.email, state = InState.preProduction(userEmail, "name"))
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)
@@ -204,7 +203,7 @@ class DetailsSpec
 
   "changeDetails" should {
     "return forbidden for an admin on a standard production app" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = anApplication(adminEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
@@ -214,18 +213,18 @@ class DetailsSpec
 
     "return the view for a developer on a sandbox app" in new Setup {
       changeDetailsShouldRenderThePage(
-        aSandboxApplication(developerEmail = loggedInDeveloper.email)
+        aSandboxApplication(developerEmail = loggedInDeveloper.developer.email)
       )
     }
 
     "return the view for an admin on a sandbox app" in new Setup {
       changeDetailsShouldRenderThePage(
-        aSandboxApplication(adminEmail = loggedInDeveloper.email)
+        aSandboxApplication(adminEmail = loggedInDeveloper.developer.email)
       )
     }
 
     "return forbidden for a developer on a standard production app" in new Setup {
-      val application = anApplication(developerEmail = loggedInDeveloper.email)
+      val application = anApplication(developerEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
@@ -272,7 +271,7 @@ class DetailsSpec
 
   "changeDetailsAction validation" should {
     "not pass when application is updated with empty name" in new Setup {
-      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("").callChangeDetailsAction
@@ -281,7 +280,7 @@ class DetailsSpec
     }
 
     "not pass when application is updated with invalid name" in new Setup {
-      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("a").callChangeDetailsAction
@@ -293,7 +292,7 @@ class DetailsSpec
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid.invalidName))
 
-      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withName("my invalid HMRC application name").callChangeDetailsAction
@@ -339,7 +338,7 @@ class DetailsSpec
   "changeDetailsAction for production app in uplifted state" should {
 
     "return forbidden for a developer" in new Setup {
-      val application = anApplication(developerEmail = loggedInDeveloper.email)
+      val application = anApplication(developerEmail = loggedInDeveloper.developer.email)
 
       givenApplicationAction(application, loggedInDeveloper)
 
@@ -349,7 +348,7 @@ class DetailsSpec
     }
 
     "return forbidden for an admin" in new Setup {
-      val application = anApplication(adminEmail = loggedInDeveloper.email)
+      val application = anApplication(adminEmail = loggedInDeveloper.developer.email)
 
       givenApplicationAction(application, loggedInDeveloper)
 
@@ -362,23 +361,23 @@ class DetailsSpec
   "changeDetailsAction for sandbox app" should {
 
     "redirect to the details page on success for an admin" in new Setup {
-      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(adminEmail = loggedInDeveloper.email))
+      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(adminEmail = loggedInDeveloper.developer.email))
     }
 
     "redirect to the details page on success for a developer" in new Setup {
-      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(developerEmail = loggedInDeveloper.email))
+      changeDetailsShouldRedirectOnSuccess(aSandboxApplication(developerEmail = loggedInDeveloper.developer.email))
     }
 
     "update all fields for an admin" in new Setup {
-      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInDeveloper.email))
+      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInDeveloper.developer.email))
     }
 
     "update all fields for a developer" in new Setup {
-      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInDeveloper.email))
+      changeDetailsShouldUpdateTheApplication(aSandboxApplication(adminEmail = loggedInDeveloper.developer.email))
     }
 
     "update the app but not the check information" in new Setup {
-      val application = aSandboxApplication(adminEmail = loggedInDeveloper.email)
+      val application = aSandboxApplication(adminEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(application, loggedInDeveloper)
 
       await(application.withName(newName).callChangeDetailsAction)
@@ -390,7 +389,7 @@ class DetailsSpec
 
   "changeOfApplicationName" should {
     "show page successfully" in new Setup {
-      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
 
       val result = addToken(underTest.requestChangeOfAppName(approvedApplication.id))(loggedInAdminRequest)
@@ -400,7 +399,7 @@ class DetailsSpec
     }
 
     "return forbidden when not an admin" in new Setup {
-      val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+      val approvedApplication = anApplication(developerEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(approvedApplication, loggedInDeveloper)
 
       val result = addToken(underTest.requestChangeOfAppName(approvedApplication.id))(loggedInDevRequest)
@@ -411,7 +410,7 @@ class DetailsSpec
 
   "changeOfApplicationNameAction" should {
     "show success page if name changed successfully" in new Setup {
-      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
       when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*))
         .thenReturn(Future.successful(TicketCreated))
@@ -426,7 +425,7 @@ class DetailsSpec
     }
 
     "show error if application name is not valid" in new Setup {
-      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
         .thenReturn(Future.successful(Invalid(true, false)))
@@ -440,7 +439,7 @@ class DetailsSpec
     }
 
     "show error if application name is too short" in new Setup {
-      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "")
@@ -452,7 +451,7 @@ class DetailsSpec
     }
 
     "show error if application name contains non-allowed chars" in new Setup {
-      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "name£")
@@ -464,7 +463,7 @@ class DetailsSpec
     }
 
     "show error if new application name is the same as the old one" in new Setup {
-      val approvedApplication = anApplication(adminEmail = loggedInAdmin.email)
+      val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name)
@@ -476,7 +475,7 @@ class DetailsSpec
     }
 
     "show forbidden if not an admin" in new Setup {
-      val approvedApplication = anApplication(developerEmail = loggedInDeveloper.email)
+      val approvedApplication = anApplication(developerEmail = loggedInDeveloper.developer.email)
       givenApplicationAction(approvedApplication, loggedInDeveloper)
 
       private val request = loggedInDevRequest.withFormUrlEncodedBody("applicationName" -> "new app name")
@@ -798,8 +797,8 @@ class DetailsSpec
     val devSession     = UserSession(devSessionId, LoggedInState.LOGGED_IN, developer)
     val adminSession   = UserSession(adminSessionId, LoggedInState.LOGGED_IN, admin)
 
-    val loggedInDeveloper = DeveloperSession(devSession)
-    val loggedInAdmin     = DeveloperSession(adminSession)
+    val loggedInDeveloper = devSession
+    val loggedInAdmin     = adminSession
 
     val newName        = "new name"
     val newDescription = Some("new description")

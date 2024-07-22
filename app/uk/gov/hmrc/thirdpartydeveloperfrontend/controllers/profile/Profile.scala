@@ -59,9 +59,9 @@ class Profile @Inject() (
 
   private def changeProfileView()(implicit req: UserRequest[_]) = {
     changeProfileViewTemplate(profileForm.fill(ProfileForm(
-      req.developerSession.developer.firstName,
-      req.developerSession.developer.lastName,
-      req.developerSession.developer.organisation
+      req.userSession.developer.firstName,
+      req.userSession.developer.lastName,
+      req.userSession.developer.organisation
     )))
   }
 
@@ -84,15 +84,13 @@ class Profile @Inject() (
           _ =>
             {
 
-              val updatedDeveloper = request.developerSession.developer.copy(
+              val updatedDeveloper = request.userSession.developer.copy(
                 firstName = profile.firstName,
                 lastName = profile.lastName,
                 organisation = profile.organisation
               )
 
-              val updatedLoggedIn = request.developerSession.copy(
-                session = request.developerSession.session.copy(developer = updatedDeveloper)
-              )
+              val updatedLoggedIn = request.userSession.copy(developer = updatedDeveloper)
 
               Ok(profileUpdatedView("profile updated", "Manage profile", "manage-profile", updatedLoggedIn))
             }
@@ -105,7 +103,7 @@ class Profile @Inject() (
   }
 
   def updatePassword(): Action[AnyContent] = loggedInAction { implicit request =>
-    processPasswordChange(request.developerSession.email, Ok(passwordUpdatedView("password changed", "Password changed", "change-password")), changeProfilePasswordView(_))
+    processPasswordChange(request.userSession.developer.email, Ok(passwordUpdatedView("password changed", "Password changed", "change-password")), changeProfilePasswordView(_))
   }
 
   def requestDeletion(): Action[AnyContent] = loggedInAction { implicit request =>
@@ -122,7 +120,7 @@ class Profile @Inject() (
       validForm => {
         validForm.confirmation match {
           case Some("true") => applicationService
-              .requestDeveloperAccountDeletion(request.developerSession.developer.userId, request.developerSession.displayedName, request.developerSession.email)
+              .requestDeveloperAccountDeletion(request.userSession.developer.userId, request.userSession.developer.displayedName, request.userSession.developer.email)
               .map(_ => Ok(profileDeleteSubmittedView()))
 
           case _ => Future.successful(Ok(changeProfileView()))

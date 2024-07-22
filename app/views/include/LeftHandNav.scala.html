@@ -19,13 +19,13 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 
 @this()
 
-@(application: Option[ApplicationViewModel] = None, navSection: Option[String] = None, flags: Map[String, Boolean] = Map.empty, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig)
+@(application: Option[ApplicationViewModel] = None, navSection: Option[String] = None, flags: Map[String, Boolean] = Map.empty, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig)
 
 @theSandbox = @{"the sandbox"}
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}

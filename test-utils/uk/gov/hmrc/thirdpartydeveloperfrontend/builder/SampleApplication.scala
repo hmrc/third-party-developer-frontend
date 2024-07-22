@@ -22,6 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
@@ -29,7 +30,7 @@ trait SampleApplication
     extends FixedClock
     with ApplicationStateHelper
     with CollaboratorTracker {
-  self: SampleDeveloperSession =>
+  self: SampleUserSession =>
 
   val appId    = ApplicationId.random
   val clientId = ClientId("myClientId")
@@ -44,8 +45,8 @@ trait SampleApplication
     grantLength = Period.ofDays(547),
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = InState.production(loggedInDeveloper.email.text, loggedInDeveloper.displayedName, ""),
+    Set(userSession.developer.email.asAdministratorCollaborator),
+    state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""),
     access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 

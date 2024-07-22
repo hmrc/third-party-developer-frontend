@@ -30,7 +30,7 @@ import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -38,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectApis
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.NewApplicationEmailPreferencesFlowV2
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
@@ -54,13 +53,13 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
   trait Setup {
 
-    val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
-    val form                                                      = mock[Form[SelectApisFromSubscriptionsForm]]
-    val apis                                                      = Set("api1", "api2")
-    val applicationId                                             = ApplicationId.random
+    val developerSessionWithoutEmailPreferences: UserSession = standardDeveloper.loggedIn
+    val form                                                 = mock[Form[SelectApisFromSubscriptionsForm]]
+    val apis                                                 = Set("api1", "api2")
+    val applicationId                                        = ApplicationId.random
 
     val newApplicationEmailPreferencesFlow                    = NewApplicationEmailPreferencesFlowV2(
-      developerSessionWithoutEmailPreferences.session.sessionId,
+      developerSessionWithoutEmailPreferences.sessionId,
       developerSessionWithoutEmailPreferences.developer.emailPreferences,
       applicationId,
       Set.empty,

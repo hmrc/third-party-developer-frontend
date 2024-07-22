@@ -32,6 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSe
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
@@ -49,7 +50,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class EditApplicationNameSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleDeveloperSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
@@ -114,13 +115,13 @@ class EditApplicationNameSpec
   "NameApplicationPage in subordinate" should {
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
-      givenApplicationAction(sampleApp, loggedInDeveloper)
+      givenApplicationAction(sampleApp, userSession)
 
       private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Continue")
       contentAsString(result) should include("Application name")
       contentAsString(result) should not include "Sign in"
@@ -175,7 +176,7 @@ class EditApplicationNameSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("We show this name to your users when they authorise your software to interact with HMRC.")
       contentAsString(result) should include("It must comply with our")
       contentAsString(result) should not include "Sign in"
