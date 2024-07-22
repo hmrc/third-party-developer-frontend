@@ -59,9 +59,11 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     val userSession: UserSession = mock[UserSession]
 
-    when(userSession.developer).thenReturn(developer)
-    when(userSession.developer.email).thenReturn(email)
-    when(userSession.developer.displayedName).thenReturn(name)
+    val devInSession: User = mock[User]
+
+    when(userSession.developer).thenReturn(devInSession)
+    when(devInSession.email).thenReturn(email)
+    when(devInSession.displayedName).thenReturn(name)
 
     val mockDeskproConnector = mock[DeskproConnector]
     val underTest            = new RequestProductionCredentials(ApmConnectorMock.aMock, mockSubmissionsConnector, ApplicationCommandConnectorMock.aMock, mockDeskproConnector, clock)

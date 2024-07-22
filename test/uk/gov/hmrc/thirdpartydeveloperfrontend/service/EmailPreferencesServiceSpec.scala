@@ -42,13 +42,12 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
   trait SetUp extends UserBuilder with LocalUserIdTracker with FixedClock with CombinedApiTestDataHelper with FlowRepositoryMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val emailPreferences                     = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
-    val developer: User                      = buildTrackedUser()
-    val developerWithEmailPrefences: User    = developer.copy(emailPreferences = emailPreferences)
-    val sessionId                            = UserSessionId.random
-    val userSession: UserSession             = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
-    val sessionNoEMailPrefences: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-    val applicationId                        = ApplicationId.random
+    val emailPreferences                      = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+    val developerWithNoEmailPreferences: User = buildTrackedUser()
+    val developerWithEmailPrefences: User     = developerWithNoEmailPreferences.copy(emailPreferences = emailPreferences)
+    val sessionId                             = UserSessionId.random
+    val userSession: UserSession              = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
+    val applicationId                         = ApplicationId.random
 
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
     val mockApmConnector                 = mock[ApmConnector]
@@ -92,7 +91,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "call the flow repository correctly and create a new flow object when nothing returned" in new SetUp {
         val expectedFlowObject = EmailPreferencesFlowV2(sessionId, Set.empty, Map.empty, Set.empty, List.empty)
         FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[EmailPreferencesFlowV2](sessionId)
-        val result             = await(underTest.fetchEmailPreferencesFlow(userSession.copy(sessionId = sessionNoEMailPrefences.sessionId)))
+        val result             = await(underTest.fetchEmailPreferencesFlow(userSession.copy(developer = developerWithNoEmailPreferences)))
 
         result shouldBe expectedFlowObject
         FlowRepositoryMock.FetchBySessionIdAndFlowType.verifyCalledWith[EmailPreferencesFlowV2](sessionId)

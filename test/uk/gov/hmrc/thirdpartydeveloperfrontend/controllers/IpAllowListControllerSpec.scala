@@ -89,6 +89,7 @@ class IpAllowListControllerSpec
       val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
+      session
     }
 
     def verifyIpAllowlistSurveyIsPresent(body: String): Assertion = {
