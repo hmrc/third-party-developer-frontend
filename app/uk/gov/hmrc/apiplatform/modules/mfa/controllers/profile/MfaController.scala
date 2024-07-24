@@ -26,7 +26,6 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms._
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
@@ -227,10 +226,10 @@ class MfaController @Inject() (
       form =>
         thirdPartyDeveloperMfaConnector.createMfaSms(request.userId, form.mobileNumber)
           .map {
-            case success: RegisterSmsSuccessResponse =>
-              Redirect(routes.MfaController.smsAccessCodePage(success.mfaId, MfaAction.CREATE, None))
-                .flashing("mobileNumber" -> success.mobileNumber)
-            case _: RegisterSmsFailureResponse       =>
+            case Some(response) =>
+              Redirect(routes.MfaController.smsAccessCodePage(response.mfaId, MfaAction.CREATE, None))
+                .flashing("mobileNumber" -> response.mobileNumber)
+            case None           =>
               val errorForm = MobileNumberForm.form
                 .fill(form)
                 .withError(key = "mobileNumber", message = "It cannot be used for access codes")

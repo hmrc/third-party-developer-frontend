@@ -34,7 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
@@ -42,6 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
@@ -185,8 +185,8 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
   lazy val authAppMfaId: MfaId                                                                        = verifiedAuthenticatorAppMfaDetail.id
   lazy val smsMfaId: MfaId                                                                            = verifiedSmsMfaDetail.id
-  lazy val registerAuthAppResponse: RegisterAuthAppResponse                                           = RegisterAuthAppResponse(authAppMfaId, "secret")
-  lazy val registerSmsResponse: RegisterSmsSuccessResponse                                            = RegisterSmsSuccessResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
+  lazy val registerAuthAppResponse: RegisterAuthAppResponse                                           = RegisterAuthAppResponse("secret", authAppMfaId)
+  lazy val registerSmsResponse: RegisterSmsResponse                                                   = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
 }
 
 trait IsOldJourneyStandardApplication extends HasApplication {

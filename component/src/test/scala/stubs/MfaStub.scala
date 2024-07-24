@@ -23,7 +23,6 @@ import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.{ChangeMfaNameRequest, CreateMfaSmsRequest}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
@@ -86,25 +85,23 @@ object MfaStub {
   }
 
   def setupSmsAccessCode(developer: User, mfaId: MfaId, mobileNumber: String): Unit = {
-    import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerSmsSuccessResponseFormat
 
     stubFor(
       post(urlEqualTo(s"/developer/${developer.userId.value}/mfa/sms"))
         .withRequestBody(equalToJson(Json.toJson(CreateMfaSmsRequest(mobileNumber)).toString()))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(RegisterSmsSuccessResponse(mfaId, mobileNumber)).toString()))
+          .withBody(Json.toJson(RegisterSmsResponse(mfaId, mobileNumber)).toString()))
     )
   }
 
   def setupGettingMfaSecret(developer: User, mfaId: MfaId): Unit = {
-    import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.registerAuthAppResponseFormat
 
     stubFor(
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/auth-app"))
         .willReturn(aResponse()
           .withStatus(OK)
-          .withBody(Json.toJson(RegisterAuthAppResponse(mfaId, "mySecret")).toString()))
+          .withBody(Json.toJson(RegisterAuthAppResponse("mySecret", mfaId)).toString()))
     )
   }
 
