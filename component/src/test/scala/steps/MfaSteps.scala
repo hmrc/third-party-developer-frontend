@@ -35,7 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
     with CustomMatchers with MfaData {
@@ -201,7 +201,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
     Stubs.setupEncryptedPostRequest(
       "/authenticate",
-      LoginRequest(developer.email, password, mfaMandatedForUser, deviceSessionId),
+      SessionCreateWithDeviceRequest(developer.email, password, Some(mfaMandatedForUser), deviceSessionId),
       OK,
       Json.toJson(userAuthenticationResponse).toString()
     )

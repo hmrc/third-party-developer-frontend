@@ -24,10 +24,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{SessionInvalid, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
@@ -43,7 +44,7 @@ class SessionService @Inject() (
     for {
       coreUser           <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- appsByTeamMember.fetchProductionSummariesByAdmin(coreUser.id).map(_.nonEmpty)
-      response           <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
+      response           <- thirdPartyDeveloperConnector.authenticate(SessionCreateWithDeviceRequest(emailAddress, password, Some(mfaMandatedForUser), deviceSessionId))
     } yield (response, coreUser.id)
   }
 

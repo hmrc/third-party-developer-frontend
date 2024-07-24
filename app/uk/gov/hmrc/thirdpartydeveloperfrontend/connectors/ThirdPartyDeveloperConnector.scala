@@ -21,40 +21,26 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{Format, Json, OFormat, OWrites, Reads}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, SessionId => _, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.{SessionId, User}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 object ThirdPartyDeveloperConnector {
-  private[connectors] case class UnregisteredUserCreationRequest(email: LaxEmailAddress)
-
   case class EmailForResetResponse(email: LaxEmailAddress)
-
-  case class FindUserIdRequest(email: LaxEmailAddress)
-  case class FindUserIdResponse(userId: UserId)
-
   case class CoreUserDetails(email: LaxEmailAddress, id: UserId)
-
-  case class GetOrCreateUserIdRequest(email: LaxEmailAddress)
-  case class GetOrCreateUserIdResponse(userId: UserId)
-
-  object JsonFormatters {
-    implicit val formatUnregisteredUserCreationRequest: Format[UnregisteredUserCreationRequest] = Json.format[UnregisteredUserCreationRequest]
-    implicit val FindUserIdRequestWrites: OWrites[FindUserIdRequest]                            = Json.writes[FindUserIdRequest]
-    implicit val FindUserIdResponseReads: Reads[FindUserIdResponse]                             = Json.reads[FindUserIdResponse]
-    implicit val getOrCreateUserIdRequestFormat: OFormat[GetOrCreateUserIdRequest]              = Json.format[GetOrCreateUserIdRequest]
-    implicit val getOrCreateUserIdResponseFormat: OFormat[GetOrCreateUserIdResponse]            = Json.format[GetOrCreateUserIdResponse]
-  }
 }
 
 @Singleton
@@ -66,10 +52,9 @@ class ThirdPartyDeveloperConnector @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends CommonResponseHandlers with Logging {
 
-  import ThirdPartyDeveloperConnector.JsonFormatters._
   import ThirdPartyDeveloperConnector._
 
-  def authenticate(loginRequest: LoginRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+  def authenticate(loginRequest: SessionCreateWithDeviceRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
     encryptedJson.secretRequest(
       loginRequest,
       http.POST[SecretRequest, ErrorOr[UserAuthenticationResponse]](s"$serviceBaseUrl/authenticate", _)
@@ -128,7 +113,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     )
   }
 
-  def reset(reset: PasswordReset)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def reset(reset: PasswordResetRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     encryptedJson.secretRequest(
       reset,
       http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/reset-password", _)
@@ -140,7 +125,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     )
   }
 
-  def changePassword(change: ChangePassword)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def changePassword(change: PasswordChangeRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     encryptedJson.secretRequest(
       change,
       http.POST[SecretRequest, ErrorOr[HttpResponse]](s"$serviceBaseUrl/change-password", _)
@@ -155,7 +140,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def requestReset(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
-    http.POST[PasswordResetRequest, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", PasswordResetRequest(email))
+    http.POST[EmailIdentifier, Either[UpstreamErrorResponse, HttpResponse]](s"$serviceBaseUrl/password-reset-request", EmailIdentifier(email))
       .map {
         case Right(response)                                 => response.status
         case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _)) => throw new UnverifiedAccount
@@ -295,6 +280,6 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def getOrCreateUserId(emailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[UserId] = {
-    http.POST[GetOrCreateUserIdRequest, GetOrCreateUserIdResponse](s"$serviceBaseUrl/developers/user-id", GetOrCreateUserIdRequest(emailAddress)).map(_.userId)
+    http.POST[FindOrCreateUserIdRequest, FindUserIdResponse](s"$serviceBaseUrl/developers/user-id", FindOrCreateUserIdRequest(emailAddress)).map(_.userId)
   }
 }

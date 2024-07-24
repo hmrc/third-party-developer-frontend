@@ -30,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, DeviceSessionId, MfaId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -61,7 +62,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
     val userPassword           = "password1!"
     val sessionId              = UserSessionId.random
-    val loginRequest           = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val loginRequest           = SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)
     val deviceSessionId        = DeviceSessionId.random
     val deviceSession          = DeviceSession(deviceSessionId, userId)
     val createDeviceSessionUrl = s"/device-session/user/$userId"

@@ -31,8 +31,9 @@ import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 
 case class MfaSecret(secret: String)
 
@@ -137,7 +138,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: String =>
-    DeveloperStub.verifyResetPassword(PasswordResetRequest(email.toLaxEmail))
+    DeveloperStub.verifyResetPassword(EmailIdentifier(email.toLaxEmail))
   }
 
   Given("""^I click on a valid password reset link for code '(.*)'$""") { resetPwdCode: String =>
@@ -169,7 +170,12 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, None), OK, Json.toJson(userAuthenticationResponse).toString())
+    Stubs.setupEncryptedPostRequest(
+      "/authenticate",
+      SessionCreateWithDeviceRequest(developer.email, password, Some(mfaMandatedForUser), None),
+      OK,
+      Json.toJson(userAuthenticationResponse).toString()
+    )
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/$sessionId", OK)
