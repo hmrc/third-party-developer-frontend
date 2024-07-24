@@ -21,7 +21,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, SessionId => _, _}
 import uk.gov.hmrc.play.http.metrics.common.API
@@ -39,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 object ThirdPartyDeveloperConnector {
-  case class EmailForResetResponse(email: LaxEmailAddress)
   case class CoreUserDetails(email: LaxEmailAddress, id: UserId)
 }
 
@@ -157,10 +155,8 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[LaxEmailAddress] = {
-    implicit val EmailForResetResponseReads: Reads[EmailForResetResponse] = Json.reads[EmailForResetResponse]
-
     metrics.record(api) {
-      http.GET[ErrorOr[EmailForResetResponse]](s"$serviceBaseUrl/reset-password?code=$code")
+      http.GET[ErrorOr[EmailIdentifier]](s"$serviceBaseUrl/reset-password?code=$code")
         .map {
           case Right(e)                                          => e.email
           case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => throw new InvalidResetCode

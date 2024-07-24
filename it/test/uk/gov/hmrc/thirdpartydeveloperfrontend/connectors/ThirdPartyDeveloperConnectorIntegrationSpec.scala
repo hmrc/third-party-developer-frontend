@@ -287,16 +287,13 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     "successfully validate reset code" in new Setup {
       val code = "ABC123"
 
-      import ThirdPartyDeveloperConnector.EmailForResetResponse
-      implicit val writes: OWrites[EmailForResetResponse] = Json.writes[EmailForResetResponse]
-
       stubFor(
         get(urlPathEqualTo("/reset-password"))
           .withQueryParam("code", equalTo(code))
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withJsonBody(EmailForResetResponse(email))
+              .withJsonBody(EmailIdentifier(email))
           )
       )
       await(underTest.fetchEmailForResetCode(code)) shouldBe email
