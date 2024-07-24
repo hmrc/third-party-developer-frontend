@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, Mfa
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
 
 @Singleton
@@ -58,7 +57,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
 
   def verifyMfa(userId: UserId, mfaId: MfaId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/verification", VerifyMfaRequest(code))
+      http.POST[VerifyMfaCodeRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/verification", VerifyMfaCodeRequest(code))
         .map {
           case Right(())                                         => true
           case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false

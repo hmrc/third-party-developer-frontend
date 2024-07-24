@@ -29,7 +29,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
 
 object MfaStub {
 
@@ -62,7 +61,7 @@ object MfaStub {
   def setupVerificationOfAccessCode(developer: User, mfaId: MfaId): Unit = {
     stubFor(
       post(urlPathEqualTo(s"/developer/${developer.userId.value}/mfa/$mfaId/verification"))
-        .withRequestBody(equalTo(Json.toJson(VerifyMfaRequest(accessCode)).toString()))
+        .withRequestBody(equalTo(Json.toJson(VerifyMfaCodeRequest(accessCode)).toString()))
         .willReturn(aResponse()
           .withStatus(NO_CONTENT))
     )

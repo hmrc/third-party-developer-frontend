@@ -34,7 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
@@ -293,7 +292,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
   "verify MFA" should {
     val code             = "12341234"
-    val verifyMfaRequest = VerifyMfaRequest(code)
+    val verifyMfaRequest = VerifyMfaCodeRequest(code)
 
     "return false if verification fails due to InvalidCode" in new Setup {
       val url = s"/developer/$userId/mfa/$mfaId/verification"
