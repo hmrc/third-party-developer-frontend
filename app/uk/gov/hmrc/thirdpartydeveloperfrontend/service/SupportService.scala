@@ -27,6 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, Eithe
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, DeskproHorizonConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{ApplyForPrivateApiAccessForm, SupportData, SupportDetailsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -42,14 +43,14 @@ class SupportService @Inject() (
 
   val ET = EitherTHelper.make[Throwable]
 
-  private def fetchSupportFlow(sessionId: String): Future[SupportFlow] = {
+  private def fetchSupportFlow(sessionId: SupportSessionId): Future[SupportFlow] = {
     flowRepository.fetchBySessionIdAndFlowType[SupportFlow](sessionId) map {
       case Some(flow) => flow
       case None       => SupportFlow(sessionId, "unknown", None)
     }
   }
 
-  def getSupportFlow(sessionId: String): Future[SupportFlow] = {
+  def getSupportFlow(sessionId: SupportSessionId): Future[SupportFlow] = {
     for {
       flow      <- fetchSupportFlow(sessionId)
       savedFlow <- flowRepository.saveFlow(flow)
@@ -60,7 +61,7 @@ class SupportService @Inject() (
     flowRepository.saveFlow(fn(flow))
   }
 
-  def setPrivateApiChoice(sessionId: String, apiChoice: String): Future[Either[Throwable, SupportFlow]] = {
+  def setPrivateApiChoice(sessionId: SupportSessionId, apiChoice: String): Future[Either[Throwable, SupportFlow]] = {
     (
       for {
         flow       <- ET.liftF(fetchSupportFlow(sessionId))
@@ -70,7 +71,7 @@ class SupportService @Inject() (
     ).value
   }
 
-  def createFlow(sessionId: String, entrypoint: String): Future[SupportFlow] = {
+  def createFlow(sessionId: SupportSessionId, entrypoint: String): Future[SupportFlow] = {
     flowRepository.saveFlow(SupportFlow(sessionId, entrypoint, None))
   }
 

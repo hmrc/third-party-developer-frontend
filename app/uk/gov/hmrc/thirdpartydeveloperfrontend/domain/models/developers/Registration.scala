@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
+package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
 
 import play.api.libs.json._
 
@@ -26,7 +26,7 @@ object Registration {
   implicit val registrationFmt: OFormat[Registration] = Json.format[Registration]
 }
 
-trait RegistrationDownstreamResponse
+sealed trait RegistrationDownstreamResponse
 
 case object RegistrationSuccessful extends RegistrationDownstreamResponse
 

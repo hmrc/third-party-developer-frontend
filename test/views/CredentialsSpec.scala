@@ -31,9 +31,11 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class CredentialsSpec extends CommonViewSpec
@@ -41,7 +43,7 @@ class CredentialsSpec extends CommonViewSpec
     with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData
+    with UserTestData
     with FixedClock {
 
   trait Setup {
@@ -53,8 +55,8 @@ class CredentialsSpec extends CommonViewSpec
   }
 
   "Credentials page" should {
-    val request   = FakeRequest().withCSRFToken
-    val developer = standardDeveloper.loggedIn
+    val request          = FakeRequest().withCSRFToken
+    val developerSession = standardDeveloper.loggedIn
 
     val application = Application(
       ApplicationId.random,
@@ -66,7 +68,7 @@ class CredentialsSpec extends CommonViewSpec
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(developer.email.asAdministratorCollaborator),
+      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
       state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant),
       checkInformation = None
@@ -75,7 +77,7 @@ class CredentialsSpec extends CommonViewSpec
     val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX)
 
     "display the credentials page for admins" in new Setup {
-      val page: Html = credentialsView.render(application, request, developer, messagesProvider, appConfig)
+      val page: Html = credentialsView.render(application, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -84,8 +86,8 @@ class CredentialsSpec extends CommonViewSpec
     }
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
-      val developerApp: Application = sandboxApplication.copy(collaborators = Set(developer.email.asDeveloperCollaborator))
-      val page: Html                = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
+      val developerApp: Application = sandboxApplication.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
+      val page: Html                = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -94,8 +96,8 @@ class CredentialsSpec extends CommonViewSpec
     }
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
-      val developerApp: Application = application.copy(collaborators = Set(developer.email.asDeveloperCollaborator))
-      val page: Html                = credentialsView.render(developerApp, request, developer, messagesProvider, appConfig)
+      val developerApp: Application = application.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
+      val page: Html                = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

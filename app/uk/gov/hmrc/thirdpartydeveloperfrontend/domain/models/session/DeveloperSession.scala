@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers
-
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session
 
 import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 
-case class DeveloperSession(session: Session) {
-  val developer: Developer         = session.developer
-  val email: LaxEmailAddress       = developer.email
-  val loggedInState: LoggedInState = session.loggedInState
+case class DeveloperSession(session: UserSession) {
+  // lazy val developer: User              = session.developer
+  lazy val email: LaxEmailAddress       = session.developer.email
+  lazy val loggedInState: LoggedInState = session.loggedInState
 
-  val displayedName: String = s"${developer.firstName} ${developer.lastName}"
+  lazy val displayedName: String = session.developer.displayedName
 
-  val displayedNameEncoded: String =
-    URLEncoder.encode(displayedName, StandardCharsets.UTF_8.toString)
-
-  val loggedInName: Option[String] =
+  lazy val loggedInName: Option[String] =
     if (loggedInState.isLoggedIn) {
       Some(displayedName)
     } else {
@@ -46,23 +42,11 @@ object DeveloperSession {
 
   def apply(
       loggedInState: LoggedInState,
-      sessionId: String,
-      developer: Developer
+      sessionId: UserSessionId,
+      developer: User
     ): DeveloperSession = {
     new DeveloperSession(
-      Session(sessionId = sessionId, developer = developer, loggedInState = loggedInState)
+      UserSession(sessionId, developer = developer, loggedInState = loggedInState)
     )
   }
-}
-
-sealed trait UserStatus
-
-case object loggedInDeveloper extends UserStatus
-
-case object AtLeastPartLoggedInEnablingMfa extends UserStatus
-
-case class User(email: LaxEmailAddress, verified: Option[Boolean])
-
-object User {
-  implicit val format: Format[User] = Json.format[User]
 }

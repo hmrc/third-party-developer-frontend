@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails
 @import views.helper.IdFormatter
@@ -27,7 +27,7 @@
 
 @(app: Application, details: Seq[ApiDetails])(
   implicit request: play.api.mvc.Request[Any],
-  loggedIn: DeveloperSession,
+  loggedIn: UserSession,
   messages: Messages,
   applicationConfig: ApplicationConfig
 )

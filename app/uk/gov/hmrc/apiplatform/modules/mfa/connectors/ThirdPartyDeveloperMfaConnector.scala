@@ -21,29 +21,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector._
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.VerifyMfaRequest
-
-object ThirdPartyDeveloperMfaConnector {
-
-  trait RegisterSmsResponse
-  case class RegisterSmsSuccessResponse(mfaId: MfaId, mobileNumber: String) extends RegisterSmsResponse
-  case class RegisterSmsFailureResponse()                                   extends RegisterSmsResponse
-
-  case class RegisterAuthAppResponse(mfaId: MfaId, secret: String)
-
-  implicit val registerAuthAppResponseFormat: OFormat[RegisterAuthAppResponse]       = Json.format[RegisterAuthAppResponse]
-  implicit val registerSmsSuccessResponseFormat: OFormat[RegisterSmsSuccessResponse] = Json.format[RegisterSmsSuccessResponse]
-}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
 
 @Singleton
 class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
@@ -58,16 +45,19 @@ class ThirdPartyDeveloperMfaConnector @Inject() (http: HttpClient, config: Appli
     }
   }
 
-  def createMfaSms(userId: UserId, mobileNumber: String)(implicit hc: HeaderCarrier): Future[RegisterSmsResponse] = {
+  def createMfaSms(userId: UserId, mobileNumber: String)(implicit hc: HeaderCarrier): Future[Option[RegisterSmsResponse]] = {
     metrics.record(api) {
-      http.POST[CreateMfaSmsRequest, RegisterSmsSuccessResponse](s"$serviceBaseUrl/developer/$userId/mfa/sms", CreateMfaSmsRequest(mobileNumber))
-        .recover { case _ => RegisterSmsFailureResponse() }
+      http.POST[CreateMfaSmsRequest, RegisterSmsResponse](s"$serviceBaseUrl/developer/$userId/mfa/sms", CreateMfaSmsRequest(mobileNumber))
+        .map(Some(_))
+        .recover {
+          case _ => None
+        }
     }
   }
 
   def verifyMfa(userId: UserId, mfaId: MfaId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
-      http.POST[VerifyMfaRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/verification", VerifyMfaRequest(code))
+      http.POST[VerifyMfaCodeRequest, ErrorOrUnit](s"$serviceBaseUrl/developer/$userId/mfa/$mfaId/verification", VerifyMfaCodeRequest(code))
         .map {
           case Right(())                                         => true
           case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => false

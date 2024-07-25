@@ -25,22 +25,24 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SelectMfaView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SelectMfaViewSpec extends CommonViewSpec
     with WithCSRFAddToken
-    with DeveloperTestData
+    with UserTestData
     with DeveloperSessionBuilder
     with LocalUserIdTracker with StubMessagesFactory {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
-  val selectMfaViewView: SelectMfaView    = app.injector.instanceOf[SelectMfaView]
+  implicit val loggedIn: UserSession   = JoeBloggs.loggedIn
+  val selectMfaViewView: SelectMfaView = app.injector.instanceOf[SelectMfaView]
 
   "SelectMfaView" should {
     "render correctly with Text Message selected as default" in {

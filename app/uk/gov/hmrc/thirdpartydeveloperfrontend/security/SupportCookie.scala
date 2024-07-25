@@ -21,18 +21,12 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvi
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 
 trait SupportCookie extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
   self: BaseController =>
 
-  def extractSupportSessionIdFromCookie(request: RequestHeader): Option[String] = {
-    request.cookies.get(supportCookieName) match {
-      case Some(cookie) => decodeCookie(cookie.value)
-      case _            => None
-    }
-  }
-
-  def withSupportCookie(result: Result, sessionId: String): Result = {
+  def withSupportCookie(result: Result, sessionId: SupportSessionId): Result = {
     result.withCookies(createSupportCookie(sessionId))
   }
 }

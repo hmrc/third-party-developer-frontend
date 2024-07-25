@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session
 
-import play.api.libs.json._
-
-case class VerifyMfaRequest(code: String)
-
-object VerifyMfaRequest {
-  implicit val format: OFormat[VerifyMfaRequest] = Json.format[VerifyMfaRequest]
-}
+class DeviceSessionInvalid(message: Option[String] = None) extends RuntimeException(message.orNull)

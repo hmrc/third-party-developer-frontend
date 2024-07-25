@@ -32,7 +32,9 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm, GroupedSubscriptions, PageData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -42,7 +44,7 @@ class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with FixedClock {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
@@ -73,7 +75,7 @@ class SubscriptionsSpec extends CommonViewSpec
   )
 
   "Subscriptions page" should {
-    val developer = buildDeveloperWithRandomId("Test".toLaxEmail, "Test", "Test", None).loggedIn
+    val developer = buildUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
     val baseState = ApplicationState(State.PRODUCTION, Some("somebody@example.com"), Some("somebody"), Some(""), instant)
 
     val productionApplicationPendingGatekeeperApproval    = buildApplication(baseState.copy(name = State.PENDING_GATEKEEPER_APPROVAL), Environment.PRODUCTION)

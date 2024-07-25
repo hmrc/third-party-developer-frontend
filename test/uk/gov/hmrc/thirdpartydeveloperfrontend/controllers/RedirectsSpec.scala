@@ -30,9 +30,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -43,18 +44,16 @@ class RedirectsSpec
     with WithCSRFAddToken
     with TestApplications
     with CollaboratorTracker
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with RedirectsServiceMockModule {
     val applicationId = "1234"
     val clientId      = ClientId("clientId123")
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-    val loggedInDeveloper = DeveloperSession(session)
+    val developer = buildTrackedUser()
+    val sessionId = UserSessionId.random
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val redirectUris = List("https://www.example.com", "https://localhost:8080").map(RedirectUri.unsafeApply)
 
@@ -88,7 +87,7 @@ class RedirectsSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     override def givenApplicationExists(application: Application): Unit = {
-      givenApplicationAction(application, loggedInDeveloper)
+      givenApplicationAction(application, session)
     }
 
     def redirectsShouldRenderThePage(application: Application, shouldShowDeleteButton: Boolean) = {
@@ -227,7 +226,7 @@ class RedirectsSpec
     }
 
     def changeRedirectUriActionShouldRenderError(originalRedirectUri: String, newRedirectUri: String) = {
-      val application = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
+      val application = anApplication(adminEmail = session.developer.email).withRedirectUris(redirectUris)
       givenApplicationExists(application)
 
       val result = underTest.changeRedirectAction(application.id)(
@@ -292,7 +291,7 @@ class RedirectsSpec
   "redirects" should {
     "return the redirects page with no redirect URIs for an application with no redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(List.empty),
         shouldShowDeleteButton = false
       )
@@ -300,7 +299,7 @@ class RedirectsSpec
 
     "return the redirects page with some redirect URIs for an admin and an application with some redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         shouldShowDeleteButton = true
       )
@@ -308,7 +307,7 @@ class RedirectsSpec
 
     "return the redirects page with some redirect URIs for a developer and an application with some redirect URIs" in new Setup {
       redirectsShouldRenderThePage(
-        anApplication(developerEmail = loggedInDeveloper.email)
+        anApplication(developerEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         shouldShowDeleteButton = false
       )
@@ -317,30 +316,30 @@ class RedirectsSpec
 
   "addRedirect" should {
     "return the add redirect page for an admin on a production application" in new Setup {
-      addRedirectShouldRenderThePage(anApplication(adminEmail = loggedInDeveloper.email), OK, shouldShowAmendControls = true)
+      addRedirectShouldRenderThePage(anApplication(adminEmail = session.developer.email), OK, shouldShowAmendControls = true)
     }
 
     "return the add redirect page for a developer on a production application" in new Setup {
-      addRedirectShouldRenderThePage(anApplication(developerEmail = loggedInDeveloper.email), FORBIDDEN, shouldShowAmendControls = false)
+      addRedirectShouldRenderThePage(anApplication(developerEmail = session.developer.email), FORBIDDEN, shouldShowAmendControls = false)
     }
   }
 
   "addRedirectAction" should {
     "redirect to the redirects page after adding a new redirect uri" in new Setup {
       addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         "https://localhost:1234"
       )
     }
 
     "re-render the add redirect page when submitted without a redirect uri" in new Setup {
-      addRedirectActionShouldRenderAddRedirectPageWithError(anApplication(adminEmail = loggedInDeveloper.email))
+      addRedirectActionShouldRenderAddRedirectPageWithError(anApplication(adminEmail = session.developer.email))
     }
 
     "re-render the add redirect page with an error message when trying to add a duplicate redirect uri" in new Setup {
       addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         "https://localhost:8080"
       )
@@ -350,7 +349,7 @@ class RedirectsSpec
   "deleteRedirect" should {
     "return the delete redirect page for an admin with a production application" in new Setup {
       deleteRedirectsShouldRenderThePage(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         OK,
         shouldShowDeleteControls = true,
@@ -360,7 +359,7 @@ class RedirectsSpec
 
     "return the delete redirect page for a developer with a sandbox application" in new Setup {
       deleteRedirectsShouldRenderThePage(
-        anApplication(environment = Environment.SANDBOX, developerEmail = loggedInDeveloper.email)
+        anApplication(environment = Environment.SANDBOX, developerEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         OK,
         shouldShowDeleteControls = true,
@@ -370,7 +369,7 @@ class RedirectsSpec
 
     "return forbidden for a developer with a production application" in new Setup {
       deleteRedirectsShouldRenderThePage(
-        anApplication(developerEmail = loggedInDeveloper.email)
+        anApplication(developerEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         FORBIDDEN,
         shouldShowDeleteControls = false,
@@ -382,7 +381,7 @@ class RedirectsSpec
   "deleteRedirectAction" should {
     "return the delete redirect confirmation page when page is submitted with no radio button selected" in new Setup {
       deleteRedirectsActionShouldRenderTheConfirmationPage(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         BAD_REQUEST,
         shouldShowDeleteControls = true,
@@ -392,7 +391,7 @@ class RedirectsSpec
 
     "return the redirects page having successfully deleted a redirect uri" in new Setup {
       deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         SEE_OTHER,
         redirectUris.head
@@ -401,7 +400,7 @@ class RedirectsSpec
 
     "return the redirects page having not deleted a redirect uri" in new Setup {
       deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         SEE_OTHER,
         redirectUris.head
@@ -412,7 +411,7 @@ class RedirectsSpec
   "changeRedirect" should {
     "return the change redirect page for an admin with a production application" in new Setup {
       changeRedirectUriShouldRenderThePage(
-        anApplication(adminEmail = loggedInDeveloper.email)
+        anApplication(adminEmail = session.developer.email)
           .withRedirectUris(redirectUris),
         OK,
         redirectUris.head.uri,
@@ -424,7 +423,7 @@ class RedirectsSpec
   "changeRedirectAction" should {
 
     "return the redirect page for an admin with a production application when submitted a changed uri" in new Setup {
-      val application         = anApplication(adminEmail = loggedInDeveloper.email).withRedirectUris(redirectUris)
+      val application         = anApplication(adminEmail = session.developer.email).withRedirectUris(redirectUris)
       val originalRedirectUri = redirectUris.head
       val newRedirectUri      = RedirectUri.unsafeApply("https://localhost:1111")
       givenApplicationExists(application)

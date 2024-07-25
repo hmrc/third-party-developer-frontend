@@ -26,27 +26,31 @@ import views.html.support.HelpWithUsingAnApiView
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
-  val sessionId          = "sessionId"
+class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
+  val supportSessionId   = SupportSessionId.random
   val apiServiceNameText = ApiDefinitionData.apiDefinition.serviceName.value
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val helpWithUsingAnApiView = app.injector.instanceOf[HelpWithUsingAnApiView]
+
+    lazy val request = FakeRequest()
+      .withSupport(underTest, cookieSigner)(supportSessionId)
+
+    fetchSessionByIdReturnsNone()
 
     val underTest = new HelpWithUsingAnApiController(
       mcc,
@@ -58,10 +62,8 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
       helpWithUsingAnApiView
     )
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val basicFlow                            = SupportFlow(sessionId, "unknown")
-    val appropriateFlow                      = basicFlow.copy(entrySelection = SupportData.UsingAnApi.id)
+    val basicFlow       = SupportFlow(supportSessionId, "unknown")
+    val appropriateFlow = basicFlow.copy(entrySelection = SupportData.UsingAnApi.id)
 
     def apiListShouldBeHidden(block: String)(implicit dom: Document) =
       dom.getElementById("conditional-" + block).classNames should contain("govuk-radios__conditional--hidden")
@@ -87,51 +89,11 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
       redirectLocation(result).value shouldBe "/developer/new-support/api/private-api"
     }
   }
-
-  trait IsLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-  }
-
-  trait NoSupportSessionExists {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait NotLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait IsPartLoggedInEnablingMFA {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
-  }
-
   "HelpWithUsingAnApiController" when {
     "using the delta functions" should {
       "work for chooseMakingCall" in {
         val form = HelpWithUsingAnApiForm("ignored", apiNameForCall = apiServiceNameText, "ignored", "ignored")
-        val flow = SupportFlow(sessionId, "untouched")
+        val flow = SupportFlow(supportSessionId, "untouched")
 
         val result = HelpWithUsingAnApiController.chooseMakingCall(form)(flow)
 
@@ -142,7 +104,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
       "work for chooseGettingExamples" in {
         val form = HelpWithUsingAnApiForm("ignored", "ignored", apiNameForExamples = apiServiceNameText, "ignored")
-        val flow = SupportFlow(sessionId, "untouched")
+        val flow = SupportFlow(supportSessionId, "untouched")
 
         val result = HelpWithUsingAnApiController.chooseGettingExamples(form)(flow)
 
@@ -153,7 +115,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
       "work for chooseReporting" in {
         val form = HelpWithUsingAnApiForm("ignored", "ignored", "ignored", apiNameForReporting = apiServiceNameText)
-        val flow = SupportFlow(sessionId, "untouched")
+        val flow = SupportFlow(supportSessionId, "untouched")
 
         val result = HelpWithUsingAnApiController.chooseReporting(form)(flow)
 
@@ -164,7 +126,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
 
       "work for choosePrivateApi" in {
         val form = HelpWithUsingAnApiForm("ignored", "ignored", "ignored", "ignored")
-        val flow = SupportFlow(sessionId, "untouched")
+        val flow = SupportFlow(supportSessionId, "untouched")
 
         val result = HelpWithUsingAnApiController.choosePrivateApi(form)(flow)
 
@@ -175,7 +137,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
     }
 
     "invoke page" should {
-      "render the helpWithUsingAnApi page when flow is appropriate" in new Setup with IsLoggedIn {
+      "render the helpWithUsingAnApi page when flow is appropriate" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.page())(request)
@@ -187,7 +149,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         apiListShouldBeHidden(SupportData.ReportingDocumentation.id)
       }
 
-      "render the previous page when flow is not appropriate" in new Setup with IsLoggedIn {
+      "render the previous page when flow is not appropriate" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
         val result = addToken(underTest.page())(request)
@@ -195,7 +157,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         shouldBeRedirectedToPreviousPage(result)
       }
 
-      "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
+      "render the previous page when there is no flow" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(privateApi = None))
 
         val result = addToken(underTest.page())(request)
@@ -205,7 +167,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
     }
 
     "invoke submit" should {
-      "handle option 'Making an API call'" in new Setup with IsLoggedIn {
+      "handle option 'Making an API call'" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()
 
@@ -222,7 +184,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         shouldBeRedirectedToDetailsPage(result)
       }
 
-      "handle option 'Getting examples for an API'" in new Setup with IsLoggedIn {
+      "handle option 'Getting examples for an API'" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()
 
@@ -238,7 +200,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         shouldBeRedirectedToDetailsPage(result)
       }
 
-      "handle option 'Reporting documentation for an API'" in new Setup with IsLoggedIn {
+      "handle option 'Reporting documentation for an API'" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()
 
@@ -255,7 +217,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         shouldBeRedirectedToDetailsPage(result)
       }
 
-      "handle option 'Private API Documentation'" in new Setup with IsLoggedIn {
+      "handle option 'Private API Documentation'" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
         SupportServiceMock.UpdateWithDelta.succeeds()
 
@@ -272,7 +234,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         shouldBeRedirectedToChoosePrivateApiPage(result)
       }
 
-      "handle bad request" in new Setup with IsLoggedIn {
+      "handle bad request" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val formRequest = request.withFormUrlEncodedBody("choice" -> "random stuff")
@@ -282,7 +244,7 @@ class HelpWithUsingAnApiControllerSpec extends BaseControllerSpec with WithCSRFA
         status(result) shouldBe BAD_REQUEST
       }
 
-      "submit valid request but no session" in new Setup with NoSupportSessionExists {
+      "submit valid request but no session" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "choice"                                            -> SupportData.ReportingDocumentation.id,
           SupportData.MakingAnApiCall.id + "-api-name"        -> "ignored",

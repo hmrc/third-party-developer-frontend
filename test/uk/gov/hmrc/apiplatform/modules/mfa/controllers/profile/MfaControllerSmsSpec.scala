@@ -25,9 +25,8 @@ import play.api.http.Status
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.RegisterSmsFailureResponse
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 
 class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
@@ -50,7 +49,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     "redirect to access code page when user is Logged in and form is valid and call to connector is successful" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
         when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
-          .thenReturn(Future.successful(registerSmsResponse))
+          .thenReturn(Future.successful(Some(registerSmsResponse)))
 
         private val result = underTest.setupSmsAction()(mobileNumberRequest())
 
@@ -63,7 +62,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     "redirect to access code page when user is Part Logged in and form is valid and call to connector is successful" in
       new SetupAuthAppSecurityPreferences with PartLogged {
         when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
-          .thenReturn(Future.successful(registerSmsResponse))
+          .thenReturn(Future.successful(Some(registerSmsResponse)))
 
         private val result = underTest.setupSmsAction()(mobileNumberRequest())
 
@@ -97,7 +96,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
       val request         = createRequest().withFormUrlEncodedBody("mobileNumber" -> badMobileNumber)
 
       when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *)(*))
-        .thenReturn(Future.successful(RegisterSmsFailureResponse()))
+        .thenReturn(Future.successful(None))
 
       val result = addToken(underTest.setupSmsAction())(request)
 

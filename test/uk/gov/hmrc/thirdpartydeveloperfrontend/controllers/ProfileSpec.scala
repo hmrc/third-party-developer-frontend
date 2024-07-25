@@ -29,22 +29,26 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ChangePassword
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup extends UserBuilder with LocalUserIdTracker with FixedClock with ApplicationServiceMock with SessionServiceMock {
     val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
     val profileView                   = app.injector.instanceOf[ProfileView]
     val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]
@@ -70,8 +74,8 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       profileDeleteSubmittedView
     )
 
-    val loggedInDeveloper: Developer = buildDeveloper()
-    val sessionId                    = "sessionId"
+    val loggedInDeveloper: User = buildTrackedUser()
+    val sessionId               = UserSessionId.random
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
@@ -86,7 +90,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
 
-      fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))
+      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(underTest.connector.updateProfile(eqTo(loggedInDeveloper.userId), requestCaptor.capture())(*))
@@ -108,8 +112,8 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*))
-        .thenReturn(Future.successful(Some(Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))))
-      when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
+        .thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))))
+      when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
         .thenReturn(failed(new InvalidCredentials()))
 
       val result = addToken(underTest.updatePassword())(request)
@@ -128,8 +132,8 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken with Develope
       )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN))))
-      when(underTest.connector.changePassword(eqTo(ChangePassword(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))))
+      when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
         .thenReturn(Future.successful(OK))
 
       val result = addToken(underTest.updatePassword())(request)

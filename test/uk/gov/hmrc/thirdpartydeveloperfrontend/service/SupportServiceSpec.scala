@@ -26,6 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.{SupportData, SupportDetailsForm}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproHorizonTicket, DeskproHorizonTicketMessage, DeskproHorizonTicketPerson}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, DeskproHorizonConnectorMockModule}
@@ -33,7 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SupportServiceSpec extends AsyncHmrcSpec {
 
-  val sessionId                        = "SESSIONID"
+  val sessionId                        = SupportSessionId.random
   val entryPoint                       = SupportData.UsingAnApi.id
   val savedFlow: SupportFlow           = SupportFlow(sessionId, entryPoint)
   val defaultFlow: SupportFlow         = SupportFlow(sessionId, "unknown")
@@ -81,9 +82,12 @@ class SupportServiceSpec extends AsyncHmrcSpec {
     }
 
     "updateWithDelta" in new Setup {
-      val result = await(underTest.updateWithDelta(f => f.copy(sessionId = "New"))(SupportFlow("Old", "?")))
+      val oldValue = SupportSessionId.random
+      val newValue = SupportSessionId.random
 
-      result shouldBe SupportFlow("New", "?")
+      val result = await(underTest.updateWithDelta(f => f.copy(sessionId = newValue))(SupportFlow(oldValue, "?")))
+
+      result shouldBe SupportFlow(newValue, "?")
     }
 
     "fetchAllPublicApis with a user" in new Setup {
@@ -101,7 +105,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       await(
         underTest.submitTicket(
           SupportFlow(
-            "123",
+            SupportSessionId.random,
             SupportData.FindingAnApi.id,
             None
           ),
@@ -131,7 +135,7 @@ class SupportServiceSpec extends AsyncHmrcSpec {
       await(
         underTest.submitTicket(
           SupportFlow(
-            "123",
+            SupportSessionId.random,
             SupportData.UsingAnApi.id,
             Some(SupportData.MakingAnApiCall.id),
             Some("Hello world")

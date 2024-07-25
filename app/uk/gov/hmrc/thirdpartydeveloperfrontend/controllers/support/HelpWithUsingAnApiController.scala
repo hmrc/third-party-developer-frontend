@@ -118,6 +118,6 @@ class HelpWithUsingAnApiController @Inject() (
 
   def form(): Form[HelpWithUsingAnApiForm] = HelpWithUsingAnApiForm.form
 
-  def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[List[ApiDefinition]] = supportService.fetchAllPublicApis(request.developerSession.map(_.developer.userId))
+  def extraData()(implicit request: MaybeUserRequest[AnyContent]): Future[List[ApiDefinition]] = supportService.fetchAllPublicApis(request.userSession.map(_.developer.userId))
 
 }

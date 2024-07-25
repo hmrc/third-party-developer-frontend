@@ -32,10 +32,10 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{PasswordChangeRequest, PasswordResetRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ChangePassword, PasswordReset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SessionService}
 
@@ -119,7 +119,7 @@ class Password @Inject() (
         Future.successful(BadRequest(resetView(formWithErrors.passwordGlobal().passwordNoMatchField()))),
       data => {
         val email = request.session.get("email").getOrElse(throw new RuntimeException("email not found in session"))
-        connector.reset(PasswordReset(email.toLaxEmail, data.password)) map {
+        connector.reset(PasswordResetRequest(email.toLaxEmail, data.password)) map {
           _ => Ok(signInView("You have reset your password", LoginForm.form, endOfJourney = true))
         } recover {
           case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
@@ -149,7 +149,7 @@ trait PasswordChange {
     ChangePasswordForm.form.bindFromRequest().fold(
       errors => Future.successful(BadRequest(error(errors.currentPasswordGlobal().passwordGlobal().passwordNoMatchField()))),
       data => {
-        val payload = ChangePassword(email, data.currentPassword, data.password)
+        val payload = PasswordChangeRequest(email, data.currentPassword, data.password)
         connector.changePassword(payload) map {
           _ => success
         } recover {

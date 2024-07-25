@@ -30,8 +30,10 @@ import play.api.http.Status._
 import play.api.libs.json.{Format, Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, PasswordResetRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 
 case class MfaSecret(secret: String)
 
@@ -40,10 +42,10 @@ object MfaSecret {
 }
 
 object TestContext {
-  var developer: Developer = _
+  var developer: User = _
 
-  var sessionIdForloggedInDeveloper: String = ""
-  var sessionIdForMfaMandatingUser: String  = ""
+  var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
+  var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
 }
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
@@ -63,7 +65,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
     val password  = result("Password")
-    val developer = buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"))
+    val developer = buildUser(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"))
 
     val mfaSetup = result("Mfa Setup")
 
@@ -120,7 +122,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   When("""^I attempt to Sign out when the session expires""") {
-    val sessionId = "sessionId"
+    val sessionId = UserSessionId.random
     Stubs.setupDeleteRequest(s"/session/$sessionId", NOT_FOUND)
     try {
       val link = driver.findElement(By.linkText("Sign out"))
@@ -136,7 +138,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
   }
 
   Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: String =>
-    DeveloperStub.verifyResetPassword(PasswordResetRequest(email.toLaxEmail))
+    DeveloperStub.verifyResetPassword(EmailIdentifier(email.toLaxEmail))
   }
 
   Given("""^I click on a valid password reset link for code '(.*)'$""") { resetPwdCode: String =>
@@ -160,15 +162,20 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  def setupLoggedOrPartLoggedInDeveloper(developer: Developer, password: String, loggedInState: LoggedInState): String = {
-    val sessionId = "sessionId_" + loggedInState.toString
+  def setupLoggedOrPartLoggedInDeveloper(developer: User, password: String, loggedInState: LoggedInState): UserSessionId = {
+    val sessionId = UserSessionId.random
 
-    val session                    = Session(sessionId, developer, loggedInState)
+    val session                    = UserSession(sessionId, loggedInState, developer)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
     val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
 
-    Stubs.setupEncryptedPostRequest("/authenticate", LoginRequest(developer.email, password, mfaMandatedForUser, None), OK, Json.toJson(userAuthenticationResponse).toString())
+    Stubs.setupEncryptedPostRequest(
+      "/authenticate",
+      SessionCreateWithDeviceRequest(developer.email, password, Some(mfaMandatedForUser), None),
+      OK,
+      Json.toJson(userAuthenticationResponse).toString()
+    )
 
     Stubs.setupRequest(s"/session/$sessionId", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/$sessionId", OK)

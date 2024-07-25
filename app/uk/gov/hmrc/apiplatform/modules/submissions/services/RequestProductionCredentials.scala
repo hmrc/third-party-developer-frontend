@@ -30,10 +30,10 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @Singleton
 class RequestProductionCredentials @Inject() (
@@ -47,7 +47,7 @@ class RequestProductionCredentials @Inject() (
 
   def requestProductionCredentials(
       application: Application,
-      requestedBy: DeveloperSession,
+      requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean
     )(implicit hc: HeaderCarrier
@@ -55,9 +55,19 @@ class RequestProductionCredentials @Inject() (
 
     def getCommand() = {
       if (isNewTouUplift) {
-        ApplicationCommands.SubmitTermsOfUseApproval(Actors.AppCollaborator(requestedBy.email), instant(), requestedBy.displayedName, requestedBy.email)
+        ApplicationCommands.SubmitTermsOfUseApproval(
+          Actors.AppCollaborator(requestedBy.developer.email),
+          instant(),
+          requestedBy.developer.displayedName,
+          requestedBy.developer.email
+        )
       } else {
-        ApplicationCommands.SubmitApplicationApprovalRequest(Actors.AppCollaborator(requestedBy.email), instant(), requestedBy.displayedName, requestedBy.email)
+        ApplicationCommands.SubmitApplicationApprovalRequest(
+          Actors.AppCollaborator(requestedBy.developer.email),
+          instant(),
+          requestedBy.developer.displayedName,
+          requestedBy.developer.email
+        )
       }
     }
 
@@ -90,7 +100,7 @@ class RequestProductionCredentials @Inject() (
 
   private def createDeskproTicketIfNeeded(
       app: Application,
-      requestedBy: DeveloperSession,
+      requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean,
       isSubmissionPassed: Boolean
@@ -102,11 +112,11 @@ class RequestProductionCredentials @Inject() (
           // Don't create a Deskpro ticket if the submission passed when it was automatically marked
           Future.successful(None)
         } else {
-          val ticket = DeskproTicket.createForTermsOfUseUplift(requestedBy.displayedName, requestedBy.email, app.name, app.id)
+          val ticket = DeskproTicket.createForTermsOfUseUplift(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
           deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
         }
       } else {
-        val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.displayedName, requestedBy.email, app.name, app.id)
+        val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
         deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
       }
     } else {

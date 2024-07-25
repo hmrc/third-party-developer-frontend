@@ -48,19 +48,19 @@ class SupportEnquiryController @Inject() (
 
   def supportEnquiryPage(useNewSupport: Boolean): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     lazy val prefilledForm = fullyloggedInDeveloper
-      .fold[Form[SupportEnquiryForm]](supportForm) { user =>
-        supportForm.bind(Map("fullname" -> user.displayedName, "emailaddress" -> user.email.text)).discardingErrors
+      .fold[Form[SupportEnquiryForm]](supportForm) { userSession =>
+        supportForm.bind(Map("fullname" -> userSession.developer.displayedName, "emailaddress" -> userSession.developer.email.text)).discardingErrors
       }
 
     if (useNewSupport)
       successful(Redirect(routes.SupportEnquiryInitialChoiceController.page()))
     else
-      successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.displayedName), prefilledForm)))
+      successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.developer.displayedName), prefilledForm)))
   }
 
   def submitSupportEnquiry() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     val requestForm = supportForm.bindFromRequest()
-    val displayName = fullyloggedInDeveloper.map(_.displayedName)
+    val displayName = fullyloggedInDeveloper.map(_.developer.displayedName)
     val userId      = fullyloggedInDeveloper.map(_.developer.userId)
 
     requestForm.fold(
@@ -73,7 +73,7 @@ class SupportEnquiryController @Inject() (
   }
 
   def thankyouPage() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val displayName = fullyloggedInDeveloper.map(_.displayedName)
+    val displayName = fullyloggedInDeveloper.map(_.developer.displayedName)
     successful(Ok(supportThankyouView("Thank you", displayName)))
   }
 

@@ -23,20 +23,20 @@ import views.html.include.Main
 import play.api.test.FakeRequest
 import play.twirl.api.{Html, HtmlFormat}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsById
 
-class MainTemplateSpec extends CommonViewSpec with DeveloperBuilder with LocalUserIdTracker {
+class MainTemplateSpec extends CommonViewSpec with UserBuilder with LocalUserIdTracker {
 
   "MainTemplateSpec" should {
-    val mainView                  = app.injector.instanceOf[Main]
-    val developer                 = buildDeveloper()
-    val session                   = Session("sessionId", developer, LoggedInState.LOGGED_IN)
-    implicit val developerSession = DeveloperSession(session)
-    implicit val request          = FakeRequest()
+    val mainView             = app.injector.instanceOf[Main]
+    val developer            = buildTrackedUser()
+    val session              = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
+    implicit val userSession = session
+    implicit val request     = FakeRequest()
 
     "Application title meta data set by configuration" in {
       when(appConfig.title).thenReturn("Application Title")

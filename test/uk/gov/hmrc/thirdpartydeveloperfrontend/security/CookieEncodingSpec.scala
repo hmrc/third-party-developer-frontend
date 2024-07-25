@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.service
+package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
+import play.api.mvc.Cookie
+import play.api.test.FakeRequest
 import play.api.{Application, Mode}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ConnectorMetrics, NoopConnectorMetrics}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
@@ -41,21 +44,23 @@ class CookieEncodingSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
     implicit override val appConfig: ApplicationConfig = mock[ApplicationConfig]
   }
 
-  "decode cookie" should {
+  "decode cookie for sessionId" should {
     "return session id when it is a valid cookie" in {
-      val cookieValue = "5ff9370ed10c6a1c9c12d6aa984cade22c407d22ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
+      val sessionId = UserSessionId.random
 
-      val expectedSessionId = "ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
+      val request = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", wrapper.encodeCookie(sessionId.toString())))
 
-      val decoded = wrapper.decodeCookie(cookieValue)
+      val decoded = wrapper.extractUserSessionIdFromCookie(request)
 
-      decoded shouldBe Some(expectedSessionId)
+      decoded shouldBe Some(sessionId)
     }
 
     "return none when it is not valid cookie" in {
       val invalidCookie = "6ff9370ed10c6a1c9c12d6aa984cade22c407d22ed777b3a-774f-4ecf-b7ac-d4f9751b0465"
 
-      val decoded = wrapper.decodeCookie(invalidCookie)
+      val request = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", invalidCookie))
+
+      val decoded = wrapper.extractUserSessionIdFromCookie(request)
 
       decoded shouldBe None
     }
@@ -63,7 +68,9 @@ class CookieEncodingSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
     "return none when it is very not valid cookie" in {
       val invalidCookie = ""
 
-      val decoded = wrapper.decodeCookie(invalidCookie)
+      val request = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", invalidCookie))
+
+      val decoded = wrapper.extractUserSessionIdFromCookie(request)
 
       decoded shouldBe None
     }

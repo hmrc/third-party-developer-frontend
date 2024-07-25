@@ -26,37 +26,42 @@ import play.api.mvc.{AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.MfaViewsValidator
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaService
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.{MobileNumberView, SmsAccessCodeView, SmsSetupCompletedView, SmsSetupReminderView, SmsSetupSkippedView}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, UserBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.AuthFakeRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class MfaControllerBaseSpec extends BaseControllerSpec
     with WithCSRFAddToken
-    with DeveloperBuilder
-    with LocalUserIdTracker
     with MfaDetailBuilder
     with MfaViewsValidator {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup
+      extends UserBuilder
+      with LocalUserIdTracker
+      with FixedClock
+      with SessionServiceMock {
+
     val secret            = "ABCDEFGH"
     val issuer            = "HMRC Developer Hub"
-    val sessionId         = "sessionId"
+    val sessionId         = UserSessionId.random
     val authAppMfaId      = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId          = verifiedSmsMfaDetail.id
-    val loggedInDeveloper = buildDeveloper()
+    val loggedInDeveloper = buildTrackedUser()
     val otpUri            = new URI("OTPURI")
     val correctCode       = "123123"
     val mobileNumber      = "07774567891"
@@ -108,10 +113,10 @@ class MfaControllerBaseSpec extends BaseControllerSpec
       override val qrCode: QRCode = mock[QRCode]
     }
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, loggedInDeveloper, loggedInState))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    val registerSmsResponse: RegisterSmsSuccessResponse = RegisterSmsSuccessResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)
+    val registerSmsResponse: RegisterSmsResponse = RegisterSmsResponse(mfaId = smsMfaId, mobileNumber = verifiedSmsMfaDetail.mobileNumber)
 
     def validateRedirectToLoginPage(result: Future[Result]) = {
       status(result) shouldBe Status.SEE_OTHER
@@ -119,12 +124,12 @@ class MfaControllerBaseSpec extends BaseControllerSpec
     }
 
     def createRequestWithInvalidSession(formFieldMap: Map[String, String] = Map.empty) = {
-      val invalidSessionId = "notASessionId"
-      when(underTest.sessionService.fetch(eqTo(invalidSessionId))(*))
+      val notPresentSessionId = UserSessionId.random
+      when(underTest.sessionService.fetch(eqTo(notPresentSessionId))(*))
         .thenReturn(Future.successful(None))
 
       val request = FakeRequest()
-        .withLoggedIn(underTest, implicitly)(invalidSessionId)
+        .withLoggedIn(underTest, implicitly)(notPresentSessionId)
         .withCSRFToken
 
       if (formFieldMap.isEmpty) request else request.withFormUrlEncodedBody(formFieldMap.toSeq: _*)
@@ -157,39 +162,39 @@ class MfaControllerBaseSpec extends BaseControllerSpec
 
   trait SetupUnprotectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
-      .thenReturn(successful(Some(buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None))))
+      .thenReturn(successful(Some(buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None))))
   }
 
   trait SetupAuthAppSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
       )))
   }
 
   trait SetupSmsSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail))
       )))
   }
 
   trait SetupWithUnverifiedSmsSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail.copy(verified = false)))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail.copy(verified = false)))
       )))
   }
 
   trait SetupSmsAndAuthAppSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildDeveloper(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail, verifiedAuthenticatorAppMfaDetail))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail, verifiedAuthenticatorAppMfaDetail))
       )))
   }
 
   trait SetupSuccessfulStart2SV extends Setup {
-    val registerAuthAppResponse = RegisterAuthAppResponse(authAppMfaId, secret)
+    val registerAuthAppResponse = RegisterAuthAppResponse(secret, authAppMfaId)
 
     when(underTest.otpAuthUri.apply(secret.toLowerCase(), issuer, loggedInDeveloper.email.text)).thenReturn(otpUri)
     when(underTest.qrCode.generateDataImageBase64(otpUri.toString)).thenReturn(qrImage)

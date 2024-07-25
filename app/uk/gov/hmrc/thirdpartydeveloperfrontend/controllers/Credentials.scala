@@ -101,7 +101,7 @@ class Credentials @Inject() (
   }
 
   def addClientSecret(applicationId: ApplicationId): Action[AnyContent] = canChangeClientSecrets(applicationId) { implicit request =>
-    val developer                   = request.developerSession.developer
+    val developer                   = request.userSession.developer
     val (secretValue, hashedSecret) = clientSecretHashingService.generateSecretAndHash()
     val cmd                         = ApplicationCommands.AddClientSecret(
       actor = Actors.AppCollaborator(developer.email),
@@ -131,7 +131,7 @@ class Credentials @Inject() (
 
   def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: ClientSecret.Id): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      val developer = request.developerSession.developer
+      val developer = request.userSession.developer
       val cmd       = ApplicationCommands.RemoveClientSecret(
         actor = Actors.AppCollaborator(developer.email),
         clientSecretId,

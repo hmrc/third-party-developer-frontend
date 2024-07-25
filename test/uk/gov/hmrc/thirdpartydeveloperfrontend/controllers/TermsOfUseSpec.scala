@@ -36,19 +36,21 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class TermsOfUseSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker
     with FixedClock {
 
@@ -68,11 +70,10 @@ class TermsOfUseSpec
       clock
     )
 
-    val loggedInDeveloper: Developer         = buildDeveloper()
-    val sessionId                            = "sessionId"
-    val session: Session                     = Session(sessionId, loggedInDeveloper, LoggedInState.LOGGED_IN)
+    val loggedInDeveloper: User              = buildTrackedUser()
+    val sessionId                            = UserSessionId.random
+    val userSession: UserSession             = UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper)
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developerSession: DeveloperSession   = DeveloperSession(session)
 
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
@@ -102,12 +103,12 @@ class TermsOfUseSpec
         checkInformation = checkInformation
       )
 
-      givenApplicationAction(application, developerSession)
+      givenApplicationAction(application, userSession)
 
       application
     }
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(session)))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(userSession)))
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
 

@@ -30,11 +30,11 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{P
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 
@@ -122,10 +122,10 @@ class ApplicationService @Inject() (
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
   }
 
-  def requestPrincipalApplicationDeletion(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestPrincipalApplicationDeletion(requester: UserSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
-    val requesterName  = requester.displayedName
-    val requesterEmail = requester.email
+    val requesterName  = requester.developer.displayedName
+    val requesterEmail = requester.developer.email
     val environment    = application.deployedTo
     val requesterRole  = roleForApplication(application, requesterEmail)
     val appId          = application.id
@@ -150,9 +150,9 @@ class ApplicationService @Inject() (
     }
   }
 
-  def deleteSubordinateApplication(requester: DeveloperSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deleteSubordinateApplication(requester: UserSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
-    val requesterEmail = requester.email
+    val requesterEmail = requester.developer.email
     val environment    = application.deployedTo
     val requesterRole  = roleForApplication(application, requesterEmail)
     val reasons        = "Subordinate application deleted by DevHub user"

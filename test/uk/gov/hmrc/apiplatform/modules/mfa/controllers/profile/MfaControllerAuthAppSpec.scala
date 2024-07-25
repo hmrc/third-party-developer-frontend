@@ -25,8 +25,9 @@ import play.api.http.Status
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId}
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 
 class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 

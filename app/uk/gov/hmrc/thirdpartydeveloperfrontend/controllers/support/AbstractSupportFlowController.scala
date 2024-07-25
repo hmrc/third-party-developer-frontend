@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
@@ -24,8 +23,9 @@ import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import play.twirl.api.HtmlFormat
 
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SupportService
@@ -37,8 +37,8 @@ abstract class AbstractSupportFlowController[F, E](
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
-  protected def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
-    request.developerSession.filter(_.loggedInState.isLoggedIn)
+  protected def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[UserSession] =
+    request.userSession.filter(_.loggedInState.isLoggedIn)
 
   def redirectBack(): Result
 
@@ -62,7 +62,7 @@ abstract class AbstractSupportFlowController[F, E](
   }
 
   private final def lookupFlow(implicit request: MaybeUserRequest[AnyContent]): Future[SupportFlow] = {
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(SupportSessionId.random)
     supportService.getSupportFlow(sessionId)
   }
 

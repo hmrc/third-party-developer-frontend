@@ -31,15 +31,17 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData
+    with UserTestData
     with FixedClock {
 
   trait Setup {
@@ -51,8 +53,8 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
   }
 
   "Client ID page" should {
-    val request   = FakeRequest().withCSRFToken
-    val developer = standardDeveloper.loggedIn
+    val request          = FakeRequest().withCSRFToken
+    val developerSession = standardDeveloper.loggedIn
 
     val application = Application(
       ApplicationId.random,
@@ -64,14 +66,14 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(developer.email.asAdministratorCollaborator),
+      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
       state = ApplicationState(updatedOn = instant),
       checkInformation = None
     )
 
     "render" in new Setup {
-      val page: Html = clientIdView.render(application, request, developer, messagesProvider, appConfig)
+      val page: Html = clientIdView.render(application, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

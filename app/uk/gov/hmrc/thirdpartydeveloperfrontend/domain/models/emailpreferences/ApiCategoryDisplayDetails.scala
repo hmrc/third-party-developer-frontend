@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatform.modules.mfa.models
-
-import java.util.UUID
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 
 import play.api.libs.json.{Json, OFormat}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
 
-case class DeviceSession(deviceSessionId: UUID, userId: UserId)
+// TODO - make category an APICategory
+case class APICategoryDisplayDetails(category: String, name: String) {
 
-object DeviceSession {
-  implicit val forma: OFormat[DeviceSession] = Json.format[DeviceSession]
-
+  def toAPICategory(): ApiCategory = {
+    ApiCategory.unsafeApply(category)
+  }
 }
 
-class DeviceSessionInvalid(message: Option[String] = None) extends RuntimeException(message.orNull)
+object APICategoryDisplayDetails {
+  implicit val formatApiCategory: OFormat[APICategoryDisplayDetails] = Json.format[APICategoryDisplayDetails]
+
+  def from(category: ApiCategory): APICategoryDisplayDetails = APICategoryDisplayDetails(category.toString, category.displayText)
+}

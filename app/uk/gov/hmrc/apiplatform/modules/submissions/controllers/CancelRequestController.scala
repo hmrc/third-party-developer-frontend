@@ -25,7 +25,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
@@ -74,8 +74,7 @@ class CancelRequestController @Inject() (
   import cats.instances.future.catsStdInstancesForFuture
   import SubmissionActionBuilders.ApplicationStateFilter
 
-  private val exec   = ec
-  private val ET     = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val ET     = EitherTHelper.make[Result]
   private val failed = (err: String) => BadRequestWithErrorMessage(err)
 
   def cancelRequestForProductionCredentialsPage(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
@@ -83,7 +82,7 @@ class CancelRequestController @Inject() (
   }
 
   def cancelRequestForProductionCredentialsAction(appId: ApplicationId) = withApplicationSubmission(ApplicationStateFilter.notProduction)(appId) { implicit request =>
-    lazy val goBackToRegularPage =
+    lazy val goBackToRegularPage: Result =
       if (request.submissionRequest.extSubmission.submission.status.isAnsweredCompletely) {
         Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(appId))
       } else {
@@ -93,7 +92,7 @@ class CancelRequestController @Inject() (
     val isValidSubmit: (String) => Boolean = (s) => s == "cancel-request" || s == "dont-cancel-request"
     val formValues                         = request.body.asFormUrlEncoded.get.filterNot(_._1 == "csrfToken")
     val reasons                            = "DevHub user cancelled request for production credentials"
-    val instigator                         = request.userId
+    val instigator: UserId                 = request.userId
     val deleteRequest                      = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant())
 
     val x =

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 
-import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -29,15 +27,18 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsFailureResponse, RegisterSmsSuccessResponse}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{DeviceSession, DeviceSessionInvalid, MfaId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, DeviceSessionId, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-    with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+    with GuiceOneAppPerSuite with UserBuilder with LocalUserIdTracker with WireMockExtensions {
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
@@ -59,9 +60,9 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     val mfaId     = MfaId.random
 
     val userPassword           = "password1!"
-    val sessionId              = "sessionId"
-    val loginRequest           = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
-    val deviceSessionId        = UUID.randomUUID()
+    val sessionId              = UserSessionId.random
+    val loginRequest           = SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)
+    val deviceSessionId        = DeviceSessionId.random
     val deviceSession          = DeviceSession(deviceSessionId, userId)
     val createDeviceSessionUrl = s"/device-session/user/$userId"
     val fetchDeviceSessionUrl  = s"/device-session/$deviceSessionId/user/$userId"
@@ -203,7 +204,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   "createMfaAuthApp" should {
     "return 201 with RegisterAuthAppResponse" in new Setup {
       val url      = s"/developer/$userId/mfa/auth-app"
-      val response = RegisterAuthAppResponse(mfaId, "secret")
+      val response = RegisterAuthAppResponse("secret", mfaId)
 
       stubFor(
         post(urlPathEqualTo(url))
@@ -232,8 +233,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
   "createMfaSms" should {
     val mobileNumber    = "0123456789"
     val request         = CreateMfaSmsRequest(mobileNumber)
-    val successResponse = RegisterSmsSuccessResponse(mfaId = MfaId.random, mobileNumber = mobileNumber)
-    val failureResponse = RegisterSmsFailureResponse()
+    val successResponse = Some(RegisterSmsResponse(mfaId = MfaId.random, mobileNumber = mobileNumber))
 
     "return 201 with RegisterSmsSuccessResponse" in new Setup {
       val url = s"/developer/$userId/mfa/sms"
@@ -259,7 +259,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(BAD_REQUEST)
           )
       )
-      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe failureResponse
+      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe None
     }
 
     "return 500 with RegisterSmsFailureResponse when invalid number provided for access codes" in new Setup {
@@ -273,7 +273,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(INTERNAL_SERVER_ERROR)
           )
       )
-      await(underTest.createMfaSms(userId, badMobileNumber)) shouldBe failureResponse
+      await(underTest.createMfaSms(userId, badMobileNumber)) shouldBe None
     }
 
     "return 404 when user is not found" in new Setup {
@@ -286,13 +286,13 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
               .withStatus(NOT_FOUND)
           )
       )
-      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe failureResponse
+      await(underTest.createMfaSms(userId, mobileNumber)) shouldBe None
     }
   }
 
   "verify MFA" should {
     val code             = "12341234"
-    val verifyMfaRequest = VerifyMfaRequest(code)
+    val verifyMfaRequest = VerifyMfaCodeRequest(code)
 
     "return false if verification fails due to InvalidCode" in new Setup {
       val url = s"/developer/$userId/mfa/$mfaId/verification"

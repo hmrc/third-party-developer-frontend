@@ -31,24 +31,27 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, LocalUserIdTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class UpliftJourneyServiceSpec
     extends AsyncHmrcSpec
-    with SampleSession
+    with SampleUserSession
     with SampleApplication
     with SubmissionsTestData
     with SubscriptionTestHelperSugar
     with SubscriptionsBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup
@@ -76,11 +79,9 @@ class UpliftJourneyServiceSpec
     val appName: String = "app"
     val apiVersion      = ApiVersionNbr("version")
 
-    val developer = buildDeveloper()
-    val sessionId = "sessionId"
-    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-
-    val loggedInDeveloper = DeveloperSession(session)
+    val developer = buildTrackedUser()
+    val sessionId = UserSessionId.random
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
     val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
@@ -173,37 +174,37 @@ class UpliftJourneyServiceSpec
   "confirmAndUplift" should {
     "return the new app id when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
       ApmConnectorMock.UpliftApplicationV2.willReturn(productionAppId)
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, session))
 
       result.isRight shouldBe true
       result shouldBe Right(productionAppId)
     }
 
     "fail when missing sell resell..." in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, None, None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, session))
 
       result.left.value shouldBe "No sell or resell or distribute set"
     }
 
     "fail when missing subscriptions" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), None))
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, session))
 
       result.left.value shouldBe "No subscriptions set"
     }
 
     "fail when no upliftable apis found" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set())
 
-      private val result = await(underTest.confirmAndUplift(sandboxAppId, loggedInDeveloper))
+      private val result = await(underTest.confirmAndUplift(sandboxAppId, session))
 
       result.left.value shouldBe "No apis found to subscribe to"
     }
@@ -211,11 +212,11 @@ class UpliftJourneyServiceSpec
 
   "apiSubscriptionData" should {
     "returns the names of apis when flow has selected them ignoring any that are not upliftable" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1, apiIdentifier2))
 
       private val result =
-        await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
+        await(underTest.apiSubscriptionData(sandboxAppId, session, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
 
       result match {
         case (names, flag) =>
@@ -226,11 +227,11 @@ class UpliftJourneyServiceSpec
     }
 
     "returns the name of selected api ignoring any that are not upliftable" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1, apiIdentifier2))
 
       private val result =
-        await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
+        await(underTest.apiSubscriptionData(sandboxAppId, session, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
 
       result match {
         case (names, flag) =>
@@ -241,11 +242,11 @@ class UpliftJourneyServiceSpec
     }
 
     "returns the name of selected api and false when there is only one upliftable api" in new Setup {
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aSingleSubscriptions)))
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       private val result =
-        await(underTest.apiSubscriptionData(sandboxAppId, loggedInDeveloper, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
+        await(underTest.apiSubscriptionData(sandboxAppId, session, List(testAPISubscriptionStatus1, testAPISubscriptionStatus2, testAPISubscriptionStatus3)))
 
       result match {
         case (names, flag) =>
@@ -259,12 +260,12 @@ class UpliftJourneyServiceSpec
   "createNewSubmission" should {
     "return the new submission when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
-      val cmd             = ApplicationCommands.ChangeApplicationSellResellOrDistribute(Actors.AppCollaborator(loggedInDeveloper.email), instant, sellResellOrDistribute)
+      val cmd             = ApplicationCommands.ChangeApplicationSellResellOrDistribute(Actors.AppCollaborator(session.developer.email), instant, sellResellOrDistribute)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(sampleApp)
 
-      private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, loggedInDeveloper))
+      private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, session))
 
       result.isRight shouldBe true
       result shouldBe Right(aSubmission)

@@ -262,7 +262,7 @@ class ManageSubscriptions @Inject() (
     }
 
   def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
-    def doEndOfJourneyRedirect(application: Application)(implicit hc: HeaderCarrier) = {
+    def doEndOfJourneyRedirect(application: Application) = {
       Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
     }
 

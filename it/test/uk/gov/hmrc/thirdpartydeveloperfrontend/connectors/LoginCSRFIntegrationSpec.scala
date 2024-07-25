@@ -36,16 +36,17 @@ import play.filters.csrf.CSRF
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, MfaDetailBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.FindUserIdRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, UserBuilder}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDeveloperStub.fetchDeveloper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
-    with BeforeAndAfterEach with DeveloperBuilder with LocalUserIdTracker with MfaDetailBuilder {
+    with BeforeAndAfterEach with UserBuilder with LocalUserIdTracker with MfaDetailBuilder with FixedClock {
 
   private lazy val config = Configuration(
     "play.filters.csrf.token.sign"                                      -> false,
@@ -74,7 +75,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   override val stubHost       = "localhost"
   override val wireMockUrl    = s"http://$stubHost:$stubPort"
   override val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
-  val sessionId               = "1234567890"
+  val sessionId               = UserSessionId.random
 
   private val contentType                = "Content-Type"
   private val contentTypeApplicationJson = "application/json"
@@ -97,7 +98,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     val loginRequest         = FakeRequest(POST, "/developer/login").withHeaders(headers)
     val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
     val csrftoken            = CSRF.getToken(loginRequestWithCSRF)
-    val developer            = buildDeveloper(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+    val developer            = buildTrackedUser(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
     val mfaId                = verifiedAuthenticatorAppMfaDetail.id
   }
 
@@ -145,13 +146,18 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                              |  "accessCodeRequired": false,
                              |  "mfaEnabled": false,
                              |  "session": {
-                             |    "sessionId": "$sessionId",
+                             |    "sessionId": "${sessionId.toString}",
                              |    "loggedInState": "LOGGED_IN",
                              |    "developer": {
                              |      "userId":"$userId",
-                             |      "email":"$userEmail",
+                             |      "email":"${userEmail.text}",
                              |      "firstName":"John",
                              |      "lastName": "Doe",
+                             |      "registrationTime": "${nowAsText}",
+                             |      "lastModified": "${nowAsText}",
+                             |      "verified": true,
+                             |      "mfaEnabled": false,
+                             |      "mfaDetails": [],
                              |      "emailPreferences": { "interests" : [], "topics": [] }
                              |    }
                              |  }

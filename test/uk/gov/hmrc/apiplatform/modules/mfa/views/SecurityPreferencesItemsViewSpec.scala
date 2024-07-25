@@ -28,20 +28,21 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.LocalDateConversionSyntax
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaDetail, MfaId, SmsMfaDetail}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {
   implicit val request: FakeRequest[AnyContentAsEmpty.type]      = FakeRequest()
   val securityPreferencesItemsView: SecurityPreferencesItemsView = app.injector.instanceOf[SecurityPreferencesItemsView]
 
-  val authAppMfaDetail: AuthenticatorAppMfaDetailSummary =
-    AuthenticatorAppMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDate.of(2022, 9, 1).asInstant, verified = true)
+  val authAppMfaDetail: AuthenticatorAppMfaDetail =
+    AuthenticatorAppMfaDetail(MfaId(java.util.UUID.randomUUID()), "name", LocalDate.of(2022, 9, 1).asInstant, verified = true)
 
-  val smsMfaDetail: SmsMfaDetailSummary =
-    SmsMfaDetailSummary(MfaId(java.util.UUID.randomUUID()), "name", LocalDate.of(2022, 9, 1).asInstant, mobileNumber = "1234567890", verified = true)
+  val smsMfaDetail: SmsMfaDetail =
+    SmsMfaDetail(MfaId(java.util.UUID.randomUUID()), "name", LocalDate.of(2022, 9, 1).asInstant, mobileNumber = "1234567890", verified = true)
 
   "SecurityPreferencesItems view" should {
 
@@ -79,7 +80,7 @@ class SecurityPreferencesItemsViewSpec extends CommonViewSpec with WithCSRFAddTo
     document.getElementById("description").text shouldBe "This is how you get your access codes."
     val mfaTypeField = Option(document.getElementById(s"mfaType-$rowId"))
     mfaTypeField should not be None
-    mfaTypeField.get.text shouldBe mfaDetail.mfaType.asText
+    mfaTypeField.get.text shouldBe mfaDetail.mfaType.displayText
 
     if (shouldShowCreatedDate) {
       document.getElementById(s"date-hint-$rowId").text shouldBe s"Added ${DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").withZone(ZoneOffset.UTC).format(mfaDetail.createdOn)}"

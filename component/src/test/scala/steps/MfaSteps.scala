@@ -16,8 +16,6 @@
 
 package steps
 
-import java.util.UUID
-
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -33,10 +31,11 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{LoginRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, LoggedInState, Session}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
     with CustomMatchers with MfaData {
@@ -104,7 +103,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
+      buildUser(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"), mfaDetails = List(smsMfaDetails))
 
     setUpDeveloperStub(developer, smsMfaId, password, None, deviceSessionFound = false)
 
@@ -119,7 +118,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(
+      buildUser(
         emailAddress = result("Email address").toLaxEmail,
         firstName = result("First name"),
         lastName = result("Last name"),
@@ -136,7 +135,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     val password = result("Password")
 
     val developer =
-      buildDeveloper(
+      buildUser(
         emailAddress = result("Email address").toLaxEmail,
         firstName = result("First name"),
         lastName = result("Last name"),
@@ -147,7 +146,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   }
 
-  def setUpDeveloperStub(developer: Developer, mfaId: MfaId, password: String, deviceSessionId: Option[UUID], deviceSessionFound: Boolean) = {
+  def setUpDeveloperStub(developer: User, mfaId: MfaId, password: String, deviceSessionId: Option[DeviceSessionId], deviceSessionFound: Boolean) = {
     driver.manage().deleteAllCookies()
     val mfaEnabled         = MfaDetailHelper.isAuthAppMfaVerified(developer.mfaDetails) || MfaDetailHelper.isSmsMfaVerified(developer.mfaDetails)
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
@@ -181,16 +180,16 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
   }
 
   def setupLoggedOrPartLoggedInDeveloper(
-      developer: Developer,
+      developer: User,
       password: String,
       loggedInState: LoggedInState,
-      deviceSessionId: Option[UUID],
+      deviceSessionId: Option[DeviceSessionId],
       accessCodeRequired: Boolean,
       mfaEnabled: Boolean
-    ): String = {
-    val sessionId = "sessionId_" + loggedInState.toString
+    ): UserSessionId = {
+    val sessionId = UserSessionId.random
 
-    val session = Session(sessionId, developer, loggedInState)
+    val session = UserSession(sessionId, loggedInState, developer)
 
     val actualSession = if (accessCodeRequired) None else Some(session)
 
@@ -202,7 +201,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
     Stubs.setupEncryptedPostRequest(
       "/authenticate",
-      LoginRequest(developer.email, password, mfaMandatedForUser, deviceSessionId),
+      SessionCreateWithDeviceRequest(developer.email, password, Some(mfaMandatedForUser), deviceSessionId),
       OK,
       Json.toJson(userAuthenticationResponse).toString()
     )

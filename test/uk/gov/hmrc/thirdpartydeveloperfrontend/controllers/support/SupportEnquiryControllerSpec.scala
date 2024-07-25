@@ -31,17 +31,19 @@ import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val supportEnquiryInitialChoiceView = app.injector.instanceOf[SupportEnquiryInitialChoiceView]
@@ -61,8 +63,9 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
     )
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val sessionId                            = "sessionId"
+    val developer                            = buildTrackedUser(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
+    val sessionId                            = UserSessionId.random
+    val supportSessionId                     = SupportSessionId.random
   }
 
   trait IsLoggedIn {
@@ -72,7 +75,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, developer))
   }
 
   trait NotLoggedIn {
@@ -91,7 +94,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer))
   }
 
   "SupportEnquiryController" when {

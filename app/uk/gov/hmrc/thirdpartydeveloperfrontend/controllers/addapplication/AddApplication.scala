@@ -30,6 +30,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -41,7 +42,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -90,7 +90,7 @@ class AddApplication @Inject() (
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
-  def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+  def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
     successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId)))
   }
 
@@ -117,7 +117,7 @@ class AddApplication @Inject() (
 
     // TODO - tidy as for comp
     upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { upliftData =>
-      flowService.resetFlow(request.developerSession).flatMap { _ =>
+      flowService.resetFlow(request.userSession).flatMap { _ =>
         upliftData.upliftableApplicationIds.toList match {
           case Nil                                                     => successful(BadRequest(Json.toJson(BadRequestError)))
           case appId :: Nil if !upliftData.hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
@@ -159,7 +159,7 @@ class AddApplication @Inject() (
       successful(Ok(addApplicationNameView(errors, environment)))
 
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService.createForUser(CreateApplicationRequest.fromAddApplicationJourney(request.developerSession, form, environment))
+      applicationService.createForUser(CreateApplicationRequest.fromAddApplicationJourney(request.userSession.developer, form, environment))
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
@@ -200,7 +200,7 @@ class AddApplication @Inject() (
       deployedTo match {
         case Environment.SANDBOX    => {
           val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
-          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), developerSession.developer.emailPreferences) map { missingSubscriptions =>
+          subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), userSession.developer.emailPreferences) map { missingSubscriptions =>
             if (alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
               Ok(addApplicationSubordinateSuccessView(application.name, applicationId))
             } else {

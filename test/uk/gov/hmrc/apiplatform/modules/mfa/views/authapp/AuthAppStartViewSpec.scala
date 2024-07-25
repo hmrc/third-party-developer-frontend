@@ -23,20 +23,22 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class AuthAppStartViewSpec
     extends CommonViewSpec
     with WithCSRFAddToken
-    with DeveloperTestData
+    with UserTestData
     with DeveloperSessionBuilder
     with LocalUserIdTracker
     with StubMessagesFactory {
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
   val authAppStartView                                      = app.injector.instanceOf[AuthAppStartView]
-  implicit val loggedIn: DeveloperSession                   = JoeBloggs.loggedIn
+  implicit val loggedIn: UserSession                        = JoeBloggs.loggedIn
 
   "AuthAppStartView view" should {
     "render correctly when form is valid" in {

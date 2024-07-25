@@ -17,9 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
-import uk.gov.hmrc.apiplatform.modules.common.utils.{FixedClock, JsonFormattersSpec}
+import uk.gov.hmrc.apiplatform.modules.common.utils.{BaseJsonFormattersSpec, FixedClock}
 
-class ClientSecretResponseSpec extends JsonFormattersSpec with FixedClock {
+class ClientSecretResponseSpec extends BaseJsonFormattersSpec with FixedClock {
   val anId             = ClientSecret.Id.random
   val fakeHashedSecret = "blahblahblah"
   val aClientSecret    = ClientSecretResponse(anId, "bob", instant, None)

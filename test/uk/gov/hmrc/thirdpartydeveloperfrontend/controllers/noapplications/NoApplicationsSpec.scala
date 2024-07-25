@@ -26,21 +26,24 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, SampleApplication, SampleSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class NoApplicationsSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with SampleSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -59,7 +62,7 @@ class NoApplicationsSpec
       mcc
     )
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -79,7 +82,7 @@ class NoApplicationsSpec
         private val result = noApplicationsController.noApplicationsPage()(loggedInRequest)
 
         status(result) shouldBe OK
-        contentAsString(result) should include(loggedInDeveloper.displayedName)
+        contentAsString(result) should include(userSession.developer.displayedName)
         contentAsString(result) should include("Sign out")
         contentAsString(result) should include("Using the Developer Hub")
         contentAsString(result) should not include "Sign in"

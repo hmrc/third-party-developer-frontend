@@ -31,10 +31,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
@@ -42,16 +45,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class AddApplicationSuccessSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
-    with DeveloperBuilder
+    with UserBuilder
     with DeveloperSessionBuilder
     with LocalUserIdTracker {
 
@@ -65,8 +68,8 @@ class AddApplicationSuccessSpec
     grantLength,
     Environment.PRODUCTION,
     Some("Description 1"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
+    Set(userSession.developer.email.asAdministratorCollaborator),
+    state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
     access =
       Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -81,8 +84,8 @@ class AddApplicationSuccessSpec
     grantLength,
     Environment.SANDBOX,
     Some("Description 2"),
-    Set(loggedInDeveloper.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
+    Set(userSession.developer.email.asAdministratorCollaborator),
+    state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
     access =
       Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red3"), RedirectUri.unsafeApply("https://red4")), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
@@ -124,7 +127,7 @@ class AddApplicationSuccessSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
@@ -149,7 +152,7 @@ class AddApplicationSuccessSpec
       // Have the lookup for subscribed apis not already in email preferences return an List containing some api definitions
       // so that we follow the new email preferences route through this journey.
       fetchAPIDetailsReturns(List(combinedApi("Test Api Definition")))
-      givenApplicationAction(subordinateApp, loggedInDeveloper)
+      givenApplicationAction(subordinateApp, userSession)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
@@ -163,13 +166,13 @@ class AddApplicationSuccessSpec
       // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
       fetchAPIDetailsReturns(List.empty)
-      givenApplicationAction(subordinateApp, loggedInDeveloper)
+      givenApplicationAction(subordinateApp, userSession)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
       titleOf(result) shouldBe "Application added to the sandbox - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("You can now use its credentials to test with sandbox APIs.")
       contentAsString(result) should include("Read the guidance on")
       contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")
@@ -183,13 +186,13 @@ class AddApplicationSuccessSpec
       // Have the lookup for subscribed apis not already in email preferences return an empty List so that we follow
       // the original route through this journey.
       fetchAPIDetailsReturns(List.empty)
-      givenApplicationAction(subordinateApp, loggedInDeveloper)
+      givenApplicationAction(subordinateApp, userSession)
 
       private val result = underTest.addApplicationSuccess(appId)(loggedInRequest)
 
       status(result) shouldBe OK
       titleOf(result) shouldBe "Application added to development - HMRC Developer Hub - GOV.UK"
-      contentAsString(result) should include(loggedInDeveloper.displayedName)
+      contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("You can now use its credentials to test with development APIs.")
       contentAsString(result) should include("Read the guidance on")
       contentAsString(result) should include("to find out which endpoints to use, creating a test user and types of test data.")

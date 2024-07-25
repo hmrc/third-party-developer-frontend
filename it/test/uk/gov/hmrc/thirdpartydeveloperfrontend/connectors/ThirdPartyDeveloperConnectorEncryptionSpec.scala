@@ -27,8 +27,8 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ChangePassword, PasswordReset}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, Registration}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{EmailAlreadyInUse, Registration}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
@@ -118,7 +118,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.reset(new PasswordReset(testEmail, "newPassword")))
+      await(underTest.reset(new PasswordResetRequest(testEmail, "newPassword")))
       verify(
         1,
         postRequestedFor(urlMatching("/reset-password"))
@@ -137,7 +137,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.changePassword(new ChangePassword(testEmail, "oldPassword", "newPassword")))
+      await(underTest.changePassword(new PasswordChangeRequest(testEmail, "oldPassword", "newPassword")))
       verify(
         1,
         postRequestedFor(urlMatching("/change-password"))
@@ -157,7 +157,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       )
 
       intercept[LockedAccount] {
-        await(underTest.changePassword(ChangePassword(testEmail, "oldPassword", "newPassword")))
+        await(underTest.changePassword(PasswordChangeRequest(testEmail, "oldPassword", "newPassword")))
       }
     }
 
@@ -171,7 +171,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       )
 
       intercept[UnverifiedAccount] {
-        await(underTest.changePassword(ChangePassword(testEmail, "oldPassword", "newPassword")))
+        await(underTest.changePassword(PasswordChangeRequest(testEmail, "oldPassword", "newPassword")))
       }
     }
 
@@ -185,7 +185,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       )
 
       intercept[InvalidCredentials] {
-        await(underTest.changePassword(ChangePassword(testEmail, "oldPassword", "newPassword")))
+        await(underTest.changePassword(PasswordChangeRequest(testEmail, "oldPassword", "newPassword")))
       }
     }
   }

@@ -23,24 +23,28 @@ import views.html.support.SupportEnquiryInitialChoiceView
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinitionData
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val supportEnquiryInitialChoiceView = app.injector.instanceOf[SupportEnquiryInitialChoiceView]
+
+    lazy val request = FakeRequest()
+      .withSupport(underTest, cookieSigner)(supportSessionId)
+
+    fetchSessionByIdReturnsNone()
 
     val underTest = new SupportEnquiryInitialChoiceController(
       mcc,
@@ -52,59 +56,16 @@ class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with 
       supportEnquiryInitialChoiceView
     )
 
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val sessionId                            = "sessionId"
-    val appropriateFlow                      = SupportFlow(sessionId, SupportData.SigningIn.id)
+    val supportSessionId = SupportSessionId.random
+    val appropriateFlow  = SupportFlow(supportSessionId, SupportData.SigningIn.id)
 
     SupportServiceMock.FetchAllPublicApis.succeeds(List(ApiDefinitionData.apiDefinition))
 
   }
 
-  trait IsLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-  }
-
-  trait NotLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait IsPartLoggedInEnablingMFA {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
-  }
-
   "SupportEnquiryController" when {
     "invoking page for new support" should {
-      "render the new support enquiry initial choice page when a user is logged in" in new Setup with IsLoggedIn {
-        val result = addToken(underTest.page())(request)
-
-        status(result) shouldBe OK
-        val dom = Jsoup.parse(contentAsString(result))
-
-        dom.getElementById(SupportData.FindingAnApi.id).attr("value") shouldEqual SupportData.FindingAnApi.id
-        dom.getElementById(SupportData.UsingAnApi.id).attr("value") shouldEqual SupportData.UsingAnApi.id
-        dom.getElementById(SupportData.SigningIn.id).attr("value") shouldEqual SupportData.SigningIn.id
-        dom.getElementById(SupportData.SettingUpApplication.id).attr("value") shouldEqual SupportData.SettingUpApplication.id
-      }
-
-      "render the new support enquiry initial choice page when a user is not logged in" in new Setup with NotLoggedIn {
+      "render the new support enquiry initial choice page" in new Setup {
         val result = addToken(underTest.page())(request)
 
         status(result) shouldBe OK
@@ -119,11 +80,9 @@ class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with 
     }
 
     "invovking submit" should {
-      "redirect to the new help with using an api page when the 'Using an API' option is selected" in new Setup with IsLoggedIn {
+      "redirect to the new help with using an api page when the 'Using an API' option is selected" in new Setup {
         val formRequest = request
           .withFormUrlEncodedBody("initialChoice" -> SupportData.UsingAnApi.id)
-
-        fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
         val result = addToken(underTest.submit())(formRequest)
 
@@ -131,11 +90,9 @@ class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with 
         redirectLocation(result) shouldBe Some("/developer/new-support/api/choose-api")
       }
 
-      "redirect to the generic support details page when any other option is selected" in new Setup with IsLoggedIn {
+      "redirect to the generic support details page when any other option is selected" in new Setup {
         val formRequest = request
           .withFormUrlEncodedBody("initialChoice" -> SupportData.FindingAnApi.id)
-
-        fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
 
         val result = addToken(underTest.submit())(formRequest)
 
@@ -143,13 +100,12 @@ class SupportEnquiryInitialChoiceControllerSpec extends BaseControllerSpec with 
         redirectLocation(result) shouldBe Some("/developer/new-support/details")
       }
 
-      "submit invalid request returns BAD_REQUEST" in new Setup with IsLoggedIn {
+      "submit invalid request returns BAD_REQUEST" in new Setup {
         val formRequest = request
           .withFormUrlEncodedBody(
             "xyz" -> "blah"
           )
 
-        fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.submit())(formRequest)

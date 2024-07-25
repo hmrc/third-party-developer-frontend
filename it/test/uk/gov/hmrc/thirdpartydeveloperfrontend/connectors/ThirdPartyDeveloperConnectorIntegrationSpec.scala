@@ -28,15 +28,21 @@ import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session, SessionInvalid, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WireMockExtensions}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
-    with GuiceOneAppPerSuite with DeveloperBuilder with LocalUserIdTracker with WireMockExtensions {
+    with GuiceOneAppPerSuite with UserBuilder with LocalUserIdTracker with WireMockExtensions with FixedClock {
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer.port" -> stubPort,
@@ -57,8 +63,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     val userId: UserId             = idOf(userEmail)
 
     val userPassword                                                     = "password1!"
-    val sessionId                                                        = "sessionId"
-    val loginRequest: LoginRequest                                       = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val sessionId                                                        = UserSessionId.random
+    val loginRequest: SessionCreateWithDeviceRequest                     = SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)
     val accessCode                                                       = "123456"
     val nonce                                                            = "ABC-123"
     val mfaId: MfaId                                                     = MfaId.random
@@ -97,20 +103,25 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
               .withBody(s"""{
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
-                           |  "developer": {
-                           |    "userId":"$userId",
-                           |    "email":"${userEmail.text}",
-                           |    "firstName":"John",
-                           |    "lastName": "Doe",
-                           |    "emailPreferences": { "interests" : [], "topics": [] }
-                           |  }
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
                            |}""".stripMargin)
           )
       )
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe Session(sessionId, buildDeveloper(userEmail), loggedInState = LoggedInState.LOGGED_IN)
+      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LOGGED_IN, buildTrackedUser(userEmail))
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -169,7 +180,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     "update session logged in state" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
       val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session: Session                                       = Session(sessionId, buildDeveloper(), LoggedInState.LOGGED_IN)
+      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser())
 
       stubFor(
         put(urlEqualTo(url))
@@ -219,17 +230,17 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Resend verification" should {
     "send verification mail" in new Setup {
-      val email: LaxEmailAddress                                                     = "john.smith@example.com".toLaxEmail
-      implicit val writes1: OWrites[ThirdPartyDeveloperConnector.FindUserIdRequest]  = Json.writes[ThirdPartyDeveloperConnector.FindUserIdRequest]
-      implicit val writes2: OWrites[ThirdPartyDeveloperConnector.FindUserIdResponse] = Json.writes[ThirdPartyDeveloperConnector.FindUserIdResponse]
+      val email: LaxEmailAddress                        = "john.smith@example.com".toLaxEmail
+      implicit val writes1: OWrites[FindUserIdRequest]  = Json.writes[FindUserIdRequest]
+      implicit val writes2: OWrites[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))
-          .withJsonRequestBody(ThirdPartyDeveloperConnector.FindUserIdRequest(email))
+          .withJsonRequestBody(FindUserIdRequest(email))
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withJsonBody(ThirdPartyDeveloperConnector.FindUserIdResponse(userId))
+              .withJsonBody(FindUserIdResponse(userId))
           )
       )
       stubFor(
@@ -245,7 +256,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Reset password" should {
     val email   = "user@example.com".toLaxEmail
-    val request = PasswordResetRequest(email)
+    val request = EmailIdentifier(email)
 
     "successfully request reset" in new Setup {
       stubFor(
@@ -276,25 +287,22 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     "successfully validate reset code" in new Setup {
       val code = "ABC123"
 
-      import ThirdPartyDeveloperConnector.EmailForResetResponse
-      implicit val writes: OWrites[EmailForResetResponse] = Json.writes[EmailForResetResponse]
-
       stubFor(
         get(urlPathEqualTo("/reset-password"))
           .withQueryParam("code", equalTo(code))
           .willReturn(
             aResponse()
               .withStatus(OK)
-              .withJsonBody(EmailForResetResponse(email))
+              .withJsonBody(EmailIdentifier(email))
           )
       )
       await(underTest.fetchEmailForResetCode(code)) shouldBe email
     }
 
     "successfully reset password" in new Setup {
-      val passwordReset: PasswordReset = PasswordReset("user@example.com".toLaxEmail, "newPassword")
-      val payload: JsValue             = Json.toJson(passwordReset)
-      val encryptedBody: SecretRequest = SecretRequest(payloadEncryption.encrypt(payload).as[String])
+      val passwordReset: PasswordResetRequest = PasswordResetRequest("user@example.com".toLaxEmail, "newPassword")
+      val payload: JsValue                    = Json.toJson(passwordReset)
+      val encryptedBody: SecretRequest        = SecretRequest(payloadEncryption.encrypt(payload).as[String])
 
       stubFor(
         post(urlPathEqualTo("/reset-password"))
@@ -309,7 +317,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "accountSetupQuestions" should {
-    val developer = buildDeveloper()
+    val developer = buildTrackedUser()
     val baseUrl   = s"/developer/account-setup/${developer.userId.value}"
 
     "successfully complete a developer account setup" in new Setup {
@@ -368,7 +376,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   }
 
   "change password" should {
-    val changePasswordRequest = ChangePassword("email@example.com".toLaxEmail, "oldPassword123", "newPassword321")
+    val changePasswordRequest = PasswordChangeRequest("email@example.com".toLaxEmail, "oldPassword123", "newPassword321")
     val payload               = Json.toJson(changePasswordRequest)
 
     "throw Invalid Credentials if the response is Unauthorised" in new Setup {
@@ -436,6 +444,10 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |      "email":"${userEmail.text}",
                            |      "firstName":"John",
                            |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaDetails": [],
                            |      "emailPreferences": { "interests" : [], "topics": [] }
                            |    }
                            |  }
@@ -449,7 +461,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
         mfaEnabled = false,
-        session = Some(Session(sessionId, buildDeveloper(userEmail), LoggedInState.LOGGED_IN))
+        session = Some(UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(userEmail)))
       )
     }
 
@@ -488,7 +500,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
 
-      intercept[InvalidCredentials](await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None))))
+      intercept[InvalidCredentials](await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None))))
     }
 
     "throw LockedAccount exception when the account is locked" in new Setup {
@@ -503,7 +515,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       )
 
       intercept[LockedAccount] {
-        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)))
+        await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)))
       }
     }
 
@@ -519,7 +531,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       )
 
       intercept[UnverifiedAccount] {
-        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)))
+        await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)))
       }
     }
 
@@ -534,7 +546,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       )
 
       intercept[UpstreamErrorResponse] {
-        await(underTest.authenticate(LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)))
+        await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)))
       }.statusCode shouldBe INTERNAL_SERVER_ERROR
     }
   }
@@ -552,21 +564,26 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
                            |{
                            |  "sessionId": "$sessionId",
                            |  "loggedInState": "LOGGED_IN",
-                           |  "developer": {
-                           |    "userId":"$userId",
-                           |    "email":"${userEmail.text}",
-                           |    "firstName":"John",
-                           |    "lastName": "Doe",
-                           |    "emailPreferences": { "interests" : [], "topics": [] }
-                           |  }
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
                            |}""".stripMargin)
           )
       )
 
-      val result: Session = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
+      val result: UserSession = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe Session(sessionId, buildDeveloper(emailAddress = userEmail), LoggedInState.LOGGED_IN)
+      result shouldBe UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(emailAddress = userEmail))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

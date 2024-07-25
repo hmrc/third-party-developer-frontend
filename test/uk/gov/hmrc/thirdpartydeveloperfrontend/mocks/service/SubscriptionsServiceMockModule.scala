@@ -23,9 +23,9 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
 
 trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -68,14 +68,14 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
     object RequestApiSubscription {
 
-      def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersionNbr) =
+      def succeedsFor(loggedInDeveloper: UserSession, app: Application, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
     }
 
     object RequestApiUnsubscribe {
 
-      def succeedsFor(loggedInDeveloper: DeveloperSession, app: Application, apiName: String, apiVersion: ApiVersionNbr) =
+      def succeedsFor(loggedInDeveloper: UserSession, app: Application, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
     }

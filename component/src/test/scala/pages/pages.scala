@@ -23,7 +23,7 @@ import utils.MfaData
 import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaType
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 
 trait FormPage extends WebPage {
   def dataError(name: String) = dataAttribute(s"[data-$name]")

@@ -33,12 +33,12 @@ import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailures, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -78,25 +78,25 @@ class ManageTeam @Inject() (
   }
 
   def addTeamMember(applicationId: ApplicationId): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.developerSession, createFraudNavModel(fraudPreventionConfig))))
+    Future.successful(Ok(addTeamMemberView(applicationViewModelFromApplicationRequest(), AddTeamMemberForm.form, request.userSession, createFraudNavModel(fraudPreventionConfig))))
   }
 
   def addTeamMemberAction(applicationId: ApplicationId): Action[AnyContent] =
     canEditTeamMembers(applicationId, alsoAllowTestingState = true) { implicit request =>
       val successRedirect = routes.ManageTeam.manageTeam(applicationId, None)
 
-      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds: DeveloperSession) = {
+      def handleAddTeamMemberView(a: ApplicationViewModel, f: Form[AddTeamMemberForm], ds: UserSession) = {
         addTeamMemberView.apply(a, f, ds, createFraudNavModel(fraudPreventionConfig))
       }
 
       def createBadRequestResult(formWithErrors: Form[AddTeamMemberForm]): PlayResult = {
-        val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], DeveloperSession) => Html = handleAddTeamMemberView
+        val viewFunction: (ApplicationViewModel, Form[AddTeamMemberForm], UserSession) => Html = handleAddTeamMemberView
 
         BadRequest(
           viewFunction(
             applicationViewModelFromApplicationRequest(),
             formWithErrors,
-            request.developerSession
+            request.userSession
           )
         )
       }
@@ -113,7 +113,7 @@ class ManageTeam @Inject() (
           }
 
         collaboratorService
-          .addTeamMember(request.application, form.email.toLaxEmail, role, request.developerSession.email)
+          .addTeamMember(request.application, form.email.toLaxEmail, role, request.userSession.developer.email)
           .map {
             _.fold(handleFailure, _ => Redirect(successRedirect))
           }
@@ -141,7 +141,7 @@ class ManageTeam @Inject() (
       form.confirm match {
         case Some("Yes") =>
           collaboratorService
-            .removeTeamMember(request.application, form.email.toLaxEmail, request.developerSession.email)
+            .removeTeamMember(request.application, form.email.toLaxEmail, request.userSession.developer.email)
             .map(_ => Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
         case _           => successful(Redirect(routes.ManageTeam.manageTeam(applicationId, None)))
       }

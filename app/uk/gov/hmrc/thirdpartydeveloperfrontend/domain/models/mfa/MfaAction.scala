@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
+package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa
 
-import play.api.libs.json._
+import scala.collection.immutable.ListSet
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
+sealed trait MfaAction
 
-final case class PasswordResetRequest(email: LaxEmailAddress)
+object MfaAction {
+  case object CREATE extends MfaAction
+  case object REMOVE extends MfaAction
 
-object PasswordResetRequest {
-  implicit val format: OFormat[PasswordResetRequest] = Json.format[PasswordResetRequest]
+  val values: ListSet[MfaAction] = ListSet(CREATE, REMOVE)
+
+  def apply(text: String): Option[MfaAction] = MfaAction.values.find(_.toString() == text.toUpperCase)
+  def unsafeApply(text: String): MfaAction   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaAction"))
 }

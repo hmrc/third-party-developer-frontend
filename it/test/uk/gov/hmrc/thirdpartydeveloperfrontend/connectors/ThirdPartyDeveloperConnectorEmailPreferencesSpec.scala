@@ -29,12 +29,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.FindUserIdResponse
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.FindUserIdResponse
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.SessionCreateWithDeviceRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, TaxRegimeInterests}
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
@@ -55,8 +57,8 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
 
     val userEmail: LaxEmailAddress                                 = "thirdpartydeveloper@example.com".toLaxEmail
     val userPassword                                               = "password1!"
-    val sessionId                                                  = "sessionId"
-    val loginRequest: LoginRequest                                 = LoginRequest(userEmail, userPassword, mfaMandatedForUser = false, None)
+    val sessionId                                                  = UserSessionId.random
+    val loginRequest: SessionCreateWithDeviceRequest               = SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)
     val accessCode                                                 = "123456"
     val nonce                                                      = "ABC-123"
     val mfaId: MfaId                                               = MfaId.random

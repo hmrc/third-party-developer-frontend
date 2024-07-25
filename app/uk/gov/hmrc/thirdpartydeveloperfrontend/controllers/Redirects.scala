@@ -72,7 +72,7 @@ class Redirects @Inject() (
 
   def addRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
-    val actor       = Actors.AppCollaborator(request.developerSession.email)
+    val actor       = Actors.AppCollaborator(request.userSession.developer.email)
 
     def handleValidForm(form: AddRedirectForm) = {
       if (application.hasRedirectUri(RedirectUri.unsafeApply(form.redirectUri))) {
@@ -104,7 +104,7 @@ class Redirects @Inject() (
 
   def deleteRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
-    val actor       = Actors.AppCollaborator(request.developerSession.email)
+    val actor       = Actors.AppCollaborator(request.userSession.developer.email)
 
     def handleValidForm(form: DeleteRedirectConfirmationForm) = {
       form.deleteRedirectConfirm match {
@@ -128,7 +128,7 @@ class Redirects @Inject() (
 
   def changeRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
     val application = request.application
-    val actor       = Actors.AppCollaborator(request.developerSession.email)
+    val actor       = Actors.AppCollaborator(request.userSession.developer.email)
 
     def handleValidForm(form: ChangeRedirectForm) = {
 

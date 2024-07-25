@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ApplyForPrivateApiAccessForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
@@ -32,12 +32,12 @@
   govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[DeveloperSession], chosenApiName: String, form: Form[ApplyForPrivateApiAccessForm], backUri: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[UserSession], chosenApiName: String, form: Form[ApplyForPrivateApiAccessForm], backUri: String)(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @devMain(
   form,
   title = "Apply for access to the @{chosenApiName} API",
-  userFullName = loggedIn.map(_.displayedName),
+  userFullName = loggedIn.map(_.developer.displayedName),
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {
@@ -61,7 +61,7 @@
           content = Text("Full name")
         ),
         classes = "govuk-!-width-full",
-        value = form("fullName").value.orElse(loggedIn.map(_.displayedName)),
+        value = form("fullName").value.orElse(loggedIn.map(_.developer.displayedName)),
         errorMessage = form.error("fullName").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )
@@ -81,7 +81,7 @@
           )
         ),
         classes = "govuk-!-width-full",
-        value = form("emailAddress").value.orElse(loggedIn.map(_.email.text)),
+        value = form("emailAddress").value.orElse(loggedIn.map(_.developer.email.text)),
         errorMessage = form.error("emailAddress").map(e => ErrorMessage(content = Text(messages(e.message))))
       )
     )

@@ -30,9 +30,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ChangePassword, PasswordReset}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidResetCode, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
@@ -73,7 +73,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         .thenReturn(Future.successful(OK))
 
     def mockConnectorUnverifiedForReset(email: LaxEmailAddress, password: String) =
-      when(mockConnector.reset(eqTo(PasswordReset(email, password)))(*))
+      when(mockConnector.reset(eqTo(PasswordResetRequest(email, password)))(*))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForRequestReset(email: LaxEmailAddress) =
@@ -81,7 +81,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForChangePassword(email: LaxEmailAddress, oldPassword: String, newPassword: String) =
-      when(mockConnector.changePassword(eqTo(ChangePassword(email, oldPassword, newPassword)))(*))
+      when(mockConnector.changePassword(eqTo(PasswordChangeRequest(email, oldPassword, newPassword)))(*))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForValidateReset(code: String) =

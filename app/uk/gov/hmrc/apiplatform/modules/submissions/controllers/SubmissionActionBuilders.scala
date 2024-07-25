@@ -34,7 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBui
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
-class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.developerSession, userRequest.msgRequest) {
+class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.userSession, userRequest.msgRequest) {
   lazy val submission         = extSubmission.submission
   lazy val answersToQuestions = submission.latestInstance.answersToQuestions
 }

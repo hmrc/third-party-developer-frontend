@@ -28,13 +28,13 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 
 @Singleton
 class UpliftJourneyService @Inject() (
@@ -47,13 +47,13 @@ class UpliftJourneyService @Inject() (
   ) extends ClockNow with EitherTHelper[String] {
   import cats.instances.future.catsStdInstancesForFuture
 
-  def confirmAndUplift(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
-    confirmAndUpliftV2(sandboxAppId, developerSession)
+  def confirmAndUplift(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+    confirmAndUpliftV2(sandboxAppId, userSession)
 
-  def confirmAndUpliftV1(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+  def confirmAndUpliftV1(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
-        flow             <- liftF(flowService.fetchFlow(developerSession))
+        flow             <- liftF(flowService.fetchFlow(userSession))
         subscriptionFlow <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
         apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
@@ -63,16 +63,16 @@ class UpliftJourneyService @Inject() (
     )
       .value
 
-  def confirmAndUpliftV2(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+  def confirmAndUpliftV2(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
-        flow                   <- liftF(flowService.fetchFlow(developerSession))
+        flow                   <- liftF(flowService.fetchFlow(userSession))
         sellResellOrDistribute <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
         subscriptionFlow       <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
         apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftData           = UpliftData(sellResellOrDistribute, apiIdsToSubscribeTo, developerSession.developer.email)
+        upliftData           = UpliftData(sellResellOrDistribute, apiIdsToSubscribeTo, userSession.developer.email)
         upliftedAppId       <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftData))
       } yield upliftedAppId
     )
@@ -80,29 +80,29 @@ class UpliftJourneyService @Inject() (
 
   def changeApiSubscriptions(
       sandboxAppId: ApplicationId,
-      developerSession: DeveloperSession,
+      userSession: UserSession,
       subscriptions: List[APISubscriptionStatus]
     )(implicit hc: HeaderCarrier
     ): Future[List[APISubscriptionStatus]] =
     (
       for {
-        flow                         <- flowService.fetchFlow(developerSession)
+        flow                         <- flowService.fetchFlow(userSession)
         subscriptionFlow              = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
         upliftableApiIds             <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
         subscriptionsWithFlowAdjusted = subscriptions.filter(SubscriptionsFilter(upliftableApiIds, subscriptionFlow))
       } yield subscriptionsWithFlowAdjusted
     )
 
-  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
+  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
-      _                       <- flowService.storeApiSubscriptions(apiSubscriptions, developerSession)
+      _                       <- flowService.storeApiSubscriptions(apiSubscriptions, userSession)
     } yield apiSubscriptions
 
   def apiSubscriptionData(
       sandboxAppId: ApplicationId,
-      developerSession: DeveloperSession,
+      userSession: UserSession,
       subscriptions: List[APISubscriptionStatus]
     )(implicit hc: HeaderCarrier
     ): Future[(Set[String], Boolean)] = {
@@ -113,7 +113,7 @@ class UpliftJourneyService @Inject() (
 
     for {
       upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
-      flow             <- flowService.fetchFlow(developerSession)
+      flow             <- flowService.fetchFlow(userSession)
       subscriptionFlow  = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
     } yield {
       val data: Set[String] =
@@ -130,17 +130,17 @@ class UpliftJourneyService @Inject() (
     }
   }
 
-  def createNewSubmission(appId: ApplicationId, application: Application, developerSession: DeveloperSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
+  def createNewSubmission(appId: ApplicationId, application: Application, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
     (
       for {
-        flow                   <- liftF(flowService.fetchFlow(developerSession))
+        flow                   <- liftF(flowService.fetchFlow(userSession))
         sellResellOrDistribute <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
 
         // Need to update the application with possible new value of sellResellOrDistribute,
         // but don't change app apart from that.
-        _ <- liftF(updateSellResellOrDistributeIfNeeded(application, sellResellOrDistribute, developerSession))
+        _ <- liftF(updateSellResellOrDistributeIfNeeded(application, sellResellOrDistribute, userSession))
 
-        submission <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, developerSession.email), "No submission returned")
+        submission <- fromOptionF(thirdPartyApplicationSubmissionsConnector.createSubmission(appId, userSession.developer.email), "No submission returned")
       } yield submission
     )
       .value
@@ -149,7 +149,7 @@ class UpliftJourneyService @Inject() (
   private def updateSellResellOrDistributeIfNeeded(
       application: Application,
       sellResellOrDistribute: SellResellOrDistribute,
-      developerSession: DeveloperSession
+      userSession: UserSession
     )(implicit hc: HeaderCarrier
     ) = {
     def existingSellResellOrDistribute = application.access match {
@@ -160,7 +160,7 @@ class UpliftJourneyService @Inject() (
     // Only save if the value is different
     if (Some(sellResellOrDistribute) != existingSellResellOrDistribute) {
       val cmd = ApplicationCommands.ChangeApplicationSellResellOrDistribute(
-        Actors.AppCollaborator(developerSession.email),
+        Actors.AppCollaborator(userSession.developer.email),
         instant(),
         sellResellOrDistribute
       )

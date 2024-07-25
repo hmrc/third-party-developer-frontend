@@ -16,14 +16,14 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
-@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
-@import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaAction
+@import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 
 @this(devMain: DevMain)
 
-@(secret: String, qrImg: String, mfaId: MfaId)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@(secret: String, qrImg: String, mfaId: MfaId)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
   title = "Set up your device",

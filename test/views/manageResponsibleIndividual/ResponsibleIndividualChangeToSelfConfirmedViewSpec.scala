@@ -22,12 +22,14 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfC
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.LoggedInState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, LocalUserIdTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
 
 class ResponsibleIndividualChangeToSelfConfirmedViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with LocalUserIdTracker with CollaboratorTracker with DeveloperTestData with DeveloperSessionBuilder with TestApplications {
+    with LocalUserIdTracker with CollaboratorTracker with UserTestData with DeveloperSessionBuilder with TestApplications {
 
   "Responsible Individual Change To Self Confirmed View" should {
     val application = anApplication()

@@ -61,7 +61,7 @@ class StartUsingYourApplicationController @Inject() (
   }
 
   def startUsingYourApplicationAction(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
-    val userEmail = request.developerSession.developer.email
+    val userEmail = request.userSession.developer.email
     val failure   = BadRequest(errorHandler.badRequestTemplate)
     val success   = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps())
     submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String, Unit]) => esu.fold(_ => failure, _ => success))

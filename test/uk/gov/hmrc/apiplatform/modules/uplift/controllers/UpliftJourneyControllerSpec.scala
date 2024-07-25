@@ -35,6 +35,11 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
@@ -42,21 +47,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
-    with SampleSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with SubmissionsTestData
     with WithCSRFAddToken
     with SubscriptionsBuilder
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker {
 
   trait Setup
@@ -108,12 +112,11 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val appName: String           = "app"
     val apiVersion: ApiVersionNbr = ApiVersionNbr("version")
 
-    val developer: Developer = buildDeveloper()
-    val sessionId            = "sessionId"
-    val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val developer: User      = buildTrackedUser()
+    val sessionId            = UserSessionId.random
+    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
-    val loggedInDeveloper: DeveloperSession = DeveloperSession(session)
-    val testingApp: Application             = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)
+    val testingApp: Application = sampleApp.copy(state = ApplicationState(updatedOn = instant), deployedTo = Environment.SANDBOX)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -189,7 +192,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     fetchByApplicationIdReturns(appId, testingApp)
     givenApplicationAction(
       ApplicationWithSubscriptionData(testingApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-      loggedInDeveloper,
+      session,
       List(testAPISubscriptionStatus1)
     )
 
@@ -240,7 +243,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.ConfirmAndUplift.thenReturns(appId)
 
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(apiIdentifiers)
-      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "true"
@@ -255,8 +258,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set(apiIdentifier1))
 
       val testFlow: ApiSubscriptions = ApiSubscriptions(Map(apiIdentifier1 -> true))
-      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow("", None, Some(testFlow)))
-      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow("", None, None))
+      GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, None, Some(testFlow)))
+      GPCFlowServiceMock.StoreApiSubscriptions.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, None, None))
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "false"
@@ -359,7 +362,10 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       val testSellResellOrDistribute: SellResellOrDistribute = SellResellOrDistribute("Yes")
 
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(
+        testSellResellOrDistribute,
+        GetProductionCredentialsFlow(UserSessionId.random, Some(testSellResellOrDistribute), None)
+      )
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -374,7 +380,10 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       val testSellResellOrDistribute: SellResellOrDistribute = SellResellOrDistribute("No")
 
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(
+        testSellResellOrDistribute,
+        GetProductionCredentialsFlow(UserSessionId.random, Some(testSellResellOrDistribute), None)
+      )
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -393,11 +402,14 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-        loggedInDeveloper,
+        session,
         List(testAPISubscriptionStatus1)
       )
       UpliftJourneyServiceMock.CreateNewSubmission.thenReturns(aSubmission)
-      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(testSellResellOrDistribute, GetProductionCredentialsFlow("", Some(testSellResellOrDistribute), None))
+      GPCFlowServiceMock.StoreSellResellOrDistribute.thenReturns(
+        testSellResellOrDistribute,
+        GetProductionCredentialsFlow(UserSessionId.random, Some(testSellResellOrDistribute), None)
+      )
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(prodAppId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -427,7 +439,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         ApplicationWithSubscriptionData(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
-        loggedInDeveloper,
+        session,
         List(testAPISubscriptionStatus1)
       )
 

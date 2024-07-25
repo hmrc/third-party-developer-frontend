@@ -16,13 +16,13 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
 @devMain(
   title = "Manage profile",
@@ -41,13 +41,13 @@
   <dl class="govuk-summary-list">
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">Name</dt>
-        <dd class="govuk-summary-list__value" id="name">@{loggedIn.displayedName}</dd>
+        <dd class="govuk-summary-list__value" id="name">@{loggedIn.developer.displayedName}</dd>
         <dd class="govuk-summary-list__actions"><a class="govuk-link" id="change" href="@controllers.profile.routes.Profile.changeProfile()">Change<span class="govuk-visually-hidden">name</span></a>
         </dd>
     </div>
     <div class="govuk-summary-list__row">
         <dt class="govuk-summary-list__key">Email address</dt>
-        <dd class="govuk-summary-list__value" id="emailAddress">@{loggedIn.email.text}</dd>
+        <dd class="govuk-summary-list__value" id="emailAddress">@{loggedIn.developer.email.text}</dd>
         </dd>
     </div>
     <div class="govuk-summary-list__row">

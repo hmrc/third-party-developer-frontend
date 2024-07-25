@@ -24,26 +24,30 @@ import views.html.support.{HelpWithSigningInView, RemoveAccessCodesView}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{LoggedInState, Session}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock with SupportServiceMockModule {
     val helpWithUsingAnApiView = app.injector.instanceOf[HelpWithSigningInView]
     val removeAccessCodesView  = app.injector.instanceOf[RemoveAccessCodesView]
 
-    val underTest                            = new HelpWithSigningInController(
+    lazy val request = FakeRequest()
+      .withSupport(underTest, cookieSigner)(supportSessionId)
+
+    fetchSessionByIdReturnsNone()
+
+    val underTest        = new HelpWithSigningInController(
       mcc,
       cookieSigner,
       sessionServiceMock,
@@ -53,11 +57,9 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
       helpWithUsingAnApiView,
       removeAccessCodesView
     )
-    val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val developer                            = buildDeveloper(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
-    val sessionId                            = "sessionId"
-    val basicFlow                            = SupportFlow(sessionId, "?")
-    val appropriateFlow                      = basicFlow.copy(entrySelection = SupportData.SigningIn.id)
+    val supportSessionId = SupportSessionId.random
+    val basicFlow        = SupportFlow(supportSessionId, "?")
+    val appropriateFlow  = basicFlow.copy(entrySelection = SupportData.SigningIn.id)
 
     def shouldBeRedirectedToPreviousPage(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
@@ -75,48 +77,9 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
     }
   }
 
-  trait IsLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.LOGGED_IN))
-  }
-
-  trait NoSupportSessionExists {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait NotLoggedIn {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturnsNone(sessionId)
-  }
-
-  trait IsPartLoggedInEnablingMFA {
-    self: Setup =>
-
-    val request = FakeRequest()
-      .withLoggedIn(underTest, cookieSigner)(sessionId)
-      .withSession(sessionParams: _*)
-
-    fetchSessionByIdReturns(sessionId, Session(sessionId, developer, LoggedInState.PART_LOGGED_IN_ENABLING_MFA))
-  }
-
   "HelpWithSigningInController" when {
     "invoking page()" should {
-      "render the HelpWithSigningInView" in new Setup() with NotLoggedIn {
+      "render the HelpWithSigningInView" in new Setup() {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.page())(request)
@@ -124,7 +87,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
         status(result) shouldBe OK
       }
 
-      "render the previous page when flow is wrong" in new Setup with IsLoggedIn {
+      "render the previous page when flow is wrong" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow.copy(entrySelection = "Something else"))
 
         val result = addToken(underTest.page())(request)
@@ -132,7 +95,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
         shouldBeRedirectedToPreviousPage(result)
       }
 
-      "render the previous page when there is no flow" in new Setup with NoSupportSessionExists {
+      "render the previous page when there is no flow" in new Setup {
         SupportServiceMock.GetSupportFlow.succeeds(basicFlow)
 
         val result = addToken(underTest.page())(request)
@@ -142,7 +105,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
     }
 
     "invoking removeAccessCodesPage()" should {
-      "render the RemoveAccessCodesView" in new Setup() with NotLoggedIn {
+      "render the RemoveAccessCodesView" in new Setup() {
         SupportServiceMock.GetSupportFlow.succeeds(appropriateFlow)
 
         val result = addToken(underTest.removeAccessCodesPage())(request)
@@ -152,7 +115,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
     }
 
     "invoke submit" should {
-      "submit new valid request from form for 'Forgotten Password' choice" in new Setup with IsLoggedIn {
+      "submit new valid request from form for 'Forgotten Password' choice" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "choice" -> SupportData.ForgottenPassword.id
         )
@@ -164,7 +127,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
         shouldBeRedirectedToNextPage(result)
       }
 
-      "submit new valid request from form for 'Access Codes' choice" in new Setup with IsLoggedIn {
+      "submit new valid request from form for 'Access Codes' choice" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "choice" -> SupportData.AccessCodes.id
         )
@@ -176,7 +139,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
         shouldBeRedirectedToRemoveAccessCodesPage(result)
       }
 
-      "submit invalid request returns BAD_REQUEST" in new Setup with IsLoggedIn {
+      "submit invalid request returns BAD_REQUEST" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "bobbins" -> SupportData.AccessCodes.id
         )
@@ -187,7 +150,7 @@ class HelpWithSigningInControllerSpec extends BaseControllerSpec with WithCSRFAd
         status(result) shouldBe BAD_REQUEST
       }
 
-      "submit valid request but no session" in new Setup with NoSupportSessionExists {
+      "submit valid request but no session" in new Setup {
         val formRequest = request.withFormUrlEncodedBody(
           "choice" -> SupportData.AccessCodes.id
         )

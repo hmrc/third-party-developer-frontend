@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
 @import play.twirl.api.HtmlFormat
 @import templates._
@@ -77,7 +77,6 @@
   fullWidth = fullWidth,
   back = back,
   fullWidthContent = fullWidthContent,
-  developerSession = None,
   navLinks = UserNavLinks(userFullName, isRegistering),
   feedbackBanner = feedbackBanner
 ) {

@@ -28,7 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
-trait TestApplications extends FixedClock with ApplicationStateHelper {
+trait TestApplications extends FixedClock with CollaboratorTracker with ApplicationStateHelper {
   self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString

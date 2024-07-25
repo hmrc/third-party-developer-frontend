@@ -16,36 +16,42 @@
 
 package utils
 
+import java.time.Instant
 import java.util.UUID
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{AuthenticatorAppMfaDetailSummary, MfaDetail, MfaId, SmsMfaDetailSummary}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Developer
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaDetail, MfaId, SmsMfaDetail}
 
 trait ComponentTestDeveloperBuilder extends FixedClock {
   val staticUserId               = UserId(UUID.fromString("11edcde7-c619-4bc1-bb6a-84dc14ea25cd"))
-  val authenticatorAppMfaDetails = AuthenticatorAppMfaDetailSummary(MfaId(UUID.fromString("13eae037-7b76-4bfd-8f77-feebd0611ebb")), "name", instant, verified = true)
-  val smsMfaDetails              = SmsMfaDetailSummary(MfaId(UUID.fromString("6a3b98f1-a2c0-488b-bf0b-cfc86ccfe24d")), "name", instant, "+447890123456", verified = true)
+  val authenticatorAppMfaDetails = AuthenticatorAppMfaDetail(MfaId(UUID.fromString("13eae037-7b76-4bfd-8f77-feebd0611ebb")), "name", instant, verified = true)
+  val smsMfaDetails              = SmsMfaDetail(MfaId(UUID.fromString("6a3b98f1-a2c0-488b-bf0b-cfc86ccfe24d")), "name", instant, "+447890123456", verified = true)
 
-  def buildDeveloper(
+  def buildUser(
       emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",
       organisation: Option[String] = None,
       mfaDetails: List[MfaDetail] = List.empty,
       emailPreferences: EmailPreferences = EmailPreferences.noPreferences
-    ): Developer = {
-    Developer(
-      staticUserId,
+    ): User = {
+    User(
       emailAddress,
       firstName,
       lastName,
+      Instant.now(),
+      Instant.now(),
+      true,
+      None,
       organisation,
       mfaDetails,
-      emailPreferences
+      None,
+      emailPreferences,
+      staticUserId
     )
   }
 }

@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{SessionInvalid, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{AccessCodeAuthenticationRequest, LoginRequest, UserAuthenticationResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Session, SessionInvalid}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
@@ -38,29 +39,30 @@ class SessionService @Inject() (
   )(implicit val ec: ExecutionContext
   ) {
 
-  def authenticate(emailAddress: LaxEmailAddress, password: String, deviceSessionId: Option[UUID])(implicit hc: HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
+  def authenticate(emailAddress: LaxEmailAddress, password: String, deviceSessionId: Option[DeviceSessionId])(implicit hc: HeaderCarrier)
+      : Future[(UserAuthenticationResponse, UserId)] = {
     for {
       coreUser           <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- appsByTeamMember.fetchProductionSummariesByAdmin(coreUser.id).map(_.nonEmpty)
-      response           <- thirdPartyDeveloperConnector.authenticate(LoginRequest(emailAddress, password, mfaMandatedForUser, deviceSessionId))
+      response           <- thirdPartyDeveloperConnector.authenticate(SessionCreateWithDeviceRequest(emailAddress, password, Some(mfaMandatedForUser), deviceSessionId))
     } yield (response, coreUser.id)
   }
 
-  def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Session] = {
+  def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[UserSession] = {
     thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(emailAddress, accessCode, nonce, mfaId))
   }
 
-  def fetch(sessionId: String)(implicit hc: HeaderCarrier): Future[Option[Session]] =
+  def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)
       .map(Some(_))
       .recover {
         case _: SessionInvalid => None
       }
 
-  def destroy(sessionId: String)(implicit hc: HeaderCarrier): Future[Int] =
+  def destroy(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Int] =
     thirdPartyDeveloperConnector.deleteSession(sessionId)
 
-  def updateUserFlowSessions(sessionId: String): Future[Unit] = {
+  def updateUserFlowSessions(sessionId: SessionId): Future[Unit] = {
     flowRepository.updateLastUpdated(sessionId)
   }
 }

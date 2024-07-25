@@ -29,20 +29,22 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedApisEmailPreferencesForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class FlowSelectApiViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData {
+    with UserTestData {
 
   val category1 = ApiCategory.AGENTS
   val category2 = ApiCategory.BUSINESS_RATES
@@ -51,13 +53,13 @@ class FlowSelectApiViewSpec extends CommonViewSpec
 
   trait Setup {
 
-    val developerSessionWithoutEmailPreferences: DeveloperSession = standardDeveloper.loggedIn
-    val form                                                      = mock[Form[SelectedApisEmailPreferencesForm]]
-    val currentCategory                                           = APICategoryDisplayDetails("AGENTS", "Agents")
-    val apis                                                      = Set("api1", "api2")
+    val developerSessionWithoutEmailPreferences: UserSession = standardDeveloper.loggedIn
+    val form                                                 = mock[Form[SelectedApisEmailPreferencesForm]]
+    val currentCategory                                      = APICategoryDisplayDetails("AGENTS", "Agents")
+    val apis                                                 = Set("api1", "api2")
 
     val emailpreferencesFlow: EmailPreferencesFlowV2          =
-      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.session.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
+      EmailPreferencesFlowV2(developerSessionWithoutEmailPreferences.sessionId, apis, Map(currentCategory.category -> apis), Set.empty, List.empty)
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
     val flowSelectApiView: FlowSelectApiView = app.injector.instanceOf[FlowSelectApiView]

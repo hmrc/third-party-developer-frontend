@@ -37,9 +37,14 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.Su
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.models.{MfaAction, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.PasswordChangeRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
@@ -49,8 +54,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{UpdateProfileRequest, User}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
@@ -114,7 +118,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   )))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(User(userEmail, Some(true)))))
+  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
   when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
   when(tpaSandboxConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(tpaProductionConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
@@ -154,7 +158,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 
   def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit tt: TypeTag[A]) = {
-    when(flowRepository.fetchBySessionIdAndFlowType[A](*[String])(eqTo(tt), *)).thenReturn(
+    when(flowRepository.fetchBySessionIdAndFlowType[A](*[A#Type])(eqTo(tt), *)).thenReturn(
       Future.successful(Some(a))
     )
   }
@@ -172,10 +176,14 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EmailPreferencesFlowV2(sessionId, Set.empty, Map(), Set.empty, List.empty)
   )
   mockFetchBySessionIdAndFlowType[SupportFlow](
-    SupportFlow(sessionId, SupportData.UsingAnApi.id, None)
+    SupportFlow(supportSessionId, SupportData.UsingAnApi.id, None)
   )
   when(flowRepository.deleteBySessionIdAndFlowType(*, *)).thenReturn(Future.successful(true))
-  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(sessionId, SupportData.UsingAnApi.id, Some(SupportData.MakingAnApiCall.id))))
+  when(flowRepository.saveFlow[SupportFlow](isA[SupportFlow])).thenReturn(Future.successful(SupportFlow(
+    supportSessionId,
+    SupportData.UsingAnApi.id,
+    Some(SupportData.MakingAnApiCall.id)
+  )))
   when(flowRepository.saveFlow[GetProductionCredentialsFlow](isA[GetProductionCredentialsFlow])).thenReturn(Future.successful(GetProductionCredentialsFlow(sessionId, None, None)))
   when(flowRepository.saveFlow[IpAllowlistFlow](isA[IpAllowlistFlow])).thenReturn(Future.successful(IpAllowlistFlow(sessionId, Set.empty)))
   when(flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](isA[NewApplicationEmailPreferencesFlowV2])).thenReturn(Future.successful(NewApplicationEmailPreferencesFlowV2(
@@ -220,12 +228,12 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     List.empty,
     REST_API
   )))))
-  when(tpdConnector.changePassword(*[ChangePassword])(*)).thenReturn(Future.successful(1))
+  when(tpdConnector.changePassword(*[PasswordChangeRequest])(*)).thenReturn(Future.successful(1))
   when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
   when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(()))
   when(thirdPartyDeveloperMfaConnector.createMfaAuthApp(*[UserId])(*)).thenReturn(Future.successful(registerAuthAppResponse))
   when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(registerSmsResponse))
+  when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(Some(registerSmsResponse)))
   when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String, String]): String = {

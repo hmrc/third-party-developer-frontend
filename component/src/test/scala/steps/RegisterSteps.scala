@@ -30,7 +30,7 @@ import utils.BrowserDriver
 import play.api.http.Status
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.Registration
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Registration
 
 object Form extends WebBrowser {
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailTopic._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
@@ -24,7 +24,7 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SelectTopicsFromSubscriptionsForm], selectedTopics: Set[String], applicationId: ApplicationId)(implicit messages: Messages, loggedIn: DeveloperSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@(form: Form[SelectTopicsFromSubscriptionsForm], selectedTopics: Set[String], applicationId: ApplicationId)(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
 @pageHeading = @{
   "Which topics do you want to receive information about?"

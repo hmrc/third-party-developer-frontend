@@ -23,11 +23,10 @@ import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Registration, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.JsonFormatters.FindUserIdRequestWrites
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.{FindUserIdRequest, FindUserIdResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.PasswordResetRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, Registration, UpdateProfileRequest}
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 
@@ -66,7 +65,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def verifyResetPassword(request: PasswordResetRequest) = {
+  def verifyResetPassword(request: EmailIdentifier) = {
     verify(1, postRequestedFor(urlPathEqualTo("/password-reset-request")).withRequestBody(equalToJson(Json.toJson(request).toString())))
   }
 
@@ -98,7 +97,7 @@ object DeveloperStub extends ComponentTestDeveloperBuilder {
     )
   }
 
-  def setupGettingDeveloperByUserId(developer: Developer): Unit = {
+  def setupGettingDeveloperByUserId(developer: User): Unit = {
     stubFor(get(urlPathEqualTo("/developer"))
       .withQueryParam("developerId", equalTo(developer.userId.toString()))
       .willReturn(aResponse()

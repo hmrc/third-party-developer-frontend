@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,6 +26,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.SupportFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
@@ -54,7 +54,7 @@ class SupportDetailsController @Inject() (
         )
       )
 
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(SupportSessionId.random)
     supportService.getSupportFlow(sessionId).map(renderPage)
   }
 
@@ -71,7 +71,7 @@ class SupportDetailsController @Inject() (
       )
     }
 
-    def handleValidForm(sessionId: String, flow: SupportFlow)(form: SupportDetailsForm): Future[Result] = {
+    def handleValidForm(sessionId: SupportSessionId, flow: SupportFlow)(form: SupportDetailsForm): Future[Result] = {
       supportService.submitTicket(flow, form).map(_ =>
         withSupportCookie(Redirect(routes.SupportDetailsController.supportConfirmationPage()), sessionId)
       )
@@ -81,7 +81,7 @@ class SupportDetailsController @Inject() (
       renderSupportDetailsPageErrorView(flow)(formWithErrors)
     }
 
-    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(UUID.randomUUID().toString)
+    val sessionId = extractSupportSessionIdFromCookie(request).getOrElse(SupportSessionId.random)
 
     supportService.getSupportFlow(sessionId).flatMap { flow =>
       SupportDetailsForm.form.bindFromRequest().fold(handleInvalidForm(flow), handleValidForm(sessionId, flow))

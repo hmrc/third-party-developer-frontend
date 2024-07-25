@@ -29,9 +29,9 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 @Singleton
@@ -95,7 +95,7 @@ class Registration @Inject() (
   }
 
   def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
-    extractSessionIdFromCookie(request)
+    extractUserSessionIdFromCookie(request)
       .map(sessionService.destroy)
       .getOrElse(Future.successful(()))
   }

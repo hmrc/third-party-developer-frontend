@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import play.api.data.Form
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 
 abstract class AbstractController(
@@ -29,7 +29,7 @@ abstract class AbstractController(
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
-  protected def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[DeveloperSession] =
-    request.developerSession.filter(_.loggedInState.isLoggedIn)
+  protected def fullyloggedInDeveloper(implicit request: MaybeUserRequest[AnyContent]): Option[UserSession] =
+    request.userSession.filter(_.loggedInState.isLoggedIn)
 
 }

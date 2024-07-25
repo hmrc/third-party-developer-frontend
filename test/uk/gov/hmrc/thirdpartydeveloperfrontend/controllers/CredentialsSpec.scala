@@ -38,21 +38,23 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class CredentialsSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker
     with FixedClock {
 
@@ -62,7 +64,7 @@ class CredentialsSpec
   trait ApplicationProvider {
     def createApplication(): Application
   }
-  val productionState: ApplicationState           = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant)
+  val productionState: ApplicationState           = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant)
   val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
 
   trait BasicApplicationProvider extends ApplicationProvider {
@@ -78,7 +80,7 @@ class CredentialsSpec
         grantLength,
         Environment.PRODUCTION,
         Some("Description 1"),
-        Set(loggedInDeveloper.email.asAdministratorCollaborator),
+        Set(userSession.developer.email.asAdministratorCollaborator),
         state = productionState,
         access = Access.Standard(
           redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
@@ -105,7 +107,7 @@ class CredentialsSpec
       None,
       grantLength,
       environment,
-      collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
+      collaborators = Set(userSession.developer.email.asCollaborator(userRole)),
       state = state,
       access = access
     )
@@ -144,15 +146,15 @@ class CredentialsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    givenApplicationAction(applicationWithSubscriptionData, loggedInDeveloper)
+    givenApplicationAction(applicationWithSubscriptionData, userSession)
     fetchCredentialsReturns(application, appTokens)
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    val actor: Actors.AppCollaborator                         = Actors.AppCollaborator(loggedInDeveloper.email)
+    val actor: Actors.AppCollaborator                         = Actors.AppCollaborator(userSession.developer.email)
   }
 
   "The credentials page" should {

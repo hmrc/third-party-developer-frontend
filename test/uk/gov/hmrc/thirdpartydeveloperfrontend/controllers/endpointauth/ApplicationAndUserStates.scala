@@ -34,20 +34,23 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector.{RegisterAuthAppResponse, RegisterSmsSuccessResponse}
-import uk.gov.hmrc.apiplatform.modules.mfa.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.MfaDetailBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
-trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder {
+trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock {
   val applicationId: ApplicationId = ApplicationId.random
   val submissionId: SubmissionId   = SubmissionId.random
   val clientId: ClientId           = ClientId.random
@@ -182,8 +185,8 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
   lazy val authAppMfaId: MfaId                                                                        = verifiedAuthenticatorAppMfaDetail.id
   lazy val smsMfaId: MfaId                                                                            = verifiedSmsMfaDetail.id
-  lazy val registerAuthAppResponse: RegisterAuthAppResponse                                           = RegisterAuthAppResponse(authAppMfaId, "secret")
-  lazy val registerSmsResponse: RegisterSmsSuccessResponse                                            = RegisterSmsSuccessResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
+  lazy val registerAuthAppResponse: RegisterAuthAppResponse                                           = RegisterAuthAppResponse("secret", authAppMfaId)
+  lazy val registerSmsResponse: RegisterSmsResponse                                                   = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
 }
 
 trait IsOldJourneyStandardApplication extends HasApplication {
@@ -241,14 +244,19 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
 
   def describeUserRole: String
 
-  def developer: Developer = Developer(
-    userId,
+  def developer: User = User(
     userEmail,
     userFirstName,
     userLastName,
-    None,
-    List(verifiedAuthenticatorAppMfaDetail),
-    EmailPreferences.noPreferences
+    Instant.now(),
+    Instant.now(),
+    verified = true,
+    accountSetup = None,
+    organisation = None,
+    nonce = None,
+    mfaDetails = List(verifiedAuthenticatorAppMfaDetail),
+    emailPreferences = EmailPreferences.noPreferences,
+    userId = userId
   )
   def maybeCollaborator: Option[Collaborator]
 }
@@ -278,15 +286,16 @@ trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
 }
 
 trait HasUserSession extends HasUserWithRole with UpdatesRequest {
-  lazy val sessionId   = "my session"
+  lazy val sessionId        = UserSessionId.random
+  lazy val supportSessionId = SupportSessionId.random
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
-  def session: Session = Session(sessionId, developer, loggedInState)
+  def session: UserSession  = UserSession(sessionId, loggedInState, developer)
   implicit val cookieSigner: CookieSigner
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
-      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId.toString) + sessionId.toString, None, "path", None, false, false)
     )
   }
 }
@@ -302,8 +311,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
-      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false),
-      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(sessionId) + sessionId, None, "path", None, false, false)
+      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId.toString) + sessionId.toString, None, "path", None, false, false),
+      Cookie("SUPPORT_SESS_ID", cookieSigner.sign(supportSessionId.toString) + supportSessionId.toString, None, "path", None, false, false)
     ).withSession(
       ("email", userEmail.text),
       ("emailAddress", userEmail.text),

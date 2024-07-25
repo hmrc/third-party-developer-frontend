@@ -27,22 +27,26 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperBuilder, DeveloperSessionBuilder, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
 
-class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with DeveloperTestData with FixedClock {
+class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with CollaboratorTracker
+    with FixedClock {
 
-  val appId: ApplicationId                = ApplicationId.random
-  val clientId: ClientId                  = ClientId("clientId123")
-  val loggedInDeveloper: DeveloperSession = adminDeveloper.loggedIn
-  val collaborator: DeveloperSession      = standardDeveloper.loggedIn
-  val collaborators: Set[Collaborator]    = Set(loggedInDeveloper.email.asAdministratorCollaborator, collaborator.email.asDeveloperCollaborator)
+  val appId: ApplicationId             = ApplicationId.random
+  val clientId: ClientId               = ClientId("clientId123")
+  val loggedInDeveloper: UserSession   = adminDeveloper.loggedIn
+  val collaborator: UserSession        = standardDeveloper.loggedIn
+  val collaborators: Set[Collaborator] = Set(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asDeveloperCollaborator)
 
   val application: Application = Application(
     appId,
@@ -55,7 +59,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     Environment.PRODUCTION,
     Some("Description 1"),
     collaborators,
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.email.text), Some(loggedInDeveloper.displayedName), Some(""), instant),
+    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
     access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
   )
 
@@ -84,11 +88,11 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe true
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false
-      elementExistsByText(document, "td", loggedInDeveloper.email.text) shouldBe true
-      elementExistsByText(document, "td", collaborator.email.text) shouldBe true
+      elementExistsByText(document, "td", loggedInDeveloper.developer.email.text) shouldBe true
+      elementExistsByText(document, "td", collaborator.developer.email.text) shouldBe true
       linkExistsWithHref(
         document,
-        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url
       ) shouldBe true
     }
 
@@ -98,11 +102,11 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       elementExistsByText(document, "h1", "Manage team members") shouldBe true
       elementExistsByText(document, "a", "Add a team member") shouldBe false
       elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true
-      elementExistsByText(document, "td", loggedInDeveloper.email.text) shouldBe true
-      elementExistsByText(document, "td", collaborator.email.text) shouldBe true
+      elementExistsByText(document, "td", loggedInDeveloper.developer.email.text) shouldBe true
+      elementExistsByText(document, "td", collaborator.developer.email.text) shouldBe true
       linkExistsWithHref(
         document,
-        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.email.text.toSha256).url
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url
       ) shouldBe false
     }
   }

@@ -149,7 +149,7 @@ class IpAllowListController @Inject() (
 
   def activateIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.getIpAllowlistFlow(request.application, request.sessionId) flatMap { flow =>
-      ipAllowlistService.activateIpAllowlist(request.application, request.sessionId, request.developerSession.email).map {
+      ipAllowlistService.activateIpAllowlist(request.application, request.sessionId, request.userSession.developer.email).map {
         _ => Ok(changeIpAllowlistSuccessView(request.application, flow))
       } recover {
         case _: ForbiddenException => Forbidden(errorHandler.forbiddenTemplate)
@@ -162,7 +162,7 @@ class IpAllowListController @Inject() (
   }
 
   def removeIpAllowlistAction(applicationId: ApplicationId): Action[AnyContent] = canEditIpAllowlistAction(applicationId) { implicit request =>
-    ipAllowlistService.deactivateIpAllowlist(request.application, request.sessionId, request.developerSession.email) map {
+    ipAllowlistService.deactivateIpAllowlist(request.application, request.sessionId, request.userSession.developer.email) map {
       _ => Ok(removeIpAllowlistSuccessView(request.application))
     } recover {
       case _: ForbiddenException => Forbidden(errorHandler.forbiddenTemplate)

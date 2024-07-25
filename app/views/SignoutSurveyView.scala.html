@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import include._
 @import views.html.helper.CSPNonce
@@ -22,7 +22,7 @@
 @this(devMain: DevMain)
 
 @(heading: String, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm])(implicit request: play.api.mvc.Request[Any],
-        loggedIn: DeveloperSession, messages: Messages, applicationConfig: ApplicationConfig)
+        loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
   title = heading,
@@ -69,9 +69,9 @@
         Don’t include any sensitive information. For example, National Insurance or credit card numbers. HMRC cannot reply to questions posted here.
       </div>
 
-      <input type="hidden" class="govuk-visually-hidden" name="email" value='@loggedIn.email.text'>
+      <input type="hidden" class="govuk-visually-hidden" name="email" value='@loggedIn.developer.email.text'>
 
-      <input type="hidden" class="govuk-visually-hidden" name="name" value='@loggedIn.displayedName'>
+      <input type="hidden" class="govuk-visually-hidden" name="name" value='@loggedIn.developer.displayedName'>
 
       <script @CSPNonce.attr>
         document.forms['myform_id'];

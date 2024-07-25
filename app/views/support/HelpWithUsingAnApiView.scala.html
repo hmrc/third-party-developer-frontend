@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportData
 
@@ -32,7 +32,7 @@
   govukSelect : GovukSelect
 )
 
-@(loggedIn: Option[DeveloperSession], form: Form[HelpWithUsingAnApiForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
+@(loggedIn: Option[UserSession], form: Form[HelpWithUsingAnApiForm], backUri: String, apis: List[ApiDefinition])(implicit request: play.api.mvc.Request[Any], messages: Messages, appConfig: ApplicationConfig)
 
 @selectItems = @{
   apis.map( api =>
@@ -63,7 +63,7 @@
 @devMain(
   form,
   title = "Which best describes what you need help with?",
-  userFullName = loggedIn.map(_.displayedName),
+  userFullName = loggedIn.map(_.developer.displayedName),
   developerSession = None,
   back = BackButtonToUrl(backUri)
 ) {

@@ -40,7 +40,7 @@ class Navigation @Inject() (
   ) extends ApplicationController(mcc) {
 
   def navLinks: Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request: MaybeUserRequest[AnyContent] =>
-    val username = request.developerSession.flatMap(_.loggedInName)
+    val username = request.userSession.flatMap(_.loggedInName)
 
     Future.successful(Ok(Json.toJson(UserNavLinks(username))))
   }

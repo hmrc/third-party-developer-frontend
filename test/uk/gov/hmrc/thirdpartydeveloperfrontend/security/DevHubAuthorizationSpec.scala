@@ -29,15 +29,16 @@ import play.api.mvc.{Cookie, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with LocalUserIdTracker
-    with DeveloperTestData
+    with UserTestData
     with DeveloperSessionBuilder {
 
   class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
@@ -48,22 +49,22 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
     override val cookieSigner: CookieSigner     = app.injector.instanceOf[CookieSigner]
   }
 
-  class Setup(developerSession: Option[DeveloperSession]) {
+  class Setup(userSession: Option[UserSession]) {
     when(appConfig.securedCookie).thenReturn(false)
 
     val underTest = new TestDevHubAuthorization(mcc)
-    val sessionId = "sessionId"
+    val sessionId = UserSessionId.random
 
     val loggedInAction = underTest.loggedInAction { _ => Future.successful(Ok(EmptyContent())) }
 
     val atLeastPartLoggedInAction = underTest.atLeastPartLoggedInEnablingMfaAction { _ => Future.successful(Ok(EmptyContent())) }
 
-    val request                  = FakeRequest().withCookies(underTest.createCookie(sessionId))
+    val request                  = FakeRequest().withCookies(underTest.createUserCookie(sessionId))
     val requestWithNoCookie      = FakeRequest()
     val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", "InvalidCookieValue"))
-    val requestWithNoRealSession = FakeRequest().withCookies(underTest.createCookie(sessionId))
+    val requestWithNoRealSession = FakeRequest().withCookies(underTest.createUserCookie(sessionId))
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(developerSession.map(ds => ds.session)))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(userSession))
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
@@ -77,7 +78,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
           val result = loggedInAction()(request)
 
           status(result) shouldBe OK
-          verify(underTest.sessionService).updateUserFlowSessions(loggedInDeveloperSession.session.sessionId)
+          verify(underTest.sessionService).updateUserFlowSessions(loggedInDeveloperSession.sessionId)
         }
       }
 
@@ -86,7 +87,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
           val result = atLeastPartLoggedInAction()(request)
 
           status(result) shouldBe OK
-          verify(underTest.sessionService).updateUserFlowSessions(loggedInDeveloperSession.session.sessionId)
+          verify(underTest.sessionService).updateUserFlowSessions(loggedInDeveloperSession.sessionId)
         }
       }
     }
@@ -98,7 +99,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
-          verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
+          verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.sessionId)
         }
       }
 
@@ -107,7 +108,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
           val result = atLeastPartLoggedInAction()(request)
 
           status(result) shouldBe OK
-          verify(underTest.sessionService).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
+          verify(underTest.sessionService).updateUserFlowSessions(partLoggedInDeveloperSession.sessionId)
         }
       }
     }
@@ -118,7 +119,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
-        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
+        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.sessionId)
       }
 
       "they have a cookie but it is invalid" in new Setup(None) {
@@ -126,7 +127,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
-        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
+        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.sessionId)
       }
 
       "they have a valid cookie but it does not exist in the session service" in new Setup(None) {
@@ -136,7 +137,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
         val result = atLeastPartLoggedInAction()(requestWithNoRealSession)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
-        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.session.sessionId)
+        verify(underTest.sessionService, times(0)).updateUserFlowSessions(partLoggedInDeveloperSession.sessionId)
       }
     }
   }

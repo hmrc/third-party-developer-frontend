@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -29,23 +28,24 @@ import play.filters.csrf.CSRF._
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState, Session}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{LocalUserIdTracker, WithCSRFAddToken}
 
-class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken with DeveloperBuilder with LocalUserIdTracker {
+class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
-    val developer = buildDeveloper()
-    val sessionId = UUID.randomUUID().toString
-    val session   = Session(sessionId, developer, LoggedInState.LOGGED_IN)
+    val developer = buildTrackedUser()
+    val sessionId = UserSessionId.random
+    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
-    val developerSession: DeveloperSession = DeveloperSession(session)
+    val developerSession: UserSession = session
 
     val signoutSurveyView      = app.injector.instanceOf[SignoutSurveyView]
     val logoutConfirmationView = app.injector.instanceOf[LogoutConfirmationView]
@@ -158,7 +158,7 @@ class UserLogoutAccountSpec extends BaseControllerSpec with WithCSRFAddToken wit
           Some(2),
           "no suggestions",
           s"${developerSession.developer.firstName} ${developerSession.developer.lastName}",
-          developerSession.email.text,
+          developerSession.developer.email.text,
           isJavascript = true
         )
       val request = loggedInRequestWithCsrfToken.withFormUrlEncodedBody(

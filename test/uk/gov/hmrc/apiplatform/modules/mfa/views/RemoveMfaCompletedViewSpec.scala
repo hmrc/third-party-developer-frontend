@@ -22,17 +22,18 @@ import views.helper.CommonViewSpec
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.RemoveMfaCompletedView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, DeveloperTestData}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{DeveloperSession, LoggedInState}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 
 class RemoveMfaCompletedViewSpec extends CommonViewSpec
-    with DeveloperTestData
+    with UserTestData
     with DeveloperSessionBuilder
     with LocalUserIdTracker
     with StubMessagesFactory {
 
-  implicit val loggedIn: DeveloperSession = JoeBloggs.loggedIn
+  implicit val loggedIn: UserSession = JoeBloggs.loggedIn
 
   val removeMfaCompletedView: RemoveMfaCompletedView = app.injector.instanceOf[RemoveMfaCompletedView]
 

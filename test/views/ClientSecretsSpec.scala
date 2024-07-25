@@ -32,13 +32,15 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ClientSecret, ClientSecretResponse, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
-    with DeveloperTestData
+    with UserTestData
     with FixedClock {
 
   trait Setup {
@@ -57,8 +59,8 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
   }
 
   "Client secrets page" should {
-    val request   = FakeRequest().withCSRFToken
-    val developer = standardDeveloper.loggedIn
+    val request          = FakeRequest().withCSRFToken
+    val developerSession = standardDeveloper.loggedIn
 
     val clientSecret1 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
     val clientSecret2 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
@@ -76,7 +78,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
       Period.ofDays(547),
       Environment.PRODUCTION,
       Some("Test Application"),
-      collaborators = Set(developer.email.asAdministratorCollaborator),
+      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
       access = Access.Standard(),
       state = ApplicationState(State.PRODUCTION, Some("requester@test.com"), Some("requester"), Some("verificationCode"), instant),
       checkInformation = None
@@ -84,7 +86,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show generate a client secret button but no delete button when the app does not have any client secrets yet" in new Setup {
       val emptyClientSecrets: Seq[Nothing] = Seq.empty
-      val page: Html                       = clientSecretsView.render(application, emptyClientSecrets, request, developer, messagesProvider, appConfig)
+      val page: Html                       = clientSecretsView.render(application, emptyClientSecrets, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -95,7 +97,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show generate another client secret button but no delete button when the app has only one client secret" in new Setup {
       val oneClientSecret: Seq[ClientSecretResponse] = Seq(clientSecret1)
-      val page: Html                                 = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig)
+      val page: Html                                 = clientSecretsView.render(application, oneClientSecret, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -106,7 +108,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show copy button when a new client secret has just been added" in new Setup {
       val aSecret    = "SomethingSecret"
-      val page: Html = clientSecretsGeneratedView.render(application, application.id, aSecret, request, developer, messagesProvider, appConfig)
+      val page: Html = clientSecretsGeneratedView.render(application, application.id, aSecret, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -118,7 +120,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     "not show copy button when a new client secret has not just been added" in new Setup {
       val oneClientSecret: Seq[ClientSecretResponse] = Seq(clientSecret1)
 
-      val page: Html = clientSecretsView.render(application, oneClientSecret, request, developer, messagesProvider, appConfig)
+      val page: Html = clientSecretsView.render(application, oneClientSecret, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -134,7 +136,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "show generate another client secret button and delete button when the app has more than one client secret" in new Setup {
       val twoClientSecrets: Seq[ClientSecretResponse] = Seq(clientSecret1, clientSecret2)
-      val page: Html                                  = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig)
+      val page: Html                                  = clientSecretsView.render(application, twoClientSecrets, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 
@@ -145,7 +147,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
 
     "not show generate another client secret button when the app has reached the limit of 5 client secrets" in new Setup {
       val twoClientSecrets: Seq[ClientSecretResponse] = Seq(clientSecret1, clientSecret2, clientSecret3, clientSecret4, clientSecret5)
-      val page: Html                                  = clientSecretsView.render(application, twoClientSecrets, request, developer, messagesProvider, appConfig)
+      val page: Html                                  = clientSecretsView.render(application, twoClientSecrets, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
 

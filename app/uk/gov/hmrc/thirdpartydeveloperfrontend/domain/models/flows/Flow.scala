@@ -23,10 +23,12 @@ import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 
 sealed trait FlowType
 
@@ -67,19 +69,21 @@ object FlowType {
 }
 
 trait Flow {
-  def sessionId: String
+  type Type <: SessionId
+  def sessionId: Type
   def flowType: FlowType
 }
 
 /** The name of the class is used on serialisation as a discriminator. Do not change.
   */
-case class IpAllowlistFlow(override val sessionId: String, allowlist: Set[String]) extends Flow {
+case class IpAllowlistFlow(override val sessionId: UserSessionId, allowlist: Set[String]) extends Flow {
+  type Type = UserSessionId
   override val flowType: FlowType = FlowType.IP_ALLOW_LIST
 }
 case class SupportApi(serviceName: ServiceName, name: String)
 
 case class SupportFlow(
-    override val sessionId: String,
+    override val sessionId: SupportSessionId,
     entrySelection: String,
     subSelection: Option[String] = None,
     api: Option[String] = None,
@@ -87,16 +91,21 @@ case class SupportFlow(
     emailAddress: Option[String] = None,
     referenceNumber: Option[String] = None
   ) extends Flow {
+
+  type Type = SupportSessionId
   override def flowType: FlowType = FlowType.SUPPORT_FLOW
 }
 
 case class EmailPreferencesFlowV2(
-    override val sessionId: String,
+    override val sessionId: UserSessionId,
     selectedCategories: Set[String],
     selectedAPIs: Map[String, Set[String]],
     selectedTopics: Set[String],
     visibleApis: List[CombinedApi]
   ) extends Flow with EmailPreferencesProducer {
+
+  type Type = UserSessionId
+
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
 
   def categoriesInOrder: List[String]                            = selectedCategories.toList.sorted
@@ -119,14 +128,14 @@ case class EmailPreferencesFlowV2(
 
 object EmailPreferencesFlowV2 {
 
-  def fromDeveloperSession(developerSession: DeveloperSession): EmailPreferencesFlowV2 = {
-    val existingEmailPreferences = developerSession.developer.emailPreferences
+  def fromDeveloperSession(userSession: UserSession): EmailPreferencesFlowV2 = {
+    val existingEmailPreferences = userSession.developer.emailPreferences
 
     existingEmailPreferences match {
       case EmailPreferences(i: List[TaxRegimeInterests], t: Set[EmailTopic]) if i.isEmpty && t.isEmpty =>
-        new EmailPreferencesFlowV2(developerSession.session.sessionId, Set.empty, Map.empty, Set.empty, List.empty)
+        new EmailPreferencesFlowV2(userSession.sessionId, Set.empty, Map.empty, Set.empty, List.empty)
       case emailPreferences                                                                            => new EmailPreferencesFlowV2(
-          developerSession.session.sessionId,
+          userSession.sessionId,
           emailPreferences.interests.map(_.regime).toSet,
           taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
           emailPreferences.topics.map(_.toString),
@@ -144,13 +153,15 @@ object EmailPreferencesFlowV2 {
 }
 
 case class NewApplicationEmailPreferencesFlowV2(
-    override val sessionId: String,
+    override val sessionId: UserSessionId,
     existingEmailPreferences: EmailPreferences,
     applicationId: ApplicationId,
     missingSubscriptions: Set[CombinedApi],
     selectedApis: Set[CombinedApi],
     selectedTopics: Set[String]
   ) extends Flow with EmailPreferencesProducer {
+
+  type Type = UserSessionId
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
 
   def optionCombine[A: Semigroup](a: A, opt: Option[A]): A = opt.map(a combine _).getOrElse(a)

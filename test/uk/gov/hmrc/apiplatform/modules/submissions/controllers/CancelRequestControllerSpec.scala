@@ -26,6 +26,9 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -36,12 +39,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
 class CancelRequestControllerSpec
     extends BaseControllerSpec
-    with SampleSession
+    with SampleUserSession
     with SampleApplication
     with SubscriptionTestHelperSugar
     with WithCSRFAddToken
-    with DeveloperBuilder
+    with UserBuilder
     with LocalUserIdTracker
+    with CollaboratorTracker
     with SubmissionsTestData {
 
   trait HasSubscriptions {
@@ -51,7 +55,7 @@ class CancelRequestControllerSpec
   trait HasSessionDeveloperFlow {
     val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[CSRF.TokenProvider].generateToken)
 
-    fetchSessionByIdReturns(sessionId, session)
+    fetchSessionByIdReturns(sessionId, userSession)
 
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
   }
@@ -96,7 +100,7 @@ class CancelRequestControllerSpec
         asSubscriptions(List(aSubscription)),
         asFields(List.empty)
       ),
-      loggedInDeveloper,
+      userSession,
       List(aSubscription)
     )
 
@@ -112,7 +116,7 @@ class CancelRequestControllerSpec
         asSubscriptions(List(aSubscription)),
         asFields(List.empty)
       ),
-      loggedInDeveloper,
+      userSession,
       List(aSubscription)
     )
 

@@ -15,13 +15,13 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{AnchorStyle, Button}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SpliceCSRFToken
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
-@(app: Application,role: Collaborator.Role, loggedIn: DeveloperSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
+@(app: Application,role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
  <div class="govuk-warning-text">
@@ -65,7 +65,7 @@
             <span>Developer</span>
           }
         </td>
-        @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.email)) {
+        @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.developer.email)) {
           <td class="govuk-table__cell center-table-text">
             <a class="govuk-button govuk-button--secondary govuk-!-margin-0" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
               Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>

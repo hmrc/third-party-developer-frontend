@@ -16,13 +16,13 @@
 
 @import include._
 @import views.html.include.DevMain
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.DeveloperSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 
 @this(devMain: DevMain)
 
-@(showAuthAppText: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: DeveloperSession, appConfig: ApplicationConfig, messages: Messages)
+@(showAuthAppText: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
 @devMain(
   title = "You can now get access codes by text",

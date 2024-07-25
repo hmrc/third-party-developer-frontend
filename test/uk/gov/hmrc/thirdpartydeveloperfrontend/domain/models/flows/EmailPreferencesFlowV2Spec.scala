@@ -19,12 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.developers.{Developer, DeveloperSession, LoggedInState, Session}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.{EmailPreferences, EmailTopic, TaxRegimeInterests}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 
-class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with DeveloperBuilder with LocalUserIdTracker {
+class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuilder with LocalUserIdTracker {
   val category1                   = "CATEGORY_1"
   val category2                   = "CATEGORY_2"
   val category1Apis               = Set("api1", "api2")
@@ -32,12 +33,11 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with Develope
   val emailPreferences            = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
   val emailPreferencesWithAllApis = EmailPreferences(List(TaxRegimeInterests(category1, Set.empty)), Set(EmailTopic.TECHNICAL))
 
-  val sessionId = "sessionId"
+  val sessionId = UserSessionId.random
 
-  def developerSession(emailPreferences: EmailPreferences): DeveloperSession = {
-    val developer: Developer = buildDeveloper(emailPreferences = emailPreferences)
-    val session: Session     = Session(sessionId, developer, LoggedInState.LOGGED_IN)
-    DeveloperSession(session)
+  def developerSession(emailPreferences: EmailPreferences): UserSession = {
+    val developer: User = buildTrackedUser(emailPreferences = emailPreferences)
+    UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
   }
 
   def emailPreferencesFlow(selectedCategories: Set[String], selectedAPIs: Map[String, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlowV2 = {
