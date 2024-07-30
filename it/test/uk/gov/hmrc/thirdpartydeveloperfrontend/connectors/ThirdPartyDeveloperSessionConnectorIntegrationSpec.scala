@@ -22,15 +22,12 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
@@ -38,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ThirdPartyDeveloperSessionConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -46,7 +42,7 @@ class ThirdPartyDeveloperSessionConnectorIntegrationSpec extends BaseConnectorIn
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-developer-session.port" -> stubPort,
-    "json.encryption.key"                              -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
+    "json.encryption.key"                                      -> "czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY="
   )
 
   override def fakeApplication(): Application =
@@ -70,7 +66,7 @@ class ThirdPartyDeveloperSessionConnectorIntegrationSpec extends BaseConnectorIn
     val mfaId: MfaId                                                     = MfaId.random
     val accessCodeAuthenticationRequest: AccessCodeAuthenticationRequest = AccessCodeAuthenticationRequest(userEmail, accessCode, nonce, mfaId)
 
-    val underTest: ThirdPartyDeveloperSessionConnector     = app.injector.instanceOf[ThirdPartyDeveloperSessionConnector]
+    val underTest: ThirdPartyDeveloperSessionConnector = app.injector.instanceOf[ThirdPartyDeveloperSessionConnector]
   }
 
   "fetchSession" should {

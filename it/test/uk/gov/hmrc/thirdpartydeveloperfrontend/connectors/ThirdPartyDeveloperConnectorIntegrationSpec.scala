@@ -33,12 +33,12 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUser
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite with UserBuilder with LocalUserIdTracker with WireMockExtensions with FixedClock {

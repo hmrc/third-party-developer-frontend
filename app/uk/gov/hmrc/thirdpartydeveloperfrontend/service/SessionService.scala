@@ -27,10 +27,9 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, M
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{SessionInvalid, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyDeveloperConnector, ThirdPartyDeveloperSessionConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperSessionConnector
 
 @Singleton
 class SessionService @Inject() (

@@ -25,10 +25,10 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HttpClient, SessionId => _, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 
 @Singleton
 class ThirdPartyDeveloperSessionConnector @Inject() (
