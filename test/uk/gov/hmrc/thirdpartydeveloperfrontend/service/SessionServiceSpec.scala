@@ -36,13 +36,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperSessionConnector
 
 class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperSessionConnector], mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
     val email                      = "thirdpartydeveloper@example.com".toLaxEmail
     val userId                     = UserId.random
@@ -145,14 +146,14 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
   "fetchUser" should {
     "return the developer when it exists" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
         .thenReturn(successful(session))
 
       await(underTest.fetch(sessionId)) shouldBe Some(session)
     }
 
     "return None when its does not exist" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
         .thenReturn(failed(new SessionInvalid))
 
       private val result = await(underTest.fetch(sessionId))
@@ -161,7 +162,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
         .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.fetch(sessionId)))

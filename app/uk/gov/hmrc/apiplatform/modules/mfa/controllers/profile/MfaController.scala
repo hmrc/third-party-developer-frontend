@@ -45,10 +45,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction.{CREATE, REMOVE}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperSessionConnector
 
 @Singleton
 class MfaController @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+    thirdPartyDeveloperSessionConnector: ThirdPartyDeveloperSessionConnector,
     val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
     val otpAuthUri: OtpAuthUri,
     val mfaService: MfaService,
@@ -151,7 +153,7 @@ class MfaController @Inject() (
   def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperSessionConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
         Redirect(routes.MfaController.nameChangePage(mfaId))
       }
 
@@ -246,7 +248,7 @@ class MfaController @Inject() (
   def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperSessionConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
         Redirect(routes.MfaController.smsSetupCompletedPage())
       }
 

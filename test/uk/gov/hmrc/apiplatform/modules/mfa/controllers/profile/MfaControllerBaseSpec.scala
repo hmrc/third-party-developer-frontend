@@ -44,6 +44,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.AuthFakeRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperSessionConnector
 
 class MfaControllerBaseSpec extends BaseControllerSpec
     with WithCSRFAddToken
@@ -87,6 +88,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
+      mock[ThirdPartyDeveloperSessionConnector],
       mock[ThirdPartyDeveloperMfaConnector],
       mock[OtpAuthUri],
       mock[MfaService],

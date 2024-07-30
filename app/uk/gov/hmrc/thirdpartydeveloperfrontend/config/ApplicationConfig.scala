@@ -29,6 +29,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val betaFeedbackUrl                                  = "/contact/beta-feedback"
   val betaFeedbackUnauthenticatedUrl                   = "/contact/beta-feedback-unauthenticated"
   val thirdPartyDeveloperUrl: String                   = baseUrl("third-party-developer")
+  val thirdPartyDeveloperSessionUrl: String            = baseUrl("third-party-developer-session")
   val thirdPartyApplicationProductionUrl: String       = thirdPartyApplicationUrl("third-party-application-production")
   val thirdPartyApplicationProductionUseProxy: Boolean = useProxy("third-party-application-production")
   val thirdPartyApplicationSandboxUrl: String          = thirdPartyApplicationUrl("third-party-application-sandbox")
@@ -94,6 +95,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val ppnsSandboxApiKey: String              = getConfString("push-pull-notifications-api-sandbox.api-key", "")
   val ppnsSandboxAuthorizationKey: String    = getConfString("push-pull-notifications-api-sandbox.authorizationKey", "")
 
+
   private def buildUrl(key: String) = {
     (getConfigDefaulted(s"$key.protocol", ""), getConfigDefaulted(s"$key.host", "")) match {
       case (p, h) if !p.isEmpty && !h.isEmpty => Some(s"$p://$h")
@@ -110,7 +112,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   private def apiSubscriptionFieldsUrl = serviceUrl("api-subscription-fields")(_)
 
   private def thirdPartyApplicationUrl = serviceUrl("third-party-application")(_)
-
+  
   private def pushPullNotificationsApiUrl = serviceUrl("push-pull-notifications-api")(_)
 
   private def useProxy(serviceName: String) = getConfBool(s"$serviceName.use-proxy", false)
