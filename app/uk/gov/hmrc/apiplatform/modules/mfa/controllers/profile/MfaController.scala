@@ -37,7 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICA
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyDeveloperConnector, ThirdPartyDeveloperSessionConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.UpdateLoggedInStateRequest
@@ -49,6 +49,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 @Singleton
 class MfaController @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
+    thirdPartyDeveloperSessionConnector: ThirdPartyDeveloperSessionConnector,
     val thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector,
     val otpAuthUri: OtpAuthUri,
     val mfaService: MfaService,
@@ -151,7 +152,7 @@ class MfaController @Inject() (
   def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperSessionConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
         Redirect(routes.MfaController.nameChangePage(mfaId))
       }
 
@@ -246,7 +247,7 @@ class MfaController @Inject() (
   def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperSessionConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
         Redirect(routes.MfaController.smsSetupCompletedPage())
       }
 

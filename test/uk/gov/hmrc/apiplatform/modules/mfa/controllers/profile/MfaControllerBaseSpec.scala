@@ -38,7 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, UserBuilder}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyDeveloperConnector, ThirdPartyDeveloperSessionConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.qr.{OtpAuthUri, QRCode}
@@ -87,6 +87,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
 
     val underTest: MfaController = new MfaController(
       mock[ThirdPartyDeveloperConnector],
+      mock[ThirdPartyDeveloperSessionConnector],
       mock[ThirdPartyDeveloperMfaConnector],
       mock[OtpAuthUri],
       mock[MfaService],

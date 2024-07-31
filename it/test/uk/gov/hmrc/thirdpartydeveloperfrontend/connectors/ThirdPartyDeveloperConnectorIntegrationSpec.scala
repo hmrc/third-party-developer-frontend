@@ -33,11 +33,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUser
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
@@ -89,124 +88,6 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
       await(underTest.verify(code)) shouldBe OK
-    }
-  }
-
-  "fetchSession" should {
-    "return the session" in new Setup {
-      stubFor(
-        get(urlPathEqualTo(s"/session/$sessionId"))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withHeader("Content-Type", "application/json")
-              .withBody(s"""{
-                           |  "sessionId": "$sessionId",
-                           |  "loggedInState": "LOGGED_IN",
-                           |    "developer": {
-                           |      "userId":"$userId",
-                           |      "email":"${userEmail.text}",
-                           |      "firstName":"John",
-                           |      "lastName": "Doe",
-                           |      "registrationTime": "${nowAsText}",
-                           |      "lastModified": "${nowAsText}",
-                           |      "verified": true,
-                           |      "mfaEnabled": false,
-                           |      "mfaDetails": [],
-                           |      "emailPreferences": { "interests" : [], "topics": [] }
-                           |    }
-                           |}""".stripMargin)
-          )
-      )
-
-      private val result = await(underTest.fetchSession(sessionId))
-
-      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LOGGED_IN, buildTrackedUser(userEmail))
-    }
-
-    "return Fail with session invalid when the session doesnt exist" in new Setup {
-      stubFor(
-        get(urlPathEqualTo(s"/session/$sessionId"))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-
-      intercept[SessionInvalid](await(underTest.fetchSession(sessionId)))
-    }
-
-    "fail on Upstream5xxResponse when the call return a 500" in new Setup {
-      stubFor(
-        get(urlPathEqualTo(s"/session/$sessionId"))
-          .willReturn(
-            aResponse()
-              .withStatus(INTERNAL_SERVER_ERROR)
-          )
-      )
-
-      intercept[UpstreamErrorResponse] {
-        await(underTest.fetchSession(sessionId))
-      }.statusCode shouldBe INTERNAL_SERVER_ERROR
-    }
-  }
-
-  "deleteSession" should {
-    "delete the session" in new Setup {
-      stubFor(
-        delete(urlPathEqualTo(s"/session/$sessionId"))
-          .willReturn(
-            aResponse()
-              .withStatus(NO_CONTENT)
-          )
-      )
-      await(underTest.deleteSession(sessionId)) shouldBe NO_CONTENT
-    }
-
-    "be successful when not found" in new Setup {
-      stubFor(
-        delete(urlPathEqualTo(s"/session/$sessionId"))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      await(underTest.deleteSession(sessionId)) shouldBe NO_CONTENT
-    }
-  }
-
-  "updateSessionLoggedInState" should {
-
-    "update session logged in state" in new Setup {
-      val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
-      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser())
-
-      stubFor(
-        put(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(session)
-          )
-      )
-      private val updatedSession = await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
-      updatedSession shouldBe session
-    }
-
-    "error with SessionInvalid if we get a 404 response" in new Setup {
-      val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
-      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      stubFor(
-        put(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[SessionInvalid] {
-        await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
-      }
     }
   }
 

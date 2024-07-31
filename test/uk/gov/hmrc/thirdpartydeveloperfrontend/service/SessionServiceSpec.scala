@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyDeveloperConnector, ThirdPartyDeveloperSessionConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -42,7 +42,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperSessionConnector], mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
     val email                      = "thirdpartydeveloper@example.com".toLaxEmail
     val userId                     = UserId.random
@@ -145,14 +145,14 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
   "fetchUser" should {
     "return the developer when it exists" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
         .thenReturn(successful(session))
 
       await(underTest.fetch(sessionId)) shouldBe Some(session)
     }
 
     "return None when its does not exist" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
         .thenReturn(failed(new SessionInvalid))
 
       private val result = await(underTest.fetch(sessionId))
@@ -161,7 +161,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
         .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.fetch(sessionId)))

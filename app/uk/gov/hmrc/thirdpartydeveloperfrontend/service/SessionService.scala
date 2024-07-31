@@ -27,12 +27,13 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, M
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{SessionInvalid, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyDeveloperConnector, ThirdPartyDeveloperSessionConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
 class SessionService @Inject() (
+    val thirdPartyDeveloperSessionConnector: ThirdPartyDeveloperSessionConnector,
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
     val appsByTeamMember: AppsByTeamMemberService,
     val flowRepository: FlowRepository
@@ -53,14 +54,14 @@ class SessionService @Inject() (
   }
 
   def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
-    thirdPartyDeveloperConnector.fetchSession(sessionId)
+    thirdPartyDeveloperSessionConnector.fetchSession(sessionId)
       .map(Some(_))
       .recover {
         case _: SessionInvalid => None
       }
 
   def destroy(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Int] =
-    thirdPartyDeveloperConnector.deleteSession(sessionId)
+    thirdPartyDeveloperSessionConnector.deleteSession(sessionId)
 
   def updateUserFlowSessions(sessionId: SessionId): Future[Unit] = {
     flowRepository.updateLastUpdated(sessionId)

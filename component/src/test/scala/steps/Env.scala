@@ -113,6 +113,7 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Br
           Map(
             "dateOfAdminMfaMandate"                                             -> "2001-01-01",
             "microservice.services.third-party-developer.port"                  -> 11111,
+            "microservice.services.third-party-developer-session.port"          -> 11111,
             "microservice.services.third-party-application-production.port"     -> 11111,
             "microservice.services.third-party-application-sandbox.port"        -> 11111,
             "microservice.services.api-definition.port"                         -> 11111,
