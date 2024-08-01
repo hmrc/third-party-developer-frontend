@@ -30,9 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 
@@ -50,38 +47,6 @@ class ThirdPartyDeveloperConnector @Inject() (
   ) extends CommonResponseHandlers with Logging {
 
   import ThirdPartyDeveloperConnector._
-
-  def authenticate(loginRequest: SessionCreateWithDeviceRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
-    encryptedJson.secretRequest(
-      loginRequest,
-      http.POST[SecretRequest, ErrorOr[UserAuthenticationResponse]](s"$serviceBaseUrl/authenticate", _)
-    )
-      .map {
-        case Right(response)                                    => response
-        case Left(UpstreamErrorResponse(_, UNAUTHORIZED, _, _)) => throw new InvalidCredentials
-        case Left(UpstreamErrorResponse(_, FORBIDDEN, _, _))    => throw new UnverifiedAccount
-        case Left(UpstreamErrorResponse(_, LOCKED, _, _))       => throw new LockedAccount
-        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))    => throw new InvalidEmail
-        case Left(err)                                          => throw err
-      }
-  }
-
-  def authenticateMfaAccessCode(
-      accessCodeAuthenticationRequest: AccessCodeAuthenticationRequest
-    )(implicit hc: HeaderCarrier
-    ): Future[UserSession] = metrics.record(api) {
-
-    encryptedJson.secretRequest(
-      accessCodeAuthenticationRequest,
-      http.POST[SecretRequest, ErrorOr[UserSession]](s"$serviceBaseUrl/authenticate-mfa", _)
-    )
-      .map {
-        case Right(response)                                   => response
-        case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => throw new InvalidCredentials
-        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))   => throw new InvalidEmail
-        case Left(err)                                         => throw err
-      }
-  }
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api: API                    = API("third-party-developer")
