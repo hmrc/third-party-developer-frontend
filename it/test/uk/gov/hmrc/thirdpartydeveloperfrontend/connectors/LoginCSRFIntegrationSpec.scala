@@ -51,6 +51,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
   private lazy val config = Configuration(
     "play.filters.csrf.token.sign"                                      -> false,
     "microservice.services.third-party-developer.port"                  -> stubPort,
+    "microservice.services.third-party-developer-session.port"          -> stubPort,
     "microservice.services.third-party-application-production.port"     -> stubPort,
     "microservice.services.third-party-application-sandbox.port"        -> stubPort,
     "microservice.services.api-definition.port"                         -> stubPort,
@@ -156,7 +157,6 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
                              |      "registrationTime": "${nowAsText}",
                              |      "lastModified": "${nowAsText}",
                              |      "verified": true,
-                             |      "mfaEnabled": false,
                              |      "mfaDetails": [],
                              |      "emailPreferences": { "interests" : [], "topics": [] }
                              |    }
