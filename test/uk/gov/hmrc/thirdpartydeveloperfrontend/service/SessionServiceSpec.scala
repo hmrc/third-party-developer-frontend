@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ThirdPartyDeveloperConnector, ThirdPartyDeveloperSessionConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -42,7 +42,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val underTest = new SessionService(mock[ThirdPartyDeveloperSessionConnector], mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
+    val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
     val email                      = "thirdpartydeveloper@example.com".toLaxEmail
     val userId                     = UserId.random
@@ -99,29 +99,29 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     "return the user authentication response from the connector when the authentication succeeds and user is not admin on production application" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticate(*)(*)).thenReturn(successful(userAuthenticationResponse))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*)).thenReturn(successful(userAuthenticationResponse))
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
       verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
-      verify(underTest.thirdPartyDeveloperSessionConnector).authenticate(*)(*)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
     }
 
     "return the user authentication response from the connector when the authentication succeeds and user is an admin on production application" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsAdminInProduction)
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticate(*)(*))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
       verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
-      verify(underTest.thirdPartyDeveloperSessionConnector).authenticate(*)(*)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
     }
 
     "propagate the exception when the connector fails" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticate(*)(*))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenThrow(new RuntimeException("this one"))
 
       intercept[RuntimeException](await(underTest.authenticate(email, password, Some(deviceSessionId)))).getMessage shouldBe "this one"
@@ -130,13 +130,13 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
   "authenticateMfaAccessCode" should {
     "return the new session from the connector when the authentication succeeds" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId))).thenReturn(successful(session))
+      when(underTest.thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId))).thenReturn(successful(session))
 
       await(underTest.authenticateAccessCode(email, accessCode, nonce, mfaId)) shouldBe session
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId)))
+      when(underTest.thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId)))
         .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.authenticateAccessCode(email, accessCode, nonce, mfaId)))
@@ -145,14 +145,14 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
   "fetchUser" should {
     "return the developer when it exists" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
         .thenReturn(successful(session))
 
       await(underTest.fetch(sessionId)) shouldBe Some(session)
     }
 
     "return None when its does not exist" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
         .thenReturn(failed(new SessionInvalid))
 
       private val result = await(underTest.fetch(sessionId))
@@ -161,7 +161,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.fetchSession(sessionId))
+      when(underTest.thirdPartyDeveloperConnector.fetchSession(sessionId))
         .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.fetch(sessionId)))

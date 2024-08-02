@@ -24,7 +24,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
@@ -33,11 +33,12 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUser
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -88,6 +89,124 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
           )
       )
       await(underTest.verify(code)) shouldBe OK
+    }
+  }
+
+  "fetchSession" should {
+    "return the session" in new Setup {
+      stubFor(
+        get(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""{
+                           |  "sessionId": "$sessionId",
+                           |  "loggedInState": "LOGGED_IN",
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
+                           |}""".stripMargin)
+          )
+      )
+
+      private val result = await(underTest.fetchSession(sessionId))
+
+      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LOGGED_IN, buildTrackedUser(userEmail))
+    }
+
+    "return Fail with session invalid when the session doesnt exist" in new Setup {
+      stubFor(
+        get(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+
+      intercept[SessionInvalid](await(underTest.fetchSession(sessionId)))
+    }
+
+    "fail on Upstream5xxResponse when the call return a 500" in new Setup {
+      stubFor(
+        get(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      intercept[UpstreamErrorResponse] {
+        await(underTest.fetchSession(sessionId))
+      }.statusCode shouldBe INTERNAL_SERVER_ERROR
+    }
+  }
+
+  "deleteSession" should {
+    "delete the session" in new Setup {
+      stubFor(
+        delete(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NO_CONTENT)
+          )
+      )
+      await(underTest.deleteSession(sessionId)) shouldBe NO_CONTENT
+    }
+
+    "be successful when not found" in new Setup {
+      stubFor(
+        delete(urlPathEqualTo(s"/session/$sessionId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      await(underTest.deleteSession(sessionId)) shouldBe NO_CONTENT
+    }
+  }
+
+  "updateSessionLoggedInState" should {
+
+    "update session logged in state" in new Setup {
+      val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser())
+
+      stubFor(
+        put(urlEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(session)
+          )
+      )
+      private val updatedSession = await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
+      updatedSession shouldBe session
+    }
+
+    "error with SessionInvalid if we get a 404 response" in new Setup {
+      val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      stubFor(
+        put(urlEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+          )
+      )
+      intercept[SessionInvalid] {
+        await(underTest.updateSessionLoggedInState(sessionId, updateLoggedInStateRequest))
+      }
     }
   }
 
@@ -303,4 +422,196 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     }
   }
 
+  "authenticate" should {
+    "return the session containing the user when the credentials are valid and MFA is disabled" in new Setup {
+
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
+                           |{
+                           |  "accessCodeRequired": false,
+                           |  "mfaEnabled": false,
+                           |  "session": {
+                           |    "sessionId": "$sessionId",
+                           |    "loggedInState": "LOGGED_IN",
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
+                           |  }
+                           |}""".stripMargin)
+          )
+      )
+
+      val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
+
+      verify(1, postRequestedFor(urlMatching("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
+      result shouldBe UserAuthenticationResponse(
+        accessCodeRequired = false,
+        mfaEnabled = false,
+        session = Some(UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(userEmail)))
+      )
+    }
+
+    "return the nonce when the credentials are valid and MFA is enabled" in new Setup {
+
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
+                           |{
+                           |  "accessCodeRequired": true,
+                           |  "mfaEnabled": true,
+                           |  "nonce": "$nonce"
+                           |}""".stripMargin)
+          )
+      )
+
+      val result: UserAuthenticationResponse = await(underTest.authenticate(loginRequest))
+
+      verify(1, postRequestedFor(urlEqualTo("/authenticate")).withRequestBody(equalToJson(encryptedLoginRequest.toString)))
+      result shouldBe UserAuthenticationResponse(accessCodeRequired = true, mfaEnabled = true, Some(nonce))
+    }
+
+    "throw Invalid credentials when the credentials are invalid" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(UNAUTHORIZED)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      intercept[InvalidCredentials](await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None))))
+    }
+
+    "throw LockedAccount exception when the account is locked" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(LOCKED)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      intercept[LockedAccount] {
+        await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)))
+      }
+    }
+
+    "throw UnverifiedAccount exception when the account is unverified" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(FORBIDDEN)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      intercept[UnverifiedAccount] {
+        await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)))
+      }
+    }
+
+    "fail on Upstream5xxResponse when the call return a 500" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate"))
+          .withRequestBody(equalToJson(encryptedLoginRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      intercept[UpstreamErrorResponse] {
+        await(underTest.authenticate(SessionCreateWithDeviceRequest(userEmail, userPassword, mfaMandatedForUser = Some(false), None)))
+      }.statusCode shouldBe INTERNAL_SERVER_ERROR
+    }
+  }
+
+  "authenticateMfaAccessCode" should {
+    "return the session containing the user when the accessCode and nonce are valid" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate-mfa"))
+          .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(s"""
+                           |{
+                           |  "sessionId": "$sessionId",
+                           |  "loggedInState": "LOGGED_IN",
+                           |    "developer": {
+                           |      "userId":"$userId",
+                           |      "email":"${userEmail.text}",
+                           |      "firstName":"John",
+                           |      "lastName": "Doe",
+                           |      "registrationTime": "${nowAsText}",
+                           |      "lastModified": "${nowAsText}",
+                           |      "verified": true,
+                           |      "mfaEnabled": false,
+                           |      "mfaDetails": [],
+                           |      "emailPreferences": { "interests" : [], "topics": [] }
+                           |    }
+                           |}""".stripMargin)
+          )
+      )
+
+      val result: UserSession = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
+
+      verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
+      result shouldBe UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(emailAddress = userEmail))
+    }
+
+    "throw Invalid credentials when the credentials are invalid" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate-mfa"))
+          .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      intercept[InvalidCredentials](await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest)))
+    }
+
+    "throw InvalidEmail when the email is not found" in new Setup {
+      stubFor(
+        post(urlEqualTo("/authenticate-mfa"))
+          .withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      intercept[InvalidEmail](await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest)))
+    }
+  }
 }

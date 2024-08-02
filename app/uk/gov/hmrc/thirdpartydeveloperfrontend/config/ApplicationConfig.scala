@@ -29,7 +29,6 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val betaFeedbackUrl                                  = "/contact/beta-feedback"
   val betaFeedbackUnauthenticatedUrl                   = "/contact/beta-feedback-unauthenticated"
   val thirdPartyDeveloperUrl: String                   = baseUrl("third-party-developer")
-  val thirdPartyDeveloperSessionUrl: String            = baseUrl("third-party-developer-session")
   val thirdPartyApplicationProductionUrl: String       = thirdPartyApplicationUrl("third-party-application-production")
   val thirdPartyApplicationProductionUseProxy: Boolean = useProxy("third-party-application-production")
   val thirdPartyApplicationSandboxUrl: String          = thirdPartyApplicationUrl("third-party-application-sandbox")
