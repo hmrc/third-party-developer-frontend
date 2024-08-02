@@ -99,29 +99,29 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     "return the user authentication response from the connector when the authentication succeeds and user is not admin on production application" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticate(*)(*)).thenReturn(successful(userAuthenticationResponse))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*)).thenReturn(successful(userAuthenticationResponse))
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
       verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
-      verify(underTest.thirdPartyDeveloperSessionConnector).authenticate(*)(*)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
     }
 
     "return the user authentication response from the connector when the authentication succeeds and user is an admin on production application" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsAdminInProduction)
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticate(*)(*))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
       verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
-      verify(underTest.thirdPartyDeveloperSessionConnector).authenticate(*)(*)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
     }
 
     "propagate the exception when the connector fails" in new Setup {
       when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticate(*)(*))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
         .thenThrow(new RuntimeException("this one"))
 
       intercept[RuntimeException](await(underTest.authenticate(email, password, Some(deviceSessionId)))).getMessage shouldBe "this one"
@@ -130,13 +130,13 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
   "authenticateMfaAccessCode" should {
     "return the new session from the connector when the authentication succeeds" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId))).thenReturn(successful(session))
+      when(underTest.thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId))).thenReturn(successful(session))
 
       await(underTest.authenticateAccessCode(email, accessCode, nonce, mfaId)) shouldBe session
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperSessionConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId)))
+      when(underTest.thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(email, accessCode, nonce, mfaId)))
         .thenThrow(new RuntimeException)
 
       intercept[RuntimeException](await(underTest.authenticateAccessCode(email, accessCode, nonce, mfaId)))

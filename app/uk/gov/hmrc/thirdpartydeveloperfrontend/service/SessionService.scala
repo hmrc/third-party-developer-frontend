@@ -45,12 +45,12 @@ class SessionService @Inject() (
     for {
       coreUser           <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- appsByTeamMember.fetchProductionSummariesByAdmin(coreUser.id).map(_.nonEmpty)
-      response           <- thirdPartyDeveloperSessionConnector.authenticate(SessionCreateWithDeviceRequest(emailAddress, password, Some(mfaMandatedForUser), deviceSessionId))
+      response           <- thirdPartyDeveloperConnector.authenticate(SessionCreateWithDeviceRequest(emailAddress, password, Some(mfaMandatedForUser), deviceSessionId))
     } yield (response, coreUser.id)
   }
 
   def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[UserSession] = {
-    thirdPartyDeveloperSessionConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(emailAddress, accessCode, nonce, mfaId))
+    thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(emailAddress, accessCode, nonce, mfaId))
   }
 
   def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
