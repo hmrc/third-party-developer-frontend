@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{HttpClient, SessionId => _, _}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.{SessionId, User}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
@@ -35,6 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 object ThirdPartyDeveloperConnector {
   case class CoreUserDetails(email: LaxEmailAddress, id: UserId)
@@ -145,6 +146,14 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
+  def updateSessionLoggedInState(sessionId: SessionId, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[UserSession] = metrics.record(api) {
+    http.PUT[String, Option[UserSession]](s"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}", "")
+      .map {
+        case Some(session) => session
+        case None          => throw new SessionInvalid
+      }
+  }
+
   def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[LaxEmailAddress] = {
     metrics.record(api) {
       http.GET[ErrorOr[EmailIdentifier]](s"$serviceBaseUrl/reset-password?code=$code")
@@ -195,6 +204,24 @@ class ThirdPartyDeveloperConnector @Inject() (
       .map {
         case Right(response) => response.status
         case Left(err)       => throw err
+      }
+  }
+
+  def fetchSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[UserSession] = metrics.record(api) {
+    http.GET[Option[UserSession]](s"$serviceBaseUrl/session/$sessionId")
+      .map {
+        case Some(session) => session
+        case None          => throw new SessionInvalid
+      }
+  }
+
+  def deleteSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+    http.DELETE[ErrorOr[HttpResponse]](s"$serviceBaseUrl/session/$sessionId")
+      .map {
+        case Right(response)                                 => response.status
+        // treat session not found as successfully destroyed
+        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => NO_CONTENT
+        case Left(err)                                       => throw err
       }
   }
 
