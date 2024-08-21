@@ -21,7 +21,6 @@ import scala.concurrent.Future
 import scala.concurrent.Future.successful
 
 import org.jsoup.Jsoup
-import views.html.support.SupportEnquiryInitialChoiceView
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.mvc.{Request, Result}
@@ -36,19 +35,17 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{SessionServiceMock, SupportServiceMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
-  trait Setup extends SessionServiceMock with SupportServiceMockModule {
-    val supportEnquiryInitialChoiceView = app.injector.instanceOf[SupportEnquiryInitialChoiceView]
-    val supportEnquiryView              = app.injector.instanceOf[SupportEnquiryView]
-    val supportThankyouView             = app.injector.instanceOf[SupportThankyouView]
+  trait Setup extends SessionServiceMock {
+    val supportEnquiryView  = app.injector.instanceOf[SupportEnquiryView]
+    val supportThankyouView = app.injector.instanceOf[SupportThankyouView]
 
     val underTest = new SupportEnquiryController(
       mcc,
@@ -56,8 +53,6 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       sessionServiceMock,
       mock[ErrorHandler],
       mock[DeskproService],
-      SupportServiceMock.aMock,
-      supportEnquiryInitialChoiceView,
       supportEnquiryView,
       supportThankyouView
     )
@@ -65,7 +60,6 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val developer                            = buildTrackedUser(emailAddress = "thirdpartydeveloper@example.com".toLaxEmail)
     val sessionId                            = UserSessionId.random
-    val supportSessionId                     = SupportSessionId.random
   }
 
   trait IsLoggedIn {
@@ -98,37 +92,21 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
   }
 
   "SupportEnquiryController" when {
-    "invoking supportEnquiryPage for new support" should {
-      "redirect to the new support enquiry initial choice page when a user is logged in" in new Setup with IsLoggedIn {
-        val result = addToken(underTest.supportEnquiryPage(true))(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result).value shouldBe "/developer/new-support"
-      }
-
-      "redirect to the new support enquiry initial choice page when a user is not logged in" in new Setup with NotLoggedIn {
-        val result = addToken(underTest.supportEnquiryPage(true))(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result).value shouldBe "/developer/new-support"
-      }
-
-    }
 
     "invoking supportEnquiryPage for old support" should {
       "support form is prepopulated when user logged in" in new Setup with IsLoggedIn {
-        val result = addToken(underTest.supportEnquiryPage(false))(request)
+        val result = addToken(underTest.supportEnquiryPage())(request)
 
         assertFullNameAndEmail(result, "John Doe", "thirdpartydeveloper@example.com")
       }
 
       "support form fields are blank when not logged in" in new Setup with NotLoggedIn {
-        val result = addToken(underTest.supportEnquiryPage(false))(request)
+        val result = addToken(underTest.supportEnquiryPage())(request)
         assertFullNameAndEmail(result, "", "")
       }
 
       "support form fields are blank when part logged in enabling MFA" in new Setup with IsPartLoggedInEnablingMFA {
-        val result = addToken(underTest.supportEnquiryPage(false))(request)
+        val result = addToken(underTest.supportEnquiryPage())(request)
 
         assertFullNameAndEmail(result, "", "")
       }

@@ -35,13 +35,11 @@ object MongoFormatters {
   implicit val formatNewApplicationEmailPreferencesFlow: OFormat[NewApplicationEmailPreferencesFlowV2] = Json.format[NewApplicationEmailPreferencesFlowV2]
   implicit val formatGetProdCredsFlow: OFormat[GetProductionCredentialsFlow]                           = Json.format[GetProductionCredentialsFlow]
   implicit val formatSupportApi: OFormat[SupportApi]                                                   = Json.format[SupportApi]
-  implicit val formatSupportFlow: OFormat[SupportFlow]                                                 = Json.format[SupportFlow]
 
   implicit val formatFlow: OFormat[Flow] = Union.from[Flow]("flowType")
     .and[IpAllowlistFlow](FlowType.IP_ALLOW_LIST.toString)
     .and[EmailPreferencesFlowV2](FlowType.EMAIL_PREFERENCES_V2.toString)
     .and[NewApplicationEmailPreferencesFlowV2](FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2.toString)
     .and[GetProductionCredentialsFlow](FlowType.GET_PRODUCTION_CREDENTIALS.toString)
-    .and[SupportFlow](FlowType.SUPPORT_FLOW.toString)
     .format
 }

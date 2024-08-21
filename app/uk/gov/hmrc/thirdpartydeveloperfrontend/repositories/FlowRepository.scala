@@ -60,7 +60,6 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
         .forType[EmailPreferencesFlowV2]
         .forType[NewApplicationEmailPreferencesFlowV2]
         .forType[GetProductionCredentialsFlow]
-        .forType[SupportFlow]
         .build
     ) {
 

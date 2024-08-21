@@ -27,7 +27,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 
 sealed trait FlowType
@@ -39,7 +38,6 @@ object FlowType {
   case object NEW_APPLICATION_EMAIL_PREFERENCES    extends FlowType
   case object NEW_APPLICATION_EMAIL_PREFERENCES_V2 extends FlowType
   case object GET_PRODUCTION_CREDENTIALS           extends FlowType
-  case object SUPPORT_FLOW                         extends FlowType
 
   val values: List[FlowType] = List(
     IP_ALLOW_LIST,
@@ -47,8 +45,7 @@ object FlowType {
     EMAIL_PREFERENCES_V2,
     NEW_APPLICATION_EMAIL_PREFERENCES,
     NEW_APPLICATION_EMAIL_PREFERENCES_V2,
-    GET_PRODUCTION_CREDENTIALS,
-    SUPPORT_FLOW
+    GET_PRODUCTION_CREDENTIALS
   )
 
   def from[A <: Flow: TypeTag]: FlowType = {
@@ -57,7 +54,6 @@ object FlowType {
       case t if t =:= typeOf[IpAllowlistFlow]                      => FlowType.IP_ALLOW_LIST
       case t if t =:= typeOf[NewApplicationEmailPreferencesFlowV2] => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
       case t if t =:= typeOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
-      case t if t =:= typeOf[SupportFlow]                          => FlowType.SUPPORT_FLOW
     }
   }
 
@@ -81,20 +77,6 @@ case class IpAllowlistFlow(override val sessionId: UserSessionId, allowlist: Set
   override val flowType: FlowType = FlowType.IP_ALLOW_LIST
 }
 case class SupportApi(serviceName: ServiceName, name: String)
-
-case class SupportFlow(
-    override val sessionId: SupportSessionId,
-    entrySelection: String,
-    subSelection: Option[String] = None,
-    api: Option[String] = None,
-    privateApi: Option[String] = None,
-    emailAddress: Option[String] = None,
-    referenceNumber: Option[String] = None
-  ) extends Flow {
-
-  type Type = SupportSessionId
-  override def flowType: FlowType = FlowType.SUPPORT_FLOW
-}
 
 case class EmailPreferencesFlowV2(
     override val sessionId: UserSessionId,

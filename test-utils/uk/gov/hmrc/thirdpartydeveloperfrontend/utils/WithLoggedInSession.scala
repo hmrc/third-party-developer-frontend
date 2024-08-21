@@ -20,7 +20,6 @@ import play.api.libs.crypto.CookieSigner
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 
 object WithLoggedInSession {
@@ -28,10 +27,6 @@ object WithLoggedInSession {
   implicit class AuthFakeRequest[A](fakeRequest: FakeRequest[A]) {
 
     def withLoggedIn(implicit cookieEncoding: CookieEncoding, cookieSigner: CookieSigner): UserSessionId => FakeRequest[A] = { id =>
-      fakeRequest.withCookies(cookieEncoding.createUserCookie(id))
-    }
-
-    def withSupport(implicit cookieEncoding: CookieEncoding, cookieSigner: CookieSigner): SupportSessionId => FakeRequest[A] = { id =>
       fakeRequest.withCookies(cookieEncoding.createUserCookie(id))
     }
   }

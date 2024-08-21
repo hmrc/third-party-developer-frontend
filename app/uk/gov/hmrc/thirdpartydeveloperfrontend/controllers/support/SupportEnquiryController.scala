@@ -20,7 +20,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
-import views.html.support.SupportEnquiryInitialChoiceView
 import views.html.{SupportEnquiryView, SupportThankyouView}
 
 import play.api.data.{Form, FormError}
@@ -38,24 +37,19 @@ class SupportEnquiryController @Inject() (
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
     val deskproService: DeskproService,
-    supportService: SupportService,
-    supportEnquiryInitialChoiceView: SupportEnquiryInitialChoiceView,
     supportEnquiryView: SupportEnquiryView,
     supportThankyouView: SupportThankyouView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) {
 
-  def supportEnquiryPage(useNewSupport: Boolean): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
+  def supportEnquiryPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     lazy val prefilledForm = fullyloggedInDeveloper
       .fold[Form[SupportEnquiryForm]](supportForm) { userSession =>
         supportForm.bind(Map("fullname" -> userSession.developer.displayedName, "emailaddress" -> userSession.developer.email.text)).discardingErrors
       }
 
-    if (useNewSupport)
-      successful(Redirect(routes.SupportEnquiryInitialChoiceController.page()))
-    else
-      successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.developer.displayedName), prefilledForm)))
+    successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.developer.displayedName), prefilledForm)))
   }
 
   def submitSupportEnquiry() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>

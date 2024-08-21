@@ -21,11 +21,10 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.security.SupportCookie
 
 abstract class AbstractController(
     mcc: MessagesControllerComponents
-  ) extends BaseController(mcc) with SupportCookie {
+  ) extends BaseController(mcc) {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 
