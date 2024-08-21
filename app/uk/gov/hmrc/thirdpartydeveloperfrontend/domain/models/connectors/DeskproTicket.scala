@@ -186,9 +186,4 @@ object DeskproTicket extends FieldTransformer {
 
 sealed trait TicketResult
 
-case object TicketCreated             extends TicketResult
-case class HorizonTicket(ref: String) extends TicketResult
-
-case object HorizonTicket {
-  implicit val reader: Reads[HorizonTicket] = (__ \ "data" \ "ref").read[String].map(HorizonTicket(_))
-}
+case object TicketCreated extends TicketResult
