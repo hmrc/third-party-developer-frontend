@@ -28,7 +28,7 @@ GET         /logout                                                             
 GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey()
 POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction()
 
-GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.supportEnquiryPage(useNewSupport: Boolean ?= false)
+GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.supportEnquiryPage()
 POST        /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.submitSupportEnquiry()
 GET         /support/submitted                                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.thankyouPage()
 
@@ -179,27 +179,5 @@ POST        /applications/:id/sell-resell-or-distribute-your-software           
 GET         /applications/:id/before-you-start                                                           uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.beforeYouStart(id: ApplicationId)
 GET         /applications/:id/we-will-check-your-answers                                                 uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.weWillCheckYourAnswers(id: ApplicationId)
 GET         /applications/:id/agree-new-terms-of-use                                                     uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.agreeNewTermsOfUse(id: ApplicationId)
-
-# TODO - rename these when done 
-GET         /new-support                                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryInitialChoiceController.page()
-POST        /new-support                                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryInitialChoiceController.submit()
-GET         /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.page()
-POST        /new-support/api/choose-api                                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithUsingAnApiController.submit()
-GET         /new-support/api/private-api                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ChooseAPrivateApiController.page()
-POST        /new-support/api/private-api                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ChooseAPrivateApiController.submit()
-GET         /new-support/api/private-api/apply                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ApplyForPrivateApiAccessController.page()
-POST        /new-support/api/private-api/apply                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.ApplyForPrivateApiAccessController.submit()
-GET         /new-support/api/private-api/cds-check                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.CheckCdsAccessIsRequiredController.page()
-POST        /new-support/api/private-api/cds-check                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.CheckCdsAccessIsRequiredController.submit()
-GET         /new-support/api/private-api/cds-access-not-required                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.CheckCdsAccessIsRequiredController.cdsAccessIsNotRequiredPage()
-GET         /new-support/details                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportDetailsPage()
-POST        /new-support/details                                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.submitSupportDetails()
-GET         /new-support/signing-in                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.page()
-POST        /new-support/signing-in                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.submit()
-GET         /new-support/signing-in/remove-access-codes                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithSigningInController.removeAccessCodesPage()
-GET         /new-support/confirmation                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportDetailsController.supportConfirmationPage()
-GET         /new-support/app                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.page()
-POST        /new-support/app                                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.submit()
-GET         /new-support/app/giving-team-member-access                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.HelpWithApplicationsController.givingTeamMembersAccess()
 
 ->          /hmrc-frontend        hmrcfrontend.Routes

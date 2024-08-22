@@ -25,7 +25,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.DeviceSessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.SupportSessionId
 
 trait CookieEncoding {
   implicit val appConfig: ApplicationConfig
@@ -39,9 +38,6 @@ trait CookieEncoding {
 
   private[security] lazy val devicecookieName   = "DEVICE_SESS_ID"
   private[security] lazy val devicecookieMaxAge = Some(604800) // Hardcoded to 7 Days
-
-  private[security] lazy val supportCookieName   = "SUPPORT_SESS_ID"
-  private[security] lazy val supportCookieMaxAge = Some(3600) // Hardcoded to 1 Hour
 
   val cookieSigner: CookieSigner
 
@@ -69,25 +65,12 @@ trait CookieEncoding {
     )
   }
 
-  def createSupportCookie(sessionId: SessionId): Cookie = {
-    Cookie(
-      supportCookieName,
-      encodeCookie(sessionId.toString()),
-      supportCookieMaxAge,
-      cookiePathOption,
-      cookieDomainOption,
-      cookieSecureOption,
-      cookieHttpOnlyOption
-    )
-  }
-
   def encodeCookie(token: String): String = {
     cookieSigner.sign(token) + token
   }
 
-  def extractUserSessionIdFromCookie(request: RequestHeader): Option[UserSessionId]       = decodeCookie(request, cookieName).flatMap(UserSessionId.apply)
-  def extractSupportSessionIdFromCookie(request: RequestHeader): Option[SupportSessionId] = decodeCookie(request, supportCookieName).flatMap(SupportSessionId.apply)
-  def extractDeviceSessionIdFromCookie(request: RequestHeader): Option[DeviceSessionId]   = decodeCookie(request, devicecookieName).flatMap(DeviceSessionId.apply)
+  def extractUserSessionIdFromCookie(request: RequestHeader): Option[UserSessionId]     = decodeCookie(request, cookieName).flatMap(UserSessionId.apply)
+  def extractDeviceSessionIdFromCookie(request: RequestHeader): Option[DeviceSessionId] = decodeCookie(request, devicecookieName).flatMap(DeviceSessionId.apply)
 
   private def decodeCookie(request: RequestHeader, theCookieName: String): Option[String] = {
     for {

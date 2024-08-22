@@ -35,16 +35,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val thirdPartyApplicationSandboxUseProxy: Boolean    = useProxy("third-party-application-sandbox")
   val thirdPartyApplicationProductionApiKey: String    = getConfString("third-party-application-production.api-key", "")
   val thirdPartyApplicationSandboxApiKey: String       = getConfString("third-party-application-sandbox.api-key", "")
-  val deskproHorizonEnabled: Boolean                   = getConfigDefaulted("deskpro-horizon.enabled", false)
   val deskproUrl: String                               = baseUrl("deskpro-ticket-queue")
-  val deskproHorizonUrl: String                        = getString("deskpro-horizon.uri")
-  val deskproHorizonApiKey: String                     = config.getOptional[String]("deskpro-horizon.api-key").map(key => s"key $key").getOrElse("")
-  val deskproHorizonBrand: Int                         = config.get[Int]("deskpro-horizon.brand")
-  val deskproHorizonApiName: String                    = config.get[String]("deskpro-horizon.api-name")
-  val deskproHorizonSupportReason: String              = config.get[String]("deskpro-horizon.support-reason")
-  val deskproHorizonOrganisation: String               = config.get[String]("deskpro-horizon.organisation")
-  val deskproHorizonApplicationId: String              = config.get[String]("deskpro-horizon.application-id")
-  val deskproHorizonTeamMemberEmail: String            = config.get[String]("deskpro-horizon.team-member-email")
 
   lazy val contactPath: String = getConfigDefaulted("contactPath", "")
 

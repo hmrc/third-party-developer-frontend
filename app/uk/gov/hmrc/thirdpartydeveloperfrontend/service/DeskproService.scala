@@ -24,15 +24,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{DeskproConnector, DeskproHorizonConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
 
 @Singleton
 class DeskproService @Inject() (
     val deskproConnector: DeskproConnector,
-    val deskproHorizonConnector: DeskproHorizonConnector,
     val appConfig: ApplicationConfig
   )(implicit val ec: ExecutionContext
   ) {
@@ -45,10 +44,6 @@ class DeskproService @Inject() (
   def submitSupportEnquiry(userId: Option[UserId], supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
     val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
 
-    for {
-      deskproResult <- deskproConnector.createTicket(userId, ticket)
-      // TODO: The Deskpro Horizon creation is included here for proof of concept. This needs to move to a separate service
-      _             <- if (appConfig.deskproHorizonEnabled) deskproHorizonConnector.createTicket(ticket) else Future.successful(TicketCreated)
-    } yield deskproResult
+    deskproConnector.createTicket(userId, ticket)
   }
 }

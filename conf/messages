@@ -206,31 +206,3 @@ no.applications.choice.error.required.field=Please select an option
 
 choose.application.to.uplift.error=Select the application you want production credentials for
 
-
-
-supportdetails.details.error.required.field=Enter details of your problem
-supportdetails.details.error.maxLength.field=You entered too much text - keep it under 3,000 characters
-supportdetails.details.error.spam.field=Your request looks like spam so cannot be submitted
-
-supportdetails.fullname.error.required.field=Enter your full name
-supportdetails.fullname.error.maxLength.field=Enter a name with fewer than 100 characters
-
-supportdetails.emailaddress.error.required.field=Enter your email address
-supportdetails.emailaddress.error.maxLength.field=Enter your email address with fewer than 320 characters
-supportdetails.emailaddress.error.not.valid.field=Enter your email address in the correct format, like name@example.com
-
-supportdetails.teammemberemailaddress.error.not.valid.field=Enter team member email address in the correct format, like name@example.com
-supportdetails.teammemberemailaddress.error.maxLength.field=Enter team member email address in the correct format, like name@example.com
-
-
-apply.for.private.access.fullname.error.required.field=Enter your full name
-apply.for.private.access.fullname.error.maxLength.field=Enter your full name with fewer than 100 characters
-
-apply.for.private.access.organisation.error.required.field=Enter your organisation
-apply.for.private.access.organisation.error.maxLength.field=Enter your organisation with fewer than 300 characters
-
-apply.for.private.access.applicationid.error.required.field=Enter your applicationId
-apply.for.private.access.applicationid.error.maxLength.field=Enter your applicationId with fewer than 48 characters
-
-please.select.an.option=Please select an option
-please.select.a.valid.api=Please select a valid API name
