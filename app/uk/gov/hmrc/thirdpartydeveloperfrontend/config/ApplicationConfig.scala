@@ -77,8 +77,6 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
 
   // PPNS
   val ppnsProductionUrl: String              = pushPullNotificationsApiUrl("push-pull-notifications-api-production")
-  val ppnsProductionApiKey: String           = getConfString("push-pull-notifications-api-production.api-key", "")
-  val ppnsProductionUseProxy: Boolean        = useProxy("push-pull-notifications-api-production")
   val ppnsProductionAuthorizationKey: String = getConfString("push-pull-notifications-api-production.authorizationKey", "")
   val ppnsSandboxUrl: String                 = pushPullNotificationsApiUrl("push-pull-notifications-api-sandbox")
   val ppnsSandboxUseProxy: Boolean           = useProxy("push-pull-notifications-api-sandbox")
