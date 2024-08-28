@@ -23,8 +23,11 @@ import scala.util.Success
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.Status._
+import play.api.libs.json.Json
+import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HttpClient, _}
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CheckInformation
@@ -42,22 +45,25 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   import ThirdPartyApplicationConnectorJsonFormatters._
 
-  protected val httpClient: HttpClient
-  protected val proxiedHttpClient: ProxiedHttpClient
+  protected val http: HttpClientV2
   implicit val ec: ExecutionContext
   val environment: Environment
   val serviceBaseUrl: String
-  val useProxy: Boolean
-  val apiKey: String
   def isEnabled: Boolean
 
-  def http: HttpClient = if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
+  def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
   val api: API = API("third-party-application")
 
   def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
     metrics.record(api) {
-      http.POST[CreateApplicationRequest, Application](s"$serviceBaseUrl/application", request).map(a => ApplicationCreatedResponse(a.id))
+      configureEbridgeIfRequired(
+        http
+          .post(url"$serviceBaseUrl/application")
+          .withBody(Json.toJson(request))
+      )
+        .execute[Application]
+        .map(a => ApplicationCreatedResponse(a.id))
     }
 
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
@@ -67,8 +73,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
         logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
 
-        http
-          .GET[Seq[ApplicationWithSubscriptionIds]](url, Seq("userId" -> userId.toString(), "environment" -> environment.toString))
+        configureEbridgeIfRequired(
+          http
+            .get(url"$url?${Seq("userId" -> userId.toString(), "environment" -> environment.toString)}")
+        )
+          .execute[Seq[ApplicationWithSubscriptionIds]]
           .andThen {
             case Success(_) =>
               logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
@@ -83,7 +92,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
     if (isEnabled) {
       metrics.record(api) {
-        http.GET[Option[Application]](s"$serviceBaseUrl/application/${id.value}")
+        configureEbridgeIfRequired(
+          http.get(url"$serviceBaseUrl/application/${id.value}")
+        )
+          .execute[Option[Application]]
       }
     } else {
       Future.successful(None)
@@ -91,7 +103,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
     metrics.record(api) {
-      http.DELETE[ErrorOrUnit](s"$serviceBaseUrl/application/${applicationId}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.versionNbr.value}")
+      val url = s"$serviceBaseUrl/application/${applicationId}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.versionNbr.value}"
+      configureEbridgeIfRequired(
+        http.delete(url"$url")
+      )
+        .execute[ErrorOrUnit]
         .map(throwOrOptionOf)
         .map {
           case Some(_) => ApplicationUpdateSuccessful
@@ -100,7 +116,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
     }
 
   def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
-    http.GET[Option[ApplicationToken]](s"$serviceBaseUrl/application/${id.value}/credentials")
+    configureEbridgeIfRequired(
+      http.get(url"$serviceBaseUrl/application/${id.value}/credentials")
+    )
+      .execute[Option[ApplicationToken]]
       .map {
         case Some(applicationToken) => applicationToken
         case None                   => throw new ApplicationNotFound
@@ -108,7 +127,10 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    http.POSTEmpty[ErrorOrUnit](s"$serviceBaseUrl/verify-uplift/$verificationCode")
+    configureEbridgeIfRequired(
+      http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
+    )
+      .execute[ErrorOrUnit]
       .map {
         case Right(_)                                          => ApplicationVerificationSuccessful
         case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => ApplicationVerificationFailed
@@ -118,7 +140,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    http.POST[CheckInformation, ErrorOrUnit](s"$serviceBaseUrl/application/${id.value}/check-information", approvalInformation)
+    configureEbridgeIfRequired(
+      http.post(url"$serviceBaseUrl/application/${id.value}/check-information")
+        .withBody(Json.toJson(approvalInformation))
+    )
+      .execute[ErrorOrUnit]
       .map(throwOrOptionOf)
       .map {
         case Some(_) => ApplicationUpdateSuccessful
@@ -129,7 +155,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
     val body = ApplicationNameValidationRequest(name, selfApplicationId)
 
-    http.POST[ApplicationNameValidationRequest, Option[ApplicationNameValidationResult]](s"$serviceBaseUrl/application/name/validate", body)
+    configureEbridgeIfRequired(
+      http.post(url"$serviceBaseUrl/application/name/validate")
+        .withBody(Json.toJson(body))
+    )
+      .execute[Option[ApplicationNameValidationResult]]
       .map {
         case Some(x) => ApplicationNameValidation(x)
         case None    => throw new ApplicationNotFound
@@ -137,26 +167,34 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
   }
 
   def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
-    http.GET[Set[ApiIdentifier]](s"$serviceBaseUrl/application/${applicationId}/subscription")
+    configureEbridgeIfRequired(
+      http.get(url"$serviceBaseUrl/application/${applicationId}/subscription")
+    )
+      .execute[Set[ApiIdentifier]]
   }
 
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
     metrics.record(api) {
-      http.GET[List[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use")
+      configureEbridgeIfRequired(
+        http.get(url"$serviceBaseUrl/terms-of-use")
+      )
+        .execute[List[TermsOfUseInvitation]]
     }
   }
 
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
-      http.GET[Option[TermsOfUseInvitation]](s"$serviceBaseUrl/terms-of-use/application/${applicationId}")
+      configureEbridgeIfRequired(
+        http.get(url"$serviceBaseUrl/terms-of-use/application/${applicationId}")
+      )
+        .execute[Option[TermsOfUseInvitation]]
     }
   }
 }
 
 @Singleton
 class ThirdPartyApplicationSandboxConnector @Inject() (
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
@@ -168,13 +206,15 @@ class ThirdPartyApplicationSandboxConnector @Inject() (
   val useProxy: Boolean        = appConfig.thirdPartyApplicationSandboxUseProxy
   val apiKey: String           = appConfig.thirdPartyApplicationSandboxApiKey
 
+  lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
+    EbridgeConfigurator.configure(useProxy, apiKey)
+
   override val isEnabled: Boolean = appConfig.hasSandbox;
 }
 
 @Singleton
 class ThirdPartyApplicationProductionConnector @Inject() (
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
@@ -182,8 +222,8 @@ class ThirdPartyApplicationProductionConnector @Inject() (
   ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
   val environment: Environment = Environment.PRODUCTION
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationProductionUrl
-  val useProxy: Boolean        = appConfig.thirdPartyApplicationProductionUseProxy
-  val apiKey: String           = appConfig.thirdPartyApplicationProductionApiKey
+
+  val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
 
   override val isEnabled = true
 }

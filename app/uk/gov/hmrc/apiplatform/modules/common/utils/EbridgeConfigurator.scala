@@ -16,24 +16,18 @@
 
 package uk.gov.hmrc.apiplatformmicroservice.common.utils
 
-import play.api.http.HeaderNames
 import uk.gov.hmrc.http.client.RequestBuilder
 
 object EbridgeConfigurator {
 
-  def configure(useProxy: Boolean, bearerToken: String, apiKey: String): RequestBuilder => RequestBuilder = (requestBuilder) =>
+  def configure(useProxy: Boolean, apiKey: String): RequestBuilder => RequestBuilder = (requestBuilder) => {
+    val apiKeyHeader = if (apiKey.isEmpty) Seq.empty[(String, String)] else Seq("x-api-key" -> apiKey)
+
     if (useProxy)
       requestBuilder
         .withProxy
-        .setHeader(buildHeaders(bearerToken, apiKey): _*)
+        .setHeader(apiKeyHeader: _*)
     else
       requestBuilder
-
-  private def buildHeaders(bearerToken: String, apiKey: String): Seq[(String, String)] = {
-    val conditionalHeader = if (apiKey.isEmpty) Seq.empty[(String, String)] else Seq("x-api-key" -> apiKey)
-
-    Seq(
-      HeaderNames.AUTHORIZATION -> s"Bearer $bearerToken"
-    ) ++ conditionalHeader
   }
 }

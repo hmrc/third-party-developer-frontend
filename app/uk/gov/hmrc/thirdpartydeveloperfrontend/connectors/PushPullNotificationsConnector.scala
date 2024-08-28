@@ -23,6 +23,7 @@ import cats.data.OptionT
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
+import play.api.http.HeaderNames
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -35,10 +36,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.PushPullNotificationsConnector.readsPushSecret
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import play.api.http.HeaderNames
 
 abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
-  protected val http: HttpClientV2
+  val http: HttpClientV2
   val environment: Environment
   val serviceBaseUrl: String
   val authorizationKey: String
@@ -58,7 +58,7 @@ abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionCont
     retry {
       configureEbridgeIfRequired(
         http.get(url"$aUrl")
-        .setHeader(HeaderNames.AUTHORIZATION -> authorizationKey)
+          .setHeader(HeaderNames.AUTHORIZATION -> authorizationKey)
       )
         .execute[A]
     }
@@ -87,7 +87,7 @@ class SandboxPushPullNotificationsConnector @Inject() (
   val authorizationKey: String = appConfig.ppnsSandboxAuthorizationKey
 
   lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
-    EbridgeConfigurator.configure(useProxy, authorizationKey, apiKey)
+    EbridgeConfigurator.configure(useProxy, apiKey)
 }
 
 @Singleton

@@ -68,12 +68,10 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
     config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")
 
   // API Subscription Fields
-  val apiSubscriptionFieldsProductionUrl: String       = apiSubscriptionFieldsUrl("api-subscription-fields-production")
-  val apiSubscriptionFieldsProductionApiKey: String    = getConfString("api-subscription-fields-production.api-key", "")
-  val apiSubscriptionFieldsProductionUseProxy: Boolean = useProxy("api-subscription-fields-production")
-  val apiSubscriptionFieldsSandboxUrl: String          = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxUseProxy: Boolean    = useProxy("api-subscription-fields-sandbox")
-  val apiSubscriptionFieldsSandboxApiKey: String       = getConfString("api-subscription-fields-sandbox.api-key", "")
+  val apiSubscriptionFieldsProductionUrl: String    = apiSubscriptionFieldsUrl("api-subscription-fields-production")
+  val apiSubscriptionFieldsSandboxUrl: String       = apiSubscriptionFieldsUrl("api-subscription-fields-sandbox")
+  val apiSubscriptionFieldsSandboxUseProxy: Boolean = useProxy("api-subscription-fields-sandbox")
+  val apiSubscriptionFieldsSandboxApiKey: String    = getConfString("api-subscription-fields-sandbox.api-key", "")
 
   // PPNS
   val ppnsProductionUrl: String              = pushPullNotificationsApiUrl("push-pull-notifications-api-production")
