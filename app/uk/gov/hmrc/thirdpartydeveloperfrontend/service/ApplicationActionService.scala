@@ -36,22 +36,25 @@ class ApplicationActionService @Inject() (
     applicationService: ApplicationService,
     subscriptionFieldsService: SubscriptionFieldsService,
     openAccessApisService: OpenAccessApiService
-  )(implicit ec: ExecutionContext
+  )(implicit val ec: ExecutionContext
   ) {
 
-  def process[A](applicationId: ApplicationId, userRequest: UserRequest[A])(implicit hc: HeaderCarrier): OptionT[Future, ApplicationRequest[A]] = {
+  def process[A](applicationId: ApplicationId, userRequest: UserRequest[A])(implicit hc: HeaderCarrier): Future[Option[ApplicationRequest[A]]] = {
     import cats.implicits._
 
-    for {
-      applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
-      application          = applicationWithSubs.application
-      environment          = application.deployedTo
-      fieldDefinitions    <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
-      openAccessApis      <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
-      subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
-      subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
-      role                <- OptionT.fromOption[Future](application.role(userRequest.developer.email))
-    } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
+    (
+      for {
+        applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
+        application          = applicationWithSubs.application
+        environment          = application.deployedTo
+        fieldDefinitions    <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
+        openAccessApis      <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
+        subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
+        subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
+        role                <- OptionT.fromOption[Future](application.role(userRequest.developer.email))
+      } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
+    )
+      .value
   }
 
   def toApiSubscriptionStatusList(

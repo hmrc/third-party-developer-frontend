@@ -21,7 +21,7 @@
 @this(main: Main)
 
 @(title: String, heading: String, message: String)(
-        implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
+        implicit request: play.api.mvc.RequestHeader, messages: Messages, applicationConfig: ApplicationConfig)
 
 @main(
   title = applicationConfig.title,

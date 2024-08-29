@@ -66,7 +66,7 @@ class QuestionsController @Inject() (
     questionView: QuestionView,
     checkAnswersView: CheckAnswersView,
     mcc: MessagesControllerComponents
-  )(implicit override val ec: ExecutionContext,
+  )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with SubmissionActionBuilders

@@ -45,7 +45,7 @@ class TestController(
   ) extends ApplicationController(mcc)
     with SubscriptionFieldsActions {}
 
-class ActionBuildersSpec extends BaseControllerSpec
+class ApplicationActionBuildersSpec extends BaseControllerSpec
     with ApplicationServiceMock
     with ApplicationActionServiceMock
     with ApplicationBuilder

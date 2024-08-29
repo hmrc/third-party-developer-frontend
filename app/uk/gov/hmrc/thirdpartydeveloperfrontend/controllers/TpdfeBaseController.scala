@@ -16,21 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import scala.concurrent.ExecutionContext
-
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{MessagesControllerComponents, Result}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.DevHubAuthorization
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
-abstract class BaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher with WithUnsafeDefaultFormBinding {
-  val errorHandler: ErrorHandler
-  val sessionService: SessionService
+abstract class TpdfeBaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher with WithUnsafeDefaultFormBinding {
+  def errorHandler: ErrorHandler
 
-  implicit def ec: ExecutionContext
+  implicit def appConfig: ApplicationConfig
 
-  implicit val appConfig: ApplicationConfig
+  protected lazy val ETR = EitherTHelper.make[Result](ec)
+
 }

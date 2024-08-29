@@ -182,14 +182,14 @@ class ManageSubscriptions @Inject() (
 
     subFieldsService
       .saveFieldValues(role, application, apiContext, apiVersion, subscriptionFieldValues, postedValuesAsMap)
-      .map({
-        case SaveSubscriptionFieldsSuccessResponse              => Redirect(successRedirect)
+      .flatMap({
+        case SaveSubscriptionFieldsSuccessResponse              => successful(Redirect(successRedirect))
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
           val viewModel  = EditApiConfigurationViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
 
-          BadRequest(validationFailureView(viewModel))
-        case SaveSubscriptionFieldsAccessDeniedResponse         => Forbidden(errorHandler.badRequestTemplate)
+          successful(BadRequest(validationFailureView(viewModel)))
+        case SaveSubscriptionFieldsAccessDeniedResponse         => errorHandler.badRequestTemplate.map(Forbidden(_))
       })
   }
 
@@ -210,14 +210,14 @@ class ManageSubscriptions @Inject() (
 
     subFieldsService
       .saveFieldValues(role, application, apiContext, apiVersion, apiSubscription.oldValues.fields, postedValuesAsMap)
-      .map({
-        case SaveSubscriptionFieldsSuccessResponse              => Redirect(successRedirect)
+      .flatMap({
+        case SaveSubscriptionFieldsSuccessResponse              => successful(Redirect(successRedirect))
         case SaveSubscriptionFieldsFailureResponse(fieldErrors) =>
           val formErrors = fieldErrors.map(error => FormError(error._1, Seq(error._2))).toSeq
           val viewModel  = EditApiConfigurationFieldViewModel.toViewModel(apiSubscription, role, formErrors, postedValuesAsMap)
 
-          BadRequest(validationFailureView(viewModel))
-        case SaveSubscriptionFieldsAccessDeniedResponse         => Forbidden(errorHandler.badRequestTemplate)
+          successful(BadRequest(validationFailureView(viewModel)))
+        case SaveSubscriptionFieldsAccessDeniedResponse         => errorHandler.badRequestTemplate.map(Forbidden(_))
       })
   }
 

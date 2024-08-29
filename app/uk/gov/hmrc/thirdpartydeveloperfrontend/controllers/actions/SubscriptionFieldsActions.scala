@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
+import scala.concurrent.Future.{failed, successful}
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.NonEmptyList
@@ -109,9 +110,9 @@ trait SubscriptionFieldsActions {
     override protected def executionContext: ExecutionContext = ec
 
     def refine[A](appRequest: ApplicationRequest[A]): Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]] = {
-      val noFieldsResult = noFieldsBehaviour match {
-        case NoSubscriptionFieldsRefinerBehaviour.BadRequest    => play.api.mvc.Results.NotFound(errorHandler.notFoundTemplate(appRequest))
-        case NoSubscriptionFieldsRefinerBehaviour.Redirect(url) => play.api.mvc.Results.Redirect(url)
+      val noFieldsResult: Future[Result] = noFieldsBehaviour match {
+        case NoSubscriptionFieldsRefinerBehaviour.BadRequest    => errorHandler.notFoundTemplate(appRequest).map(NotFound(_))
+        case NoSubscriptionFieldsRefinerBehaviour.Redirect(url) => successful(Redirect(url))
       }
 
       val apiSubscriptionStatuses = appRequest.subscriptions.filter(s => s.subscribed)
@@ -119,12 +120,11 @@ trait SubscriptionFieldsActions {
       val apiSubStatusesWithFieldDefinitions = NonEmptyList
         .fromList(APISubscriptionStatusWithSubscriptionFields(apiSubscriptionStatuses).toList)
 
-      Future.successful(
-        apiSubStatusesWithFieldDefinitions
-          .fold[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]](Left(noFieldsResult))(withDefinitions =>
-            Right(new ApplicationWithFieldDefinitionsRequest(withDefinitions, appRequest))
-          )
-      )
+      val resultRequest = apiSubStatusesWithFieldDefinitions.map(defns => new ApplicationWithFieldDefinitionsRequest(defns, appRequest))
+
+      resultRequest.fold[Future[Either[Result, ApplicationWithFieldDefinitionsRequest[A]]]](
+        noFieldsResult.map(Left(_))
+      )(req => successful(Right(req)))
     }
   }
 
@@ -140,16 +140,14 @@ trait SubscriptionFieldsActions {
 
         val details = request.fieldDefinitions.map(toDetails(accessLevel)).toList
 
-        Future.successful(
-          if (pageNumber >= 1 && pageNumber <= details.size) {
-            val apiDetails            = details(pageNumber - 1)
-            val apiSubscriptionStatus = request.fieldDefinitions.toList(pageNumber - 1)
+        if (pageNumber >= 1 && pageNumber <= details.size) {
+          val apiDetails            = details(pageNumber - 1)
+          val apiSubscriptionStatus = request.fieldDefinitions.toList(pageNumber - 1)
 
-            Right(new ApplicationWithSubscriptionFieldPageRequest(pageNumber, details.size, apiSubscriptionStatus, apiDetails, request))
-          } else {
-            Left(NotFound(errorHandler.notFoundTemplate(request)))
-          }
-        )
+          successful(Right(new ApplicationWithSubscriptionFieldPageRequest(pageNumber, details.size, apiSubscriptionStatus, apiDetails, request)))
+        } else {
+          errorHandler.notFoundTemplate(request).map(x => Left(NotFound(x)))
+        }
       }
     }
 
@@ -163,15 +161,13 @@ trait SubscriptionFieldsActions {
 
       def refine[A](request: ApplicationWithFieldDefinitionsRequest[A]): Future[Either[Result, ApplicationWithSubscriptionFieldsRequest[A]]] = {
 
-        Future.successful({
-          val apiSubscription = request.fieldDefinitions.filter(d => { d.context == context && d.apiVersion.versionNbr == version })
+        val apiSubscription = request.fieldDefinitions.filter(d => { d.context == context && d.apiVersion.versionNbr == version })
 
-          apiSubscription match {
-            case Nil               => Left(NotFound(errorHandler.notFoundTemplate(request)))
-            case apiDetails :: Nil => Right(new ApplicationWithSubscriptionFieldsRequest(apiDetails, request))
-            case _                 => throw new RuntimeException(s"Too many APIs match for; context: ${context.value} version: ${version.value}")
-          }
-        })
+        apiSubscription match {
+          case Nil               => errorHandler.notFoundTemplate(request).map(x => Left(NotFound(x)))
+          case apiDetails :: Nil => successful(Right(new ApplicationWithSubscriptionFieldsRequest(apiDetails, request)))
+          case _                 => failed(new RuntimeException(s"Too many APIs match for; context: ${context.value} version: ${version.value}"))
+        }
       }
     }
 
@@ -184,18 +180,18 @@ trait SubscriptionFieldsActions {
 
       def refine[A](request: ApplicationWithSubscriptionFieldsRequest[A]): Future[Either[Result, ApplicationWithWritableSubscriptionField[A]]] = {
 
-        Future.successful({
-          val subscriptionFieldValues = request.apiSubscription.fields.fields
-            .filter(d => d.definition.name.value == fieldName)
+        val subscriptionFieldValues = request.apiSubscription.fields.fields
+          .filter(d => d.definition.name.value == fieldName)
 
-          subscriptionFieldValues match {
-            case Nil                           => Left(NotFound(errorHandler.notFoundTemplate(request)))
-            case subscriptionFieldValue :: Nil => {
-              val accessLevel = DevhubAccessLevel.fromRole(request.role)
-              val canWrite    = subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
+        subscriptionFieldValues match {
+          case Nil                           => errorHandler.notFoundTemplate(request).map(x => Left(NotFound(x)))
+          case subscriptionFieldValue :: Nil => {
+            val accessLevel = DevhubAccessLevel.fromRole(request.role)
+            val canWrite    = subscriptionFieldValue.definition.access.devhub.satisfiesWrite(accessLevel)
 
-              if (canWrite) {
-                Right(new ApplicationWithWritableSubscriptionField(
+            if (canWrite) {
+              successful(Right(
+                new ApplicationWithWritableSubscriptionField(
                   APISubscriptionStatusWithWritableSubscriptionField(
                     request.apiSubscription.name,
                     request.apiSubscription.context,
@@ -204,14 +200,14 @@ trait SubscriptionFieldsActions {
                     request.apiSubscription.fields
                   ),
                   request
-                ))
-              } else {
-                Left(Forbidden(errorHandler.badRequestTemplate(request)))
-              }
+                )
+              ))
+            } else {
+              errorHandler.badRequestTemplate(request).map(x => Left(Forbidden(x)))
             }
-            case _                             => throw new RuntimeException(s"Too many APIs match for; fieldName: ${fieldName}")
           }
-        })
+          case _                             => failed(new RuntimeException(s"Too many APIs match for; fieldName: ${fieldName}"))
+        }
       }
     }
 

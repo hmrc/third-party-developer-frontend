@@ -101,21 +101,22 @@ class ManageTeam @Inject() (
         )
       }
 
-      def handleValidForm(form: AddTeamMemberForm) = {
+      def handleValidForm(form: AddTeamMemberForm): Future[PlayResult] = {
         val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
 
-        val handleFailure: Failures => PlayResult = (fails) =>
+        val handleFailure: Failures => Future[PlayResult] = (fails) =>
           fails.head match {
-            case CommandFailures.CollaboratorAlreadyExistsOnApp =>
-              createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
-            case CommandFailures.ApplicationNotFound            => NotFound(errorHandler.notFoundTemplate)
-            case _                                              => InternalServerError("Action failed")
+            case CommandFailures.CollaboratorAlreadyExistsOnApp => successful(
+                createBadRequestResult(AddTeamMemberForm.form.fill(form).withError("email", "team.member.error.emailAddress.already.exists.field"))
+              )
+            case CommandFailures.ApplicationNotFound            => errorHandler.notFoundTemplate.map(NotFound(_))
+            case _                                              => successful(InternalServerError("Action failed"))
           }
 
         collaboratorService
           .addTeamMember(request.application, form.email.toLaxEmail, role, request.userSession.developer.email)
-          .map {
-            _.fold(handleFailure, _ => Redirect(successRedirect))
+          .flatMap {
+            _.fold(handleFailure, _ => successful(Redirect(successRedirect)))
           }
       }
 

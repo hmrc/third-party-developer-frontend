@@ -24,7 +24,6 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
@@ -53,7 +52,6 @@ class StartUsingYourApplicationController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with EitherTHelper[String]
     with SubmissionActionBuilders {
 
   def startUsingYourApplicationPage(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
@@ -62,8 +60,10 @@ class StartUsingYourApplicationController @Inject() (
 
   def startUsingYourApplicationAction(productionAppId: ApplicationId) = checkActionForPreProduction(SupportsSubscriptions, AdministratorOnly)(productionAppId) { implicit request =>
     val userEmail = request.userSession.developer.email
-    val failure   = BadRequest(errorHandler.badRequestTemplate)
-    val success   = Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps())
-    submissionService.confirmSetupComplete(productionAppId, userEmail).map((esu: Either[String, Unit]) => esu.fold(_ => failure, _ => success))
+    val failure   = errorHandler.badRequestTemplate.map(BadRequest(_))
+    val success   = successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps()))
+    submissionService.confirmSetupComplete(productionAppId, userEmail).flatMap {
+      case esu: Either[String, Unit] => esu.fold(_ => failure, _ => success)
+    }
   }
 }

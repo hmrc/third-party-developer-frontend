@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
-import java.time.{Duration, Instant}
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 import org.apache.pekko.stream.Materializer
 import org.mockito.invocation.InvocationOnMock
@@ -35,7 +36,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
 
   trait Setup {
     implicit val m: Materializer = app.materializer
-    val config                   = SessionTimeoutFilterConfig(timeoutDuration = Duration.ofSeconds(10), onlyWipeAuthToken = false)
+    val config                   = SessionTimeoutFilterConfig(timeoutDuration = 10.seconds, onlyWipeAuthToken = false)
 
     val nextOperationFunction = mock[RequestHeader => Future[Result]]
     val whitelistedUrl        = uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.UserLoginAccount.login().url

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.helper.EnvironmentNameService
@@ -65,10 +66,9 @@ class NoApplications @Inject() (
       hasErrors => Future.successful(BadRequest(noApplicationsChoiceView(hasErrors))),
       formData =>
         formData.choice.getOrElse("") match {
-          case "get-emails" =>
-            Future.successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
-          case "use-apis"   => Future.successful(Redirect(routes.NoApplications.startUsingRestApisPage()))
-          case _            => Future.successful(InternalServerError(errorHandler.internalServerErrorTemplate))
+          case "get-emails" => successful(Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()))
+          case "use-apis"   => successful(Redirect(routes.NoApplications.startUsingRestApisPage()))
+          case _            => errorHandler.internalServerErrorTemplate.map(InternalServerError(_))
         }
     )
   }

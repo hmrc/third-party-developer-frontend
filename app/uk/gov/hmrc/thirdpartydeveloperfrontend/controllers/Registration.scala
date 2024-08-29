@@ -85,10 +85,10 @@ class Registration @Inject() (
       request.session.get("email").fold(Future.successful(BadRequest(signInView("Sign in", LoginForm.form)))) { email =>
         connector.resendVerificationEmail(email.toLaxEmail)
           .map(_ => Redirect(routes.Registration.confirmation()))
-          .recover {
+          .recoverWith {
             case NonFatal(e) => {
               logger.warn(s"resendVerification failed with ${e.getMessage}")
-              NotFound(errorHandler.notFoundTemplate).removingFromSession("email")
+              errorHandler.notFoundTemplate.map(x => NotFound(x).removingFromSession("email"))
             }
           }
       }

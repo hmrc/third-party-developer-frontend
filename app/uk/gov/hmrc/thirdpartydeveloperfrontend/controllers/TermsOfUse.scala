@@ -63,7 +63,7 @@ class TermsOfUse @Inject() (
 
   def termsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
-      Future.successful(BadRequest(errorHandler.badRequestTemplate))
+      errorHandler.badRequestTemplate.map(BadRequest(_))
     } else {
       val termsOfUse = termsOfUseVersionService.getForApplication(request.application)
       Future.successful(Ok(termsOfUseView(applicationViewModelFromApplicationRequest(), TermsOfUseForm.form, termsOfUse)))
@@ -83,7 +83,7 @@ class TermsOfUse @Inject() (
           .updateCheckInformation(app, updatedInformation)
           .map(_ => Redirect(routes.Details.details(app.id)))
       } else {
-        Future.successful(BadRequest(errorHandler.badRequestTemplate))
+        errorHandler.badRequestTemplate.map(BadRequest(_))
       }
     }
 

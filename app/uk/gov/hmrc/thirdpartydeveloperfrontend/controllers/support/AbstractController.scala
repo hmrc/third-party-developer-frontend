@@ -24,7 +24,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 abstract class AbstractController(
     mcc: MessagesControllerComponents
-  ) extends BaseController(mcc) {
+  ) extends TpdfeBaseController(mcc) {
 
   val supportForm: Form[SupportEnquiryForm] = SupportEnquiryForm.form
 

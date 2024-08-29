@@ -239,29 +239,29 @@ class UserLoginAccount @Inject() (
             (userAuthenticationResponse, userId) <- sessionService.authenticate(loginForm.emailaddress.toLaxEmail, loginForm.password, deviceSessionId)
             response                             <- routeToLoginOr2SV(loginForm, userAuthenticationResponse, request.session, userId)
           } yield response
-        } recover {
+        } recoverWith {
           case _: InvalidEmail       =>
             logger.warn("Login failed due to invalid Email")
             audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> loginForm.emailaddress))
-            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress)))
+            successful(Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress))))
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid credentials")
             audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> loginForm.emailaddress))
-            Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress)))
+            successful(Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress))))
           case _: LockedAccount      =>
             logger.warn("Login failed account locked")
             audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> loginForm.emailaddress))
-            Locked(accountLockedView())
+            successful(Locked(accountLockedView()))
           case _: UnverifiedAccount  =>
             logger.warn("Login failed unverified account")
-            Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, loginForm.emailaddress)))
-              .withSession("email" -> loginForm.emailaddress)
+            successful(Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, loginForm.emailaddress)))
+              .withSession("email" -> loginForm.emailaddress))
           case _: UserNotFound       =>
             logger.warn("Login failed due to user not found")
-            InternalServerError(errorHandler.internalServerErrorTemplate)
+            errorHandler.internalServerErrorTemplate.map(InternalServerError(_))
           case _: MatchError         =>
             logger.warn("Inconsistent response from server")
-            InternalServerError(errorHandler.internalServerErrorTemplate)
+            errorHandler.internalServerErrorTemplate.map(InternalServerError(_))
         }
     )
   }
@@ -279,7 +279,7 @@ class UserLoginAccount @Inject() (
             successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId.id, smsMfaId.id)))
           } else {
             logger.warn("Inconsistent state of user mfa")
-            successful(InternalServerError(errorHandler.internalServerErrorTemplate))
+            errorHandler.internalServerErrorTemplate.map(InternalServerError(_))
           }
 
         case None => successful(NotFound("User not found"))

@@ -26,11 +26,10 @@ import play.api.mvc.{ActionRefiner, _}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, BaseController, HasApplication, UserRequest}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, HasApplication, TpdfeBaseController, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
@@ -75,17 +74,11 @@ object SubmissionActionBuilders {
 }
 
 trait SubmissionActionBuilders {
-  self: BaseController with ApplicationActionBuilders =>
+  self: ApplicationActionBuilders with TpdfeBaseController =>
 
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter, SubmissionStatusFilter}
 
-  val submissionService: SubmissionService
-
-  private[this] val ecPassThru = ec
-
-  private val E = new EitherTHelper[Result] {
-    implicit val ec: ExecutionContext = ecPassThru
-  }
+  def submissionService: SubmissionService
 
   private def submissionRefiner(submissionId: SubmissionId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
     new ActionRefiner[UserRequest, SubmissionRequest] {
@@ -95,7 +88,7 @@ trait SubmissionActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = input
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetch(submissionId), NotFound(errorHandler.notFoundTemplate(input)))
+            submission <- ETR.fromOptionM(submissionService.fetch(submissionId), errorHandler.notFoundTemplate(input).map(NotFound(_)))
           } yield new SubmissionRequest(submission, input)
         )
           .value
@@ -109,8 +102,7 @@ trait SubmissionActionBuilders {
       override def refine[A](request: SubmissionRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
 
-        applicationActionService.process(request.submission.applicationId, request.userRequest)
-          .toRight(NotFound(errorHandler.notFoundTemplate(request)))
+        ETR.fromOptionM(applicationActionService.process(request.submission.applicationId, request.userRequest), errorHandler.notFoundTemplate(request).map(NotFound(_)))
           .map(r => new SubmissionApplicationRequest(r.application, request, r.subscriptions))
           .value
       }
@@ -125,7 +117,7 @@ trait SubmissionActionBuilders {
 
         (
           for {
-            submission <- E.fromOptionF(submissionService.fetchLatestExtendedSubmission(request.application.id), NotFound(errorHandler.notFoundTemplate(request)))
+            submission <- ETR.fromOptionM(submissionService.fetchLatestExtendedSubmission(request.application.id), errorHandler.notFoundTemplate(request).map(NotFound(_)))
           } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest), request.subscriptions)
         )
           .value

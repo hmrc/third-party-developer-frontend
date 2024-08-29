@@ -64,7 +64,7 @@
   fullWidth: Boolean = false,
   timeout: Boolean = true,
   additionalScriptsBlock: Option[Html] = None
-)(contentBlock: Html)(implicit request: Request[_], messages: Messages)
+)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages)
 
 @timeoutBlock = {
   @if(timeout) {

@@ -362,7 +362,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
-      contentAsString(result) should include("Sorry, we’re experiencing technical difficulties")
+      contentAsString(result) should include("Sorry, there is a problem with the service")
 
     }
 
