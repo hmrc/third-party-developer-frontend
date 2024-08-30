@@ -149,7 +149,7 @@ class SubscriptionsController @Inject() (
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
         }
 
-      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = Future.successful(BadRequest(errorHandler.badRequestTemplate))
+      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = errorHandler.badRequestTemplate.map(BadRequest(_))
 
       ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm);
     }

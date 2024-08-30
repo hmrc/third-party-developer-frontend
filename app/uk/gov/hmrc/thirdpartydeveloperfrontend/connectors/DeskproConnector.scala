@@ -16,14 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import java.net.URL
 import java.{util => ju}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 import scala.util.control.NonFatal
 
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
@@ -34,7 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 @Singleton
-class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+class DeskproConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger {
 
   lazy val serviceBaseUrl: String = config.deskproUrl
@@ -55,7 +58,9 @@ class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, m
   }
 
   private def createTicket(id: String, idType: String, deskproTicket: DeskproTicket)(implicit hc: HeaderCarrier): Future[TicketResult] = metrics.record(api) {
-    http.POST[DeskproTicket, ErrorOrUnit](requestUrl("/deskpro/ticket"), deskproTicket)
+    http.post(requestUrl("/deskpro/ticket"))
+      .withBody(Json.toJson(deskproTicket))
+      .execute[ErrorOrUnit]
       .map(throwOr(TicketCreated))
       .andThen {
         case Success(_) => logger.info(s"Deskpro ticket '${deskproTicket.subject}' created successfully")
@@ -68,11 +73,16 @@ class DeskproConnector @Inject() (http: HttpClient, config: ApplicationConfig, m
   }
 
   def createFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[TicketId] = metrics.record(api) {
-    http.POST[Feedback, Option[TicketId]](requestUrl("/deskpro/feedback"), feedback)
+    http.post(requestUrl("/deskpro/feedback"))
+      .withBody(Json.toJson(feedback))
+      .execute[Option[TicketId]]
       .map(_.fold(throw UpstreamErrorResponse("Create Feedback failed", 404, 500))(x => x))
   }
 
   override def toString = "DeskproConnector()"
 
-  private def requestUrl[B, A](uri: String): String = s"$serviceBaseUrl$uri"
+  private def requestUrl[B, A](path: String): URL = {
+    val concat = s"${serviceBaseUrl}${path}"
+    url"$concat"
+  }
 }

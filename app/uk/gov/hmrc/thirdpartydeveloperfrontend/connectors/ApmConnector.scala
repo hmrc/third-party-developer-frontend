@@ -20,9 +20,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-import play.api.libs.json.Writes
+import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, MappedApiDefinitions, ServiceName}
@@ -45,7 +46,7 @@ object ApmConnector {
 }
 
 @Singleton
-class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
+class ApmConnector @Inject() (http: HttpClientV2, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
     extends OpenAccessApisConnector
     with CommonResponseHandlers {
 
@@ -55,35 +56,38 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   val api = API("api-platform-microservice")
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
-    http.GET[Option[ApplicationWithSubscriptionData]](s"${config.serviceBaseUrl}/applications/${applicationId}")
+    http.get(url"${config.serviceBaseUrl}/applications/${applicationId}")
+      .execute[Option[ApplicationWithSubscriptionData]]
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]] = {
 
-    http.GET[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]](
-      s"${config.serviceBaseUrl}/subscription-fields",
-      Seq("environment" -> environment.toString)
-    )
+    http.get(url"${config.serviceBaseUrl}/subscription-fields?environment=$environment")
+      .execute[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]]
   }
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
-    http.GET[MappedApiDefinitions](s"${config.serviceBaseUrl}/api-definitions", Seq("applicationId" -> applicationId.toString))
+    http.get(url"${config.serviceBaseUrl}/api-definitions?applicationId=${applicationId}")
+      .execute[MappedApiDefinitions]
       .map(_.wrapped.values.toList)
   }
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
-    http.GET[MappedApiDefinitions](s"${config.serviceBaseUrl}/api-definitions/open", Seq("environment" -> environment.toString))
+    http.get(url"${config.serviceBaseUrl}/api-definitions/open?environment=$environment")
+      .execute[MappedApiDefinitions]
       .map(_.wrapped.values.toList)
   }
 
   def fetchExtendedApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
-    http.GET[ExtendedApiDefinition](s"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
+    http.get(url"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
+      .execute[ExtendedApiDefinition]
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)
       }
 
   def fetchCombinedApi(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
-    http.GET[CombinedApi](s"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
+    http.get(url"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
+      .execute[CombinedApi]
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)
@@ -92,11 +96,13 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
   def fetchApiDefinitionsVisibleToUser(userId: Option[UserId])(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams: Seq[(String, String)] = userId.fold(Seq.empty[(String, String)])(id => Seq("developerId" -> id.toString()))
 
-    http.GET[List[ApiDefinition]](s"${config.serviceBaseUrl}/combined-api-definitions", queryParams)
+    http.get(url"${config.serviceBaseUrl}/combined-api-definitions?$queryParams")
+      .execute[List[ApiDefinition]]
   }
 
   def fetchCombinedApisVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[CombinedApi]]] =
-    http.GET[List[CombinedApi]](s"${config.serviceBaseUrl}/combined-rest-xml-apis/developer", Seq("developerId" -> userId.toString()))
+    http.get(url"${config.serviceBaseUrl}/combined-rest-xml-apis/developer?developerId=$userId")
+      .execute[List[CombinedApi]]
       .map(Right(_))
       .recover {
         case NonFatal(e) => Left(e)
@@ -104,25 +110,32 @@ class ApmConnector @Inject() (http: HttpClient, config: ApmConnector.Config, met
 
   def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
-      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/api-definitions/upliftable")
+      http.get(url"${config.serviceBaseUrl}/api-definitions/upliftable")
+        .execute[Set[ApiIdentifier]]
     }
 
   def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
-      http.GET[Set[ApiIdentifier]](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/upliftableSubscriptions")
+      http.get(url"${config.serviceBaseUrl}/applications/$applicationId/upliftableSubscriptions")
+        .execute[Set[ApiIdentifier]]
     }
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
     metrics.record(api) {
-      http.GET[MappedApiDefinitions](s"${config.serviceBaseUrl}/api-definitions/all", Seq("environment" -> environment.toString))
+      http.get(url"${config.serviceBaseUrl}/api-definitions/all?environment=$environment")
+        .execute[MappedApiDefinitions]
         .map(_.wrapped.values.toList)
     }
 
   def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV1, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/uplift", RequestUpliftV1(subs))
+    http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
+      .withBody(Json.toJson(RequestUpliftV1(subs)))
+      .execute[ApplicationId]
   }
 
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.POST[RequestUpliftV2, ApplicationId](s"${config.serviceBaseUrl}/applications/${applicationId.toString()}/uplift", RequestUpliftV2(upliftData))
+    http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
+      .withBody(Json.toJson(RequestUpliftV2(upliftData)))
+      .execute[ApplicationId]
   }
 }

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.mvc.{Action, ActionFilter, AnyContent, Result}
@@ -36,9 +37,9 @@ trait PpnsActions {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
       if (hasPpnsFields(request)) {
-        Future.successful(None)
+        successful(None)
       } else {
-        Future.successful(Some(NotFound(errorHandler.notFoundTemplate)))
+        errorHandler.notFoundTemplate.map(x => Some(NotFound(x)))
       }
     }
   }

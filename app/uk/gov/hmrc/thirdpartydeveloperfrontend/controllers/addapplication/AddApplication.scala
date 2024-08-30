@@ -209,7 +209,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case Environment.PRODUCTION => successful(NotFound(errorHandler.notFoundTemplate(appRequest)))
+        case Environment.PRODUCTION => errorHandler.notFoundTemplate(appRequest).map(NotFound(_))
       }
     }
   }

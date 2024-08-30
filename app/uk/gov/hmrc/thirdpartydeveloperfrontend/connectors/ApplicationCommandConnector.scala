@@ -20,7 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import com.google.inject.{Inject, Singleton}
 
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, InternalServerException}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, InternalServerException, StringContextOps}
 
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandHandlerTypes, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
@@ -29,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessfu
 
 @Singleton
 class ApplicationCommandConnector @Inject() (
-    val http: HttpClient,
+    val http: HttpClientV2,
     val config: ApmConnector.Config
   )(implicit val ec: ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
@@ -72,12 +73,11 @@ class ApplicationCommandConnector @Inject() (
           throw new InternalServerException("Failed parsing response to dispatch")
       }
     }
-    val url                                                                 = s"${baseApplicationUrl(applicationId)}/dispatch"
-    val request                                                             = DispatchRequest(command, adminsToEmail)
-    val extraHeaders                                                        = Seq.empty[(String, String)]
     import cats.syntax.either._
 
-    http.PATCH[DispatchRequest, HttpResponse](url, request, extraHeaders)
+    http.patch(url"${baseApplicationUrl(applicationId)}/dispatch")
+      .withBody(Json.toJson(DispatchRequest(command, adminsToEmail)))
+      .execute[HttpResponse]
       .map(response =>
         response.status match {
           case OK          => parseWithLogAndThrow[DispatchSuccessResult](response.body).asRight[Failures]

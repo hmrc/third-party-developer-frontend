@@ -34,7 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, BaseControllerSpec, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, TpdfeBaseController, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with LocalUserIdTracker
@@ -42,7 +42,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
     with DeveloperSessionBuilder {
 
   class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
-      extends BaseController(mcc)
+      extends TpdfeBaseController(mcc)
       with ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
     override val errorHandler: ErrorHandler     = mock[ErrorHandler]

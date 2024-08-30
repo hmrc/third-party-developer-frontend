@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
 
 import cats.data.NonEmptyList
 import views.html.ppns.PushSecretsView
@@ -42,15 +43,15 @@ class PushPullNotifications @Inject() (
     mcc: MessagesControllerComponents,
     pushSecretsView: PushSecretsView,
     pushPullNotificationsService: PushPullNotificationsService
-  )(implicit override val ec: ExecutionContext,
+  )(implicit val ec: ExecutionContext,
     override val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with PpnsActions {
 
   def showPushSecrets(applicationId: ApplicationId): Action[AnyContent] = subscribedToApiWithPpnsFieldAction(applicationId, ViewPushSecret, SandboxOrAdmin) {
     implicit request: ApplicationRequest[AnyContent] =>
-      pushPullNotificationsService.fetchPushSecrets(request.application) map { pushSecrets =>
+      pushPullNotificationsService.fetchPushSecrets(request.application) flatMap { pushSecrets =>
         NonEmptyList.fromList(pushSecrets.toList)
-          .fold(NotFound(errorHandler.notFoundTemplate))(nonEmptySecrets => Ok(pushSecretsView(request.application, nonEmptySecrets)))
+          .fold(errorHandler.notFoundTemplate.map(NotFound(_)))(nonEmptySecrets => successful(Ok(pushSecretsView(request.application, nonEmptySecrets))))
       }
   }
 }

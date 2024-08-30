@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
-import cats.data.OptionT
-import cats.implicits._
 import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
@@ -39,7 +37,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
 
   def givenApplicationActionReturnsNotFound[A](applicationId: ApplicationId): Unit =
     when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*))
-      .thenReturn(OptionT.none[Future, ApplicationRequest[A]])
+      .thenReturn(successful(None))
 
   def givenApplicationAction[A](application: Application, userSession: UserSession): Unit =
     givenApplicationAction[A](ApplicationWithSubscriptionData(application, Set.empty, Map.empty), userSession)
@@ -51,10 +49,10 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
       openAccessApis: List[ApiDefinition] = List.empty
     ): Unit = {
 
-    def createReturn(req: UserRequest[A]): OptionT[Future, ApplicationRequest[A]] = {
+    def createReturn(req: UserRequest[A]): Future[Option[ApplicationRequest[A]]] = {
       appData.application.role(userSession.developer.email) match {
-        case None       => OptionT.none[Future, ApplicationRequest[A]]
-        case Some(role) => OptionT.pure[Future](
+        case None       => successful(None)
+        case Some(role) => successful(Some(
             new ApplicationRequest(
               application = appData.application,
               deployedTo = appData.application.deployedTo,
@@ -63,7 +61,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
               role,
               userRequest = req
             )
-          )
+          ))
       }
     }
     when(applicationActionServiceMock.process[A](eqTo(appData.application.id), *)(*))

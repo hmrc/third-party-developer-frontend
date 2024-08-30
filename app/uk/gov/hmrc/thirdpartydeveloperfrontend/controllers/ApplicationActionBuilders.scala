@@ -16,57 +16,47 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.State
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Capability, Permission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
-trait BaseActionBuilders {
-  val errorHandler: ErrorHandler
-}
+trait ApplicationActionBuilders {
+  self: TpdfeBaseController =>
 
-trait ApplicationActionBuilders extends BaseActionBuilders {
-  val applicationActionService: ApplicationActionService
+  protected def applicationActionService: ApplicationActionService
 
-  implicit val appConfig: ApplicationConfig
-
-  implicit private def hc(implicit request: Request[_]): HeaderCarrier =
-    HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-
-  def applicationRequestRefiner(applicationId: ApplicationId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] =
+  def applicationRequestRefiner(applicationId: ApplicationId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] = {
     new ActionRefiner[UserRequest, ApplicationRequest] {
       override protected def executionContext: ExecutionContext = ec
 
       override def refine[A](request: UserRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
         implicit val implicitRequest: UserRequest[A] = request
-        import cats.implicits._
 
-        applicationActionService.process(applicationId, request)
-          .toRight(NotFound(errorHandler.notFoundTemplate(Request(request, request.userSession)))).value
+        ETR.fromOptionM(applicationActionService.process(applicationId, request), errorHandler.notFoundTemplate(Request(request, request.userSession)).map(NotFound(_)))
+          .value
       }
-    }
-
-  private def forbiddenWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
-    if (cond) {
-      None
-    } else {
-      Some(Forbidden(errorHandler.forbiddenTemplate))
     }
   }
 
-  private def badRequestWhenNot[A](cond: Boolean)(implicit applicationRequest: ApplicationRequest[A]): Option[Result] = {
+  private def forbiddenWhenNot[A](cond: Boolean)(implicit ec: ExecutionContext, applicationRequest: ApplicationRequest[A]): Future[Option[Result]] = {
     if (cond) {
-      None
+      successful(None)
     } else {
-      Some(BadRequest(errorHandler.badRequestTemplate))
+      errorHandler.forbiddenTemplate.map(x => Some(Forbidden(x)))
+    }
+  }
+
+  private def badRequestWhenNot[A](cond: Boolean)(implicit ec: ExecutionContext, applicationRequest: ApplicationRequest[A]): Future[Option[Result]] = {
+    if (cond) {
+      successful(None)
+    } else {
+      errorHandler.badRequestTemplate.map(x => Some(BadRequest(x)))
     }
   }
 
@@ -76,7 +66,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
-      Future.successful(forbiddenWhenNot(cond(request)))
+      forbiddenWhenNot(cond(request))
     }
   }
 
@@ -86,7 +76,7 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest: ApplicationRequest[A] = request
 
-      Future.successful(badRequestWhenNot(cond(request)))
+      badRequestWhenNot(cond(request))
     }
   }
 
@@ -98,12 +88,13 @@ trait ApplicationActionBuilders extends BaseActionBuilders {
   def approvalFilter(approvalPredicate: State => Boolean)(implicit ec: ExecutionContext) = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
-    override protected def filter[A](request: ApplicationRequest[A]) = Future.successful {
+    override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
       implicit val implicitRequest = request
 
-      if (approvalPredicate(request.application.state.name)) None
+      if (approvalPredicate(request.application.state.name))
+        successful(None)
       else {
-        Some(NotFound(errorHandler.notFoundTemplate))
+        errorHandler.notFoundTemplate.map(x => Some(NotFound(x)))
       }
     }
   }

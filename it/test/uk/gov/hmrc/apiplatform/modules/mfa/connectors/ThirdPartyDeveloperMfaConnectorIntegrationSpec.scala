@@ -78,7 +78,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(createDeviceSessionUrl))
-          .withJsonRequestBody("")
+          .withEmptyBody()
           .willReturn(
             aResponse()
               .withStatus(CREATED)
@@ -99,7 +99,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(createDeviceSessionUrl))
-          .withJsonRequestBody("")
+          .withEmptyBody()
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)
@@ -113,7 +113,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(createDeviceSessionUrl))
-          .withJsonRequestBody("")
+          .withEmptyBody()
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)
@@ -150,7 +150,7 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
 
       stubFor(
         post(urlPathEqualTo(fetchDeviceSessionUrl))
-          .withJsonRequestBody("")
+          .withEmptyBody()
           .willReturn(
             aResponse()
               .withStatus(INTERNAL_SERVER_ERROR)

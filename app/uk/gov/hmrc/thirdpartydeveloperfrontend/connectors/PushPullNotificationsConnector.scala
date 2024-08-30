@@ -25,8 +25,10 @@ import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.HeaderNames
 import play.api.libs.json.{Json, Reads}
+import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads}
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -36,18 +38,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 
 abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
-  protected val httpClient: HttpClient
-  protected val proxiedHttpClient: ProxiedHttpClient
+  val http: HttpClientV2
   val environment: Environment
   val serviceBaseUrl: String
-  val useProxy: Boolean
-  val apiKey: String
   val authorizationKey: String
 
   val api: API = API("push-pull-notifications-api")
 
-  def http: HttpClient =
-    if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
+  def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
   def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
     import cats.implicits._
@@ -56,9 +54,13 @@ abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionCont
       .getOrElse(Seq.empty)
   }
 
-  private def getWithAuthorization[A](url: String)(implicit rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
+  private def getWithAuthorization[A](aUrl: String)(implicit rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
     retry {
-      http.GET[A](url, Seq.empty, Seq(HeaderNames.AUTHORIZATION -> authorizationKey))
+      configureEbridgeIfRequired(
+        http.get(url"$aUrl")
+          .setHeader(HeaderNames.AUTHORIZATION -> authorizationKey)
+      )
+        .execute[A]
     }
   }
 }
@@ -72,8 +74,7 @@ private[connectors] case class PushSecret(value: String)
 @Singleton
 class SandboxPushPullNotificationsConnector @Inject() (
     val appConfig: ApplicationConfig,
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport
   )(implicit val ec: ExecutionContext
@@ -84,21 +85,23 @@ class SandboxPushPullNotificationsConnector @Inject() (
   val useProxy: Boolean        = appConfig.ppnsSandboxUseProxy
   val apiKey: String           = appConfig.ppnsSandboxApiKey
   val authorizationKey: String = appConfig.ppnsSandboxAuthorizationKey
+
+  lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
+    EbridgeConfigurator.configure(useProxy, apiKey)
 }
 
 @Singleton
 class ProductionPushPullNotificationsConnector @Inject() (
     val appConfig: ApplicationConfig,
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport
   )(implicit val ec: ExecutionContext
   ) extends AbstractPushPullNotificationsConnector {
 
+  val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
+
   val environment: Environment = Environment.PRODUCTION
   val serviceBaseUrl: String   = appConfig.ppnsProductionUrl
-  val useProxy: Boolean        = appConfig.ppnsProductionUseProxy
-  val apiKey: String           = appConfig.ppnsProductionApiKey
   val authorizationKey: String = appConfig.ppnsProductionAuthorizationKey
 }

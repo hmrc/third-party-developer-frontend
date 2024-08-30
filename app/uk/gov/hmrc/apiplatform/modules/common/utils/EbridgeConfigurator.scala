@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+package uk.gov.hmrc.apiplatformmicroservice.common.utils
 
-import play.api.mvc.MessagesControllerComponents
+import uk.gov.hmrc.http.client.RequestBuilder
 
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+object EbridgeConfigurator {
 
-abstract class LoggedInController(mcc: MessagesControllerComponents) extends TpdfeBaseController(mcc) {
-  implicit def developerSessionFromRequest(implicit request: UserRequest[_]): UserSession = request.userSession
+  def configure(useProxy: Boolean, apiKey: String): RequestBuilder => RequestBuilder = (requestBuilder) => {
+    val apiKeyHeader = if (apiKey.isEmpty) Seq.empty[(String, String)] else Seq("x-api-key" -> apiKey)
+
+    if (useProxy)
+      requestBuilder
+        .withProxy
+        .setHeader(apiKeyHeader: _*)
+    else
+      requestBuilder
+  }
 }

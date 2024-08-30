@@ -31,7 +31,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     extends LoggedInController(mcc)
     with ApplicationActionBuilders {
 
-  val applicationService: ApplicationService
+  def applicationService: ApplicationService
 
   def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
     request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == "PPNSField"))

@@ -24,6 +24,10 @@ trait WireMockExtensions {
     import com.github.tomakehurst.wiremock.client.WireMock._
     import play.api.libs.json._
 
+    def withEmptyBody(): MappingBuilder = {
+      bldr
+    }
+
     def withJsonRequestBody[T](t: T)(implicit writes: Writes[T]): MappingBuilder = {
       bldr.withRequestBody(equalTo(Json.toJson(t).toString))
     }

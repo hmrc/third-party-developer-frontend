@@ -26,7 +26,9 @@ import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.Status.{BAD_REQUEST, CREATED, NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
@@ -38,17 +40,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
-  protected val httpClient: HttpClient
-  protected val proxiedHttpClient: ProxiedHttpClient
+  val http: HttpClientV2
   val environment: Environment
   val serviceBaseUrl: String
-  val useProxy: Boolean
-  val apiKey: String
 
   import SubscriptionFieldsConnectorJsonFormatters._
 
-  def http: HttpClient =
-    if (useProxy) proxiedHttpClient.withHeaders(apiKey) else httpClient
+  def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
   def fetchFieldsValuesWithPrefetchedDefinitions(
       clientId: ClientId,
@@ -115,7 +113,10 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     ): Future[Seq[SubscriptionFieldDefinition]] = {
     val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
     logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
-    http.GET[Option[ApiFieldDefinitions]](url)
+    configureEbridgeIfRequired(
+      http.get(url"$url")
+    )
+      .execute[Option[ApiFieldDefinitions]]
       .map {
         case Some(x) => x.fieldDefinitions.map(toDomain)
         case None    => Seq.empty
@@ -124,7 +125,10 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
   def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
     val url = s"$serviceBaseUrl/definition"
-    http.GET[Option[AllApiFieldDefinitions]](url)
+    configureEbridgeIfRequired(
+      http.get(url"$url")
+    )
+      .execute[Option[AllApiFieldDefinitions]]
       .map {
         case Some(x) => toDomain(x)
         case None    => DefinitionsByApiVersion.empty
@@ -140,17 +144,23 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
-    http.PUT[SubscriptionFieldsPutRequest, HttpResponse](url, SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)).map { response =>
-      response.status match {
-        case BAD_REQUEST  =>
-          Json.parse(response.body).validate[Map[String, String]] match {
-            case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
-            case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
-          }
-        case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
-        case statusCode   => throw UpstreamErrorResponse("Failed to put subscription fields", statusCode)
+    configureEbridgeIfRequired(
+      http
+        .put(url"$url")
+        .withBody(Json.toJson(SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)))
+    )
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case BAD_REQUEST  =>
+            Json.parse(response.body).validate[Map[String, String]] match {
+              case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
+              case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
+            }
+          case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
+          case statusCode   => throw UpstreamErrorResponse("Failed to put subscription fields", statusCode)
+        }
       }
-    }
   }
 
   def deleteFieldValues(
@@ -160,13 +170,17 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     )(implicit hc: HeaderCarrier
     ): Future[FieldsDeleteResult] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    http.DELETE[HttpResponse](url).map { response =>
-      response.status match {
-        case NO_CONTENT => FieldsDeleteSuccessResult
-        case NOT_FOUND  => FieldsDeleteSuccessResult
-        case _          => FieldsDeleteFailureResult
+    configureEbridgeIfRequired(
+      http.delete(url"$url")
+    )
+      .execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case NO_CONTENT => FieldsDeleteSuccessResult
+          case NOT_FOUND  => FieldsDeleteSuccessResult
+          case _          => FieldsDeleteFailureResult
+        }
       }
-    }
   }
 
   private def fetchApplicationApiValues(
@@ -176,7 +190,10 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     )(implicit hc: HeaderCarrier
     ): Future[Option[ApplicationApiFieldValues]] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    http.GET[Option[ApplicationApiFieldValues]](url)
+    configureEbridgeIfRequired(
+      http.get(url"$url")
+    )
+      .execute[Option[ApplicationApiFieldValues]]
   }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
@@ -244,8 +261,7 @@ private[connectors] object SubscriptionFieldsConnectorDomain {
 @Singleton
 class SandboxSubscriptionFieldsConnector @Inject() (
     val appConfig: ApplicationConfig,
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport
   )(implicit val ec: ExecutionContext
@@ -255,13 +271,16 @@ class SandboxSubscriptionFieldsConnector @Inject() (
   val serviceBaseUrl: String   = appConfig.apiSubscriptionFieldsSandboxUrl
   val useProxy: Boolean        = appConfig.apiSubscriptionFieldsSandboxUseProxy
   val apiKey: String           = appConfig.apiSubscriptionFieldsSandboxApiKey
+
+  lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
+    EbridgeConfigurator.configure(useProxy, apiKey)
+
 }
 
 @Singleton
 class ProductionSubscriptionFieldsConnector @Inject() (
     val appConfig: ApplicationConfig,
-    val httpClient: HttpClient,
-    val proxiedHttpClient: ProxiedHttpClient,
+    val http: HttpClientV2,
     val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport
   )(implicit val ec: ExecutionContext
@@ -269,6 +288,6 @@ class ProductionSubscriptionFieldsConnector @Inject() (
 
   val environment: Environment = Environment.PRODUCTION
   val serviceBaseUrl: String   = appConfig.apiSubscriptionFieldsProductionUrl
-  val useProxy: Boolean        = appConfig.apiSubscriptionFieldsProductionUseProxy
-  val apiKey: String           = appConfig.apiSubscriptionFieldsProductionApiKey
+
+  val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
 }

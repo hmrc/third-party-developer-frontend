@@ -21,22 +21,21 @@ import scala.concurrent.{ExecutionContext, Future}
 import cats.data.{EitherT, OptionT}
 import cats.implicits._
 
-import play.api.mvc._
+import play.api.mvc.{Action, _}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendHeaderCarrierProvider
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseController, MaybeUserRequest, UserRequest, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{MaybeUserRequest, TpdfeBaseController, UserRequest, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
-trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncoding with ApplicationLogger {
-  self: BaseController =>
+trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
+  self: FrontendController =>
 
-  implicit val appConfig: ApplicationConfig
+  implicit def ec: ExecutionContext
 
-  val sessionService: SessionService
+  def sessionService: SessionService
 
   object DeveloperSessionFilter {
     type Type = UserSession => Boolean
@@ -85,20 +84,20 @@ trait DevHubAuthorization extends FrontendHeaderCarrierProvider with CookieEncod
     result.discardingCookies(DiscardingCookie(devicecookieName))
   }
 
-  private[security] def loadSession[A](implicit ec: ExecutionContext, request: Request[A]): Future[Option[UserSession]] = {
+  private[security] def loadSession[A](implicit request: Request[A]): Future[Option[UserSession]] = {
     (for {
       sessionId <- extractUserSessionIdFromCookie(request)
     } yield fetchDeveloperSession(sessionId))
       .getOrElse(Future.successful(None))
   }
 
-  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit ec: ExecutionContext, hc: HeaderCarrier): Future[Option[UserSession]] = {
+  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] = {
     sessionService.fetch(sessionId)
   }
 }
 
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
-  self: BaseController =>
+  self: TpdfeBaseController =>
 
   def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] =>

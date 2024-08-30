@@ -89,7 +89,7 @@ class Credentials @Inject() (
       if (request.application.createdOn.isBefore(serverTokenCutoffDate)) {
         applicationService.fetchCredentials(request.application).map { tokens => Ok(serverTokenView(request.application, tokens.accessToken)) }
       } else {
-        successful(NotFound(errorHandler.notFoundTemplate))
+        errorHandler.notFoundTemplate.map(NotFound(_))
       }
     }
 
@@ -111,21 +111,21 @@ class Credentials @Inject() (
       instant()
     )
 
-    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).map {
-      case Right(response)                                                                                          => Ok(clientSecretsGeneratedView(response.applicationResponse, applicationId, secretValue))
-      case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))                                             => NotFound(errorHandler.notFoundTemplate)
-      case Left(NonEmptyList(CommandFailures.GenericFailure("App is in PRODUCTION so User must be an ADMIN"), Nil)) => Forbidden(errorHandler.badRequestTemplate)
-      case Left(NonEmptyList(CommandFailures.ClientSecretLimitExceeded, Nil))                                       => UnprocessableEntity(errorHandler.badRequestTemplate)
-      case Left(failures: NonEmptyList[CommandFailure])                                                             => fails(applicationId)(failures)
+    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).flatMap {
+      case Right(response)                                                                                          => successful(Ok(clientSecretsGeneratedView(response.applicationResponse, applicationId, secretValue)))
+      case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))                                             => errorHandler.notFoundTemplate.map(NotFound(_))
+      case Left(NonEmptyList(CommandFailures.GenericFailure("App is in PRODUCTION so User must be an ADMIN"), Nil)) => errorHandler.badRequestTemplate.map(Forbidden(_))
+      case Left(NonEmptyList(CommandFailures.ClientSecretLimitExceeded, Nil))                                       => errorHandler.badRequestTemplate.map(UnprocessableEntity(_))
+      case Left(failures: NonEmptyList[CommandFailure])                                                             => successful(fails(applicationId)(failures))
     }
   }
 
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: ClientSecret.Id): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService.fetchCredentials(request.application).map { tokens =>
+      applicationService.fetchCredentials(request.application).flatMap { tokens =>
         tokens.clientSecrets
           .find(_.id == clientSecretId)
-          .fold(NotFound(errorHandler.notFoundTemplate))(secret => Ok(deleteClientSecretView(request.application, secret)))
+          .fold(errorHandler.notFoundTemplate.map(NotFound(_)))(secret => successful(Ok(deleteClientSecretView(request.application, secret))))
       }
     }
 
