@@ -39,7 +39,7 @@ class ProfileSpec extends CommonViewSpec
 
   private val request = FakeRequest().withCSRFToken
 
-  val developer = buildUser("developer@example.com".toLaxEmail, "FirstName", "LastName", Some("TestOrganisation")).loggedIn
+  val developer = buildUser("developer@example.com".toLaxEmail, "FirstName", "LastName").loggedIn
 
   "Profile page" should {
     val profileView = app.injector.instanceOf[ProfileView]

@@ -58,15 +58,6 @@
                 aria-labelledby="lastname-label"
                 value="@form.data.getOrElse("lastname", "")" class="govuk-input @if(form.errors("lastname").nonEmpty) {govuk-input--error}"/>
     </div>
-    <div class="govuk-form-group @if(form.errors("organisation").nonEmpty) {govuk-form-group--error}">
-        <label class="govuk-label govuk-!-font-weight-bold" for="organisation" id="organisation-label">Organisation (optional)</label>
-        @fieldError(form.errors, "organisation")
-        <input type="text"
-                id="organisation"
-                name="organisation"
-                aria-labelledby="organisation-label"
-                value="@form.data.getOrElse("organisation", "")" class="govuk-input @if(form.errors("organisation").nonEmpty) {govuk-input--error}"/>
-    </div>
     <button id="submit" class="govuk-button" type="submit">Save changes</button>
   }
 }

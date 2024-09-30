@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Registration, UpdateProfileRequest}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
@@ -85,14 +84,14 @@ object Stubs extends ApplicationLogger {
 
 object DeveloperStub {
 
-  def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson): StubMapping =
+  def register(registration: RegistrationRequest, status: Int)(implicit encryptedJson: EncryptedJson): StubMapping =
     stubFor(
       post(urlMatching(s"/developer"))
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(registration).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(email: LaxEmailAddress, profile: UpdateProfileRequest, status: Int): StubMapping =
+  def update(email: LaxEmailAddress, profile: UpdateRequest, status: Int): StubMapping =
     stubFor(
       post(urlMatching(s"/developer/$email"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))

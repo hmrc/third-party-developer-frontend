@@ -75,7 +75,7 @@ class SubscriptionsSpec extends CommonViewSpec
   )
 
   "Subscriptions page" should {
-    val developer = buildUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
+    val developer = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
     val baseState = ApplicationState(State.PRODUCTION, Some("somebody@example.com"), Some("somebody"), Some(""), instant)
 
     val productionApplicationPendingGatekeeperApproval    = buildApplication(baseState.copy(name = State.PENDING_GATEKEEPER_APPROVAL), Environment.PRODUCTION)

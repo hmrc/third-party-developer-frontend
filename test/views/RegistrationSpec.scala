@@ -47,7 +47,6 @@ class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
         .withError("emailaddress", "Email address error message")
         .withError("password", "Password error message")
         .withError("confirmpassword", "Confirm password error message")
-        .withError("organisation", "Organisation error message")
 
       val page = registrationView.render(formWithErrors, request, messagesProvider, appConfig)
       page.contentType should include("text/html")
@@ -58,7 +57,6 @@ class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {
       elementExistsById(document, "data-field-error-lastname") shouldBe true
       elementExistsById(document, "data-field-error-emailaddress") shouldBe true
       elementExistsById(document, "data-field-error-password") shouldBe true
-      elementExistsById(document, "data-field-error-organisation") shouldBe true
     }
   }
 }

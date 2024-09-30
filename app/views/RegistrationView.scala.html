@@ -82,25 +82,6 @@
       />
     </div>
 
-    <div class="govuk-form-group @if(form.errors("organisation").nonEmpty){govuk-form-group--error}">
-      <label class="govuk-label govuk-!-font-weight-bold" for="organisation" id="organisation-label">
-        Organisation (optional)
-      </label>
-      <span id="organisation-name-error" class="govuk-error-message">
-        <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "organisation", true)
-      </span>
-      <input
-        type="text"
-        id="organisation"
-        name="organisation"
-        value="@form.data.getOrElse("organisation", "")"
-        class="govuk-input @if(form.errors("organisation").nonEmpty){govuk-input--error}"
-        aria-labelledby="organisation-label"
-        aria-required="false"
-        aria-describedby="organisation-name-error"
-      />
-    </div>
-
     <div class="govuk-form-group @if(form.errors("emailaddress").nonEmpty){govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="emailaddress" id="emailaddress-label">
         Email address

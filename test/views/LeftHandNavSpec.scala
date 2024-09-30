@@ -50,7 +50,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     val applicationId: ApplicationId                          = ApplicationId.random
     val clientId: ClientId                                    = ClientId("std-client-id")
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val loggedIn: UserSession                        = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test", None).loggedIn
+    implicit val loggedIn: UserSession                        = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test").loggedIn
 
     val standardApplication: Application =
       Application(applicationId, clientId, "name", instant, Some(instant), None, Period.ofDays(547), Environment.PRODUCTION, access = Access.Standard())

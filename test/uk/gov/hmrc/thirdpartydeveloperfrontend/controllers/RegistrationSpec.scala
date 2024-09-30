@@ -28,7 +28,8 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Registration => RegistrationModel, RegistrationSuccessful}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.RegistrationSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 
@@ -69,17 +70,16 @@ class RegistrationSpec extends BaseControllerSpec {
   }
 
   "registration" should {
-    "register with normalized firstname, lastname, email and organisation" in new Setup {
+    "register with normalized firstname, lastname, email" in new Setup {
       val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
         ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
-        ("confirmpassword", "VALID@1q2w3e"),
-        ("organisation", "org")
+        ("confirmpassword", "VALID@1q2w3e")
       )
 
-      val requestCaptor: ArgumentCaptor[RegistrationModel] = ArgumentCaptor.forClass(classOf[RegistrationModel])
+      val requestCaptor: ArgumentCaptor[RegistrationRequest] = ArgumentCaptor.forClass(classOf[RegistrationRequest])
       when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
 
       val result = underTest.register()(request)
@@ -91,7 +91,6 @@ class RegistrationSpec extends BaseControllerSpec {
       requestCaptor.getValue.lastName shouldBe "last"
       requestCaptor.getValue.email.text shouldBe "email@example.com"
       requestCaptor.getValue.password shouldBe "VALID@1q2w3e"
-      requestCaptor.getValue.organisation shouldBe Some("org")
     }
     "register with no organisation" in new Setup {
       val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
@@ -102,12 +101,10 @@ class RegistrationSpec extends BaseControllerSpec {
         ("confirmpassword", "VALID@1q2w3e")
       )
 
-      val requestCaptor: ArgumentCaptor[RegistrationModel] = ArgumentCaptor.forClass(classOf[RegistrationModel])
+      val requestCaptor: ArgumentCaptor[RegistrationRequest] = ArgumentCaptor.forClass(classOf[RegistrationRequest])
       when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
 
       await(underTest.register()(request))
-
-      requestCaptor.getValue.organisation shouldBe None
     }
   }
 

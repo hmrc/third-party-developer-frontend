@@ -50,12 +50,6 @@
         <dd class="govuk-summary-list__value" id="emailAddress">@{loggedIn.developer.email.text}</dd>
         </dd>
     </div>
-    <div class="govuk-summary-list__row">
-        <dt class="govuk-summary-list__key">Organisation</dt>
-        <dd class="govuk-summary-list__value" id="organisation">@(loggedIn.developer.organisation.getOrElse("None"))</dd>
-        <dd class="govuk-summary-list__actions"><a class="govuk-link" id="change-organisation" href="@controllers.profile.routes.Profile.changeProfile()">Change<span class="govuk-visually-hidden">organisation</span></a>
-        </dd>
-    </div>
   </dl>
 
   <h2 class="govuk-heading-m">Delete account</h2>

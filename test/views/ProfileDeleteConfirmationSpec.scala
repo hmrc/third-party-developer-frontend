@@ -40,7 +40,7 @@ class ProfileDeleteConfirmationSpec extends CommonViewSpec
   val profileDeleteConfirmation = app.injector.instanceOf[ProfileDeleteConfirmationView]
 
   "Profile delete confirmation page" should {
-    val developer        = buildTrackedUser("Test".toLaxEmail, "Test", "Test", None)
+    val developer        = buildTrackedUser("Test".toLaxEmail, "Test", "Test")
     val developerSession = developer.loggedIn
 
     "render with no errors" in {
