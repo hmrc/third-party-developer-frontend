@@ -32,7 +32,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -88,7 +87,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
         ("lastname", "  last  ")    // with whitespaces before and after
       )
 
-      val requestCaptor: ArgumentCaptor[UpdateProfileRequest] = ArgumentCaptor.forClass(classOf[UpdateProfileRequest])
+      val requestCaptor: ArgumentCaptor[UpdateRequest] = ArgumentCaptor.forClass(classOf[UpdateRequest])
 
       fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)

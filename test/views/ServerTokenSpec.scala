@@ -53,7 +53,7 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
 
   "Server token page" should {
     val request          = FakeRequest().withCSRFToken
-    val developerSession = buildUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
+    val developerSession = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
 
     val application = Application(
       ApplicationId.random,

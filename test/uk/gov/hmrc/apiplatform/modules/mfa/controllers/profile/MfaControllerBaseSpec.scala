@@ -162,34 +162,34 @@ class MfaControllerBaseSpec extends BaseControllerSpec
 
   trait SetupUnprotectedAccount extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
-      .thenReturn(successful(Some(buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None))))
+      .thenReturn(successful(Some(buildTrackedUser(emailAddress = loggedInDeveloper.email))))
   }
 
   trait SetupAuthAppSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
       )))
   }
 
   trait SetupSmsSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, mfaDetails = List(verifiedSmsMfaDetail))
       )))
   }
 
   trait SetupWithUnverifiedSmsSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail.copy(verified = false)))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, mfaDetails = List(verifiedSmsMfaDetail.copy(verified = false)))
       )))
   }
 
   trait SetupSmsAndAuthAppSecurityPreferences extends Setup {
     when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
       .thenReturn(successful(Some(
-        buildTrackedUser(emailAddress = loggedInDeveloper.email, organisation = None, mfaDetails = List(verifiedSmsMfaDetail, verifiedAuthenticatorAppMfaDetail))
+        buildTrackedUser(emailAddress = loggedInDeveloper.email, mfaDetails = List(verifiedSmsMfaDetail, verifiedAuthenticatorAppMfaDetail))
       )))
   }
 

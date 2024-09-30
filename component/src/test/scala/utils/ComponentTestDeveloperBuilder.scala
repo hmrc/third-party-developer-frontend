@@ -35,7 +35,6 @@ trait ComponentTestDeveloperBuilder extends FixedClock {
       emailAddress: LaxEmailAddress = "something@example.com".toLaxEmail,
       firstName: String = "John",
       lastName: String = "Doe",
-      organisation: Option[String] = None,
       mfaDetails: List[MfaDetail] = List.empty,
       emailPreferences: EmailPreferences = EmailPreferences.noPreferences
     ): User = {
@@ -47,7 +46,6 @@ trait ComponentTestDeveloperBuilder extends FixedClock {
       Instant.now(),
       true,
       None,
-      organisation,
       mfaDetails,
       None,
       emailPreferences,

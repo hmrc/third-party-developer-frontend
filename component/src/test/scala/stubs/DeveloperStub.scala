@@ -25,19 +25,18 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{Registration, UpdateProfileRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {
 
-  def register(registration: Registration, status: Int)(implicit encryptedJson: EncryptedJson) =
+  def register(registration: RegistrationRequest, status: Int)(implicit encryptedJson: EncryptedJson) =
     stubFor(
       post(urlMatching(s"/developer"))
         .withRequestBody(equalToJson(encryptedJson.toSecretRequestJson(registration).toString()))
         .willReturn(aResponse().withStatus(status))
     )
 
-  def update(userId: UserId, profile: UpdateProfileRequest, status: Int) =
+  def update(userId: UserId, profile: UpdateRequest, status: Int) =
     stubFor(
       post(urlMatching(s"/developer/$userId"))
         .withRequestBody(equalToJson(Json.toJson(profile).toString()))

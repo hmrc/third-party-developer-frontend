@@ -23,14 +23,14 @@ import stubs.{DeveloperStub, Stubs}
 
 import play.api.http.Status._
 
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.UpdateRequest
 
 class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
 
   Given("""^I want to successfully change my profile$""") { () =>
     // Pulling the user id from the developer in the test context defined in LoginSteps
     val userId = TestContext.developer.userId
-    DeveloperStub.update(userId, UpdateProfileRequest("Joe", "Bloggs", None), OK)
+    DeveloperStub.update(userId, UpdateRequest("Joe", "Bloggs"), OK)
   }
 
   Given("""^I want to successfully change my password""") { () =>

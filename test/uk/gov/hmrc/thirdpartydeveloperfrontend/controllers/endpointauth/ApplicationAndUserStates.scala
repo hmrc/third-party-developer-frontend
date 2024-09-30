@@ -239,7 +239,6 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
   lazy val userFullName               = s"$userFirstName $userLastName"
   lazy val userPhone                  = "01611234567"
   lazy val userPassword               = "S3curE-Pa$$w0rd!"
-  lazy val organisation               = "Big Corp"
 
   def describeUserRole: String
 
@@ -251,7 +250,6 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
     Instant.now(),
     verified = true,
     accountSetup = None,
-    organisation = None,
     nonce = None,
     mfaDetails = List(verifiedAuthenticatorAppMfaDetail),
     emailPreferences = EmailPreferences.noPreferences,

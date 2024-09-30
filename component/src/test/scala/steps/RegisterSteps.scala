@@ -30,7 +30,7 @@ import utils.BrowserDriver
 import play.api.http.Status
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.Registration
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
 
 object Form extends WebBrowser {
 
@@ -65,8 +65,8 @@ class RegisterSteps extends ScalaDsl with EN with Matchers with NavigationSugar 
     Form.populate(data)
   }
 
-  def createPayload(data: Map[String, String]): Registration = {
-    Registration(data("first name"), data("last name"), data("email address").toLaxEmail, data("password"))
+  def createPayload(data: Map[String, String]): RegistrationRequest = {
+    RegistrationRequest(data("email address").toLaxEmail, data("password"), data("first name"), data("last name"))
   }
 
   Given("""^I expect a resend call from '(.*)'$""") {

@@ -24,7 +24,7 @@ import views.html._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.UpdateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -60,8 +60,7 @@ class Profile @Inject() (
   private def changeProfileView()(implicit req: UserRequest[_]) = {
     changeProfileViewTemplate(profileForm.fill(ProfileForm(
       req.userSession.developer.firstName,
-      req.userSession.developer.lastName,
-      req.userSession.developer.organisation
+      req.userSession.developer.lastName
     )))
   }
 
@@ -80,14 +79,13 @@ class Profile @Inject() (
         Future.successful(BadRequest(changeProfileViewTemplate(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
       profile =>
-        connector.updateProfile(request.userId, UpdateProfileRequest(profile.firstName.trim, profile.lastName.trim, profile.organisation)) map {
+        connector.updateProfile(request.userId, UpdateRequest(profile.firstName.trim, profile.lastName.trim)) map {
           _ =>
             {
 
               val updatedDeveloper = request.userSession.developer.copy(
                 firstName = profile.firstName,
-                lastName = profile.lastName,
-                organisation = profile.organisation
+                lastName = profile.lastName
               )
 
               val updatedLoggedIn = request.userSession.copy(developer = updatedDeveloper)

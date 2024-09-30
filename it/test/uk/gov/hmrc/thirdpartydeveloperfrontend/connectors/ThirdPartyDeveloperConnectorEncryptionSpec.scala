@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{EmailAlreadyInUse, Registration}
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.EmailAlreadyInUse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
@@ -63,19 +63,19 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
               .withHeader("Content-Type", "application/json")
           )
       )
-      await(underTest.register(new Registration("first", "last", testEmail, "password")))
+      await(underTest.register(RegistrationRequest(testEmail, "password", "first", "last")))
       verify(
         1,
         postRequestedFor(urlMatching("/developer"))
           .withRequestBody(
-            equalTo("""{"data":"yLR5YLduz4B2c79v3eSrnUuk71jBNoOOytn5CgYL/JbxxGVgD/JJVZAwF5fm/z3LTxtUsa9G6WSLb9F5Sh4YNTQuTO4Cm+8EtimKAMofV6BnHESgQTR9x1Ebgznq7UM9"}""")
+            equalTo("""{"data":"SnD4DUOHcofAQ4I47oLWPCAIWeXP8hBIUsmHpLSdfe8TTlFZeN9pdMBfvNsiVUpPS+/lxFkt0qkUPhO+QeTxrREvKVs1IbLSGjbfz3+8EIA/q3z/6QwfaPGC2meIEd75"}""")
           )
       )
     }
 
     "fail to register a developer when the email address is already in use" in new Setup {
-      val registrationToTest = Registration("first", "last", testEmail, "password")
-      val secretPayload      = SecretRequest("yLR5YLduz4B2c79v3eSrnUuk71jBNoOOytn5CgYL/JbxxGVgD/JJVZAwF5fm/z3LTxtUsa9G6WSLb9F5Sh4YNTQuTO4Cm+8EtimKAMofV6BnHESgQTR9x1Ebgznq7UM9")
+      val registrationToTest = RegistrationRequest(testEmail, "password", "first", "last")
+      val secretPayload      = SecretRequest("SnD4DUOHcofAQ4I47oLWPCAIWeXP8hBIUsmHpLSdfe8TTlFZeN9pdMBfvNsiVUpPS+/lxFkt0qkUPhO+QeTxrREvKVs1IbLSGjbfz3+8EIA/q3z/6QwfaPGC2meIEd75")
 
       stubFor(
         post(urlEqualTo("/developer"))

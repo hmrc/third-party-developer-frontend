@@ -29,7 +29,8 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{EmailAlreadyInUse, Registration => RegistrationModel, RegistrationSuccessful}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{EmailAlreadyInUse, RegistrationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
@@ -71,7 +72,7 @@ class Registration @Inject() (
         },
         userData => {
           val registration =
-            RegistrationModel(userData.firstName.trim, userData.lastName.trim, userData.emailaddress.toLaxEmail, userData.password, userData.organisation)
+            RegistrationRequest(userData.emailaddress.toLaxEmail, userData.password, userData.firstName.trim, userData.lastName.trim)
           connector.register(registration).map {
             case RegistrationSuccessful => Redirect(routes.Registration.confirmation()).addingToSession("email" -> userData.emailaddress)
             case EmailAlreadyInUse      => BadRequest(registrationView(requestForm.emailAddressAlreadyInUse))

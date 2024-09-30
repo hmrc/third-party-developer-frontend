@@ -40,8 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.PasswordChangeRequest
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.UpdateProfileRequest
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{PasswordChangeRequest, UpdateRequest}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
@@ -208,7 +207,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
   when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(submission)))
   when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
-  when(tpdConnector.updateProfile(*[UserId], *[UpdateProfileRequest])(*)).thenReturn(Future.successful(1))
+  when(tpdConnector.updateProfile(*[UserId], *[UpdateRequest])(*)).thenReturn(Future.successful(1))
   when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
   when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
   when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi(
@@ -404,7 +403,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/submissions/responsible-individual-verification", _)                   => Map("verified" -> "yes")
       case Endpoint("POST", "/developer/profile/delete", _)                                                    => Map("confirmation" -> "true")
       case Endpoint("POST", "/developer/profile/email-preferences/topics", _)                                  => Map("topic[]" -> "BUSINESS_AND_POLICY")
-      case Endpoint("POST", "/developer/profile/", _)                                                          => Map("firstname" -> userFirstName, "lastname" -> userLastName, "organisation" -> organisation)
+      case Endpoint("POST", "/developer/profile/", _)                                                          => Map("firstname" -> userFirstName, "lastname" -> userLastName)
       case Endpoint("POST", "/developer/profile/email-preferences/apis-from-subscriptions", _)                 => Map("selectedApi[]" -> "my api", "applicationId" -> applicationId.toString())
       case Endpoint("POST", "/developer/profile/password", _)                                                  =>
         Map("currentpassword" -> userPassword, "password" -> (userPassword + "new"), "confirmpassword" -> (userPassword + "new"))

@@ -16,16 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.tpd.domain.models
 
-import play.api.libs.json._
-
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-
-case class Registration(firstName: String, lastName: String, email: LaxEmailAddress, password: String, organisation: Option[String] = None)
-
-object Registration {
-  implicit val registrationFmt: OFormat[Registration] = Json.format[Registration]
-}
-
 sealed trait RegistrationDownstreamResponse
 
 case object RegistrationSuccessful extends RegistrationDownstreamResponse

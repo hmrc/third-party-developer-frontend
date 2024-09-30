@@ -42,7 +42,7 @@ class ProfileDeleteSubmittedSpec extends CommonViewSpec
     "render with no errors" in {
       val request = FakeRequest().withCSRFToken
 
-      val developer = buildTrackedUser("Test".toLaxEmail, "Test", "Test", None).loggedIn
+      val developer = buildTrackedUser("Test".toLaxEmail, "Test", "Test").loggedIn
 
       val page = profileDeleteSubmittedView.render(request, developer, appConfig, messagesProvider, "details")
       page.contentType should include("text/html")

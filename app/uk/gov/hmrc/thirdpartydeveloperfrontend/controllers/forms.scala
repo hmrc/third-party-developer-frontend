@@ -100,7 +100,7 @@ object PasswordResetForm {
 
 }
 
-case class RegisterForm(firstName: String, lastName: String, emailaddress: String, password: String, confirmPassword: String, organisation: Option[String] = None)
+case class RegisterForm(firstName: String, lastName: String, emailaddress: String, password: String, confirmPassword: String)
     extends ConfirmPassword
 
 object RegistrationForm {
@@ -111,8 +111,7 @@ object RegistrationForm {
       "lastname"        -> lastnameValidator,
       "emailaddress"    -> emailValidator(),
       "password"        -> passwordValidator,
-      "confirmpassword" -> text,
-      "organisation"    -> optional(text)
+      "confirmpassword" -> text
     )(RegisterForm.apply)(RegisterForm.unapply).verifying(passwordsMatch)
   )
 
@@ -130,15 +129,14 @@ object DeleteProfileForm {
   )
 }
 
-case class ProfileForm(firstName: String, lastName: String, organisation: Option[String])
+case class ProfileForm(firstName: String, lastName: String)
 
 object ProfileForm {
 
   lazy val form = Form(
     mapping(
-      "firstname"    -> firstnameValidator,
-      "lastname"     -> lastnameValidator,
-      "organisation" -> optional(text)
+      "firstname" -> firstnameValidator,
+      "lastname"  -> lastnameValidator
     )(ProfileForm.apply)(ProfileForm.unapply)
   )
 }

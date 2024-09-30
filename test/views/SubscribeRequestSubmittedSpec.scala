@@ -55,7 +55,7 @@ class SubscribeRequestSubmittedSpec
       val apiName     = "Test API"
       val apiVersion  = ApiVersionNbr("1.0")
       val clientId    = ClientId("clientId123")
-      val developer   = buildUser("email@example.com".toLaxEmail, "First Name", "Last Name", None).loggedIn
+      val developer   = buildUser("email@example.com".toLaxEmail, "First Name", "Last Name").loggedIn
       val application = sampleApp
 
       val subscribeRequestSubmittedView = app.injector.instanceOf[SubscribeRequestSubmittedView]

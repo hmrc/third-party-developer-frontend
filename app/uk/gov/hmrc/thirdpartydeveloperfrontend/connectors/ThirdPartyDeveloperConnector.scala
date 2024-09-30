@@ -37,7 +37,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 object ThirdPartyDeveloperConnector {
   case class CoreUserDetails(email: LaxEmailAddress, id: UserId)
@@ -96,7 +95,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api: API                    = API("third-party-developer")
 
-  def register(registration: Registration)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
+  def register(registration: RegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
     encryptedJson.secretRequest(
       registration,
       encrypted =>
@@ -192,7 +191,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     }
   }
 
-  def updateProfile(userId: UserId, profile: UpdateProfileRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def updateProfile(userId: UserId, profile: UpdateRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
     http.post(url"$serviceBaseUrl/developer/$userId")
       .withBody(Json.toJson(profile))
       .execute[ErrorOr[HttpResponse]]
