@@ -21,7 +21,6 @@ import scala.concurrent.Future
 import scala.concurrent.Future.failed
 
 import org.jsoup.Jsoup
-import org.mockito.ArgumentCaptor
 import views.html._
 
 import play.api.http.Status.OK
@@ -41,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidCredentials
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.PasswordChangeFailedDueToInvalidCredentials
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ProfileService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
@@ -58,6 +57,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     val underTest = new Profile(
       applicationServiceMock,
+      mock[ProfileService],
       mock[AuditService],
       sessionServiceMock,
       mock[ThirdPartyDeveloperConnector],
@@ -87,19 +87,30 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
         ("lastname", "  last  ")    // with whitespaces before and after
       )
 
-      val requestCaptor: ArgumentCaptor[UpdateRequest] = ArgumentCaptor.forClass(classOf[UpdateRequest])
-
       fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-      when(underTest.connector.updateProfile(eqTo(loggedInDeveloper.userId), requestCaptor.capture())(*))
+      when(underTest.profileService.updateProfileName(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo("first"), eqTo("last"))(*))
         .thenReturn(Future.successful(OK))
 
       val result = addToken(underTest.updateProfile())(request)
 
-      status(result) shouldBe 200
-      requestCaptor.getValue.firstName shouldBe "first"
-      requestCaptor.getValue.lastName shouldBe "last"
+      status(result) shouldBe OK
+    }
+
+    "show error if first name not filled in" in new Setup {
+      val request = createRequest.withFormUrlEncodedBody(
+        ("firstname", " "), // with whitespaces
+        ("lastname", "last")
+      )
+
+      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
+      updateUserFlowSessionsReturnsSuccessfully(sessionId)
+
+      val result = addToken(underTest.updateProfile())(request)
+
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) should include("Enter your first name")
     }
 
     "fail and send an audit event while changing the password if old password is incorrect" in new Setup {

@@ -59,6 +59,8 @@ class ConfigurationModule extends AbstractModule {
     bind(classOf[ThirdPartyApplicationSubmissionsConnector.Config])
       .toProvider(classOf[ThirdPartyApplicationSubmissionsConnectorConfigProvider])
 
+    bind(classOf[ApiPlatformDeskproConnector.Config]).toProvider(classOf[ApiPlatformDeskproConnectorConfigProvider])
+
     bind(classOf[ClientSecretsHashingConfig]).toProvider(classOf[ClientSecretsHashingConfigProvider])
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())

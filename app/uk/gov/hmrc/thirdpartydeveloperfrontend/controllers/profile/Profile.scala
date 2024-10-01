@@ -24,15 +24,15 @@ import views.html._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.UpdateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, ProfileService, SessionService}
 
 @Singleton
 class Profile @Inject() (
     val applicationService: ApplicationService,
+    val profileService: ProfileService,
     val auditService: AuditService,
     val sessionService: SessionService,
     val connector: ThirdPartyDeveloperConnector,
@@ -79,7 +79,7 @@ class Profile @Inject() (
         Future.successful(BadRequest(changeProfileViewTemplate(formWithErrors.firstnameGlobal().lastnameGlobal())))
       },
       profile =>
-        connector.updateProfile(request.userId, UpdateRequest(profile.firstName.trim, profile.lastName.trim)) map {
+        profileService.updateProfileName(request.userId, request.email, profile.firstName.trim, profile.lastName.trim) map {
           _ =>
             {
 
