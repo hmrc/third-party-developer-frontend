@@ -36,7 +36,7 @@ class ProfileService @Inject() (
   ) extends ClockNow {
 
   def updateProfileName(userId: UserId, email: LaxEmailAddress, firstName: String, lastName: String)(implicit hc: HeaderCarrier) = {
-    val name = firstName + " " + lastName
+    val name = s"$firstName $lastName"
     for {
       response <- developerConnector.updateProfile(userId, UpdateRequest(firstName, lastName))
       result   <- deskproConnector.updatePersonName(email, name, hc)
