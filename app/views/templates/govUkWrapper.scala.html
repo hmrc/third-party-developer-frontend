@@ -193,8 +193,7 @@
   Seq(
       NavigationItem(content = Text("Documentation"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/using-the-hub")),
       NavigationItem(content = Text("Applications"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/applications")),
-      NavigationItem(content = Text("Support"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support")),
-      NavigationItem(content = Text("Service Availability"), href = Some("https://api-platform-status.production.tax.service.gov.uk/"))
+      NavigationItem(content = Text("Support"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support"))
   )
 }
 
@@ -203,6 +202,7 @@
     Meta(
       items = Some(
         Seq(
+          FooterItem(text = Some("Service Availability"), href = Some("https://api-platform-status.production.tax.service.gov.uk/")),
           FooterItem(text = Some("Cookies"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/help/cookies")),
           FooterItem(text = Some("Accessibility statement"), href = Some(s"${applicationConfig.platformFrontendHost}/accessibility-statement/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}")),
           FooterItem(text = Some("Privacy Policy"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/privacy")),
