@@ -7,9 +7,9 @@ object AppDependencies {
   lazy val seleniumVersion = "4.14.0"
   lazy val bootstrapVersion = "9.4.0"
   lazy val mongoVersion = "1.7.0"
-  lazy val apiDomainVersion = "0.16.0"
-  lazy val appDomainVersion = "0.55.0"
-  lazy val tpdDomainVersion = "0.9.0"
+  lazy val apiDomainVersion = "0.19.1"
+  lazy val appDomainVersion = "0.61.7"
+  lazy val tpdDomainVersion = "0.10.0"
 
   lazy val compile = Seq(
     ws,
