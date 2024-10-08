@@ -39,11 +39,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 
 abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
     with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
-
-  import ThirdPartyApplicationConnectorJsonFormatters._
 
   protected val http: HttpClientV2
   implicit val ec: ExecutionContext
@@ -62,11 +62,11 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
           .post(url"$serviceBaseUrl/application")
           .withBody(Json.toJson(request))
       )
-        .execute[Application]
+        .execute[ApplicationWithCollaborators]
         .map(a => ApplicationCreatedResponse(a.id))
     }
 
-  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]] =
+  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
     if (isEnabled) {
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
@@ -77,7 +77,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
           http
             .get(url"$url?${Seq("userId" -> userId.toString(), "environment" -> environment.toString)}")
         )
-          .execute[Seq[ApplicationWithSubscriptionIds]]
+          .execute[Seq[ApplicationWithSubscriptions]]
           .andThen {
             case Success(_) =>
               logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
@@ -89,13 +89,13 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       Future.successful(Seq.empty)
     }
 
-  def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]] =
+  def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
     if (isEnabled) {
       metrics.record(api) {
         configureEbridgeIfRequired(
           http.get(url"$serviceBaseUrl/application/${id.value}")
         )
-          .execute[Option[Application]]
+          .execute[Option[ApplicationWithCollaborators]]
       }
     } else {
       Future.successful(None)

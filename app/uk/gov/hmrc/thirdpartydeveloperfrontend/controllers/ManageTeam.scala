@@ -40,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes
 
 @Singleton
 class ManageTeam @Inject() (
@@ -60,7 +61,8 @@ class ManageTeam @Inject() (
   ) extends ApplicationController(mcc)
     with CommandHandlerTypes[DispatchSuccessResult]
     with FraudPreventionNavLinkHelper
-    with WithUnsafeDefaultFormBinding {
+    with WithUnsafeDefaultFormBinding
+    with ApplicationSyntaxes {
 
   private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTeamMembers, TeamMembersOnly)(applicationId)(fun)

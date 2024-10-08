@@ -23,6 +23,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREED
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+
 
 @this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
 
@@ -43,7 +45,7 @@
     Crumb("Manage details"),
     Crumb.application(app),
     Crumb.viewAllApplications,
-    Crumb.home
+    Crumb.home 
   ),
   leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
   developerSession = Some(loggedIn)

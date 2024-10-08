@@ -25,14 +25,15 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
+
 case class ApplicationSummary(
     id: ApplicationId,
-    name: String,
+    name: ApplicationName,
     role: Collaborator.Role,
     termsOfUseStatus: TermsOfUseStatus,
     state: State,
     lastAccess: Option[Instant],
-    grantLength: Period,
+    grantLength: GrantLength,
     serverTokenUsed: Boolean = false,
     createdOn: Instant,
     accessType: AccessType,
@@ -40,31 +41,30 @@ case class ApplicationSummary(
     subscriptionIds: Set[ApiIdentifier]
   )
 
-object ApplicationSummary {
+object ApplicationSummary extends ApplicationSyntaxes {
 
-  def from(app: Application, userId: UserId): ApplicationSummary = {
+  def from(app: ApplicationWithCollaborators, userId: UserId): ApplicationSummary = {
 
-    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
+    val role = app.roleFor(userId).getOrElse(throw new NotFoundException("Role not found"))
 
     ApplicationSummary(
       app.id,
-      app.name,
+      app.details.name,
       role,
       app.termsOfUseStatus,
       app.state.name,
-      app.lastAccess,
-      app.grantLength,
-      app.lastAccessTokenUsage.isDefined,
-      app.createdOn,
+      app.details.lastAccess,
+      app.details.grantLength,
+      app.details.lastAccessTokenUsage.isDefined,
+      app.details.createdOn,
       app.access.accessType,
       app.deployedTo,
       Set.empty
     )
   }
 
-  def from(app: ApplicationWithSubscriptionIds, userId: UserId): ApplicationSummary = {
-
-    val role = app.roleForCollaborator(userId).getOrElse(throw new NotFoundException("Role not found"))
+  def from(app: ApplicationWithSubscriptions, userId: UserId): ApplicationSummary = {
+    val role = app.roleFor(userId).getOrElse(throw new NotFoundException("Role not found"))
 
     ApplicationSummary(
       app.id,
@@ -72,10 +72,10 @@ object ApplicationSummary {
       role,
       app.termsOfUseStatus,
       app.state.name,
-      app.lastAccess,
-      app.grantLength,
-      app.lastAccessTokenUsage.isDefined,
-      app.createdOn,
+      app.details.lastAccess,
+      app.details.grantLength,
+      app.details.lastAccessTokenUsage.isDefined,
+      app.details.createdOn,
       app.access.accessType,
       app.deployedTo,
       app.subscriptions

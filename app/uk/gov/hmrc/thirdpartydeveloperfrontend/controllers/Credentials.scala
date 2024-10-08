@@ -37,10 +37,10 @@ import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.LocalDateC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 @Singleton
 class Credentials @Inject() (
@@ -65,7 +65,7 @@ class Credentials @Inject() (
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ClockNow
-    with CommandHandlerTypes[Application] {
+    with CommandHandlerTypes[ApplicationWithCollaborators] {
 
   private def canViewClientCredentialsPage(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
     checkActionForApprovedApps(ViewCredentials, TeamMembersOnly)(applicationId)(fun)
@@ -86,7 +86,7 @@ class Credentials @Inject() (
 
   def serverToken(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      if (request.application.createdOn.isBefore(serverTokenCutoffDate)) {
+      if (request.application.details.createdOn.isBefore(serverTokenCutoffDate)) {
         applicationService.fetchCredentials(request.application).map { tokens => Ok(serverTokenView(request.application, tokens.accessToken)) }
       } else {
         errorHandler.notFoundTemplate.map(NotFound(_))

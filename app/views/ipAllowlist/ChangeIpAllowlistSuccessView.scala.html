@@ -15,7 +15,7 @@
  *@
 
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
@@ -23,7 +23,7 @@
 
 @this(devMain: DevMain)
 
-@(app: Application, ipAllowlistFlow: IpAllowlistFlow)(
+@(app: ApplicationWithCollaborators, ipAllowlistFlow: IpAllowlistFlow)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @devMain(
@@ -40,7 +40,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
   <div class="ip-allowlist">
     <div class="govuk-panel govuk-panel--confirmation">
       <h1 class="govuk-panel__title">
-        @if(app.ipAllowlist.allowlist.isEmpty) {
+        @if(app.details.ipAllowlist.allowlist.isEmpty) {
           Your IP allow list is active
         } else {
           IP allow list changes active

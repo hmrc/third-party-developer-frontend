@@ -26,8 +26,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subs
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
-case class PageData(app: Application, subscriptions: Option[GroupedSubscriptions], openAccessApis: List[ApiDefinition])
+case class PageData(app: ApplicationWithCollaborators, subscriptions: Option[GroupedSubscriptions], openAccessApis: List[ApiDefinition])
 
 case class GroupedSubscriptions(testApis: Seq[APISubscriptions], apis: Seq[APISubscriptions], exampleApi: Option[APISubscriptions] = None)
 

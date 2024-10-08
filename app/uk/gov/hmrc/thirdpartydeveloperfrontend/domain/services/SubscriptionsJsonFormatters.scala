@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
 
 trait AccessRequirementsJsonFormatters {
   import play.api.libs.json._

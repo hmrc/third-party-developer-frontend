@@ -31,7 +31,10 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.GrantLength
 
 // scalastyle:off number.of.types
 
@@ -282,23 +285,23 @@ object EditApplicationForm {
     )(EditApplicationForm.apply)(EditApplicationForm.unapply)
   )
 
-  def withData(app: Application) = {
-    val privacyPolicyUrl      = app.privacyPolicyLocation match {
-      case PrivacyPolicyLocations.Url(url) => Some(url)
-      case _                               => None
+  def withData(app: ApplicationWithCollaborators) = {
+    val (privacyPolicyLocation, termsAndConditionsLocation) = app.access match {
+      case a: Access.Standard => (a.privacyPolicyLocation, a.termsAndConditionsLocation)
+      case _ => (None, None)
     }
-    val termsAndConditionsUrl = app.termsAndConditionsLocation match {
-      case TermsAndConditionsLocations.Url(url) => Some(url)
-      case _                                    => None
-    }
+
+    val privacyPolicyUrl: Option[String] = privacyPolicyLocation collect { case PrivacyPolicyLocations.Url(u) => u }
+    val termsAndConditionsUrl: Option[String] = termsAndConditionsLocation collect { case TermsAndConditionsLocations.Url(u) => u }
+
     form.fillAndValidate(
       EditApplicationForm(
         app.id,
-        app.name,
-        app.description,
+        app.name.value,
+        app.details.description,
         privacyPolicyUrl,
         termsAndConditionsUrl,
-        app.grantLengthDisplayValue()
+        GrantLength.show(app.details.grantLength)
       )
     )
   }
@@ -554,10 +557,10 @@ object ChangeOfApplicationNameForm {
     )(ChangeOfApplicationNameForm.apply)(ChangeOfApplicationNameForm.unapply)
   )
 
-  def withData(applicationName: String) = {
+  def withData(applicationName: ApplicationName) = {
     form.fillAndValidate(
       ChangeOfApplicationNameForm(
-        applicationName
+        applicationName.value
       )
     )
   }

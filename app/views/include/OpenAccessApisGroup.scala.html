@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
@@ -22,7 +22,7 @@
 
 @(
   role: Collaborator.Role,
-  app: Application,
+  app: ApplicationWithCollaborators,
   openAccessApis: List[ApiDefinition]
 )(
   implicit messagesProvider: MessagesProvider,

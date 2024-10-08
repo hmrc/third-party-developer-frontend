@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 @Singleton
 class UpliftJourneyService @Inject() (
@@ -130,7 +131,7 @@ class UpliftJourneyService @Inject() (
     }
   }
 
-  def createNewSubmission(appId: ApplicationId, application: Application, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
+  def createNewSubmission(appId: ApplicationId, application: ApplicationWithCollaborators, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
     (
       for {
         flow                   <- liftF(flowService.fetchFlow(userSession))
@@ -147,7 +148,7 @@ class UpliftJourneyService @Inject() (
   }
 
   private def updateSellResellOrDistributeIfNeeded(
-      application: Application,
+      application: ApplicationWithCollaborators,
       sellResellOrDistribute: SellResellOrDistribute,
       userSession: UserSession
     )(implicit hc: HeaderCarrier

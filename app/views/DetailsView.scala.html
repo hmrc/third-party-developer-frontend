@@ -23,8 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
 @import java.time.Clock
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
 
@@ -59,11 +58,11 @@
   <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
   <p class="govuk-body govuk-!-margin-0">
-    Created @{DateFormatter.formatDate(app.createdOn)}
+    Created @{DateFormatter.formatDate(app.details.createdOn)}
   </p>
 
   <p class="govuk-body">
-    @{DateFormatter.formatLastAccessDate(app.lastAccess, app.createdOn, clock) match {
+    @{DateFormatter.formatLastAccessDate(app.details.lastAccess, app.details.createdOn, clock) match {
       case Some(formattedDate) => s"Last API call $formattedDate"
       case _ => "No API called"
     }}
@@ -115,7 +114,7 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application description</th>
-        <td class="govuk-table__cell" id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
+        <td class="govuk-table__cell" id="description">@if(app.details.description.nonEmpty) {@{app.details.description}} else {None}</td>
         <td class="govuk-table__cell"></td>
       </tr>
       <tr class="govuk-table__row">

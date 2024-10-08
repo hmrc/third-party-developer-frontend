@@ -33,9 +33,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 object StartUsingYourApplicationController {
-  case class ViewModel(appId: ApplicationId, appName: String, showApiConfig: Boolean)
+  case class ViewModel(appId: ApplicationId, appName: ApplicationName, showApiConfig: Boolean)
 }
 
 @Singleton

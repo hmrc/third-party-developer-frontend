@@ -23,6 +23,8 @@ import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
@@ -47,7 +49,7 @@ case class ResponsibleIndividualToUVerification(
     applicationId: ApplicationId,
     submissionId: SubmissionId,
     submissionInstance: Int,
-    applicationName: String,
+    applicationName: ApplicationName,
     createdOn: Instant,
     state: ResponsibleIndividualVerificationState
   ) extends ResponsibleIndividualVerification
@@ -57,7 +59,7 @@ case class ResponsibleIndividualTouUpliftVerification(
     applicationId: ApplicationId,
     submissionId: SubmissionId,
     submissionInstance: Int,
-    applicationName: String,
+    applicationName: ApplicationName,
     createdOn: Instant,
     requestingAdminName: String,
     requestingAdminEmail: LaxEmailAddress,
@@ -69,7 +71,7 @@ case class ResponsibleIndividualUpdateVerification(
     applicationId: ApplicationId,
     submissionId: SubmissionId,
     submissionInstance: Int,
-    applicationName: String,
+    applicationName: ApplicationName,
     createdOn: Instant,
     responsibleIndividual: ResponsibleIndividual,
     requestingAdminName: String,

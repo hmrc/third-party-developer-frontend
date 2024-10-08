@@ -32,8 +32,8 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 @Singleton
 class RequestProductionCredentials @Inject() (
@@ -46,12 +46,12 @@ class RequestProductionCredentials @Inject() (
   ) extends ClockNow with ApplicationLogger {
 
   def requestProductionCredentials(
-      application: Application,
+      application: ApplicationWithCollaborators,
       requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean
     )(implicit hc: HeaderCarrier
-    ): Future[Either[ErrorDetails, Application]] = {
+    ): Future[Either[ErrorDetails, ApplicationWithCollaborators]] = {
 
     def getCommand() = {
       if (isNewTouUplift) {
@@ -71,7 +71,7 @@ class RequestProductionCredentials @Inject() (
       }
     }
 
-    def handleCmdSuccess(app: Application) = {
+    def handleCmdSuccess(app: ApplicationWithCollaborators) = {
       val ET = EitherTHelper.make[ErrorDetails]
       (for {
         submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
@@ -80,7 +80,7 @@ class RequestProductionCredentials @Inject() (
 
     }
 
-    def handleCmdResult(app: Application, dispatchResult: Either[NonEmptyList[CommandFailure], DispatchSuccessResult]) = {
+    def handleCmdResult(app: ApplicationWithCollaborators, dispatchResult: Either[NonEmptyList[CommandFailure], DispatchSuccessResult]) = {
       dispatchResult match {
         case Right(successResult)                       => handleCmdSuccess(successResult.applicationResponse)
         case Left(errors: NonEmptyList[CommandFailure]) =>
@@ -99,7 +99,7 @@ class RequestProductionCredentials @Inject() (
   }
 
   private def createDeskproTicketIfNeeded(
-      app: Application,
+      app: ApplicationWithCollaborators,
       requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean,

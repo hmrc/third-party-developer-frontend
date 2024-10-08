@@ -72,8 +72,8 @@ class ResponsibleIndividualVerificationService @Inject() (
         submission     <- ET.liftF(tpaSubmissionsConnector.fetchLatestSubmission(riVerification.applicationId))
         _              <- ET.liftF(sendDeskproTicketForTermsOfUse(
                             riVerification,
-                            application.application.state.requestedByName,
-                            application.application.state.requestedByEmailAddress.map(_.toLaxEmail),
+                            application.state.requestedByName,
+                            application.state.requestedByEmailAddress.map(_.toLaxEmail),
                             getIsGranted(submission)
                           ))
       } yield riVerification

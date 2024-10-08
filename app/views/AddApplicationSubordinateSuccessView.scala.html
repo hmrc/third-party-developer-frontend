@@ -18,10 +18,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.helper.EnvironmentNameService
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 @this(devMain: DevMain)
 
-@(appName: String, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig, environmentNameService: EnvironmentNameService)
+@(appName: ApplicationName, id: ApplicationId)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig, environmentNameService: EnvironmentNameService)
 
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @pageHeading = @{s"Application added to ${environmentNameService.subordinateWording}"}
@@ -37,7 +38,7 @@
 ) {
   <h1 class="govuk-heading-l">@pageHeading</h1>
 
-  <h2 class="govuk-heading-m">You added @appName</h2>
+  <h2 class="govuk-heading-m">You added @appName.value</h2>
 
   <p class="govuk-body">
     You can now use its credentials to test with @subordinateEnvName APIs.

@@ -16,9 +16,9 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportChangingAppDetails
-
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
@@ -52,7 +52,7 @@
   @helper.form(action = routes.Details.changeDetailsAction(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
-    @if(app.hasCapability(SupportChangingAppDetails)) {
+    @if(app.hasCapability(Capabilities.SupportChangingAppDetails)) {
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
         <label id="applicationName-label" class="govuk-label govuk-!-font-weight-bold" for="applicationName">
           Application name

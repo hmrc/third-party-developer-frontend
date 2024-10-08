@@ -40,7 +40,7 @@ class CollaboratorService @Inject() (
     with ClockNow {
 
   def addTeamMember(
-      app: Application,
+      app: ApplicationWithCollaborators,
       newTeamMemberEmail: LaxEmailAddress,
       newTeamMemberRole: Collaborator.Role,
       requestingEmail: LaxEmailAddress
@@ -65,7 +65,7 @@ class CollaboratorService @Inject() (
   }
 
   def removeTeamMember(
-      app: Application,
+      app: ApplicationWithCollaborators,
       teamMemberToRemove: LaxEmailAddress,
       requestingEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier

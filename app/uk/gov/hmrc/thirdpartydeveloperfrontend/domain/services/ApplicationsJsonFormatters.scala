@@ -17,18 +17,9 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 
 trait ApplicationsJsonFormatters {
   import play.api.libs.json._
-
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-
-  implicit val formatFieldValue: Format[FieldValue] = Json.valueFormat[FieldValue]
-  implicit val formatFieldName: Format[FieldName]   = Json.valueFormat[FieldName]
-
-  implicit val keyReadsFieldName: KeyReads[FieldName]   = key => JsSuccess(FieldName(key))
-  implicit val keyWritesFieldName: KeyWrites[FieldName] = _.value
 
   object TOUAHelper {
     import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
@@ -38,9 +29,6 @@ trait ApplicationsJsonFormatters {
 
   implicit val formatTermsOfUseAgreement: OFormat[TermsOfUseAgreement] = TOUAHelper.formatTOUA
 
-  implicit val formatApplication: OFormat[Application] = Json.format[Application]
-
-  implicit val format: OFormat[ApplicationWithSubscriptionData] = Json.format[ApplicationWithSubscriptionData]
 }
 
 object ApplicationsJsonFormatters extends ApplicationsJsonFormatters

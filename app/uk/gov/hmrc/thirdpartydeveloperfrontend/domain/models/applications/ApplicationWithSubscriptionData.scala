@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
 
-case class ApplicationWithSubscriptionData(
-    application: Application,
-    subscriptions: Set[ApiIdentifier] = Set.empty,
-    subscriptionFieldValues: Map[ApiContext, Map[ApiVersionNbr, Fields.Alias]] = Map.empty
-  )
+// case class ApplicationWithSubscriptionData(
+//     application: Application,
+//     subscriptions: Set[ApiIdentifier] = Set.empty,
+//     subscriptionFieldValues: Map[ApiContext, Map[ApiVersionNbr, Fields.Alias]] = Map.empty
+//   )

@@ -31,8 +31,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
 
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
@@ -55,9 +56,9 @@ class ApmConnector @Inject() (http: HttpClientV2, config: ApmConnector.Config, m
 
   val api = API("api-platform-microservice")
 
-  def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] =
+  def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
     http.get(url"${config.serviceBaseUrl}/applications/${applicationId}")
-      .execute[Option[ApplicationWithSubscriptionData]]
+      .execute[Option[ApplicationWithSubscriptionFields]]
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]]] = {
 

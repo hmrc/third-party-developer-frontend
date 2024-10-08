@@ -23,8 +23,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsOfUseAcceptance
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 object TermsOfUseService {
   case class TermsOfUseAgreementDetails(emailAddress: LaxEmailAddress, name: Option[String], date: Instant, version: Option[String])
@@ -46,8 +46,8 @@ class TermsOfUseService {
     )
   }
 
-  def getAgreementDetails(application: Application): List[TermsOfUseAgreementDetails] =
-    application.checkInformation.fold[List[TermsOfUseAgreementDetails]](List.empty)(getAgreementDetailsFromCheckInformation) ++ (
+  def getAgreementDetails(application: ApplicationWithCollaborators): List[TermsOfUseAgreementDetails] =
+    application.details.checkInformation.fold[List[TermsOfUseAgreementDetails]](List.empty)(getAgreementDetailsFromCheckInformation) ++ (
       application.access match {
         case std: Access.Standard => getAgreementDetailsFromStandardApp(std)
         case _                    => List.empty

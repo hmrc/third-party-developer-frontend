@@ -23,7 +23,9 @@ import play.api.data.FormError
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 
 object EditManageSubscription {
 

@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 object ProdCredsChecklistController {
   case class DummyForm(dummy: String = "dummy")
@@ -58,7 +59,7 @@ object ProdCredsChecklistController {
     lazy val fieldName = label.toLowerCase
   }
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
-  case class ViewModel(appId: ApplicationId, appName: String, isNewTermsOfUseUplift: Boolean, groupings: NonEmptyList[ViewGrouping])
+  case class ViewModel(appId: ApplicationId, appName: ApplicationName, isNewTermsOfUseUplift: Boolean, groupings: NonEmptyList[ViewGrouping])
 
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress   = extSubmission.questionnaireProgress.get(questionnaire.id).get
@@ -77,7 +78,7 @@ object ProdCredsChecklistController {
     )
   }
 
-  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String, appState: ApplicationState): ViewModel = {
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: ApplicationName, appState: ApplicationState): ViewModel = {
     val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
     ViewModel(appId, appName, appState.name.isProduction, groupings)
   }

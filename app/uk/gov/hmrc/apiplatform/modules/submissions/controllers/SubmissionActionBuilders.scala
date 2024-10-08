@@ -31,14 +31,14 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, HasApplication, TpdfeBaseController, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class SubmissionRequest[A](val extSubmission: ExtendedSubmission, val userRequest: UserRequest[A]) extends UserRequest[A](userRequest.userSession, userRequest.msgRequest) {
   lazy val submission         = extSubmission.submission
   lazy val answersToQuestions = submission.latestInstance.answersToQuestions
 }
 
-class SubmissionApplicationRequest[A](val application: Application, val submissionRequest: SubmissionRequest[A], val subscriptions: List[APISubscriptionStatus])
+class SubmissionApplicationRequest[A](val application: ApplicationWithCollaborators, val submissionRequest: SubmissionRequest[A], val subscriptions: List[APISubscriptionStatus])
     extends SubmissionRequest[A](submissionRequest.extSubmission, submissionRequest.userRequest) with HasApplication
 
 object SubmissionActionBuilders {

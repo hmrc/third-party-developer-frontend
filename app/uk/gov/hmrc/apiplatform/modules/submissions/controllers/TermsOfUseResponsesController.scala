@@ -34,9 +34,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 object TermsOfUseResponsesController {
-  case class TermsOfUseResponsesViewModel(applicationName: String, answersViewModel: ViewModel)
+  case class TermsOfUseResponsesViewModel(applicationName: ApplicationName, answersViewModel: ViewModel)
 }
 
 @Singleton

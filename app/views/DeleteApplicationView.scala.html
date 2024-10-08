@@ -17,13 +17,13 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @this(devMain: DevMain)
 
-@(app: Application, roleOfLoggedIn: Collaborator.Role)(
+@(app: ApplicationWithCollaborators, roleOfLoggedIn: Collaborator.Role)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @devMain(

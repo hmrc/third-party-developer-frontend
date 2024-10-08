@@ -27,9 +27,10 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.FieldName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
 
 @Singleton
 class SubscriptionsService @Inject() (
@@ -43,18 +44,18 @@ class SubscriptionsService @Inject() (
 
   private def doRequest(
       requester: UserSession,
-      application: Application,
+      application: ApplicationWithCollaborators,
       apiName: String,
       apiVersion: ApiVersionNbr
     )(
-      f: (String, LaxEmailAddress, String, ApplicationId, String, ApiVersionNbr) => DeskproTicket
+      f: (String, LaxEmailAddress, ApplicationName, ApplicationId, String, ApiVersionNbr) => DeskproTicket
     ) = {
     f(requester.developer.displayedName, requester.developer.email, application.name, application.id, apiName, apiVersion)
   }
 
   def requestApiSubscription(
       requester: UserSession,
-      application: Application,
+      application: ApplicationWithCollaborators,
       apiName: String,
       apiVersion: ApiVersionNbr
     )(implicit hc: HeaderCarrier
@@ -62,7 +63,7 @@ class SubscriptionsService @Inject() (
     deskproConnector.createTicket(Some(requester.developer.userId), doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiSubscribe))
   }
 
-  def requestApiUnsubscribe(requester: UserSession, application: Application, apiName: String, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApiUnsubscribe(requester: UserSession, application: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[TicketResult] = {
     deskproConnector.createTicket(Some(requester.developer.userId), doRequest(requester, application, apiName, apiVersion)(DeskproTicket.createForApiUnsubscribe))
   }
 
@@ -76,12 +77,12 @@ class SubscriptionsService @Inject() (
     } yield subs.contains(apiIdentifier)
   }
 
-  def subscribeToApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+  def subscribeToApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant())
     applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
   }
 
-  def unsubscribeFromApi(application: Application, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+  def unsubscribeFromApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant())
     applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
   }

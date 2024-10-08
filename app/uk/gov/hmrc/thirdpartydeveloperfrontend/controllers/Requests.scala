@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{
   APISubscriptionStatusWithSubscriptionFields,
   APISubscriptionStatusWithWritableSubscriptionField
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class UserRequest[A](val userSession: UserSession, val msgRequest: MessagesRequest[A]) extends MessagesRequest[A](msgRequest, msgRequest.messagesApi) {
   lazy val sessionId = userSession.sessionId
@@ -54,11 +54,11 @@ class UserRequest[A](val userSession: UserSession, val msgRequest: MessagesReque
 class MaybeUserRequest[A](val userSession: Option[UserSession], request: MessagesRequest[A]) extends MessagesRequest[A](request, request.messagesApi)
 
 trait HasApplication {
-  def application: Application
+  def application: ApplicationWithCollaborators
 }
 
 class ApplicationRequest[A](
-    val application: Application,
+    val application: ApplicationWithCollaborators,
     val deployedTo: Environment,
     val subscriptions: List[APISubscriptionStatus],
     val openAccessApis: List[ApiDefinition],

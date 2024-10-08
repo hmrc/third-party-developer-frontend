@@ -22,13 +22,13 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 @Singleton
 class PushPullNotificationsService @Inject() (connectorsWrapper: ConnectorsWrapper) {
 
-  def fetchPushSecrets(application: Application)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
+  def fetchPushSecrets(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
     val connector: PushPullNotificationsConnector = connectorsWrapper.forEnvironment(application.deployedTo).pushPullNotificationsConnector
     connector.fetchPushSecrets(application.clientId)
   }

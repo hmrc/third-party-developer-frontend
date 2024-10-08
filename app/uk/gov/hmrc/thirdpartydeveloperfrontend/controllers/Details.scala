@@ -53,6 +53,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 object Details {
   case class Agreement(who: String, when: Instant)
@@ -64,7 +66,7 @@ object Details {
     ) {
     lazy val agreementNeeded = exists && !agreement.isDefined
   }
-  case class ApplicationNameModel(application: Application)
+  case class ApplicationNameModel(application: ApplicationWithCollaborators)
   case class PrivacyPolicyLocationModel(applicationId: ApplicationId, privacyPolicyUrl: String, isInDesktop: Boolean)
 }
 
@@ -123,7 +125,7 @@ class Details @Inject() (
               Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
             }
           } else {
-            Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+            Ok(unauthorisedAppDetailsView(request.application.name, request.application.admins))
           }
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
@@ -179,12 +181,12 @@ class Details @Inject() (
     val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
-      application.name
+      application.name.value
     }
     val effectiveDescription = form.description.filterNot(_.isBlank())
 
     List(
-      if (effectiveNewName == application.name)
+      if (effectiveNewName == application.name.value)
         List.empty
       else {
         val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
@@ -193,7 +195,7 @@ class Details @Inject() (
         else
           List.empty
       },
-      if (effectiveDescription == application.description) {
+      if (effectiveDescription == application.details.description) {
         List.empty
       } else {
         if (effectiveDescription.isDefined)
@@ -352,7 +354,7 @@ class Details @Inject() (
       val requestForm        = ChangeOfApplicationNameForm.form.bindFromRequest()
       val newApplicationName = form.applicationName.trim()
 
-      if (newApplicationName.equalsIgnoreCase(application.name)) {
+      if (newApplicationName.equalsIgnoreCase(application.name.value)) {
 
         def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
           requestForm.withError(appNameField, "application.name.unchanged.error")
@@ -370,7 +372,7 @@ class Details @Inject() (
                   applicationService.requestProductonApplicationNameChange(
                     request.userSession.developer.userId,
                     application,
-                    newApplicationName,
+                    ApplicationName(newApplicationName),
                     request.userSession.developer.displayedName,
                     request.userSession.developer.email
                   )

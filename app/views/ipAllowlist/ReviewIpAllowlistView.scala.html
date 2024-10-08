@@ -18,17 +18,17 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
 
-@(app: Application, ipAllowlistFlow: IpAllowlistFlow)(
+@(app: ApplicationWithCollaborators, ipAllowlistFlow: IpAllowlistFlow)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @breadcrumbs = @{
-  if(app.ipAllowlist.allowlist.isEmpty) {
+  if(app.details.ipAllowlist.allowlist.isEmpty) {
     Seq.empty
   } else {
     Seq(
@@ -39,7 +39,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
   }
 }
 @backButton = @{
-  if(app.ipAllowlist.allowlist.isEmpty) {
+  if(app.details.ipAllowlist.allowlist.isEmpty) {
     BackButtonWithJavaScript
   } else {
     NoBackButton
@@ -55,7 +55,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
 ) {
   <div class="ip-allowlist">
     <h1 class="govuk-heading-l">
-      @if(app.ipAllowlist.allowlist.isEmpty) {
+      @if(app.details.ipAllowlist.allowlist.isEmpty) {
         Check your IP allow list before you make it active
       } else {
         Review updates to your IP allow list before you make your changes active
@@ -66,7 +66,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
 
     <br>
 
-    @if(app.ipAllowlist.allowlist.isEmpty) {
+    @if(app.details.ipAllowlist.allowlist.isEmpty) {
       <div class="govuk-warning-text">
         <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
         <strong class="govuk-warning-text__text">
@@ -80,7 +80,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
       </div>
     }
 
-    @defining(ipAllowlistFlow.allowlist.size > 1 || app.ipAllowlist.allowlist.isEmpty) { canRemove =>
+    @defining(ipAllowlistFlow.allowlist.size > 1 || app.details.ipAllowlist.allowlist.isEmpty) { canRemove =>
       <table class="govuk-table @if(canRemove) {wide} else {narrow}">
         <caption class="govuk-visually-hidden">Review IP allow list table</caption>
         <thead class="govuk-table__head">
@@ -111,7 +111,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
     </p>
 
     <p class="govuk-body">
-      @if(app.ipAllowlist.allowlist.isEmpty) {
+      @if(app.details.ipAllowlist.allowlist.isEmpty) {
         Check you have added all the IP addresses you want to use before making your IP allow list active.
       } else {
         Check you have added all the IP addresses you want to use.
@@ -122,13 +122,13 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
       @helper.CSRF.formField
       <div class="govuk-button-group">
         <button id="submit" class="govuk-button" type="submit">
-          @if(app.ipAllowlist.allowlist.isEmpty) {
+          @if(app.details.ipAllowlist.allowlist.isEmpty) {
             Make IP allow list active
           } else {
             Make changes active
           }
         </button>
-        @if(app.ipAllowlist.allowlist.isEmpty) {
+        @if(app.details.ipAllowlist.allowlist.isEmpty) {
           <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
         } else {
           <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowListController.viewIpAllowlist(app.id)">Cancel</a>

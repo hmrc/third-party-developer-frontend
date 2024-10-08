@@ -16,49 +16,49 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 
 sealed trait Capability {
-  def hasCapability(app: BaseApplication): Boolean
+  def hasCapability(app: ApplicationWithCollaborators): Boolean
 }
 
 object Capabilities {
 
   trait StandardAppCapability extends Capability {
-    final def hasCapability(app: BaseApplication): Boolean = app.access.accessType == AccessType.STANDARD
+    final def hasCapability(app: ApplicationWithCollaborators): Boolean = app.isStandard
   }
 
   case object Guaranteed extends Capability {
-    def hasCapability(app: BaseApplication) = true
+    def hasCapability(app: ApplicationWithCollaborators) = true
   }
 
   case object SupportsTermsOfUse extends Capability {
-    def hasCapability(app: BaseApplication) = true
+    def hasCapability(app: ApplicationWithCollaborators) = true
   }
 
   case object ViewCredentials extends Capability {
-    def hasCapability(app: BaseApplication) = true
+    def hasCapability(app: ApplicationWithCollaborators) = true
   }
 
   case object ChangeClientSecret extends Capability {
-    def hasCapability(app: BaseApplication) = app.isApproved
+    def hasCapability(app: ApplicationWithCollaborators) = app.isApproved
   }
 
   case object SupportsTeamMembers extends Capability {
-    def hasCapability(app: BaseApplication) = true
+    def hasCapability(app: ApplicationWithCollaborators) = true
   }
 
   case object SupportsSubscriptions extends StandardAppCapability
 
   case object EditSubscriptionFields extends Capability {
-    override def hasCapability(app: BaseApplication): Boolean = !app.isPendingApproval
+    override def hasCapability(app: ApplicationWithCollaborators): Boolean = !app.isPendingGatekeeperApproval
   }
 
   case object SupportsDetails extends StandardAppCapability
 
   case object ManageLockedSubscriptions extends Capability {
-    def hasCapability(app: BaseApplication) = app.hasLockedSubscriptions
+    def hasCapability(app: ApplicationWithCollaborators) = app.areSubscriptionsLocked
   }
 
   case object SupportsRedirects extends StandardAppCapability
@@ -71,22 +71,22 @@ object Capabilities {
       case Access.Standard(_, _, _, _, _, importantSubmissionData) => importantSubmissionData.nonEmpty
       case _                                                       => false
     }
-    def hasCapability(app: BaseApplication): Boolean = app.state.name.isInTesting && false == hasSubmissions(app.access)
+    def hasCapability(app: ApplicationWithCollaborators): Boolean = app.isInTesting && false == hasSubmissions(app.access)
   }
 
   case object SupportChangingAppDetails extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.isInTesting || app.deployedTo.isSandbox
+    def hasCapability(app: ApplicationWithCollaborators): Boolean = app.isInTesting || app.deployedTo.isSandbox
   }
 
   case object SupportsIpAllowlist extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = true
+    def hasCapability(app: ApplicationWithCollaborators): Boolean = true
   }
 
   case object SupportsResponsibleIndividual extends Capability {
-    def hasCapability(app: BaseApplication): Boolean = app.deployedTo == Environment.PRODUCTION
+    def hasCapability(app: ApplicationWithCollaborators): Boolean = app.isProduction
   }
 
   case object ViewPushSecret extends Capability {
-    def hasCapability(app: BaseApplication) = true
+    def hasCapability(app: ApplicationWithCollaborators) = true
   }
 }

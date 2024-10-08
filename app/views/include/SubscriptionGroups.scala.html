@@ -15,9 +15,9 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
@@ -26,7 +26,7 @@
   role: Collaborator.Role,
   subscriptions: GroupedSubscriptions,
   openAccessApis: List[ApiDefinition],
-  app: Application,
+  app: ApplicationWithCollaborators,
   afterUnsubscribeRedirectTo: SubscriptionRedirect,
   showSubscriptionFields: Boolean,
   showSectionHeadings: Boolean = true

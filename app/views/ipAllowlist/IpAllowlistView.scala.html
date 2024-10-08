@@ -16,14 +16,13 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @this(devMain: DevMain)
 
-@(app: Application, roleOfLoggedIn: Collaborator.Role)(
+@(app: ApplicationWithCollaborators, roleOfLoggedIn: Collaborator.Role)(
         implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 @sandboxOrAdmin = @{
     app.deployedTo.isSandbox || roleOfLoggedIn.isAdministrator
@@ -63,7 +62,7 @@
                 </tr>
             </thead>
             <tbody class="govuk-table__body">
-            @for(ipRange <- app.ipAllowlist.allowlist.toSeq.sorted) {
+            @for(ipRange <- app.details.ipAllowlist.allowlist.toSeq.sorted) {
                 <tr class="govuk-table__row">
                     <td class="govuk-table__cell">@ipRange</td>
                 </tr>
@@ -86,7 +85,7 @@
                 </a>
             </p>
 
-            @if(!app.ipAllowlist.required) {
+            @if(!app.details.ipAllowlist.required) {
                 <a class="govuk-button govuk-button--warning" href="@routes.IpAllowListController.removeIpAllowlist(app.id)">
                     Remove your IP Allow list
                 </a>

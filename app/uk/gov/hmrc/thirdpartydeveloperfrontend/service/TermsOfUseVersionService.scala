@@ -21,9 +21,9 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{AnyContent, Request}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 @Singleton
 class TermsOfUseVersionService @Inject() (termsOfUseService: TermsOfUseService) {
@@ -32,7 +32,7 @@ class TermsOfUseVersionService @Inject() (termsOfUseService: TermsOfUseService) 
     TermsOfUseVersion.latest
   }
 
-  def getForApplication(application: Application)(implicit request: Request[AnyContent]): TermsOfUseVersion = {
+  def getForApplication(application: ApplicationWithCollaborators)(implicit request: Request[AnyContent]): TermsOfUseVersion = {
     termsOfUseService.getAgreementDetails(application).lastOption
       .flatMap((tou: TermsOfUseAgreementDetails) => tou.version)
       .flatMap(TermsOfUseVersion.fromVersionString(_))

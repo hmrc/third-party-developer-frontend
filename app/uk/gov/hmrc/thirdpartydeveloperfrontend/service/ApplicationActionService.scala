@@ -27,9 +27,9 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ApiVer
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models._
 
 @Singleton
 class ApplicationActionService @Inject() (
@@ -45,21 +45,21 @@ class ApplicationActionService @Inject() (
     (
       for {
         applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
-        application          = applicationWithSubs.application
+        application          = applicationWithSubs.asAppWithCollaborators
         environment          = application.deployedTo
         fieldDefinitions    <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
         openAccessApis      <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
         subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
         subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
-        role                <- OptionT.fromOption[Future](application.role(userRequest.developer.email))
+        role                <- OptionT.fromOption[Future](application.roleFor(userRequest.developer.userId))
       } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
     )
       .value
   }
 
   def toApiSubscriptionStatusList(
-      application: ApplicationWithSubscriptionData,
-      subscriptionFieldDefinitions: Map[ApiContext, Map[ApiVersionNbr, Map[FieldName, SubscriptionFieldDefinition]]],
+      application: ApplicationWithSubscriptionFields,
+      subscriptionFieldDefinitions: ApiFieldMap[SubscriptionFieldDefinition],
       summaryApiDefinitions: List[ApiDefinition]
     ): List[APISubscriptionStatus] = {
 
@@ -71,7 +71,7 @@ class ApplicationActionService @Inject() (
 
         def zipDefinitionsAndValues(): List[SubscriptionFieldValue] = {
           val fieldNameToDefinition = subscriptionFieldDefinitions.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
-          val fieldNameToValue      = application.subscriptionFieldValues.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
+          val fieldNameToValue      = application.fieldValues.getOrElse(context, Map.empty).getOrElse(apiVersionNbr, Map.empty)
 
           fieldNameToDefinition.toList.map {
             case (n, d) => SubscriptionFieldValue(d, fieldNameToValue.getOrElse(n, FieldValue.empty))
@@ -86,8 +86,8 @@ class ApplicationActionService @Inject() (
           subscribed = application.subscriptions.contains(ApiIdentifier(context, apiVersionNbr)),
           requiresTrust = false, // Because these are filtered out
           fields = SubscriptionFieldsWrapper(
-            applicationId = application.application.id,
-            clientId = application.application.clientId,
+            applicationId = application.id,
+            clientId = application.clientId,
             apiContext = context,
             apiVersion = apiVersionNbr,
             fields = zipDefinitionsAndValues()
