@@ -89,7 +89,7 @@ class TermsOfUseSpec
       ): ApplicationWithCollaborators = {
 
       val application = standardApp
-        // Application(
+      // Application(
       //   appId,
       //   ClientId("clientId"),
       //   "appName",
@@ -174,9 +174,9 @@ class TermsOfUseSpec
   "agreeTermsOfUse" should {
 
     "record the terms of use agreement for an administrator on a standard production app" in new Setup {
-      val application: ApplicationWithCollaborators                 = givenApplicationExists()
+      val application: ApplicationWithCollaborators = givenApplicationExists()
       returnLatestTermsOfUseVersion
-      val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
+      val captor: ArgumentCaptor[CheckInformation]  = ArgumentCaptor.forClass(classOf[CheckInformation])
       when(underTest.applicationService.updateCheckInformation(eqTo(application), captor.capture())(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

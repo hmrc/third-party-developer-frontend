@@ -37,7 +37,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permis
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes
 
-class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock with ApplicationSyntaxes with ApplicationWithCollaboratorsFixtures {
+class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock with ApplicationSyntaxes
+    with ApplicationWithCollaboratorsFixtures {
 
   val developer: User                     = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
@@ -212,6 +213,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
     val app = createApp(Environment.PRODUCTION, Access.Standard(), productionApplicationState)
 
     it("should find when an email sha matches") {
+      import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
       app.findCollaboratorByHash(developer.email.text.toSha256) shouldBe Some(developerCollaborator)
     }
 

@@ -71,7 +71,7 @@ class CredentialsSpec
   trait BasicApplicationProvider extends ApplicationProvider {
 
     def createApplication(): ApplicationWithCollaborators = standardApp
-    
+
     //  = {
     //   Application(
     //     applicationId,
@@ -101,19 +101,19 @@ class CredentialsSpec
       environment: Environment = Environment.PRODUCTION,
       createdOn: Instant = instant
     ): ApplicationWithCollaborators = standardApp
-    // Application(
-    //   applicationId,
-    //   clientId,
-    //   "app",
-    //   createdOn,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   environment,
-    //   collaborators = Set(userSession.developer.email.asCollaborator(userRole)),
-    //   state = state,
-    //   access = access
-    // )
+  // Application(
+  //   applicationId,
+  //   clientId,
+  //   "app",
+  //   createdOn,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   environment,
+  //   collaborators = Set(userSession.developer.email.asCollaborator(userRole)),
+  //   state = state,
+  //   access = access
+  // )
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with ApplicationCommandConnectorMockModule {
     val credentialsView: CredentialsView                       = app.injector.instanceOf[CredentialsView]
@@ -144,12 +144,12 @@ class CredentialsSpec
       FixedClock.clock
     )
 
-    val application: ApplicationWithCollaborators                                         = createApplication()
-    val ApplicationWithSubscriptionFields: ApplicationWithSubscriptions = application.withSubscriptions(Set.empty)
+    val application: ApplicationWithCollaborators                       = createApplication()
+    val applicationWithSubscriptions: ApplicationWithSubscriptions = application.withSubscriptions(Set.empty)
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    givenApplicationAction(ApplicationWithSubscriptionFields, userSession)
+    givenApplicationAction(applicationWithSubscriptions, userSession)
     fetchCredentialsReturns(application, appTokens)
     fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)

@@ -37,7 +37,7 @@ class ApplicationSpec extends HmrcSpec with FixedClock with ApplicationWithColla
   )
 
   val baseApplication = standardApp
-    
+
   //   Application(
   //   ApplicationId.random,
   //   ClientId("client"),

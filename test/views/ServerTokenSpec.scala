@@ -42,14 +42,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class ServerTokenSpec
-  extends CommonViewSpec
-  with WithCSRFAddToken
-  with CollaboratorTracker
-  with LocalUserIdTracker
-  with DeveloperSessionBuilder
-  with UserBuilder
-  with FixedClock
-  with ApplicationWithCollaboratorsFixtures {
+    extends CommonViewSpec
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with UserBuilder
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]

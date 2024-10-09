@@ -59,10 +59,13 @@ class ApplicationActionBuildersSpec extends BaseControllerSpec
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
     val applicationWithSubscriptionFields = buildApplicationWithSubscriptionFields(developer.email)
-    val subscriptionWithoutSubFields    = buildAPISubscriptionStatus("api name")
+    val subscriptionWithoutSubFields      = buildAPISubscriptionStatus("api name")
 
     val subscriptionWithSubFields =
-      buildAPISubscriptionStatus("api name", fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionFields.asAppWithCollaborators, List(buildSubscriptionFieldValue("field1")))))
+      buildAPISubscriptionStatus(
+        "api name",
+        fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionFields.asAppWithCollaborators, List(buildSubscriptionFieldValue("field1"))))
+      )
 
     val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock, applicationActionServiceMock)
 

@@ -41,11 +41,11 @@ class ApplicationCommandConnectorSpec
     extends AsyncHmrcSpec
     with WireMockSugar
     with GuiceOneAppPerSuite
-    with FixedClock 
+    with FixedClock
     with ApplicationWithCollaboratorsFixtures {
 
   def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationWithCollaborators = standardApp
-    
+
   //   {
   //   Application(
   //     ApplicationId.random,

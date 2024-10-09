@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 sealed trait Capability {
   def hasCapability(app: ApplicationWithCollaborators): Boolean
@@ -67,7 +67,7 @@ object Capabilities {
 
   case object SupportsAppChecks extends Capability {
 
-    def hasSubmissions(access: Access): Boolean      = access match {
+    def hasSubmissions(access: Access): Boolean                   = access match {
       case Access.Standard(_, _, _, _, _, importantSubmissionData) => importantSubmissionData.nonEmpty
       case _                                                       => false
     }

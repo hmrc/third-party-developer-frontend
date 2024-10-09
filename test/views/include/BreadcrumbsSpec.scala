@@ -49,7 +49,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Fix
       //   grantLength = Period.ofDays(547),
       //   Environment.PRODUCTION
       // )
-      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)
 

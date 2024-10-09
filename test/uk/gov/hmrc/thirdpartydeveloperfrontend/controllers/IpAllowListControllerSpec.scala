@@ -83,7 +83,7 @@ class IpAllowListControllerSpec
     val developer: User = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
 
     val anApplicationWithoutIpAllowlist: ApplicationWithCollaborators = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: ApplicationWithCollaborators = anApplicationWithoutIpAllowlist.modify(_.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24"))))
+    val anApplicationWithIpAllowlist: ApplicationWithCollaborators    = anApplicationWithoutIpAllowlist.modify(_.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24"))))
 
     def givenTheUserIsLoggedInAs(user: User): UserSession = {
       val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)

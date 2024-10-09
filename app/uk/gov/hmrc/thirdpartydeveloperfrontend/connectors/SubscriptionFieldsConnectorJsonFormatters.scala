@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{AccessRequirementsJsonFormatters, ApplicationsJsonFormatters, SubscriptionsJsonFormatters}
 import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.AccessRequirements
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{AccessRequirementsJsonFormatters, ApplicationsJsonFormatters, SubscriptionsJsonFormatters}
 
 object SubscriptionFieldsConnectorJsonFormatters
     extends ApplicationsJsonFormatters

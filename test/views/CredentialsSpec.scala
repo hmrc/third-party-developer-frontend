@@ -62,7 +62,7 @@ class CredentialsSpec extends CommonViewSpec
     val developerSession = standardDeveloper.loggedIn
 
     val application = standardApp
-      //Application(
+    // Application(
     //   ApplicationId.random,
     //   ClientId("Test Application Client ID"),
     //   "Test Application",
@@ -91,7 +91,7 @@ class CredentialsSpec extends CommonViewSpec
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
       val developerApp: ApplicationWithCollaborators = sandboxApplication.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
-      val page: Html                = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
+      val page: Html                                 = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -101,7 +101,7 @@ class CredentialsSpec extends CommonViewSpec
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
       val developerApp: ApplicationWithCollaborators = application.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
-      val page: Html                = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
+      val page: Html                                 = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

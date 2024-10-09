@@ -43,7 +43,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock 
+    with FixedClock
     with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {

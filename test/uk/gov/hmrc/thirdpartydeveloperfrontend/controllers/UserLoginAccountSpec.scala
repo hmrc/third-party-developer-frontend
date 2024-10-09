@@ -121,18 +121,18 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val applicationsWhereUserIsAdminInProduction =
       Seq(
         ApplicationWithSubscriptionsData.one
-      //   ApplicationWithSubscriptions(
-      //     applicationId,
-      //     clientId,
-      //     "myName",
-      //     instant,
-      //     Some(instant),
-      //     None,
-      //     grantLength,
-      //     Environment.PRODUCTION,
-      //     collaborators = Set(sessionWithAuthAppMfa.developer.email.asAdministratorCollaborator),
-      //     subscriptions = Set.empty
-      //   )
+          //   ApplicationWithSubscriptions(
+          //     applicationId,
+          //     clientId,
+          //     "myName",
+          //     instant,
+          //     Some(instant),
+          //     None,
+          //     grantLength,
+          //     Environment.PRODUCTION,
+          //     collaborators = Set(sessionWithAuthAppMfa.developer.email.asAdministratorCollaborator),
+          //     subscriptions = Set.empty
+          //   )
       )
 
     val sessionParams: Seq[(String, String)] = Seq(

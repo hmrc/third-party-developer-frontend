@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import com.google.inject.Inject
 import com.google.inject.name.Named
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 case class BridgedConnector[T] @Inject() (@Named("SANDBOX") sandbox: T, @Named("PRODUCTION") production: T) {
 

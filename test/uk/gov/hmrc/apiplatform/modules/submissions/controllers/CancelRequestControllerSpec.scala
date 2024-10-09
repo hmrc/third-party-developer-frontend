@@ -96,9 +96,9 @@ class CancelRequestControllerSpec
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-        // sampleApp
-        //   .withSubscriptions(Set(aSubscription))
-        //   .withFields(Map.empty),
+      // sampleApp
+      //   .withSubscriptions(Set(aSubscription))
+      //   .withFields(Map.empty),
       userSession,
       List(aSubscription)
     )

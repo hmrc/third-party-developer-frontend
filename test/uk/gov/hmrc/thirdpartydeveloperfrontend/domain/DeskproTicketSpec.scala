@@ -30,13 +30,13 @@ class DeskproTicketSpec extends AsyncHmrcSpec with ApplicationNameFixtures {
 
   implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  val requestorName   = "bob example"
-  val requestorEmail  = "bob@example.com".toLaxEmail
+  val requestorName  = "bob example"
+  val requestorEmail = "bob@example.com".toLaxEmail
   // val applicationName = "my app"
-  val applicationId   = ApplicationId.random
-  val apiName         = "my api"
-  val apiVersion      = ApiVersionNbr.random
-  val comments        = "very nice"
+  val applicationId  = ApplicationId.random
+  val apiName        = "my api"
+  val apiVersion     = ApiVersionNbr.random
+  val comments       = "very nice"
 
   def checkDeskproTicket(ticket: DeskproTicket, expectedSubject: String, expectedMsg: String) = {
     ticket.message.replaceAll("\\s+", " ") shouldBe expectedMsg

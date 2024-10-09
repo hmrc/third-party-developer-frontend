@@ -20,10 +20,10 @@ import java.time.Instant
 
 import play.api.libs.json.{Format, OFormat}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 

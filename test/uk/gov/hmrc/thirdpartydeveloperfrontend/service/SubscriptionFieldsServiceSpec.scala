@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -37,9 +36,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{Acce
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 
-class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock {
+class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   val apiContext: ApiContext       = ApiContext("sub-ser-test")
   val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
@@ -48,8 +48,9 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
   val applicationId: ApplicationId = ApplicationId.random
   val clientId                     = ClientId("clientId")
 
-  val application =
-    Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+  val application = standardApp
+
+    // Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
 
   trait Setup extends SubscriptionFieldsConnectorMock {
 
@@ -73,7 +74,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     ).thenReturn(
       Future.successful(
         Some(
-          Application(applicationId, clientId, "name", instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+          standardApp
+          // Application(applicationId, clientId, "name", instant, Some(instant), None, grantLength = GrantLength.EIGHTEEN_MONTHS, Environment.PRODUCTION)
         )
       )
     )
@@ -96,7 +98,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       )
 
       val newValue1                  = FieldValue("newValue")
-      val newValuesMap: Fields.Alias = Map(definition1.name -> newValue1)
+      val newValuesMap = Map(definition1.name -> newValue1)
 
       when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -105,7 +107,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       result shouldBe SaveSubscriptionFieldsSuccessResponse
 
-      val newFields1: Fields.Alias = Map(
+      val newFields1 = Map(
         definition1.name -> newValue1,
         definition2.name -> value2.value
       )

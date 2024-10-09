@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CidrBlock
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, CidrBlock}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
@@ -32,7 +32,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 @Singleton
 class IpAllowlistService @Inject() (
@@ -47,9 +46,9 @@ class IpAllowlistService @Inject() (
   private def fetchIpAllowListFlow(sessionId: UserSessionId, app: Option[ApplicationWithCollaborators], createIfNotFound: Boolean = true): Future[IpAllowlistFlow] = {
     flowRepository.fetchBySessionIdAndFlowType[IpAllowlistFlow](sessionId) map { maybeFlow =>
       (maybeFlow, app, createIfNotFound) match {
-        case (Some(flow: IpAllowlistFlow), _, _)  => flow
+        case (Some(flow: IpAllowlistFlow), _, _)                   => flow
         case (None, Some(app: ApplicationWithCollaborators), true) => IpAllowlistFlow(sessionId, app.details.ipAllowlist.allowlist)
-        case _                                    => throw new IllegalStateException(s"No IP allowlist flow exists for session ID $sessionId")
+        case _                                                     => throw new IllegalStateException(s"No IP allowlist flow exists for session ID $sessionId")
       }
     }
 
@@ -81,7 +80,8 @@ class IpAllowlistService @Inject() (
     } yield savedFlow
   }
 
-  def activateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def activateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier)
+      : Future[ApplicationUpdateSuccessful] = {
     for {
       flow     <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       _         = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
@@ -97,7 +97,8 @@ class IpAllowlistService @Inject() (
     } yield response
   }
 
-  def deactivateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deactivateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier)
+      : Future[ApplicationUpdateSuccessful] = {
     if (app.details.ipAllowlist.required) {
       Future.failed(new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"))
     } else {

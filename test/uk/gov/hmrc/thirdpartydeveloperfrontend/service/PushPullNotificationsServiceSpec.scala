@@ -29,24 +29,27 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock {
+class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val clientId: ClientId         = ClientId(UUID.randomUUID.toString)
     val grantLength: Period        = Period.ofDays(547)
 
-    val anApplication: Application                                     = Application(
-      ApplicationId.random,
-      clientId,
-      "App name 1",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      deployedTo = Environment.PRODUCTION
-    )
+    val anApplication: ApplicationWithCollaborators = standardApp
+    //                                      = Application(
+    //   ApplicationId.random,
+    //   clientId,
+    //   "App name 1",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   deployedTo = Environment.PRODUCTION
+    // )
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))

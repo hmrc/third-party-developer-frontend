@@ -35,29 +35,29 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
     val user = "foo@bar.com".toLaxEmail.asDeveloperCollaborator
 
     val serverTokenApplication   = standardApp
-      // new Application(
-      //   ApplicationId.random,
-      //   ClientId(""),
-      //   "",
-      //   instant,
-      //   Some(instant),
-      //   Some(instant),
-      //   grantLength = Period.ofDays(547),
-      //   Environment.PRODUCTION,
-      //   collaborators = Set(user)
-      // )
-    val noServerTokenApplication =standardApp
-      // new Application(
-      //   ApplicationId.random,
-      //   ClientId(""),
-      //   "",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength = Period.ofDays(547),
-      //   Environment.PRODUCTION,
-      //   collaborators = Set(user)
-      // )
+    // new Application(
+    //   ApplicationId.random,
+    //   ClientId(""),
+    //   "",
+    //   instant,
+    //   Some(instant),
+    //   Some(instant),
+    //   grantLength = Period.ofDays(547),
+    //   Environment.PRODUCTION,
+    //   collaborators = Set(user)
+    // )
+    val noServerTokenApplication = standardApp
+    // new Application(
+    //   ApplicationId.random,
+    //   ClientId(""),
+    //   "",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength = Period.ofDays(547),
+    //   Environment.PRODUCTION,
+    //   collaborators = Set(user)
+    // )
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.withEnvironment(Environment.SANDBOX), user.userId)

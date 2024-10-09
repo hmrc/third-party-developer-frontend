@@ -167,7 +167,12 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: ApplicationWithCollaborators, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: RedirectUri) = {
+    def deleteRedirectsActionShouldRenderTheConfirmationPage(
+        application: ApplicationWithCollaborators,
+        resultStatus: Int,
+        shouldShowDeleteControls: Boolean,
+        redirectUriToDelete: RedirectUri
+      ) = {
       givenApplicationExists(application)
 
       val result = underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri))
@@ -195,7 +200,11 @@ class RedirectsSpec
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: ApplicationWithCollaborators, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(
+        application: ApplicationWithCollaborators,
+        resultStatus: Int,
+        redirectUriToDelete: RedirectUri
+      ) = {
       givenApplicationExists(application)
 
       val result =

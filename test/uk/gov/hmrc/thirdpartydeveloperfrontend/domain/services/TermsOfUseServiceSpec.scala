@@ -27,8 +27,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 
 class TermsOfUseServiceSpec extends HmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
-  def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None): ApplicationWithCollaborators = standardApp
-    
+  def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None)
+      : ApplicationWithCollaborators = standardApp
+
   //   Application(
   //   ApplicationId.random,
   //   ClientId("clientId"),
@@ -56,17 +57,17 @@ class TermsOfUseServiceSpec extends HmrcSpec with FixedClock with ApplicationWit
   //   checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))
   // )
 
-  val email: LaxEmailAddress                       = "bob@example.com".toLaxEmail
-  val name                                         = "Bob Example"
-  val responsibleIndividual: ResponsibleIndividual = ResponsibleIndividual(FullName(name), email)
-  val version1_2                                   = "1.2"
-  val appWithNoAgreements: ApplicationWithCollaborators             = buildApplication()
-  val checkInfoAgreement: TermsOfUseAgreement      = TermsOfUseAgreement(email, instant, version1_2)
-  val stdAppAgreement: TermsOfUseAcceptance        = TermsOfUseAcceptance(responsibleIndividual, instant, SubmissionId.random, 0)
-  val appWithCheckInfoAgreements: ApplicationWithCollaborators      = buildApplication(Some(List(checkInfoAgreement)))
-  val appWithStdAppAgreements: ApplicationWithCollaborators         = buildApplication(None, Some(List(stdAppAgreement)))
-  val nonStdApp: ApplicationWithCollaborators                       = buildApplication().withAccess(Access.Privileged())
-  val underTest                                    = new TermsOfUseService()
+  val email: LaxEmailAddress                                   = "bob@example.com".toLaxEmail
+  val name                                                     = "Bob Example"
+  val responsibleIndividual: ResponsibleIndividual             = ResponsibleIndividual(FullName(name), email)
+  val version1_2                                               = "1.2"
+  val appWithNoAgreements: ApplicationWithCollaborators        = buildApplication()
+  val checkInfoAgreement: TermsOfUseAgreement                  = TermsOfUseAgreement(email, instant, version1_2)
+  val stdAppAgreement: TermsOfUseAcceptance                    = TermsOfUseAcceptance(responsibleIndividual, instant, SubmissionId.random, 0)
+  val appWithCheckInfoAgreements: ApplicationWithCollaborators = buildApplication(Some(List(checkInfoAgreement)))
+  val appWithStdAppAgreements: ApplicationWithCollaborators    = buildApplication(None, Some(List(stdAppAgreement)))
+  val nonStdApp: ApplicationWithCollaborators                  = buildApplication().withAccess(Access.Privileged())
+  val underTest                                                = new TermsOfUseService()
 
   "getAgreementDetails" should {
     "return empty list if no agreements found" in {

@@ -108,33 +108,33 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: ApplicationWithCollaborators = standardApp
-    // Application(
-    //   productionApplicationId,
-    //   productionClientId,
-    //   "name",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength = Period.ofDays(547),
-    //   Environment.PRODUCTION,
-    //   Some("description"),
-    //   Set()
-    // )
-  val sandboxApplicationId               = ApplicationId.random
-  val sandboxClientId                    = ClientId("Client ID")
+  // Application(
+  //   productionApplicationId,
+  //   productionClientId,
+  //   "name",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength = Period.ofDays(547),
+  //   Environment.PRODUCTION,
+  //   Some("description"),
+  //   Set()
+  // )
+  val sandboxApplicationId                                = ApplicationId.random
+  val sandboxClientId                                     = ClientId("Client ID")
 
   val sandboxApplication: ApplicationWithCollaborators = standardApp2
-    // Application(
-    //   sandboxApplicationId,
-    //   sandboxClientId,
-    //   "name",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength = Period.ofDays(547),
-    //   Environment.SANDBOX,
-    //   Some("description")
-    // )
+  // Application(
+  //   sandboxApplicationId,
+  //   sandboxClientId,
+  //   "name",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength = Period.ofDays(547),
+  //   Environment.SANDBOX,
+  //   Some("description")
+  // )
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

@@ -46,7 +46,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock 
+    with FixedClock
     with ApplicationWithCollaboratorsFixtures {
 
   val request         = FakeRequest().withCSRFToken

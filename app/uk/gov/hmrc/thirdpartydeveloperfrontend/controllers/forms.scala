@@ -23,6 +23,8 @@ import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, GrantLength}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
   PrivacyPolicyLocation,
   PrivacyPolicyLocations,
@@ -31,10 +33,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.GrantLength
 
 // scalastyle:off number.of.types
 
@@ -288,10 +286,10 @@ object EditApplicationForm {
   def withData(app: ApplicationWithCollaborators) = {
     val (privacyPolicyLocation, termsAndConditionsLocation) = app.access match {
       case a: Access.Standard => (a.privacyPolicyLocation, a.termsAndConditionsLocation)
-      case _ => (None, None)
+      case _                  => (None, None)
     }
 
-    val privacyPolicyUrl: Option[String] = privacyPolicyLocation collect { case PrivacyPolicyLocations.Url(u) => u }
+    val privacyPolicyUrl: Option[String]      = privacyPolicyLocation collect { case PrivacyPolicyLocations.Url(u) => u }
     val termsAndConditionsUrl: Option[String] = termsAndConditionsLocation collect { case TermsAndConditionsLocations.Url(u) => u }
 
     form.fillAndValidate(

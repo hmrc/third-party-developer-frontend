@@ -61,7 +61,7 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
       access: Access = standardAccess(),
       ipAllowlist: IpAllowlist = IpAllowlist()
     ): ApplicationWithCollaborators = {
-      standardApp
+    standardApp
     // ApplicationWithCollaborators(
     //   CoreApplication(
     //     id = appId,

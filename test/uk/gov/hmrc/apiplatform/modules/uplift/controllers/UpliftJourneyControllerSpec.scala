@@ -435,8 +435,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     }
 
     "redirect to the 'sell resell or distribute' page if a prod app" in new Setup {
-      val prodAppId: ApplicationId = ApplicationId.random
-      val prodApp: ApplicationWithCollaborators     = sampleApp.withId(prodAppId)
+      val prodAppId: ApplicationId              = ApplicationId.random
+      val prodApp: ApplicationWithCollaborators = sampleApp.withId(prodAppId)
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         prodApp.withSubscriptions(asSubscriptions(List(testAPISubscriptionStatus1))).withFieldValues(Map.empty),

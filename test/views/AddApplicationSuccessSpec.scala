@@ -56,7 +56,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec with ApplicationNameFixtu
     }
 
     "allow manage API subscriptions for sandbox application" in {
-      val document        = testPage(appNameOne, Environment.SANDBOX)
+      val document = testPage(appNameOne, Environment.SANDBOX)
       elementExistsByText(document, "p", sandboxMessage) shouldBe true
       elementExistsByText(document, "a", sandboxButton) shouldBe true
     }

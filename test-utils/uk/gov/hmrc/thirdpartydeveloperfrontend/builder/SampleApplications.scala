@@ -47,16 +47,16 @@ trait SampleApplications extends SampleApplication {
   val adminSubmittedSandboxApplication: ApplicationWithCollaborators =
     adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val adminCreatedSandboxApplication: ApplicationWithCollaborators   = adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
+  val adminCreatedSandboxApplication: ApplicationWithCollaborators = adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
 
   val developerSubmittedProductionApplication: ApplicationWithCollaborators =
     developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val developerCreatedProductionApplication: ApplicationWithCollaborators   = developerApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
+  val developerCreatedProductionApplication: ApplicationWithCollaborators = developerApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
 
   val developerSubmittedSandboxApplication: ApplicationWithCollaborators =
     developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val devloperCreatedSandboxApplication: ApplicationWithCollaborators    = developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
+  val devloperCreatedSandboxApplication: ApplicationWithCollaborators = developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
 
 }

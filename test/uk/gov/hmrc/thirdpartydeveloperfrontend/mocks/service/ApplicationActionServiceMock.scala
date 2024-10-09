@@ -32,6 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val applicationActionServiceMock = mock[ApplicationActionService]
@@ -42,6 +43,9 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
 
   def givenApplicationAction[A](application: ApplicationWithCollaborators, userSession: UserSession): Unit =
     givenApplicationAction[A](application.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession)
+
+  def givenApplicationAction[A](application: ApplicationWithSubscriptions, userSession: UserSession): Unit =
+    givenApplicationAction[A](application.withFieldValues(Map.empty), userSession)
 
   def givenApplicationAction[A](
       appData: ApplicationWithSubscriptionFields,

@@ -54,7 +54,8 @@ class ManageTeamSpec
     with UserBuilder
     with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationActionServiceMock with ApplicationWithCollaboratorsFixtures {
+  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationActionServiceMock
+      with ApplicationWithCollaboratorsFixtures {
     val manageTeamView: ManageTeamView             = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView: AddTeamMemberView       = app.injector.instanceOf[AddTeamMemberView]
     val removeTeamMemberView: RemoveTeamMemberView = app.injector.instanceOf[RemoveTeamMemberView]
@@ -101,7 +102,7 @@ class ManageTeamSpec
         createdOn = Instant.parse("2018-04-06T09:00:00Z"),
         lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       ))
-      .withCollaborators(collaborators.toList: _*)
+        .withCollaborators(collaborators.toList: _*)
 
       givenApplicationAction(application, session)
       fetchCredentialsReturns(application, tokens())

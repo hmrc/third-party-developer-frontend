@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import java.time.{Instant}
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -62,7 +62,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   def checkInformation: Option[CheckInformation]
 
   def application: ApplicationWithCollaborators = standardApp
-  
+
   //  = Application(
   //   applicationId,
   //   clientId,
@@ -82,32 +82,32 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   //   checkInformation,
   //   IpAllowlist()
   // )
-  lazy val redirectUrl                                    = RedirectUri.unsafeApply("https://example.com/redirect-here")
-  lazy val apiContext: ApiContext                         = ApiContext("ctx")
-  lazy val apiVersion: ApiVersionNbr                      = ApiVersionNbr("1.0")
-  lazy val apiIdentifier: ApiIdentifier                   = ApiIdentifier(apiContext, apiVersion)
-  lazy val apiFieldName: FieldName                        = FieldName("my_field")
-  lazy val apiFieldValue: FieldValue                      = FieldValue("my value")
-  lazy val apiPpnsFieldName: FieldName                    = FieldName("my_ppns_field")
-  lazy val apiPpnsFieldValue: FieldValue                  = FieldValue("my ppns value")
-  lazy val appWithSubsIds: ApplicationWithSubscriptions   = application.withSubscriptions(Set(apiIdentifier))
-  lazy val privacyPolicyUrl                               = "http://example.com/priv"
-  lazy val termsConditionsUrl                             = "http://example.com/tcs"
-  lazy val category                                       = "category1"
+  lazy val redirectUrl                                  = RedirectUri.unsafeApply("https://example.com/redirect-here")
+  lazy val apiContext: ApiContext                       = ApiContext("ctx")
+  lazy val apiVersion: ApiVersionNbr                    = ApiVersionNbr("1.0")
+  lazy val apiIdentifier: ApiIdentifier                 = ApiIdentifier(apiContext, apiVersion)
+  lazy val apiFieldName: FieldName                      = FieldName("my_field")
+  lazy val apiFieldValue: FieldValue                    = FieldValue("my value")
+  lazy val apiPpnsFieldName: FieldName                  = FieldName("my_ppns_field")
+  lazy val apiPpnsFieldValue: FieldValue                = FieldValue("my ppns value")
+  lazy val appWithSubsIds: ApplicationWithSubscriptions = application.withSubscriptions(Set(apiIdentifier))
+  lazy val privacyPolicyUrl                             = "http://example.com/priv"
+  lazy val termsConditionsUrl                           = "http://example.com/tcs"
+  lazy val category                                     = "category1"
 
-  lazy val appWithSubsData: ApplicationWithSubscriptionFields = 
+  lazy val appWithSubsData: ApplicationWithSubscriptionFields =
     application
-    .withSubscriptions(Set(apiIdentifier))
-    .withFieldValues(
-      Map(
-        apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+      .withSubscriptions(Set(apiIdentifier))
+      .withFieldValues(
+        Map(
+          apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+        )
       )
-    )
 
-  lazy val questionnaireId: Questionnaire.Id                = Questionnaire.Id.random
-  lazy val question: Question.AcknowledgementOnly           = Question.AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
-  lazy val questionItem: QuestionItem                       = QuestionItem(question)
-  lazy val questionnaire: Questionnaire                     = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
+  lazy val questionnaireId: Questionnaire.Id      = Questionnaire.Id.random
+  lazy val question: Question.AcknowledgementOnly = Question.AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
+  lazy val questionItem: QuestionItem             = QuestionItem(question)
+  lazy val questionnaire: Questionnaire           = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
 
   lazy val questionIdsOfInterest: QuestionIdsOfInterest                  = QuestionIdsOfInterest(
     Question.Id.random,
@@ -279,12 +279,12 @@ trait UserIsDeveloper extends UserIsTeamMember {
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp: ApplicationWithCollaborators              = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
-  val otherAppWithSubsIds: ApplicationWithSubscriptions   = otherApp.withSubscriptions(Set(apiIdentifier))
+  val otherApp: ApplicationWithCollaborators            = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
+  val otherAppWithSubsIds: ApplicationWithSubscriptions = otherApp.withSubscriptions(Set(apiIdentifier))
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
-  def describeUserRole                                    = "The user is not a member of the application team"
-  def maybeCollaborator: Option[Collaborator]             = None
+  def describeUserRole                                  = "The user is not a member of the application team"
+  def maybeCollaborator: Option[Collaborator]           = None
 }
 
 trait HasUserSession extends HasUserWithRole {

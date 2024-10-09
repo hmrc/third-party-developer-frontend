@@ -43,7 +43,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def fetchByApplicationIdReturns(id: ApplicationId, returns: ApplicationWithSubscriptionFields): Unit =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(Some(returns)))
 
-  def  fetchByApplicationIdReturns(appData: ApplicationWithSubscriptions): Unit =
+  def fetchByApplicationIdReturns(appData: ApplicationWithSubscriptions): Unit =
     fetchByApplicationIdReturns(appData.id, appData.withFieldValues(Map.empty))
 
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =

@@ -121,19 +121,19 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val aTermsAndConditionsURL = Some("a terms and conditions url")
       val standardAccess         = Access.Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
       val application            = standardApp
-        // Application(
-        //   applicationId,
-        //   clientId,
-        //   "An App Name",
-        //   instant,
-        //   Some(instant),
-        //   None,
-        //   grantLength,
-        //   Environment.SANDBOX,
-        //   description = aDescription,
-        //   access = standardAccess,
-        //   state = ApplicationState(State.TESTING, None, None, None, instant)
-        // )
+      // Application(
+      //   applicationId,
+      //   clientId,
+      //   "An App Name",
+      //   instant,
+      //   Some(instant),
+      //   None,
+      //   grantLength,
+      //   Environment.SANDBOX,
+      //   description = aDescription,
+      //   access = standardAccess,
+      //   state = ApplicationState(State.TESTING, None, None, None, instant)
+      // )
       val document               = Jsoup.parse(renderPage(application).body)
 
       formGroupWithLabelIsPrepopulated(document, "Application name", "An App Name") shouldBe true
@@ -183,17 +183,17 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     "not display the option to change the app name if in prod with state production" in {
 
       val application = standardApp
-        // Application(
-        //   applicationId,
-        //   clientId,
-        //   "An App Name",
-        //   instant,
-        //   Some(instant),
-        //   None,
-        //   grantLength,
-        //   Environment.PRODUCTION,
-        //   state = ApplicationState(State.PRODUCTION, None, None, None, instant)
-        // )
+      // Application(
+      //   applicationId,
+      //   clientId,
+      //   "An App Name",
+      //   instant,
+      //   Some(instant),
+      //   None,
+      //   grantLength,
+      //   Environment.PRODUCTION,
+      //   state = ApplicationState(State.PRODUCTION, None, None, None, instant)
+      // )
       val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false

@@ -76,7 +76,7 @@ trait ApplicationBuilder extends CollaboratorTracker with FixedClock with Applic
       ApiIdentifier(apiContext, apiVersion)
     )
 
-  def buildSubscriptionFieldValues(apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Map[FieldName,FieldValue]): ApiFieldMap[FieldValue] = {
+  def buildSubscriptionFieldValues(apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Map[FieldName, FieldValue]): ApiFieldMap[FieldValue] = {
     Map(apiContext -> Map(apiVersion -> fields))
   }
 
@@ -85,9 +85,8 @@ trait ApplicationBuilder extends CollaboratorTracker with FixedClock with Applic
       apiVersion: ApiVersionNbr = ApiVersionNbr.random,
       fields: Map[FieldName, FieldValue] = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
     ): ApplicationWithSubscriptionFields = {
-      buildApplication("email@example.com".toLaxEmail)
-        .withSubscriptions(Set(ApiIdentifier(apiContext, apiVersion)))
-        .withFieldValues(buildSubscriptionFieldValues(apiContext, apiVersion, fields)
-    )
+    buildApplication("email@example.com".toLaxEmail)
+      .withSubscriptions(Set(ApiIdentifier(apiContext, apiVersion)))
+      .withFieldValues(buildSubscriptionFieldValues(apiContext, apiVersion, fields))
   }
 }

@@ -63,8 +63,8 @@ class ApmConnectorIntegrationSpec
   }
 
   "fetchApplicationById" should {
-    val applicationId                                                    = ApplicationId.random
-    val application                                                      = Application(applicationId, ClientId("someId"), "someName", instant, None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
+    val applicationId                                                        = ApplicationId.random
+    val application                                                          = Application(applicationId, ClientId("someId"), "someName", instant, None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
     val ApplicationWithSubscriptionFields: ApplicationWithSubscriptionFields =
       ApplicationWithSubscriptionFields(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
 

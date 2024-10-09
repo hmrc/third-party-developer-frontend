@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
 trait ApplicationSyntaxes {
 
   implicit class ApplicationWithCollaboratorsSyntax(app: ApplicationWithCollaborators) {
+
     def termsOfUseStatus: TermsOfUseStatus = {
       val termsOfUseAgreementsAreEmpty = app.details.checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty).isEmpty
 
@@ -74,11 +74,11 @@ trait ApplicationSyntaxes {
     }
 
     def hasResponsibleIndividual: Boolean = {
-       app.access match {
-          case Access.Standard(_, _, _, _, _, Some(_)) => true
-          case _                                       => false
-        }
+      app.access match {
+        case Access.Standard(_, _, _, _, _, Some(_)) => true
+        case _                                       => false
       }
+    }
 
     def canViewServerToken(developer: User): Boolean = {
       import Collaborator.Roles._
@@ -102,13 +102,14 @@ trait ApplicationSyntaxes {
       }
     }
 
-    def isPermittedToAgreeToTermsOfUse(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
-    def isPermittedToEditAppDetails(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.SandboxOnly)
+    def isPermittedToAgreeToTermsOfUse(developer: User): Boolean          = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
+    def isPermittedToEditAppDetails(developer: User): Boolean             = allows(Capabilities.SupportsDetails, developer, Permissions.SandboxOnly)
     def isPermittedToEditProductionAppDetails(developer: User): Boolean   = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
     def isProductionAppButEditDetailsNotAllowed(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndDeveloper)
   }
 
   implicit class ApplicationWithSubscriptionsSyntax(app: ApplicationWithSubscriptions) {
+
     def termsOfUseStatus: TermsOfUseStatus = {
       val termsOfUseAgreementsAreEmpty = app.details.checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty).isEmpty
 
@@ -130,17 +131,17 @@ trait ApplicationSyntaxes {
 
 object ApplicationSyntaxes extends ApplicationSyntaxes
 
-      // def determineTermsOfUseStatus(app: ApplicationWithCollaborators): TermsOfUseStatus = {
-      //     val termsOfUseAgreementsAreEmpty = app.details.checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty).isEmpty
+// def determineTermsOfUseStatus(app: ApplicationWithCollaborators): TermsOfUseStatus = {
+//     val termsOfUseAgreementsAreEmpty = app.details.checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty).isEmpty
 
-      //     if (app.details.deployedTo.isSandbox || !app.details.access.isStandard) {
-      //       TermsOfUseStatus.NOT_APPLICABLE
-      //     } else if (termsOfUseAgreementsAreEmpty) {
-      //       TermsOfUseStatus.AGREEMENT_REQUIRED
-      //     } else {
-      //       TermsOfUseStatus.AGREED
-      //     }
-      // }
+//     if (app.details.deployedTo.isSandbox || !app.details.access.isStandard) {
+//       TermsOfUseStatus.NOT_APPLICABLE
+//     } else if (termsOfUseAgreementsAreEmpty) {
+//       TermsOfUseStatus.AGREEMENT_REQUIRED
+//     } else {
+//       TermsOfUseStatus.AGREED
+//     }
+// }
 // trait BaseApplication {
 //   val defaultGrantLengthDays = 547
 

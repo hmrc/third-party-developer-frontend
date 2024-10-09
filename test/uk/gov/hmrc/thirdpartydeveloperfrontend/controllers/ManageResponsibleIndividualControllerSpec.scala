@@ -288,7 +288,9 @@ class ManageResponsibleIndividualControllerSpec
 
   "responsibleIndividualChangeToSelfAction" should {
     "save current users details as the RI" in new Setup {
-      when(applicationServiceMock.updateResponsibleIndividual(*[ApplicationWithCollaborators], *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+      when(applicationServiceMock.updateResponsibleIndividual(*[ApplicationWithCollaborators], *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(
+        ApplicationUpdateSuccessful
+      ))
       val user = session.developer.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)

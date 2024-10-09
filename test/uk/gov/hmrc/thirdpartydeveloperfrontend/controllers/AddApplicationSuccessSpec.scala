@@ -54,9 +54,8 @@ class AddApplicationSuccessSpec
     with WithCSRFAddToken
     with UserBuilder
     with DeveloperSessionBuilder
-    with LocalUserIdTracker 
-    with ApplicationWithCollaboratorsFixtures
-    {
+    with LocalUserIdTracker
+    with ApplicationWithCollaboratorsFixtures {
 
   val principalApp: ApplicationWithCollaborators = standardApp
   //  = Application(
@@ -76,7 +75,7 @@ class AddApplicationSuccessSpec
   // )
 
   val subordinateApp: ApplicationWithCollaborators = standardApp2
-  
+
   //  = Application(
   //   appId,
   //   clientId,

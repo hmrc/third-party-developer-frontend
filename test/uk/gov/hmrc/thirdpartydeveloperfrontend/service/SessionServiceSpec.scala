@@ -35,9 +35,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock {
+class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -63,34 +63,36 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
     val applicationsWhereUserIsDeveloperInProduction =
       Seq(
-        ApplicationWithSubscriptions(
-          applicationId,
-          clientId,
-          "myName",
-          instant,
-          Some(instant),
-          None,
-          grantLength,
-          Environment.PRODUCTION,
-          collaborators = Set(email.asDeveloperCollaborator),
-          subscriptions = Set.empty
-        )
+        standardApp.withSubscriptions(Set.empty)
+        // ApplicationWithSubscriptions(
+        //   applicationId,
+        //   clientId,
+        //   "myName",
+        //   instant,
+        //   Some(instant),
+        //   None,
+        //   grantLength,
+        //   Environment.PRODUCTION,
+        //   collaborators = Set(email.asDeveloperCollaborator),
+        //   subscriptions = Set.empty
+        // )
       )
 
     val applicationsWhereUserIsAdminInProduction =
       Seq(
-        ApplicationWithSubscriptions(
-          applicationId,
-          clientId,
-          "myName",
-          instant,
-          Some(instant),
-          None,
-          grantLength,
-          Environment.PRODUCTION,
-          collaborators = Set(email.asAdministratorCollaborator),
-          subscriptions = Set.empty
-        )
+        standardApp.withSubscriptions(Set.empty)
+        // ApplicationWithSubscriptions(
+        //   applicationId,
+        //   clientId,
+        //   "myName",
+        //   instant,
+        //   Some(instant),
+        //   None,
+        //   grantLength,
+        //   Environment.PRODUCTION,
+        //   collaborators = Set(email.asAdministratorCollaborator),
+        //   subscriptions = Set.empty
+        // )
       )
 
   }
