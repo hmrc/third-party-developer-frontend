@@ -37,8 +37,7 @@ class NavLinkSpec extends AsyncHmrcSpec {
         Seq(
           NavLink("Documentation", "http://localhost:9680/api-documentation/docs/using-the-hub"),
           NavLink("Applications", "http://localhost:9685/developer/applications"),
-          NavLink("Support", "http://localhost:9685/developer/support"),
-          NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)
+          NavLink("Support", "http://localhost:9685/developer/support")
         )
     }
   }
