@@ -34,7 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationStateHelper, SampleApplication}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -77,13 +76,14 @@ class TermsOfUseResponsesControllerSpec
     val termsOfUseResponsesView = app.injector.instanceOf[TermsOfUseResponsesView]
 
     def givenAppInState(appState: ApplicationState) = {
-      val grantedApp = submittedApp.copy(state = appState)
+      val grantedApp = submittedApp.withState(appState)
       givenApplicationAction(
-        ApplicationWithSubscriptionData(
-          grantedApp,
-          asSubscriptions(List(aSubscription)),
-          asFields(List.empty)
-        ),
+        grantedApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
+        // ApplicationWithSubscriptionFields(
+        //   grantedApp,
+        //   asSubscriptions(List(aSubscription)),
+        //   asFields(List.empty)
+        // ),
         userSession,
         List(aSubscription)
       )

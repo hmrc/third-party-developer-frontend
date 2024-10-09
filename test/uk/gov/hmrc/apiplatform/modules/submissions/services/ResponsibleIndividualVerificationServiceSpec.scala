@@ -35,6 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, TestApplications}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with CollaboratorTracker
@@ -56,7 +57,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       applicationId,
       SubmissionId.random,
       0,
-      "App name",
+      ApplicationName("App name"),
       instant,
       ResponsibleIndividualVerificationState.INITIAL
     )
@@ -105,7 +106,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "New application submitted for checking"
       deskproTicket.name shouldBe application.state.requestedByName.get
       deskproTicket.email.text shouldBe application.state.requestedByEmailAddress.get
-      deskproTicket.message should include(riVerification.applicationName)
+      deskproTicket.message should include(riVerification.applicationName.value)
       deskproTicket.message should include("submitted the following application for production use on the Developer Hub")
       deskproTicket.referrer should include(s"/application/${riVerification.applicationId.value}/check-answers")
     }
@@ -116,7 +117,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         applicationId,
         SubmissionId.random,
         0,
-        "App name",
+        ApplicationName("App name"),
         instant,
         requesterName,
         requesterEmail,
@@ -140,7 +141,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "Terms of use uplift application submitted for checking"
       deskproTicket.name shouldBe requesterName
       deskproTicket.email shouldBe requesterEmail
-      deskproTicket.message should include(riVerificationUplift.applicationName)
+      deskproTicket.message should include(riVerificationUplift.applicationName.value)
       deskproTicket.message should include("has submitted a Terms of Use application that has warnings or fails")
       deskproTicket.referrer should include("https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use")
     }
@@ -151,7 +152,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         applicationId,
         SubmissionId.random,
         0,
-        "App name",
+        ApplicationName("App name"),
         instant,
         requesterName,
         requesterEmail,
@@ -177,7 +178,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         applicationId,
         SubmissionId.random,
         0,
-        "App name",
+        ApplicationName("App name"),
         instant,
         responsibleIndividual,
         "Mr Admin",

@@ -39,6 +39,7 @@ object AppDependencies {
     "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
     "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
     "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-application-domain-fixtures"       % appDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"       % tpdDomainVersion
   ).map(_ % "test")
 

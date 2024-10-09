@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import java.time.{Instant, LocalDate, Period}
+import java.time.{Instant}
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -45,40 +45,43 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
+import java.time.LocalDate
 
-trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock {
+trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
   val applicationId: ApplicationId = ApplicationId.random
   val submissionId: SubmissionId   = SubmissionId.random
   val clientId: ClientId           = ClientId.random
-  val applicationName              = "my app"
+  val applicationName              = ApplicationName("my app")
   val createdOn: Instant           = LocalDate.of(2020, 1, 1).asInstant
 
   def describeApplication: String
   def access: Access
   def checkInformation: Option[CheckInformation]
 
-  def application: Application                            = Application(
-    applicationId,
-    clientId,
-    applicationName,
-    createdOn,
-    None,
-    None,
-    Period.ofYears(1),
-    environment,
-    None,
-    maybeCollaborator match {
-      case Some(collaborator) => Set(collaborator)
-      case None               => Set()
-    },
-    access,
-    state,
-    checkInformation,
-    IpAllowlist()
-  )
+  def application: ApplicationWithCollaborators = standardApp
+  
+  //  = Application(
+  //   applicationId,
+  //   clientId,
+  //   applicationName,
+  //   createdOn,
+  //   None,
+  //   None,
+  //   Period.ofYears(1),
+  //   environment,
+  //   None,
+  //   maybeCollaborator match {
+  //     case Some(collaborator) => Set(collaborator)
+  //     case None               => Set()
+  //   },
+  //   access,
+  //   state,
+  //   checkInformation,
+  //   IpAllowlist()
+  // )
   lazy val redirectUrl                                    = RedirectUri.unsafeApply("https://example.com/redirect-here")
   lazy val apiContext: ApiContext                         = ApiContext("ctx")
   lazy val apiVersion: ApiVersionNbr                      = ApiVersionNbr("1.0")
@@ -87,18 +90,20 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val apiFieldValue: FieldValue                      = FieldValue("my value")
   lazy val apiPpnsFieldName: FieldName                    = FieldName("my_ppns_field")
   lazy val apiPpnsFieldValue: FieldValue                  = FieldValue("my ppns value")
-  lazy val appWithSubsIds: ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = Set(apiIdentifier))
+  lazy val appWithSubsIds: ApplicationWithSubscriptions   = application.withSubscriptions(Set(apiIdentifier))
   lazy val privacyPolicyUrl                               = "http://example.com/priv"
   lazy val termsConditionsUrl                             = "http://example.com/tcs"
   lazy val category                                       = "category1"
 
-  lazy val appWithSubsData: ApplicationWithSubscriptionData = ApplicationWithSubscriptionData(
-    application,
-    Set(apiIdentifier),
-    Map(
-      apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+  lazy val appWithSubsData: ApplicationWithSubscriptionFields = 
+    application
+    .withSubscriptions(Set(apiIdentifier))
+    .withFieldValues(
+      Map(
+        apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+      )
     )
-  )
+
   lazy val questionnaireId: Questionnaire.Id                = Questionnaire.Id.random
   lazy val question: Question.AcknowledgementOnly           = Question.AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
   lazy val questionItem: QuestionItem                       = QuestionItem(question)
@@ -274,8 +279,8 @@ trait UserIsDeveloper extends UserIsTeamMember {
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp: Application                               = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId)))
-  val otherAppWithSubsIds: ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(otherApp).copy(subscriptions = Set(apiIdentifier))
+  val otherApp: ApplicationWithCollaborators              = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
+  val otherAppWithSubsIds: ApplicationWithSubscriptions   = otherApp.withSubscriptions(Set(apiIdentifier))
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   def describeUserRole                                    = "The user is not a member of the application team"

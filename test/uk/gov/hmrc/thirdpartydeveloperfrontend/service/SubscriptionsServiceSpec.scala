@@ -30,12 +30,12 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
@@ -71,7 +71,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       FixedClock.clock
     )
 
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
@@ -82,26 +82,26 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
-  val productionApplication: Application =
-    Application(
-      productionApplicationId,
-      productionClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("description"),
-      Set()
-    )
+  val productionApplication: ApplicationWithCollaborators = standardApp
+    // Application(
+    //   productionApplicationId,
+    //   productionClientId,
+    //   "name",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   Some("description"),
+    //   Set()
+    // )
 
   "isSubscribedToApi" should {
     val subscriptions = Set(
       ApiIdentifier(ApiContext("first context"), versionOne),
       ApiIdentifier(ApiContext("second context"), versionOne)
     )
-    val appWithData   = ApplicationWithSubscriptionData(buildApplication("email@example.com".toLaxEmail), subscriptions)
+    val appWithData   = buildApplication("email@example.com".toLaxEmail).withSubscriptions(subscriptions).withFieldValues(Map.empty)
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
       val apiContext   = ApiContext("third context")
@@ -111,7 +111,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
 
       private val result =
-        await(subscriptionsService.isSubscribedToApi(appWithData.application.id, subscription))
+        await(subscriptionsService.isSubscribedToApi(appWithData.id, subscription))
 
       result shouldBe false
     }
@@ -124,7 +124,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
       when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
 
       private val result =
-        await(subscriptionsService.isSubscribedToApi(appWithData.application.id, subscription))
+        await(subscriptionsService.isSubscribedToApi(appWithData.id, subscription))
 
       result shouldBe true
     }

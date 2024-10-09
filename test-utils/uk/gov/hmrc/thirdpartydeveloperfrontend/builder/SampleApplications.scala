@@ -19,41 +19,44 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 trait SampleApplications extends SampleApplication {
   self: SampleUserSession with CollaboratorTracker =>
 
-  val activeApplication: Application = sampleApp
+  val activeApplication: ApplicationWithCollaborators = sampleApp
 
-  val activeDeveloperApplication: Application = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
+  val activeDeveloperApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
 
-  val ropcApplication: Application = sampleApp.copy(access = Access.Ropc())
+  val ropcApplication: ApplicationWithCollaborators = sampleApp.withAccess(Access.Ropc())
 
-  val privilegedApplication: Application = sampleApp.copy(access = Access.Privileged())
+  val privilegedApplication: ApplicationWithCollaborators = sampleApp.withAccess(Access.Privileged())
 
-  val newApplication: Application = sampleApp.copy(state = InState.testing)
+  val newApplication: ApplicationWithCollaborators = sampleApp.withState(InState.testing)
 
-  val newSandboxApplication: Application = sampleApp.copy(deployedTo = Environment.SANDBOX, state = InState.testing)
+  val newSandboxApplication: ApplicationWithCollaborators = sampleApp.modify(_.copy(deployedTo = Environment.SANDBOX, state = InState.testing))
 
-  val adminApplication: Application     = sampleApp.copy(collaborators = Set(userSession.developer.email.asAdministratorCollaborator))
-  val developerApplication: Application = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
+  val adminApplication: ApplicationWithCollaborators     = sampleApp.copy(collaborators = Set(userSession.developer.email.asAdministratorCollaborator))
+  val developerApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
 
-  val adminSubmittedProductionApplication: Application =
-    adminApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
-  val adminCreatedProductionApplication: Application   = adminApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.testing)
+  val adminSubmittedProductionApplication: ApplicationWithCollaborators =
+    adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+  val adminCreatedProductionApplication: ApplicationWithCollaborators   = adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
 
-  val adminSubmittedSandboxApplication: Application =
-    adminApplication.copy(deployedTo = Environment.SANDBOX, state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
-  val adminCreatedSandboxApplication: Application   = adminApplication.copy(deployedTo = Environment.SANDBOX, state = InState.testing)
+  val adminSubmittedSandboxApplication: ApplicationWithCollaborators =
+    adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val developerSubmittedProductionApplication: Application =
-    developerApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
-  val developerCreatedProductionApplication: Application   = developerApplication.copy(deployedTo = Environment.PRODUCTION, state = InState.testing)
+  val adminCreatedSandboxApplication: ApplicationWithCollaborators   = adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
 
-  val developerSubmittedSandboxApplication: Application =
-    developerApplication.copy(deployedTo = Environment.SANDBOX, state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
-  val devloperCreatedSandboxApplication: Application    = developerApplication.copy(deployedTo = Environment.SANDBOX, state = InState.testing)
+  val developerSubmittedProductionApplication: ApplicationWithCollaborators =
+    developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+
+  val developerCreatedProductionApplication: ApplicationWithCollaborators   = developerApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
+
+  val developerSubmittedSandboxApplication: ApplicationWithCollaborators =
+    developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+
+  val devloperCreatedSandboxApplication: ApplicationWithCollaborators    = developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
 
 }

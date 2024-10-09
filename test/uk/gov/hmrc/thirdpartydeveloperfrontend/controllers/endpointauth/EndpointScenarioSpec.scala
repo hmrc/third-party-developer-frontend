@@ -287,13 +287,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   final def getQueryParameterValues(endpoint: Endpoint): Map[String, String] = {
     endpoint match {
       case Endpoint("GET", "/developer/applications/:id/change-locked-subscription", _)           =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
+        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)          =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
+        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("GET", "/developer/applications/:id/change-private-subscription", _)          =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
+        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)         =>
-        Map("name" -> applicationName, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
+        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                 =>
         Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> redirectUrl.toString())
       case Endpoint("GET", "/developer/applications/:id/ip-allowlist/remove", _)                  => Map("cidrBlock" -> "192.168.1.2/8")
@@ -379,19 +379,19 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         )
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)               => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/contact", _)                       => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
-      case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                          => Map("applicationName" -> applicationName)
+      case Endpoint("POST", "/developer/applications/:id/check-your-answers/name", _)                          => Map("applicationName" -> applicationName.value)
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/privacy-policy", _)                => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/subscriptions", _)                 => Map()
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/team/remove", _)                   => Map("email" -> userEmail.text)
       case Endpoint("POST", "/developer/applications/:id/check-your-answers/terms-of-use", _)                  => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                            => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
-      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                               => Map("applicationName" -> applicationName)
+      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                               => Map("applicationName" -> applicationName.value)
       case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                     => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
       case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                        => Map("email" -> userEmail.text)
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                       => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/details/change", _)                                   => Map(
           "applicationId"         -> applicationId.toString(),
-          "applicationName"       -> applicationName,
+          "applicationName"       -> applicationName.value,
           "description"           -> "my description",
           "privacyPolicyUrl"      -> privacyPolicyUrl,
           "termsAndConditionsUrl" -> termsConditionsUrl,

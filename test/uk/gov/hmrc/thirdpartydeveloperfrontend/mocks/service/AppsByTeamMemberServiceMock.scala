@@ -21,22 +21,23 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionsFixtures
 
-trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar {
+trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar with ApplicationWithSubscriptionsFixtures {
   val appsByTeamMemberServiceMock = mock[AppsByTeamMemberService]
 
-  def fetchProductionSummariesByAdmin(userId: UserId, apps: Seq[ApplicationWithSubscriptionIds]) = {
+  def fetchProductionSummariesByAdmin(userId: UserId, apps: Seq[ApplicationWithSubscriptions]) = {
     when(appsByTeamMemberServiceMock.fetchProductionSummariesByAdmin(eqTo(userId))(*)).thenReturn(successful(apps))
   }
 
-  def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[ApplicationWithSubscriptionIds]) =
+  def fetchAppsByTeamMemberReturns(environment: Environment)(apps: Seq[ApplicationWithSubscriptions]) =
     when(appsByTeamMemberServiceMock.fetchAppsByTeamMember(eqTo(environment))(*[UserId])(*))
-      .thenReturn(successful(apps.map(_.copy(deployedTo = environment))))
+      .thenReturn(successful(apps.map(a => a.withEnvironment(environment))))
 
-  def fetchByTeamMembersWithRoleReturns(apps: Seq[ApplicationWithSubscriptionIds]) =
+  def fetchByTeamMembersWithRoleReturns(apps: Seq[ApplicationWithSubscriptions]) =
     when(appsByTeamMemberServiceMock.fetchByTeamMemberWithRole(*)(*)(*[UserId])(*)).thenReturn(successful(apps))
 
   def fetchProductionSummariesByTeamMemberReturns(summaries: Seq[ApplicationSummary]) =

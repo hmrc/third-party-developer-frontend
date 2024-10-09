@@ -37,6 +37,8 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class CredentialsSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -44,7 +46,8 @@ class CredentialsSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock {
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     val credentialsView = app.injector.instanceOf[CredentialsView]
@@ -58,26 +61,27 @@ class CredentialsSpec extends CommonViewSpec
     val request          = FakeRequest().withCSRFToken
     val developerSession = standardDeveloper.loggedIn
 
-    val application = Application(
-      ApplicationId.random,
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      instant,
-      Some(instant),
-      None,
-      Period.ofDays(547),
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-      access = Access.Standard(),
-      state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant),
-      checkInformation = None
-    )
+    val application = standardApp
+      //Application(
+    //   ApplicationId.random,
+    //   ClientId("Test Application Client ID"),
+    //   "Test Application",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   Period.ofDays(547),
+    //   Environment.PRODUCTION,
+    //   Some("Test Application"),
+    //   collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
+    //   access = Access.Standard(),
+    //   state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant),
+    //   checkInformation = None
+    // )
 
-    val sandboxApplication = application.copy(deployedTo = Environment.SANDBOX)
+    val sandboxApplication = application.withEnvironment(Environment.SANDBOX)
 
     "display the credentials page for admins" in new Setup {
-      val page: Html = credentialsView.render(application, request, developerSession, messagesProvider, appConfig)
+      val page: Html = credentialsView.render(standardApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)
@@ -86,7 +90,7 @@ class CredentialsSpec extends CommonViewSpec
     }
 
     "display the credentials page for non admins if the app is in sandbox" in new Setup {
-      val developerApp: Application = sandboxApplication.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
+      val developerApp: ApplicationWithCollaborators = sandboxApplication.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
       val page: Html                = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
@@ -96,7 +100,7 @@ class CredentialsSpec extends CommonViewSpec
     }
 
     "tell the user they don't have access to credentials when the logged in user is not an admin and the app is not in sandbox" in new Setup {
-      val developerApp: Application = application.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
+      val developerApp: ApplicationWithCollaborators = application.copy(collaborators = Set(developerSession.developer.email.asDeveloperCollaborator))
       val page: Html                = credentialsView.render(developerApp, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")

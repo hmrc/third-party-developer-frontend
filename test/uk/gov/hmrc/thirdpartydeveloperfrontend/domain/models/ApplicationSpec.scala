@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
-import java.time.Period
-
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividual, TermsOfUseAcceptance, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.{FixedClock, HmrcSpec}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class ApplicationSpec extends HmrcSpec with FixedClock {
+class ApplicationSpec extends HmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
   val url            = "http://example.com"
   val standardAccess = Access.Standard()
 
@@ -38,68 +36,70 @@ class ApplicationSpec extends HmrcSpec with FixedClock {
     List.empty[TermsOfUseAcceptance]
   )
 
-  val baseApplication = Application(
-    ApplicationId.random,
-    ClientId("client"),
-    "name",
-    instant,
-    Some(instant),
-    None,
-    Period.ofDays(1),
-    Environment.PRODUCTION,
-    access = standardAccess
-  )
+  val baseApplication = standardApp
+    
+  //   Application(
+  //   ApplicationId.random,
+  //   ClientId("client"),
+  //   "name",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   Period.ofDays(1),
+  //   Environment.PRODUCTION,
+  //   access = standardAccess
+  // )
 
   "privacy policy location" should {
     "be correct for old journey app when no location supplied" in {
-      val application = baseApplication.copy(access = Access.Standard(privacyPolicyUrl = None))
+      val application = baseApplication.withAccess(Access.Standard(privacyPolicyUrl = None))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.NoneProvided
     }
     "be correct for old journey app when location was supplied" in {
-      val application = baseApplication.copy(access = Access.Standard(privacyPolicyUrl = Some(url)))
+      val application = baseApplication.withAccess(Access.Standard(privacyPolicyUrl = Some(url)))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.Url(url)
     }
     "be correct for new journey app when location was url" in {
       val application =
-        baseApplication.copy(access = Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.Url(url)))))
+        baseApplication.withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.Url(url)))))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.Url(url)
     }
     "be correct for new journey app when location was in desktop app" in {
       val application =
-        baseApplication.copy(access = Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.InDesktopSoftware))))
+        baseApplication.withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.InDesktopSoftware))))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.InDesktopSoftware
     }
     "be correct for new journey app when location was not supplied" in {
       val application =
-        baseApplication.copy(access = Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.NoneProvided))))
+        baseApplication.withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(privacyPolicyLocation = PrivacyPolicyLocations.NoneProvided))))
       application.privacyPolicyLocation shouldBe PrivacyPolicyLocations.NoneProvided
     }
   }
 
   "terms and conditions location" should {
     "be correct for old journey app when no location supplied" in {
-      val application = baseApplication.copy(access = Access.Standard(termsAndConditionsUrl = None))
+      val application = baseApplication.withAccess(Access.Standard(termsAndConditionsUrl = None))
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocations.NoneProvided
     }
     "be correct for old journey app when location was supplied" in {
-      val application = baseApplication.copy(access = Access.Standard(termsAndConditionsUrl = Some(url)))
+      val application = baseApplication.withAccess(Access.Standard(termsAndConditionsUrl = Some(url)))
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocations.Url(url)
     }
     "be correct for new journey app when location was url" in {
       val application =
-        baseApplication.copy(access = Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocations.Url(url)))))
+        baseApplication.withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocations.Url(url)))))
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocations.Url(url)
     }
     "be correct for new journey app when location was in desktop app" in {
       val application =
-        baseApplication.copy(access =
+        baseApplication.withAccess(
           Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocations.InDesktopSoftware)))
         )
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocations.InDesktopSoftware
     }
     "be correct for new journey app when location was not supplied" in {
       val application =
-        baseApplication.copy(access =
+        baseApplication.withAccess(
           Access.Standard(importantSubmissionData = Some(importantSubmissionData.copy(termsAndConditionsLocation = TermsAndConditionsLocations.NoneProvided)))
         )
       application.termsAndConditionsLocation shouldBe TermsAndConditionsLocations.NoneProvided

@@ -466,7 +466,7 @@ class DetailsSpec
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name)
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name.value)
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
@@ -816,7 +816,7 @@ class DetailsSpec
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    when(underTest.applicationService.updateCheckInformation(any[Application], any[CheckInformation])(*))
+    when(underTest.applicationService.updateCheckInformation(any[ApplicationWithCollaborators], any[CheckInformation])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     val sessionParams        = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -841,7 +841,7 @@ class DetailsSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePage(application: Application, hasChangeButton: Boolean = true, hasTermsOfUseAgreement: Boolean = true) = {
+    def detailsShouldRenderThePage(application: ApplicationWithCollaborators, hasChangeButton: Boolean = true, hasTermsOfUseAgreement: Boolean = true) = {
       givenApplicationAction(application, loggedInDeveloper)
 
       if (hasTermsOfUseAgreement) {
@@ -857,14 +857,14 @@ class DetailsSpec
       // APIS-5669 - temporarily removed Change link
       // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
       elementIdentifiedByIdContainsText(doc, "applicationId", application.id.toString()) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "applicationName", application.name) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.describe()) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.describe()) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.value.describe()) shouldBe true
+      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.value.describe()) shouldBe true
       elementExistsContainsText(doc, "p", "Timmy Test agreed to version 2 of the terms of use on") shouldBe hasTermsOfUseAgreement
     }
 
-    def changeDetailsShouldRenderThePage(application: Application) = {
+    def changeDetailsShouldRenderThePage(application: ApplicationWithCollaborators) = {
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
@@ -875,16 +875,16 @@ class DetailsSpec
       linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
-        inputExistsWithValue(doc, "applicationName", "text", application.name) shouldBe true
+        inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
       } else {
-        inputExistsWithValue(doc, "applicationName", "hidden", application.name) shouldBe true
+        inputExistsWithValue(doc, "applicationName", "hidden", application.details.name.value) shouldBe true
       }
-      textareaExistsWithText(doc, "description", application.description.getOrElse("None")) shouldBe true
-      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.describe()) shouldBe true
-      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.describe()) shouldBe true
+      textareaExistsWithText(doc, "description", application.details.description.getOrElse("None")) shouldBe true
+      inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
+      inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.value.describe()) shouldBe true
     }
 
-    def changeDetailsShouldRedirectOnSuccess(application: Application) = {
+    def changeDetailsShouldRedirectOnSuccess(application: ApplicationWithCollaborators) = {
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
@@ -893,7 +893,7 @@ class DetailsSpec
       redirectLocation(result) shouldBe Some(routes.Details.details(application.id).url)
     }
 
-    def changeDetailsShouldUpdateTheApplication(application: Application) = {
+    def changeDetailsShouldUpdateTheApplication(application: ApplicationWithCollaborators) = {
       givenApplicationAction(application, loggedInDeveloper)
 
       await(
@@ -910,10 +910,10 @@ class DetailsSpec
 
     implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
 
-    implicit class ChangeDetailsAppAugment(val app: Application) {
+    implicit class ChangeDetailsAppAugment(val app: ApplicationWithCollaborators) {
       private val appAccess = app.access.asInstanceOf[Access.Standard]
 
-      final def toForm = EditApplicationForm(app.id, app.name, app.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.grantLengthDisplayValue())
+      final def toForm = EditApplicationForm(app.id, app.details.name.value, app.details.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.details.grantLength.show())
 
       final def callDetails: Future[Result] = underTest.details(app.id)(loggedInDevRequest)
 

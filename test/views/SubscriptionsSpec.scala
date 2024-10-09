@@ -39,13 +39,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserBuilder
-    with FixedClock {
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
 

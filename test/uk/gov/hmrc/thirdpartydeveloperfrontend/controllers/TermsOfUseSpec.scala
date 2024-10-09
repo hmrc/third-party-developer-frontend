@@ -42,7 +42,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -54,7 +53,7 @@ class TermsOfUseSpec
     with LocalUserIdTracker
     with FixedClock {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock with ApplicationWithCollaboratorsFixtures {
 
     val termsOfUseView: TermsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -87,21 +86,23 @@ class TermsOfUseSpec
         environment: Environment = Environment.PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Access.Standard()
-      ): Application = {
-      val application = Application(
-        appId,
-        ClientId("clientId"),
-        "appName",
-        instant,
-        Some(instant),
-        None,
-        grantLength,
-        environment,
-        collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
-        access = access,
-        state = ApplicationState(State.PRODUCTION, Some("dont-care"), Some("dont-care"), Some("dont-care"), instant),
-        checkInformation = checkInformation
-      )
+      ): ApplicationWithCollaborators = {
+
+      val application = standardApp
+        // Application(
+      //   appId,
+      //   ClientId("clientId"),
+      //   "appName",
+      //   instant,
+      //   Some(instant),
+      //   None,
+      //   grantLength,
+      //   environment,
+      //   collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
+      //   access = access,
+      //   state = ApplicationState(State.PRODUCTION, Some("dont-care"), Some("dont-care"), Some("dont-care"), instant),
+      //   checkInformation = checkInformation
+      // )
 
       givenApplicationAction(application, userSession)
 
@@ -173,7 +174,7 @@ class TermsOfUseSpec
   "agreeTermsOfUse" should {
 
     "record the terms of use agreement for an administrator on a standard production app" in new Setup {
-      val application: Application                 = givenApplicationExists()
+      val application: ApplicationWithCollaborators                 = givenApplicationExists()
       returnLatestTermsOfUseVersion
       val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
       when(underTest.applicationService.updateCheckInformation(eqTo(application), captor.capture())(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))

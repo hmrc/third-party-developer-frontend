@@ -19,6 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 
 trait ApplicationSyntaxes {
 
@@ -42,7 +44,7 @@ trait ApplicationSyntaxes {
 
     def hasCapability(capability: Capability): Boolean = capability.hasCapability(app)
 
-    private def allows(capability: Capability, developer: User, permission: Permission): Boolean = {
+    def allows(capability: Capability, developer: User, permission: Permission): Boolean = {
       hasCapability(capability) && permits(developer, permission)
     }
 
@@ -77,6 +79,28 @@ trait ApplicationSyntaxes {
           case _                                       => false
         }
       }
+
+    def canViewServerToken(developer: User): Boolean = {
+      import Collaborator.Roles._
+
+      (app.deployedTo, app.access.accessType, app.state.name, app.roleFor(developer.userId)) match {
+        case (Environment.SANDBOX, AccessType.STANDARD, State.PRODUCTION, _)                      => true
+        case (Environment.PRODUCTION, AccessType.STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+        case _                                                                                    => false
+      }
+    }
+
+    def canPerformApprovalProcess(developer: User): Boolean = {
+      import Collaborator.Roles._
+
+      (app.deployedTo, app.access.accessType, app.state.name, app.roleFor(developer.userId)) match {
+        case (Environment.SANDBOX, _, _, _)                                                                           => false
+        case (Environment.PRODUCTION, AccessType.STANDARD, State.TESTING, Some(ADMINISTRATOR))                        => true
+        case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
+        case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
+        case _                                                                                                        => false
+      }
+    }
 
     def isPermittedToAgreeToTermsOfUse(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
     def isPermittedToEditAppDetails(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.SandboxOnly)

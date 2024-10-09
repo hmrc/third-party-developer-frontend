@@ -56,38 +56,41 @@ class CredentialsSpec
     with SubscriptionTestHelperSugar
     with UserBuilder
     with LocalUserIdTracker
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   val applicationId: ApplicationId = ApplicationId.random
   val appTokens: ApplicationToken  = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
 
   trait ApplicationProvider {
-    def createApplication(): Application
+    def createApplication(): ApplicationWithCollaborators
   }
   val productionState: ApplicationState           = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant)
   val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
 
   trait BasicApplicationProvider extends ApplicationProvider {
 
-    def createApplication(): Application = {
-      Application(
-        applicationId,
-        clientId,
-        "App name 1",
-        instant,
-        Some(instant),
-        None,
-        grantLength,
-        Environment.PRODUCTION,
-        Some("Description 1"),
-        Set(userSession.developer.email.asAdministratorCollaborator),
-        state = productionState,
-        access = Access.Standard(
-          redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
-          termsAndConditionsUrl = Some("http://tnc-url.com")
-        )
-      )
-    }
+    def createApplication(): ApplicationWithCollaborators = standardApp
+    
+    //  = {
+    //   Application(
+    //     applicationId,
+    //     clientId,
+    //     "App name 1",
+    //     instant,
+    //     Some(instant),
+    //     None,
+    //     grantLength,
+    //     Environment.PRODUCTION,
+    //     Some("Description 1"),
+    //     Set(userSession.developer.email.asAdministratorCollaborator),
+    //     state = productionState,
+    //     access = Access.Standard(
+    //       redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
+    //       termsAndConditionsUrl = Some("http://tnc-url.com")
+    //     )
+    //   )
+    // }
   }
 
   def createConfiguredApplication(
@@ -97,20 +100,20 @@ class CredentialsSpec
       access: Access = Access.Standard(),
       environment: Environment = Environment.PRODUCTION,
       createdOn: Instant = instant
-    ): Application =
-    Application(
-      applicationId,
-      clientId,
-      "app",
-      createdOn,
-      Some(instant),
-      None,
-      grantLength,
-      environment,
-      collaborators = Set(userSession.developer.email.asCollaborator(userRole)),
-      state = state,
-      access = access
-    )
+    ): ApplicationWithCollaborators = standardApp
+    // Application(
+    //   applicationId,
+    //   clientId,
+    //   "app",
+    //   createdOn,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   environment,
+    //   collaborators = Set(userSession.developer.email.asCollaborator(userRole)),
+    //   state = state,
+    //   access = access
+    // )
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with ApplicationCommandConnectorMockModule {
     val credentialsView: CredentialsView                       = app.injector.instanceOf[CredentialsView]
@@ -141,12 +144,12 @@ class CredentialsSpec
       FixedClock.clock
     )
 
-    val application: Application                                         = createApplication()
-    val applicationWithSubscriptionData: ApplicationWithSubscriptionData = ApplicationWithSubscriptionData(application)
+    val application: ApplicationWithCollaborators                                         = createApplication()
+    val ApplicationWithSubscriptionFields: ApplicationWithSubscriptions = application.withSubscriptions(Set.empty)
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    givenApplicationAction(applicationWithSubscriptionData, userSession)
+    givenApplicationAction(ApplicationWithSubscriptionFields, userSession)
     fetchCredentialsReturns(application, appTokens)
     fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -159,7 +162,7 @@ class CredentialsSpec
 
   "The credentials page" should {
     "be displayed for an app" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
       val result: Future[Result] = underTest.credentials(applicationId)(loggedInRequest)
 
@@ -169,7 +172,7 @@ class CredentialsSpec
     }
 
     "inform the user that only admins can access credentials when the user has the developer role and the app is in PROD" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Future[Result] = underTest.credentials(applicationId)(loggedInRequest)
 
@@ -181,7 +184,7 @@ class CredentialsSpec
 
   "The client ID page" should {
     "be displayed for an app" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
       val result: Future[Result] = underTest.clientId(applicationId)(loggedInRequest)
 
@@ -190,7 +193,7 @@ class CredentialsSpec
     }
 
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Future[Result] = underTest.clientId(applicationId)(loggedInRequest)
 
@@ -198,7 +201,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
 
       val result: Future[Result] = underTest.clientId(applicationId)(loggedInRequest)
 
@@ -208,7 +211,7 @@ class CredentialsSpec
 
   "The client secrets page" should {
     "be displayed for an app" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
       val result: Accumulator[ByteString, Result] = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
@@ -217,7 +220,7 @@ class CredentialsSpec
     }
 
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Accumulator[ByteString, Result] = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
@@ -225,7 +228,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
 
       val result: Accumulator[ByteString, Result] = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
 
@@ -238,7 +241,7 @@ class CredentialsSpec
     val dateAfterCutoff  = Credentials.serverTokenCutoffDate.plus(1, DAYS)
 
     "be displayed for an app" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateBeforeCutoff)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateBeforeCutoff)
 
       val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
 
@@ -247,7 +250,7 @@ class CredentialsSpec
     }
 
     "return 404 for new apps" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateAfterCutoff)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateAfterCutoff)
 
       val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
 
@@ -255,7 +258,7 @@ class CredentialsSpec
     }
 
     "return 403 when the user has the developer role and the app is in PROD" in new Setup {
-      def createApplication(): Application =
+      def createApplication(): ApplicationWithCollaborators =
         createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION, createdOn = dateBeforeCutoff)
 
       val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
@@ -264,7 +267,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication(): Application =
+      def createApplication(): ApplicationWithCollaborators =
         createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, createdOn = dateBeforeCutoff, state = pendingGatekeeperApproval)
 
       val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
@@ -275,7 +278,7 @@ class CredentialsSpec
 
   "addClientSecret" should {
     "add the client secret" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
 
@@ -285,7 +288,7 @@ class CredentialsSpec
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, environment = Environment.PRODUCTION)
       ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
@@ -294,7 +297,7 @@ class CredentialsSpec
     }
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, environment = Environment.SANDBOX)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, environment = Environment.SANDBOX)
       ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
@@ -312,7 +315,7 @@ class CredentialsSpec
     }
 
     "display the error page when a user with developer role tries to add production secrets" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -321,7 +324,7 @@ class CredentialsSpec
     }
 
     "display the error page when the application has not reached production state" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
 
       val result: Future[Result] = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
@@ -330,7 +333,7 @@ class CredentialsSpec
     }
 
     "return to the login page when the user is not logged in" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedOutRequest)
 
@@ -359,7 +362,7 @@ class CredentialsSpec
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Accumulator[ByteString, Result] = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 
@@ -367,7 +370,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
 
       val result: Accumulator[ByteString, Result] = underTest.deleteClientSecret(applicationId, clientSecretToDelete.id)(loggedInRequest.withCSRFToken)
 
@@ -380,7 +383,7 @@ class CredentialsSpec
     val clientSecretId = ClientSecret.Id.random
 
     "delete the selected client secret" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR)
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
       // givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
@@ -392,7 +395,7 @@ class CredentialsSpec
     }
 
     "return 403 when a user with developer role tries do delete production secrets" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.DEVELOPER, environment = Environment.PRODUCTION)
 
       val result: Future[Result] = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 
@@ -400,7 +403,7 @@ class CredentialsSpec
     }
 
     "return 400 when the application has not reached production state" in new Setup {
-      def createApplication(): Application = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
+      def createApplication(): ApplicationWithCollaborators = createConfiguredApplication(applicationId, Collaborator.Roles.ADMINISTRATOR, state = pendingGatekeeperApproval)
 
       val result: Future[Result] = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 

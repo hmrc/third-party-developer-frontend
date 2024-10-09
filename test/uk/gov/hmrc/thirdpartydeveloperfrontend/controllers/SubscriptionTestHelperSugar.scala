@@ -20,10 +20,10 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 
 trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
   self: AsyncHmrcSpec with SampleApplication =>
@@ -70,7 +70,7 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
     )
   }
 
-  def sampleSubscriptionsWithSubscriptionConfiguration(application: Application): List[APISubscriptionStatus] = {
+  def sampleSubscriptionsWithSubscriptionConfiguration(application: ApplicationWithCollaborators): List[APISubscriptionStatus] = {
     val sfv = buildSubscriptionFieldValue("the value")
 
     val subscriptionFieldsWrapper = SubscriptionFieldsWrapper(application.id, application.clientId, employmentContext, versionOne, List(sfv))

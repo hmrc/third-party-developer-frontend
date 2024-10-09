@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import java.time.Period
-
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -25,48 +23,49 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.{FixedClock, HmrcSpec}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
-class TermsOfUseServiceSpec extends HmrcSpec with FixedClock {
+class TermsOfUseServiceSpec extends HmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
-  def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None): Application = Application(
-    ApplicationId.random,
-    ClientId("clientId"),
-    "App name 1",
-    instant,
-    Some(instant),
-    None,
-    Period.ofDays(10),
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set.empty,
-    state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user"), Some(""), instant),
-    access = Access.Standard(importantSubmissionData =
-      standardAppAgreements.map(standardAppAgreements =>
-        ImportantSubmissionData(
-          Some("http://example.com"),
-          responsibleIndividual,
-          Set.empty,
-          TermsAndConditionsLocations.InDesktopSoftware,
-          PrivacyPolicyLocations.InDesktopSoftware,
-          standardAppAgreements
-        )
-      )
-    ),
-    checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))
-  )
+  def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None): ApplicationWithCollaborators = standardApp
+    
+  //   Application(
+  //   ApplicationId.random,
+  //   ClientId("clientId"),
+  //   "App name 1",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   Period.ofDays(10),
+  //   Environment.PRODUCTION,
+  //   Some("Description 1"),
+  //   Set.empty,
+  //   state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user"), Some(""), instant),
+  //   access = Access.Standard(importantSubmissionData =
+  //     standardAppAgreements.map(standardAppAgreements =>
+  //       ImportantSubmissionData(
+  //         Some("http://example.com"),
+  //         responsibleIndividual,
+  //         Set.empty,
+  //         TermsAndConditionsLocations.InDesktopSoftware,
+  //         PrivacyPolicyLocations.InDesktopSoftware,
+  //         standardAppAgreements
+  //       )
+  //     )
+  //   ),
+  //   checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))
+  // )
 
   val email: LaxEmailAddress                       = "bob@example.com".toLaxEmail
   val name                                         = "Bob Example"
   val responsibleIndividual: ResponsibleIndividual = ResponsibleIndividual(FullName(name), email)
   val version1_2                                   = "1.2"
-  val appWithNoAgreements: Application             = buildApplication()
+  val appWithNoAgreements: ApplicationWithCollaborators             = buildApplication()
   val checkInfoAgreement: TermsOfUseAgreement      = TermsOfUseAgreement(email, instant, version1_2)
   val stdAppAgreement: TermsOfUseAcceptance        = TermsOfUseAcceptance(responsibleIndividual, instant, SubmissionId.random, 0)
-  val appWithCheckInfoAgreements: Application      = buildApplication(Some(List(checkInfoAgreement)))
-  val appWithStdAppAgreements: Application         = buildApplication(None, Some(List(stdAppAgreement)))
-  val nonStdApp: Application                       = buildApplication().copy(access = Access.Privileged())
+  val appWithCheckInfoAgreements: ApplicationWithCollaborators      = buildApplication(Some(List(checkInfoAgreement)))
+  val appWithStdAppAgreements: ApplicationWithCollaborators         = buildApplication(None, Some(List(stdAppAgreement)))
+  val nonStdApp: ApplicationWithCollaborators                       = buildApplication().withAccess(Access.Privileged())
   val underTest                                    = new TermsOfUseService()
 
   "getAgreementDetails" should {
@@ -88,13 +87,14 @@ class TermsOfUseServiceSpec extends HmrcSpec with FixedClock {
     }
     "return empty list if ImportantSubmissionData is missing" in {
       val agreements =
-        underTest.getAgreementDetails(appWithStdAppAgreements.copy(access = appWithStdAppAgreements.access.asInstanceOf[Access.Standard].copy(importantSubmissionData = None)))
+        underTest.getAgreementDetails(appWithStdAppAgreements.withAccess(appWithStdAppAgreements.access.asInstanceOf[Access.Standard].copy(importantSubmissionData = None)))
       agreements.size shouldBe 0
     }
     "return empty list if ImportantSubmissionData.termsOfUseAcceptances is empty" in {
       val importantSubmissionData = appWithStdAppAgreements.access.asInstanceOf[Access.Standard].importantSubmissionData.get
-      val agreements              = underTest.getAgreementDetails(appWithStdAppAgreements.copy(access =
-        appWithStdAppAgreements.access.asInstanceOf[Access.Standard].copy(importantSubmissionData = Some(importantSubmissionData.copy(termsOfUseAcceptances = List.empty)))
+      val agreements              = underTest.getAgreementDetails(appWithStdAppAgreements.withAccess(
+        appWithStdAppAgreements.access.asInstanceOf[Access.Standard]
+          .copy(importantSubmissionData = Some(importantSubmissionData.copy(termsOfUseAcceptances = List.empty)))
       ))
       agreements.size shouldBe 0
     }

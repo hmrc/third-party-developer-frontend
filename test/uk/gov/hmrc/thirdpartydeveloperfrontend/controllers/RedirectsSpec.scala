@@ -33,11 +33,11 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class RedirectsSpec
     extends BaseControllerSpec
@@ -86,11 +86,11 @@ class RedirectsSpec
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    override def givenApplicationExists(application: Application): Unit = {
+    override def givenApplicationExists(application: ApplicationWithCollaborators): Unit = {
       givenApplicationAction(application, session)
     }
 
-    def redirectsShouldRenderThePage(application: Application, shouldShowDeleteButton: Boolean) = {
+    def redirectsShouldRenderThePage(application: ApplicationWithCollaborators, shouldShowDeleteButton: Boolean) = {
       givenApplicationExists(application)
 
       val result = underTest.redirects(application.id)(loggedInRequest.withCSRFToken)
@@ -103,7 +103,7 @@ class RedirectsSpec
       elementExistsByText(document, "button", "Delete") shouldBe shouldShowDeleteButton
     }
 
-    def addRedirectShouldRenderThePage(application: Application, resultStatus: Int, shouldShowAmendControls: Boolean) = {
+    def addRedirectShouldRenderThePage(application: ApplicationWithCollaborators, resultStatus: Int, shouldShowAmendControls: Boolean) = {
       givenApplicationExists(application)
 
       val result = underTest.addRedirect(application.id)(loggedInRequest.withCSRFToken)
@@ -116,7 +116,7 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "add", "Continue") shouldBe shouldShowAmendControls
     }
 
-    def addRedirectActionShouldRenderAddRedirectPageWithError(application: Application) = {
+    def addRedirectActionShouldRenderAddRedirectPageWithError(application: ApplicationWithCollaborators) = {
       givenApplicationExists(application)
 
       val result = underTest.addRedirectAction(application.id)(loggedInRequest.withCSRFToken)
@@ -128,7 +128,7 @@ class RedirectsSpec
       elementExistsById(document, "data-field-error-redirectUri") shouldBe true
     }
 
-    def addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(application: Application, redirectUri: String) = {
+    def addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(application: ApplicationWithCollaborators, redirectUri: String) = {
       givenApplicationExists(application)
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUri)
@@ -141,7 +141,7 @@ class RedirectsSpec
       elementExistsById(document, "data-field-error-redirectUri") shouldBe true
     }
 
-    def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: Application, redirectUriToAdd: String) = {
+    def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: ApplicationWithCollaborators, redirectUriToAdd: String) = {
       givenApplicationExists(application)
       RedirectsServiceMock.AddRedirect.succeedsWith(RedirectUri.unsafeApply(redirectUriToAdd))
 
@@ -153,7 +153,7 @@ class RedirectsSpec
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
-    def deleteRedirectsShouldRenderThePage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: String) = {
+    def deleteRedirectsShouldRenderThePage(application: ApplicationWithCollaborators, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: String) = {
       givenApplicationExists(application)
 
       val request = loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete)
@@ -167,7 +167,7 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: Application, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: RedirectUri) = {
+    def deleteRedirectsActionShouldRenderTheConfirmationPage(application: ApplicationWithCollaborators, resultStatus: Int, shouldShowDeleteControls: Boolean, redirectUriToDelete: RedirectUri) = {
       givenApplicationExists(application)
 
       val result = underTest.deleteRedirectAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri))
@@ -181,7 +181,7 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: Application, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: ApplicationWithCollaborators, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
       givenApplicationExists(application)
       RedirectsServiceMock.DeleteRedirect.succeedsWith(redirectUriToDelete)
 
@@ -195,7 +195,7 @@ class RedirectsSpec
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: Application, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(application: ApplicationWithCollaborators, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
       givenApplicationExists(application)
 
       val result =
@@ -209,7 +209,7 @@ class RedirectsSpec
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
     }
 
-    def changeRedirectUriShouldRenderThePage(application: Application, resultStatus: Int, originalRedirectUri: String, newRedirectUri: String) = {
+    def changeRedirectUriShouldRenderThePage(application: ApplicationWithCollaborators, resultStatus: Int, originalRedirectUri: String, newRedirectUri: String) = {
       givenApplicationExists(application)
 
       val result = underTest.changeRedirect(application.id)(
@@ -244,7 +244,7 @@ class RedirectsSpec
   "production application in state pre-production" should {
 
     trait PreApprovedReturnsNotFound extends Setup {
-      def executeAction: Application => Future[Result]
+      def executeAction: ApplicationWithCollaborators => Future[Result]
 
       val testingApplication = aStandardNonApprovedApplication().withRedirectUris(redirectUris)
 

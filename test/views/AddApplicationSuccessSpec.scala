@@ -30,8 +30,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationNameFixtures
 
-class AddApplicationSuccessSpec extends CommonViewSpec
+class AddApplicationSuccessSpec extends CommonViewSpec with ApplicationNameFixtures
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
@@ -43,7 +45,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec
 
   "Add application success page" should {
 
-    def testPage(applicationName: String, environment: Environment): Document = {
+    def testPage(applicationName: ApplicationName, environment: Environment): Document = {
       val applicationId = ApplicationId.random
       val loggedIn      = standardDeveloper.loggedIn
       val request       = FakeRequest().withCSRFToken
@@ -54,8 +56,7 @@ class AddApplicationSuccessSpec extends CommonViewSpec
     }
 
     "allow manage API subscriptions for sandbox application" in {
-      val applicationName = "an application name"
-      val document        = testPage(applicationName, Environment.SANDBOX)
+      val document        = testPage(appNameOne, Environment.SANDBOX)
       elementExistsByText(document, "p", sandboxMessage) shouldBe true
       elementExistsByText(document, "a", sandboxButton) shouldBe true
     }

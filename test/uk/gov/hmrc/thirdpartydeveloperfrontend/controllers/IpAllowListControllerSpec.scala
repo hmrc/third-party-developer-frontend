@@ -36,12 +36,12 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
@@ -82,8 +82,8 @@ class IpAllowListControllerSpec
     val admin: User     = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
     val developer: User = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
 
-    val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
+    val anApplicationWithoutIpAllowlist: ApplicationWithCollaborators = anApplication(adminEmail = admin.email, developerEmail = developer.email)
+    val anApplicationWithIpAllowlist: ApplicationWithCollaborators = anApplicationWithoutIpAllowlist.modify(_.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24"))))
 
     def givenTheUserIsLoggedInAs(user: User): UserSession = {
       val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
@@ -226,7 +226,7 @@ class IpAllowListControllerSpec
     }
 
     "not show the remove allowlist link when the IP allowlist is required" in new Setup {
-      val application: Application = anApplicationWithIpAllowlist.copy(ipAllowlist = IpAllowlist(required = true, allowlist = Set("1.1.1.0/24")))
+      val application: ApplicationWithCollaborators = anApplicationWithIpAllowlist.modify(_.copy(ipAllowlist = IpAllowlist(required = true, allowlist = Set("1.1.1.0/24"))))
       givenApplicationAction(application, givenTheUserIsLoggedInAs(admin))
       when(mockIpAllowlistService.getIpAllowlistFlow(application, sessionId))
         .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))

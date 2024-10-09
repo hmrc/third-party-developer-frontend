@@ -44,7 +44,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, User
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{AppsByTeamMemberServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
@@ -52,6 +51,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionsData
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     with UserBuilder with LocalUserIdTracker with CollaboratorTracker with CookieEncoding with MfaDetailBuilder with FixedClock {
@@ -120,18 +120,19 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     val applicationsWhereUserIsAdminInProduction =
       Seq(
-        ApplicationWithSubscriptionIds(
-          applicationId,
-          clientId,
-          "myName",
-          instant,
-          Some(instant),
-          None,
-          grantLength,
-          Environment.PRODUCTION,
-          collaborators = Set(sessionWithAuthAppMfa.developer.email.asAdministratorCollaborator),
-          subscriptions = Set.empty
-        )
+        ApplicationWithSubscriptionsData.one
+      //   ApplicationWithSubscriptions(
+      //     applicationId,
+      //     clientId,
+      //     "myName",
+      //     instant,
+      //     Some(instant),
+      //     None,
+      //     grantLength,
+      //     Environment.PRODUCTION,
+      //     collaborators = Set(sessionWithAuthAppMfa.developer.email.asAdministratorCollaborator),
+      //     subscriptions = Set.empty
+      //   )
       )
 
     val sessionParams: Seq[(String, String)] = Seq(

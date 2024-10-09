@@ -37,12 +37,14 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock {
+    with FixedClock 
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     val clientIdView = app.injector.instanceOf[ClientIdView]
@@ -56,21 +58,22 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
     val request          = FakeRequest().withCSRFToken
     val developerSession = standardDeveloper.loggedIn
 
-    val application = Application(
-      ApplicationId.random,
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      instant,
-      Some(instant),
-      None,
-      Period.ofDays(547),
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-      access = Access.Standard(),
-      state = ApplicationState(updatedOn = instant),
-      checkInformation = None
-    )
+    val application = standardApp
+    //   Application(
+    //   ApplicationId.random,
+    //   ClientId("Test Application Client ID"),
+    //   "Test Application",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   Period.ofDays(547),
+    //   Environment.PRODUCTION,
+    //   Some("Test Application"),
+    //   collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
+    //   access = Access.Standard(),
+    //   state = ApplicationState(updatedOn = instant),
+    //   checkInformation = None
+    // )
 
     "render" in new Setup {
       val page: Html = clientIdView.render(application, request, developerSession, messagesProvider, appConfig)

@@ -41,8 +41,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationComma
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
+class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
 
   val versionOne = ApiVersionNbr("1.0")
   val versionTwo = ApiVersionNbr("2.0")
@@ -86,13 +88,13 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       clock
     )
 
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
     }
 
-    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
@@ -105,34 +107,34 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
-  val productionApplication: Application =
-    Application(
-      productionApplicationId,
-      productionClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength = Period.ofDays(547),
-      Environment.PRODUCTION,
-      Some("description"),
-      Set()
-    )
+  val productionApplication: ApplicationWithCollaborators = standardApp
+    // Application(
+    //   productionApplicationId,
+    //   productionClientId,
+    //   "name",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength = Period.ofDays(547),
+    //   Environment.PRODUCTION,
+    //   Some("description"),
+    //   Set()
+    // )
   val sandboxApplicationId               = ApplicationId.random
   val sandboxClientId                    = ClientId("Client ID")
 
-  val sandboxApplication: Application =
-    Application(
-      sandboxApplicationId,
-      sandboxClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength = Period.ofDays(547),
-      Environment.SANDBOX,
-      Some("description")
-    )
+  val sandboxApplication: ApplicationWithCollaborators = standardApp2
+    // Application(
+    //   sandboxApplicationId,
+    //   sandboxClientId,
+    //   "name",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength = Period.ofDays(547),
+    //   Environment.SANDBOX,
+    //   Some("description")
+    // )
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

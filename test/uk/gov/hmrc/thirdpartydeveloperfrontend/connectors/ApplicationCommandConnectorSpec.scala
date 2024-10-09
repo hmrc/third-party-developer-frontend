@@ -27,7 +27,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Administrator
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, DispatchRequest, DispatchSuccessResult}
@@ -36,33 +35,35 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
 
 class ApplicationCommandConnectorSpec
     extends AsyncHmrcSpec
     with WireMockSugar
     with GuiceOneAppPerSuite
-    with FixedClock {
+    with FixedClock 
+    with ApplicationWithCollaboratorsFixtures {
 
-  def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): Application = {
-    Application(
-      ApplicationId.random,
-      ClientId("clientid"),
-      "appName",
-      createdOn,
-      Some(lastAccess),
-      None,
-      Period.ofDays(547),
-      Environment.PRODUCTION,
-      None,
-      Set.empty,
-      Access.Privileged(),
-      ApplicationState(State.TESTING, None, None, None, instant),
-      None,
-      IpAllowlist(required = false, Set.empty)
-    )
-  }
+  def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationWithCollaborators = standardApp
+    
+  //   {
+  //   Application(
+  //     ApplicationId.random,
+  //     ClientId("clientid"),
+  //     "appName",
+  //     createdOn,
+  //     Some(lastAccess),
+  //     None,
+  //     Period.ofDays(547),
+  //     Environment.PRODUCTION,
+  //     None,
+  //     Set.empty,
+  //     Access.Privileged(),
+  //     ApplicationState(State.TESTING, None, None, None, instant),
+  //     None,
+  //     IpAllowlist(required = false, Set.empty)
+  //   )
+  // }
 
   val apiVersion1   = ApiVersionNbr.random
   val applicationId = ApplicationId.random

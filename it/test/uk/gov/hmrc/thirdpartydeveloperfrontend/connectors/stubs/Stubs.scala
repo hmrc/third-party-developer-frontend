@@ -34,7 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionFields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
 
@@ -297,7 +297,7 @@ object ApiPlatformMicroserviceStub {
     )
   }
 
-  def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionData): StubMapping = {
+  def stubFetchApplicationById(applicationId: ApplicationId, data: ApplicationWithSubscriptionFields): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/applications/${applicationId}"))
         .willReturn(

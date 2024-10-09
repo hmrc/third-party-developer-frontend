@@ -123,13 +123,13 @@ class AddApplicationProductionSwitchSpec
 
     def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should include(summary.name)
+        contentAsString(results) should include(summary.name.value)
       }
     }
 
     def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should not include (summary.name)
+        contentAsString(results) should not include (summary.name.value)
       }
     }
 

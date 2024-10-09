@@ -32,10 +32,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 
 class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock {
 
@@ -63,7 +63,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
     val applicationsWhereUserIsDeveloperInProduction =
       Seq(
-        ApplicationWithSubscriptionIds(
+        ApplicationWithSubscriptions(
           applicationId,
           clientId,
           "myName",
@@ -79,7 +79,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
     val applicationsWhereUserIsAdminInProduction =
       Seq(
-        ApplicationWithSubscriptionIds(
+        ApplicationWithSubscriptions(
           applicationId,
           clientId,
           "myName",

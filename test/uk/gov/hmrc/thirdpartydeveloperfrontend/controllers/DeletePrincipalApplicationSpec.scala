@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
@@ -45,6 +46,7 @@ class DeletePrincipalApplicationSpec
     with TestApplications
     with ErrorHandlerMock
     with UserBuilder
+    with ApplicationWithCollaboratorsFixtures
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
@@ -80,21 +82,22 @@ class DeletePrincipalApplicationSpec
 
     private val startOfDay: Instant = LocalDate.now.atStartOfDay().asInstant
 
-    val application = Application(
-      appId,
-      clientId,
-      appName,
-      startOfDay,
-      Some(startOfDay),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Description 1"),
-      Set(userSession.developer.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), startOfDay),
-      access =
-        Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
+    val application = standardApp
+    //   Application(
+    //   appId,
+    //   clientId,
+    //   appName,
+    //   startOfDay,
+    //   Some(startOfDay),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   Some("Description 1"),
+    //   Set(userSession.developer.email.asAdministratorCollaborator),
+    //   state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), startOfDay),
+    //   access =
+    //     Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    // )
 
     givenApplicationAction(application, userSession)
     fetchSessionByIdReturns(sessionId, userSession)

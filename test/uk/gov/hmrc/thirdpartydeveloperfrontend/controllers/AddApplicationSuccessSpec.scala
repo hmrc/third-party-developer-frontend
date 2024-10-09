@@ -28,9 +28,6 @@ import play.api.test.Helpers.{redirectLocation, _}
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -41,12 +38,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class AddApplicationSuccessSpec
     extends BaseControllerSpec
@@ -56,39 +54,44 @@ class AddApplicationSuccessSpec
     with WithCSRFAddToken
     with UserBuilder
     with DeveloperSessionBuilder
-    with LocalUserIdTracker {
+    with LocalUserIdTracker 
+    with ApplicationWithCollaboratorsFixtures
+    {
 
-  val principalApp: Application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(userSession.developer.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
-    access =
-      Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val principalApp: ApplicationWithCollaborators = standardApp
+  //  = Application(
+  //   appId,
+  //   clientId,
+  //   "App name 1",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   Environment.PRODUCTION,
+  //   Some("Description 1"),
+  //   Set(userSession.developer.email.asAdministratorCollaborator),
+  //   state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
+  //   access =
+  //     Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  // )
 
-  val subordinateApp: Application = Application(
-    appId,
-    clientId,
-    "App name 2",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.SANDBOX,
-    Some("Description 2"),
-    Set(userSession.developer.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
-    access =
-      Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red3"), RedirectUri.unsafeApply("https://red4")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val subordinateApp: ApplicationWithCollaborators = standardApp2
+  
+  //  = Application(
+  //   appId,
+  //   clientId,
+  //   "App name 2",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   Environment.SANDBOX,
+  //   Some("Description 2"),
+  //   Set(userSession.developer.email.asAdministratorCollaborator),
+  //   state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
+  //   access =
+  //     Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red3"), RedirectUri.unsafeApply("https://red4")), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  // )
 
   trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock
       with EmailPreferencesServiceMock with CombinedApiTestDataHelper {

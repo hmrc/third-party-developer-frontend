@@ -36,13 +36,13 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{PushPullNotificationsService, SessionService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class PushPullNotificationsSpec
     extends BaseControllerSpec
@@ -59,7 +59,7 @@ class PushPullNotificationsSpec
   "showPushSecrets" when {
     "logged in as a Developer on an application" should {
       "return 403 for a prod app" in new Setup {
-        val application: Application = anApplication(developerEmail = session.developer.email)
+        val application: ApplicationWithCollaborators = anApplication(developerEmail = session.developer.email)
         givenApplicationAction(application, session)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
@@ -72,7 +72,7 @@ class PushPullNotificationsSpec
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-        val application: Application = aSandboxApplication(developerEmail = session.developer.email)
+        val application: ApplicationWithCollaborators = aSandboxApplication(developerEmail = session.developer.email)
         givenApplicationAction(application, session)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
@@ -91,7 +91,7 @@ class PushPullNotificationsSpec
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-        val application: Application = anApplication(adminEmail = session.developer.email)
+        val application: ApplicationWithCollaborators = anApplication(adminEmail = session.developer.email)
         givenApplicationAction(application, session)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
@@ -102,7 +102,7 @@ class PushPullNotificationsSpec
 
     "not a team member on an application" should {
       "return not found" in new Setup {
-        val application: Application = aStandardApplication
+        val application: ApplicationWithCollaborators = aStandardApplication
         givenApplicationAction(application, session)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
@@ -113,7 +113,7 @@ class PushPullNotificationsSpec
 
     "not logged in" should {
       "redirect to login" in new Setup {
-        val application: Application = aStandardApplication
+        val application: ApplicationWithCollaborators = aStandardApplication
         givenApplicationAction(application, session)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedOutRequest)
@@ -157,13 +157,13 @@ class PushPullNotificationsSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def showPushSecretsShouldRenderThePage(application: Application) = {
+    def showPushSecretsShouldRenderThePage(application: ApplicationWithCollaborators) = {
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
-      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), session, subsData)
+      givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), session, subsData)
 
       val expectedSecrets = Seq("some secret")
       when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))

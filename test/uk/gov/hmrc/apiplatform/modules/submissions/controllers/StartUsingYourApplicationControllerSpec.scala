@@ -83,7 +83,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
 
   "startUsingYourApplicationPage" should {
     "return success for app in PRE_PRODUCTION state" in new Setup {
-      val app = sampleApp.copy(state = InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
+      val app = sampleApp.withState(InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
       givenApplicationAction(app, userSession)
 
       val result = underTest.startUsingYourApplicationPage(app.id)(loggedInRequest.withCSRFToken)
@@ -92,7 +92,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
     }
 
     "return failure for app in non-PRE_PRODUCTION state" in new Setup {
-      val pendingApprovalApp = sampleApp.copy(state = InState.pendingGatekeeperApproval(userSession.developer.email.text, userSession.developer.displayedName))
+      val pendingApprovalApp = sampleApp.withState(InState.pendingGatekeeperApproval(userSession.developer.email.text, userSession.developer.displayedName))
       givenApplicationAction(pendingApprovalApp, userSession)
 
       val result = underTest.startUsingYourApplicationPage(pendingApprovalApp.id)(loggedInRequest.withCSRFToken)
@@ -103,7 +103,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
 
   "startUsingYourApplicationAction" should {
     "redirect to manage apps page when submission service called successfully" in new Setup {
-      val app = sampleApp.copy(state = InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
+      val app = sampleApp.withState(InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
       givenApplicationAction(app, userSession)
       SubmissionServiceMock.ConfirmSetupComplete.thenReturnSuccessFor(app.id, userSession.developer.email)
 
@@ -114,7 +114,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
     }
 
     "redirect to bad request page when submission service called unsuccessfully" in new Setup {
-      val app = sampleApp.copy(state = InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
+      val app = sampleApp.withState(InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
       givenApplicationAction(app, userSession)
       SubmissionServiceMock.ConfirmSetupComplete.thenReturnFailure()
 

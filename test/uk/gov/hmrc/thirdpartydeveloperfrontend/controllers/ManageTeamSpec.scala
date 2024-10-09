@@ -38,7 +38,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
@@ -55,7 +54,7 @@ class ManageTeamSpec
     with UserBuilder
     with LocalUserIdTracker {
 
-  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationActionServiceMock with ApplicationWithCollaboratorsFixtures {
     val manageTeamView: ManageTeamView             = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView: AddTeamMemberView       = app.injector.instanceOf[AddTeamMemberView]
     val removeTeamMemberView: RemoveTeamMemberView = app.injector.instanceOf[RemoveTeamMemberView]
@@ -84,7 +83,7 @@ class ManageTeamSpec
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     CollaboratorServiceMock.AddTeamMember.succeeds()
-    CollaboratorServiceMock.RemoveTeamMember.succeeds(mock[Application])
+    CollaboratorServiceMock.RemoveTeamMember.succeeds(mock[ApplicationWithCollaborators])
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
@@ -94,15 +93,15 @@ class ManageTeamSpec
         appId: ApplicationId,
         userRole: Collaborator.Role,
         additionalTeamMembers: Seq[Collaborator] = Seq()
-      ): Application = {
+      ): ApplicationWithCollaborators = {
 
       val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(session.developer.email.asCollaborator(userRole))
-      val application   = aStandardApplication.copy(
+      val application   = aStandardApplication.modify(_.copy(
         id = appId,
-        collaborators = collaborators,
         createdOn = Instant.parse("2018-04-06T09:00:00Z"),
         lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
-      )
+      ))
+      .withCollaborators(collaborators.toList: _*)
 
       givenApplicationAction(application, session)
       fetchCredentialsReturns(application, tokens())
@@ -285,7 +284,7 @@ class ManageTeamSpec
 
     "logged in as an admin" should {
       "remove a team member when given the correct email and confirmation is 'Yes'" in new Setup {
-        val application: Application = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
 
         val result: Future[Result] =
           underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
@@ -297,7 +296,7 @@ class ManageTeamSpec
       }
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
-        val application: Application = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
 
         val result: Future[Result] =
           underTest.removeTeamMemberAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "No"))
@@ -309,7 +308,7 @@ class ManageTeamSpec
       }
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
-        val application: Application = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
 
         val result: Future[Result] = underTest.removeTeamMemberAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text))
 
@@ -319,7 +318,7 @@ class ManageTeamSpec
       }
 
       "show 400 Bad Request when no email is given" in new Setup {
-        val application: Application = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
 
         val result: Future[Result] = underTest.removeTeamMemberAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
 
@@ -330,7 +329,7 @@ class ManageTeamSpec
 
     "logged in as a developer" should {
       "return 403 Forbidden" in new Setup {
-        val application: Application = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
 
         val result: Future[Result] = underTest.removeTeamMemberAction(application.id)(loggedInRequest.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
@@ -366,7 +365,7 @@ class ManageTeamSpec
           apiVersion
         )
 
-        val app: Application = aStandardPendingApprovalApplication(developer.email)
+        val app: ApplicationWithCollaborators = aStandardPendingApprovalApplication(developer.email)
 
         givenApplicationAction(app, session)
 

@@ -40,7 +40,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
@@ -73,11 +72,12 @@ class CheckAnswersControllerSpec
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
 
     givenApplicationAction(
-      ApplicationWithSubscriptionData(
-        testingApp.copy(id = applicationId),
-        asSubscriptions(List(aSubscription)),
-        asFields(List.empty)
-      ),
+      testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
+      // ApplicationWithSubscriptions(
+      //   testingApp.copy(id = applicationId),
+      //   asSubscriptions(List(aSubscription)),
+      //   asFields(List.empty)
+      // ),
       userSession,
       List(aSubscription)
     )

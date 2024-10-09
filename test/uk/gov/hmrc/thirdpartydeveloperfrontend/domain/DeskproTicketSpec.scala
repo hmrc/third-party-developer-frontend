@@ -24,14 +24,15 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationNameFixtures
 
-class DeskproTicketSpec extends AsyncHmrcSpec {
+class DeskproTicketSpec extends AsyncHmrcSpec with ApplicationNameFixtures {
 
   implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val requestorName   = "bob example"
   val requestorEmail  = "bob@example.com".toLaxEmail
-  val applicationName = "my app"
+  // val applicationName = "my app"
   val applicationId   = ApplicationId.random
   val apiName         = "my api"
   val apiVersion      = ApiVersionNbr.random
@@ -47,11 +48,11 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
     "have the correct details populated" in {
       val form = SupportEnquiryForm(requestorName, requestorEmail.text, comments)
 
-      val ticket = DeskproTicket.createFromSupportEnquiry(form, applicationName)
+      val ticket = DeskproTicket.createFromSupportEnquiry(form, appNameOne.value)
 
       checkDeskproTicket(
         ticket,
-        s"$applicationName: Support Enquiry",
+        s"$appNameOne: Support Enquiry",
         s"${requestorEmail.text} has submitted the following support enquiry: $comments Please send them a response within 2 working days. HMRC Developer Hub"
       )
     }
@@ -59,24 +60,24 @@ class DeskproTicketSpec extends AsyncHmrcSpec {
 
   "a deskpro ticket created for Api Subscribe" should {
     "have the correct details populated" in {
-      val ticket = DeskproTicket.createForApiSubscribe(requestorName, requestorEmail, applicationName, applicationId, apiName, apiVersion)
+      val ticket = DeskproTicket.createForApiSubscribe(requestorName, requestorEmail, appNameOne, applicationId, apiName, apiVersion)
 
       checkDeskproTicket(
         ticket,
         "Request to subscribe to an API",
-        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId}' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$appNameOne' identified by '$applicationId' to be subscribed to the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }
 
   "a deskpro ticket created for Api unsubscribe" should {
     "have the correct details populated" in {
-      val ticket = DeskproTicket.createForApiUnsubscribe(requestorName, requestorEmail, applicationName, applicationId, apiName, apiVersion)
+      val ticket = DeskproTicket.createForApiUnsubscribe(requestorName, requestorEmail, appNameOne, applicationId, apiName, apiVersion)
 
       checkDeskproTicket(
         ticket,
         "Request to unsubscribe from an API",
-        s"I '${requestorEmail.text}' want my application '$applicationName' identified by '${applicationId}' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
+        s"I '${requestorEmail.text}' want my application '$appNameOne' identified by '$applicationId' to be unsubscribed from the API '$apiName' with version '${apiVersion.value}'"
       )
     }
   }

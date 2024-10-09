@@ -25,31 +25,34 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 trait SampleApplication
     extends FixedClock
     with ApplicationStateHelper
-    with CollaboratorTracker {
+    with CollaboratorTracker
+    with ApplicationWithCollaboratorsFixtures {
   self: SampleUserSession =>
 
   val appId    = ApplicationId.random
   val clientId = ClientId("myClientId")
 
-  val sampleApp: Application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    instant,
-    Some(instant),
-    None,
-    grantLength = Period.ofDays(547),
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(userSession.developer.email.asAdministratorCollaborator),
-    state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""),
-    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val sampleApp = standardApp
+  //   Application = Application(
+  //   appId,
+  //   clientId,
+  //   "App name 1",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength = Period.ofDays(547),
+  //   Environment.PRODUCTION,
+  //   Some("Description 1"),
+  //   Set(userSession.developer.email.asAdministratorCollaborator),
+  //   state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""),
+  //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  // )
 
-  val testingApp   = sampleApp.copy(state = InState.testing)
-  val submittedApp = sampleApp.copy(state = InState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
+  val testingApp   = sampleApp.withState(InState.testing)
+  val submittedApp = sampleApp.withState(InState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))
 }

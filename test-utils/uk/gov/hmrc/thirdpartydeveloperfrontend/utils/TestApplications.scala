@@ -20,7 +20,7 @@ import java.time.Period
 import java.util.UUID.randomUUID
 import scala.util.Random
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, _}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -28,7 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
-trait TestApplications extends FixedClock with CollaboratorTracker with ApplicationStateHelper {
+trait TestApplications extends FixedClock with CollaboratorTracker with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
   self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
@@ -38,7 +38,7 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
       clientId: ClientId = ClientId(randomString(28)),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail
-    ): Application = {
+    ): ApplicationWithCollaborators = {
 
     anApplication(
       appId,
@@ -60,35 +60,37 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
       access: Access = standardAccess(),
       ipAllowlist: IpAllowlist = IpAllowlist()
-    ): Application = {
-
-    Application(
-      id = appId,
-      clientId = clientId,
-      name = "App name 1",
-      createdOn = instant,
-      lastAccess = Some(instant),
-      grantLength = Period.ofDays(547),
-      deployedTo = environment,
-      description = Some("Description 1"),
-      collaborators = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator),
-      state = state,
-      access = access,
-      ipAllowlist = ipAllowlist
-    )
+    ): ApplicationWithCollaborators = {
+      standardApp
+    // ApplicationWithCollaborators(
+    //   CoreApplication(
+    //     id = appId,
+    //     clientId = clientId,
+    //     name = "App name 1",
+    //     createdOn = instant,
+    //     lastAccess = Some(instant),
+    //     grantLength = Period.ofDays(547),
+    //     deployedTo = environment,
+    //     description = Some("Description 1"),
+    //     state = state,
+    //     access = access,
+    //     ipAllowlist = ipAllowlist
+    //   ),
+    //   collaborators = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
+    // )
   }
 
-  val aStandardApplication: Application = anApplication()
+  val aStandardApplication: ApplicationWithCollaborators = anApplication()
 
-  def aStandardApprovedApplication: Application = aStandardApplication
+  def aStandardApprovedApplication: ApplicationWithCollaborators = aStandardApplication
 
-  def aStandardNonApprovedApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
+  def aStandardNonApprovedApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
     anApplication(adminEmail = adminEmail).withState(InState.testing)
 
-  def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
+  def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
     anApplication(adminEmail = adminEmail).withState(InState.pendingRequesterVerification("test@test.com", "test name", "test"))
 
-  def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): Application =
+  def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
     anApplication(adminEmail = adminEmail).withState(InState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
@@ -100,11 +102,11 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
     Access.Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
   }
 
-  def anROPCApplication(): Application = anApplication(access = ropcAccess())
+  def anROPCApplication(): ApplicationWithCollaborators = anApplication(access = ropcAccess())
 
   def ropcAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access = Access.Ropc(scopes)
 
-  def aPrivilegedApplication(): Application = anApplication(access = privilegedAccess())
+  def aPrivilegedApplication(): ApplicationWithCollaborators = anApplication(access = privilegedAccess())
 
   def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access.Privileged = Access.Privileged(None, scopes)
 
@@ -114,19 +116,19 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
 
   private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 
-  implicit class AppAugment(val app: Application) {
-    final def withName(name: String): Application = app.copy(name = name)
+  implicit class AppAugment(val app: ApplicationWithCollaborators) {
+    final def withName(name: String): ApplicationWithCollaborators = app.modify(_.copy(name = ApplicationName(name)))
 
-    final def withDescription(description: Option[String]): Application = app.copy(description = description)
+    final def withDescription(description: Option[String]): ApplicationWithCollaborators = app.modify(_.copy(description = description))
 
-    final def withTeamMember(email: LaxEmailAddress, userRole: Collaborator.Role): Application =
+    final def withTeamMember(email: LaxEmailAddress, userRole: Collaborator.Role): ApplicationWithCollaborators =
       app.copy(collaborators = app.collaborators + Collaborator(email, userRole, UserId.random))
 
-    final def withTeamMembers(teamMembers: Set[Collaborator]): Application = app.copy(collaborators = teamMembers)
+    final def withTeamMembers(teamMembers: Set[Collaborator]): ApplicationWithCollaborators = app.copy(collaborators = teamMembers)
 
-    final def withState(state: ApplicationState): Application = app.copy(state = state)
+    final def withState(state: ApplicationState): ApplicationWithCollaborators = app.withState(state)
 
-    final def withCheckInformation(checkInformation: CheckInformation): Application = app.copy(checkInformation = Some(checkInformation))
+    final def withCheckInformation(checkInformation: CheckInformation): ApplicationWithCollaborators = app.modify(_.copy(checkInformation = Some(checkInformation)))
 
     def standardAccess: Access.Standard = {
       if (app.access.accessType != AccessType.STANDARD) {
@@ -136,10 +138,10 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
       }
     }
 
-    final def withRedirectUris(someRedirectUris: List[RedirectUri]): Application = app.copy(access = standardAccess.copy(redirectUris = someRedirectUris))
+    final def withRedirectUris(someRedirectUris: List[RedirectUri]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(redirectUris = someRedirectUris))
 
-    final def withTermsAndConditionsUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(termsAndConditionsUrl = url))
+    final def withTermsAndConditionsUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(termsAndConditionsUrl = url))
 
-    final def withPrivacyPolicyUrl(url: Option[String]): Application = app.copy(access = standardAccess.copy(privacyPolicyUrl = url))
+    final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
   }
 }

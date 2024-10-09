@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import java.time.Period
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -26,14 +24,17 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collabor
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.GrantLength
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationNameFixtures
 
-class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with FixedClock {
-  val grantLength = Period.ofDays(547)
+class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with FixedClock with ApplicationNameFixtures {
+  val grantLength = GrantLength.EIGHTEEN_MONTHS
+
   "noProductionApplications" should {
     val sandboxApp =
       ApplicationSummary(
         ApplicationId.random,
-        "",
+        appNameOne,
         Collaborator.Roles.DEVELOPER,
         TermsOfUseStatus.AGREED,
         State.TESTING,
@@ -49,7 +50,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with Fix
     val notYetLiveProductionApp =
       ApplicationSummary(
         ApplicationId.random,
-        "",
+        appNameTwo,
         Collaborator.Roles.DEVELOPER,
         TermsOfUseStatus.AGREED,
         State.TESTING,

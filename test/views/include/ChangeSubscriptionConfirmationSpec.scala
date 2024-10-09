@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -45,7 +46,8 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock {
+    with FixedClock 
+    with ApplicationWithCollaboratorsFixtures {
 
   val request         = FakeRequest().withCSRFToken
   val applicationId   = ApplicationId.random
@@ -58,21 +60,22 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
 
   val loggedInDeveloper = standardDeveloper.loggedIn
 
-  val application = Application(
-    applicationId,
-    clientId,
-    applicationName,
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-    access =
-      Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val application = standardApp
+  //    Application(
+  //   applicationId,
+  //   clientId,
+  //   applicationName,
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   Environment.PRODUCTION,
+  //   Some("Description 1"),
+  //   Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
+  //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
+  //   access =
+  //     Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  // )
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]

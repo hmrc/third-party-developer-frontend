@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionFields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
@@ -65,20 +65,20 @@ class ApmConnectorIntegrationSpec
   "fetchApplicationById" should {
     val applicationId                                                    = ApplicationId.random
     val application                                                      = Application(applicationId, ClientId("someId"), "someName", instant, None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
-    val applicationWithSubscriptionData: ApplicationWithSubscriptionData =
-      ApplicationWithSubscriptionData(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
+    val ApplicationWithSubscriptionFields: ApplicationWithSubscriptionFields =
+      ApplicationWithSubscriptionFields(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
 
     "return ApplicationData when successful" in new Setup {
 
-      ApiPlatformMicroserviceStub.stubFetchApplicationById(applicationId, applicationWithSubscriptionData: ApplicationWithSubscriptionData)
-      val result: Option[ApplicationWithSubscriptionData] = await(underTest.fetchApplicationById(applicationId))
-      result shouldBe Some(applicationWithSubscriptionData)
+      ApiPlatformMicroserviceStub.stubFetchApplicationById(applicationId, ApplicationWithSubscriptionFields: ApplicationWithSubscriptionFields)
+      val result: Option[ApplicationWithSubscriptionFields] = await(underTest.fetchApplicationById(applicationId))
+      result shouldBe Some(ApplicationWithSubscriptionFields)
     }
 
     "return None when not found returned" in new Setup {
 
       ApiPlatformMicroserviceStub.stubFetchApplicationByIdFailure(applicationId)
-      val result: Option[ApplicationWithSubscriptionData] = await(underTest.fetchApplicationById(applicationId))
+      val result: Option[ApplicationWithSubscriptionFields] = await(underTest.fetchApplicationById(applicationId))
       result shouldBe None
     }
   }

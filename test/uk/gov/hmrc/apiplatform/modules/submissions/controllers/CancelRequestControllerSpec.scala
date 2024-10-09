@@ -31,11 +31,11 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class CancelRequestControllerSpec
     extends BaseControllerSpec
@@ -95,11 +95,10 @@ class CancelRequestControllerSpec
     self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
 
     givenApplicationAction(
-      ApplicationWithSubscriptionData(
-        sampleApp,
-        asSubscriptions(List(aSubscription)),
-        asFields(List.empty)
-      ),
+      sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
+        // sampleApp
+        //   .withSubscriptions(Set(aSubscription))
+        //   .withFields(Map.empty),
       userSession,
       List(aSubscription)
     )
@@ -111,11 +110,12 @@ class CancelRequestControllerSpec
     self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
 
     givenApplicationAction(
-      ApplicationWithSubscriptionData(
-        testingApp,
-        asSubscriptions(List(aSubscription)),
-        asFields(List.empty)
-      ),
+      testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
+      // ApplicationWithSubscriptions(
+      //   testingApp,
+      //   asSubscriptions(List(aSubscription)),
+      //   asFields(List.empty)
+      // ),
       userSession,
       List(aSubscription)
     )
@@ -152,7 +152,7 @@ class CancelRequestControllerSpec
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request")
 
-      ApplicationCommandConnectorMock.DispatchWithThrow.thenReturnsSuccess(mock[Application])
+      ApplicationCommandConnectorMock.DispatchWithThrow.thenReturnsSuccess(mock[ApplicationWithCollaborators])
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 

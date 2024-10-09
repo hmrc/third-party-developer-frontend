@@ -29,17 +29,18 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
 
-  implicit class AppWithSubIdsSyntax(val application: Application) {
-    def asAppWithSubIds(apis: ApiIdentifier*): ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = apis.toSet)
-    def asAppWithSubIds(): ApplicationWithSubscriptionIds                     = ApplicationWithSubscriptionIds.from(application)
+  implicit class AppWithSubIdsSyntax(val application: ApplicationWithCollaborators) {
+    def asAppWithSubIds(apis: ApiIdentifier*): ApplicationWithSubscriptions = application.withSubscriptions(apis.toSet)
+    def asAppWithSubIds(): ApplicationWithSubscriptions                     = application.withSubscriptions(Set.empty)
   }
   val versionOne = ApiVersionNbr("1.0")
   val versionTwo = ApiVersionNbr("2.0")
@@ -70,44 +71,47 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     val userId         = UserId.random
     val email          = "bob@example.com".toLaxEmail
     val grantLength    = Period.ofDays(547)
-    val productionApp1 = ApplicationWithSubscriptionIds(
-      ApplicationId.random,
-      ClientId("cl-id1"),
-      "zapplication",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      collaborators = Set(Collaborators.Administrator(userId, email))
-    )
-    val sandboxApp1    = ApplicationWithSubscriptionIds(
-      ApplicationId.random,
-      ClientId("cl-id2"),
-      "application",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.SANDBOX,
-      collaborators = Set(Collaborators.Administrator(userId, email))
-    )
-    val productionApp2 = ApplicationWithSubscriptionIds(
-      ApplicationId.random,
-      ClientId("cl-id3"),
-      "4pplication",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      collaborators = Set(Collaborators.Administrator(userId, email))
-    )
+    val productionApp1 = standardApp.withSubscriptions(Set.empty)
+    //   ApplicationWithSubscriptionIds(
+    //   ApplicationId.random,
+    //   ClientId("cl-id1"),
+    //   "zapplication",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   collaborators = Set(Collaborators.Administrator(userId, email))
+    // )
+    val sandboxApp1    = standardApp.withSubscriptions(Set.empty)
+    //   ApplicationWithSubscriptions(
+    //   ApplicationId.random,
+    //   ClientId("cl-id2"),
+    //   "application",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.SANDBOX,
+    //   collaborators = Set(Collaborators.Administrator(userId, email))
+    // )
+    val productionApp2 = standardApp.withSubscriptions(Set.empty)
+    //   ApplicationWithSubscriptions(
+    //   ApplicationId.random,
+    //   ClientId("cl-id3"),
+    //   "4pplication",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   collaborators = Set(Collaborators.Administrator(userId, email))
+    // )
 
     val productionApps = Seq(productionApp1, productionApp2)
     val sandboxApps    = Seq(sandboxApp1)
 
-    implicit class ApplicationwithSubIdsSummarySyntax(application: ApplicationWithSubscriptionIds) {
+    implicit class ApplicationwithSubIdsSummarySyntax(application: ApplicationWithSubscriptions) {
       def asProdSummary: ApplicationSummary    = ApplicationSummary.from(application, userId)
       def asSandboxSummary: ApplicationSummary = ApplicationSummary.from(application, userId)
     }

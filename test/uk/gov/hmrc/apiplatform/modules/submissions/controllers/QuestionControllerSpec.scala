@@ -36,7 +36,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -68,11 +67,12 @@ class QuestionControllerSpec
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
 
     givenApplicationAction(
-      ApplicationWithSubscriptionData(
-        testingApp.copy(id = applicationId),
-        asSubscriptions(List(aSubscription)),
-        asFields(List.empty)
-      ),
+      testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
+      // ApplicationWithSubscriptionFields(
+      //   testingApp.copy(id = applicationId),
+      //   asSubscriptions(List(aSubscription)),
+      //   asFields(List.empty)
+      // ),
       userSession,
       List(aSubscription)
     )

@@ -41,11 +41,11 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class ManageResponsibleIndividualControllerSpec
     extends BaseControllerSpec
@@ -106,22 +106,23 @@ class ManageResponsibleIndividualControllerSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     def givenTheApplicationExistWithUserRole(teamMembers: Seq[Collaborator], touAcceptances: List[TermsOfUseAcceptance]) = {
-      val application = aStandardApplication.copy(
-        id = appId,
-        access = standardAccess().copy(importantSubmissionData =
-          Some(ImportantSubmissionData(
-            None,
-            responsibleIndividual,
-            Set.empty,
-            TermsAndConditionsLocations.InDesktopSoftware,
-            PrivacyPolicyLocations.InDesktopSoftware,
-            touAcceptances
-          ))
-        ),
-        collaborators = teamMembers.toSet,
-        createdOn = Instant.parse("2018-04-06T09:00:00Z"),
-        lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
-      )
+      val application = aStandardApplication
+      // .copy(
+      //   id = appId,
+      //   access = standardAccess().copy(importantSubmissionData =
+      //     Some(ImportantSubmissionData(
+      //       None,
+      //       responsibleIndividual,
+      //       Set.empty,
+      //       TermsAndConditionsLocations.InDesktopSoftware,
+      //       PrivacyPolicyLocations.InDesktopSoftware,
+      //       touAcceptances
+      //     ))
+      //   ),
+      //   collaborators = teamMembers.toSet,
+      //   createdOn = Instant.parse("2018-04-06T09:00:00Z"),
+      //   lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
+      // )
 
       givenApplicationAction(application, session)
       fetchCredentialsReturns(application, tokens())
@@ -287,7 +288,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "responsibleIndividualChangeToSelfAction" should {
     "save current users details as the RI" in new Setup {
-      when(applicationServiceMock.updateResponsibleIndividual(*[Application], *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+      when(applicationServiceMock.updateResponsibleIndividual(*[ApplicationWithCollaborators], *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(ApplicationUpdateSuccessful))
       val user = session.developer.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)
 
       givenTheApplicationExistWithUserRole(List(user), List.empty)
@@ -359,7 +360,7 @@ class ManageResponsibleIndividualControllerSpec
       val name          = "bob"
       val email         = "bob@example.com".toLaxEmail
       val requesterName = session.developer.displayedName
-      when(applicationServiceMock.verifyResponsibleIndividual(*[Application], *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(*)).thenReturn(successful(
+      when(applicationServiceMock.verifyResponsibleIndividual(*[ApplicationWithCollaborators], *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(*)).thenReturn(successful(
         ApplicationUpdateSuccessful
       ))
       val user          = session.developer.email.asCollaborator(Collaborator.Roles.ADMINISTRATOR)

@@ -25,48 +25,48 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker with FixedClock {
+class ApplicationSummaryTest extends AnyWordSpec with Matchers with CollaboratorTracker with LocalUserIdTracker with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   "from" should {
     val user = "foo@bar.com".toLaxEmail.asDeveloperCollaborator
 
-    val serverTokenApplication   =
-      new Application(
-        ApplicationId.random,
-        ClientId(""),
-        "",
-        instant,
-        Some(instant),
-        Some(instant),
-        grantLength = Period.ofDays(547),
-        Environment.PRODUCTION,
-        collaborators = Set(user)
-      )
-    val noServerTokenApplication =
-      new Application(
-        ApplicationId.random,
-        ClientId(""),
-        "",
-        instant,
-        Some(instant),
-        None,
-        grantLength = Period.ofDays(547),
-        Environment.PRODUCTION,
-        collaborators = Set(user)
-      )
+    val serverTokenApplication   = standardApp
+      // new Application(
+      //   ApplicationId.random,
+      //   ClientId(""),
+      //   "",
+      //   instant,
+      //   Some(instant),
+      //   Some(instant),
+      //   grantLength = Period.ofDays(547),
+      //   Environment.PRODUCTION,
+      //   collaborators = Set(user)
+      // )
+    val noServerTokenApplication =standardApp
+      // new Application(
+      //   ApplicationId.random,
+      //   ClientId(""),
+      //   "",
+      //   instant,
+      //   Some(instant),
+      //   None,
+      //   grantLength = Period.ofDays(547),
+      //   Environment.PRODUCTION,
+      //   collaborators = Set(user)
+      // )
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(serverTokenApplication.copy(deployedTo = Environment.SANDBOX), user.userId)
+      val summary = ApplicationSummary.from(serverTokenApplication.withEnvironment(Environment.SANDBOX), user.userId)
 
       summary.serverTokenUsed shouldBe (true)
     }
 
     "not set serverTokenUsed if application does not have a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(noServerTokenApplication.copy(deployedTo = Environment.SANDBOX), user.userId)
+      val summary = ApplicationSummary.from(noServerTokenApplication.withEnvironment(Environment.SANDBOX), user.userId)
 
       summary.serverTokenUsed shouldBe (false)
     }

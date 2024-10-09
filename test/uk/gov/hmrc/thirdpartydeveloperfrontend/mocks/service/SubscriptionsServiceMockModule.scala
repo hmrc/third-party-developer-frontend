@@ -24,9 +24,9 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -39,18 +39,18 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
     object SubscribeToApi {
 
-      def succeeds(app: Application, apiIdentifier: ApiIdentifier) =
+      def succeeds(app: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier) =
         when(aMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
       def succeeds() = {
-        val mockApp = mock[Application]
+        val mockApp = mock[ApplicationWithCollaborators]
         when(aMock.subscribeToApi(*, *, *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(mockApp).asSuccess)
       }
     }
 
     object UnsubscribeFromApi {
 
-      def succeeds(app: Application, apiIdentifier: ApiIdentifier) =
+      def succeeds(app: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier) =
         when(aMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
     }
 
@@ -68,14 +68,14 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
     object RequestApiSubscription {
 
-      def succeedsFor(loggedInDeveloper: UserSession, app: Application, apiName: String, apiVersion: ApiVersionNbr) =
+      def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
     }
 
     object RequestApiUnsubscribe {
 
-      def succeedsFor(loggedInDeveloper: UserSession, app: Application, apiName: String, apiVersion: ApiVersionNbr) =
+      def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
     }

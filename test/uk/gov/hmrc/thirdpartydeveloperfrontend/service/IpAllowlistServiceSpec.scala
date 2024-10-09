@@ -33,13 +33,13 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class IpAllowlistServiceSpec
     extends AsyncHmrcSpec
@@ -220,13 +220,14 @@ class IpAllowlistServiceSpec
 
   "deactivateIpAllowlist" should {
     "update the allowlist in TPA with an empty set" in new Setup {
-      val app: Application = anApplication(
-        developerEmail = standardDeveloper.email,
-        ipAllowlist = IpAllowlist(
-          required = false,
-          allowlist = Set("1.1.1.1/24")
-        )
-      )
+      val app: ApplicationWithCollaborators = standardApp
+      // anApplication(
+      //   developerEmail = standardDeveloper.email,
+      //   ipAllowlist = IpAllowlist(
+      //     required = false,
+      //     allowlist = Set("1.1.1.1/24")
+      //   )
+      // )
 
       val existingFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24", "2.2.2.2/24"))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
@@ -255,9 +256,10 @@ class IpAllowlistServiceSpec
     }
 
     "fail when the IP allowlist is required" in new Setup {
-      val app: Application = anApplication(
-        ipAllowlist = IpAllowlist(required = true)
-      )
+      val app: ApplicationWithCollaborators = standardApp
+      // anApplication(
+      //   ipAllowlist = IpAllowlist(required = true)
+      // )
 
       val expectedException: ForbiddenException = intercept[ForbiddenException] {
         await(underTest.deactivateIpAllowlist(app, sessionId, standardDeveloper.email))

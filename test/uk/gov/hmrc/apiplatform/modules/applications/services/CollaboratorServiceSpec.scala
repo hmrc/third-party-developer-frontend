@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -32,7 +32,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
@@ -44,7 +43,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with CollaboratorsTestData {
+    with CollaboratorsTestData
+    with ApplicationWithCollaboratorsFixtures {
 
   val versionOne  = ApiVersionNbr("1.0")
   val versionTwo  = ApiVersionNbr("2.0")
@@ -74,26 +74,26 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
-  val productionApplication: Application =
-    Application(
-      productionApplicationId,
-      productionClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("description"),
-      mixOfAllTypesOfCollaborators
-    )
+  val productionApplication: ApplicationWithCollaborators = standardApp
+    // Application(
+    //   productionApplicationId,
+    //   productionClientId,
+    //   "name",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   Some("description"),
+    //   mixOfAllTypesOfCollaborators
+    // )
 
   "add teamMember" should {
     "add teamMember successful" in new Setup {
       TPDMock.FetchByEmails.returnsEmptySeq()
       TPDMock.GetOrCreateUser.succeedsWith(developerAsCollaborator.userId)
 
-      val mockResponse = mock[Application]
+      val mockResponse = mock[ApplicationWithCollaborators]
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse)
 
@@ -115,7 +115,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     "remove teamMember successfully from production" in new Setup {
       TPDMock.FetchByEmails.returnsEmptySeq()
 
-      val mockResponse = mock[Application]
+      val mockResponse = mock[ApplicationWithCollaborators]
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 
@@ -147,7 +147,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
         adminDeveloper.copy(email = verifiedAdmin.emailAddress),
         adminDeveloper.copy(email = unverifiedAdmin.emailAddress, verified = false)
       ))
-      val mockResponse = mock[Application]
+      val mockResponse = mock[ApplicationWithCollaborators]
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 

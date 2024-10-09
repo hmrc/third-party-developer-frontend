@@ -28,7 +28,6 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -49,12 +48,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationComma
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
     with ApplicationBuilder
     with LocalUserIdTracker
     with DeveloperSessionBuilder
+    with ApplicationWithCollaboratorsFixtures
     with UserTestData {
 
   val versionOne  = ApiVersionNbr("1.0")
@@ -107,13 +111,13 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       clock
     )
 
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
     }
 
-    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
@@ -126,34 +130,34 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
-  val productionApplication: Application =
-    Application(
-      productionApplicationId,
-      productionClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("description"),
-      Set()
-    )
-  val sandboxApplicationId               = ApplicationId.random
-  val sandboxClientId                    = ClientId("Client ID")
+  val productionApplication: ApplicationWithCollaborators = standardApp
+    // Application(
+    //   productionApplicationId,
+    //   productionClientId,
+    //   "name",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   Some("description"),
+    //   Set()
+    // )
+  // val sandboxApplicationId               = ApplicationId.random
+  // val sandboxClientId                    = ClientId("Client ID")
 
-  val sandboxApplication: Application =
-    Application(
-      sandboxApplicationId,
-      sandboxClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.SANDBOX,
-      Some("description")
-    )
+  val sandboxApplication: ApplicationWithCollaborators = standardApp
+    // Application(
+    //   sandboxApplicationId,
+    //   sandboxClientId,
+    //   "name",
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.SANDBOX,
+    //   Some("description")
+    // )
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -303,10 +307,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val adminRequester     = adminDeveloper.loggedIn
     val developerEmail     = "developer@example.com".toLaxEmail
     val developerRequester = standardDeveloper.loggedIn
-    val teamMembers        = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
-    val sandboxApp         = sandboxApplication.copy(collaborators = teamMembers)
-    val invalidROPCApp     = sandboxApplication.copy(collaborators = teamMembers, access = Access.Ropc())
-    val productionApp      = productionApplication.copy(collaborators = teamMembers)
+    val teamMembers        = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator).toSeq
+    val sandboxApp         = sandboxApplication.withCollaborators(teamMembers: _*)
+    val invalidROPCApp     = sandboxApplication.withCollaborators(teamMembers: _*).withAccess(Access.Ropc())
+    val productionApp      = productionApplication.withCollaborators(teamMembers: _*)
     val reasons            = "Subordinate application deleted by DevHub user"
     val expectedMessage    = "Only standard subordinate applications can be deleted by admins"
 
@@ -421,7 +425,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val adminRequester = adminDeveloper.loggedIn
 
     "correctly create a deskpro ticket" in new Setup {
-      private val applicationName = "applicationName"
+      private val applicationName = ApplicationName("applicationName")
 
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
 

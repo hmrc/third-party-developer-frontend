@@ -72,7 +72,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
   "requestProductionCredentials" should {
     "successfully create a ticket if requester is responsible individual" in new Setup {
       val app             = anApplication(appId = applicationId, developerEmail = email)
-      val appAfterCommand = app.copy(name = "New app name")
+      val appAfterCommand = app.withName("New app name")
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(appAfterCommand)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
@@ -86,7 +86,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.subject shouldBe "New application submitted for checking"
       ticketCapture.value.name shouldBe name
       ticketCapture.value.email shouldBe email
-      ticketCapture.value.message should include(appAfterCommand.name)
+      ticketCapture.value.message should include(appAfterCommand.name.value)
       ticketCapture.value.message should include("submitted the following application for production use on the Developer Hub")
       ticketCapture.value.referrer should include(s"/application/${app.id.value}/check-answers")
     }
@@ -106,7 +106,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.subject shouldBe "Terms of use uplift application submitted for checking"
       ticketCapture.value.name shouldBe name
       ticketCapture.value.email shouldBe email
-      ticketCapture.value.message should include(app.name)
+      ticketCapture.value.message should include(app.name.value)
       ticketCapture.value.message should include("has submitted a Terms of Use application that has warnings or fails")
       ticketCapture.value.referrer should include("https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use")
     }
