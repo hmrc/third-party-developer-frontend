@@ -54,7 +54,7 @@ object SubmissionActionBuilders {
     val notProduction: Type               = !_.isProduction
     val production: Type                  = _.isProduction
     val preProduction: Type               = _.isPreProduction
-    val inTesting: Type                   = _.isInTesting
+    val inTesting: Type                   = _.isTesting
     val allAllowed: Type                  = _ => true
     val pendingApproval: Type             = _.isPendingApproval
     val pendingApprovalOrProduction: Type = _.isPendingApprovalOrProduction

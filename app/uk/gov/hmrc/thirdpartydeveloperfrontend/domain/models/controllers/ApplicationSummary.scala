@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import java.time.{Instant, Period}
+import java.time.{Instant}
 
 import uk.gov.hmrc.http.NotFoundException
 

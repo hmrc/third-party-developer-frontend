@@ -46,7 +46,7 @@ trait ApplicationSyntaxes {
       hasCapability(capability) && permits(developer, permission)
     }
 
-    private def permits(developer: User, permission: Permission = Permissions.SandboxOrAdmin): Boolean = {
+    def permits(developer: User, permission: Permission = Permissions.SandboxOrAdmin): Boolean = {
       permission.hasPermissions(app, developer)
     }
 
@@ -77,10 +77,14 @@ trait ApplicationSyntaxes {
           case _                                       => false
         }
       }
+
+    def isPermittedToAgreeToTermsOfUse(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
+    def isPermittedToEditAppDetails(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.SandboxOnly)
+    def isPermittedToEditProductionAppDetails(developer: User): Boolean   = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
+    def isProductionAppButEditDetailsNotAllowed(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndDeveloper)
   }
 
   implicit class ApplicationWithSubscriptionsSyntax(app: ApplicationWithSubscriptions) {
-    
     def termsOfUseStatus: TermsOfUseStatus = {
       val termsOfUseAgreementsAreEmpty = app.details.checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty).isEmpty
 

@@ -46,7 +46,7 @@ class AppsByTeamMemberService @Inject() (
     )(implicit hc: HeaderCarrier
     ): Future[Seq[ApplicationWithSubscriptions]] =
     fetchAppsByTeamMember(environment)(userId).map { apps =>
-      apps.filter(_.roleFor(userId) == requiredRole)
+      apps.filter(_.roleFor(userId) == Some(requiredRole))
     }
 
   def fetchProductionSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =

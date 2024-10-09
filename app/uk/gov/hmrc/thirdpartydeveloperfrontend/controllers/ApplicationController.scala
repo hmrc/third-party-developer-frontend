@@ -77,7 +77,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
 
   def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved) _
 
-  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isInTesting) _
+  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isTesting) _
 
-  def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
+  def checkActionForTesting = checkActionWithStateCheck(_.isTesting) _
 }

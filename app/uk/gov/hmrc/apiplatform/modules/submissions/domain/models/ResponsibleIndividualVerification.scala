@@ -23,7 +23,6 @@ import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
@@ -39,7 +38,7 @@ sealed trait ResponsibleIndividualVerification {
   def applicationId: ApplicationId
   def submissionId: SubmissionId
   def submissionInstance: Int
-  def applicationName: String
+  def applicationName: ApplicationName
   def createdOn: Instant
   def state: ResponsibleIndividualVerificationState
 }

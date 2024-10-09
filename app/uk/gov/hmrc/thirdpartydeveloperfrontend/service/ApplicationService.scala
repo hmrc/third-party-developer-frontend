@@ -39,7 +39,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 
 @Singleton
@@ -170,7 +169,7 @@ class ApplicationService @Inject() (
   }
 
   private def roleForApplication(application: ApplicationWithCollaborators, email: LaxEmailAddress) =
-    application.collaborators.find(_.emailAddress.text == email).getOrElse(throw new ApplicationNotFound).role
+    application.collaborators.find(_.emailAddress == email).getOrElse(throw new ApplicationNotFound).role
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
