@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
-import java.util.UUID
 import scala.concurrent.Future.{failed, successful}
 
 import play.api.http.Status.INTERNAL_SERVER_ERROR
@@ -36,20 +34,10 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock wit
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val clientId: ClientId         = ClientId(UUID.randomUUID.toString)
-    val grantLength: Period        = Period.ofDays(547)
-
+    
     val anApplication: ApplicationWithCollaborators = standardApp
-    //                                      = Application(
-    //   ApplicationId.random,
-    //   clientId,
-    //   "App name 1",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   deployedTo = Environment.PRODUCTION
-    // )
+    val clientId: ClientId         = anApplication.clientId
+
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))

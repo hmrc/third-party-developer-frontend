@@ -101,6 +101,12 @@ class CredentialsSpec
       environment: Environment = Environment.PRODUCTION,
       createdOn: Instant = instant
     ): ApplicationWithCollaborators = standardApp
+    .withId(applicationId)
+    .withState(state)
+    .withAccess(access)
+    .withEnvironment(environment)
+    .withCollaborators(userSession.developer.email.asCollaborator(userRole))
+    .modify(_.copy(createdOn = createdOn, clientId = clientId))
   // Application(
   //   applicationId,
   //   clientId,

@@ -38,6 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
@@ -77,7 +78,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       ApplicationId.random,
       SubmissionId.random,
       0,
-      "App name",
+      ApplicationName("App name"),
       instant,
       ResponsibleIndividualVerificationState.INITIAL
     )

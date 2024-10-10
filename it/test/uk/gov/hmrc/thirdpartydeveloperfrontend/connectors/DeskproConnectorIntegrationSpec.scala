@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("microservice.services.deskpro-ticket-queue.port" -> stubPort)
@@ -55,7 +56,7 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   "DeskproConnector" when {
 
     "Creating a Deskpro ticket" should {
-      val ticket       = DeskproTicket.createForRequestProductionCredentials("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, "Test App", ApplicationId.random)
+      val ticket       = DeskproTicket.createForRequestProductionCredentials("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, ApplicationName("Test App"), ApplicationId.random)
       val ticketPath   = "/deskpro/ticket"
       val expectedBody = Json.toJson(ticket).toString()
 

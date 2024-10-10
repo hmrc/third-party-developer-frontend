@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.Period
-
 import org.scalatest.EitherValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -32,10 +30,10 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionFields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 class ApmConnectorIntegrationSpec
     extends BaseConnectorIntegrationSpec
@@ -43,6 +41,7 @@ class ApmConnectorIntegrationSpec
     with WireMockExtensions
     with ApmConnectorJsonFormatters
     with FixedClock
+    with ApplicationWithSubscriptionsFixtures
     with EitherValues {
 
   private val stubConfig = Configuration(
@@ -64,9 +63,10 @@ class ApmConnectorIntegrationSpec
 
   "fetchApplicationById" should {
     val applicationId                                                        = ApplicationId.random
-    val application                                                          = Application(applicationId, ClientId("someId"), "someName", instant, None, None, Period.ofDays(547), Environment.PRODUCTION, None, Set.empty)
+    val application                                                          = standardApp
+    
     val ApplicationWithSubscriptionFields: ApplicationWithSubscriptionFields =
-      ApplicationWithSubscriptionFields(application = application, subscriptions = Set.empty, subscriptionFieldValues = Map.empty)
+      application.withSubscriptions(Set.empty).withFieldValues(Map.empty)
 
     "return ApplicationData when successful" in new Setup {
 

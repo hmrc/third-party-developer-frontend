@@ -38,8 +38,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with CollaboratorTracker
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   val appId: ApplicationId             = ApplicationId.random
@@ -48,20 +50,21 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
   val collaborator: UserSession        = standardDeveloper.loggedIn
   val collaborators: Set[Collaborator] = Set(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asDeveloperCollaborator)
 
-  val application: Application = Application(
-    appId,
-    clientId,
-    "App name 1",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    collaborators,
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val application = standardApp
+  // Application(
+  //   appId,
+  //   clientId,
+  //   "App name 1",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   Environment.PRODUCTION,
+  //   Some("Description 1"),
+  //   collaborators,
+  //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
+  //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  // )
 
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]

@@ -23,7 +23,7 @@ import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
@@ -64,35 +64,11 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     val applicationsWhereUserIsDeveloperInProduction =
       Seq(
         standardApp.withSubscriptions(Set.empty)
-        // ApplicationWithSubscriptions(
-        //   applicationId,
-        //   clientId,
-        //   "myName",
-        //   instant,
-        //   Some(instant),
-        //   None,
-        //   grantLength,
-        //   Environment.PRODUCTION,
-        //   collaborators = Set(email.asDeveloperCollaborator),
-        //   subscriptions = Set.empty
-        // )
       )
 
     val applicationsWhereUserIsAdminInProduction =
       Seq(
         standardApp.withSubscriptions(Set.empty)
-        // ApplicationWithSubscriptions(
-        //   applicationId,
-        //   clientId,
-        //   "myName",
-        //   instant,
-        //   Some(instant),
-        //   None,
-        //   grantLength,
-        //   Environment.PRODUCTION,
-        //   collaborators = Set(email.asAdministratorCollaborator),
-        //   subscriptions = Set.empty
-        // )
       )
 
   }

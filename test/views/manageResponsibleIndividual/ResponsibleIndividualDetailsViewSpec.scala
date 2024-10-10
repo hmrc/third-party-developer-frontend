@@ -34,24 +34,26 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with UserTestData with DeveloperSessionBuilder
+class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with UserTestData with DeveloperSessionBuilder with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  val application = Application(
-    ApplicationId.random,
-    ClientId("clientId123"),
-    "App name 1",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set.empty,
-    state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user name"), Some(""), instant),
-    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val application = standardApp
+  // Application(
+  //   ApplicationId.random,
+  //   ClientId("clientId123"),
+  //   "App name 1",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   Environment.PRODUCTION,
+  //   Some("Description 1"),
+  //   Set.empty,
+  //   state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user name"), Some(""), instant),
+  //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
+  // )
 
   "responsible individual details view" should {
     val view          = app.injector.instanceOf[ResponsibleIndividualDetailsView]

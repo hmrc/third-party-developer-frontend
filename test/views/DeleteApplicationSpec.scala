@@ -33,9 +33,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with SampleUserSession with SampleApplication
     with DeveloperSessionBuilder
+    with ApplicationWithCollaboratorsFixtures
     with UserTestData {
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
@@ -43,8 +46,8 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
   val application             = sampleApp
   val prodAppId               = ApplicationId.random
   val sandboxAppId            = ApplicationId.random
-  val prodApp: Application    = application.copy(id = prodAppId)
-  val sandboxApp: Application = application.copy(id = sandboxAppId, deployedTo = Environment.SANDBOX)
+  val prodApp: ApplicationWithCollaborators    = application.withId(prodAppId)
+  val sandboxApp: ApplicationWithCollaborators = application.withId(sandboxAppId).withEnvironment(Environment.SANDBOX)
 
   "delete application page" should {
     "show content and link to delete application for Administrator" when {

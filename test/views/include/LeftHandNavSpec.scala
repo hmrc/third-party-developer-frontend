@@ -40,6 +40,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.IsNewJourneyStandardApplication
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class LeftHandNavSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -47,6 +50,7 @@ class LeftHandNavSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   trait Setup {
@@ -60,20 +64,21 @@ class LeftHandNavSpec extends CommonViewSpec
 
     val loggedInDeveloper: UserSession = standardDeveloper.loggedIn
 
-    val application: Application = Application(
-      applicationId,
-      clientId,
-      applicationName,
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Description 1"),
-      Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-      access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
+    val application: ApplicationWithCollaborators = standardApp
+    //  = Application(
+    //   applicationId,
+    //   clientId,
+    //   applicationName,
+    //   instant,
+    //   Some(instant),
+    //   None,
+    //   grantLength,
+    //   Environment.PRODUCTION,
+    //   Some("Description 1"),
+    //   Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
+    //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
+    //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
+    // )
 
     val applicationViewModelWithApiSubscriptions: ApplicationViewModel   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
@@ -122,7 +127,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields: ApplicationViewModel =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS)), hasSubscriptionsFields = false, hasPpnsFields = false)
+          ApplicationViewModel(application.modify(_.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS))), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page: Html                                    = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
@@ -152,7 +157,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields: ApplicationViewModel =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS)), hasSubscriptionsFields = true, hasPpnsFields = false)
+          ApplicationViewModel(application.modify(_.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS))), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page: Html                                 = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")

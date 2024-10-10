@@ -25,7 +25,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Applicati
 
 class ApplicationSpec extends HmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
   val url            = "http://example.com"
-  val standardAccess = Access.Standard()
 
   val importantSubmissionData = ImportantSubmissionData(
     None,

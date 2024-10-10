@@ -34,9 +34,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationToken, ApplicationWithSubscriptionFields}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
 
 object Stubs extends ApplicationLogger {
 
@@ -156,10 +157,10 @@ object ApplicationStub {
     )
   }
 
-  def configureUserApplications(email: LaxEmailAddress, applications: List[Application] = Nil, status: Int = OK): StubMapping = {
+  def configureUserApplications(email: LaxEmailAddress, applications: List[ApplicationWithCollaborators] = Nil, status: Int = OK): StubMapping = {
     val encodedEmail = URLEncoder.encode(email.text, "UTF-8")
 
-    def stubResponse(environment: Environment, applications: List[Application]) = {
+    def stubResponse(environment: Environment, applications: List[ApplicationWithCollaborators]) = {
       stubFor(
         get(urlPathEqualTo("/developer/applications"))
           .withQueryParam("emailAddress", equalTo(encodedEmail))

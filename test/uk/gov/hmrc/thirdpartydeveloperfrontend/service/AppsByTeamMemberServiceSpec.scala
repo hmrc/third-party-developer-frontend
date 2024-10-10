@@ -16,14 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -68,45 +65,16 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
   }
 
   "Fetch by teamMember" should {
-    val userId         = UserId.random
-    val email          = "bob@example.com".toLaxEmail
-    val grantLength    = Period.ofDays(547)
-    val productionApp1 = standardApp.withSubscriptions(Set.empty)
-    //   ApplicationWithSubscriptionIds(
-    //   ApplicationId.random,
-    //   ClientId("cl-id1"),
-    //   "zapplication",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   Environment.PRODUCTION,
-    //   collaborators = Set(Collaborators.Administrator(userId, email))
-    // )
-    val sandboxApp1    = standardApp.withSubscriptions(Set.empty)
-    //   ApplicationWithSubscriptions(
-    //   ApplicationId.random,
-    //   ClientId("cl-id2"),
-    //   "application",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   Environment.SANDBOX,
-    //   collaborators = Set(Collaborators.Administrator(userId, email))
-    // )
-    val productionApp2 = standardApp.withSubscriptions(Set.empty)
-    //   ApplicationWithSubscriptions(
-    //   ApplicationId.random,
-    //   ClientId("cl-id3"),
-    //   "4pplication",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   Environment.PRODUCTION,
-    //   collaborators = Set(Collaborators.Administrator(userId, email))
-    // )
+    val userId         = standardApp.collaborators.head.userId
+
+    val productionApp1 = standardApp
+      .withSubscriptions(Set.empty)
+
+    val sandboxApp1    = standardApp
+      .withSubscriptions(Set.empty)
+
+    val productionApp2 = standardApp
+      .withSubscriptions(Set.empty)
 
     val productionApps = Seq(productionApp1, productionApp2)
     val sandboxApps    = Seq(sandboxApp1)

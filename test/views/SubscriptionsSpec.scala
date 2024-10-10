@@ -40,6 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -60,21 +61,22 @@ class SubscriptionsSpec extends CommonViewSpec
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
 
-  def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(
-    ApplicationId.random,
-    ClientId("Test Application Client ID"),
-    "Test Application",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    environment,
-    Some("Test Application"),
-    Set.empty,
-    Access.Standard(),
-    applicationState,
-    None
-  )
+  def buildApplication(applicationState: ApplicationState, environment: Environment) = standardApp.withState(applicationState).withEnvironment(environment)
+  // Application(
+  //   ApplicationId.random,
+  //   ClientId("Test Application Client ID"),
+  //   "Test Application",
+  //   instant,
+  //   Some(instant),
+  //   None,
+  //   grantLength,
+  //   environment,
+  //   Some("Test Application"),
+  //   Set.empty,
+  //   Access.Standard(),
+  //   applicationState,
+  //   None
+  // )
 
   "Subscriptions page" should {
     val developer = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
@@ -87,7 +89,7 @@ class SubscriptionsSpec extends CommonViewSpec
 
     val sandboxApplicationTesting = buildApplication(ApplicationState(updatedOn = instant), Environment.SANDBOX)
 
-    def renderPageForApplicationAndRole(application: Application, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
+    def renderPageForApplicationAndRole(application: ApplicationWithCollaborators, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(
         role,
         pageData,

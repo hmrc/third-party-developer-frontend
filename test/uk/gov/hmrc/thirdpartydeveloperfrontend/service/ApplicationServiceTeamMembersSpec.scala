@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
@@ -33,7 +31,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
@@ -104,37 +101,10 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
-  val productionApplicationId = ApplicationId.random
-  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
   val productionApplication: ApplicationWithCollaborators = standardApp
-  // Application(
-  //   productionApplicationId,
-  //   productionClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength = Period.ofDays(547),
-  //   Environment.PRODUCTION,
-  //   Some("description"),
-  //   Set()
-  // )
-  val sandboxApplicationId                                = ApplicationId.random
-  val sandboxClientId                                     = ClientId("Client ID")
 
-  val sandboxApplication: ApplicationWithCollaborators = standardApp2
-  // Application(
-  //   sandboxApplicationId,
-  //   sandboxClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength = Period.ofDays(547),
-  //   Environment.SANDBOX,
-  //   Some("description")
-  // )
+  val sandboxApplication: ApplicationWithCollaborators = standardApp2.withEnvironment(Environment.SANDBOX)
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

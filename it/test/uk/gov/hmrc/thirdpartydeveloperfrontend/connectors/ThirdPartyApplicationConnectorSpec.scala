@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.Period
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -36,13 +35,15 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnectorJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WireMockExtensions}
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
-    with CollaboratorTracker with LocalUserIdTracker with FixedClock {
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with ApplicationWithCollaboratorsFixtures
+    with FixedClock {
 
   private val apiKey: String = UUID.randomUUID().toString
   private val clientId       = ClientId(UUID.randomUUID().toString)
@@ -82,20 +83,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
-    def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: String = "My Application") = new Application(
-      appId,
-      clientId,
-      appName,
-      instant,
-      Some(instant),
-      None,
-      Period.ofDays(547),
-      connector.environment,
-      Some("Description"),
-      Set("john@example.com".toLaxEmail.asAdministratorCollaborator),
-      Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy")),
-      state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("john@example.com"), Some("John Dory"), None, instant)
-    )
+    def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) = standardApp.withId(appId).modify(_.copy(clientId = clientId, name = appName))
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
   }
@@ -137,7 +125,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
 
   "fetch application by id" should {
     val url     = s"/application/${applicationId}"
-    val appName = "app name"
+    val appName = ApplicationName("app name")
 
     "return an application" in new Setup {
       stubFor(

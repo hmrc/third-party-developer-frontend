@@ -38,12 +38,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserBuilder
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
@@ -76,7 +78,8 @@ class TermsOfUseSpec extends CommonViewSpec
         val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
         val version           = "1.0"
         val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
-        val application       = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val application       = standardApp 
+        //Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page        =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }
@@ -102,7 +105,8 @@ class TermsOfUseSpec extends CommonViewSpec
     "viewing an unagreed application" should {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-        val application      = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val application      = standardApp
+        //Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page       =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }

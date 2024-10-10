@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.Period
-import java.util.UUID.randomUUID
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -31,17 +28,30 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Applicati
 import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.ApiFieldMap
 import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
 
 trait ApplicationBuilder extends CollaboratorTracker with FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
   self: UserIdTracker =>
 
   def buildApplication(appOwnerEmail: LaxEmailAddress): ApplicationWithCollaborators = {
 
-    // val appId        = ApplicationId.random
+    val appId        = ApplicationId.random
     // val clientId     = ClientId("clientid-" + randomUUID.toString)
-    // val appOwnerName = "App owner name"
+    val appOwnerName = "App owner name"
+    val access = Access.Standard(
+        redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
+        termsAndConditionsUrl = Some("http://tnc-url.com")
+      )
 
     standardApp
+    .withId(appId)
+    .withCollaborators(appOwnerEmail.asAdministratorCollaborator)
+    .withEnvironment(Environment.SANDBOX)
+    .withState(InState.production(appOwnerEmail.text, appOwnerName, ""))
+    .withAccess(access)
+    .modify(_.copy(name = ApplicationName(s"${appId.toString()}-name")))
     // Application(
     //   appId,
     //   clientId,

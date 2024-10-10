@@ -38,6 +38,7 @@ trait SampleApplication
   val clientId = ClientId("myClientId")
 
   val sampleApp = standardApp
+    .withCollaborators(userSession.developer.email.asAdministratorCollaborator)
   //   Application = Application(
   //   appId,
   //   clientId,
