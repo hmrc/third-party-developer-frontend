@@ -73,6 +73,7 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
       .withState(state)
       .withAccess(access)
       .withCollaborators(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
+      .withDescription(Some("Description 1"))
     // ApplicationWithCollaborators(
     //   CoreApplication(
     //     id = appId,

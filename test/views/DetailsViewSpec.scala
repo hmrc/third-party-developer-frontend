@@ -75,7 +75,7 @@ class DetailsViewSpec
     implicit val loggedIn: UserSession = adminDeveloper.loggedIn
   }
 
-  trait LoggedInUserIsDev   {
+  trait LoggedInUserIsDev {
     implicit val loggedIn: UserSession = standardDeveloper.loggedIn
   }
 
