@@ -75,6 +75,10 @@ class DetailsViewSpec
     implicit val loggedIn: UserSession = adminDeveloper.loggedIn
   }
 
+  trait LoggedInUserIsDev   {
+    implicit val loggedIn: UserSession = standardDeveloper.loggedIn
+  }
+
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val navSection: String                           = "details"
@@ -305,7 +309,7 @@ class DetailsViewSpec
       "managing a sandbox application" should {
         val deployedTo = Environment.SANDBOX
 
-        "show nothing when a developer" in {
+        "show nothing when logged in as a developer because you can change details" in {
           val application = anApplication(environment = deployedTo)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
@@ -313,7 +317,7 @@ class DetailsViewSpec
           page.changingAppDetailsAdminList shouldBe null
         }
 
-        "show nothing when an admin" in new LoggedInUserIsAdmin {
+        "show nothing when logged in as an admin because you can change details" in new LoggedInUserIsAdmin {
           val application = anApplication(environment = deployedTo)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
@@ -325,15 +329,16 @@ class DetailsViewSpec
       "managing a production application" when {
         val deployedTo = Environment.PRODUCTION
 
-        "show Changing these details section containing admin email address" in {
+        "show Changing these details section containing admin email address when logged in as a developer" in new LoggedInUserIsDev with ApplicationSyntaxes {
           val application = anApplication(environment = deployedTo)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
+          page.changingAppDetailsAdminList should not be null
           page.changingAppDetailsAdminList.text should include(adminEmail.text)
         }
 
-        "show nothing when an admin" in new LoggedInUserIsAdmin {
+        "show nothing when you are allowed to change the details" in new LoggedInUserIsAdmin {
           val application = anApplication(environment = deployedTo)
 
           val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))

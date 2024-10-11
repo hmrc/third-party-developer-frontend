@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, State}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocations, ResponsibleIndividual, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
@@ -41,9 +41,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with UserBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
+class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with UserBuilder with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   val leftHandNavView: LeftHandNav = app.injector.instanceOf[LeftHandNav]
 
@@ -51,7 +51,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val loggedIn: UserSession                        = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test").loggedIn
 
-    val productionState: ApplicationState  = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant)
+    val productionState: ApplicationState = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant)
 
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
@@ -130,7 +130,6 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       val prodAppAsAdmin  = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
       val sandboxAppAsDev = standardApp.withEnvironment(Environment.SANDBOX).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
       val prodAppAsDev    = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
-      
 
       val prodAppAsAdminDocument: Document  =
         Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
@@ -154,7 +153,8 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
         List.empty
       )
 
-      val application = standardApp.withEnvironment(Environment.PRODUCTION).withState(productionState).withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData)))
+      val application =
+        standardApp.withEnvironment(Environment.PRODUCTION).withState(productionState).withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData)))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 

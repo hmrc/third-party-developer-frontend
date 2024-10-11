@@ -16,16 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.Period
-
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 trait SampleApplication
     extends FixedClock
@@ -34,7 +29,7 @@ trait SampleApplication
     with ApplicationWithCollaboratorsFixtures {
   self: SampleUserSession =>
 
-  val appId    = ApplicationId.random
+  val appId    = standardApp.id
   val clientId = ClientId("myClientId")
 
   val sampleApp = standardApp

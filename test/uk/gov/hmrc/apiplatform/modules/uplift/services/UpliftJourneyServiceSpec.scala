@@ -62,7 +62,6 @@ class UpliftJourneyServiceSpec
       with FixedClock {
 
     val sandboxAppId = ApplicationId.random
-    val prodAppId    = ApplicationId.random
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -31,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -47,41 +47,40 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
-import java.time.LocalDate
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
-  val applicationId: ApplicationId = ApplicationId.random
-  val submissionId: SubmissionId   = SubmissionId.random
-  val clientId: ClientId           = ClientId.random
-  val applicationName              = ApplicationName("my app")
-  val createdOn: Instant           = LocalDate.of(2020, 1, 1).asInstant
+  val applicationId: ApplicationId = applicationIdOne
+  val submissionId: SubmissionId   = submissionIdOne
+  val clientId: ClientId           = clientIdOne
+  val applicationName              = appNameOne
 
   def describeApplication: String
   def access: Access
   def checkInformation: Option[CheckInformation]
 
-  def application: ApplicationWithCollaborators = standardApp
+  def collabs: Set[Collaborator] = maybeCollaborator match {
+    case Some(collaborator) => Set(collaborator)
+    case None               => Set.empty
+  }
 
-  //  = Application(
-  //   applicationId,
-  //   clientId,
-  //   applicationName,
-  //   createdOn,
-  //   None,
-  //   None,
-  //   Period.ofYears(1),
-  //   environment,
-  //   None,
-  //   maybeCollaborator match {
-  //     case Some(collaborator) => Set(collaborator)
-  //     case None               => Set()
-  //   },
-  //   access,
-  //   state,
-  //   checkInformation,
-  //   IpAllowlist()
-  // )
+  def application: ApplicationWithCollaborators =
+    standardApp
+      .modify(_.copy(
+        id = applicationId,
+        clientId = clientId,
+        name = applicationName,
+        createdOn = instant,
+        lastAccess = None,
+        lastAccessTokenUsage = None,
+        grantLength = GrantLength.ONE_YEAR,
+        deployedTo = environment,
+        access = access,
+        state = state,
+        checkInformation = checkInformation,
+        ipAllowlist = IpAllowlist()
+      ))
+      .withCollaborators(collabs.toList: _*)
+
   lazy val redirectUrl                                  = RedirectUri.unsafeApply("https://example.com/redirect-here")
   lazy val apiContext: ApiContext                       = ApiContext("ctx")
   lazy val apiVersion: ApiVersionNbr                    = ApiVersionNbr("1.0")
@@ -174,7 +173,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     SubmissionId.random,
     submissionIndex,
     applicationName,
-    createdOn,
+    instant,
     responsibleIndividual,
     "admin@example.com",
     "Mr Admin".toLaxEmail,
@@ -236,7 +235,7 @@ trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
   def checkInformation: Option[CheckInformation] = None
 }
 
-trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
+trait HasUserWithRole extends MockConnectors with MfaDetailBuilder with FixedClock {
   lazy val userEmail: LaxEmailAddress = "user@example.com".toLaxEmail
   lazy val userId: UserId             = UserId.random
   lazy val userFirstName              = "Bob"
@@ -251,8 +250,8 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
     userEmail,
     userFirstName,
     userLastName,
-    Instant.now(),
-    Instant.now(),
+    instant,
+    instant,
     verified = true,
     accountSetup = None,
     nonce = None,

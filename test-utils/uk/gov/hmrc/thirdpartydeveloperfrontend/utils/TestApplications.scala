@@ -61,7 +61,18 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
       access: Access = standardAccess(),
       ipAllowlist: IpAllowlist = IpAllowlist()
     ): ApplicationWithCollaborators = {
+
+    /*
+
+  lazy val adminDeveloper = buildTrackedUser("admin@example.com".toLaxEmail, "firstName1", "lastName1")
+  lazy val JoeBloggs      = buildTrackedUser("developer@example.com".toLaxEmail, "Joe", "Bloggs")
+  val standardDeveloper   = buildTrackedUser("developer@example.com".toLaxEmail, "firstName2", "lastName2")
+     */
     standardApp
+      .withEnvironment(environment)
+      .withState(state)
+      .withAccess(access)
+      .withCollaborators(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     // ApplicationWithCollaborators(
     //   CoreApplication(
     //     id = appId,

@@ -20,11 +20,10 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithSubscriptions, ApplicationWithSubscriptionsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionsFixtures
 
 trait AppsByTeamMemberServiceMock extends MockitoSugar with ArgumentMatchersSugar with ApplicationWithSubscriptionsFixtures {
   val appsByTeamMemberServiceMock = mock[AppsByTeamMemberService]

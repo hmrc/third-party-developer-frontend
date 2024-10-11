@@ -18,9 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
 trait TermsOfUseVersionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val termsOfUseVersionServiceMock = mock[TermsOfUseVersionService]

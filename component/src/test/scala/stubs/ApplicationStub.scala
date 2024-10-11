@@ -21,10 +21,10 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationToken
 
 object ApplicationStub {
 

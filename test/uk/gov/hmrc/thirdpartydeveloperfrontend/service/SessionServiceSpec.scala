@@ -22,6 +22,7 @@ import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -35,9 +36,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperCon
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
-class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock with ApplicationWithCollaboratorsFixtures {
+class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()

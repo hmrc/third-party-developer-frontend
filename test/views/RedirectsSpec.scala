@@ -51,9 +51,12 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserI
       val standardAccess = Access.Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
 
       val applicationWithRedirects =
-        sampleApp.withAccess(standardAccess).withCollaborators(Set(loggedInDeveloper1.developer.email.asAdministratorCollaborator, loggedInDeveloper2.developer.email.asDeveloperCollaborator))
+        sampleApp.withAccess(standardAccess).withCollaborators(Set(
+          loggedInDeveloper1.developer.email.asAdministratorCollaborator,
+          loggedInDeveloper2.developer.email.asDeveloperCollaborator
+        ))
 
-      val user                     = if (role.isAdministrator) {
+      val user = if (role.isAdministrator) {
         loggedInDeveloper1
       } else {
         loggedInDeveloper2

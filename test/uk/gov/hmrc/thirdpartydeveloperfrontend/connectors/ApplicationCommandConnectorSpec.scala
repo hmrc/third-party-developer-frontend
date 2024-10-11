@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.{Instant, Period}
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList

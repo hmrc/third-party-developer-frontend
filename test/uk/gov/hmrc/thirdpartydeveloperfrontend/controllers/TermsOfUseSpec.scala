@@ -51,9 +51,10 @@ class TermsOfUseSpec
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock with ApplicationWithCollaboratorsFixtures {
+  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
 
     val termsOfUseView: TermsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -76,8 +77,9 @@ class TermsOfUseSpec
 
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    println(loggedInRequest)
 
-    val appId: ApplicationId = ApplicationId.random
+    val appId: ApplicationId = standardApp.id
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -88,7 +90,16 @@ class TermsOfUseSpec
         access: Access = Access.Standard()
       ): ApplicationWithCollaborators = {
 
-      val application = standardApp
+      println(loggedInDeveloper)
+      println(loggedInDeveloper.email.asCollaborator(userRole))
+      println(idOf(loggedInDeveloper.email))
+
+      val application =
+        standardApp
+          .withCollaborators(loggedInDeveloper.email.asCollaborator(userRole))
+          .withEnvironment(environment)
+          .withAccess(access)
+          .modify(_.copy(checkInformation = checkInformation))
       // Application(
       //   appId,
       //   ClientId("clientId"),
@@ -154,6 +165,7 @@ class TermsOfUseSpec
 
     "return a bad request for a sandbox app" in new Setup {
       givenApplicationExists(environment = Environment.SANDBOX)
+      println("THIS TEST")
       val result: Future[Result] = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }

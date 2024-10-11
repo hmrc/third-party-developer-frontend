@@ -28,7 +28,7 @@ import views.html.noapplications.StartUsingRestApisView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationNameFixtures, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -45,8 +45,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationNameFixtures
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class ViewAllApplicationsPageSpec extends CommonViewSpec
     with WithCSRFAddToken

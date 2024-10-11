@@ -83,7 +83,8 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
-    def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) = standardApp.withId(appId).modify(_.copy(clientId = clientId, name = appName))
+    def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =
+      standardApp.withId(appId).modify(_.copy(clientId = clientId, name = appName))
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
   }

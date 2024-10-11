@@ -23,7 +23,7 @@ import views.html.DeleteApplicationView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -33,8 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with SampleUserSession with SampleApplication
     with DeveloperSessionBuilder
@@ -43,9 +41,9 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
 
   val deleteApplicationView = app.injector.instanceOf[DeleteApplicationView]
 
-  val application             = sampleApp
-  val prodAppId               = ApplicationId.random
-  val sandboxAppId            = ApplicationId.random
+  val application                              = sampleApp
+  val prodAppId                                = ApplicationId.random
+  val sandboxAppId                             = ApplicationId.random
   val prodApp: ApplicationWithCollaborators    = application.withId(prodAppId)
   val sandboxApp: ApplicationWithCollaborators = application.withId(sandboxAppId).withEnvironment(Environment.SANDBOX)
 

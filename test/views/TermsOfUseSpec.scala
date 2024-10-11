@@ -26,7 +26,7 @@ import views.html.TermsOfUseView
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, CheckInformation, State, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, CheckInformation, State, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -38,7 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class TermsOfUseSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -78,8 +77,8 @@ class TermsOfUseSpec extends CommonViewSpec
         val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
         val version           = "1.0"
         val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
-        val application       = standardApp 
-        //Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val application       = standardApp
+        // Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page        =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }
@@ -106,7 +105,7 @@ class TermsOfUseSpec extends CommonViewSpec
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
         val application      = standardApp
-        //Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        // Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page       =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }

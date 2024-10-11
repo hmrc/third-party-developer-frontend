@@ -105,7 +105,7 @@ trait ApplicationSyntaxes {
     def isPermittedToAgreeToTermsOfUse(developer: User): Boolean          = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
     def isPermittedToEditAppDetails(developer: User): Boolean             = allows(Capabilities.SupportsDetails, developer, Permissions.SandboxOnly)
     def isPermittedToEditProductionAppDetails(developer: User): Boolean   = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndAdmin)
-    def isProductionAppButEditDetailsNotAllowed(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndDeveloper)
+    def isProductionAppButEditDetailsNotAllowed(developer: User): Boolean = allows(Capabilities.SupportsDetails, developer, Permissions.ProductionAndOnlyDeveloper)
   }
 
   implicit class ApplicationWithSubscriptionsSyntax(app: ApplicationWithSubscriptions) {

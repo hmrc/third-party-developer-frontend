@@ -63,7 +63,9 @@ class TermsOfUse @Inject() (
   }
 
   def termsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
+    println("GOT PAST ACTION FILTER")
     if (request.application.termsOfUseStatus == TermsOfUseStatus.NOT_APPLICABLE) {
+      println("NOT APPLICABLE")
       errorHandler.badRequestTemplate.map(BadRequest(_))
     } else {
       val termsOfUse = termsOfUseVersionService.getForApplication(request.application)

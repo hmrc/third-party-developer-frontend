@@ -21,7 +21,8 @@ import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
@@ -36,8 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{Acce
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
 
@@ -50,7 +49,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   val application = standardApp
 
-    // Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+  // Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
 
   trait Setup extends SubscriptionFieldsConnectorMock {
 
@@ -97,7 +96,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
         SubscriptionFieldValue(definition2, FieldValue("oldValue2"))
       )
 
-      val newValue1                  = FieldValue("newValue")
+      val newValue1    = FieldValue("newValue")
       val newValuesMap = Map(definition1.name -> newValue1)
 
       when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))

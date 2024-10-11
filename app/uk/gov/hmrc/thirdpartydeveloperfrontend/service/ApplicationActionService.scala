@@ -52,7 +52,7 @@ class ApplicationActionService @Inject() (
         subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
         subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
         role                <- OptionT.fromOption[Future](application.roleFor(userRequest.developer.userId))
-      } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
+      } yield { println("Got app req"); new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest) }
     )
       .value
   }

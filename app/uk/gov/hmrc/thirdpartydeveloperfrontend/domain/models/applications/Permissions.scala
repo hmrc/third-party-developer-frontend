@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
@@ -38,10 +38,10 @@ object Permissions {
       app.isProduction && app.isAdministrator(developer.userId)
   }
 
-  case object ProductionAndDeveloper extends Permission {
+  case object ProductionAndOnlyDeveloper extends Permission {
 
     override def hasPermissions(app: ApplicationWithCollaborators, developer: User): Boolean =
-      app.isProduction && app.isCollaborator(developer.userId)
+      app.isProduction && app.roleFor(developer.userId).fold(false)(!_.isAdministrator)
   }
 
   case object SandboxOnly extends Permission {

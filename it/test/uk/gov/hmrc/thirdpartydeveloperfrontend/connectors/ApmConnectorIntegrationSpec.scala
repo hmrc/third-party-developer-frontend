@@ -27,13 +27,13 @@ import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 class ApmConnectorIntegrationSpec
     extends BaseConnectorIntegrationSpec
@@ -62,9 +62,9 @@ class ApmConnectorIntegrationSpec
   }
 
   "fetchApplicationById" should {
-    val applicationId                                                        = ApplicationId.random
-    val application                                                          = standardApp
-    
+    val applicationId = ApplicationId.random
+    val application   = standardApp
+
     val ApplicationWithSubscriptionFields: ApplicationWithSubscriptionFields =
       application.withSubscriptions(Set.empty).withFieldValues(Map.empty)
 
