@@ -52,7 +52,8 @@ class EditApplicationNameSpec
     with ApplicationActionServiceMock
     with SampleUserSession
     with SampleApplication
-    with SubscriptionTestHelperSugar
+    with SubscriptionTestSugar
+    with SubscriptionTestHelper
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker

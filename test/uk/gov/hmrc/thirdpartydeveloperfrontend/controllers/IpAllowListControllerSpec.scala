@@ -40,19 +40,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFl
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
     with ApplicationActionServiceMock
-    with TestApplications
-    with WithCSRFAddToken
-    with UserBuilder
-    with CollaboratorTracker
-    with LocalUserIdTracker {
+    with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup
+      extends ApplicationServiceMock
+      with SessionServiceMock
+      with TestApplications
+      with UserBuilder
+      with CollaboratorTracker
+      with LocalUserIdTracker {
+
     implicit val hc: HeaderCarrier                 = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 
@@ -83,8 +85,11 @@ class IpAllowListControllerSpec
     val admin: User     = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
     val developer: User = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
 
-    val anApplicationWithoutIpAllowlist: ApplicationWithCollaborators = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: ApplicationWithCollaborators    = anApplicationWithoutIpAllowlist.modify(_.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24"))))
+    val anApplicationWithoutIpAllowlist: ApplicationWithCollaborators =
+      anApplication(adminEmail = admin.email, developerEmail = developer.email).modify(_.copy(ipAllowlist = IpAllowlist()))
+
+    val anApplicationWithIpAllowlist: ApplicationWithCollaborators =
+      anApplicationWithoutIpAllowlist.withId(applicationIdTwo).modify(_.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24"))))
 
     def givenTheUserIsLoggedInAs(user: User): UserSession = {
       val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
@@ -101,14 +106,15 @@ class IpAllowListControllerSpec
   "viewIpAllowlist" should {
     "return the start page when the app does not have an active allowlist" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+
       when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
 
       val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
-      body should include("IP allow list")
-      body should include("Before you start")
+      withClue("Heading")(body should include("IP allow list"))
+      withClue("Before you start")(body should include("Before you start"))
       verifyIpAllowlistSurveyIsPresent(body)
     }
 

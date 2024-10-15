@@ -60,11 +60,11 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val request               = FakeRequest().withCSRFToken
       val privacyPolicyUrl      = application.privacyPolicyLocation match {
         case Some(PrivacyPolicyLocations.Url(url)) => Some(url)
-        case _                               => None
+        case _                                     => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
         case Some(TermsAndConditionsLocations.Url(url)) => Some(url)
-        case _                                    => None
+        case _                                          => None
       }
 
       val form = EditApplicationForm.form.fill(

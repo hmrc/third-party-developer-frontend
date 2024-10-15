@@ -24,13 +24,12 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with FixedClock with ApplicationWithCollaboratorsFixtures {
 
@@ -40,7 +39,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Fix
     "render in the right order" in {
 
       val applicationName = ApplicationName("An Application Name")
-      val crumbs = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp.withName(applicationName)), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp.withName(applicationName)), Crumb.viewAllApplications, Crumb.home(appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)
 

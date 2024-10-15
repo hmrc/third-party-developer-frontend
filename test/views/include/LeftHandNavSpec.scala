@@ -59,7 +59,7 @@ class LeftHandNavSpec extends CommonViewSpec
     val loggedInDeveloper: UserSession = standardDeveloper.loggedIn
 
     val application: ApplicationWithCollaborators = standardApp
-    .withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator)
+      .withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator)
 
     val applicationViewModelWithApiSubscriptions: ApplicationViewModel   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)

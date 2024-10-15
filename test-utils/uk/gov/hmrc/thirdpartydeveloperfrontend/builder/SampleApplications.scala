@@ -24,24 +24,16 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 trait SampleApplications extends SampleApplication {
   self: SampleUserSession with CollaboratorTracker =>
 
-  val activeApplication: ApplicationWithCollaborators = sampleApp
-
-  val activeDeveloperApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
-
-  val ropcApplication: ApplicationWithCollaborators = ropcApp.withId(applicationIdOne)
-
-  val privilegedApplication: ApplicationWithCollaborators = privilegedApp.withId(applicationIdOne)
-
-  val newApplication: ApplicationWithCollaborators = sampleApp.withState(InState.testing)
-
   val newSandboxApplication: ApplicationWithCollaborators = sampleApp.modify(_.copy(deployedTo = Environment.SANDBOX, state = InState.testing))
 
-  val adminApplication: ApplicationWithCollaborators     = sampleApp.copy(collaborators = Set(userSession.developer.email.asAdministratorCollaborator))
+  val adminApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asAdministratorCollaborator))
+
   val developerApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
 
   val adminSubmittedProductionApplication: ApplicationWithCollaborators =
     adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
-  val adminCreatedProductionApplication: ApplicationWithCollaborators   = adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
+
+  val adminCreatedProductionApplication: ApplicationWithCollaborators = adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
 
   val adminSubmittedSandboxApplication: ApplicationWithCollaborators =
     adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))

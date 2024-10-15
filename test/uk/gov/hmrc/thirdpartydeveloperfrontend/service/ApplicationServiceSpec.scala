@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.Period
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
@@ -125,37 +124,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
-  val productionApplicationId = ApplicationId.random
-  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
-
   val productionApplication: ApplicationWithCollaborators = standardApp
-  // Application(
-  //   productionApplicationId,
-  //   productionClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.PRODUCTION,
-  //   Some("description"),
-  //   Set()
-  // )
-  // val sandboxApplicationId               = ApplicationId.random
-  // val sandboxClientId                    = ClientId("Client ID")
 
-  val sandboxApplication: ApplicationWithCollaborators = standardApp
-  // Application(
-  //   sandboxApplicationId,
-  //   sandboxClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.SANDBOX,
-  //   Some("description")
-  // )
+  val sandboxApplicationId = ApplicationId.random
+
+  val sandboxApplication: ApplicationWithCollaborators = standardApp.withId(sandboxApplicationId).withEnvironment(Environment.SANDBOX)
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

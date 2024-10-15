@@ -30,7 +30,6 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
-import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
@@ -59,7 +58,6 @@ class DetailsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubmissionsTestData
-    with SubmissionServiceMockModule
     with FixedClock {
 
   "details" when {
@@ -165,7 +163,7 @@ class DetailsSpec
 
         returnAgreementDetails()
         givenApplicationAction(preProdApplication, loggedInDeveloper)
-        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(devSessionId).withSession(sessionParams: _*)
+        val loggedInRequestWithForceAppDetailsParam = FakeRequest("GET", "/?forceAppDetails").withLoggedIn(underTest, implicitly)(devOnAppSessionId).withSession(sessionParams: _*)
         val result                                  = addToken(underTest.details(preProdApplication.id))(loggedInRequestWithForceAppDetailsParam)
 
         status(result) shouldBe OK
@@ -177,7 +175,7 @@ class DetailsSpec
     "not a team member on an application" should {
       "return not found" in new Setup {
         val application = aStandardApplication
-        givenApplicationAction(application, loggedInDeveloper)
+        givenApplicationAction(application, loggedInDeveloperNotOnApp)
 
         val result = application.callDetails
 
@@ -246,22 +244,22 @@ class DetailsSpec
       redirectsToLogin(result)
     }
 
-    "return not found for an ROPC application" in new Setup {
-      val application = anROPCApplication()
+    "return bad request for an ROPC application" in new Setup {
+      val application = ropcApp.withCollaborators(developer.email.asDeveloperCollaborator)
       givenApplicationAction(application, loggedInDeveloper)
 
-      val result = underTest.details(application.id)(loggedInDevRequest)
+      val result = underTest.changeDetails(application.id)(loggedInDevRequest)
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe BAD_REQUEST
     }
 
-    "return not found for a privileged application" in new Setup {
-      val application = aPrivilegedApplication()
+    "return bad request for a privileged application" in new Setup {
+      val application = privilegedApp.withCollaborators(developer.email.asDeveloperCollaborator)
       givenApplicationAction(application, loggedInDeveloper)
 
-      val result = underTest.details(application.id)(loggedInDevRequest)
+      val result = underTest.changeDetails(application.id)(loggedInDevRequest)
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe BAD_REQUEST
     }
   }
 
@@ -304,16 +302,16 @@ class DetailsSpec
   "changeDetailsAction for production app in testing state" should {
 
     "return not found due to not being in a state of production" in new Setup {
-      val application = aStandardNonApprovedApplication()
+      val application = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting).withCollaborators(developer.email.asDeveloperCollaborator)
       givenApplicationAction(application, loggedInDeveloper)
 
-      val result = application.callChangeDetails
+      val result = application.withName("").callChangeDetailsAction
 
       status(result) shouldBe NOT_FOUND
     }
 
     "return not found when not a teamMember on the app" in new Setup {
-      val application = aStandardApprovedApplication.withCollaborators(admin.email.asAdministratorCollaborator)
+      val application = standardApp.withEnvironment(Environment.SANDBOX).withCollaborators()
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
@@ -408,7 +406,8 @@ class DetailsSpec
     "show success page if name changed successfully" in new Setup {
       val approvedApplication = anApplication(adminEmail = loggedInAdmin.developer.email)
       givenApplicationAction(approvedApplication, loggedInAdmin)
-      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*))
+
+      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*))
         .thenReturn(Future.successful(TicketCreated))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
@@ -416,7 +415,7 @@ class DetailsSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *, *, *[LaxEmailAddress])(*)
+      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 
@@ -708,15 +707,15 @@ class DetailsSpec
     }
   }
 
-  trait Setup 
+  trait Setup
       extends ApplicationServiceMock
       with ApplicationActionServiceMock
-      with TermsOfUseServiceMock 
+      with SubmissionServiceMockModule
+      with TermsOfUseServiceMock
       with TestApplications
       with UserBuilder
       with CollaboratorTracker
-      with LocalUserIdTracker
-      {
+      with LocalUserIdTracker {
     val unauthorisedAppDetailsView              = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val detailsView                             = app.injector.instanceOf[DetailsView]
     val changeDetailsView                       = app.injector.instanceOf[ChangeDetailsView]
@@ -745,32 +744,35 @@ class DetailsSpec
       termsOfUseServiceMock
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val developer                     = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
+    val developerWhoIsNotCollaborator = buildTrackedUser(emailAddress = "developer2@example.com".toLaxEmail)
 
-    val developer      = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
+    val admin = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
 
-    val admin          = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
+    val devOnAppSessionId    = UserSessionId.random
+    val devNOTOnAppSessionId = UserSessionId.random
+    val adminSessionId       = UserSessionId.random
+    val devOnAppSession      = UserSession(devOnAppSessionId, LoggedInState.LOGGED_IN, developer)
+    val devNOTOnAppSession   = UserSession(devNOTOnAppSessionId, LoggedInState.LOGGED_IN, developerWhoIsNotCollaborator)
+    val adminSession         = UserSession(adminSessionId, LoggedInState.LOGGED_IN, admin)
 
-    val devSessionId   = UserSessionId.random
-    val adminSessionId = UserSessionId.random
-    val devSession     = UserSession(devSessionId, LoggedInState.LOGGED_IN, developer)
-    val adminSession   = UserSession(adminSessionId, LoggedInState.LOGGED_IN, admin)
-
-    val loggedInDeveloper = devSession
-    val loggedInAdmin     = adminSession
+    val loggedInDeveloper         = devOnAppSession
+    val loggedInDeveloperNotOnApp = devNOTOnAppSession
+    val loggedInAdmin             = adminSession
 
     val newName        = "new name"
     val newDescription = Some("new description")
     val newTermsUrl    = Some("http://example.com/new-terms")
     val newPrivacyUrl  = Some("http://example.com/new-privacy")
 
-    val termsAndConditionsUrl                                                               = "http://example.com/terms-conds"
-    val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
+    val termsAndConditionsUrl = "http://example.com/terms-conds"
+    val privacyPolicyUrl      = "http://example.com/priv-policy"
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(Valid))
 
-    when(underTest.sessionService.fetch(eqTo(devSessionId))(*)).thenReturn(successful(Some(devSession)))
+    when(underTest.sessionService.fetch(eqTo(devNOTOnAppSessionId))(*)).thenReturn(successful(Some(devNOTOnAppSession)))
+    when(underTest.sessionService.fetch(eqTo(devOnAppSessionId))(*)).thenReturn(successful(Some(devOnAppSession)))
     when(underTest.sessionService.fetch(eqTo(adminSessionId))(*)).thenReturn(successful(Some(adminSession)))
 
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
@@ -780,7 +782,6 @@ class DetailsSpec
 
     when(underTest.applicationService.updateCheckInformation(any[ApplicationWithCollaborators], any[CheckInformation])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
-
 
     def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
       anApplication(access = Access.Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
@@ -828,11 +829,9 @@ class DetailsSpec
       )
     )
 
-
-
     val sessionParams        = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest     = FakeRequest().withSession(sessionParams: _*)
-    val loggedInDevRequest   = FakeRequest().withLoggedIn(underTest, implicitly)(devSessionId).withSession(sessionParams: _*)
+    val loggedInDevRequest   = FakeRequest().withLoggedIn(underTest, implicitly)(devOnAppSessionId).withSession(sessionParams: _*)
     val loggedInAdminRequest = FakeRequest().withLoggedIn(underTest, implicitly)(adminSessionId).withSession(sessionParams: _*)
 
     def captureApplicationCmd: ApplicationCommand = {
@@ -867,12 +866,12 @@ class DetailsSpec
       val doc = Jsoup.parse(contentAsString(result))
       // APIS-5669 - temporarily removed Change link
       // linkExistsWithHref(doc, routes.Details.changeDetails(application.id).url) shouldBe hasChangeButton
-      elementIdentifiedByIdContainsText(doc, "applicationId", application.id.toString()) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.value.describe()) shouldBe true
-      elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.value.describe()) shouldBe true
-      elementExistsContainsText(doc, "p", "Timmy Test agreed to version 2 of the terms of use on") shouldBe hasTermsOfUseAgreement
+      withClue("id")(elementIdentifiedByIdContainsText(doc, "applicationId", application.id.toString()) shouldBe true)
+      withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
+      withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
+      withClue("privacy")(elementIdentifiedByIdContainsText(doc, "privacyPolicyUrl", application.privacyPolicyLocation.value.describe()) shouldBe true)
+      withClue("t&c")(elementIdentifiedByIdContainsText(doc, "termsAndConditionsUrl", application.termsAndConditionsLocation.value.describe()) shouldBe true)
+      withClue("terms of use")(elementExistsContainsText(doc, "p", "Timmy Test agreed to version 2 of the terms of use on") shouldBe hasTermsOfUseAgreement)
     }
 
     def changeDetailsShouldRenderThePage(application: ApplicationWithCollaborators) = {

@@ -234,8 +234,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
   }
 
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): ApplicationWithCollaborators = {
-    
-    
+
     val collaborators = Set(
       developerCollaborator,
       administrator.email.asAdministratorCollaborator

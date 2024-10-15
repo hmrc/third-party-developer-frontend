@@ -51,7 +51,7 @@ object Permissions {
         case (Environment.PRODUCTION, Some(Collaborator.Roles.DEVELOPER)) => true
         case _                                                            => false
       }
-        */
+   */
 
   case object SandboxOnly extends Permission {
 

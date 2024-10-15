@@ -54,7 +54,7 @@ class IpAllowlistServiceSpec
   }
 
   val appWithNoIpAllowList = standardApp.withIpAllowlist(defaultIpAllowList)
-  
+
   trait Setup extends FlowRepositoryMockModule
       with FixedClock
       with ApplicationCommandConnectorMockModule {

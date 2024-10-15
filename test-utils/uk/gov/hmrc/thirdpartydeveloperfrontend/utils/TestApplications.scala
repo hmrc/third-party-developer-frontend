@@ -33,15 +33,11 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      // appId: ApplicationId = ApplicationId.random,
-      // clientId: ClientId = ClientId(randomString(28)),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail
     ): ApplicationWithCollaborators = {
 
     anApplication(
-      // appId,
-      // clientId,
       environment = Environment.SANDBOX,
       state = InState.production("a", "b", "c"),
       adminEmail = adminEmail,
@@ -50,22 +46,12 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
   }
 
   def anApplication(
-      // appId: ApplicationId = ApplicationId.random,
-      // clientId: ClientId = ClientId(randomString(28)),
-      // grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = InState.production("test@test.com", "test name", "test"),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
-      access: Access = standardAccess(),
+      access: Access = standardAccess()
     ): ApplicationWithCollaborators = {
-
-    /*
-
-  lazy val adminDeveloper = buildTrackedUser("admin@example.com".toLaxEmail, "firstName1", "lastName1")
-  lazy val JoeBloggs      = buildTrackedUser("developer@example.com".toLaxEmail, "Joe", "Bloggs")
-  val standardDeveloper   = buildTrackedUser("developer@example.com".toLaxEmail, "firstName2", "lastName2")
-     */
 
     standardApp
       .withEnvironment(environment)
@@ -73,21 +59,6 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
       .withAccess(access)
       .withCollaborators(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
       .withDescription(Some("Description 1"))
-    // ApplicationWithCollaborators(
-    //   CoreApplication(
-    //     id = appId,
-    //     clientId = clientId,
-    //     name = "App name 1",
-    //     createdOn = instant,
-    //     lastAccess = Some(instant),
-    //     grantLength = Period.ofDays(547),
-    //     deployedTo = environment,
-    //     description = Some("Description 1"),
-    //     state = state,
-    //     access = access
-    //   ),
-    //   collaborators = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
-    // )
   }
 
   lazy val aStandardApplication: ApplicationWithCollaborators = anApplication()
@@ -112,11 +83,11 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
     Access.Standard(redirectUris, termsAndConditionsUrl, privacyPolicyUrl)
   }
 
-  def anROPCApplication(): ApplicationWithCollaborators = anApplication(access = ropcAccess())
+  def anROPCApplication(): ApplicationWithCollaborators = anApplication(access = ropcAccess()).withId(applicationIdTwo)
 
   def ropcAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access = Access.Ropc(scopes)
 
-  def aPrivilegedApplication(): ApplicationWithCollaborators = anApplication(access = privilegedAccess())
+  def aPrivilegedApplication(): ApplicationWithCollaborators = anApplication(access = privilegedAccess()).withId(applicationIdThree)
 
   def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access.Privileged = Access.Privileged(None, scopes)
 

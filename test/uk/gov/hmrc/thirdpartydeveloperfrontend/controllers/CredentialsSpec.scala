@@ -51,7 +51,8 @@ class CredentialsSpec
     extends BaseControllerSpec
     with SampleUserSession
     with SampleApplication
-    with SubscriptionTestHelperSugar
+    with SubscriptionTestSugar
+    with SubscriptionTestHelper
     with UserBuilder
     with LocalUserIdTracker
     with ApplicationWithCollaboratorsFixtures

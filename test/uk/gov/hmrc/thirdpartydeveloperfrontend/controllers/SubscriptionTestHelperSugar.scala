@@ -25,8 +25,24 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
-  self: AsyncHmrcSpec with SampleApplication =>
+trait SubscriptionTestSugar {
+  self: AsyncHmrcSpec =>
+
+  def verifyApplicationSubscription(
+      applicationSubscription: APISubscriptions,
+      expectedApiHumanReadableAppName: String,
+      expectedApiServiceName: String,
+      expectedVersions: List[ApiVersion]
+    ): Unit = {
+    applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
+    applicationSubscription.apiServiceName.value shouldBe expectedApiServiceName
+    applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
+  }
+
+}
+
+trait SubscriptionTestHelper extends SubscriptionsBuilder {
+  self: SampleApplication =>
 
   val employmentContext = ApiContext("individual-employment-context")
   val taxContext        = ApiContext("individual-tax-context")
@@ -86,17 +102,6 @@ trait SubscriptionTestHelperSugar extends SubscriptionsBuilder {
         fields = Some(subscriptionFieldsWrapper)
       )
     )
-  }
-
-  def verifyApplicationSubscription(
-      applicationSubscription: APISubscriptions,
-      expectedApiHumanReadableAppName: String,
-      expectedApiServiceName: String,
-      expectedVersions: List[ApiVersion]
-    ): Unit = {
-    applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
-    applicationSubscription.apiServiceName.value shouldBe expectedApiServiceName
-    applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
   }
 
   def generateName(prefix: String, index: Int = 1) = s"$prefix-name-$index"

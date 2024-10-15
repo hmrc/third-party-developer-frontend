@@ -44,8 +44,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
   val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
   val versionOne: ApiVersionNbr    = ApiVersionNbr("version-1")
   val applicationName: String      = "third-party-application"
-  val applicationId: ApplicationId = ApplicationId.random
-  val clientId                     = ClientId("clientId")
+  val applicationId: ApplicationId = standardApp.id
+  val clientId                     = standardApp.clientId
 
   val application = standardApp
 

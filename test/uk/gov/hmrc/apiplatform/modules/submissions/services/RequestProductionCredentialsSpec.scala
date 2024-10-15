@@ -23,9 +23,10 @@ import org.mockito.captor.ArgCaptor
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerificationId}
@@ -37,8 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with CollaboratorTracker
@@ -69,8 +68,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     val mockDeskproConnector = mock[DeskproConnector]
     val underTest            = new RequestProductionCredentials(ApmConnectorMock.aMock, mockSubmissionsConnector, ApplicationCommandConnectorMock.aMock, mockDeskproConnector, clock)
 
-    val app = standardApp.withCollaborators(email.asAdministratorCollaborator)
-    val applicationId                                                       = app.id
+    val app           = standardApp.withCollaborators(email.asAdministratorCollaborator)
+    val applicationId = app.id
 
   }
 

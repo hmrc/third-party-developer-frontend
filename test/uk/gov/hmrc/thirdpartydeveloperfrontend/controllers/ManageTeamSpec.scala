@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -46,16 +46,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRF
 
 class ManageTeamSpec
     extends BaseControllerSpec
-    with SampleUserSession
-    with SampleApplication
-    with SubscriptionTestHelperSugar
-    with WithCSRFAddToken
-    with TestApplications
-    with UserBuilder
-    with LocalUserIdTracker {
+    with SubscriptionTestSugar
+    with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock with CollaboratorServiceMockModule with SessionServiceMock with ApplicationActionServiceMock
-      with ApplicationWithCollaboratorsFixtures {
+  trait Setup
+      extends ApplicationServiceMock
+      with CollaboratorServiceMockModule
+      with SessionServiceMock
+      with ApplicationActionServiceMock
+      with ApplicationWithCollaboratorsFixtures
+      with SampleUserSession
+      with SampleApplication
+      with SubscriptionTestHelper
+      with TestApplications
+      with UserBuilder
+      with LocalUserIdTracker {
     val manageTeamView: ManageTeamView             = app.injector.instanceOf[ManageTeamView]
     val addTeamMemberView: AddTeamMemberView       = app.injector.instanceOf[AddTeamMemberView]
     val removeTeamMemberView: RemoveTeamMemberView = app.injector.instanceOf[RemoveTeamMemberView]
@@ -78,7 +83,7 @@ class ManageTeamSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer: User      = buildTrackedUser()
-    val sessionId            = UserSessionId.random
+    // val sessionId            = UserSessionId.random
     val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     fetchSessionByIdReturns(sessionId, session)
@@ -109,6 +114,18 @@ class ManageTeamSpec
 
       application
     }
+  }
+
+  trait ExtendedSetup extends Setup {
+    val teamMemberEmail     = "teammembertodelete@example.com"
+    val teamMemberEmailHash = teamMemberEmail.toSha256
+
+    val additionalTeamMembers = Seq(
+      "email1@example.com".toLaxEmail.asDeveloperCollaborator,
+      "email2@example.com".toLaxEmail.asDeveloperCollaborator,
+      "email3@example.com".toLaxEmail.asDeveloperCollaborator,
+      teamMemberEmail.toLaxEmail.asDeveloperCollaborator
+    )
   }
 
   "manageTeam" should {
@@ -233,16 +250,8 @@ class ManageTeamSpec
   }
 
   "removeTeamMember" should {
-    val teamMemberEmail       = "teammembertodelete@example.com"
-    val teamMemberEmailHash   = teamMemberEmail.toSha256
-    val additionalTeamMembers = Seq(
-      "email1@example.com".toLaxEmail.asDeveloperCollaborator,
-      "email2@example.com".toLaxEmail.asDeveloperCollaborator,
-      "email3@example.com".toLaxEmail.asDeveloperCollaborator,
-      teamMemberEmail.toLaxEmail.asDeveloperCollaborator
-    )
 
-    "show the remove team member page when logged in as an admin" in new Setup {
+    "show the remove team member page when logged in as an admin" in new ExtendedSetup {
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
 
       val result: Future[Result] =
@@ -252,7 +261,7 @@ class ManageTeamSpec
       contentAsString(result) should include(teamMemberEmail)
     }
 
-    "show the remove team member page when logged in as a developer" in new Setup {
+    "show the remove team member page when logged in as a developer" in new ExtendedSetup {
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER, additionalTeamMembers = additionalTeamMembers)
 
       val result: Future[Result] =
@@ -262,7 +271,7 @@ class ManageTeamSpec
       contentAsString(result) should include(teamMemberEmail)
     }
 
-    "redirect to login page when logged out" in new Setup {
+    "redirect to login page when logged out" in new ExtendedSetup {
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER, additionalTeamMembers = additionalTeamMembers)
 
       val result: Future[Result] = underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
@@ -271,7 +280,7 @@ class ManageTeamSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    "reject invalid email address" in new Setup {
+    "reject invalid email address" in new ExtendedSetup {
       givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
       val result: Future[Result] = underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress"))
 

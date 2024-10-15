@@ -30,8 +30,8 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -47,14 +47,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestA
 class PushPullNotificationsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with SampleUserSession
-    with SampleApplication
-    with SubscriptionTestHelperSugar
-    with TestApplications
-    with CollaboratorTracker
-    with UserBuilder
-    with LocalUserIdTracker
-    with GuiceOneAppPerSuite {
+    with SubscriptionTestSugar
+    with GuiceOneAppPerSuite
+    with ApplicationWithCollaboratorsFixtures {
 
   "showPushSecrets" when {
     "logged in as a Developer on an application" should {
@@ -68,6 +63,7 @@ class PushPullNotificationsSpec
       }
 
       "return the push secret for a sandbox app" in new Setup {
+        println(session.developer.email)
         showPushSecretsShouldRenderThePage(aSandboxApplication(developerEmail = session.developer.email))
       }
 
@@ -83,7 +79,8 @@ class PushPullNotificationsSpec
 
     "logged in as an Administrator on an application" should {
       "return the push secret for a production app" in new Setup {
-        showPushSecretsShouldRenderThePage(anApplication(adminEmail = session.developer.email))
+        println("In test " + session.developer.userId)
+        showPushSecretsShouldRenderThePage(anApplication(adminEmail = session.developer.email).withId(applicationIdTwo))
       }
 
       "return the push secret for a sandbox app" in new Setup {
@@ -123,7 +120,14 @@ class PushPullNotificationsSpec
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock
+      with SubscriptionTestHelper
+      with SampleApplication
+      with SampleUserSession
+      with UserBuilder
+      with TestApplications
+      with CollaboratorTracker
+      with LocalUserIdTracker {
     private val pushSecretsView                  = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
@@ -141,8 +145,10 @@ class PushPullNotificationsSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer = buildTrackedUser()
-    val sessionId = UserSessionId.random
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    println("In setup " + developer.userId)
+
+    // val sessionId = UserSessionId.random
+    val session = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     when(underTest.sessionService.fetch(eqTo(sessionId))(*))
       .thenReturn(successful(Some(session)))
@@ -158,6 +164,7 @@ class PushPullNotificationsSpec
     }
 
     def showPushSecretsShouldRenderThePage(application: ApplicationWithCollaborators) = {
+      println(application.collaborators)
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))

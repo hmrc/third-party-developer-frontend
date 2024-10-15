@@ -60,11 +60,11 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
-        loggedInActionRefiner() andThen                     // Log In Redirect
-          applicationRequestRefiner(applicationId) andThen  // NOT_FOUND
-          capabilityFilter(capability) andThen              // BAD_REQUEST
-          permissionFilter(permissions) andThen             // FORBIDDEN
-          approvalFilter(stateCheck)                        // NOT_FOUND
+        loggedInActionRefiner() andThen                    // Log In Redirect
+          applicationRequestRefiner(applicationId) andThen // NOT_FOUND
+          capabilityFilter(capability) andThen             // BAD_REQUEST
+          permissionFilter(permissions) andThen            // FORBIDDEN
+          approvalFilter(stateCheck)                       // NOT_FOUND
       ).invokeBlock(request, block)
     }
   }

@@ -34,22 +34,21 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
 
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with ErrorHandlerMock
-    with CollaboratorTracker
-    with UserBuilder
-    with LocalUserIdTracker 
     with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup 
+  trait Setup
       extends ApplicationServiceMock
       with TestApplications
       with ApplicationActionServiceMock
+      with CollaboratorTracker
+      with UserBuilder
+      with LocalUserIdTracker
       with SessionServiceMock {
     val deleteApplicationView                    = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView    = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
@@ -71,8 +70,8 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId           = standardApp.id
-    val clientId        = standardApp.clientId
+    val appId    = standardApp.id
+    val clientId = standardApp.clientId
 
     val developer   = buildTrackedUser()
     val sessionId   = UserSessionId.random
@@ -82,9 +81,11 @@ class DeletePrincipalApplicationSpec
 
     private val startOfDay: Instant = LocalDate.now.atStartOfDay().asInstant
 
+    val collaborator = userSession.developer.email.asAdministratorCollaborator
+
     val application = standardApp
       .withState(appStateProduction)
-      .withCollaborators(userSession.developer.email.asAdministratorCollaborator)
+      .withCollaborators(collaborator)
       .modify(_.copy(
         createdOn = startOfDay,
         lastAccess = Some(startOfDay),
@@ -155,15 +156,16 @@ class DeletePrincipalApplicationSpec
     }
   }
 
-  "return not found if non-approved app" when {
-    trait UnapprovedApplicationSetup extends Setup {
-      val nonApprovedApplication = aStandardNonApprovedApplication(userSession.developer.email)
+  trait UnapprovedApplicationSetup extends Setup {
+    val nonApprovedApplication = aStandardNonApprovedApplication(collaborator.emailAddress).withId(applicationIdTwo)
 
-      givenApplicationAction(nonApprovedApplication, userSession)
+    givenApplicationAction(nonApprovedApplication, userSession)
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
-        .thenReturn(Future.successful(TicketCreated))
-    }
+    when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
+      .thenReturn(Future.successful(TicketCreated))
+  }
+
+  "return not found if non-approved app" should {
 
     "deleteApplication action is called" in new UnapprovedApplicationSetup {
       val result = addToken(underTest.deleteApplication(nonApprovedApplication.id, None))(loggedInRequest)

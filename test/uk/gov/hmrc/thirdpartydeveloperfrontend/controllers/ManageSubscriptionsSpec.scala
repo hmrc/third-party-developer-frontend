@@ -58,7 +58,8 @@ class ManageSubscriptionsSpec
     with WithCSRFAddToken
     with SampleUserSession
     with SampleApplication
-    with SubscriptionTestHelperSugar
+    with SubscriptionTestSugar
+    with SubscriptionTestHelper
     with TestApplications
     with UserBuilder
     with LocalUserIdTracker
@@ -73,12 +74,12 @@ class ManageSubscriptionsSpec
 
   val role: Roles.ADMINISTRATOR.type = Collaborator.Roles.ADMINISTRATOR
 
-  val application: ApplicationWithCollaborators = 
+  val application: ApplicationWithCollaborators =
     standardApp
       .withName("App name 1")
       .withEnvironment(Environment.SANDBOX)
       .withCollaborators(userSession.developer.email.asCollaborator(role))
-      .withAccess( standardAccess.copy( 
+      .withAccess(standardAccess.copy(
         redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
         termsAndConditionsUrl = Some("http://tnc-url.com")
       ))

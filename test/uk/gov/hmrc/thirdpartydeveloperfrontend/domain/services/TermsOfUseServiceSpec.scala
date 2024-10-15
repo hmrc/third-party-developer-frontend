@@ -28,19 +28,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 class TermsOfUseServiceSpec extends HmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: List[TermsOfUseAcceptance] = List.empty)
-      : ApplicationWithCollaborators = 
-        standardApp
-          .withAccess(standardAccess.copy(importantSubmissionData = 
-            Some(ImportantSubmissionData(
-              Some("http://example.com"),
-              responsibleIndividual,
-              Set.empty,
-              TermsAndConditionsLocations.InDesktopSoftware,
-              PrivacyPolicyLocations.InDesktopSoftware,
-              standardAppAgreements
-            ))
-          ))
-          .modify(_.copy(checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))))
+      : ApplicationWithCollaborators =
+    standardApp
+      .withAccess(standardAccess.copy(importantSubmissionData =
+        Some(ImportantSubmissionData(
+          Some("http://example.com"),
+          responsibleIndividual,
+          Set.empty,
+          TermsAndConditionsLocations.InDesktopSoftware,
+          PrivacyPolicyLocations.InDesktopSoftware,
+          standardAppAgreements
+        ))
+      ))
+      .modify(_.copy(checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))))
 
   val email: LaxEmailAddress                                   = "bob@example.com".toLaxEmail
   val name                                                     = "Bob Example"

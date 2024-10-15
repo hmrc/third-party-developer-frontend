@@ -75,9 +75,9 @@ class SubscriptionsGroupSpec
 
     lazy val body: Document = {
       val application = standardApp
-          .withEnvironment(environment)
-          .withCollaborators(loggedInDeveloper.developer.email.asCollaborator(role))
-          .withState(state)
+        .withEnvironment(environment)
+        .withCollaborators(loggedInDeveloper.developer.email.asCollaborator(role))
+        .withState(state)
 
       Jsoup.parse(
         subscriptionsGroup

@@ -76,7 +76,6 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
 
   val productionApplication: ApplicationWithCollaborators = standardApp.withCollaborators(developerEmail.asDeveloperCollaborator, administratorEmail.asAdministratorCollaborator)
 
-
   "add teamMember" should {
     "add teamMember successful" in new Setup {
       TPDMock.FetchByEmails.returnsEmptySeq()

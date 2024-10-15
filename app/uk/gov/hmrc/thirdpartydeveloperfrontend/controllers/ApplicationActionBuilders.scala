@@ -101,6 +101,6 @@ trait ApplicationActionBuilders {
 
   def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) = {
     val test: ApplicationRequest[_] => Boolean = (req) => permission.hasPermissions(req.application, req.userSession.developer)
-    forbiddenWhenNotFilter(req => test(req) )
+    forbiddenWhenNotFilter(req => test(req))
   }
 }

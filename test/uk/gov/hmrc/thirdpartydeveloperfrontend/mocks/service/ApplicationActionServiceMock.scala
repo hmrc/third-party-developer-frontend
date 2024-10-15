@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
+
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
 
   val applicationActionServiceMock = mock[ApplicationActionService]
@@ -67,6 +68,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
           ))
       }
     }
+    reset(applicationActionServiceMock)
     when(applicationActionServiceMock.process[A](eqTo(appData.id), *)(*))
       .thenAnswer((a: ApplicationId, request: UserRequest[A], c: HeaderCarrier) => createReturn(request))
   }

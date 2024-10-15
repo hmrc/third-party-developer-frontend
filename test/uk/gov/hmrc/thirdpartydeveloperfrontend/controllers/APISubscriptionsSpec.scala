@@ -31,7 +31,8 @@ class APISubscriptionsSpec
     with UserBuilder
     with SampleUserSession
     with SampleApplication
-    with SubscriptionTestHelperSugar {
+    with SubscriptionTestSugar
+    with SubscriptionTestHelper {
 
   "groupSubscriptions" should {
     val publicAccess  = ApiAccess.PUBLIC

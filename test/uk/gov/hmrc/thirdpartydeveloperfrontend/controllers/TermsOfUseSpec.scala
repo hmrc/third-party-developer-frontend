@@ -52,14 +52,13 @@ class TermsOfUseSpec
     with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  trait Setup 
+  trait Setup
       extends ApplicationServiceMock
       with SessionServiceMock
       with ApplicationActionServiceMock
       with TermsOfUseVersionServiceMock
       with UserBuilder
-      with LocalUserIdTracker
-      {
+      with LocalUserIdTracker {
 
     val termsOfUseView: TermsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -82,7 +81,7 @@ class TermsOfUseSpec
 
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    
+
     val appId: ApplicationId = standardApp.id
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

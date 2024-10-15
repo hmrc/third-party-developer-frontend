@@ -40,10 +40,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class RedirectsSpec
     extends BaseControllerSpec
-    with WithCSRFAddToken
-    {
+    with WithCSRFAddToken {
 
-  trait Setup 
+  trait Setup
       extends ApplicationServiceMock
       with SessionServiceMock
       with ApplicationActionServiceMock
