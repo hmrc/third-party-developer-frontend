@@ -59,27 +59,12 @@ class CredentialsSpec extends CommonViewSpec
     val request          = FakeRequest().withCSRFToken
     val developerSession = standardDeveloper.loggedIn
 
-    val application = standardApp
-    // Application(
-    //   ApplicationId.random,
-    //   ClientId("Test Application Client ID"),
-    //   "Test Application",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   Period.ofDays(547),
-    //   Environment.PRODUCTION,
-    //   Some("Test Application"),
-    //   collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-    //   access = Access.Standard(),
-    //   state = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant),
-    //   checkInformation = None
-    // )
+    val application = standardApp.withCollaborators(developerSession.developer.email.asAdministratorCollaborator)
 
     val sandboxApplication = application.withEnvironment(Environment.SANDBOX)
 
     "display the credentials page for admins" in new Setup {
-      val page: Html = credentialsView.render(standardApp, request, developerSession, messagesProvider, appConfig)
+      val page: Html = credentialsView.render(application, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

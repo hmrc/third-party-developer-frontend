@@ -46,12 +46,11 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with UserTestData
     with FixedClock
-    with ApplicationWithCollaboratorsFixtures
-    with ApplicationStateFixtures {
+    with ApplicationWithCollaboratorsFixtures {
 
   val changeDetails = app.injector.instanceOf[ChangeDetailsView]
-  val applicationId = ApplicationId.random
-  val clientId      = ClientId("clientId123")
+  val applicationId = standardApp.id
+  val clientId      = standardApp.clientId
 
   "change application details page" should {
 
@@ -59,12 +58,12 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
       val loggedIn              = adminDeveloper.loggedIn
       val request               = FakeRequest().withCSRFToken
-      val privacyPolicyUrl      = application.privacyPolicyLocation.value match {
-        case PrivacyPolicyLocations.Url(url) => Some(url)
+      val privacyPolicyUrl      = application.privacyPolicyLocation match {
+        case Some(PrivacyPolicyLocations.Url(url)) => Some(url)
         case _                               => None
       }
-      val termsAndConditionsUrl = application.termsAndConditionsLocation.value match {
-        case TermsAndConditionsLocations.Url(url) => Some(url)
+      val termsAndConditionsUrl = application.termsAndConditionsLocation match {
+        case Some(TermsAndConditionsLocations.Url(url)) => Some(url)
         case _                                    => None
       }
 
@@ -93,18 +92,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
     "render" in {
 
-      val application = standardApp.withEnvironment(Environment.SANDBOX)
-      //   Application(
-      //   applicationId,
-      //   clientId,
-      //   "An App Name",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   Period.ofDays(547),
-      //   Environment.SANDBOX,
-      //   state = ApplicationState(State.TESTING, None, None, None, instant)
-      // )
+      val application = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting)
       val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true
@@ -119,43 +107,19 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val aDescription           = Some("a helpful description")
       val aPrivacyPolicyURL      = Some("a privacy policy url")
       val aTermsAndConditionsURL = Some("a terms and conditions url")
-      val standardAccess         = Access.Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
-      val application            = standardApp
-      // Application(
-      //   applicationId,
-      //   clientId,
-      //   "An App Name",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   Environment.SANDBOX,
-      //   description = aDescription,
-      //   access = standardAccess,
-      //   state = ApplicationState(State.TESTING, None, None, None, instant)
-      // )
+      val anAccess               = Access.Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
+      val application            = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting).withAccess(anAccess).modify(_.copy(description = aDescription))
       val document               = Jsoup.parse(renderPage(application).body)
 
-      formGroupWithLabelIsPrepopulated(document, "Application name", "An App Name") shouldBe true
-      textareaExistsWithText(document, "description", aDescription.get) shouldBe true
-      formGroupWithLabelIsPrepopulated(document, "Privacy policy URL (optional)", aPrivacyPolicyURL.get) shouldBe true
-      formGroupWithLabelIsPrepopulated(document, "Terms and conditions URL (optional)", aTermsAndConditionsURL.get) shouldBe true
+      withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.value) shouldBe true)
+      withClue("Description")(textareaExistsWithText(document, "description", aDescription.get) shouldBe true)
+      withClue("Privacy Policy URL")(formGroupWithLabelIsPrepopulated(document, "Privacy policy URL (optional)", aPrivacyPolicyURL.get) shouldBe true)
+      withClue("T&C url")(formGroupWithLabelIsPrepopulated(document, "Terms and conditions URL (optional)", aTermsAndConditionsURL.get) shouldBe true)
     }
 
     "not display the option to change the app name if in prod pending GK approval" in {
 
-      val application = standardApp
-      //   Application(
-      //   applicationId,
-      //   clientId,
-      //   "An App Name",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   Environment.PRODUCTION,
-      //   state = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, None, None, None, instant)
-      // )
+      val application = standardApp.withState(appStatePendingGatekeeperApproval)
       val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false
@@ -163,18 +127,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
     "not display the option to change the app name if in prod pending requestor verification" in {
 
-      val application = standardApp
-      //   Application(
-      //   applicationId,
-      //   clientId,
-      //   "An App Name",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   Environment.PRODUCTION,
-      //   state = ApplicationState(State.PENDING_REQUESTER_VERIFICATION, None, None, None, instant)
-      // )
+      val application = standardApp.withState(appStatePendingRequesterVerification)
       val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false

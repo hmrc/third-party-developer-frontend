@@ -51,8 +51,6 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val loggedIn: UserSession                        = buildTrackedUser("user@example.com".toLaxEmail, "Test", "Test").loggedIn
 
-    val productionState: ApplicationState = ApplicationState(State.PRODUCTION, Some(""), Some(""), Some(""), instant)
-
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
 
@@ -95,7 +93,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include links to client ID and client secrets if the user is an admin and the app has reached production state" in new Setup {
-      val application = standardApp.withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator)).withState(productionState)
+      val application = standardApp.withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator)).withState(appStateProduction)
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -105,7 +103,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
       val application =
-        standardApp.withEnvironment(Environment.SANDBOX).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator)).withState(productionState)
+        standardApp.withEnvironment(Environment.SANDBOX).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator)).withState(appStateProduction)
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -154,7 +152,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       )
 
       val application =
-        standardApp.withEnvironment(Environment.PRODUCTION).withState(productionState).withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData)))
+        standardApp.withEnvironment(Environment.PRODUCTION).withState(appStateProduction).withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData)))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 

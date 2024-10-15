@@ -28,6 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationIdFixtures
 
 trait StatusTestDataHelper extends FixedClock {
 
@@ -88,11 +89,11 @@ trait ProgressTestDataHelper {
   }
 }
 
-trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData with ProgressTestDataHelper with StatusTestDataHelper {
+trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData with ProgressTestDataHelper with StatusTestDataHelper with ApplicationIdFixtures {
   self: ClockNow =>
 
   val submissionId  = SubmissionId.random
-  val applicationId = ApplicationId.random
+  val applicationId = applicationIdOne
 
   val standardContext: AskWhen.Context = Map(
     AskWhen.Context.Keys.IN_HOUSE_SOFTWARE -> "No",

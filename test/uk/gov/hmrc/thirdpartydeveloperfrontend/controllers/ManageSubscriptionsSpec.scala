@@ -73,24 +73,15 @@ class ManageSubscriptionsSpec
 
   val role: Roles.ADMINISTRATOR.type = Collaborator.Roles.ADMINISTRATOR
 
-  val application: ApplicationWithCollaborators = standardApp
-  //  = Application(
-  //   appId,
-  //   clientId,
-  //   "App name 1",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.SANDBOX,
-  //   Some("Description 1"),
-  //   Set(userSession.developer.email.asCollaborator(role)),
-  //   state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant),
-  //   access = Access.Standard(
-  //     redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
-  //     termsAndConditionsUrl = Some("http://tnc-url.com")
-  //   )
-  // )
+  val application: ApplicationWithCollaborators = 
+    standardApp
+      .withName("App name 1")
+      .withEnvironment(Environment.SANDBOX)
+      .withCollaborators(userSession.developer.email.asCollaborator(role))
+      .withAccess( standardAccess.copy( 
+        redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
+        termsAndConditionsUrl = Some("http://tnc-url.com")
+      ))
 
   val productionApplication: ApplicationWithCollaborators = application.withEnvironment(Environment.PRODUCTION).withId(ApplicationId.random)
 

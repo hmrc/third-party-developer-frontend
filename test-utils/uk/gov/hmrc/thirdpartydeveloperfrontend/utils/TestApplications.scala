@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import java.time.Period
 import java.util.UUID.randomUUID
 import scala.util.Random
 
@@ -28,21 +27,21 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
-trait TestApplications extends FixedClock with CollaboratorTracker with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
+trait TestApplications extends FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
   self: CollaboratorTracker =>
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      appId: ApplicationId = ApplicationId.random,
-      clientId: ClientId = ClientId(randomString(28)),
+      // appId: ApplicationId = ApplicationId.random,
+      // clientId: ClientId = ClientId(randomString(28)),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail
     ): ApplicationWithCollaborators = {
 
     anApplication(
-      appId,
-      clientId,
+      // appId,
+      // clientId,
       environment = Environment.SANDBOX,
       state = InState.production("a", "b", "c"),
       adminEmail = adminEmail,
@@ -51,15 +50,14 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
   }
 
   def anApplication(
-      appId: ApplicationId = ApplicationId.random,
-      clientId: ClientId = ClientId(randomString(28)),
-      grantLength: Period = Period.ofDays(547),
+      // appId: ApplicationId = ApplicationId.random,
+      // clientId: ClientId = ClientId(randomString(28)),
+      // grantLength: Period = Period.ofDays(547),
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = InState.production("test@test.com", "test name", "test"),
       adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
       developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
       access: Access = standardAccess(),
-      ipAllowlist: IpAllowlist = IpAllowlist()
     ): ApplicationWithCollaborators = {
 
     /*
@@ -68,6 +66,7 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
   lazy val JoeBloggs      = buildTrackedUser("developer@example.com".toLaxEmail, "Joe", "Bloggs")
   val standardDeveloper   = buildTrackedUser("developer@example.com".toLaxEmail, "firstName2", "lastName2")
      */
+
     standardApp
       .withEnvironment(environment)
       .withState(state)
@@ -85,14 +84,13 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
     //     deployedTo = environment,
     //     description = Some("Description 1"),
     //     state = state,
-    //     access = access,
-    //     ipAllowlist = ipAllowlist
+    //     access = access
     //   ),
     //   collaborators = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
     // )
   }
 
-  val aStandardApplication: ApplicationWithCollaborators = anApplication()
+  lazy val aStandardApplication: ApplicationWithCollaborators = anApplication()
 
   def aStandardApprovedApplication: ApplicationWithCollaborators = aStandardApplication
 
@@ -100,7 +98,7 @@ trait TestApplications extends FixedClock with CollaboratorTracker with Applicat
     anApplication(adminEmail = adminEmail).withState(InState.testing)
 
   def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
-    anApplication(adminEmail = adminEmail).withState(InState.pendingRequesterVerification("test@test.com", "test name", "test"))
+    anApplication(adminEmail = adminEmail).withState(InState.pendingGatekeeperApproval("test@test.com", "test name"))
 
   def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
     anApplication(adminEmail = adminEmail).withState(InState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))

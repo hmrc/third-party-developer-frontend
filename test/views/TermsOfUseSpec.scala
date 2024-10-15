@@ -63,22 +63,13 @@ class TermsOfUseSpec extends CommonViewSpec
     implicit val loggedIn   = buildUser("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
     implicit val navSection = "details"
 
-    val id          = ApplicationId.random
-    val clientId    = ClientId("clientId")
-    val appName     = "an application"
-    val createdOn   = instant
-    val lastAccess  = Some(instant)
-    val grantLength = Period.ofDays(547)
-    val deployedTo  = Environment.PRODUCTION
-
     "viewing an agreed application" should {
       trait Setup {
         val emailAddress      = "email@example.com".toLaxEmail
         val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
         val version           = "1.0"
         val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
-        val application       = standardApp
-        // Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val application       = standardApp.modify(_.copy(checkInformation = Some(checkInformation)))
         val page: Page        =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }

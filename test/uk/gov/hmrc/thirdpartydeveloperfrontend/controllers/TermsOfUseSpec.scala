@@ -49,12 +49,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class TermsOfUseSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker
     with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
+  trait Setup 
+      extends ApplicationServiceMock
+      with SessionServiceMock
+      with ApplicationActionServiceMock
+      with TermsOfUseVersionServiceMock
+      with UserBuilder
+      with LocalUserIdTracker
+      {
 
     val termsOfUseView: TermsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -77,8 +82,7 @@ class TermsOfUseSpec
 
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
-    println(loggedInRequest)
-
+    
     val appId: ApplicationId = standardApp.id
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -90,30 +94,12 @@ class TermsOfUseSpec
         access: Access = Access.Standard()
       ): ApplicationWithCollaborators = {
 
-      println(loggedInDeveloper)
-      println(loggedInDeveloper.email.asCollaborator(userRole))
-      println(idOf(loggedInDeveloper.email))
-
       val application =
         standardApp
           .withCollaborators(loggedInDeveloper.email.asCollaborator(userRole))
           .withEnvironment(environment)
           .withAccess(access)
           .modify(_.copy(checkInformation = checkInformation))
-      // Application(
-      //   appId,
-      //   ClientId("clientId"),
-      //   "appName",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   environment,
-      //   collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
-      //   access = access,
-      //   state = ApplicationState(State.PRODUCTION, Some("dont-care"), Some("dont-care"), Some("dont-care"), instant),
-      //   checkInformation = checkInformation
-      // )
 
       givenApplicationAction(application, userSession)
 
@@ -165,7 +151,6 @@ class TermsOfUseSpec
 
     "return a bad request for a sandbox app" in new Setup {
       givenApplicationExists(environment = Environment.SANDBOX)
-      println("THIS TEST")
       val result: Future[Result] = addToken(underTest.termsOfUse(appId))(loggedInRequest)
       status(result) shouldBe BAD_REQUEST
     }

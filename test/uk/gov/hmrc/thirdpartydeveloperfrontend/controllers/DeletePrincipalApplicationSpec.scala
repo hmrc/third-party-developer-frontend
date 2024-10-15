@@ -28,7 +28,6 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -36,17 +35,22 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCr
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with TestApplications
     with ErrorHandlerMock
+    with CollaboratorTracker
     with UserBuilder
-    with ApplicationWithCollaboratorsFixtures
-    with LocalUserIdTracker {
+    with LocalUserIdTracker 
+    with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup 
+      extends ApplicationServiceMock
+      with TestApplications
+      with ApplicationActionServiceMock
+      with SessionServiceMock {
     val deleteApplicationView                    = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView    = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
     val deletePrincipalApplicationCompleteView   = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
@@ -67,9 +71,8 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId           = ApplicationId.random
-    val clientId        = ClientId("clientIdzzz")
-    val appName: String = "Application Name"
+    val appId           = standardApp.id
+    val clientId        = standardApp.clientId
 
     val developer   = buildTrackedUser()
     val sessionId   = UserSessionId.random
@@ -80,21 +83,13 @@ class DeletePrincipalApplicationSpec
     private val startOfDay: Instant = LocalDate.now.atStartOfDay().asInstant
 
     val application = standardApp
-    //   Application(
-    //   appId,
-    //   clientId,
-    //   appName,
-    //   startOfDay,
-    //   Some(startOfDay),
-    //   None,
-    //   grantLength,
-    //   Environment.PRODUCTION,
-    //   Some("Description 1"),
-    //   Set(userSession.developer.email.asAdministratorCollaborator),
-    //   state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), startOfDay),
-    //   access =
-    //     Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    // )
+      .withState(appStateProduction)
+      .withCollaborators(userSession.developer.email.asAdministratorCollaborator)
+      .modify(_.copy(
+        createdOn = startOfDay,
+        lastAccess = Some(startOfDay),
+        description = Some("Description 1")
+      ))
 
     givenApplicationAction(application, userSession)
     fetchSessionByIdReturns(sessionId, userSession)

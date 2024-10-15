@@ -40,20 +40,6 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
     with FixedClock {
 
   val application = standardApp
-  // Application(
-  //   ApplicationId.random,
-  //   ClientId("clientId123"),
-  //   "App name 1",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.PRODUCTION,
-  //   Some("Description 1"),
-  //   Set.empty,
-  //   state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user name"), Some(""), instant),
-  //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  // )
 
   "responsible individual details view" should {
     val view          = app.injector.instanceOf[ResponsibleIndividualDetailsView]
@@ -74,7 +60,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       )
       val document    = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
 
-      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name)
+      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name.value)
       elementBySelector(document, "#environment").map(_.text()) shouldBe Some(environment)
 
       val oldRiNames = document.select(".riHistoryName")

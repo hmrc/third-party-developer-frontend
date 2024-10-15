@@ -58,11 +58,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestA
 class DetailsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with TestApplications
     with SubmissionsTestData
-    with UserBuilder
-    with CollaboratorTracker
-    with LocalUserIdTracker
     with SubmissionServiceMockModule
     with FixedClock {
 
@@ -233,7 +229,7 @@ class DetailsSpec
     }
 
     "return not found when not a teamMember on the app" in new Setup {
-      val application = aStandardApprovedApplication
+      val application = aStandardApprovedApplication.withCollaborators()
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.callChangeDetails
@@ -307,7 +303,7 @@ class DetailsSpec
 
   "changeDetailsAction for production app in testing state" should {
 
-    "return not found" in new Setup {
+    "return not found due to not being in a state of production" in new Setup {
       val application = aStandardNonApprovedApplication()
       givenApplicationAction(application, loggedInDeveloper)
 
@@ -317,7 +313,7 @@ class DetailsSpec
     }
 
     "return not found when not a teamMember on the app" in new Setup {
-      val application = aStandardApprovedApplication
+      val application = aStandardApprovedApplication.withCollaborators(admin.email.asAdministratorCollaborator)
       givenApplicationAction(application, loggedInDeveloper)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
@@ -487,9 +483,6 @@ class DetailsSpec
   }
 
   "changing privacy policy location for old journey applications" should {
-    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) =
-      anApplication(access = Access.Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
-    val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
 
     "display update page with url field populated" in new Setup {
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
@@ -534,26 +527,6 @@ class DetailsSpec
   }
 
   "changing privacy policy location for new journey applications" should {
-    def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = anApplication(access =
-      Access.Standard(
-        List.empty,
-        None,
-        None,
-        Set.empty,
-        None,
-        Some(
-          ImportantSubmissionData(
-            None,
-            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
-            Set.empty,
-            TermsAndConditionsLocations.InDesktopSoftware,
-            privacyPolicyLocation,
-            List.empty
-          )
-        )
-      )
-    )
-    val privacyPolicyUrl                                                           = "http://example.com/priv-policy"
 
     "display update page with 'in desktop' radio selected" in new Setup {
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
@@ -624,10 +597,6 @@ class DetailsSpec
   }
 
   "changing terms and conditions location for old journey applications" should {
-    def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
-      anApplication(access = Access.Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
-    val termsAndConditionsUrl                                                               = "http://example.com/terms-conds"
-
     "display update page with url field populated" in new Setup {
       val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(Some(termsAndConditionsUrl))
       givenApplicationAction(appWithTermsAndConditionsUrl, loggedInAdmin)
@@ -670,26 +639,6 @@ class DetailsSpec
   }
 
   "changing terms and conditions location for new journey applications" should {
-    def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = anApplication(access =
-      Access.Standard(
-        List.empty,
-        None,
-        None,
-        Set.empty,
-        None,
-        Some(
-          ImportantSubmissionData(
-            None,
-            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
-            Set.empty,
-            termsAndConditionsLocation,
-            PrivacyPolicyLocations.InDesktopSoftware,
-            List.empty
-          )
-        )
-      )
-    )
-    val termsAndConditionsUrl                                                                     = "http://example.com/terms-conds"
 
     "display update page with 'in desktop' radio selected" in new Setup {
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
@@ -759,7 +708,15 @@ class DetailsSpec
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with TermsOfUseServiceMock {
+  trait Setup 
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with TermsOfUseServiceMock 
+      with TestApplications
+      with UserBuilder
+      with CollaboratorTracker
+      with LocalUserIdTracker
+      {
     val unauthorisedAppDetailsView              = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val detailsView                             = app.injector.instanceOf[DetailsView]
     val changeDetailsView                       = app.injector.instanceOf[ChangeDetailsView]
@@ -790,8 +747,10 @@ class DetailsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer      = buildTrackedUser()
+    val developer      = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
+
     val admin          = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
+
     val devSessionId   = UserSessionId.random
     val adminSessionId = UserSessionId.random
     val devSession     = UserSession(devSessionId, LoggedInState.LOGGED_IN, developer)
@@ -804,6 +763,9 @@ class DetailsSpec
     val newDescription = Some("new description")
     val newTermsUrl    = Some("http://example.com/new-terms")
     val newPrivacyUrl  = Some("http://example.com/new-privacy")
+
+    val termsAndConditionsUrl                                                               = "http://example.com/terms-conds"
+    val privacyPolicyUrl                                                          = "http://example.com/priv-policy"
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(Valid))
@@ -818,6 +780,55 @@ class DetailsSpec
 
     when(underTest.applicationService.updateCheckInformation(any[ApplicationWithCollaborators], any[CheckInformation])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
+
+
+    def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
+      anApplication(access = Access.Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
+
+    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) =
+      anApplication(access = Access.Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
+
+    def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = anApplication(access =
+      Access.Standard(
+        List.empty,
+        None,
+        None,
+        Set.empty,
+        None,
+        Some(
+          ImportantSubmissionData(
+            None,
+            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
+            Set.empty,
+            termsAndConditionsLocation,
+            PrivacyPolicyLocations.InDesktopSoftware,
+            List.empty
+          )
+        )
+      )
+    )
+
+    def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = anApplication(access =
+      Access.Standard(
+        List.empty,
+        None,
+        None,
+        Set.empty,
+        None,
+        Some(
+          ImportantSubmissionData(
+            None,
+            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
+            Set.empty,
+            TermsAndConditionsLocations.InDesktopSoftware,
+            privacyPolicyLocation,
+            List.empty
+          )
+        )
+      )
+    )
+
+
 
     val sessionParams        = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest     = FakeRequest().withSession(sessionParams: _*)

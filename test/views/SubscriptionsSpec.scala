@@ -39,6 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{EditApplicationForm,
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.ApplicationStateFilter.pendingApprovalOrProduction
 
 class SubscriptionsSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -59,33 +60,17 @@ class SubscriptionsSpec extends CommonViewSpec
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
 
-  def buildApplication(applicationState: ApplicationState, environment: Environment) = standardApp.withState(applicationState).withEnvironment(environment)
-  // Application(
-  //   ApplicationId.random,
-  //   ClientId("Test Application Client ID"),
-  //   "Test Application",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   environment,
-  //   Some("Test Application"),
-  //   Set.empty,
-  //   Access.Standard(),
-  //   applicationState,
-  //   None
-  // )
 
   "Subscriptions page" should {
     val developer = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
     val baseState = ApplicationState(State.PRODUCTION, Some("somebody@example.com"), Some("somebody"), Some(""), instant)
 
-    val productionApplicationPendingGatekeeperApproval    = buildApplication(baseState.copy(name = State.PENDING_GATEKEEPER_APPROVAL), Environment.PRODUCTION)
-    val productionApplicationPendingRequesterVerification = buildApplication(baseState.copy(name = State.PENDING_REQUESTER_VERIFICATION), Environment.PRODUCTION)
-    val productionApplication                             = buildApplication(baseState, Environment.PRODUCTION)
-    val productionApplicationTesting                      = buildApplication(ApplicationState(updatedOn = instant), Environment.PRODUCTION)
+    val productionApplicationPendingGatekeeperApproval    = standardApp.withState(appStatePendingGatekeeperApproval)
+    val productionApplicationPendingRequesterVerification = standardApp.withState(appStatePendingRequesterVerification)
+    val productionApplication                             = standardApp.withState(appStateProduction)
+    val productionApplicationTesting                      = standardApp.withState(appStateTesting)
 
-    val sandboxApplicationTesting = buildApplication(ApplicationState(updatedOn = instant), Environment.SANDBOX)
+    val sandboxApplicationTesting = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting)
 
     def renderPageForApplicationAndRole(application: ApplicationWithCollaborators, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(

@@ -27,35 +27,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 
 class TermsOfUseServiceSpec extends HmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
-  def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: Option[List[TermsOfUseAcceptance]] = None)
-      : ApplicationWithCollaborators = standardApp
-
-  //   Application(
-  //   ApplicationId.random,
-  //   ClientId("clientId"),
-  //   "App name 1",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   Period.ofDays(10),
-  //   Environment.PRODUCTION,
-  //   Some("Description 1"),
-  //   Set.empty,
-  //   state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user"), Some(""), instant),
-  //   access = Access.Standard(importantSubmissionData =
-  //     standardAppAgreements.map(standardAppAgreements =>
-  //       ImportantSubmissionData(
-  //         Some("http://example.com"),
-  //         responsibleIndividual,
-  //         Set.empty,
-  //         TermsAndConditionsLocations.InDesktopSoftware,
-  //         PrivacyPolicyLocations.InDesktopSoftware,
-  //         standardAppAgreements
-  //       )
-  //     )
-  //   ),
-  //   checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))
-  // )
+  def buildApplication(checkInfoAgreements: Option[List[TermsOfUseAgreement]] = None, standardAppAgreements: List[TermsOfUseAcceptance] = List.empty)
+      : ApplicationWithCollaborators = 
+        standardApp
+          .withAccess(standardAccess.copy(importantSubmissionData = 
+            Some(ImportantSubmissionData(
+              Some("http://example.com"),
+              responsibleIndividual,
+              Set.empty,
+              TermsAndConditionsLocations.InDesktopSoftware,
+              PrivacyPolicyLocations.InDesktopSoftware,
+              standardAppAgreements
+            ))
+          ))
+          .modify(_.copy(checkInformation = checkInfoAgreements.map(agreements => CheckInformation(termsOfUseAgreements = agreements))))
 
   val email: LaxEmailAddress                                   = "bob@example.com".toLaxEmail
   val name                                                     = "Bob Example"
@@ -65,7 +50,7 @@ class TermsOfUseServiceSpec extends HmrcSpec with FixedClock with ApplicationWit
   val checkInfoAgreement: TermsOfUseAgreement                  = TermsOfUseAgreement(email, instant, version1_2)
   val stdAppAgreement: TermsOfUseAcceptance                    = TermsOfUseAcceptance(responsibleIndividual, instant, SubmissionId.random, 0)
   val appWithCheckInfoAgreements: ApplicationWithCollaborators = buildApplication(Some(List(checkInfoAgreement)))
-  val appWithStdAppAgreements: ApplicationWithCollaborators    = buildApplication(None, Some(List(stdAppAgreement)))
+  val appWithStdAppAgreements: ApplicationWithCollaborators    = buildApplication(None, List(stdAppAgreement))
   val nonStdApp: ApplicationWithCollaborators                  = buildApplication().withAccess(Access.Privileged())
   val underTest                                                = new TermsOfUseService()
 

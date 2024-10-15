@@ -46,13 +46,13 @@ class ApplicationActionService @Inject() (
       for {
         applicationWithSubs <- OptionT(applicationService.fetchByApplicationId(applicationId))
         application          = applicationWithSubs.asAppWithCollaborators
+        role                <- OptionT.fromOption[Future](application.roleFor(userRequest.developer.userId))
         environment          = application.deployedTo
         fieldDefinitions    <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
         openAccessApis      <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
         subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
         subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
-        role                <- OptionT.fromOption[Future](application.roleFor(userRequest.developer.userId))
-      } yield { println("Got app req"); new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest) }
+      } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
     )
       .value
   }

@@ -56,27 +56,10 @@ class LeftHandNavSpec extends CommonViewSpec
 
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-    val applicationId: ApplicationId = ApplicationId.random
-    val clientId: ClientId           = ClientId("clientId123")
-    val applicationName              = "Test Application"
-
     val loggedInDeveloper: UserSession = standardDeveloper.loggedIn
 
     val application: ApplicationWithCollaborators = standardApp
-    //  = Application(
-    //   applicationId,
-    //   clientId,
-    //   applicationName,
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   Environment.PRODUCTION,
-    //   Some("Description 1"),
-    //   Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-    //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-    //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    // )
+    .withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator)
 
     val applicationViewModelWithApiSubscriptions: ApplicationViewModel   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)

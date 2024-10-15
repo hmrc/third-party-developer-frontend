@@ -61,11 +61,6 @@ class ProdCredsChecklistControllerSpec
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptionFields(
-      //   testingApp,
-      //   asSubscriptions(List(aSubscription)),
-      //   asFields(List.empty)
-      // ),
       userSession,
       List(aSubscription)
     )
@@ -104,11 +99,6 @@ class ProdCredsChecklistControllerSpec
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptionFields(
-      //   sampleApp,
-      //   asSubscriptions(List(aSubscription)),
-      //   asFields(List.empty)
-      // ),
       userSession,
       List(aSubscription)
     )

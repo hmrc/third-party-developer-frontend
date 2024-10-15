@@ -74,19 +74,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
   val productionApplicationId = ApplicationId.random
   val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
 
-  val productionApplication: ApplicationWithCollaborators = standardApp
-  // Application(
-  //   productionApplicationId,
-  //   productionClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.PRODUCTION,
-  //   Some("description"),
-  //   mixOfAllTypesOfCollaborators
-  // )
+  val productionApplication: ApplicationWithCollaborators = standardApp.withCollaborators(developerEmail.asDeveloperCollaborator, administratorEmail.asAdministratorCollaborator)
+
 
   "add teamMember" should {
     "add teamMember successful" in new Setup {

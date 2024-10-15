@@ -68,11 +68,6 @@ class QuestionControllerSpec
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptionFields(
-      //   testingApp.copy(id = applicationId),
-      //   asSubscriptions(List(aSubscription)),
-      //   asFields(List.empty)
-      // ),
       userSession,
       List(aSubscription)
     )

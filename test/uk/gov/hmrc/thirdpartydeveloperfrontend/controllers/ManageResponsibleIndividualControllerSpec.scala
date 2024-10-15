@@ -106,23 +106,20 @@ class ManageResponsibleIndividualControllerSpec
 
     def givenTheApplicationExistWithUserRole(teamMembers: Seq[Collaborator], touAcceptances: List[TermsOfUseAcceptance]) = {
       val application = aStandardApplication
-      // .copy(
-      //   id = appId,
-      //   access = standardAccess().copy(importantSubmissionData =
-      //     Some(ImportantSubmissionData(
-      //       None,
-      //       responsibleIndividual,
-      //       Set.empty,
-      //       TermsAndConditionsLocations.InDesktopSoftware,
-      //       PrivacyPolicyLocations.InDesktopSoftware,
-      //       touAcceptances
-      //     ))
-      //   ),
-      //   collaborators = teamMembers.toSet,
-      //   createdOn = Instant.parse("2018-04-06T09:00:00Z"),
-      //   lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
-      // )
-
+      .withCollaborators(teamMembers.toList: _*)
+      .withAccess(
+        standardAccessOne.copy(
+          importantSubmissionData = Some(
+            ImportantSubmissionData(
+              None,
+              responsibleIndividual,
+              Set.empty,
+              TermsAndConditionsLocations.InDesktopSoftware,
+              PrivacyPolicyLocations.InDesktopSoftware,
+              touAcceptances
+            ))
+        )
+      )
       givenApplicationAction(application, session)
       fetchCredentialsReturns(application, tokens())
 

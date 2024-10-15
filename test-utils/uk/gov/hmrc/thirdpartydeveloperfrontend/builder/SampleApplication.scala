@@ -17,10 +17,10 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ClientId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 
 trait SampleApplication
     extends FixedClock
@@ -30,24 +30,11 @@ trait SampleApplication
   self: SampleUserSession =>
 
   val appId    = standardApp.id
-  val clientId = ClientId("myClientId")
+  val clientId = standardApp.clientId
 
   val sampleApp = standardApp
     .withCollaborators(userSession.developer.email.asAdministratorCollaborator)
-  //   Application = Application(
-  //   appId,
-  //   clientId,
-  //   "App name 1",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength = Period.ofDays(547),
-  //   Environment.PRODUCTION,
-  //   Some("Description 1"),
-  //   Set(userSession.developer.email.asAdministratorCollaborator),
-  //   state = InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""),
-  //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply(_)), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  // )
+    .withName(ApplicationName("App name 1"))
 
   val testingApp   = sampleApp.withState(InState.testing)
   val submittedApp = sampleApp.withState(InState.pendingGatekeeperApproval("requestedByEmail", "requestedByName"))

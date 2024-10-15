@@ -81,7 +81,6 @@ trait ApplicationActionBuilders {
   }
 
   def capabilityFilter(capability: Capability)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = {
-    println("Checking capability")
     val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
     badRequestWhenNotFilter(capabilityCheck)
   }
@@ -101,9 +100,7 @@ trait ApplicationActionBuilders {
   }
 
   def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) = {
-    println("Checking permissions")
-
     val test: ApplicationRequest[_] => Boolean = (req) => permission.hasPermissions(req.application, req.userSession.developer)
-    forbiddenWhenNotFilter(req => { val result = test(req); println("Permisison " + result); result })
+    forbiddenWhenNotFilter(req => test(req) )
   }
 }

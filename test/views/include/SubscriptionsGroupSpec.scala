@@ -75,23 +75,9 @@ class SubscriptionsGroupSpec
 
     lazy val body: Document = {
       val application = standardApp
-      // Application(
-      //   applicationId,
-      //   clientId,
-      //   applicationName,
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   environment,
-      //   Some("Description 1"),
-      //   Set(loggedInDeveloper.developer.email.asCollaborator(role)),
-      //   state = state,
-      //   access = Access.Standard(
-      //     redirectUris = List("https://red1.example.com", "https://red2.example.con").map(RedirectUri.unsafeApply),
-      //     termsAndConditionsUrl = Some("http://tnc-url.example.com")
-      //   )
-      // )
+          .withEnvironment(environment)
+          .withCollaborators(loggedInDeveloper.developer.email.asCollaborator(role))
+          .withState(state)
 
       Jsoup.parse(
         subscriptionsGroup

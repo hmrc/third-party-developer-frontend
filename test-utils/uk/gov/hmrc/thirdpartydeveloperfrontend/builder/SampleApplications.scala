@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
@@ -29,9 +28,9 @@ trait SampleApplications extends SampleApplication {
 
   val activeDeveloperApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
 
-  val ropcApplication: ApplicationWithCollaborators = sampleApp.withAccess(Access.Ropc())
+  val ropcApplication: ApplicationWithCollaborators = ropcApp.withId(applicationIdOne)
 
-  val privilegedApplication: ApplicationWithCollaborators = sampleApp.withAccess(Access.Privileged())
+  val privilegedApplication: ApplicationWithCollaborators = privilegedApp.withId(applicationIdOne)
 
   val newApplication: ApplicationWithCollaborators = sampleApp.withState(InState.testing)
 

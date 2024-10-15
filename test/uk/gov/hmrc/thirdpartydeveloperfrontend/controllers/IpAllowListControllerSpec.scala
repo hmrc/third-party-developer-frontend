@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
@@ -48,6 +49,7 @@ class IpAllowListControllerSpec
     with TestApplications
     with WithCSRFAddToken
     with UserBuilder
+    with CollaboratorTracker
     with LocalUserIdTracker {
 
   trait Setup extends ApplicationServiceMock with SessionServiceMock {

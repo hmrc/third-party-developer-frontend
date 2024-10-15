@@ -41,15 +41,17 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 class RedirectsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with TestApplications
-    with CollaboratorTracker
-    with UserBuilder
-    with LocalUserIdTracker {
+    {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with RedirectsServiceMockModule {
-    val applicationId = "1234"
-    val clientId      = ClientId("clientId123")
-
+  trait Setup 
+      extends ApplicationServiceMock
+      with SessionServiceMock
+      with ApplicationActionServiceMock
+      with RedirectsServiceMockModule
+      with TestApplications
+      with CollaboratorTracker
+      with UserBuilder
+      with LocalUserIdTracker {
     val developer = buildTrackedUser()
     val sessionId = UserSessionId.random
     val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)

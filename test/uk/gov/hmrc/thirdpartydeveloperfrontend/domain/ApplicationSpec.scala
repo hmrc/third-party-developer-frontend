@@ -234,28 +234,14 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
   }
 
   private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): ApplicationWithCollaborators = {
-    // val collaborators = Set(
-    //   developerCollaborator,
-    //   administrator.email.asAdministratorCollaborator
-    // )
+    
+    
+    val collaborators = Set(
+      developerCollaborator,
+      administrator.email.asAdministratorCollaborator
+    )
 
-    standardApp
-
-    // val app = Application(
-    //   ApplicationId.random,
-    //   ClientId("clientId"),
-    //   "app name",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength = Period.ofDays(547),
-    //   environment,
-    //   description = None,
-    //   collaborators = collaborators,
-    //   access = access,
-    //   state = defaultApplicationState
-    // )
-    // app
+    standardApp.withEnvironment(environment).withAccess(access).withState(defaultApplicationState).withCollaborators(collaborators)
   }
 
   def runTableTests(data: Seq[(Environment, Access, User, Boolean)], defaultApplicationState: ApplicationState)(fn: (ApplicationWithCollaborators, User) => Boolean): Unit = {

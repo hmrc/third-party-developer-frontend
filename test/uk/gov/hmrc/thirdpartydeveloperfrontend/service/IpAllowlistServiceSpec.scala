@@ -49,6 +49,12 @@ class IpAllowlistServiceSpec
     with UserBuilder
     with LocalUserIdTracker {
 
+  implicit class IpAllowlistSyntax(app: ApplicationWithCollaborators) {
+    def withIpAllowlist(list: IpAllowlist) = app.modify(_.copy(ipAllowlist = list))
+  }
+
+  val appWithNoIpAllowList = standardApp.withIpAllowlist(defaultIpAllowList)
+  
   trait Setup extends FlowRepositoryMockModule
       with FixedClock
       with ApplicationCommandConnectorMockModule {
@@ -75,7 +81,7 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(expectedFlow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
-      val result: IpAllowlistFlow = await(underTest.getIpAllowlistFlow(anApplication(), sessionId))
+      val result: IpAllowlistFlow = await(underTest.getIpAllowlistFlow(appWithNoIpAllowList, sessionId))
 
       result shouldBe expectedFlow
     }
@@ -86,7 +92,7 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
-      val result: IpAllowlistFlow = await(underTest.getIpAllowlistFlow(anApplication(ipAllowlist = IpAllowlist(allowlist = ipAllowlist)), sessionId))
+      val result: IpAllowlistFlow = await(underTest.getIpAllowlistFlow(appWithNoIpAllowList.withIpAllowlist(IpAllowlist(allowlist = ipAllowlist)), sessionId))
 
       result shouldBe expectedFlow
       FlowRepositoryMock.SaveFlow.verifyCalledWith[IpAllowlistFlow](expectedFlow)
@@ -113,18 +119,18 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
-      val result: IpAllowlistFlow = await(underTest.addCidrBlock(newCidrBlock, anApplication(), sessionId))
+      val result: IpAllowlistFlow = await(underTest.addCidrBlock(newCidrBlock, appWithNoIpAllowList, sessionId))
 
       result shouldBe expectedFlow
     }
 
     "add the cidr block to a new flow if it does not exist yet" in new Setup {
-      val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set(newCidrBlock))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
       FlowRepositoryMock.SaveFlow.thenReturnSuccess[IpAllowlistFlow]
 
-      val result: IpAllowlistFlow = await(underTest.addCidrBlock(newCidrBlock, anApplication(), sessionId))
+      val result: IpAllowlistFlow = await(underTest.addCidrBlock(newCidrBlock, appWithNoIpAllowList, sessionId))
 
+      val expectedFlow: IpAllowlistFlow = IpAllowlistFlow(sessionId, Set(newCidrBlock))
       result shouldBe expectedFlow
     }
   }
@@ -156,9 +162,8 @@ class IpAllowlistServiceSpec
 
   "activateIpAllowlist" should {
     "successfully dispatch a command to change ip allowlist" in new Setup {
-      val app = anApplication(
-        developerEmail = standardDeveloper.email,
-        ipAllowlist = IpAllowlist(
+      val app = appWithNoIpAllowList.withIpAllowlist(
+        IpAllowlist(
           required = true,
           allowlist = Set("1.1.1.1/24")
         )
@@ -198,7 +203,7 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
 
       val expectedException: ForbiddenException = intercept[ForbiddenException] {
-        await(underTest.activateIpAllowlist(anApplication(), sessionId, standardDeveloper.email))
+        await(underTest.activateIpAllowlist(appWithNoIpAllowList, sessionId, standardDeveloper.email))
       }
 
       expectedException.getMessage shouldBe s"IP allowlist for session ID $sessionId cannot be activated because it is empty"
@@ -209,7 +214,7 @@ class IpAllowlistServiceSpec
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturnNothing[IpAllowlistFlow](sessionId)
 
       val expectedException: IllegalStateException = intercept[IllegalStateException] {
-        await(underTest.activateIpAllowlist(anApplication(), sessionId, standardDeveloper.email))
+        await(underTest.activateIpAllowlist(appWithNoIpAllowList, sessionId, standardDeveloper.email))
       }
 
       expectedException.getMessage shouldBe s"No IP allowlist flow exists for session ID $sessionId"
@@ -219,14 +224,12 @@ class IpAllowlistServiceSpec
 
   "deactivateIpAllowlist" should {
     "update the allowlist in TPA with an empty set" in new Setup {
-      val app: ApplicationWithCollaborators = standardApp
-      // anApplication(
-      //   developerEmail = standardDeveloper.email,
-      //   ipAllowlist = IpAllowlist(
-      //     required = false,
-      //     allowlist = Set("1.1.1.1/24")
-      //   )
-      // )
+      val app = appWithNoIpAllowList.withIpAllowlist(
+        IpAllowlist(
+          required = false,
+          allowlist = Set("1.1.1.1/24")
+        )
+      )
 
       val existingFlow = IpAllowlistFlow(sessionId, Set("1.1.1.1/24", "2.2.2.2/24"))
       FlowRepositoryMock.FetchBySessionIdAndFlowType.thenReturn[IpAllowlistFlow](sessionId)(existingFlow)
@@ -255,10 +258,7 @@ class IpAllowlistServiceSpec
     }
 
     "fail when the IP allowlist is required" in new Setup {
-      val app: ApplicationWithCollaborators = standardApp
-      // anApplication(
-      //   ipAllowlist = IpAllowlist(required = true)
-      // )
+      val app: ApplicationWithCollaborators = appWithNoIpAllowList.withIpAllowlist(IpAllowlist(required = true))
 
       val expectedException: ForbiddenException = intercept[ForbiddenException] {
         await(underTest.deactivateIpAllowlist(app, sessionId, standardDeveloper.email))

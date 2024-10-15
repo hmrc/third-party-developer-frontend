@@ -29,9 +29,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 class ResponsibleIndividualChangeToOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with LocalUserIdTracker with DeveloperSessionBuilder with TestApplications with UserTestData {
+    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with TestApplications with UserTestData  {
 
   "Responsible Individual Change To Other View" should {
     val application = anApplication()
