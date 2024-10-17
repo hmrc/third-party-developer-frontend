@@ -62,22 +62,6 @@ class ServerTokenSpec
     val request          = FakeRequest().withCSRFToken
     val developerSession = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
 
-    // val application = Application(
-    //   ApplicationId.random,
-    //   ClientId("Test Application Client ID"),
-    //   "Test Application",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength,
-    //   Environment.PRODUCTION,
-    //   Some("Test Application"),
-    //   collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-    //   access = Access.Standard(),
-    //   state = ApplicationState(updatedOn = instant),
-    //   checkInformation = None
-    // )
-
     "render" in new Setup {
       val serverTokenView = app.injector.instanceOf[ServerTokenView]
       val page: Html      = serverTokenView.render(standardApp, randomUUID.toString, request, developerSession, messagesProvider, appConfig)

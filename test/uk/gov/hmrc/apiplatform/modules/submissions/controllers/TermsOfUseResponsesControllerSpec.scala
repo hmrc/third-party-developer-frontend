@@ -81,11 +81,6 @@ class TermsOfUseResponsesControllerSpec
       val grantedApp = submittedApp.withState(appState)
       givenApplicationAction(
         grantedApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-        // ApplicationWithSubscriptionFields(
-        //   grantedApp,
-        //   asSubscriptions(List(aSubscription)),
-        //   asFields(List.empty)
-        // ),
         userSession,
         List(aSubscription)
       )

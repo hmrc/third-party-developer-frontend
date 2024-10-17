@@ -62,11 +62,6 @@ class CredentialsRequestedControllerSpec
 
     givenApplicationAction(
       submittedApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptions(
-      //   submittedApp,
-      //   asSubscriptions(List(aSubscription)),
-      //   asFields(List.empty)
-      // ),
       userSession,
       List(aSubscription)
     )

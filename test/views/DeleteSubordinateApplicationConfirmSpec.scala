@@ -50,20 +50,6 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
     val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
     val application       = standardApp
-    // Application(
-    //   appId,
-    //   clientId,
-    //   "App name 1",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   Period.ofDays(547),
-    //   Environment.SANDBOX,
-    //   Some("Description 1"),
-    //   Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-    //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-    //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    // )
 
     "show link and text to confirm deletion" in {
 

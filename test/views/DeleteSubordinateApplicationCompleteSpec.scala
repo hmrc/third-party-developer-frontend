@@ -50,20 +50,6 @@ class DeleteSubordinateApplicationCompleteSpec extends CommonViewSpec with WithC
       val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
       val application       = standardApp
-      // Application(
-      //   appId,
-      //   clientId,
-      //   "App name 1",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   Environment.SANDBOX,
-      //   Some("Description 1"),
-      //   Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-      //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-      //   access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-      // )
 
       val page = deleteSubordinateApplicationCompleteView.render(application, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")

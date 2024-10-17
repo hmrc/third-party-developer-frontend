@@ -60,21 +60,6 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
   val loggedInDeveloper = standardDeveloper.loggedIn
 
   val application = standardApp
-  //    Application(
-  //   applicationId,
-  //   clientId,
-  //   applicationName,
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.PRODUCTION,
-  //   Some("Description 1"),
-  //   Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-  //   state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-  //   access =
-  //     Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  // )
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]

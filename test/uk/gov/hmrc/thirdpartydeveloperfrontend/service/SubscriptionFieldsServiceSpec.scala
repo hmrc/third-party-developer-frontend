@@ -49,8 +49,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   val application = standardApp
 
-  // Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
-
   trait Setup extends SubscriptionFieldsConnectorMock {
 
     lazy val locked = false
@@ -74,7 +72,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       Future.successful(
         Some(
           standardApp
-          // Application(applicationId, clientId, "name", instant, Some(instant), None, grantLength = GrantLength.EIGHTEEN_MONTHS, Environment.PRODUCTION)
         )
       )
     )

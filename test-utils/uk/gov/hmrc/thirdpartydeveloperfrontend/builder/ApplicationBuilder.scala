@@ -28,7 +28,6 @@ trait ApplicationBuilder extends FixedClock with ApplicationStateHelper with App
   def buildApplication(appOwnerEmail: LaxEmailAddress): ApplicationWithCollaborators = {
 
     val appId        = ApplicationId.random
-    // val clientId     = ClientId("clientid-" + randomUUID.toString)
     val appOwnerName = "App owner name"
     val access       = Access.Standard(
       redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),

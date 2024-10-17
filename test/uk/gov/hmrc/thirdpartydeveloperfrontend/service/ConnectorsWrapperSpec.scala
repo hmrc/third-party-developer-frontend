@@ -75,32 +75,10 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with Applicati
   val grantLength             = Period.ofDays(547)
 
   val productionApplication = standardApp
-  // Application(
-  //   productionApplicationId,
-  //   productionClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.PRODUCTION,
-  //   Some("description")
-  // )
   val sandboxApplicationId  = ApplicationId.random
   val sandboxClientId       = ClientId("Client ID")
 
   val sandboxApplication = standardApp.withEnvironment(Environment.SANDBOX).withId(sandboxApplicationId)
-  // Application(
-  //   sandboxApplicationId,
-  //   sandboxClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.SANDBOX,
-  //   Some("description")
-  // )
 
   "fetchByApplicationId" when {
     "return the application fetched from the production connector when it exists there" in new Setup {

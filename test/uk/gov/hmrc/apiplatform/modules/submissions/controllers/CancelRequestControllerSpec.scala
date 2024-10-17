@@ -97,9 +97,6 @@ class CancelRequestControllerSpec
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // sampleApp
-      //   .withSubscriptions(Set(aSubscription))
-      //   .withFields(Map.empty),
       userSession,
       List(aSubscription)
     )
@@ -112,11 +109,6 @@ class CancelRequestControllerSpec
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptions(
-      //   testingApp,
-      //   asSubscriptions(List(aSubscription)),
-      //   asFields(List.empty)
-      // ),
       userSession,
       List(aSubscription)
     )

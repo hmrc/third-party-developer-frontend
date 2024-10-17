@@ -194,7 +194,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     fetchByApplicationIdReturns(appId, testingApp)
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(testAPISubscriptionStatus1))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptionFields(testingApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
       session,
       List(testAPISubscriptionStatus1)
     )
@@ -405,7 +404,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         prodApp.withSubscriptions(asSubscriptions(List(testAPISubscriptionStatus1))).withFieldValues(Map.empty),
-        // ApplicationWithSubscriptionFields(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
         session,
         List(testAPISubscriptionStatus1)
       )
@@ -443,7 +441,6 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       fetchByApplicationIdReturns(prodAppId, prodApp)
       givenApplicationAction(
         prodApp.withSubscriptions(asSubscriptions(List(testAPISubscriptionStatus1))).withFieldValues(Map.empty),
-        // ApplicationWithSubscriptionFields(prodApp, asSubscriptions(List(testAPISubscriptionStatus1)), asFields(List.empty)),
         session,
         List(testAPISubscriptionStatus1)
       )

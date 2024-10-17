@@ -37,18 +37,6 @@ class ApplicationSpec extends HmrcSpec with FixedClock with ApplicationWithColla
 
   val baseApplication = standardApp
 
-  //   Application(
-  //   ApplicationId.random,
-  //   ClientId("client"),
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   Period.ofDays(1),
-  //   Environment.PRODUCTION,
-  //   access = standardAccess
-  // )
-
   "privacy policy location" should {
     "be correct for old journey app when no location supplied" in {
       val application = baseApplication.withAccess(Access.Standard(privacyPolicyUrl = None))

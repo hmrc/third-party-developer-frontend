@@ -58,21 +58,6 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
     val developerSession = standardDeveloper.loggedIn
 
     val application = standardApp
-    //   Application(
-    //   ApplicationId.random,
-    //   ClientId("Test Application Client ID"),
-    //   "Test Application",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   Period.ofDays(547),
-    //   Environment.PRODUCTION,
-    //   Some("Test Application"),
-    //   collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-    //   access = Access.Standard(),
-    //   state = ApplicationState(updatedOn = instant),
-    //   checkInformation = None
-    // )
 
     "render" in new Setup {
       val page: Html = clientIdView.render(application, request, developerSession, messagesProvider, appConfig)

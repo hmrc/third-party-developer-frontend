@@ -46,25 +46,6 @@ class ApplicationCommandConnectorSpec
 
   def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationWithCollaborators = standardApp
 
-  //   {
-  //   Application(
-  //     ApplicationId.random,
-  //     ClientId("clientid"),
-  //     "appName",
-  //     createdOn,
-  //     Some(lastAccess),
-  //     None,
-  //     Period.ofDays(547),
-  //     Environment.PRODUCTION,
-  //     None,
-  //     Set.empty,
-  //     Access.Privileged(),
-  //     ApplicationState(State.TESTING, None, None, None, instant),
-  //     None,
-  //     IpAllowlist(required = false, Set.empty)
-  //   )
-  // }
-
   val apiVersion1   = ApiVersionNbr.random
   val applicationId = ApplicationId.random
   val administrator = Administrator(UserId.random, "sample@example.com".toLaxEmail)

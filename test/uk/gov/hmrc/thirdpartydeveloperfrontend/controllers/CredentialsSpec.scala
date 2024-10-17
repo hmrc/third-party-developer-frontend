@@ -326,7 +326,6 @@ class CredentialsSpec
 
     "delete the selected client secret" in new Setup with ApplicationProviderWithAdmin {
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
-      // givenDeleteClientSecretSucceeds(application, actor, clientSecretId)
 
       val result: Future[Result] = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 

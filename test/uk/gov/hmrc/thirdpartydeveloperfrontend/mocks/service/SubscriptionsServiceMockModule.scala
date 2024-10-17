@@ -79,7 +79,6 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
           .thenReturn(successful(mock[TicketResult]))
     }
-    //
   }
 
   object SubscriptionsServiceMock extends AbstractSubscriptionsServiceMock {

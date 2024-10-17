@@ -136,17 +136,6 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     "not display the option to change the app name if in prod with state production" in {
 
       val application = standardApp
-      // Application(
-      //   applicationId,
-      //   clientId,
-      //   "An App Name",
-      //   instant,
-      //   Some(instant),
-      //   None,
-      //   grantLength,
-      //   Environment.PRODUCTION,
-      //   state = ApplicationState(State.PRODUCTION, None, None, None, instant)
-      // )
       val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "label", "Application name") shouldBe false

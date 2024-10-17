@@ -75,11 +75,6 @@ class CheckAnswersControllerSpec
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
-      // ApplicationWithSubscriptions(
-      //   testingApp.copy(id = applicationId),
-      //   asSubscriptions(List(aSubscription)),
-      //   asFields(List.empty)
-      // ),
       userSession,
       List(aSubscription)
     )
