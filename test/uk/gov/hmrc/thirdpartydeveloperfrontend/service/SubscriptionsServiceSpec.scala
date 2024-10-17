@@ -16,34 +16,24 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptionsFixtures}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonEmailData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
-
-  val versionOne          = ApiVersionNbr("1.0")
-  val versionTwo          = ApiVersionNbr("2.0")
-  val grantLength: Period = Period.ofDays(547)
-
-  val email = "bob@example.com".toLaxEmail
+class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscriptionsFixtures {
 
   trait Setup
       extends ApplicationCommandConnectorMockModule {
@@ -79,52 +69,23 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
   }
 
-  val productionApplicationId = ApplicationId.random
-  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
-
-  val productionApplication: ApplicationWithCollaborators = standardApp
-  // Application(
-  //   productionApplicationId,
-  //   productionClientId,
-  //   "name",
-  //   instant,
-  //   Some(instant),
-  //   None,
-  //   grantLength,
-  //   Environment.PRODUCTION,
-  //   Some("description"),
-  //   Set()
-  // )
-
   "isSubscribedToApi" should {
-    val subscriptions = Set(
-      ApiIdentifier(ApiContext("first context"), versionOne),
-      ApiIdentifier(ApiContext("second context"), versionOne)
-    )
-    val appWithData   = buildApplication("email@example.com".toLaxEmail).withSubscriptions(subscriptions).withFieldValues(Map.empty)
+    val appWithSubs = standardApp.withSubscriptions(Set(apiIdentifierOne, apiIdentifierTwo)).withFieldValues(Map.empty)
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
-      val apiContext   = ApiContext("third context")
-      val apiVersion   = ApiVersionNbr("3.0")
-      val subscription = ApiIdentifier(apiContext, apiVersion)
-
-      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
+      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithSubs)))
 
       private val result =
-        await(subscriptionsService.isSubscribedToApi(appWithData.id, subscription))
+        await(subscriptionsService.isSubscribedToApi(appWithSubs.id, apiIdentifierFour))
 
       result shouldBe false
     }
 
     "return true when the application is subscribed to the requested api version" in new Setup {
-      val apiContext   = ApiContext("first context")
-      val apiVersion   = versionOne
-      val subscription = ApiIdentifier(apiContext, apiVersion)
-
-      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithData)))
+      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithSubs)))
 
       private val result =
-        await(subscriptionsService.isSubscribedToApi(appWithData.id, subscription))
+        await(subscriptionsService.isSubscribedToApi(appWithSubs.id, apiIdentifierOne))
 
       result shouldBe true
     }
@@ -132,42 +93,32 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder w
 
   "Subscribe to API" should {
     "with no subscription fields definitions" in new Setup {
+      theProductionConnectorthenReturnTheApplication(standardApp.id, standardApp)
 
-      private val context = ApiContext("api1")
-      private val version = versionOne
-
-      private val subscription = ApiIdentifier(context, version)
-
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
-
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(productionApplication)
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(standardApp)
 
       private val result =
-        await(subscriptionsService.subscribeToApi(productionApplication, subscription, email))
+        await(subscriptionsService.subscribeToApi(standardApp, apiIdentifierFour, CommonEmailData.altDev))
 
       result.isRight shouldBe true
-      result shouldBe Right(DispatchSuccessResult(productionApplication))
+      result shouldBe Right(DispatchSuccessResult(standardApp))
     }
   }
 
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
-      private val context       = ApiContext("api1")
-      private val version       = versionOne
-      private val apiIdentifier = ApiIdentifier(context, version)
+      theProductionConnectorthenReturnTheApplication(standardApp.id, standardApp)
 
-      theProductionConnectorthenReturnTheApplication(productionApplicationId, productionApplication)
+      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(standardApp)
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(productionApplication)
-
-      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(productionClientId, context, version))
+      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(standardApp.clientId, apiContextOne, apiVersionNbrOne))
         .thenReturn(successful(FieldsDeleteSuccessResult))
 
       private val result =
-        await(subscriptionsService.unsubscribeFromApi(productionApplication, apiIdentifier, email))
+        await(subscriptionsService.unsubscribeFromApi(standardApp, apiIdentifierOne, CommonEmailData.altDev))
 
       result.isRight shouldBe true
-      result shouldBe Right(DispatchSuccessResult(productionApplication))
+      result shouldBe Right(DispatchSuccessResult(standardApp))
     }
   }
 }

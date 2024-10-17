@@ -16,57 +16,51 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.temporal.ChronoUnit.DAYS
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import views.helper.EnvironmentNameService
 import views.html._
 
-import play.api.mvc.{AnyContentAsEmpty, Result}
-import play.api.test.FakeRequest
+import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{ApplicationBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec
-    with SampleUserSession
-    with SampleApplication
     with SubscriptionTestSugar
     with SubscriptionTestHelper
-    with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker
-    with ApplicationBuilder {
+    with ApplicationWithCollaboratorsFixtures
+    with WithCSRFAddToken {
 
-  val collaborator: Collaborator = userSession.developer.email.asAdministratorCollaborator
+  val sandboxAppSummaries =
+    (1 to 5).map { i => standardApp.withEnvironment(Environment.SANDBOX).withId(ApplicationId.random).withName(ApplicationName(s"App $i")) }.map(ApplicationSummary.from(
+      _,
+      adminUser.userId
+    )).toList
 
-  val appCreatedOn  = instant.minus(1, DAYS)
-  val appLastAccess = appCreatedOn
-
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(userSession.developer.email)).map(ApplicationSummary.from(_, userSession.developer.userId)).toList
-
-  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock
-      with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup
+      extends UpliftLogicMock
+      with AppsByTeamMemberServiceMock
+      with ApplicationServiceMock
+      with ApmConnectorMockModule
+      with ApplicationActionServiceMock
+      with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
@@ -103,18 +97,6 @@ class ChooseApplicationToUpliftActionSpec
 
     val hc = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, userSession)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
-
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withCSRFToken
-
-    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
-
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
     when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
@@ -150,10 +132,11 @@ class ChooseApplicationToUpliftActionSpec
 
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> "")))
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInAdminRequest.withFormUrlEncodedBody(("applicationId" -> "")).withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
 
+      println(contentAsString(result))
       contentAsString(result) should include("Select the application you want production credentials for")
     }
 
@@ -166,7 +149,7 @@ class ChooseApplicationToUpliftActionSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.toString())))
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInDevRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.toString())))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId).toString

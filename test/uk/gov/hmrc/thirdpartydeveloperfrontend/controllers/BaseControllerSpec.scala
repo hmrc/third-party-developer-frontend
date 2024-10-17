@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.Period
-
 import org.apache.pekko.stream.Materializer
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -26,31 +24,57 @@ import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
+import play.api.test.FakeRequest
+import play.filters.csrf.CSRF.TokenProvider
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
-class BaseControllerSpec
+abstract class BaseControllerSpec
     extends AsyncHmrcSpec
     with GuiceOneAppPerSuite
     with ErrorHandlerMock
-    with SessionServiceMock {
+    with SessionServiceMock
+    with CommonSessionFixtures
+    with CookieEncoding
+    with FixedClock {
 
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
   def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = false, List.empty, "")
-
-  implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
+  implicit val cookieSigner: CookieSigner          = app.injector.instanceOf[CookieSigner]
 
   implicit lazy val materializer: Materializer = app.materializer
 
   lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
-  val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
-  val grantLength: Period               = Period.ofDays(547)
+  val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+
+  val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
+
+  FetchSessionById.succeedsWith(devSession.sessionId, devSession)
+  UpdateUserFlowSessions.succeedsWith(devSession.sessionId)
+  val loggedInDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(devSession.sessionId).withSession(sessionParams: _*)
+
+  FetchSessionById.succeedsWith(adminSession.sessionId, adminSession)
+  UpdateUserFlowSessions.succeedsWith(adminSession.sessionId)
+  val loggedInAdminRequest = FakeRequest().withLoggedIn(this, cookieSigner)(adminSession.sessionId).withSession(sessionParams: _*)
+
+  FetchSessionById.succeedsWith(altDevSession.sessionId, altDevSession)
+  UpdateUserFlowSessions.succeedsWith(altDevSession.sessionId)
+  val loggedInAltDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(altDevSession.sessionId).withSession(sessionParams: _*)
+
+  FetchSessionById.succeedsWith(partLoggedInSession.sessionId, partLoggedInSession)
+  val partLoggedInRequest = FakeRequest().withLoggedIn(this, cookieSigner)(partLoggedInSession.sessionId)
+
+  val mcc: MessagesControllerComponents       = app.injector.instanceOf[MessagesControllerComponents]
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

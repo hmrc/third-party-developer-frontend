@@ -27,6 +27,7 @@ import play.filters.csrf.CSRF
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -46,7 +47,7 @@ class QuestionControllerSpec
     with SampleUserSession
     with SampleApplication
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
+    with ExtendedSubscriptionTestHelper
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker
@@ -84,7 +85,8 @@ class QuestionControllerSpec
       with HasSubscriptions
       with HasSessionDeveloperFlow
       with HasAppInTestingState
-      with AppendedClues {
+      with AppendedClues
+      with FixedClock {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 

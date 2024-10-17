@@ -57,7 +57,7 @@ class ManageTeamSpec
       with ApplicationWithCollaboratorsFixtures
       with SampleUserSession
       with SampleApplication
-      with SubscriptionTestHelper
+      with ExtendedSubscriptionTestHelper
       with TestApplications
       with UserBuilder
       with LocalUserIdTracker {
@@ -375,7 +375,7 @@ class ManageTeamSpec
           apiVersion
         )
 
-        val app: ApplicationWithCollaborators = aStandardPendingApprovalApplication(developer.email)
+        val app: ApplicationWithCollaborators = aStandardPendingApprovalApplication // (developer.email)
 
         givenApplicationAction(app, session)
 

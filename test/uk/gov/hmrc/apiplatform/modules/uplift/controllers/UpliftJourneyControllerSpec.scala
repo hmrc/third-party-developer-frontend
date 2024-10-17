@@ -33,6 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
@@ -56,7 +57,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleUserSession
     with SampleApplication
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
+    with ExtendedSubscriptionTestHelper
     with SubmissionsTestData
     with WithCSRFAddToken
     with SubscriptionsBuilder
@@ -71,7 +72,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       with ApmConnectorMockModule
       with GetProductionCredentialsFlowServiceMockModule
       with UpliftJourneyServiceMockModule
-      with SessionServiceMock {
+      with SessionServiceMock
+      with FixedClock {
 
     def titleOf(result: Future[Result]): String = {
       val titleRegEx = """<title[^>]*>(.*)</title>""".r

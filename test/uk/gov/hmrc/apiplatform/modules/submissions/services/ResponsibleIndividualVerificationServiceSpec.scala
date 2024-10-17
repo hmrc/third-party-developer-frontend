@@ -47,7 +47,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val applicationId              = ApplicationId.random
-    val application                = aStandardPendingResponsibleIndividualVerificationApplication()
+    val application                = aStandardPendingResponsibleIndividualVerificationApplication
     val code                       = "12345678"
     val requesterName              = "Mr Submitter"
     val requesterEmail             = "submitter@example.com".toLaxEmail

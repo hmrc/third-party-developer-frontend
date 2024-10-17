@@ -97,12 +97,12 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     val confirmPasswordFieldName = "confirmpassword"
     val currentPasswordFieldName = "currentpassword"
     val emailSessionName         = "email"
-    val developerEmail           = "developer@example.com".toLaxEmail
+    val devEmail                 = "developer@example.com".toLaxEmail
     val developerPassword        = "$Pr4srs1234W0irddd1$"
     val developerCode            = "developerCode"
     val sessionParams            = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val request                  = FakeRequest().withSession(sessionParams: _*)
-    val requestWithSession       = request.withSession((emailSessionName, developerEmail.text))
+    val requestWithSession       = request.withSession((emailSessionName, devEmail.text))
 
     val mockHeaderCarrier = mock[HeaderCarrier]
   }
@@ -130,37 +130,37 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "process password changed unverified user" in new Setup {
-      mockConnectorUnverifiedForChangePassword(developerEmail, developerPassword, developerPassword)
+      mockConnectorUnverifiedForChangePassword(devEmail, developerPassword, developerPassword)
       val requestWithPassword = requestWithSession
         .withFormUrlEncodedBody((currentPasswordFieldName, developerPassword), (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
 
       val result =
-        underTest.processPasswordChange(developerEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly)
+        underTest.processPasswordChange(devEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly)
 
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPassword).get("email").mkString shouldBe developerEmail.text
+      await(result).session(requestWithPassword).get("email").mkString shouldBe devEmail.text
     }
 
     "request reset unverified user" in new Setup {
-      mockConnectorUnverifiedForRequestReset(developerEmail)
+      mockConnectorUnverifiedForRequestReset(devEmail)
       val requestWithPasswordAndEmail = requestWithSession
-        .withFormUrlEncodedBody((emailFieldName, developerEmail.text))
+        .withFormUrlEncodedBody((emailFieldName, devEmail.text))
 
       val result = addToken(underTest.requestReset())(requestWithPasswordAndEmail)
 
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail.text
+      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe devEmail.text
     }
 
     "reset unverified user" in new Setup {
-      mockConnectorUnverifiedForReset(developerEmail, developerPassword)
+      mockConnectorUnverifiedForReset(devEmail, developerPassword)
       val requestWithPasswordAndEmail = requestWithSession
         .withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
 
       val result = addToken(underTest.resetPassword())(requestWithPasswordAndEmail)
 
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe developerEmail.text
+      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe devEmail.text
     }
 
     "show the forgot password page" in new Setup {
@@ -171,17 +171,17 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "show the sent reset link page" in new Setup {
-      mockRequestResetFor(developerEmail)
-      val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, developerEmail.text))
+      mockRequestResetFor(devEmail)
+      val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, devEmail.text))
 
       val result = addToken(underTest.requestReset())(requestWithEmail)
 
       status(result) shouldBe OK
-      contentAsString(result) should include(s"We have sent an email to ${developerEmail.text}")
+      contentAsString(result) should include(s"We have sent an email to ${devEmail.text}")
     }
 
     "show the reset password page with errors for unverified email" in new Setup {
-      val requestWithunverifiedEmail = request.withFlash("error" -> "UnverifiedAccount", "email" -> developerEmail.text)
+      val requestWithunverifiedEmail = request.withFlash("error" -> "UnverifiedAccount", "email" -> devEmail.text)
 
       val result = addToken(underTest.resetPasswordError())(requestWithunverifiedEmail)
 
@@ -191,7 +191,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     }
 
     "show the reset password page with no errors" in new Setup {
-      val requestWithVerifiedEmail = request.withSession("email" -> developerEmail.text)
+      val requestWithVerifiedEmail = request.withSession("email" -> devEmail.text)
 
       val result = addToken(underTest.resetPasswordChange())(requestWithVerifiedEmail)
 

@@ -41,8 +41,8 @@ class CancelRequestControllerSpec
     extends BaseControllerSpec
     with SampleUserSession
     with SampleApplication
+    with ExtendedSubscriptionTestHelper
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker

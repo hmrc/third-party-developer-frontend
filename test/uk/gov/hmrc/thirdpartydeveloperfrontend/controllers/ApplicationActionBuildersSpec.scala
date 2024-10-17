@@ -24,14 +24,14 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.LoggedInRequestTestHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class TestController(
     val cookieSigner: CookieSigner,
@@ -45,20 +45,19 @@ class TestController(
   ) extends ApplicationController(mcc)
     with SubscriptionFieldsActions {}
 
-class ApplicationActionBuildersSpec extends BaseControllerSpec
-    with ApplicationServiceMock
-    with ApplicationActionServiceMock
-    with ApplicationBuilder
-    with LocalUserIdTracker
+class ApplicationActionBuildersSpec
+    extends BaseControllerSpec
+    with WithCSRFAddToken
+    with SubscriptionTestSugar
     with SubscriptionsBuilder
-    with LoggedInRequestTestHelper {
+    with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup {
-    val loggedInDeveloper = session
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+    val loggedInDeveloper = devSession
 
     val errorHandler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
 
-    val applicationWithSubscriptionFields = buildApplicationWithSubscriptionFields(developer.email)
+    val applicationWithSubscriptionFields = standardApp.withSubscriptions(Set.empty).withFieldValues(Map.empty)
     val subscriptionWithoutSubFields      = buildAPISubscriptionStatus("api name")
 
     val subscriptionWithSubFields =
@@ -76,7 +75,7 @@ class ApplicationActionBuildersSpec extends BaseControllerSpec
 
       val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionFields.id, context, version) {
         definitionsRequest: ApplicationWithSubscriptionFieldsRequest[AnyContent] => Future.successful(underTest.Ok(testResultBody))
-      }(loggedInRequest)
+      }(loggedInDevRequest)
       status(result) shouldBe expectedStatus
       if (expectedStatus == OK) {
         contentAsString(result) shouldBe testResultBody

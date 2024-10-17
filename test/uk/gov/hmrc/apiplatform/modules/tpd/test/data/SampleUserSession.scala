@@ -26,7 +26,7 @@ trait SampleUserSession {
   lazy val user: User = buildTrackedUser()
   lazy val sessionId  = UserSessionId.random
 
-  val partLoggedInSessionId                 = UserSessionId.random
-  lazy val partLoggedInSession: UserSession = UserSession(partLoggedInSessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, user)
-  lazy val userSession: UserSession         = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
+  // val partLoggedInSession.sessionId                 = UserSessionId.random
+  // lazy val partLoggedInSession: UserSession = UserSession(partLoggedInSession.sessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, user)
+  lazy val userSession: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
 }

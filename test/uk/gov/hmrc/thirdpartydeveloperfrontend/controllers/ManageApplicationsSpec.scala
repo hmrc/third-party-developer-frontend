@@ -25,7 +25,6 @@ import views.html._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -57,10 +56,9 @@ class ManageApplicationsSpec
 
   val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-
   trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock
-      with TermsOfUseInvitationServiceMockModule with SubmissionServiceMockModule {
+      with TermsOfUseInvitationServiceMockModule with SubmissionServiceMockModule with FixedClock {
+
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
@@ -85,7 +83,7 @@ class ManageApplicationsSpec
       .withSession(sessionParams: _*)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(manageApplicationsController, implicitly)(partLoggedInSessionId)
+      .withLoggedIn(manageApplicationsController, implicitly)(partLoggedInSession.sessionId)
       .withSession(sessionParams: _*)
   }
 

@@ -33,7 +33,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionsData
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
@@ -46,7 +45,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{AppsByTeamMemberServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -54,9 +53,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
 
 class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
-    with UserBuilder with LocalUserIdTracker with CollaboratorTracker with CookieEncoding with MfaDetailBuilder with FixedClock {
+    with UserBuilder with LocalUserIdTracker with CollaboratorTracker with CookieEncoding with MfaDetailBuilder {
 
-  trait Setup extends SessionServiceMock with ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule with AppsByTeamMemberServiceMock {
+  trait Setup extends ThirdPartyDeveloperConnectorMockModule with ThirdPartyDeveloperMfaConnectorMockModule with AppsByTeamMemberServiceMock {
 
     val developerWithAuthAppMfa                      = buildTrackedUser(mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
     val developerWithSmsMfa                          = buildTrackedUser(mfaDetails = List(verifiedSmsMfaDetail))
@@ -121,18 +120,6 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val applicationsWhereUserIsAdminInProduction =
       Seq(
         ApplicationWithSubscriptionsData.one
-          //   ApplicationWithSubscriptions(
-          //     applicationId,
-          //     clientId,
-          //     "myName",
-          //     instant,
-          //     Some(instant),
-          //     None,
-          //     grantLength,
-          //     Environment.PRODUCTION,
-          //     collaborators = Set(sessionWithAuthAppMfa.developer.email.asAdministratorCollaborator),
-          //     subscriptions = Set.empty
-          //   )
       )
 
     val sessionParams: Seq[(String, String)] = Seq(
@@ -190,7 +177,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
   }
@@ -226,14 +213,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
   trait PartLogged extends Setup {
     def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
-
-    fetchSessionByIdReturns(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
+    FetchSessionById.succeedsWith(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
   }
 
   trait LoggedIn extends Setup {
     def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
-
-    fetchSessionByIdReturns(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
+    FetchSessionById.succeedsWith(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
   }
 
   "authenticate with username and password" should {
@@ -255,7 +240,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -391,7 +376,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidPassword),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
 
@@ -419,7 +404,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("Provide a valid email or password")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidEmail),
-        eqTo(Map("developerEmail" -> unregisteredEmail.text))
+        eqTo(Map("devEmail" -> unregisteredEmail.text))
       )(*)
     }
 
@@ -451,7 +436,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You've entered details that do not match our records. Reset your password to sign in.")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToLockedAccount),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
   }
@@ -593,7 +578,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -610,7 +595,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -624,7 +609,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
 
@@ -651,7 +636,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
 
@@ -665,7 +650,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       contentAsString(result) should include("You have entered an incorrect access code")
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
       )(*)
     }
 
@@ -692,7 +677,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
-        eqTo(Map("developerEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
       )(*)
     }
   }
@@ -769,8 +754,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "partially logged in" should {
       "show the sign-in page" in new SetupWithUserAuthResRequiringMfaEnablement {
-        when(underTest.sessionService.fetch(eqTo(sessionPartLoggedInEnablingMfa.sessionId))(*))
-          .thenReturn(Future.successful(Some(sessionPartLoggedInEnablingMfa)))
+        FetchSessionById.succeedsWith(sessionPartLoggedInEnablingMfa.sessionId, sessionPartLoggedInEnablingMfa)
 
         private val partLoggedInRequest = FakeRequest()
           .withLoggedIn(underTest, implicitly)(sessionPartLoggedInEnablingMfa.sessionId)
@@ -785,8 +769,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "already logged in" should {
       "show the list applications page" in new Setup {
-        when(underTest.sessionService.fetch(eqTo(sessionWithAuthAppMfa.sessionId))(*))
-          .thenReturn(Future.successful(Some(sessionWithAuthAppMfa)))
+        FetchSessionById.succeedsWith(sessionWithAuthAppMfa.sessionId, sessionWithAuthAppMfa)
 
         private val loggedInRequest = FakeRequest()
           .withLoggedIn(underTest, implicitly)(sessionWithAuthAppMfa.sessionId)

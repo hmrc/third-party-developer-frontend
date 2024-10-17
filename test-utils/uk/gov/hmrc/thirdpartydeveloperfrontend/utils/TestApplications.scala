@@ -21,35 +21,34 @@ import scala.util.Random
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata._
 
-trait TestApplications extends FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
-  self: CollaboratorTracker =>
+trait TestApplications extends FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures with CommonCollaboratorFixtures {
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
   def aSandboxApplication(
-      adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
-      developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail
+      administratorEmail: LaxEmailAddress = adminEmail,
+      developerEmail: LaxEmailAddress = devEmail
     ): ApplicationWithCollaborators = {
 
     anApplication(
       environment = Environment.SANDBOX,
       state = InState.production("a", "b", "c"),
-      adminEmail = adminEmail,
-      developerEmail = developerEmail
+      administratorEmail,
+      developerEmail
     )
   }
 
   def anApplication(
       environment: Environment = Environment.PRODUCTION,
       state: ApplicationState = InState.production("test@test.com", "test name", "test"),
-      adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail,
-      developerEmail: LaxEmailAddress = "developer@example.com".toLaxEmail,
+      administratorEmail: LaxEmailAddress = adminEmail,
+      developerEmail: LaxEmailAddress = devEmail,
       access: Access = standardAccess()
     ): ApplicationWithCollaborators = {
 
@@ -57,22 +56,22 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
       .withEnvironment(environment)
       .withState(state)
       .withAccess(access)
-      .withCollaborators(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
+      .withCollaborators( /* TODO */ )
       .withDescription(Some("Description 1"))
   }
 
-  lazy val aStandardApplication: ApplicationWithCollaborators = anApplication()
+  val aStandardApplication: ApplicationWithCollaborators = anApplication()
 
-  def aStandardApprovedApplication: ApplicationWithCollaborators = aStandardApplication
+  val aStandardApprovedApplication: ApplicationWithCollaborators = aStandardApplication
 
-  def aStandardNonApprovedApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
-    anApplication(adminEmail = adminEmail).withState(InState.testing)
+  val aStandardNonApprovedApplication: ApplicationWithCollaborators =
+    anApplication().withState(InState.testing)
 
-  def aStandardPendingApprovalApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
-    anApplication(adminEmail = adminEmail).withState(InState.pendingGatekeeperApproval("test@test.com", "test name"))
+  val aStandardPendingApprovalApplication: ApplicationWithCollaborators =
+    anApplication().withState(InState.pendingGatekeeperApproval("test@test.com", "test name"))
 
-  def aStandardPendingResponsibleIndividualVerificationApplication(adminEmail: LaxEmailAddress = "admin@example.com".toLaxEmail): ApplicationWithCollaborators =
-    anApplication(adminEmail = adminEmail).withState(InState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
+  val aStandardPendingResponsibleIndividualVerificationApplication: ApplicationWithCollaborators =
+    anApplication().withState(InState.pendingResponsibleIndividualVerification("admin@example.com", "admin name"))
 
   def standardAccess(
       redirectUris: List[RedirectUri] = List("https://redirect1", "https://redirect2").map(RedirectUri.unsafeApply(_)),
@@ -120,9 +119,5 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
     }
 
     final def withRedirectUris(someRedirectUris: List[RedirectUri]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(redirectUris = someRedirectUris))
-
-    final def withTermsAndConditionsUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(termsAndConditionsUrl = url))
-
-    final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
   }
 }

@@ -61,7 +61,7 @@ class EditApplicationNameSpec
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock with FixedClock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
@@ -101,7 +101,7 @@ class EditApplicationNameSpec
     fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
+    fetchSessionByIdReturns(partLoggedInSession.sessionId, partLoggedInSession)
 
     givenApplicationNameIsValid()
 
@@ -109,7 +109,7 @@ class EditApplicationNameSpec
       .withLoggedIn(underTest, implicitly)(sessionId)
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
+      .withLoggedIn(underTest, implicitly)(partLoggedInSession.sessionId)
 
   }
 

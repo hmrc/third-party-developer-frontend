@@ -16,24 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
+import java.util.UUID
 import scala.concurrent.Future.successful
+import scala.util.Random
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
-  ApplicationWithCollaborators,
-  ApplicationWithSubscriptionFields,
-  ApplicationWithSubscriptions,
-  CheckInformation
-}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications}
 
-trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TestApplications with CollaboratorTracker with LocalUserIdTracker {
+trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with FixedClock {
   val applicationServiceMock = mock[ApplicationService]
 
   def fetchByApplicationIdReturns(id: ApplicationId, returns: ApplicationWithCollaborators): Unit =
@@ -73,6 +69,12 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenApplicationExists(application: ApplicationWithSubscriptions): Unit = givenApplicationExists(application.withFieldValues(Map.empty))
 
   def givenApplicationExists(application: ApplicationWithSubscriptionFields): Unit = {
+    def aClientSecret()                                                                                                                                            = ClientSecretResponse(ClientSecret.Id.random, UUID.randomUUID.toString, instant)
+    def randomString(length: Int)                                                                                                                                  = Random.alphanumeric.take(length).mkString
+    def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
+      ApplicationToken(List(aClientSecret()), accessToken)
+    }
+
     fetchByApplicationIdReturns(application.id, application)
 
     when(applicationServiceMock.fetchCredentials(eqTo(application.asAppWithCollaborators))(*)).thenReturn(successful(tokens()))
@@ -87,4 +89,4 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   }
 }
 
-object ApplicationServiceMock extends ApplicationServiceMock
+object ApplicationServiceMock extends ApplicationServiceMock with FixedClock

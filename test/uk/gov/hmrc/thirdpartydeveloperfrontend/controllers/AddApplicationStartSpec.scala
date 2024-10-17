@@ -22,21 +22,18 @@ import scala.concurrent.Future
 import views.helper.EnvironmentNameService
 import views.html._
 
-import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
@@ -44,24 +41,27 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class AddApplicationStartSpec
     extends BaseControllerSpec
-    with SampleUserSession
-    with SampleApplication
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
     with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker
-    with ApplicationBuilder {
+    with ApplicationWithCollaboratorsFixtures
+    with FixedClock {
 
-  val collaborator: Collaborator = userSession.developer.email.asAdministratorCollaborator
+  val sandboxAppSummaries = (1 to 5).map { i =>
+    standardApp
+      .withEnvironment(Environment.SANDBOX)
+      .withId(ApplicationId.random)
+      .withName(ApplicationName(s"App $i"))
+  }
+    .map(ApplicationSummary.from(_, devUser.userId)).toList
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(userSession.developer.email)).map(ApplicationSummary.from(_, userSession.developer.userId)).toList
-
-  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock with SessionServiceMock
+  trait Setup
+      extends UpliftLogicMock
+      with ApplicationServiceMock
+      with ApmConnectorMockModule
+      with ApplicationActionServiceMock
       with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
@@ -98,17 +98,6 @@ class AddApplicationStartSpec
 
     val hc = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, userSession)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
-
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withCSRFToken
-
-    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
   }
 
   "Add subordinate applications start page" should {
@@ -116,11 +105,11 @@ class AddApplicationStartSpec
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-      private val result = underTest.addApplicationSubordinate()(loggedInRequest)
+      private val result = underTest.addApplicationSubordinate()(loggedInDevRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to the sandbox")
-      contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include(devUser.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should not include "Sign in"
     }
@@ -128,11 +117,11 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environmennt is QA/Dev" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      private val result = underTest.addApplicationSubordinate()(loggedInRequest)
+      private val result = underTest.addApplicationSubordinate()(loggedInDevRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to development")
-      contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include(devUser.displayedName)
       contentAsString(result) should not include "Sign in"
     }
 
@@ -164,7 +153,7 @@ class AddApplicationStartSpec
       val myAppId   = summaries.head.id
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
-      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+      private val result = underTest.addApplicationPrincipal()(loggedInDevRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
@@ -179,42 +168,40 @@ class AddApplicationStartSpec
       val myAppId   = summaries.head.id
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
-      private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+      private val result = underTest.addApplicationPrincipal()(loggedInDevRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
     }
 
-    "return the uplift journey 'before you start' page when the UpliftJourneyConfig returns On " +
-      "and we have only 1 application" in new Setup {
-        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
-        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
+    "return the uplift journey 'before you start' page when the UpliftJourneyConfig returns On and we have only 1 application" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-        val summaries = sandboxAppSummaries.take(1)
-        val myAppId   = summaries.head.id
-        aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
+      val summaries = sandboxAppSummaries.take(1)
+      val myAppId   = summaries.head.id
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
-        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+      private val result = underTest.addApplicationPrincipal()(loggedInDevRequest.withCSRFToken)
 
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
-      }
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${myAppId.value}/before-you-start")
+    }
 
-    "return the uplift journey 'Which application do you want production credentials for?' page when the UpliftJourneyConfig returns On" +
-      "and we have more than 1 application" in new Setup {
-        when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
-        when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-        when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
+    "return the uplift journey 'Which application do you want production credentials for?' page when the UpliftJourneyConfig returns On and we have more than 1 application" in new Setup {
+      when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+      when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-        val summaries = sandboxAppSummaries.take(2)
-        aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
+      val summaries = sandboxAppSummaries.take(2)
+      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
-        private val result = underTest.addApplicationPrincipal()(loggedInRequest)
+      private val result = underTest.addApplicationPrincipal()(loggedInDevRequest.withCSRFToken)
 
-        status(result) shouldBe OK
-        contentAsString(result) should include("Which application do you want production credentials for")
-      }
+      status(result) shouldBe OK
+      contentAsString(result) should include("Which application do you want production credentials for")
+    }
 
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()

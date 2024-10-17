@@ -22,11 +22,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.UserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
-trait ApplicationBuilder extends CollaboratorTracker with FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
-  self: UserIdTracker =>
+trait ApplicationBuilder extends FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
 
   def buildApplication(appOwnerEmail: LaxEmailAddress): ApplicationWithCollaborators = {
 
@@ -40,38 +37,10 @@ trait ApplicationBuilder extends CollaboratorTracker with FixedClock with Applic
 
     standardApp
       .withId(appId)
-      .withCollaborators(appOwnerEmail.asAdministratorCollaborator)
       .withEnvironment(Environment.SANDBOX)
       .withState(InState.production(appOwnerEmail.text, appOwnerName, ""))
       .withAccess(access)
       .modify(_.copy(name = ApplicationName(s"${appId.toString()}-name")))
-    // Application(
-    //   appId,
-    //   clientId,
-    //   s"${appId.toString()}-name",
-    //   instant,
-    //   Some(instant),
-    //   None,
-    //   grantLength = Period.ofDays(547),
-    //   Environment.SANDBOX,
-    //   Some(s"$appId-description"),
-    //   buildCollaborators(Seq(appOwnerEmail)),
-    //   state = InState.production(appOwnerEmail.text, appOwnerName, ""),
-    //   access = Access.Standard(
-    //     redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
-    //     termsAndConditionsUrl = Some("http://tnc-url.com")
-    //   )
-    // )
-  }
-
-  def buildCollaborators(emails: Seq[LaxEmailAddress]): Set[Collaborator] = {
-    emails.map(email => email.asAdministratorCollaborator).toSet
-  }
-
-  def buildApplicationWithSubscriptionFields(appOwnerEmail: LaxEmailAddress): ApplicationWithSubscriptionFields = {
-    val application = buildApplication(appOwnerEmail)
-
-    application.withSubscriptions(Set.empty).withFieldValues(Map.empty)
   }
 
   def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersionNbr): Set[ApiIdentifier] =

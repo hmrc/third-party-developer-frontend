@@ -29,9 +29,10 @@ import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -41,16 +42,19 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken, _}
 
 class DetailsViewSpec
     extends CommonViewSpec
-    with TestApplications
-    with CollaboratorTracker
-    with LocalUserIdTracker
     with WithCSRFAddToken
-    with DeveloperSessionBuilder
-    with UserTestData {
+    with CommonSessionFixtures
+    with ApplicationWithCollaboratorsFixtures
+    with FixedClock {
+
+  implicit class AppAugment(val app: ApplicationWithCollaborators) {
+    final def withCheckInformation(checkInformation: CheckInformation): ApplicationWithCollaborators = app.modify(_.copy(checkInformation = Some(checkInformation)))
+  }
 
   val detailsView = app.injector.instanceOf[DetailsView]
 
@@ -67,16 +71,15 @@ class DetailsViewSpec
   }
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", instant)))
-  val adminEmail          = "admin@example.com".toLaxEmail
-
-  implicit val loggedIn: UserSession = JoeBloggs.loggedIn
+  val sandboxApp          = standardApp.withEnvironment(Environment.SANDBOX)
+  val prodApp             = standardApp.withEnvironment(Environment.PRODUCTION)
 
   trait LoggedInUserIsAdmin {
-    implicit val loggedIn: UserSession = adminDeveloper.loggedIn
+    implicit val loggedIn: UserSession = adminSession
   }
 
   trait LoggedInUserIsDev {
-    implicit val loggedIn: UserSession = standardDeveloper.loggedIn
+    implicit val loggedIn: UserSession = devSession
   }
 
   "Application details view" when {
@@ -85,37 +88,33 @@ class DetailsViewSpec
 
     "rendering Environment " when {
       "managing a principal application" should {
-        val deployedTo  = Environment.PRODUCTION
-        val application = anApplication(environment = deployedTo)
 
-        "Show Production when environment is Production" in {
+        "Show Production when environment is Production" in new LoggedInUserIsDev {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
           page.environmentName.text shouldBe "Production"
         }
-        "Show QA when environment is QA" in {
+        "Show QA when environment is QA" in new LoggedInUserIsDev {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
           page.environmentName.text shouldBe "QA"
         }
       }
 
       "managing a subordinate application" should {
-        val deployedTo  = Environment.SANDBOX
-        val application = anApplication(environment = deployedTo)
 
-        "Show Sandbox when environment is Sandbox" in {
+        "Show Sandbox when environment is Sandbox" in new LoggedInUserIsDev {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
           page.environmentName.text shouldBe "Sandbox"
         }
-        "Show Development when environment is Development" in {
+        "Show Development when environment is Development" in new LoggedInUserIsDev {
           when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
           when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
           page.environmentName.text shouldBe "Development"
         }
       }
@@ -123,43 +122,35 @@ class DetailsViewSpec
 
     "showing Change links for Privacy Policy and Terms & Conditions locations" when {
       "managing a sandbox application" should {
-        val deployedTo                       = Environment.SANDBOX
+
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
 
-        "show nothing when a developer" in {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
 
           page.changePrivacyPolicyLocationLink shouldBe null
           page.changeTermsConditionsLocationLink shouldBe null
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {
-          val application = anApplication(environment = deployedTo)
 
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
 
           page.changePrivacyPolicyLocationLink shouldBe null
           page.changeTermsConditionsLocationLink shouldBe null
         }
       }
       "managing a production application" should {
-        val deployedTo = Environment.PRODUCTION
 
-        "show nothing when a developer" in {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page = Page(detailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
           page.changePrivacyPolicyLocationLink shouldBe null
           page.changeTermsConditionsLocationLink shouldBe null
         }
 
         "show Change links when an admin" in new LoggedInUserIsAdmin {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
           page.changePrivacyPolicyLocationLink.text should startWith("Change")
           page.changeTermsConditionsLocationLink.text should startWith("Change")
@@ -169,45 +160,33 @@ class DetailsViewSpec
 
     "showing Terms of Use details" when {
       "managing a sandbox application" should {
-        val deployedTo                       = Environment.SANDBOX
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
 
-        "show nothing when a developer" in {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
 
           page.termsOfUse shouldBe null
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
 
           page.termsOfUse shouldBe null
         }
       }
 
       "managing a production application" when {
-        val deployedTo = Environment.PRODUCTION
-
         "the app is a privileged app" should {
-          val access                        = Access.Privileged()
           val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(exists = false)
+          val application                   = prodApp.withAccess(Access.Privileged())
 
-          "show nothing when a developer" in {
-
-            val application = anApplication(environment = deployedTo, access = access)
-
+          "show nothing when a developer" in new LoggedInUserIsDev {
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForPrivApp))
 
             page.termsOfUse shouldBe null
           }
 
           "show nothing when an admin" in new LoggedInUserIsAdmin {
-            val application = anApplication(environment = deployedTo, access = access)
-
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForPrivApp))
 
             page.termsOfUse shouldBe null
@@ -215,19 +194,16 @@ class DetailsViewSpec
         }
 
         "the app is an ROPC app" should {
-          val access                        = Access.Ropc()
           val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(exists = false)
+          val application                   = prodApp.withAccess(Access.Ropc())
 
-          "show nothing when a developer" in {
-            val application = anApplication(environment = deployedTo, access = access)
-            val page        = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
+          "show nothing when a developer" in new LoggedInUserIsDev {
+            val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
 
             page.termsOfUse shouldBe null
           }
 
           "show nothing when an admin" in new LoggedInUserIsAdmin {
-            val application = anApplication(environment = deployedTo, access = access)
-
             val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForRopcApp))
 
             page.termsOfUse shouldBe null
@@ -235,15 +211,12 @@ class DetailsViewSpec
         }
 
         "the app is a standard app" when {
-          val access = Access.Standard()
 
           "the user is a developer" should {
-            "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in {
+            "show 'not agreed' and have no link to read and agree when the terms of use have not been agreed" in new LoggedInUserIsDev {
               val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
+              val application                  = prodApp.withCheckInformation(checkInformation)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
-
-              val application = anApplication(environment = deployedTo, access = access)
-                .withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelNotAgreed))
 
@@ -251,14 +224,12 @@ class DetailsViewSpec
               page.readLink shouldBe null
             }
 
-            "show agreement details and have no link to read when the terms of use have been agreed" in {
+            "show agreement details and have no link to read when the terms of use have been agreed" in new LoggedInUserIsDev {
               val emailAddress      = "user@example.com".toLaxEmail
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
               val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
-
-              val application = anApplication(environment = deployedTo, access = access)
-                .withCheckInformation(checkInformation)
+              val application       = prodApp.withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
@@ -273,8 +244,7 @@ class DetailsViewSpec
               val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
-              val application = anApplication(environment = deployedTo, access = access)
-                .withCheckInformation(checkInformation)
+              val application = prodApp.withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelNotAgreed))
 
@@ -290,8 +260,7 @@ class DetailsViewSpec
               val version           = "1.0"
               val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
 
-              val application = anApplication(environment = deployedTo, access = access)
-                .withCheckInformation(checkInformation)
+              val application = prodApp.withCheckInformation(checkInformation)
 
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
@@ -306,42 +275,34 @@ class DetailsViewSpec
     }
 
     "showing Changing these application details" when {
+
       "managing a sandbox application" should {
-        val deployedTo = Environment.SANDBOX
 
-        "show nothing when logged in as a developer because you can change details" in {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+        "show nothing when logged in as a developer because you can change details" in new LoggedInUserIsDev {
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
           page.changingAppDetailsAdminList shouldBe null
         }
 
         "show nothing when logged in as an admin because you can change details" in new LoggedInUserIsAdmin {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
           page.changingAppDetailsAdminList shouldBe null
         }
       }
 
       "managing a production application" when {
-        val deployedTo = Environment.PRODUCTION
 
         "show Changing these details section containing admin email address when logged in as a developer" in new LoggedInUserIsDev with ApplicationSyntaxes {
-          val application = anApplication(environment = deployedTo)
 
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
           page.changingAppDetailsAdminList should not be null
           page.changingAppDetailsAdminList.text should include(adminEmail.text)
         }
 
         "show nothing when you are allowed to change the details" in new LoggedInUserIsAdmin {
-          val application = anApplication(environment = deployedTo)
-
-          val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
+          val page = Page(detailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
           page.changingAppDetailsAdminList shouldBe null
         }

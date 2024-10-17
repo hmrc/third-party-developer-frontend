@@ -49,7 +49,7 @@ class VerifyResponsibleIndividualControllerSpec
     with SampleUserSession
     with SampleApplication
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
+    with ExtendedSubscriptionTestHelper
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker {

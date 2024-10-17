@@ -44,7 +44,7 @@ class TermsOfUseResponsesControllerSpec
     with SampleUserSession
     with SampleApplication
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
+    with ExtendedSubscriptionTestHelper
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker
@@ -70,7 +70,8 @@ class TermsOfUseResponsesControllerSpec
       with ApmConnectorMockModule
       with SubmissionServiceMockModule
       with HasSubscriptions
-      with HasSessionDeveloperFlow {
+      with HasSessionDeveloperFlow
+      with FixedClock {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 

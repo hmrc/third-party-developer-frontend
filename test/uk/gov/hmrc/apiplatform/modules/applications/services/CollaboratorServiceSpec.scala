@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.apiplatform.modules.applications.services
 
-import java.time.Period
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
@@ -28,27 +26,18 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CollaboratorsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, _}
 
-class CollaboratorServiceSpec extends AsyncHmrcSpec
-    with SubscriptionsBuilder
-    with ApplicationBuilder
-    with LocalUserIdTracker
-    with DeveloperSessionBuilder
-    with UserTestData
-    with CollaboratorsTestData
-    with ApplicationWithCollaboratorsFixtures {
-
-  val versionOne  = ApiVersionNbr("1.0")
-  val versionTwo  = ApiVersionNbr("2.0")
-  val grantLength = Period.ofDays(547)
+class CollaboratorServiceSpec
+    extends AsyncHmrcSpec
+    with CommonUserFixtures
+    with ApplicationWithCollaboratorsFixtures
+    with FixedClock {
 
   trait Setup
       extends ThirdPartyDeveloperConnectorMockModule
@@ -71,21 +60,16 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
-  val productionApplicationId = ApplicationId.random
-  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
-
-  val productionApplication: ApplicationWithCollaborators = standardApp.withCollaborators(developerEmail.asDeveloperCollaborator, administratorEmail.asAdministratorCollaborator)
-
   "add teamMember" should {
     "add teamMember successful" in new Setup {
       TPDMock.FetchByEmails.returnsEmptySeq()
-      TPDMock.GetOrCreateUser.succeedsWith(developerAsCollaborator.userId)
+      TPDMock.GetOrCreateUser.succeedsWith(devAsCollaborator.userId)
 
       val mockResponse = mock[ApplicationWithCollaborators]
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse)
 
-      val result = await(collaboratorService.addTeamMember(productionApplication, developerEmail, Collaborator.Roles.DEVELOPER, administratorEmail))
+      val result = await(collaboratorService.addTeamMember(standardApp, devEmail, Collaborator.Roles.DEVELOPER, adminEmail))
       result.isRight shouldBe true
 
       inside(result) {
@@ -93,8 +77,8 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
           response shouldBe mockResponse
           inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
             case ApplicationCommands.AddCollaborator(actor, collaborator, _) =>
-              actor shouldBe Actors.AppCollaborator(administratorEmail)
-              collaborator shouldBe developerAsCollaborator
+              actor shouldBe Actors.AppCollaborator(adminEmail)
+              collaborator shouldBe devAsCollaborator
           }
       }
     }
@@ -107,7 +91,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 
-      val result = await(collaboratorService.removeTeamMember(productionApplication, developerEmail, administratorEmail))
+      val result = await(collaboratorService.removeTeamMember(standardApp, devEmail, adminEmail))
       result.isRight shouldBe true
 
       inside(result) {
@@ -115,25 +99,25 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
           response shouldBe mockResponse
           inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
             case ApplicationCommands.RemoveCollaborator(actor, collaborator, _) =>
-              actor shouldBe Actors.AppCollaborator(administratorEmail)
-              collaborator shouldBe developerAsCollaborator
+              actor shouldBe Actors.AppCollaborator(adminEmail)
+              collaborator shouldBe devAsCollaborator
           }
       }
     }
 
-    "remove teamMember determines admins to email" in new Setup {
+    "remove teamMember determines admins to email" in new Setup with CollaboratorTracker with LocalUserIdTracker {
       val verifiedAdmin      = "verified@example.com".toLaxEmail.asAdministratorCollaborator
       val unverifiedAdmin    = "unverified@example.com".toLaxEmail.asAdministratorCollaborator
       val removerAdmin       = "admin.email@example.com".toLaxEmail.asAdministratorCollaborator
       val verifiedDeveloper  = "developer@example.com".toLaxEmail.asDeveloperCollaborator
       val teamMemberToRemove = "to.remove@example.com".toLaxEmail.asAdministratorCollaborator
-      val application        = productionApplication.copy(collaborators = Set(verifiedAdmin, unverifiedAdmin, removerAdmin, verifiedDeveloper, teamMemberToRemove))
+      val application        = standardApp.withCollaborators(verifiedAdmin, unverifiedAdmin, removerAdmin, verifiedDeveloper, teamMemberToRemove)
 
       val notExcluded = Set(verifiedAdmin, unverifiedAdmin).map(_.emailAddress)
 
       TPDMock.FetchByEmails.returnsSuccessFor(notExcluded)(Seq(
-        adminDeveloper.copy(email = verifiedAdmin.emailAddress),
-        adminDeveloper.copy(email = unverifiedAdmin.emailAddress, verified = false)
+        adminUser.copy(email = verifiedAdmin.emailAddress),
+        adminUser.copy(email = unverifiedAdmin.emailAddress, verified = false)
       ))
       val mockResponse = mock[ApplicationWithCollaborators]
 
@@ -146,7 +130,7 @@ class CollaboratorServiceSpec extends AsyncHmrcSpec
     }
 
     "determineOtherAdmins" should {
-      "exclude the actor and the removed" in new Setup {
+      "exclude the actor and the removed" in new Setup with CollaboratorTracker with LocalUserIdTracker {
         val verifiedAdmin      = "verified@example.com".toLaxEmail.asAdministratorCollaborator
         val unverifiedAdmin    = "unverified@example.com".toLaxEmail.asAdministratorCollaborator
         val removerAdmin       = "admin.email@example.com".toLaxEmail.asAdministratorCollaborator

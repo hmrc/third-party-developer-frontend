@@ -23,51 +23,51 @@ import scala.concurrent.Future
 import views.helper.EnvironmentNameService
 import views.html._
 
-import play.api.mvc.{AnyContentAsEmpty, Result}
-import play.api.test.FakeRequest
+import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class AddApplicationProductionSwitchSpec
     extends BaseControllerSpec
-    with SampleUserSession
-    with SampleApplication
     with SubscriptionTestSugar
-    with SubscriptionTestHelper
     with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker
-    with ApplicationBuilder {
-
-  val collaborator: Collaborator = userSession.developer.email.asAdministratorCollaborator
+    with ApplicationWithCollaboratorsFixtures
+    with FixedClock {
 
   val appCreatedOn  = instant.minus(1, DAYS)
   val appLastAccess = appCreatedOn
 
-  val sandboxAppSummaries = (1 to 5).map(_ => buildApplication(userSession.developer.email)).map(ApplicationSummary.from(_, userSession.developer.userId)).toList
+  val sandboxAppSummaries = (1 to 5).map { i =>
+    standardApp
+      .withEnvironment(Environment.SANDBOX)
+      .withId(ApplicationId.random)
+      .withName(ApplicationName(s"App $i"))
+  }
+    .map(ApplicationSummary.from(_, devUser.userId)).toList
 
-  trait Setup extends UpliftLogicMock with AppsByTeamMemberServiceMock with ApplicationServiceMock with ApmConnectorMockModule with ApplicationActionServiceMock
-      with SessionServiceMock with EmailPreferencesServiceMock {
+  trait Setup
+      extends UpliftLogicMock
+      with AppsByTeamMemberServiceMock
+      with ApplicationServiceMock
+      with ApmConnectorMockModule
+      with ApplicationActionServiceMock
+      with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
@@ -103,43 +103,31 @@ class AddApplicationProductionSwitchSpec
     )
     val hc        = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, userSession)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-    fetchSessionByIdReturns(partLoggedInSessionId, partLoggedInSession)
-
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withCSRFToken
-
-    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(partLoggedInSessionId)
-
     when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
     when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
     def shouldShowWhichAppMessage()(implicit results: Future[Result]) = {
-      contentAsString(results) should include("Which application do you want production credentials for?")
+      withClue("shouldShowWhichAppMessage")(contentAsString(results) should include("Which application do you want production credentials for?"))
     }
 
     def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should include(summary.name.value)
+        withClue(s"shouldShowAppNamesFor[${summary.name.value}]")(contentAsString(results) should include(summary.name.value))
       }
     }
 
     def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should not include (summary.name.value)
+        withClue(s"shouldNotShowAppNamesFor: ${summary.name.value}")(contentAsString(results) should not include (summary.name.value))
       }
     }
 
     def shouldShowMessageAboutNotNeedingProdCreds()(implicit results: Future[Result]) = {
-      contentAsString(results) should include("You do not need production credentials")
+      withClue("shouldShowMessageAboutNotNeedingProdCreds")(contentAsString(results) should include("You do not need production credentials"))
     }
 
     def shouldNotShowMessageAboutNotNeedingProdCreds()(implicit results: Future[Result]) = {
-      contentAsString(results) should not include ("You do not need production credentials")
+      withClue("shouldNotShowMessageAboutNotNeedingProdCreds")(contentAsString(results) should not include ("You do not need production credentials"))
     }
   }
 
@@ -148,7 +136,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(Nil, List.empty, List.empty)
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      val result = underTest.addApplicationProductionSwitch()(loggedInDevRequest)
 
       status(result) shouldBe BAD_REQUEST
     }
@@ -161,7 +149,7 @@ class AddApplicationProductionSwitchSpec
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      val result = underTest.addApplicationProductionSwitch()(loggedInDevRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(
@@ -174,7 +162,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
 
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
-      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInDevRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -195,7 +183,7 @@ class AddApplicationProductionSwitchSpec
 
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
 
-      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInDevRequest)
 
       status(result) shouldBe OK
 
@@ -213,7 +201,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
 
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
-      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInDevRequest.withCSRFToken)
 
       status(result) shouldBe OK
 
@@ -232,7 +220,7 @@ class AddApplicationProductionSwitchSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInRequest)
+      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInDevRequest.withCSRFToken)
 
       status(result) shouldBe OK
 

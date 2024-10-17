@@ -140,15 +140,19 @@ class SubscriptionsController @Inject() (
           Future.successful(ApplicationUpdateSuccessful)
       }
 
-      def handleValidForm(form: ChangeSubscriptionForm) =
+      def handleValidForm(form: ChangeSubscriptionForm) = {
         if (request.application.areSubscriptionsLocked) {
+          println("Locked")
           import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
           Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
         }
+      }
 
-      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = errorHandler.badRequestTemplate.map(BadRequest(_))
+      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = {
+        errorHandler.badRequestTemplate.map(BadRequest(_))
+      }
 
       ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm);
     }

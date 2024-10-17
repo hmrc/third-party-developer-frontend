@@ -42,9 +42,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
 
-  val versionOne = ApiVersionNbr("1.0")
-  val versionTwo = ApiVersionNbr("2.0")
-
   trait Setup extends FixedClock with ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -148,7 +145,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
   "request delete developer" should {
     val developerName   = "Testy McTester"
-    val developerEmail  = "testy@example.com".toLaxEmail
+    val devEmail        = "testy@example.com".toLaxEmail
     val developerUserId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {
@@ -157,7 +154,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, developerEmail))
+      await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, devEmail))
 
       verify(mockDeskproConnector, times(1)).createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))

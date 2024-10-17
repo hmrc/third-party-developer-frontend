@@ -24,7 +24,6 @@ import views.html.noapplications.{NoApplicationsChoiceView, StartUsingRestApisVi
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
@@ -46,8 +45,6 @@ class NoApplicationsSpec
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker {
-
-  private val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
   trait Setup extends SessionServiceMock {
     val noApplicationsChoiceView                                = app.injector.instanceOf[NoApplicationsChoiceView]
@@ -71,7 +68,7 @@ class NoApplicationsSpec
       .withSession(sessionParams: _*).withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(noApplicationsController, implicitly)(partLoggedInSessionId)
+      .withLoggedIn(noApplicationsController, implicitly)(partLoggedInSession.sessionId)
       .withSession(sessionParams: _*)
   }
 
