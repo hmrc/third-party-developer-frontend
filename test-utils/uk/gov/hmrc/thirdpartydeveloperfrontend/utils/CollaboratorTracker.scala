@@ -21,7 +21,10 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.UserIdTracker
 
 trait CollaboratorTracker extends UserIdTracker {
-  def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = Collaborator(email, role, idOf(email))
+
+  def collaboratorOf(email: LaxEmailAddress, role: Collaborator.Role): Collaborator = {
+    Collaborator(email, role, idOf(email))
+  }
 
   implicit class CollaboratorSyntax(email: LaxEmailAddress) {
     def asAdministratorCollaborator             = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)

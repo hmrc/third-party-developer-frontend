@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -36,6 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth.IsNewJourneyStandardApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel, LeftHandNavFlags}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
@@ -47,6 +48,7 @@ class LeftHandNavSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   trait Setup {
@@ -54,26 +56,10 @@ class LeftHandNavSpec extends CommonViewSpec
 
     val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
-    val applicationId: ApplicationId = ApplicationId.random
-    val clientId: ClientId           = ClientId("clientId123")
-    val applicationName              = "Test Application"
-
     val loggedInDeveloper: UserSession = standardDeveloper.loggedIn
 
-    val application: Application = Application(
-      applicationId,
-      clientId,
-      applicationName,
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Description 1"),
-      Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-      access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
+    val application: ApplicationWithCollaborators = standardApp
+      .withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator)
 
     val applicationViewModelWithApiSubscriptions: ApplicationViewModel   = ApplicationViewModel(application, hasSubscriptionsFields = true, hasPpnsFields = false)
     val applicationViewModelWithNoApiSubscriptions: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
@@ -122,7 +108,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithoutSubsFields: ApplicationViewModel =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS)), hasSubscriptionsFields = false, hasPpnsFields = false)
+          ApplicationViewModel(application.modify(_.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS))), hasSubscriptionsFields = false, hasPpnsFields = false)
         val page: Html                                    = leftHandNavRender(Some(oldAppWithoutSubsFields), Some("details"))
 
         page.contentType should include("text/html")
@@ -152,7 +138,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
       "NOT display server token link for old apps" in new Setup {
         val oldAppWithSubsFields: ApplicationViewModel =
-          ApplicationViewModel(application.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS)), hasSubscriptionsFields = true, hasPpnsFields = false)
+          ApplicationViewModel(application.modify(_.copy(createdOn = serverTokenCutoffDate.minus(1, DAYS))), hasSubscriptionsFields = true, hasPpnsFields = false)
         val page: Html                                 = leftHandNavRender(Some(oldAppWithSubsFields), Some("details"))
 
         page.contentType should include("text/html")

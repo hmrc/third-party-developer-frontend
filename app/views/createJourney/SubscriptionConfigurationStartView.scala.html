@@ -17,12 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.ApiDetails
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
 @this(devMain: DevMain)
 
-@(application: Application, apis: Seq[ApiDetails])(
+@(application: ApplicationWithCollaborators, apis: Seq[ApiDetails])(
   implicit request: play.api.mvc.Request[Any],
   loggedIn: UserSession,
   messages: Messages,

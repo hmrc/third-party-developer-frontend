@@ -27,7 +27,6 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Disp
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 @Singleton
 class CollaboratorService @Inject() (
@@ -40,7 +39,7 @@ class CollaboratorService @Inject() (
     with ClockNow {
 
   def addTeamMember(
-      app: Application,
+      app: ApplicationWithCollaborators,
       newTeamMemberEmail: LaxEmailAddress,
       newTeamMemberRole: Collaborator.Role,
       requestingEmail: LaxEmailAddress
@@ -65,7 +64,7 @@ class CollaboratorService @Inject() (
   }
 
   def removeTeamMember(
-      app: Application,
+      app: ApplicationWithCollaborators,
       teamMemberToRemove: LaxEmailAddress,
       requestingEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier

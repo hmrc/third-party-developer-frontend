@@ -38,7 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
@@ -49,7 +49,8 @@ class UpliftJourneyServiceSpec
     with SampleUserSession
     with SampleApplication
     with SubmissionsTestData
-    with SubscriptionTestHelperSugar
+    with SubscriptionTestSugar
+    with SubscriptionTestHelper
     with SubscriptionsBuilder
     with UserBuilder
     with LocalUserIdTracker {
@@ -62,7 +63,6 @@ class UpliftJourneyServiceSpec
       with FixedClock {
 
     val sandboxAppId = ApplicationId.random
-    val prodAppId    = ApplicationId.random
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 

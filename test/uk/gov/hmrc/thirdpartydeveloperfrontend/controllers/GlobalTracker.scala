@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Fields
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.{GlobalUserIdTracker, UserIdTracker}
 
-case class ApplicationWithSubscriptionData(
-    application: Application,
-    subscriptions: Set[ApiIdentifier] = Set.empty,
-    subscriptionFieldValues: Map[ApiContext, Map[ApiVersionNbr, Fields.Alias]] = Map.empty
-  )
+trait GlobalTracker extends UserIdTracker {
+  def idOf(email: LaxEmailAddress): UserId = GlobalUserIdTracker.idOf(email)
+}

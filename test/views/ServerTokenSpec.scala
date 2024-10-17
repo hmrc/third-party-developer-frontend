@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -40,8 +40,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with DeveloperSessionBuilder with UserBuilder
-    with FixedClock {
+class ServerTokenSpec
+    extends CommonViewSpec
+    with WithCSRFAddToken
+    with CollaboratorTracker
+    with LocalUserIdTracker
+    with DeveloperSessionBuilder
+    with UserBuilder
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     val appConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -55,25 +62,9 @@ class ServerTokenSpec extends CommonViewSpec with WithCSRFAddToken with Collabor
     val request          = FakeRequest().withCSRFToken
     val developerSession = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
 
-    val application = Application(
-      ApplicationId.random,
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-      access = Access.Standard(),
-      state = ApplicationState(updatedOn = instant),
-      checkInformation = None
-    )
-
     "render" in new Setup {
       val serverTokenView = app.injector.instanceOf[ServerTokenView]
-      val page: Html      = serverTokenView.render(application, randomUUID.toString, request, developerSession, messagesProvider, appConfig)
+      val page: Html      = serverTokenView.render(standardApp, randomUUID.toString, request, developerSession, messagesProvider, appConfig)
 
       page.contentType should include("text/html")
       val document: Document = Jsoup.parse(page.body)

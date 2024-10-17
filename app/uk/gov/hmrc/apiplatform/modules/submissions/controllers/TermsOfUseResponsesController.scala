@@ -22,6 +22,7 @@ import scala.concurrent.ExecutionContext
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
@@ -36,7 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequ
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
 object TermsOfUseResponsesController {
-  case class TermsOfUseResponsesViewModel(applicationName: String, answersViewModel: ViewModel)
+  case class TermsOfUseResponsesViewModel(applicationName: ApplicationName, answersViewModel: ViewModel)
 }
 
 @Singleton

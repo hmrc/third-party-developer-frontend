@@ -16,38 +16,27 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
-import java.util.UUID
 import scala.concurrent.Future.{failed, successful}
 
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock {
+class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    val clientId: ClientId         = ClientId(UUID.randomUUID.toString)
-    val grantLength: Period        = Period.ofDays(547)
 
-    val anApplication: Application                                     = Application(
-      ApplicationId.random,
-      clientId,
-      "App name 1",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      deployedTo = Environment.PRODUCTION
-    )
+    val anApplication: ApplicationWithCollaborators = standardApp
+    val clientId: ClientId                          = anApplication.clientId
+
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))

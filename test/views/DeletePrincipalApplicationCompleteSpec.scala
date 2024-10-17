@@ -33,7 +33,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class DeletePrincipalApplicationCompleteSpec extends CommonViewSpec with WithCSRFAddToken with DeveloperSessionBuilder with UserTestData with SampleUserSession
+class DeletePrincipalApplicationCompleteSpec
+    extends CommonViewSpec
+    with WithCSRFAddToken
+    with DeveloperSessionBuilder
+    with UserTestData
+    with SampleUserSession
     with SampleApplication
     with LocalUserIdTracker {
 

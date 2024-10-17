@@ -71,4 +71,4 @@ case class ManageApplicationsViewModel(
 
 }
 
-case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: String, dueBy: Instant)
+case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: ApplicationName, dueBy: Instant)

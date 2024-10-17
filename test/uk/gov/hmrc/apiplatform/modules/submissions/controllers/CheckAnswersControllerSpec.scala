@@ -26,6 +26,7 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.{Completed, InProgress}
@@ -38,9 +39,8 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelperSugar}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
@@ -51,7 +51,8 @@ class CheckAnswersControllerSpec
     extends BaseControllerSpec
     with SampleUserSession
     with SampleApplication
-    with SubscriptionTestHelperSugar
+    with SubscriptionTestSugar
+    with ExtendedSubscriptionTestHelper
     with WithCSRFAddToken
     with UserBuilder
     with LocalUserIdTracker
@@ -73,11 +74,7 @@ class CheckAnswersControllerSpec
     self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
 
     givenApplicationAction(
-      ApplicationWithSubscriptionData(
-        testingApp.copy(id = applicationId),
-        asSubscriptions(List(aSubscription)),
-        asFields(List.empty)
-      ),
+      testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
       userSession,
       List(aSubscription)
     )
@@ -92,7 +89,8 @@ class CheckAnswersControllerSpec
       with SubmissionServiceMockModule
       with HasSubscriptions
       with HasSessionDeveloperFlow
-      with HasAppInTestingState {
+      with HasAppInTestingState
+      with FixedClock {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 

@@ -36,12 +36,8 @@ class ForgotPasswordViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with StubMessagesFactory {
-  // with DeveloperSessionBuilder
-  // with DeveloperBuilder {
 
   val forgotPasswordView: ForgotPasswordView = app.injector.instanceOf[ForgotPasswordView]
-
-  // val loggedInDeveloper: DeveloperSession =buildDeveloperWithRandomId("admin@example.com".toLaxEmail, "firstName1", "lastName1").loggedIn
 
   "Forgot Password page" should {
 

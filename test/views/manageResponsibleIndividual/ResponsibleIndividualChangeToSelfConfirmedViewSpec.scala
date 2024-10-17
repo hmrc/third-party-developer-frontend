@@ -45,7 +45,7 @@ class ResponsibleIndividualChangeToSelfConfirmedViewSpec extends CommonViewSpec 
     "display name of application correctly" in {
       val document = Jsoup.parse(renderPage().body)
 
-      document.selectFirst("#appName").text() shouldBe application.name
+      document.selectFirst("#appName").text() shouldBe application.name.value
     }
   }
 }

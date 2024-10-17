@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -52,6 +52,7 @@ class TermsOfUse @Inject() (
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper
+    with ApplicationSyntaxes
     with ClockNow {
 
   def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -71,9 +72,9 @@ class TermsOfUse @Inject() (
   }
 
   def agreeTermsOfUse(id: ApplicationId) = canChangeTermsOfUseAction(id) { implicit request =>
-    def handleValidForm(app: Application, form: TermsOfUseForm) = {
+    def handleValidForm(app: ApplicationWithCollaborators, form: TermsOfUseForm) = {
       if (app.termsOfUseStatus == TermsOfUseStatus.AGREEMENT_REQUIRED) {
-        val information        = app.checkInformation.getOrElse(CheckInformation())
+        val information        = app.details.checkInformation.getOrElse(CheckInformation())
         val updatedInformation = information.copy(
           termsOfUseAgreements =
             information.termsOfUseAgreements :+ TermsOfUseAgreement(request.userSession.developer.email, instant(), termsOfUseVersionService.getLatest().toString)

@@ -46,10 +46,10 @@ class AuditService @Inject() (auditConnector: AuditConnector, appConfig: Applica
         .get(oldKey)
         .map(value => newKey -> URLDecoder.decode(value, StandardCharsets.UTF_8.toString))
 
-    val developerEmail    = mapHeader("X-email-address", "developerEmail")
+    val devEmail          = mapHeader("X-email-address", "devEmail")
     val developerFullName = mapHeader("X-name", "developerFullName")
 
-    Seq(developerEmail, developerFullName).flatten
+    Seq(devEmail, developerFullName).flatten
   }
 }
 
@@ -76,7 +76,7 @@ object AuditAction {
     val auditType = "PasswordChangeFailedDueToInvalidCredentials"
 
     override val tags = Map(
-      "developerEmail" -> email.text
+      "devEmail" -> email.text
     )
   }
 

@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SubscriptionTestHelperSugar
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -38,7 +38,8 @@ class GetProductionCredentialsFlowServiceSpec
     extends AsyncHmrcSpec
     with SampleUserSession
     with SampleApplication
-    with SubscriptionTestHelperSugar
+    with SubscriptionTestSugar
+    with SubscriptionTestHelper
     with SubscriptionsBuilder
     with FlowRepositoryMockModule
     with LocalUserIdTracker with DeveloperSessionBuilder with UserTestData {

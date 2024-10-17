@@ -16,12 +16,12 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @this(devMain: DevMain)
 
-@(applicationId: ApplicationId, app: Application)(
+@(applicationId: ApplicationId, app: ApplicationWithCollaborators)(
   implicit request: Request[_], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig
 )
 

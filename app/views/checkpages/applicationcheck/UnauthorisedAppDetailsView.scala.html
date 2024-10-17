@@ -17,10 +17,11 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 @this(devMain: DevMain)
 
-@(appName: String, adminEmails: Set[LaxEmailAddress])(
+@(appName: ApplicationName, admins: Set[Collaborator])(
   implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig
 )
 
@@ -28,7 +29,7 @@
   title = "Production application",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb(appName),
+    Crumb(appName.value),
     Crumb.viewAllApplications,
     Crumb.home
   ),
@@ -36,23 +37,23 @@
 ) {
 
   <span class="govuk-caption-l">Production application</span>
-  <h1 class="govuk-heading-l">@appName</h1>
+  <h1 class="govuk-heading-l">@appName.value</h1>
 
   <div class="govuk-inset-text">
     You cannot view this application because you're not an administrator.
   </div>
 
-  @if(adminEmails.size == 1){
+  @if(admins.size == 1){
     <p class="govuk-body">
-      Ask the administrator <a class="govuk-link" href="mailto:@{adminEmails.head.text}">@{adminEmails.head.text}</a> to remove you from the application and add you as an administrator.
+      Ask the administrator <a class="govuk-link" href="mailto:@{admins.head.emailAddress.text}">@{admins.head.emailAddress.text}</a> to remove you from the application and add you as an administrator.
     </p>
   } else {
     <p class="govuk-body">
       Ask an administrator to remove you from the application and add you as an administrator:
     </p>
     <ul class="govuk-list govuk-list--bullet">
-      @for(email<-adminEmails) {
-        <li><a class="govuk-link" href="mailto:@{email.text}">@email</a></li>
+      @for(admin<-admins) {
+        <li><a class="govuk-link" href="mailto:@{admin.emailAddress.text}">@admin.emailAddress.text</a></li>
       }
     </ul>
   }

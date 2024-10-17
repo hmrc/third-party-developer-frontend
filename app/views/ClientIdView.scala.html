@@ -16,14 +16,14 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import _root_.controllers.routes.Assets
 @import views.html.helper.CSPNonce
 
 @this(devMain: DevMain)
 
-@(app: Application)(
+@(app: ApplicationWithCollaborators)(
         implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
 @clientId = @{app.clientId.value}
