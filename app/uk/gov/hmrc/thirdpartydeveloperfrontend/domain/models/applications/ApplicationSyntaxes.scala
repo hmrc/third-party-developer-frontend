@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
@@ -52,32 +52,12 @@ trait ApplicationSyntaxes {
       permission.hasPermissions(app, developer)
     }
 
-    def hasRedirectUri(redirectUri: RedirectUri): Boolean = app.access match {
-      case s: Access.Standard => s.redirectUris.contains(redirectUri)
-      case _                  => false
-    }
-
     def termsOfUseAgreements: List[TermsOfUseAgreement] = app.details.checkInformation.map(_.termsOfUseAgreements).getOrElse(List.empty)
 
     def canChangeClientCredentials(developer: User): Boolean = allows(Capabilities.ChangeClientSecret, developer, Permissions.SandboxOrAdmin)
 
     def canViewPushSecret(developer: User): Boolean = {
       allows(Capabilities.ViewPushSecret, developer, Permissions.SandboxOrAdmin)
-    }
-
-    // TODO - move canAdd to domain model
-    private val maximumNumberOfRedirectUris = 5
-
-    def canAddRedirectUri: Boolean = app.access match {
-      case s: Access.Standard => s.redirectUris.lengthCompare(maximumNumberOfRedirectUris) < 0
-      case _                  => false
-    }
-
-    def hasResponsibleIndividual: Boolean = {
-      app.access match {
-        case Access.Standard(_, _, _, _, _, Some(_)) => true
-        case _                                       => false
-      }
     }
 
     def canViewServerToken(developer: User): Boolean = {
