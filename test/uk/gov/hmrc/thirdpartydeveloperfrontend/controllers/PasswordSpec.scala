@@ -34,13 +34,12 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidResetCode, UnverifiedAccount}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup {
 
     val mockConnector    = mock[ThirdPartyDeveloperConnector]
     val mockAuditService = mock[AuditService]

@@ -52,7 +52,6 @@ class ManageTeamSpec
   trait Setup
       extends ApplicationServiceMock
       with CollaboratorServiceMockModule
-      with SessionServiceMock
       with ApplicationActionServiceMock
       with ApplicationWithCollaboratorsFixtures
       with SampleUserSession
@@ -83,7 +82,6 @@ class ManageTeamSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer: User      = buildTrackedUser()
-    // val sessionId            = UserSessionId.random
     val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
     fetchSessionByIdReturns(sessionId, session)

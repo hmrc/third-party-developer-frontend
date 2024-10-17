@@ -16,18 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import java.util.UUID.randomUUID
 import scala.util.Random
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata._
 
-trait TestApplications extends FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures with CommonCollaboratorFixtures {
+trait TestApplications extends ApplicationStateHelper with ApplicationWithCollaboratorsFixtures with CommonCollaboratorFixtures with TokenProvider {
 
   private def randomString(length: Int) = Random.alphanumeric.take(length).mkString
 
@@ -89,12 +86,6 @@ trait TestApplications extends FixedClock with ApplicationStateHelper with Appli
   def aPrivilegedApplication(): ApplicationWithCollaborators = anApplication(access = privilegedAccess()).withId(applicationIdThree)
 
   def privilegedAccess(scopes: Set[String] = Set(randomString(10), randomString(10), randomString(10))): Access.Privileged = Access.Privileged(None, scopes)
-
-  def tokens(clientId: ClientId = ClientId(randomString(28)), clientSecret: String = randomString(28), accessToken: String = randomString(28)): ApplicationToken = {
-    ApplicationToken(List(aClientSecret()), accessToken)
-  }
-
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 
   implicit class AppAugment(val app: ApplicationWithCollaborators) {
     final def withName(name: String): ApplicationWithCollaborators = app.modify(_.copy(name = ApplicationName(name)))

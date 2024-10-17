@@ -28,16 +28,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -45,23 +40,20 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class EditApplicationNameSpec
     extends BaseControllerSpec
-    with ApplicationActionServiceMock
-    with SampleUserSession
-    with SampleApplication
-    with SubscriptionTestSugar
-    with SubscriptionTestHelper
     with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker
-    with FixedClock {
+    with ApplicationWithCollaboratorsFixtures {
 
   val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
-  trait Setup extends UpliftLogicMock with ApplicationServiceMock with ApmConnectorMockModule with SessionServiceMock with EmailPreferencesServiceMock with FixedClock {
+  trait Setup
+      extends UpliftLogicMock
+      with ApplicationActionServiceMock
+      with ApplicationServiceMock
+      with ApmConnectorMockModule
+      with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
     val usingPrivilegedApplicationCredentialsView = app.injector.instanceOf[UsingPrivilegedApplicationCredentialsView]
     val addApplicationStartSubordinateView        = app.injector.instanceOf[AddApplicationStartSubordinateView]
@@ -98,31 +90,19 @@ class EditApplicationNameSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, userSession)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-    fetchSessionByIdReturns(partLoggedInSession.sessionId, partLoggedInSession)
-
     givenApplicationNameIsValid()
-
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-
-    val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(partLoggedInSession.sessionId)
-
   }
 
   "NameApplicationPage in subordinate" should {
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
-      givenApplicationAction(sampleApp, userSession)
+      givenApplicationAction(standardApp, devSession)
 
-      private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInRequest.withCSRFToken)
+      private val result = underTest.addApplicationName(Environment.SANDBOX)(loggedInDevRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
-      contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include(devSession.developer.displayedName)
       contentAsString(result) should include("Continue")
       contentAsString(result) should include("Application name")
       contentAsString(result) should not include "Sign in"
@@ -152,7 +132,7 @@ class EditApplicationNameSpec
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = loggedInRequest.withCSRFToken
+        private val request = loggedInDevRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", ""))
 
         private val result = underTest.editApplicationNameAction(Environment.SANDBOX)(request)
@@ -173,11 +153,11 @@ class EditApplicationNameSpec
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInRequest.withCSRFToken)
+      private val result = underTest.addApplicationName(Environment.PRODUCTION)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
-      contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include(adminSession.developer.displayedName)
       contentAsString(result) should include("We show this name to your users when they authorise your software to interact with HMRC.")
       contentAsString(result) should include("It must comply with our")
       contentAsString(result) should not include "Sign in"
@@ -208,7 +188,7 @@ class EditApplicationNameSpec
 
         givenApplicationNameIsInvalid(Invalid(invalidName = true, duplicateName = false))
 
-        private val request = loggedInRequest.withCSRFToken
+        private val request = loggedInAdminRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", ""))
 
         private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
@@ -228,7 +208,7 @@ class EditApplicationNameSpec
 
         givenApplicationNameIsInvalid(Invalid(invalidName = false, duplicateName = true))
 
-        private val request = loggedInRequest.withCSRFToken
+        private val request = loggedInAdminRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", ""))
 
         private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)

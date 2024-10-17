@@ -20,8 +20,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import org.apache.pekko.stream.Materializer
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import views.emailpreferences.EmailPreferencesSummaryViewData
 import views.html.emailpreferences._
 
@@ -30,16 +28,12 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController
@@ -48,20 +42,18 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ErrorHandlerMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class EmailPreferencesControllerSpec
-    extends PlaySpec
-    with GuiceOneAppPerSuite
-    with SessionServiceMock
+    extends BaseControllerSpec
     with ErrorHandlerMock {
 
   val category1 = ApiCategory.INCOME_TAX_MTD
   val category2 = ApiCategory.VAT
 
-  trait Setup extends UserBuilder with LocalUserIdTracker with FixedClock {
+  trait Setup {
     val mockEmailPreferencesService: EmailPreferencesService = mock[EmailPreferencesService]
 
     implicit val cookieSigner: CookieSigner = app.injector.instanceOf[CookieSigner]
@@ -111,13 +103,15 @@ class EmailPreferencesControllerSpec
         mockSelectTopicsFromSubscriptionsView
       )
 
-    val emailPreferences: EmailPreferences                        = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
-    val developer: User                                           = buildTrackedUser()
-    val developerWithEmailPrefences: User                         = developer.copy(emailPreferences = emailPreferences)
-    val sessionId                                                 = UserSessionId.random
-    val session: UserSession                                      = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
-    val sessionNoEMailPrefences: UserSession                      = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-    private val sessionParams: Seq[(String, String)]              = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
+    val emailPreferences: EmailPreferences = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
+    val developer: User                    = devUser
+    val developerWithEmailPrefences: User  = developer.copy(emailPreferences = emailPreferences)
+
+    val sessionId = UserSessionId.random
+
+    val session: UserSession                 = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
+    val sessionNoEMailPrefences: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+
     lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
   }
 
@@ -149,7 +143,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
 
       verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(expectedCategoryMap, expectedAPIDisplayNames)))(*, *, *, *)
     }
@@ -163,7 +157,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(loggedInRequest.withFlash("unsubscribed" -> "true"))
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
 
       verify(mockEmailPreferencesSummaryView).apply(eqTo(EmailPreferencesSummaryViewData(Map.empty, Map.empty, unsubscribed = true)))(*, *, *, *)
     }
@@ -173,8 +167,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.emailPreferencesSummaryPage()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
@@ -188,7 +182,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val result: Future[Result] = controllerUnderTest.unsubscribeAllPage()(loggedInRequest)
-      status(result) mustBe OK
+      status(result) shouldBe OK
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesSummaryView)
@@ -200,8 +194,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.unsubscribeAllPage()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesUnsubscribeAllView)
@@ -217,10 +211,10 @@ class EmailPreferencesControllerSpec
 
       when(mockEmailPreferencesService.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(loggedInRequest)
-      status(result) mustBe SEE_OTHER
+      status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
-      flash(result).get("unsubscribed") mustBe Some("true")
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
+      flash(result).get("unsubscribed") shouldBe Some("true")
     }
 
     "redirect to login screen for non-logged in user" in new Setup {
@@ -228,8 +222,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.unsubscribeAllAction()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
       verifyZeroInteractions(mockEmailPreferencesService)
@@ -244,7 +238,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowStartPage()(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
       verify(mockEmailPreferencesStartView).apply()(*, *, *, *)
     }
 
@@ -253,8 +247,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowStartPage()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesStartView)
     }
@@ -271,7 +265,7 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(EmailPreferencesFlowV2.fromDeveloperSession(session)))
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesPage()(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
       verify(mockEmailPreferencesSelectCategoriesView).apply(*, eqTo(apiCategories), eqTo(EmailPreferencesFlowV2.fromDeveloperSession(session).selectedCategories))(
         *,
         *,
@@ -285,8 +279,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesPage()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectCategoriesView)
     }
@@ -309,8 +303,8 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.updateCategories(eqTo(session), *)).thenReturn(Future.successful(flow))
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(requestWithForm)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectApisPage("a1").url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.flowSelectApisPage("a1").url)
     }
 
     "redirect back to self if form data is empty" in new Setup {
@@ -322,7 +316,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(loggedInRequest)
 
-      status(result) mustBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
       verify(mockEmailPreferencesSelectCategoriesView).apply(*, eqTo(apiCategories), eqTo(Set.empty[String]))(*, *, *, *)
 
     }
@@ -332,8 +326,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectCategoriesAction()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
@@ -349,8 +343,8 @@ class EmailPreferencesControllerSpec
         .thenReturn(Future.successful(EmailPreferencesFlowV2.fromDeveloperSession(session)))
       val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(loggedInRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
 
     }
 
@@ -359,8 +353,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectNoCategoriesAction()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
@@ -383,7 +377,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage(apiCategory.category)(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
       verify(mockEmailPreferencesSelectApiView).apply(*, eqTo(apiCategory), eqTo(visibleApis), eqTo(Set.empty))(*, *, *, *)
     }
 
@@ -393,8 +387,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage("")(loggedInRequest)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
 
@@ -403,8 +397,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisPage("anyCategory")(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
@@ -431,8 +425,8 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.updateSelectedApis(*, eqTo(category1.toString()), eqTo(List("a1", "a2")))).thenReturn(Future.successful(emailFlow))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectApisPage(apiCategory2.category).url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.flowSelectApisPage(apiCategory2.category).url)
     }
 
     "redirect to the topics page when category last in alphabetical order" in new Setup {
@@ -449,8 +443,8 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.updateSelectedApis(*, eqTo(category2.toString()), eqTo(List("a1", "a2")))).thenReturn(Future.successful(emailFlow))
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
     }
 
     "return 400 when form has missing elements" in new Setup {
@@ -466,7 +460,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(requestWithForm)
 
-      status(result) mustBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
       verify(mockEmailPreferencesService, times(0)).updateSelectedApis(*, *, *)
       verify(mockEmailPreferencesSelectApiView).apply(*, eqTo(apiCategory1), eqTo(visibleApis), eqTo(Set.empty))(*, *, *, *)
     }
@@ -476,8 +470,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectApisAction()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesSelectApiView)
     }
@@ -496,7 +490,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsPage()(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
 
       verify(mockEmailPreferencesFlowSelectTopicView).apply(*, eqTo(expectedSelectedTopics))(*, *, *, *)
     }
@@ -506,8 +500,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsPage()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesFlowSelectTopicView)
     }
@@ -528,8 +522,8 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.deleteFlow(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES_V2))).thenReturn(Future.successful(true))
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.emailPreferencesSummaryPage().url)
 
       verify(mockEmailPreferencesService).fetchEmailPreferencesFlow(eqTo(session))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.userId), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
@@ -548,8 +542,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.flowSelectTopicsPage().url)
 
       verify(mockEmailPreferencesService).fetchEmailPreferencesFlow(eqTo(session))
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.userId), eqTo(emailFlow.copy(selectedTopics = Set("TECHNICAL"))))(*)
@@ -562,7 +556,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(loggedInRequest)
 
-      status(result) mustBe BAD_REQUEST
+      status(result) shouldBe BAD_REQUEST
       verify(mockEmailPreferencesFlowSelectTopicView).apply(*, eqTo(Set.empty))(*, *, *, *)
     }
 
@@ -571,8 +565,8 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(FakeRequest())
 
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(routes.UserLoginAccount.login().url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
 
       verifyZeroInteractions(mockEmailPreferencesService)
     }
@@ -599,7 +593,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.selectApisFromSubscriptionsPage(applicationId)(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
       verify(mockSelectApisFromSubscriptionsView).apply(
         *,
         *,
@@ -622,8 +616,8 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.updateNewApplicationSelectedApis(*, *[ApplicationId], *)(*)).thenReturn(Future.successful(mock[NewApplicationEmailPreferencesFlowV2]))
 
       val result: Future[Result] = controllerUnderTest.selectApisFromSubscriptionsAction(applicationId)(requestWithForm)
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(EmailPreferencesControllerRoutes.selectTopicsFromSubscriptionsPage(applicationId).url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(EmailPreferencesControllerRoutes.selectTopicsFromSubscriptionsPage(applicationId).url)
 
       verify(mockEmailPreferencesService).updateNewApplicationSelectedApis(eqTo(session), eqTo(applicationId), eqTo(Set(ServiceName("a1"), ServiceName("a2"))))(*)
     }
@@ -650,7 +644,7 @@ class EmailPreferencesControllerSpec
 
       val result: Future[Result] = controllerUnderTest.selectTopicsFromSubscriptionsPage(applicationId)(loggedInRequest)
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
       verify(mockSelectTopicsFromSubscriptionsView).apply(
         *,
         eqTo(Set.empty),
@@ -683,8 +677,8 @@ class EmailPreferencesControllerSpec
       when(mockEmailPreferencesService.deleteFlow(*, *)).thenReturn(Future.successful(true))
 
       val result: Future[Result] = controllerUnderTest.selectTopicsFromSubscriptionsAction(applicationId)(requestWithForm)
-      status(result) mustBe SEE_OTHER
-      redirectLocation(result) mustBe Some(AddApplicationRoutes.addApplicationSuccess(applicationId).url)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(AddApplicationRoutes.addApplicationSuccess(applicationId).url)
 
       verify(mockEmailPreferencesService).updateEmailPreferences(eqTo(developer.userId), eqTo(newApplicationEmailPreferencesFlow.copy(selectedTopics = Set("a1"))))(*)
     }

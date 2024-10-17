@@ -22,24 +22,17 @@ import play.api.http.Status.OK
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.Profile
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class NavigationSpec extends BaseControllerSpec {
 
   class Setup(loggedInState: Option[LoggedInState])
-      extends UserBuilder
-      with LocalUserIdTracker
-      with FixedClock
-      with ApplicationServiceMock
-      with SessionServiceMock
+      extends ApplicationServiceMock
       with ApplicationActionServiceMock {
 
     val underTest = new Navigation(
@@ -51,14 +44,13 @@ class NavigationSpec extends BaseControllerSpec {
       cookieSigner
     )
 
-    val developer = buildTrackedUser()
-    val sessionId = UserSessionId.random
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session   = devSession
+    val sessionId = session.sessionId
 
     var userPassword = "Password1!"
 
     loggedInState.map(loggedInState => {
-      fetchSessionByIdReturns(sessionId, UserSession(sessionId, loggedInState, developer))
+      fetchSessionByIdReturns(sessionId, UserSession(sessionId, loggedInState, devUser))
     })
 
     private val request =
@@ -95,7 +87,7 @@ class NavigationSpec extends BaseControllerSpec {
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
-        links.head shouldBe NavLink("John Doe", Profile.showProfile().url, isSensitive = true)
+        links.head shouldBe NavLink(devUser.displayedName, Profile.showProfile().url, isSensitive = true)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {

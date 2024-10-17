@@ -21,7 +21,6 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 
 import org.jsoup.Jsoup
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import views.html.ppns.PushSecretsView
 
 import play.api.mvc.Result
@@ -37,18 +36,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class PushPullNotificationsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with SubscriptionTestSugar
-    with GuiceOneAppPerSuite
-    with CommonSessionFixtures
-    with ApplicationWithCollaboratorsFixtures
-    with FixedClock {
+    with ApplicationWithCollaboratorsFixtures {
 
   "showPushSecrets" when {
     "logged in as a Developer on an application" should {

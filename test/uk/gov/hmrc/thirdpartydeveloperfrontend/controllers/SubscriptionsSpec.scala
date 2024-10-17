@@ -32,7 +32,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr, Environment}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -46,8 +45,7 @@ class SubscriptionsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubscriptionTestSugar
-    with ApplicationWithCollaboratorsFixtures
-    with FixedClock {
+    with ApplicationWithCollaboratorsFixtures {
 
   val apiName       = "api-1"
   val apiVersion    = ApiVersionNbr("1.0")

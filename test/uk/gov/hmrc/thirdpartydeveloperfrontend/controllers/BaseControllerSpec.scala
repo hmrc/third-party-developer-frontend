@@ -74,7 +74,7 @@ abstract class BaseControllerSpec
   FetchSessionById.succeedsWith(partLoggedInSession.sessionId, partLoggedInSession)
   val partLoggedInRequest = FakeRequest().withLoggedIn(this, cookieSigner)(partLoggedInSession.sessionId)
 
-  val mcc: MessagesControllerComponents       = app.injector.instanceOf[MessagesControllerComponents]
+  val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()

@@ -30,18 +30,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule, SessionServiceMock}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class RedirectsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with ApplicationWithCollaboratorsFixtures
-    with CommonSessionFixtures
-    with FixedClock {
+    with ApplicationWithCollaboratorsFixtures {
 
   implicit class AppAugment(val app: ApplicationWithCollaborators) {
 
@@ -58,10 +54,8 @@ class RedirectsSpec
 
   trait Setup
       extends ApplicationServiceMock
-      with SessionServiceMock
       with ApplicationActionServiceMock
-      with RedirectsServiceMockModule
-      with FixedClock {
+      with RedirectsServiceMockModule {
 
     val redirectUris = List("https://www.example.com", "https://localhost:8080").map(RedirectUri.unsafeApply)
 
