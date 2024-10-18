@@ -16,10 +16,10 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription.EditApiConfigurationViewModel
 @import views.helper.IdFormatter
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 @(
-  app: Application,
+  app: ApplicationWithCollaborators,
   viewModel: EditApiConfigurationViewModel,
   formPostUrl: Call,
   skipLink : Option[Call] = None

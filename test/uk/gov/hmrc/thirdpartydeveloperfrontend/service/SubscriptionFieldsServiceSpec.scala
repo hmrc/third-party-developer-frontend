@@ -16,40 +16,38 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
   SaveSubscriptionFieldsAccessDeniedResponse,
   SaveSubscriptionFieldsSuccessResponse,
   SubscriptionFieldValue
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements, FieldValue, Fields}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock {
+class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   val apiContext: ApiContext       = ApiContext("sub-ser-test")
   val apiVersion: ApiVersionNbr    = ApiVersionNbr("1.0")
   val versionOne: ApiVersionNbr    = ApiVersionNbr("version-1")
   val applicationName: String      = "third-party-application"
-  val applicationId: ApplicationId = ApplicationId.random
-  val clientId                     = ClientId("clientId")
+  val applicationId: ApplicationId = standardApp.id
+  val clientId                     = standardApp.clientId
 
-  val application =
-    Application(applicationId, clientId, applicationName, instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+  val application = standardApp
 
   trait Setup extends SubscriptionFieldsConnectorMock {
 
@@ -73,7 +71,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     ).thenReturn(
       Future.successful(
         Some(
-          Application(applicationId, clientId, "name", instant, Some(instant), None, grantLength = Period.ofDays(547), Environment.PRODUCTION)
+          standardApp
         )
       )
     )
@@ -95,8 +93,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
         SubscriptionFieldValue(definition2, FieldValue("oldValue2"))
       )
 
-      val newValue1                  = FieldValue("newValue")
-      val newValuesMap: Fields.Alias = Map(definition1.name -> newValue1)
+      val newValue1    = FieldValue("newValue")
+      val newValuesMap = Map(definition1.name -> newValue1)
 
       when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
@@ -105,7 +103,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       result shouldBe SaveSubscriptionFieldsSuccessResponse
 
-      val newFields1: Fields.Alias = Map(
+      val newFields1 = Map(
         definition1.name -> newValue1,
         definition2.name -> value2.value
       )

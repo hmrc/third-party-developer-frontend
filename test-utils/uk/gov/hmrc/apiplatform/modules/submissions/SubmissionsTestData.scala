@@ -23,7 +23,7 @@ import scala.util.Random
 import cats.data.NonEmptyList
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ApplicationIdFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
@@ -88,11 +88,11 @@ trait ProgressTestDataHelper {
   }
 }
 
-trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData with ProgressTestDataHelper with StatusTestDataHelper {
+trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData with ProgressTestDataHelper with StatusTestDataHelper with ApplicationIdFixtures {
   self: ClockNow =>
 
   val submissionId  = SubmissionId.random
-  val applicationId = ApplicationId.random
+  val applicationId = applicationIdOne
 
   val standardContext: AskWhen.Context = Map(
     AskWhen.Context.Keys.IN_HOUSE_SOFTWARE -> "No",

@@ -25,37 +25,41 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptionFields, ApplicationWithSubscriptions}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{Application, ApplicationWithSubscriptionData}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationActionService
 
 trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
+
   val applicationActionServiceMock = mock[ApplicationActionService]
 
   def givenApplicationActionReturnsNotFound[A](applicationId: ApplicationId): Unit =
     when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*))
       .thenReturn(successful(None))
 
-  def givenApplicationAction[A](application: Application, userSession: UserSession): Unit =
-    givenApplicationAction[A](ApplicationWithSubscriptionData(application, Set.empty, Map.empty), userSession)
+  def givenApplicationAction[A](application: ApplicationWithCollaborators, userSession: UserSession): Unit =
+    givenApplicationAction[A](application.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession)
+
+  def givenApplicationAction[A](application: ApplicationWithSubscriptions, userSession: UserSession): Unit =
+    givenApplicationAction[A](application.withFieldValues(Map.empty), userSession)
 
   def givenApplicationAction[A](
-      appData: ApplicationWithSubscriptionData,
+      appData: ApplicationWithSubscriptionFields,
       userSession: UserSession,
       subscriptions: List[APISubscriptionStatus] = List.empty,
       openAccessApis: List[ApiDefinition] = List.empty
     ): Unit = {
 
     def createReturn(req: UserRequest[A]): Future[Option[ApplicationRequest[A]]] = {
-      appData.application.role(userSession.developer.email) match {
+      appData.roleFor(userSession.developer.email) match {
         case None       => successful(None)
         case Some(role) => successful(Some(
             new ApplicationRequest(
-              application = appData.application,
-              deployedTo = appData.application.deployedTo,
+              application = appData.asAppWithCollaborators,
+              deployedTo = appData.deployedTo,
               subscriptions,
               openAccessApis,
               role,
@@ -64,7 +68,8 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
           ))
       }
     }
-    when(applicationActionServiceMock.process[A](eqTo(appData.application.id), *)(*))
+    reset(applicationActionServiceMock)
+    when(applicationActionServiceMock.process[A](eqTo(appData.id), *)(*))
       .thenAnswer((a: ApplicationId, request: UserRequest[A], c: HeaderCarrier) => createReturn(request))
   }
 

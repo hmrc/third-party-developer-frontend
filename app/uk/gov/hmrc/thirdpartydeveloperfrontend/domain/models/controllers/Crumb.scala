@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 case class Crumb(name: String, url: String = "", dataAttribute: Option[String] = None)
 
@@ -40,10 +40,10 @@ object Crumb {
   val signIn =
     Crumb("Sign in", s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
 
-  def application(application: Application) =
+  def application(application: ApplicationWithCollaborators) =
     Crumb(s"${application.name}", s"${routes.Details.details(application.id)}", Some("data-breadcrumb-app-name"))
 
-  def applicationMetadata(application: Application) =
+  def applicationMetadata(application: ApplicationWithCollaborators) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
 
   def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
@@ -52,5 +52,6 @@ object Crumb {
 
   def emailPreferences = Crumb("Email preferences", s"${profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()}", Some("data-breadcrumb-email-preferences"))
 
-  def ipAllowlist(application: Application) = Crumb("IP allow list", s"${routes.IpAllowListController.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
+  def ipAllowlist(application: ApplicationWithCollaborators) =
+    Crumb("IP allow list", s"${routes.IpAllowListController.viewIpAllowlist(application.id)}", Some("data-breadcrumb-ip-allowlist"))
 }

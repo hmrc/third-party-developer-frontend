@@ -57,7 +57,7 @@ trait Auditing {
   }
 
   def audit(auditAction: AuditAction, userSession: UserSession)(implicit hc: HeaderCarrier): Future[AuditResult] = {
-    auditService.audit(auditAction, Map("developerEmail" -> userSession.developer.email.text, "developerFullName" -> userSession.developer.displayedName))
+    auditService.audit(auditAction, Map("devEmail" -> userSession.developer.email.text, "developerFullName" -> userSession.developer.displayedName))
   }
 }
 
@@ -242,15 +242,15 @@ class UserLoginAccount @Inject() (
         } recoverWith {
           case _: InvalidEmail       =>
             logger.warn("Login failed due to invalid Email")
-            audit(LoginFailedDueToInvalidEmail, Map("developerEmail" -> loginForm.emailaddress))
+            audit(LoginFailedDueToInvalidEmail, Map("devEmail" -> loginForm.emailaddress))
             successful(Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress))))
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid credentials")
-            audit(LoginFailedDueToInvalidPassword, Map("developerEmail" -> loginForm.emailaddress))
+            audit(LoginFailedDueToInvalidPassword, Map("devEmail" -> loginForm.emailaddress))
             successful(Unauthorized(signInView("Sign in", LoginForm.invalidCredentials(requestForm, loginForm.emailaddress))))
           case _: LockedAccount      =>
             logger.warn("Login failed account locked")
-            audit(LoginFailedDueToLockedAccount, Map("developerEmail" -> loginForm.emailaddress))
+            audit(LoginFailedDueToLockedAccount, Map("devEmail" -> loginForm.emailaddress))
             successful(Locked(accountLockedView()))
           case _: UnverifiedAccount  =>
             logger.warn("Login failed unverified account")
@@ -336,7 +336,7 @@ class UserLoginAccount @Inject() (
         .recover {
           case _: InvalidCredentials =>
             logger.warn("Login failed due to invalid access code")
-            audit(LoginFailedDueToInvalidAccessCode, Map("developerEmail" -> email.text))
+            audit(LoginFailedDueToInvalidAccessCode, Map("devEmail" -> email.text))
             handleAccessCodeError(form, mfaId, mfaType, userHasMultipleMfa)
         }
     }

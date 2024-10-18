@@ -17,13 +17,13 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.helper.EnvironmentNameService
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PageData
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GroupedSubscriptions
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, hmrcNewTabLink: HmrcNewTabLink)
@@ -32,7 +32,7 @@
     role: Collaborator.Role,
     data: PageData,
     form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm],
-    app: Application,
+    app: ApplicationWithCollaborators,
     environment: Environment,
     subscriptions: Option[GroupedSubscriptions],
     openAccessApis: List[ApiDefinition]
@@ -44,7 +44,7 @@
     environmentNameService: EnvironmentNameService
 )
 
-@isPendingOrActiveProductionApplication(application: Application) = @{
+@isPendingOrActiveProductionApplication(application: ApplicationWithCollaborators) = @{
     application.deployedTo.isProduction && !application.isInTesting
 }
 

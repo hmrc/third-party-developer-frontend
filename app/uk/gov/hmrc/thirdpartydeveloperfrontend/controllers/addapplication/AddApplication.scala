@@ -133,9 +133,10 @@ class AddApplication @Inject() (
 
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { upliftData =>
+        println(upliftData)
         (upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
-          case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-          case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
+          case (0, _)     => println(0); successful(BadRequest(Json.toJson(BadRequestError)))
+          case (1, false) => println(1); successful(BadRequest(Json.toJson(BadRequestError)))
           case _          => successful(
               BadRequest(
                 chooseApplicationToUpliftView(

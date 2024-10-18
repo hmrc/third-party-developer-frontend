@@ -26,11 +26,11 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
@@ -121,7 +121,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       requestedByName: String,
       requestedByEmailAddress: LaxEmailAddress
     )(implicit hc: HeaderCarrier
-    ): Future[Either[ErrorDetails, Application]] =
+    ): Future[Either[ErrorDetails, ApplicationWithCollaborators]] =
     metrics.record(api) {
       import play.api.http.Status._
 
@@ -135,7 +135,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
           lazy val badResponse      = new RuntimeException("Something went wrong in the response")
 
           (response.status, jsValue) match {
-            case (OK, Success(value))                  => Right(value.asOpt[Application].getOrElse(throw badResponse))
+            case (OK, Success(value))                  => Right(value.asOpt[ApplicationWithCollaborators].getOrElse(throw badResponse))
             case (PRECONDITION_FAILED, Success(value)) => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
             case (CONFLICT, Success(value))            => Left(value.asOpt[ErrorDetails].getOrElse(throw badResponse))
             case (_, _)                                => throw badResponse

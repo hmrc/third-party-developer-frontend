@@ -60,11 +60,11 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
-        loggedInActionRefiner() andThen
-          applicationRequestRefiner(applicationId) andThen
-          capabilityFilter(capability) andThen
-          permissionFilter(permissions) andThen
-          approvalFilter(stateCheck)
+        loggedInActionRefiner() andThen                    // Log In Redirect
+          applicationRequestRefiner(applicationId) andThen // NOT_FOUND
+          capabilityFilter(capability) andThen             // BAD_REQUEST
+          permissionFilter(permissions) andThen            // FORBIDDEN
+          approvalFilter(stateCheck)                       // NOT_FOUND
       ).invokeBlock(request, block)
     }
   }
@@ -77,7 +77,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
 
   def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved) _
 
-  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isInTesting) _
+  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isTesting) _
 
-  def checkActionForTesting = checkActionWithStateCheck(_.isInTesting) _
+  def checkActionForTesting = checkActionWithStateCheck(_.isTesting) _
 }

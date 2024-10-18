@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
-@(app: Application)
+@(app: ApplicationWithCollaborators)
 
 @defining(app.collaborators.filter(_.role.isAdministrator)) { administrators =>
   @if(administrators.size == 1) {

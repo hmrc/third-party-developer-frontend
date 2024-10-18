@@ -28,10 +28,11 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.ApplicationStateFilter.pendingApprovalOrProduction
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -45,7 +46,8 @@ class SubscriptionsSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserBuilder
-    with FixedClock {
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   val manageSubscriptions = app.injector.instanceOf[ManageSubscriptionsView]
 
@@ -58,34 +60,18 @@ class SubscriptionsSpec extends CommonViewSpec
     def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
   }
 
-  def buildApplication(applicationState: ApplicationState, environment: Environment): Application = Application(
-    ApplicationId.random,
-    ClientId("Test Application Client ID"),
-    "Test Application",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    environment,
-    Some("Test Application"),
-    Set.empty,
-    Access.Standard(),
-    applicationState,
-    None
-  )
-
   "Subscriptions page" should {
     val developer = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
     val baseState = ApplicationState(State.PRODUCTION, Some("somebody@example.com"), Some("somebody"), Some(""), instant)
 
-    val productionApplicationPendingGatekeeperApproval    = buildApplication(baseState.copy(name = State.PENDING_GATEKEEPER_APPROVAL), Environment.PRODUCTION)
-    val productionApplicationPendingRequesterVerification = buildApplication(baseState.copy(name = State.PENDING_REQUESTER_VERIFICATION), Environment.PRODUCTION)
-    val productionApplication                             = buildApplication(baseState, Environment.PRODUCTION)
-    val productionApplicationTesting                      = buildApplication(ApplicationState(updatedOn = instant), Environment.PRODUCTION)
+    val productionApplicationPendingGatekeeperApproval    = standardApp.withState(appStatePendingGatekeeperApproval)
+    val productionApplicationPendingRequesterVerification = standardApp.withState(appStatePendingRequesterVerification)
+    val productionApplication                             = standardApp.withState(appStateProduction)
+    val productionApplicationTesting                      = standardApp.withState(appStateTesting)
 
-    val sandboxApplicationTesting = buildApplication(ApplicationState(updatedOn = instant), Environment.SANDBOX)
+    val sandboxApplicationTesting = standardApp.inSandbox().withState(appStateTesting)
 
-    def renderPageForApplicationAndRole(application: Application, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
+    def renderPageForApplicationAndRole(application: ApplicationWithCollaborators, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(
         role,
         pageData,

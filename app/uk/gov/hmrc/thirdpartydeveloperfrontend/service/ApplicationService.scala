@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator, ValidatedApplicationName}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -35,7 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 
 @Singleton
@@ -60,13 +59,14 @@ class ApplicationService @Inject() (
     appCmdConnector.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
   }
 
-  def updatePrivacyPolicyLocation(application: Application, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def updatePrivacyPolicyLocation(application: ApplicationWithCollaborators, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier)
+      : Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant(), newLocation)
     dispatchCmd(application.id, request)
   }
 
   def updateResponsibleIndividual(
-      application: Application,
+      application: ApplicationWithCollaborators,
       userId: UserId,
       fullName: String,
       emailAddress: LaxEmailAddress
@@ -77,7 +77,7 @@ class ApplicationService @Inject() (
   }
 
   def updateTermsConditionsLocation(
-      application: Application,
+      application: ApplicationWithCollaborators,
       userId: UserId,
       newLocation: TermsAndConditionsLocation
     )(implicit hc: HeaderCarrier
@@ -97,7 +97,7 @@ class ApplicationService @Inject() (
   }
 
   def verifyResponsibleIndividual(
-      application: Application,
+      application: ApplicationWithCollaborators,
       userId: UserId,
       requesterName: String,
       riName: String,
@@ -108,21 +108,18 @@ class ApplicationService @Inject() (
     dispatchCmd(application.id, request)
   }
 
-  def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionData]] = {
+  def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] = {
     apmConnector.fetchApplicationById(applicationId)
   }
 
-  def fetchCredentials(application: Application)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
+  def fetchCredentials(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
-  type ApiMap[V]   = Map[ApiContext, Map[ApiVersionNbr, V]]
-  type FieldMap[V] = ApiMap[Map[FieldName, V]]
-
-  def updateCheckInformation(application: Application, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def updateCheckInformation(application: ApplicationWithCollaborators, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
   }
 
-  def requestPrincipalApplicationDeletion(requester: UserSession, application: Application)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestPrincipalApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
     val requesterName  = requester.developer.displayedName
     val requesterEmail = requester.developer.email
@@ -150,7 +147,7 @@ class ApplicationService @Inject() (
     }
   }
 
-  def deleteSubordinateApplication(requester: UserSession, application: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deleteSubordinateApplication(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val requesterEmail = requester.developer.email
     val environment    = application.deployedTo
@@ -168,8 +165,8 @@ class ApplicationService @Inject() (
     }
   }
 
-  private def roleForApplication(application: Application, email: LaxEmailAddress) =
-    application.role(email).getOrElse(throw new ApplicationNotFound)
+  private def roleForApplication(application: ApplicationWithCollaborators, email: LaxEmailAddress) =
+    application.collaborators.find(_.emailAddress == email).getOrElse(throw new ApplicationNotFound).role
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
     connectorWrapper.productionApplicationConnector.verify(verificationCode)
@@ -220,14 +217,14 @@ class ApplicationService @Inject() (
 
   def requestProductonApplicationNameChange(
       userId: UserId,
-      application: Application,
-      newApplicationName: String,
+      application: ApplicationWithCollaborators,
+      newApplicationName: ApplicationName,
       requesterName: String,
       requesterEmail: LaxEmailAddress
     )(implicit hc: HeaderCarrier
     ) = {
 
-    def createDeskproTicket(application: Application, newApplicationName: String, requesterName: String, requesterEmail: LaxEmailAddress) = {
+    def createDeskproTicket(application: ApplicationWithCollaborators, newApplicationName: ApplicationName, requesterName: String, requesterEmail: LaxEmailAddress) = {
       val previousAppName = application.name
       val appId           = application.id
 
@@ -238,7 +235,7 @@ class ApplicationService @Inject() (
     deskproConnector.createTicket(Some(userId), ticket)
   }
 
-  def applicationConnectorFor(application: Application): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
+  def applicationConnectorFor(application: ApplicationWithCollaborators): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
 
   def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
     if (environment.contains(Environment.PRODUCTION)) {
@@ -279,8 +276,8 @@ object ApplicationService {
 
   trait ApplicationConnector {
     def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
-    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptionIds]]
-    def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Application]]
+    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
+    def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
     def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]

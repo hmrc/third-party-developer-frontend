@@ -27,7 +27,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationState
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationState}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.QuestionnaireState.NotApplicable
@@ -58,7 +58,7 @@ object ProdCredsChecklistController {
     lazy val fieldName = label.toLowerCase
   }
   case class ViewGrouping(label: String, questionnaireSummaries: NonEmptyList[ViewQuestionnaireSummary])
-  case class ViewModel(appId: ApplicationId, appName: String, isNewTermsOfUseUplift: Boolean, groupings: NonEmptyList[ViewGrouping])
+  case class ViewModel(appId: ApplicationId, appName: ApplicationName, isNewTermsOfUseUplift: Boolean, groupings: NonEmptyList[ViewGrouping])
 
   def convertToSummary(extSubmission: ExtendedSubmission)(questionnaire: Questionnaire): ViewQuestionnaireSummary = {
     val progress   = extSubmission.questionnaireProgress.get(questionnaire.id).get
@@ -77,7 +77,7 @@ object ProdCredsChecklistController {
     )
   }
 
-  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: String, appState: ApplicationState): ViewModel = {
+  def convertSubmissionToViewModel(extSubmission: ExtendedSubmission)(appId: ApplicationId, appName: ApplicationName, appState: ApplicationState): ViewModel = {
     val groupings = extSubmission.submission.groups.map(convertToViewGrouping(extSubmission))
     ViewModel(appId, appName, appState.name.isProduction, groupings)
   }

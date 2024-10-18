@@ -66,7 +66,7 @@ class IpAllowListController @Inject() (
 
   def viewIpAllowlist(applicationId: ApplicationId): Action[AnyContent] = canViewIpAllowlistAction(applicationId) { implicit request =>
     ipAllowlistService.discardIpAllowlistFlow(request.sessionId) map { _ =>
-      if (request.application.ipAllowlist.allowlist.isEmpty) {
+      if (request.application.details.ipAllowlist.allowlist.isEmpty) {
         Ok(startIpAllowlistView(request.application, request.role))
       } else {
         Ok(ipAllowlistView(request.application, request.role))

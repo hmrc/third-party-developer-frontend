@@ -70,6 +70,7 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers",
       "uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig",
       "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret.Id",
+      "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.common.domain.models._"

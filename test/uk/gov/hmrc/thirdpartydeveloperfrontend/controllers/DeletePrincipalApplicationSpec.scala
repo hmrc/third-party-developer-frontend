@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{Instant, LocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -27,27 +26,21 @@ import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 
 class DeletePrincipalApplicationSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with TestApplications
     with ErrorHandlerMock
-    with UserBuilder
-    with LocalUserIdTracker {
+    with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock {
     val deleteApplicationView                    = app.injector.instanceOf[DeleteApplicationView]
     val deletePrincipalApplicationConfirmView    = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
     val deletePrincipalApplicationCompleteView   = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
@@ -68,36 +61,12 @@ class DeletePrincipalApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    val appId           = ApplicationId.random
-    val clientId        = ClientId("clientIdzzz")
-    val appName: String = "Application Name"
-
-    val developer   = buildTrackedUser()
-    val sessionId   = UserSessionId.random
-    val userSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    private val startOfDay: Instant = LocalDate.now.atStartOfDay().asInstant
+    val sessionId = adminSession.sessionId
 
-    val application = Application(
-      appId,
-      clientId,
-      appName,
-      startOfDay,
-      Some(startOfDay),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("Description 1"),
-      Set(userSession.developer.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), startOfDay),
-      access =
-        Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
-
-    givenApplicationAction(application, userSession)
-    fetchSessionByIdReturns(sessionId, userSession)
+    givenApplicationAction(standardApp, adminSession)
+    fetchSessionByIdReturns(sessionId, adminSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams   = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -107,7 +76,7 @@ class DeletePrincipalApplicationSpec
   "delete application page" should {
     "return delete application page" in new Setup {
 
-      val result = addToken(underTest.deleteApplication(application.id, None))(loggedInRequest)
+      val result = addToken(underTest.deleteApplication(standardApp.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
@@ -120,7 +89,7 @@ class DeletePrincipalApplicationSpec
   "delete application confirm page" should {
     "return delete application confirm page" in new Setup {
 
-      val result = addToken(underTest.confirmRequestDeletePrincipalApplication(application.id, None))(loggedInRequest)
+      val result = addToken(underTest.confirmRequestDeletePrincipalApplication(standardApp.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
@@ -136,39 +105,40 @@ class DeletePrincipalApplicationSpec
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(userSession), eqTo(application))(*))
+      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
         .thenReturn(Future.successful(TicketCreated))
 
-      val result = addToken(underTest.requestDeletePrincipalApplicationAction(application.id))(requestWithFormBody)
+      val result = addToken(underTest.requestDeletePrincipalApplicationAction(standardApp.id))(requestWithFormBody)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
 
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(userSession), eqTo(application))(*)
+      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
 
-      val result = addToken(underTest.requestDeletePrincipalApplicationAction(application.id))(requestWithFormBody)
+      val result = addToken(underTest.requestDeletePrincipalApplicationAction(standardApp.id))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${standardApp.id}/details")
     }
   }
 
-  "return not found if non-approved app" when {
-    trait UnapprovedApplicationSetup extends Setup {
-      val nonApprovedApplication = aStandardNonApprovedApplication(userSession.developer.email)
+  trait UnapprovedApplicationSetup extends Setup {
+    val nonApprovedApplication = standardApp.withState(appStateTesting)
 
-      givenApplicationAction(nonApprovedApplication, userSession)
+    givenApplicationAction(nonApprovedApplication, adminSession)
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
-        .thenReturn(Future.successful(TicketCreated))
-    }
+    when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
+      .thenReturn(Future.successful(TicketCreated))
+  }
+
+  "return not found if non-approved app" should {
 
     "deleteApplication action is called" in new UnapprovedApplicationSetup {
       val result = addToken(underTest.deleteApplication(nonApprovedApplication.id, None))(loggedInRequest)

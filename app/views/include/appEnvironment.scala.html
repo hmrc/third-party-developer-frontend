@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
-@(app: Application)(implicit appConfig: ApplicationConfig)
+@(app: ApplicationWithCollaborators)(implicit appConfig: ApplicationConfig)
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
 @envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}
@@ -30,7 +30,7 @@
     <span class="govuk-body govuk-!-font-weight-bold govuk-!-margin-0">Application:</span>
   </div>
   <div class="govuk-grid-column-three-quarters" data-app-name>
-    <p class="govuk-body govuk-!-margin-0">@app.name</p>
+    <p class="govuk-body govuk-!-margin-0" id="application-name">@app.name</p>
   </div>
 </div>
 

@@ -16,55 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import java.time.Period
-import java.util.UUID.randomUUID
-
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, RedirectUri}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{ApiFieldMap, FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.UserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{FieldName, FieldValue, Fields}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
-trait ApplicationBuilder extends CollaboratorTracker with FixedClock with ApplicationStateHelper {
-  self: UserIdTracker =>
+trait ApplicationBuilder extends FixedClock with ApplicationStateHelper with ApplicationWithCollaboratorsFixtures {
 
-  def buildApplication(appOwnerEmail: LaxEmailAddress): Application = {
+  def buildApplication(appOwnerEmail: LaxEmailAddress): ApplicationWithCollaborators = {
 
     val appId        = ApplicationId.random
-    val clientId     = ClientId("clientid-" + randomUUID.toString)
     val appOwnerName = "App owner name"
-
-    Application(
-      appId,
-      clientId,
-      s"${appId.toString()}-name",
-      instant,
-      Some(instant),
-      None,
-      grantLength = Period.ofDays(547),
-      Environment.SANDBOX,
-      Some(s"$appId-description"),
-      buildCollaborators(Seq(appOwnerEmail)),
-      state = InState.production(appOwnerEmail.text, appOwnerName, ""),
-      access = Access.Standard(
-        redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
-        termsAndConditionsUrl = Some("http://tnc-url.com")
-      )
+    val access       = Access.Standard(
+      redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
+      termsAndConditionsUrl = Some("http://tnc-url.com")
     )
-  }
 
-  def buildCollaborators(emails: Seq[LaxEmailAddress]): Set[Collaborator] = {
-    emails.map(email => email.asAdministratorCollaborator).toSet
-  }
-
-  def buildApplicationWithSubscriptionData(appOwnerEmail: LaxEmailAddress): ApplicationWithSubscriptionData = {
-    val application = buildApplication(appOwnerEmail)
-
-    ApplicationWithSubscriptionData(application)
+    standardApp
+      .withId(appId)
+      .withEnvironment(Environment.SANDBOX)
+      .withState(InState.production(appOwnerEmail.text, appOwnerName, ""))
+      .withAccess(access)
+      .modify(_.copy(name = ApplicationName(s"${appId.toString()}-name")))
   }
 
   def buildSubscriptions(apiContext: ApiContext, apiVersion: ApiVersionNbr): Set[ApiIdentifier] =
@@ -72,19 +47,17 @@ trait ApplicationBuilder extends CollaboratorTracker with FixedClock with Applic
       ApiIdentifier(apiContext, apiVersion)
     )
 
-  def buildSubscriptionFieldValues(apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Fields.Alias): Map[ApiContext, Map[ApiVersionNbr, Fields.Alias]] = {
+  def buildSubscriptionFieldValues(apiContext: ApiContext, apiVersion: ApiVersionNbr, fields: Map[FieldName, FieldValue]): ApiFieldMap[FieldValue] = {
     Map(apiContext -> Map(apiVersion -> fields))
   }
 
-  def buildApplicationWithSubscriptionData(
+  def buildApplicationWithSubscriptionFields(
       apiContext: ApiContext = ApiContext.random,
       apiVersion: ApiVersionNbr = ApiVersionNbr.random,
-      fields: Fields.Alias = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
-    ): ApplicationWithSubscriptionData = {
-    ApplicationWithSubscriptionData(
-      buildApplication("email@example.com".toLaxEmail),
-      buildSubscriptions(apiContext, apiVersion),
-      buildSubscriptionFieldValues(apiContext, apiVersion, fields)
-    )
+      fields: Map[FieldName, FieldValue] = Map(FieldName.random -> FieldValue.random, FieldName.random -> FieldValue.random)
+    ): ApplicationWithSubscriptionFields = {
+    buildApplication("email@example.com".toLaxEmail)
+      .withSubscriptions(Set(ApiIdentifier(apiContext, apiVersion)))
+      .withFieldValues(buildSubscriptionFieldValues(apiContext, apiVersion, fields))
   }
 }

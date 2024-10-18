@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import java.time.Period
 import java.time.temporal.ChronoUnit.DAYS
 
 import org.scalatest.funspec.AnyFunSpec
@@ -32,13 +31,13 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
-class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock {
+class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with LocalUserIdTracker with CollaboratorTracker with FixedClock with ApplicationSyntaxes
+    with ApplicationWithCollaboratorsFixtures {
 
   val developer: User                     = standardDeveloper
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
@@ -213,47 +212,12 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
     val app = createApp(Environment.PRODUCTION, Access.Standard(), productionApplicationState)
 
     it("should find when an email sha matches") {
+      import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
       app.findCollaboratorByHash(developer.email.text.toSha256) shouldBe Some(developerCollaborator)
     }
 
     it("should not find when an email sha doesn't match") {
       app.findCollaboratorByHash("not a matching sha") shouldBe None
-    }
-  }
-
-  describe("Application.grantLengthDisplayValue") {
-    val thousandDays = 1000
-    val app          = createApp(Environment.PRODUCTION, Access.Standard(), productionApplicationState)
-
-    it("should return '1 month' display value for 30 days grant length") {
-      app.copy(grantLength = Period.ofDays(30)).grantLengthDisplayValue() shouldBe "1 month"
-    }
-    it("should return '3 months' display value for 90 days grant length") {
-      app.copy(grantLength = Period.ofDays(90)).grantLengthDisplayValue() shouldBe "3 months"
-    }
-    it("should return '6 months' display value for 180 days grant length") {
-      app.copy(grantLength = Period.ofDays(180)).grantLengthDisplayValue() shouldBe "6 months"
-    }
-    it("should return '1 year' display value for 365 days grant length") {
-      app.copy(grantLength = Period.ofDays(365)).grantLengthDisplayValue() shouldBe "1 year"
-    }
-    it("should return '18 months' display value for 547 days grant length") {
-      app.copy(grantLength = Period.ofDays(547)).grantLengthDisplayValue() shouldBe "18 months"
-    }
-    it("should return '3 years' display value for 1095 days grant length") {
-      app.copy(grantLength = Period.ofDays(1095)).grantLengthDisplayValue() shouldBe "3 years"
-    }
-    it("should return '5 years' display value for 1825 days grant length") {
-      app.copy(grantLength = Period.ofDays(1825)).grantLengthDisplayValue() shouldBe "5 years"
-    }
-    it("should return '10 years' display value for 3650 days grant length") {
-      app.copy(grantLength = Period.ofDays(3650)).grantLengthDisplayValue() shouldBe "10 years"
-    }
-    it("should return '100 years' display value for 36500 days grant length") {
-      app.copy(grantLength = Period.ofDays(36500)).grantLengthDisplayValue() shouldBe "100 years"
-    }
-    it("should return '33 months' display value for 1000 days grant length") {
-      app.copy(grantLength = Period.ofDays(thousandDays)).grantLengthDisplayValue() shouldBe "33 months"
     }
   }
 
@@ -269,30 +233,17 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
     }
   }
 
-  private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): Application = {
+  private def createApp(environment: Environment, access: Access, defaultApplicationState: ApplicationState): ApplicationWithCollaborators = {
+
     val collaborators = Set(
       developerCollaborator,
       administrator.email.asAdministratorCollaborator
     )
 
-    val app = Application(
-      ApplicationId.random,
-      ClientId("clientId"),
-      "app name",
-      instant,
-      Some(instant),
-      None,
-      grantLength = Period.ofDays(547),
-      environment,
-      description = None,
-      collaborators = collaborators,
-      access = access,
-      state = defaultApplicationState
-    )
-    app
+    standardApp.withEnvironment(environment).withAccess(access).withState(defaultApplicationState).withCollaborators(collaborators)
   }
 
-  def runTableTests(data: Seq[(Environment, Access, User, Boolean)], defaultApplicationState: ApplicationState)(fn: (Application, User) => Boolean): Unit = {
+  def runTableTests(data: Seq[(Environment, Access, User, Boolean)], defaultApplicationState: ApplicationState)(fn: (ApplicationWithCollaborators, User) => Boolean): Unit = {
 
     data.zipWithIndex.foreach {
       case ((environment, applicationType, user, accessAllowed), index) =>

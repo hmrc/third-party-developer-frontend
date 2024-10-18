@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 @import views.helper.IdFormatter
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, GroupedSubscriptions}
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
@@ -25,7 +25,7 @@
 
 @(
   role: Collaborator.Role,
-  app: Application,
+  app: ApplicationWithCollaborators,
   apisSubscriptions: Seq[APISubscriptions],
   group: String,
   afterSubscriptionRedirectTo: SubscriptionRedirect,
@@ -67,7 +67,7 @@
                 </div>
               </div>
               <div class="govuk-grid-column-one-quarter govuk-!-text-align-right">
-                @if(app.hasLockedSubscriptions && role.isAdministrator) {
+                @if(app.areSubscriptionsLocked && role.isAdministrator) {
                   <p class='govuk-body govuk-!-padding-top-2 request-change-link'>
                     <a
                       id="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-request-@if(api.subscribed) {unsubscribe} else {subscribe}"
@@ -93,7 +93,7 @@
                 <div class="govuk-form-group govuk-!-margin-bottom-0">
                   @helper.form(action = controllers.routes.SubscriptionsController.changeApiSubscription(app.id, api.context, api.apiVersion.versionNbr, afterSubscriptionRedirectTo.toString), Symbol("class") -> "slider") {
                     @helper.CSRF.formField
-                    <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-toggle" @if(app.hasLockedSubscriptions || api.isPrivate) { disabled } aria-live="assertive">
+                    <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-toggle" @if(app.areSubscriptionsLocked || api.isPrivate) { disabled } aria-live="assertive">
                       <legend class="govuk-visually-hidden">subscribe to @{api.name} @{api.apiVersion.versionNbr} (@{api.apiVersion.status.displayText})</legend>
                       <div class="slider__radios slider__radios--font-fix">
                         <input class="slider__on slider__on-submit" id="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-on" name="subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>

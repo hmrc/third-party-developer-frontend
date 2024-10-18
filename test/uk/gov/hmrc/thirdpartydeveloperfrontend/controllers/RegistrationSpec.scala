@@ -31,13 +31,12 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.RegistrationSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 
 class RegistrationSpec extends BaseControllerSpec {
 
   var userPassword = "Password1!"
 
-  trait Setup extends SessionServiceMock {
+  trait Setup {
     val registrationView            = app.injector.instanceOf[RegistrationView]
     val signInView                  = app.injector.instanceOf[SignInView]
     val accountVerifiedView         = app.injector.instanceOf[AccountVerifiedView]

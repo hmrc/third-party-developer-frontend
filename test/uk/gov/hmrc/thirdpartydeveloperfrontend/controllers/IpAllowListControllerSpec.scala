@@ -24,34 +24,26 @@ import org.scalatest.Assertion
 import views.html.ipAllowlist._
 
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.IpAllowlist
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, IpAllowlist}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.IpAllowlistService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class IpAllowListControllerSpec
     extends BaseControllerSpec
-    with ApplicationActionServiceMock
-    with TestApplications
     with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker {
+    with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock {
+
     implicit val hc: HeaderCarrier                 = HeaderCarrier()
     val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
 
@@ -76,21 +68,9 @@ class IpAllowListControllerSpec
       app.injector.instanceOf[RemoveCidrBlockView]
     )
 
-    val sessionId       = UserSessionId.random
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+    val anApplicationWithoutIpAllowlist: ApplicationWithCollaborators = standardApp.modify(_.copy(ipAllowlist = IpAllowlist()))
 
-    val admin: User     = buildTrackedUser(emailAddress = "admin@example.com".toLaxEmail)
-    val developer: User = buildTrackedUser(emailAddress = "developer@example.com".toLaxEmail)
-
-    val anApplicationWithoutIpAllowlist: Application = anApplication(adminEmail = admin.email, developerEmail = developer.email)
-    val anApplicationWithIpAllowlist: Application    = anApplicationWithoutIpAllowlist.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24")))
-
-    def givenTheUserIsLoggedInAs(user: User): UserSession = {
-      val session = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
-      fetchSessionByIdReturns(sessionId, session)
-      updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      session
-    }
+    val anApplicationWithIpAllowlist: ApplicationWithCollaborators = standardApp.modify(_.copy(ipAllowlist = IpAllowlist(allowlist = Set("1.1.1.0/24"))))
 
     def verifyIpAllowlistSurveyIsPresent(body: String): Assertion = {
       body should include("will help us to improve this service.")
@@ -99,23 +79,24 @@ class IpAllowListControllerSpec
 
   "viewIpAllowlist" should {
     "return the start page when the app does not have an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      when(mockIpAllowlistService.discardIpAllowlistFlow(adminSession.sessionId)).thenReturn(successful(true))
+
+      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
-      body should include("IP allow list")
-      body should include("Before you start")
+      withClue("Heading")(body should include("IP allow list"))
+      withClue("Before you start")(body should include("Before you start"))
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return the allowlist when the app has an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
+      givenApplicationAction(anApplicationWithIpAllowlist, adminSession)
+      when(mockIpAllowlistService.discardIpAllowlistFlow(adminSession.sessionId)).thenReturn(successful(true))
 
-      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -125,39 +106,41 @@ class IpAllowListControllerSpec
     }
 
     "return the start page and tell the user to contact an admin when a developer accesses a prod app that does not have an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
-      when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
+      when(mockIpAllowlistService.discardIpAllowlistFlow(devSession.sessionId)).thenReturn(successful(true))
 
-      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("An IP allow list is a security feature that lets you control which IP addresses are allowed to make API requests to HMRC")
       body should include("You cannot set up the IP allow list because you are not an administrator")
-      body should include("The administrator <a class=\"govuk-link\" href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
+      body should include("These administrators have access:")
+      body should include(adminEmail.text)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return the allowlist and tell the user to contact an admin when a developer accesses a prod app that has an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithIpAllowlist, givenTheUserIsLoggedInAs(developer))
-      when(mockIpAllowlistService.discardIpAllowlistFlow(sessionId)).thenReturn(successful(true))
+      givenApplicationAction(anApplicationWithIpAllowlist, devSession)
+      when(mockIpAllowlistService.discardIpAllowlistFlow(devSession.sessionId)).thenReturn(successful(true))
 
-      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.viewIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("API requests can only be made from these IP addresses.")
       body should include("You cannot edit the IP allow list because you are not an administrator")
-      body should include("The administrator <a class=\"govuk-link\" href=\"mailto:admin@example.com\">admin@example.com</a> has access.")
+      body should include("These administrators have access:")
+      body should include(adminEmail.text)
       verifyIpAllowlistSurveyIsPresent(body)
     }
   }
 
   "allowedIps" should {
     "return the allowed IP addresses page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.allowedIps(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.allowedIps(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -167,9 +150,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.allowedIps(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.allowedIps(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -177,9 +160,9 @@ class IpAllowListControllerSpec
 
   "settingUpAllowlist" should {
     "return the setting up allowlist page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.settingUpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.settingUpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -189,9 +172,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.settingUpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.settingUpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -199,11 +182,12 @@ class IpAllowListControllerSpec
 
   "editIpAllowlist" should {
     "return the edit IP allowlist page when the app does not have an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.editIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
+
+      val result: Future[Result] = underTest.editIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -212,11 +196,11 @@ class IpAllowListControllerSpec
     }
 
     "return the edit IP allowlist page when the app has an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
+      givenApplicationAction(anApplicationWithIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
 
-      val result: Future[Result] = underTest.editIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.editIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -226,12 +210,12 @@ class IpAllowListControllerSpec
     }
 
     "not show the remove allowlist link when the IP allowlist is required" in new Setup {
-      val application: Application = anApplicationWithIpAllowlist.copy(ipAllowlist = IpAllowlist(required = true, allowlist = Set("1.1.1.0/24")))
-      givenApplicationAction(application, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(application, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
+      val application: ApplicationWithCollaborators = anApplicationWithIpAllowlist.modify(_.copy(ipAllowlist = IpAllowlist(required = true, allowlist = Set("1.1.1.0/24"))))
+      givenApplicationAction(application, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(application, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
 
-      val result: Future[Result] = underTest.editIpAllowlist(application.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.editIpAllowlist(application.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -241,9 +225,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.settingUpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.settingUpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -251,9 +235,9 @@ class IpAllowListControllerSpec
 
   "editIpAllowlistAction" should {
     "redirect to the add CIDR block page when the user responds yes" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest
         .withFormUrlEncodedBody("confirm" -> "Yes"))
 
       status(result) shouldBe SEE_OTHER
@@ -261,9 +245,9 @@ class IpAllowListControllerSpec
     }
 
     "redirect to the review IP allowlist page when the user responds no" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest
         .withFormUrlEncodedBody("confirm" -> "No"))
 
       status(result) shouldBe SEE_OTHER
@@ -271,11 +255,10 @@ class IpAllowListControllerSpec
     }
 
     "return validation error when the user does not select an option" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
-      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("confirm" -> ""))
+      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> ""))
 
       status(result) shouldBe BAD_REQUEST
       val body: String = contentAsString(result)
@@ -284,10 +267,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
-        .withFormUrlEncodedBody("confirm" -> "Yes"))
+      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest.withFormUrlEncodedBody("confirm" -> "Yes"))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -295,11 +277,11 @@ class IpAllowListControllerSpec
 
   "addCidrBlock" should {
     "return the add cidr block page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
 
-      val result: Future[Result] = underTest.addCidrBlock(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.addCidrBlock(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -308,9 +290,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.addCidrBlock(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.addCidrBlock(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -320,23 +302,23 @@ class IpAllowListControllerSpec
     val newCidrBlock = "2.2.2.0/24"
 
     "add the CIDR block and redirect to the edit page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.addCidrBlock(newCidrBlock, anApplicationWithoutIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set(newCidrBlock))))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.addCidrBlock(newCidrBlock, anApplicationWithoutIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set(newCidrBlock))))
 
-      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest
         .withFormUrlEncodedBody("ipAddress" -> newCidrBlock))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${anApplicationWithoutIpAllowlist.id.value}/ip-allowlist/change")
-      verify(mockIpAllowlistService).addCidrBlock(newCidrBlock, anApplicationWithoutIpAllowlist, sessionId)
+      verify(mockIpAllowlistService).addCidrBlock(newCidrBlock, anApplicationWithoutIpAllowlist, adminSession.sessionId)
     }
 
     "return validation error when the CIDR block is invalid" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
-      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken
         .withFormUrlEncodedBody("ipAddress" -> "invalid CIDR block"))
 
       status(result) shouldBe BAD_REQUEST
@@ -346,10 +328,10 @@ class IpAllowListControllerSpec
     }
 
     "return validation error when the CIDR block is in a private range" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
-      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken
         .withFormUrlEncodedBody("ipAddress" -> "192.168.1.0/24"))
 
       status(result) shouldBe BAD_REQUEST
@@ -359,10 +341,10 @@ class IpAllowListControllerSpec
     }
 
     "return validation error when the CIDR block is using a wider range than it is allowed" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
-      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken
         .withFormUrlEncodedBody("ipAddress" -> "2.2.0.0/16"))
 
       status(result) shouldBe BAD_REQUEST
@@ -372,9 +354,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken
+      val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest
         .withFormUrlEncodedBody("ipAddress" -> "2.2.2.0/24"))
 
       status(result) shouldBe FORBIDDEN
@@ -385,9 +367,9 @@ class IpAllowListControllerSpec
     val cidrBlockToRemove = "2.2.2.0/24"
 
     "return the remove cidr block page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.removeCidrBlock(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.removeCidrBlock(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -396,9 +378,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.removeCidrBlock(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.removeCidrBlock(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -408,31 +390,31 @@ class IpAllowListControllerSpec
     val cidrBlockToRemove = "2.2.2.0/24"
 
     "remove the CIDR block and redirect to the setup page when the IP allowlist is empty" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.removeCidrBlock(cidrBlockToRemove, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.removeCidrBlock(cidrBlockToRemove, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
-      val result: Future[Result] = underTest.removeCidrBlockAction(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInRequest)
+      val result: Future[Result] = underTest.removeCidrBlockAction(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInAdminRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${anApplicationWithoutIpAllowlist.id.value}/ip-allowlist/setup")
-      verify(mockIpAllowlistService).removeCidrBlock(cidrBlockToRemove, sessionId)
+      verify(mockIpAllowlistService).removeCidrBlock(cidrBlockToRemove, adminSession.sessionId)
     }
 
     "remove the CIDR block and redirect to the edit IP allowlist page when the IP allowlist is not empty" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.removeCidrBlock(cidrBlockToRemove, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set("1.1.1.0/24"))))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.removeCidrBlock(cidrBlockToRemove, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("1.1.1.0/24"))))
 
-      val result: Future[Result] = underTest.removeCidrBlockAction(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInRequest)
+      val result: Future[Result] = underTest.removeCidrBlockAction(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInAdminRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${anApplicationWithoutIpAllowlist.id.value}/ip-allowlist/change")
-      verify(mockIpAllowlistService).removeCidrBlock(cidrBlockToRemove, sessionId)
+      verify(mockIpAllowlistService).removeCidrBlock(cidrBlockToRemove, adminSession.sessionId)
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.removeCidrBlockAction(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInRequest)
+      val result: Future[Result] = underTest.removeCidrBlockAction(anApplicationWithoutIpAllowlist.id, cidrBlockToRemove)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -440,11 +422,11 @@ class IpAllowListControllerSpec
 
   "reviewIpAllowlist" should {
     "return the review IP allowlist page when the app does not have an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
 
-      val result: Future[Result] = underTest.reviewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.reviewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -454,11 +436,11 @@ class IpAllowListControllerSpec
     }
 
     "return the review IP allowlist page when the app has an active allowlist" in new Setup {
-      givenApplicationAction(anApplicationWithIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
+      givenApplicationAction(anApplicationWithIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
 
-      val result: Future[Result] = underTest.reviewIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.reviewIpAllowlist(anApplicationWithIpAllowlist.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -468,9 +450,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.reviewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.reviewIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -478,36 +460,36 @@ class IpAllowListControllerSpec
 
   "activateIpAllowlist" should {
     "activate the IP allowlist and return the success page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId))
-        .thenReturn(successful(IpAllowlistFlow(sessionId, Set("2.2.2.0/24"))))
-      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId))
+        .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
+      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
-      val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
       body should include("Your IP allow list is active")
-      verify(mockIpAllowlistService).activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), eqTo(admin.email))(*)
+      verify(mockIpAllowlistService).activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), eqTo(adminEmail))(*)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return 403 when the service throws a forbidden exception" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, sessionId)).thenReturn(successful(IpAllowlistFlow(sessionId, Set())))
-      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
+      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
         .thenReturn(failed(new ForbiddenException("forbidden")))
 
-      val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -515,9 +497,9 @@ class IpAllowListControllerSpec
 
   "removeIpAllowlist" should {
     "return the remove IP allowlist page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
-      val result: Future[Result] = underTest.removeIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.removeIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
@@ -526,9 +508,9 @@ class IpAllowListControllerSpec
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.removeIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInRequest.withCSRFToken)
+      val result: Future[Result] = underTest.removeIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }
@@ -536,33 +518,33 @@ class IpAllowListControllerSpec
 
   "removeIpAllowlistAction" should {
     "deactivate the IP allowlist and return the success page" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
-      val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("IP allow list removed")
-      verify(mockIpAllowlistService).deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), eqTo(admin.email))(*)
+      verify(mockIpAllowlistService).deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), eqTo(adminEmail))(*)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return 403 when the service throws a forbidden exception" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(admin))
-      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(sessionId), *[LaxEmailAddress])(*))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
+      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
         .thenReturn(failed(new ForbiddenException("forbidden")))
 
-      val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
 
       status(result) shouldBe FORBIDDEN
     }
 
     "return 403 when a developer tries to access a production app" in new Setup {
-      givenApplicationAction(anApplicationWithoutIpAllowlist, givenTheUserIsLoggedInAs(developer))
+      givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInRequest)
+      val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest)
 
       status(result) shouldBe FORBIDDEN
     }

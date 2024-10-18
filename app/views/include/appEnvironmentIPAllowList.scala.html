@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 
-@(app: Application)(implicit appConfig: ApplicationConfig)
+@(app: ApplicationWithCollaborators)(implicit appConfig: ApplicationConfig)
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
 @envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}

@@ -27,7 +27,6 @@ trait DeveloperSessionBuilder {
   }
 
   private def buildDeveloperSession(loggedInState: LoggedInState, developer: User): UserSession = {
-
     val sessionId = UserSessionId.random
 
     UserSession(

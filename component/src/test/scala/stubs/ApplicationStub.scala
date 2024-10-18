@@ -21,9 +21,10 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationToken, ApplicationWithSubscriptionIds}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationToken
 
 object ApplicationStub {
 
@@ -69,12 +70,12 @@ object ApplicationStub {
     )
   }
 
-  def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptionIds] = Nil, status: Int = OK) = {
+  def configureUserApplications(userId: UserId, applications: List[ApplicationWithSubscriptions] = Nil, status: Int = OK) = {
     import play.api.libs.json.Json
 
-    implicit val writes = Json.writes[ApplicationWithSubscriptionIds]
+    implicit val writes = Json.writes[ApplicationWithSubscriptions]
 
-    def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptionIds]) = {
+    def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptions]) = {
       stubFor(
         get(urlPathEqualTo("/developer/applications"))
           .withQueryParam("userId", equalTo(userId.toString()))

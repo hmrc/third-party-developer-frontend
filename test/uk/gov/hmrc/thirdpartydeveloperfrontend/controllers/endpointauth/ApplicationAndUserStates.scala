@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
-import java.time.{Instant, LocalDate, Period}
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -31,6 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -45,64 +45,68 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
-trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock {
-  val applicationId: ApplicationId = ApplicationId.random
-  val submissionId: SubmissionId   = SubmissionId.random
-  val clientId: ClientId           = ClientId.random
-  val applicationName              = "my app"
-  val createdOn: Instant           = LocalDate.of(2020, 1, 1).asInstant
+trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
+  val applicationId: ApplicationId = applicationIdOne
+  val submissionId: SubmissionId   = submissionIdOne
+  val clientId: ClientId           = clientIdOne
+  val applicationName              = appNameOne
 
   def describeApplication: String
   def access: Access
   def checkInformation: Option[CheckInformation]
 
-  def application: Application                            = Application(
-    applicationId,
-    clientId,
-    applicationName,
-    createdOn,
-    None,
-    None,
-    Period.ofYears(1),
-    environment,
-    None,
-    maybeCollaborator match {
-      case Some(collaborator) => Set(collaborator)
-      case None               => Set()
-    },
-    access,
-    state,
-    checkInformation,
-    IpAllowlist()
-  )
-  lazy val redirectUrl                                    = RedirectUri.unsafeApply("https://example.com/redirect-here")
-  lazy val apiContext: ApiContext                         = ApiContext("ctx")
-  lazy val apiVersion: ApiVersionNbr                      = ApiVersionNbr("1.0")
-  lazy val apiIdentifier: ApiIdentifier                   = ApiIdentifier(apiContext, apiVersion)
-  lazy val apiFieldName: FieldName                        = FieldName("my_field")
-  lazy val apiFieldValue: FieldValue                      = FieldValue("my value")
-  lazy val apiPpnsFieldName: FieldName                    = FieldName("my_ppns_field")
-  lazy val apiPpnsFieldValue: FieldValue                  = FieldValue("my ppns value")
-  lazy val appWithSubsIds: ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(application).copy(subscriptions = Set(apiIdentifier))
-  lazy val privacyPolicyUrl                               = "http://example.com/priv"
-  lazy val termsConditionsUrl                             = "http://example.com/tcs"
-  lazy val category                                       = "category1"
+  def collabs: Set[Collaborator] = maybeCollaborator match {
+    case Some(collaborator) => Set(collaborator)
+    case None               => Set.empty
+  }
 
-  lazy val appWithSubsData: ApplicationWithSubscriptionData = ApplicationWithSubscriptionData(
-    application,
-    Set(apiIdentifier),
-    Map(
-      apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
-    )
-  )
-  lazy val questionnaireId: Questionnaire.Id                = Questionnaire.Id.random
-  lazy val question: Question.AcknowledgementOnly           = Question.AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
-  lazy val questionItem: QuestionItem                       = QuestionItem(question)
-  lazy val questionnaire: Questionnaire                     = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
+  def application: ApplicationWithCollaborators =
+    standardApp
+      .modify(_.copy(
+        id = applicationId,
+        clientId = clientId,
+        name = applicationName,
+        createdOn = instant,
+        lastAccess = None,
+        lastAccessTokenUsage = None,
+        grantLength = GrantLength.ONE_YEAR,
+        deployedTo = environment,
+        access = access,
+        state = state,
+        checkInformation = checkInformation,
+        ipAllowlist = IpAllowlist()
+      ))
+      .withCollaborators(collabs.toList: _*)
+
+  lazy val redirectUrl                                  = RedirectUri.unsafeApply("https://example.com/redirect-here")
+  lazy val apiContext: ApiContext                       = ApiContext("ctx")
+  lazy val apiVersion: ApiVersionNbr                    = ApiVersionNbr("1.0")
+  lazy val apiIdentifier: ApiIdentifier                 = ApiIdentifier(apiContext, apiVersion)
+  lazy val apiFieldName: FieldName                      = FieldName("my_field")
+  lazy val apiFieldValue: FieldValue                    = FieldValue("my value")
+  lazy val apiPpnsFieldName: FieldName                  = FieldName("my_ppns_field")
+  lazy val apiPpnsFieldValue: FieldValue                = FieldValue("my ppns value")
+  lazy val appWithSubsIds: ApplicationWithSubscriptions = application.withSubscriptions(Set(apiIdentifier))
+  lazy val privacyPolicyUrl                             = "http://example.com/priv"
+  lazy val termsConditionsUrl                           = "http://example.com/tcs"
+  lazy val category                                     = "category1"
+
+  lazy val appWithSubsData: ApplicationWithSubscriptionFields =
+    application
+      .withSubscriptions(Set(apiIdentifier))
+      .withFieldValues(
+        Map(
+          apiContext -> Map(ApiVersionNbr("1.0") -> Map(apiFieldName -> apiFieldValue, apiPpnsFieldName -> apiPpnsFieldValue))
+        )
+      )
+
+  lazy val questionnaireId: Questionnaire.Id      = Questionnaire.Id.random
+  lazy val question: Question.AcknowledgementOnly = Question.AcknowledgementOnly(Question.Id.random, Wording("hi"), None)
+  lazy val questionItem: QuestionItem             = QuestionItem(question)
+  lazy val questionnaire: Questionnaire           = Questionnaire(questionnaireId, Questionnaire.Label("label"), NonEmptyList.one(questionItem))
 
   lazy val questionIdsOfInterest: QuestionIdsOfInterest                  = QuestionIdsOfInterest(
     Question.Id.random,
@@ -169,7 +173,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     SubmissionId.random,
     submissionIndex,
     applicationName,
-    createdOn,
+    instant,
     responsibleIndividual,
     "admin@example.com",
     "Mr Admin".toLaxEmail,
@@ -231,7 +235,7 @@ trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
   def checkInformation: Option[CheckInformation] = None
 }
 
-trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
+trait HasUserWithRole extends MockConnectors with MfaDetailBuilder with FixedClock {
   lazy val userEmail: LaxEmailAddress = "user@example.com".toLaxEmail
   lazy val userId: UserId             = UserId.random
   lazy val userFirstName              = "Bob"
@@ -246,8 +250,8 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder {
     userEmail,
     userFirstName,
     userLastName,
-    Instant.now(),
-    Instant.now(),
+    instant,
+    instant,
     verified = true,
     accountSetup = None,
     nonce = None,
@@ -274,12 +278,12 @@ trait UserIsDeveloper extends UserIsTeamMember {
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp: Application                               = application.copy(id = ApplicationId.random, collaborators = Set(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId)))
-  val otherAppWithSubsIds: ApplicationWithSubscriptionIds = ApplicationWithSubscriptionIds.from(otherApp).copy(subscriptions = Set(apiIdentifier))
+  val otherApp: ApplicationWithCollaborators            = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
+  val otherAppWithSubsIds: ApplicationWithSubscriptions = otherApp.withSubscriptions(Set(apiIdentifier))
   when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
-  def describeUserRole                                    = "The user is not a member of the application team"
-  def maybeCollaborator: Option[Collaborator]             = None
+  def describeUserRole                                  = "The user is not a member of the application team"
+  def maybeCollaborator: Option[Collaborator]           = None
 }
 
 trait HasUserSession extends HasUserWithRole {

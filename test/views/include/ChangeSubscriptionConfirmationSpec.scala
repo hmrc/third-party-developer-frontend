@@ -25,7 +25,7 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -45,7 +45,8 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock {
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   val request         = FakeRequest().withCSRFToken
   val applicationId   = ApplicationId.random
@@ -58,21 +59,7 @@ class ChangeSubscriptionConfirmationSpec extends CommonViewSpec
 
   val loggedInDeveloper = standardDeveloper.loggedIn
 
-  val application = Application(
-    applicationId,
-    clientId,
-    applicationName,
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-    state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-    access =
-      Access.Standard(redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val application = standardApp
 
   def renderPage(form: Form[ChangeSubscriptionConfirmationForm], subscribed: Boolean) = {
     val changeSubscriptionConfirmationView = app.injector.instanceOf[ChangeSubscriptionConfirmationView]

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import java.time.Period
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
@@ -29,14 +27,13 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -48,18 +45,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.Versi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceSpec extends AsyncHmrcSpec
     with SubscriptionsBuilder
-    with ApplicationBuilder
-    with LocalUserIdTracker
-    with DeveloperSessionBuilder
-    with UserTestData {
-
-  val versionOne  = ApiVersionNbr("1.0")
-  val versionTwo  = ApiVersionNbr("2.0")
-  val grantLength = Period.ofDays(547)
+    with ApplicationWithCollaboratorsFixtures
+    with CommonSessionFixtures
+    with FixedClock {
 
   trait Setup extends FixedClock with ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -107,13 +100,13 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       clock
     )
 
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
     }
 
-    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: Application): Unit = {
+    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
       when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
       when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
         .thenReturn(successful(Some(application)))
@@ -123,37 +116,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
     VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
-  val productionApplicationId = ApplicationId.random
-  val productionClientId      = ClientId(s"client-id-${randomUUID().toString}")
+  val productionApplication: ApplicationWithCollaborators = standardApp
 
-  val productionApplication: Application =
-    Application(
-      productionApplicationId,
-      productionClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("description"),
-      Set()
-    )
-  val sandboxApplicationId               = ApplicationId.random
-  val sandboxClientId                    = ClientId("Client ID")
+  val sandboxApplicationId = ApplicationId.random
 
-  val sandboxApplication: Application =
-    Application(
-      sandboxApplicationId,
-      sandboxClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.SANDBOX,
-      Some("description")
-    )
+  val sandboxApplication: ApplicationWithCollaborators = standardApp.withId(sandboxApplicationId).inSandbox()
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -239,13 +206,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request application deletion" should {
 
-    val adminEmail                            = "admin@example.com".toLaxEmail
-    val adminRequester                        = adminDeveloper.loggedIn
-    val developerEmail                        = "developer@example.com".toLaxEmail
-    val developerRequester                    = standardDeveloper.loggedIn
-    val teamMembers                           = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
-    val sandboxApp                            = sandboxApplication.copy(collaborators = teamMembers)
-    val productionApp                         = productionApplication.copy(collaborators = teamMembers)
+    val adminRequester                        = adminSession
+    val developerRequester                    = devSession
     val subject                               = "Request to delete an application"
     val captor: ArgumentCaptor[DeskproTicket] = ArgumentCaptor.forClass(classOf[DeskproTicket])
 
@@ -256,7 +218,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestPrincipalApplicationDeletion(adminRequester, sandboxApp)) shouldBe TicketCreated
+      await(applicationService.requestPrincipalApplicationDeletion(adminRequester, sandboxApplication)) shouldBe TicketCreated
 
       verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
@@ -269,8 +231,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestPrincipalApplicationDeletion(developerRequester, sandboxApp)) shouldBe TicketCreated
-      captor.getValue.email shouldBe developerEmail
+      await(applicationService.requestPrincipalApplicationDeletion(developerRequester, sandboxApplication)) shouldBe TicketCreated
+      captor.getValue.email shouldBe devEmail
       captor.getValue.subject shouldBe subject
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
     }
@@ -282,7 +244,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestPrincipalApplicationDeletion(adminRequester, productionApp)) shouldBe TicketCreated
+      await(applicationService.requestPrincipalApplicationDeletion(adminRequester, productionApplication)) shouldBe TicketCreated
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
     }
@@ -290,7 +252,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "not create a deskpro ticket or audit record for a Developer in a Production app" in new Setup {
 
       intercept[ForbiddenException] {
-        await(applicationService.requestPrincipalApplicationDeletion(developerRequester, productionApp))
+        await(applicationService.requestPrincipalApplicationDeletion(developerRequester, productionApplication))
       }
       verifyZeroInteractions(mockDeskproConnector)
       verifyZeroInteractions(mockAuditService)
@@ -298,29 +260,21 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   "delete subordinate application" should {
-
-    val adminEmail         = "admin@example.com".toLaxEmail
-    val adminRequester     = adminDeveloper.loggedIn
-    val developerEmail     = "developer@example.com".toLaxEmail
-    val developerRequester = standardDeveloper.loggedIn
-    val teamMembers        = Set(adminEmail.asAdministratorCollaborator, developerEmail.asDeveloperCollaborator)
-    val sandboxApp         = sandboxApplication.copy(collaborators = teamMembers)
-    val invalidROPCApp     = sandboxApplication.copy(collaborators = teamMembers, access = Access.Ropc())
-    val productionApp      = productionApplication.copy(collaborators = teamMembers)
-    val reasons            = "Subordinate application deleted by DevHub user"
-    val expectedMessage    = "Only standard subordinate applications can be deleted by admins"
+    val invalidROPCApp  = sandboxApplication.withAccess(Access.Ropc())
+    val reasons         = "Subordinate application deleted by DevHub user"
+    val expectedMessage = "Only standard subordinate applications can be deleted by admins"
 
     "delete standard subordinate application when requested by an admin" in new Setup {
-      val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminRequester.developer.userId, reasons, instant)
+      val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminSession.developer.userId, reasons, instant)
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
-      await(applicationService.deleteSubordinateApplication(adminRequester, sandboxApp))
+      await(applicationService.deleteSubordinateApplication(adminSession, sandboxApplication))
     }
 
     "throw an exception when a subordinate application is requested to be deleted by a developer" in new Setup {
 
       private val exception = intercept[ForbiddenException](
-        await(applicationService.deleteSubordinateApplication(developerRequester, sandboxApp))
+        await(applicationService.deleteSubordinateApplication(devSession, sandboxApplication))
       )
       exception.getMessage shouldBe expectedMessage
     }
@@ -328,7 +282,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "throw an exception when a production application is requested to be deleted by a developer" in new Setup {
 
       private val exception = intercept[ForbiddenException](
-        await(applicationService.deleteSubordinateApplication(developerRequester, productionApp))
+        await(applicationService.deleteSubordinateApplication(devSession, productionApplication))
       )
       exception.getMessage shouldBe expectedMessage
     }
@@ -336,7 +290,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "throw an exception when a ROPC application is requested to be deleted by a developer" in new Setup {
 
       private val exception = intercept[ForbiddenException](
-        await(applicationService.deleteSubordinateApplication(developerRequester, invalidROPCApp))
+        await(applicationService.deleteSubordinateApplication(devSession, invalidROPCApp))
       )
       exception.getMessage shouldBe expectedMessage
     }
@@ -418,20 +372,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   }
 
   "requestProductionApplicationNameChange" should {
-    val adminRequester = adminDeveloper.loggedIn
 
     "correctly create a deskpro ticket" in new Setup {
-      private val applicationName = "applicationName"
+      private val applicationName = ApplicationName("applicationName")
 
       when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
 
       private val result =
         await(applicationService.requestProductonApplicationNameChange(
-          adminRequester.developer.userId,
+          adminSession.developer.userId,
           productionApplication,
           applicationName,
-          adminRequester.developer.displayedName,
-          adminRequester.developer.email
+          adminSession.developer.displayedName,
+          adminSession.developer.email
         ))
 
       result shouldBe TicketCreated

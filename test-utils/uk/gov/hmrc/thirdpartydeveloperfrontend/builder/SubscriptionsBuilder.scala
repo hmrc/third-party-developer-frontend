@@ -17,11 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.AccessRequirements
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, FieldName, FieldValue}
 
 trait SubscriptionsBuilder {
 
@@ -39,7 +40,7 @@ trait SubscriptionsBuilder {
     SubscriptionFieldsWrapper(applicationId, clientId, context, version, List.empty)
   }
 
-  def buildSubscriptionFieldsWrapper(application: Application, fields: List[SubscriptionFieldValue]) = {
+  def buildSubscriptionFieldsWrapper(application: ApplicationWithCollaborators, fields: List[SubscriptionFieldValue]) = {
 
     val applicationId = application.id
 

@@ -26,7 +26,7 @@ import views.html.TermsOfUseView
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, CheckInformation, State, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, CheckInformation, State, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -44,6 +44,7 @@ class TermsOfUseSpec extends CommonViewSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserBuilder
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   val termsOfUseView = app.injector.instanceOf[TermsOfUseView]
@@ -62,21 +63,13 @@ class TermsOfUseSpec extends CommonViewSpec
     implicit val loggedIn   = buildUser("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
     implicit val navSection = "details"
 
-    val id          = ApplicationId.random
-    val clientId    = ClientId("clientId")
-    val appName     = "an application"
-    val createdOn   = instant
-    val lastAccess  = Some(instant)
-    val grantLength = Period.ofDays(547)
-    val deployedTo  = Environment.PRODUCTION
-
     "viewing an agreed application" should {
       trait Setup {
         val emailAddress      = "email@example.com".toLaxEmail
         val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
         val version           = "1.0"
         val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
-        val application       = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val application       = standardApp.modify(_.copy(checkInformation = Some(checkInformation)))
         val page: Page        =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }
@@ -102,7 +95,8 @@ class TermsOfUseSpec extends CommonViewSpec
     "viewing an unagreed application" should {
       trait Setup {
         val checkInformation = CheckInformation(termsOfUseAgreements = List.empty)
-        val application      = Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
+        val application      = standardApp
+        // Application(id, clientId, appName, createdOn, lastAccess, None, grantLength, deployedTo, checkInformation = Some(checkInformation))
         val page: Page       =
           Page(termsOfUseView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), TermsOfUseForm.form, TermsOfUseVersion.latest))
       }

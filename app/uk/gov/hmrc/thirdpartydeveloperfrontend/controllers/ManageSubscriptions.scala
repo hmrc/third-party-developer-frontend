@@ -29,15 +29,15 @@ import play.api.mvc._
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, FieldName, FieldValue}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 
 object ManageSubscriptions {
@@ -262,13 +262,13 @@ class ManageSubscriptions @Inject() (
     }
 
   def subscriptionConfigurationStepPage(applicationId: ApplicationId, pageNumber: Int): Action[AnyContent] = {
-    def doEndOfJourneyRedirect(application: Application) = {
-      Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(application.id)))
+    def doEndOfJourneyRedirect(appId: ApplicationId) = {
+      Future.successful(Redirect(addapplication.routes.AddApplication.addApplicationSuccess(appId)))
     }
 
     subFieldsDefinitionsExistActionWithPageNumber(applicationId, pageNumber) { implicit request: ApplicationWithSubscriptionFieldPageRequest[AnyContent] =>
       if (pageNumber == request.totalPages) {
-        doEndOfJourneyRedirect(request.application)
+        doEndOfJourneyRedirect(request.application.id)
 
       } else {
         Future.successful(Ok(subscriptionConfigurationStepPageView(request.application, pageNumber, request.totalPages)))
