@@ -118,7 +118,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val sessionId            = UserSessionId.random
     val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
 
-    val testingApp: ApplicationWithCollaborators = sampleApp.withState(ApplicationState(updatedOn = instant)).withEnvironment(Environment.SANDBOX)
+    val testingApp: ApplicationWithCollaborators = sampleApp.withState(ApplicationState(updatedOn = instant)).inSandbox()
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)

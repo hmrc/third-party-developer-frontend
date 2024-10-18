@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -88,7 +88,7 @@ class SubscriptionsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developerApplication: ApplicationWithCollaborators = standardApp.withEnvironment(Environment.SANDBOX)
+    val developerApplication: ApplicationWithCollaborators = standardApp.inSandbox()
 
     fetchByApplicationIdReturns(developerApplication.id, developerApplication)
 
@@ -331,20 +331,20 @@ class SubscriptionsSpec
       behave like allowedSubscriptionChangeWithCheckUpdate(adminSession)(standardApp.withState(appStateTesting))
     }
     "an administrator attempts to change a submitted-for-checking sandbox application" should {
-      behave like allowedSubscriptionChange(adminSession)(standardApp.withEnvironment(Environment.SANDBOX))
+      behave like allowedSubscriptionChange(adminSession)(standardApp.inSandbox())
     }
     "an administrator attempts to change a created sandbox application" should {
-      behave like allowedSubscriptionChange(adminSession)(standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting))
+      behave like allowedSubscriptionChange(adminSession)(standardApp.inSandbox().withState(appStateTesting))
     }
     "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(devSession)(standardApp) }
     "a developer attempts to change a created production application" should {
       behave like allowedSubscriptionChangeWithCheckUpdate(devSession)(standardApp.withState(appStateTesting))
     }
     "a developer attempts to change a submitted-for-checking sandbox application" should {
-      behave like allowedSubscriptionChange(devSession)(standardApp.withEnvironment(Environment.SANDBOX))
+      behave like allowedSubscriptionChange(devSession)(standardApp.inSandbox())
     }
     "a developer attempts to change a created sandbox application" should {
-      behave like allowedSubscriptionChange(devSession)(standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting))
+      behave like allowedSubscriptionChange(devSession)(standardApp.inSandbox().withState(appStateTesting))
     }
   }
 
@@ -421,19 +421,19 @@ class SubscriptionsSpec
       behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withState(appStateTesting))
     }
     "an administrator attempts to change a submitted-for-checking sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withEnvironment(Environment.SANDBOX))
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox())
     }
     "an administrator attempts to change a created sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting))
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox().withState(appStateTesting))
     }
 
     "a developer attempts to change a submitted-for-cecking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(devSession)(standardApp) }
     "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withState(appStateTesting)) }
     "a developer attempts to change a submitted-for-checking sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withEnvironment(Environment.SANDBOX))
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox())
     }
     "a developer attempts to change a created sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting))
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox().withState(appStateTesting))
     }
   }
 
@@ -541,18 +541,18 @@ class SubscriptionsSpec
       behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withState(appStateTesting))
     }
     "an administrator attempts to change a submitted-for-checking sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withEnvironment(Environment.SANDBOX))
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox())
     }
     "an administrator attempts to change a created sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting))
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox().withState(appStateTesting))
     }
     "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(devSession)(standardApp) }
     "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withState(appStateTesting)) }
     "a developer attempts to change a submitted-for-checking sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withEnvironment(Environment.SANDBOX))
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox())
     }
     "a developer attempts to change a created sandbox application" should {
-      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting))
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox().withState(appStateTesting))
     }
   }
 

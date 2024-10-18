@@ -71,7 +71,7 @@ class DetailsViewSpec
   }
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", instant)))
-  val sandboxApp          = standardApp.withEnvironment(Environment.SANDBOX)
+  val sandboxApp          = standardApp.inSandbox()
   val prodApp             = standardApp.withEnvironment(Environment.PRODUCTION)
 
   trait LoggedInUserIsAdmin {

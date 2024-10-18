@@ -92,7 +92,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
     "render" in {
 
-      val application = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting)
+      val application = standardApp.inSandbox().withState(appStateTesting)
       val document    = Jsoup.parse(renderPage(application).body)
 
       elementExistsByText(document, "h1", "Change application details") shouldBe true
@@ -108,7 +108,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val aPrivacyPolicyURL      = Some("a privacy policy url")
       val aTermsAndConditionsURL = Some("a terms and conditions url")
       val anAccess               = Access.Standard(privacyPolicyUrl = aPrivacyPolicyURL, termsAndConditionsUrl = aTermsAndConditionsURL)
-      val application            = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting).withAccess(anAccess).modify(_.copy(description = aDescription))
+      val application            = standardApp.inSandbox().withState(appStateTesting).withAccess(anAccess).modify(_.copy(description = aDescription))
       val document               = Jsoup.parse(renderPage(application).body)
 
       withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.value) shouldBe true)

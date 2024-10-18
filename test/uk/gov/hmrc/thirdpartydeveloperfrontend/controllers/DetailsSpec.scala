@@ -56,7 +56,7 @@ class DetailsSpec
     with ApplicationWithCollaboratorsFixtures {
 
   val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description")))
-  val sandboxApplication  = approvedApplication.withEnvironment(Environment.SANDBOX)
+  val sandboxApplication  = approvedApplication.inSandbox()
   val inTestingApp        = approvedApplication.withState(appStateTesting)
 
   "details" when {

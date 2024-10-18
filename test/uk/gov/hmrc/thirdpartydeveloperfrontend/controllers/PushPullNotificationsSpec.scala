@@ -29,7 +29,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -56,7 +55,7 @@ class PushPullNotificationsSpec
       }
 
       "return the push secret for a sandbox app" in new Setup {
-        val application: ApplicationWithCollaborators = standardApp.withEnvironment(Environment.SANDBOX)
+        val application: ApplicationWithCollaborators = standardApp.inSandbox()
         showPushSecretsShouldRenderThePage(adminSession, loggedInAdminRequest)(application)
       }
 
@@ -76,7 +75,7 @@ class PushPullNotificationsSpec
       }
 
       "return the push secret for a sandbox app" in new Setup {
-        showPushSecretsShouldRenderThePage(adminSession, loggedInAdminRequest)(standardApp.withEnvironment(Environment.SANDBOX))
+        showPushSecretsShouldRenderThePage(adminSession, loggedInAdminRequest)(standardApp.inSandbox())
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {

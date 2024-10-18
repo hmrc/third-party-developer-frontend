@@ -99,7 +99,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
   val productionApplication: ApplicationWithCollaborators = standardApp
 
-  val sandboxApplication: ApplicationWithCollaborators = standardApp2.withEnvironment(Environment.SANDBOX)
+  val sandboxApplication: ApplicationWithCollaborators = standardApp2.inSandbox()
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

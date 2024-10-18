@@ -245,7 +245,7 @@ class CredentialsSpec
     }
 
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup with ApplicationProviderWithAdmin {
-      override def modifiers = _.withEnvironment(Environment.SANDBOX)
+      override def modifiers = _.inSandbox()
 
       ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 

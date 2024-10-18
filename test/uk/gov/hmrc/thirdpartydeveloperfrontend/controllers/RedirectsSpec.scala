@@ -29,7 +29,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, RedirectUri}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -376,7 +375,7 @@ class RedirectsSpec
 
     "return the delete redirect page for a developer with a sandbox application" in new Setup {
       deleteRedirectsShouldRenderThePage(loggedInAdminRequest)(
-        standardApp.withEnvironment(Environment.SANDBOX)
+        standardApp.inSandbox()
           .withRedirectUris(redirectUris),
         OK,
         shouldShowDeleteControls = true,

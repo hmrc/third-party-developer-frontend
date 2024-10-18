@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -55,7 +55,7 @@ class AddApplicationProductionSwitchSpec
 
   val sandboxAppSummaries = (1 to 5).map { i =>
     standardApp
-      .withEnvironment(Environment.SANDBOX)
+      .inSandbox()
       .withId(ApplicationId.random)
       .withName(ApplicationName(s"App $i"))
   }

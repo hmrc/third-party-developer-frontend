@@ -25,7 +25,7 @@ import play.api.http.Status
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -78,7 +78,7 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with Applicati
   val sandboxApplicationId  = ApplicationId.random
   val sandboxClientId       = ClientId("Client ID")
 
-  val sandboxApplication = standardApp.withEnvironment(Environment.SANDBOX).withId(sandboxApplicationId)
+  val sandboxApplication = standardApp.inSandbox().withId(sandboxApplicationId)
 
   "fetchByApplicationId" when {
     "return the application fetched from the production connector when it exists there" in new Setup {

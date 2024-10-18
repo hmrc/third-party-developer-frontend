@@ -64,7 +64,7 @@ class ManageSubscriptionsSpec
   val application: ApplicationWithCollaborators =
     standardApp
       .withName(ApplicationName("App name 1"))
-      .withEnvironment(Environment.SANDBOX)
+      .inSandbox()
       .withAccess(standardAccess.copy(
         redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
         termsAndConditionsUrl = Some("http://tnc-url.com")

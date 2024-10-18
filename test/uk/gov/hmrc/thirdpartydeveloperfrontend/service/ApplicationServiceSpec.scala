@@ -120,7 +120,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   val sandboxApplicationId = ApplicationId.random
 
-  val sandboxApplication: ApplicationWithCollaborators = standardApp.withId(sandboxApplicationId).withEnvironment(Environment.SANDBOX)
+  val sandboxApplication: ApplicationWithCollaborators = standardApp.withId(sandboxApplicationId).inSandbox()
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,

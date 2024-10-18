@@ -28,7 +28,6 @@ import play.api.test.Helpers.{redirectLocation, _}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
@@ -47,7 +46,7 @@ class AddApplicationSuccessSpec
     with WithCSRFAddToken
     with ApplicationWithCollaboratorsFixtures {
 
-  val subordinateApp: ApplicationWithCollaborators = standardApp.withEnvironment(Environment.SANDBOX)
+  val subordinateApp: ApplicationWithCollaborators = standardApp.inSandbox()
 
   trait Setup
       extends UpliftLogicMock

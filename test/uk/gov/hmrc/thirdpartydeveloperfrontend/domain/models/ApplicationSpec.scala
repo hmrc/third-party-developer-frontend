@@ -40,7 +40,7 @@ class ApplicationSpec extends HmrcSpec with FixedClock with ApplicationWithColla
   "privacy policy location" should {
     "be correct for old journey app when no location supplied" in {
       val application = baseApplication.withAccess(Access.Standard(privacyPolicyUrl = None))
-      application.privacyPolicyLocation shouldBe None
+      application.privacyPolicyLocation shouldBe Some(PrivacyPolicyLocations.NoneProvided)
     }
     "be correct for old journey app when location was supplied" in {
       val application = baseApplication.withAccess(Access.Standard(privacyPolicyUrl = Some(url)))
@@ -66,7 +66,7 @@ class ApplicationSpec extends HmrcSpec with FixedClock with ApplicationWithColla
   "terms and conditions location" should {
     "be correct for old journey app when no location supplied" in {
       val application = baseApplication.withAccess(Access.Standard(termsAndConditionsUrl = None))
-      application.termsAndConditionsLocation shouldBe None
+      application.termsAndConditionsLocation shouldBe Some(TermsAndConditionsLocations.NoneProvided)
     }
     "be correct for old journey app when location was supplied" in {
       val application = baseApplication.withAccess(Access.Standard(termsAndConditionsUrl = Some(url)))

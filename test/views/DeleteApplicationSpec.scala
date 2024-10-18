@@ -45,7 +45,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
   val prodAppId                                = ApplicationId.random
   val sandboxAppId                             = ApplicationId.random
   val prodApp: ApplicationWithCollaborators    = application.withId(prodAppId)
-  val sandboxApp: ApplicationWithCollaborators = application.withId(sandboxAppId).withEnvironment(Environment.SANDBOX)
+  val sandboxApp: ApplicationWithCollaborators = application.withId(sandboxAppId).inSandbox()
 
   "delete application page" should {
     "show content and link to delete application for Administrator" when {

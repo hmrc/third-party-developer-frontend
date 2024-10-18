@@ -69,7 +69,7 @@ class SubscriptionsSpec extends CommonViewSpec
     val productionApplication                             = standardApp.withState(appStateProduction)
     val productionApplicationTesting                      = standardApp.withState(appStateTesting)
 
-    val sandboxApplicationTesting = standardApp.withEnvironment(Environment.SANDBOX).withState(appStateTesting)
+    val sandboxApplicationTesting = standardApp.inSandbox().withState(appStateTesting)
 
     def renderPageForApplicationAndRole(application: ApplicationWithCollaborators, role: Collaborator.Role, pageData: PageData, request: FakeRequest[AnyContentAsEmpty.type]) = {
       manageSubscriptions.render(

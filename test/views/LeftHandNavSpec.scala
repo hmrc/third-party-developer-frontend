@@ -103,7 +103,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "include links to client ID and client secrets if the user is not an admin but the app is in sandbox" in new Setup {
       val application =
-        standardApp.withEnvironment(Environment.SANDBOX).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator)).withState(appStateProduction)
+        standardApp.inSandbox().withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator)).withState(appStateProduction)
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
@@ -113,7 +113,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "include link to push secrets when the application has PPNS fields and the user is an admin or the application is sandbox" in new Setup {
       val prodAppAsAdmin  = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
-      val sandboxAppAsDev = standardApp.withEnvironment(Environment.SANDBOX).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
+      val sandboxAppAsDev = standardApp.inSandbox().withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document  =
         Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = true)), Some("")).body)
@@ -126,7 +126,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
 
     "not include link to push secrets when the application does not have PPNS fields, or it does, but the user is only a developer for a production app" in new Setup {
       val prodAppAsAdmin  = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
-      val sandboxAppAsDev = standardApp.withEnvironment(Environment.SANDBOX).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
+      val sandboxAppAsDev = standardApp.inSandbox().withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
       val prodAppAsDev    = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document  =

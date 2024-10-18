@@ -61,7 +61,7 @@ class CredentialsSpec extends CommonViewSpec
 
     val application = standardApp.withCollaborators(developerSession.developer.email.asAdministratorCollaborator)
 
-    val sandboxApplication = application.withEnvironment(Environment.SANDBOX)
+    val sandboxApplication = application.inSandbox()
 
     "display the credentials page for admins" in new Setup {
       val page: Html = credentialsView.render(application, request, developerSession, messagesProvider, appConfig)

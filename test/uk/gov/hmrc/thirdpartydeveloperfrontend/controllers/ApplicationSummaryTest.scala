@@ -20,7 +20,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -36,13 +35,13 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
     val noServerTokenApplication = standardApp.modify(_.copy(createdOn = instant, lastAccess = Some(instant), lastAccessTokenUsage = None)).withCollaborators(user)
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(serverTokenApplication.withEnvironment(Environment.SANDBOX), user.userId)
+      val summary = ApplicationSummary.from(serverTokenApplication.inSandbox(), user.userId)
 
       summary.serverTokenUsed shouldBe (true)
     }
 
     "not set serverTokenUsed if application does not have a date set for lastAccessTokenUsage" in {
-      val summary = ApplicationSummary.from(noServerTokenApplication.withEnvironment(Environment.SANDBOX), user.userId)
+      val summary = ApplicationSummary.from(noServerTokenApplication.inSandbox(), user.userId)
 
       summary.serverTokenUsed shouldBe (false)
     }

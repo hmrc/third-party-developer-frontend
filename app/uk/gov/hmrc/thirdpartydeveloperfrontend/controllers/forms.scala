@@ -285,7 +285,7 @@ object EditApplicationForm {
 
   def withData(app: ApplicationWithCollaborators) = {
     val (privacyPolicyLocation, termsAndConditionsLocation) = app.access match {
-      case a: Access.Standard => (a.privacyPolicyLocation, a.termsAndConditionsLocation)
+      case a: Access.Standard => (Some(a.privacyPolicyLocation), Some(a.termsAndConditionsLocation))
       case _                  => (None, None)
     }
 
