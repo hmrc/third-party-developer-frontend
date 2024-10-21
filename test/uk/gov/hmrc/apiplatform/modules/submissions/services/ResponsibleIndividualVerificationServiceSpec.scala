@@ -24,7 +24,7 @@ import org.mockito.captor.ArgCaptor
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{SubmissionId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -35,19 +35,19 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, TestApplications}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
+    with ApplicationWithCollaboratorsFixtures
     with CollaboratorTracker
     with LocalUserIdTracker
     with ApplicationServiceMock
-    with TestApplications
     with SubmissionsTestData {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val applicationId              = ApplicationId.random
-    val application                = aStandardPendingResponsibleIndividualVerificationApplication
+    val application                = standardApp.withState(appStatePendingRIVerification)
     val code                       = "12345678"
     val requesterName              = "Mr Submitter"
     val requesterEmail             = "submitter@example.com".toLaxEmail

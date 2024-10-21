@@ -136,7 +136,6 @@ class ChooseApplicationToUpliftActionSpec
 
       status(result) shouldBe BAD_REQUEST
 
-      println(contentAsString(result))
       contentAsString(result) should include("Select the application you want production credentials for")
     }
 

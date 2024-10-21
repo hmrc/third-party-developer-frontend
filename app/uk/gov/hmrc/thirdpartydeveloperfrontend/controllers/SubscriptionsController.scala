@@ -142,7 +142,6 @@ class SubscriptionsController @Inject() (
 
       def handleValidForm(form: ChangeSubscriptionForm) = {
         if (request.application.areSubscriptionsLocked) {
-          println("Locked")
           import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
           Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {

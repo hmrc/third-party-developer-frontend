@@ -45,14 +45,6 @@ object Permissions {
     }
   }
 
-  /*
-    override def hasPermissions(app: BaseApplication, developer: User): Boolean =
-      (app.deployedTo, app.role(developer.email)) match {
-        case (Environment.PRODUCTION, Some(Collaborator.Roles.DEVELOPER)) => true
-        case _                                                            => false
-      }
-   */
-
   case object SandboxOnly extends Permission {
 
     override def hasPermissions(app: ApplicationWithCollaborators, developer: User): Boolean =

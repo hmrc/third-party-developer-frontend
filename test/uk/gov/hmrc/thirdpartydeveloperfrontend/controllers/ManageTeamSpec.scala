@@ -41,8 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken}
 
 class ManageTeamSpec
     extends BaseControllerSpec
@@ -57,7 +57,6 @@ class ManageTeamSpec
       with SampleUserSession
       with SampleApplication
       with ExtendedSubscriptionTestHelper
-      with TestApplications
       with UserBuilder
       with LocalUserIdTracker {
     val manageTeamView: ManageTeamView             = app.injector.instanceOf[ManageTeamView]
@@ -99,8 +98,8 @@ class ManageTeamSpec
         additionalTeamMembers: Seq[Collaborator] = Seq()
       ): ApplicationWithCollaborators = {
 
-      val collaborators = aStandardApplication.collaborators ++ additionalTeamMembers ++ Set(session.developer.email.asCollaborator(userRole))
-      val application   = aStandardApplication.modify(_.copy(
+      val collaborators = standardApp.collaborators ++ additionalTeamMembers ++ Set(session.developer.email.asCollaborator(userRole))
+      val application   = standardApp.modify(_.copy(
         id = appId,
         createdOn = Instant.parse("2018-04-06T09:00:00Z"),
         lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
@@ -373,7 +372,7 @@ class ManageTeamSpec
           apiVersion
         )
 
-        val app: ApplicationWithCollaborators = aStandardPendingApprovalApplication // (developer.email)
+        val app: ApplicationWithCollaborators = standardApp.withState(appStatePendingGatekeeperApproval)
 
         givenApplicationAction(app, session)
 

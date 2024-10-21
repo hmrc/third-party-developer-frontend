@@ -39,14 +39,15 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite
     with WireMockExtensions
     with CollaboratorTracker
+    with ApplicationWithCollaboratorsFixtures
     with LocalUserIdTracker
-    with TestApplications
     with SubmissionsTestData
     with ApplicationsJsonFormatters {
 
@@ -192,7 +193,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "createSubmission" should {
-    val app   = aStandardApplication
+    val app   = standardApp
     val email = "bob@example.com".toLaxEmail
     val url   = s"/submissions/application/${app.id.value}"
 
@@ -247,7 +248,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "confirmSetupComplete" should {
-    val app   = aStandardApplication
+    val app   = standardApp
     val email = "bob@example.com".toLaxEmail
     val url   = s"/application/${app.id.value}/confirm-setup-complete"
 
@@ -283,7 +284,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
   }
 
   "requestApproval" should {
-    val app   = aStandardApplication
+    val app   = standardApp
     val url   = s"/approvals/application/${app.id.value}/request"
     val name  = "bob example"
     val email = "bob@spongepants.com".toLaxEmail
@@ -302,7 +303,7 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
       val result = await(connector.requestApproval(app.id, name, email))
 
       result.isRight shouldBe true
-      result.toOption.get.name shouldBe app.name
+      result.toOption.value.name shouldBe app.name
     }
 
     "return with a PRECONDITION_FAILED error" in new Setup {

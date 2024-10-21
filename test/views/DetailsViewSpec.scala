@@ -43,7 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{TestApplications, WithCSRFAddToken, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
 class DetailsViewSpec
     extends CommonViewSpec

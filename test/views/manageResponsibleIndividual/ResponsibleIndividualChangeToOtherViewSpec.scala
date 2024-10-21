@@ -22,19 +22,20 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToOther
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
 
 class ResponsibleIndividualChangeToOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with TestApplications with UserTestData {
+    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with ApplicationWithCollaboratorsFixtures with UserTestData {
 
   "Responsible Individual Change To Other View" should {
-    val application = anApplication()
+    val application = standardApp
     val view        = app.injector.instanceOf[ResponsibleIndividualChangeToOtherView]
     val riName      = "Mr Responsible"
     val riEmail     = "ri@example.com"

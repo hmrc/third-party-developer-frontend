@@ -22,6 +22,7 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfO
 
 import play.api.test.FakeRequest
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -31,10 +32,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.inputExistsWith
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ResponsibleIndividualChangeToSelfOrOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
-    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with TestApplications with UserTestData {
+    with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with ApplicationWithCollaboratorsFixtures with UserTestData {
 
   "Responsible Individual Change To Self or Other View" should {
-    val application = anApplication()
+    val application = standardApp
     val view        = app.injector.instanceOf[ResponsibleIndividualChangeToSelfOrOtherView]
 
     def renderPage() = {

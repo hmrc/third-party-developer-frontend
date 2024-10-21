@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, CidrBlock, IpAllowlist}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, CidrBlock, IpAllowlist}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -43,7 +43,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 class IpAllowlistServiceSpec
     extends AsyncHmrcSpec
     with Matchers
-    with TestApplications
+    with ApplicationWithCollaboratorsFixtures
     with CollaboratorTracker
     with UserTestData
     with UserBuilder
