@@ -20,11 +20,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -39,7 +38,7 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
 
       def succeeds() =
         when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
-          .thenReturn(DispatchSuccessResult(mock[Application]).asSuccess)
+          .thenReturn(DispatchSuccessResult(mock[ApplicationWithCollaborators]).asSuccess)
 
       def teamMemberAlreadyExists() =
         when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
@@ -58,13 +57,13 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
 
     object RemoveTeamMember {
 
-      def succeeds(app: Application) =
+      def succeeds(app: ApplicationWithCollaborators) =
         when(aMock.removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
-      def thenReturnsSuccessFor(requestingEmail: LaxEmailAddress)(app: Application) =
+      def thenReturnsSuccessFor(requestingEmail: LaxEmailAddress)(app: ApplicationWithCollaborators) =
         when(aMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(requestingEmail))(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
-      def verifyCalledFor(app: Application, emailToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress) =
+      def verifyCalledFor(app: ApplicationWithCollaborators, emailToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress) =
         verify(aMock, atLeastOnce).removeTeamMember(eqTo(app), eqTo(emailToRemove), eqTo(requestingEmail))(*)
 
       def verifyNeverCalled() =

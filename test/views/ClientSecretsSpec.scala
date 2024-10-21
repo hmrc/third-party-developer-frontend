@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ClientSecret, ClientSecretResponse, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
@@ -41,7 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock {
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     val clientSecretsView: ClientSecretsView                   = app.injector.instanceOf[ClientSecretsView]
@@ -68,21 +69,7 @@ class ClientSecretsSpec extends CommonViewSpec with WithCSRFAddToken with Collab
     val clientSecret4 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
     val clientSecret5 = ClientSecretResponse(ClientSecret.Id.random, "", instant)
 
-    val application = Application(
-      ApplicationId(UUID.randomUUID()),
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      instant,
-      Some(instant),
-      None,
-      Period.ofDays(547),
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-      access = Access.Standard(),
-      state = ApplicationState(State.PRODUCTION, Some("requester@test.com"), Some("requester"), Some("verificationCode"), instant),
-      checkInformation = None
-    )
+    val application = standardApp
 
     "show generate a client secret button but no delete button when the app does not have any client secrets yet" in new Setup {
       val emptyClientSecrets: Seq[Nothing] = Seq.empty

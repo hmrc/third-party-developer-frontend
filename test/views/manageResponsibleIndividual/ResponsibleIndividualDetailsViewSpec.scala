@@ -23,7 +23,7 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -36,22 +36,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with UserTestData with DeveloperSessionBuilder
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  val application = Application(
-    ApplicationId.random,
-    ClientId("clientId123"),
-    "App name 1",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.PRODUCTION,
-    Some("Description 1"),
-    Set.empty,
-    state = ApplicationState(State.PRODUCTION, Some("user@example.com"), Some("user name"), Some(""), instant),
-    access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-  )
+  val application = standardApp
 
   "responsible individual details view" should {
     val view          = app.injector.instanceOf[ResponsibleIndividualDetailsView]
@@ -72,7 +60,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       )
       val document    = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
 
-      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name)
+      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name.value)
       elementBySelector(document, "#environment").map(_.text()) shouldBe Some(environment)
 
       val oldRiNames = document.select(".riHistoryName")
@@ -91,42 +79,5 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       oldRiToDates.get(1).text() shouldBe "to 2"
     }
 
-    // RESTORE THESE WHEN FUNCTIONALITY IS COMPLETE
-    //
-    // "Change button is shown for admins" in {
-    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
-
-    //   elementExistsById(document, "changeResponsibleIndividual") shouldBe true
-    //   elementExistsById(document, "changeRiText") shouldBe false
-    //   elementExistsById(document, "adminList") shouldBe false
-    // }
-
-    // "Change button is not shown for non-admins, correct text shown if there is only 1 admin" in {
-    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin@example.com"), false)).body)
-
-    //   elementExistsById(document, "changeResponsibleIndividual") shouldBe false
-    //   elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. Speak to admin@example.com if you want to make a change.")
-    //   elementExistsById(document, "adminList") shouldBe false
-    // }
-
-    // "Change button is not shown for non-admins, correct text shown if there is more than 1 admin" in {
-    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), false, List("admin1@example.com", "admin2@example.com"), false)).body)
-
-    //   elementExistsById(document, "changeResponsibleIndividual") shouldBe false
-    //   elementBySelector(document, "#changeRiText").map(_.text()) shouldBe Some("Only admins can change the responsible individual. If you want to make a change, speak to:")
-    //   elementBySelector(document, "#adminList").map(_.text()) shouldBe Some("admin1@example.com admin2@example.com")
-    // }
-
-    // "Change button navigates to the self/other page if the user is not already the RI" in {
-    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), false)).body)
-
-    //   linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToSelfOrOther(application.id).url)
-    // }
-
-    // "Change button skips the self/other page if the user is already the RI" in {
-    //   val document = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, List(), true, List(), true)).body)
-
-    //   linkExistsWithHref(document, uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualChangeToOther(application.id).url)
-    // }
   }
 }

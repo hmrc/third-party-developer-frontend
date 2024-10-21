@@ -31,7 +31,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, CheckInformation, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
@@ -41,7 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -108,7 +107,7 @@ class SubscriptionsController @Inject() (
   }
 
   def renderSubscriptions(
-      application: Application,
+      application: ApplicationWithCollaborators,
       userSession: UserSession,
       renderHtml: (Collaborator.Role, PageData, Form[EditApplicationForm]) => Html
     )(implicit request: ApplicationRequest[AnyContent]
@@ -141,15 +140,18 @@ class SubscriptionsController @Inject() (
           Future.successful(ApplicationUpdateSuccessful)
       }
 
-      def handleValidForm(form: ChangeSubscriptionForm) =
-        if (request.application.hasLockedSubscriptions) {
+      def handleValidForm(form: ChangeSubscriptionForm) = {
+        if (request.application.areSubscriptionsLocked) {
           import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
           Future.successful(BadRequest(Json.toJson(BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
         }
+      }
 
-      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = errorHandler.badRequestTemplate.map(BadRequest(_))
+      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = {
+        errorHandler.badRequestTemplate.map(BadRequest(_))
+      }
 
       ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm);
     }
@@ -259,10 +261,10 @@ class SubscriptionsController @Inject() (
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
 
-  private def updateCheckInformation(app: Application)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  private def updateCheckInformation(app: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     app.deployedTo match {
       case Environment.PRODUCTION =>
-        applicationService.updateCheckInformation(app, app.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
+        applicationService.updateCheckInformation(app, app.details.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
       case _                      => Future.successful(ApplicationUpdateSuccessful)
     }
   }

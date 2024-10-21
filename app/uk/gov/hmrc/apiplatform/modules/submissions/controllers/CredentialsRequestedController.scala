@@ -22,6 +22,7 @@ import scala.concurrent.ExecutionContext
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
@@ -34,7 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
@@ -42,7 +42,7 @@ object CredentialsRequestedController {
 
   case class CredentialsRequestedViewModel(
       appId: ApplicationId,
-      appName: String,
+      appName: ApplicationName,
       subscriptions: Seq[APISubscriptionStatus],
       sellResellOrDistribute: String,
       isNewTermsOfUseUplift: Boolean,
@@ -86,7 +86,8 @@ class CredentialsRequestedController @Inject() (
       Ok(credentialsRequestedView(viewModel, err))
     }
 
-    def convertToViewModel(application: Application, submission: Submission, subscriptions: List[APISubscriptionStatus], answersViewModel: ViewModel): CredentialsRequestedViewModel = {
+    def convertToViewModel(application: ApplicationWithCollaborators, submission: Submission, subscriptions: List[APISubscriptionStatus], answersViewModel: ViewModel)
+        : CredentialsRequestedViewModel = {
       val inHouse                = submission.context.get(AskWhen.Context.Keys.IN_HOUSE_SOFTWARE)
       val sellResellOrDistribute = if (inHouse.contains("No")) "Yes" else "No"
       val selectedSubscriptions  = subscriptions.filter(s => s.subscribed)

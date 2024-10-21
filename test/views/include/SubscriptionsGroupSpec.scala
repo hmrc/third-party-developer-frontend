@@ -49,6 +49,7 @@ class SubscriptionsGroupSpec
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserBuilder
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
@@ -73,23 +74,10 @@ class SubscriptionsGroupSpec
   case class Page(role: Collaborator.Role, environment: Environment, state: ApplicationState) {
 
     lazy val body: Document = {
-      val application = Application(
-        applicationId,
-        clientId,
-        applicationName,
-        instant,
-        Some(instant),
-        None,
-        grantLength,
-        environment,
-        Some("Description 1"),
-        Set(loggedInDeveloper.developer.email.asCollaborator(role)),
-        state = state,
-        access = Access.Standard(
-          redirectUris = List("https://red1.example.com", "https://red2.example.con").map(RedirectUri.unsafeApply),
-          termsAndConditionsUrl = Some("http://tnc-url.example.com")
-        )
-      )
+      val application = standardApp
+        .withEnvironment(environment)
+        .withCollaborators(loggedInDeveloper.developer.email.asCollaborator(role))
+        .withState(state)
 
       Jsoup.parse(
         subscriptionsGroup

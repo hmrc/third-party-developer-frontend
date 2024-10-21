@@ -76,7 +76,7 @@ class AuditServiceSpec extends AsyncHmrcSpec {
         tags = Map(
           "transactionName"   -> "Application uplift to production request has been denied, due to invalid credentials",
           "developerFullName" -> developerSession.developer.displayedName,
-          "developerEmail"    -> developerSession.developer.email.text
+          "devEmail"          -> developerSession.developer.email.text
         ),
         detail = Map(
           "applicationId" -> "123456"
@@ -92,14 +92,14 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
     "send an event when the password change fails due to invalid credentials for a user who is logged in" in new Setup {
 
-      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developerSession.developer.email.text, "developerFullName" -> developerSession.developer.displayedName))
+      verifyPasswordChangeFailedAuditEventSent(tags = Map("devEmail" -> developerSession.developer.email.text, "developerFullName" -> developerSession.developer.displayedName))
     }
 
     "send an event when the password change fails due to invalid credentials for a user who is not logged in" in new Setup {
 
       implicit override val hc: HeaderCarrier = HeaderCarrier()
 
-      verifyPasswordChangeFailedAuditEventSent(tags = Map("developerEmail" -> developerSession.developer.email.text))
+      verifyPasswordChangeFailedAuditEventSent(tags = Map("devEmail" -> developerSession.developer.email.text))
     }
   }
 

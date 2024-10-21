@@ -21,61 +21,49 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 
 import org.jsoup.Jsoup
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import views.html.ppns.PushSecretsView
 
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{PushPullNotificationsService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, TestApplications, WithCSRFAddToken}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class PushPullNotificationsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with SampleUserSession
-    with SampleApplication
-    with SubscriptionTestHelperSugar
-    with TestApplications
-    with CollaboratorTracker
-    with UserBuilder
-    with LocalUserIdTracker
-    with GuiceOneAppPerSuite {
+    with ApplicationWithCollaboratorsFixtures {
 
   "showPushSecrets" when {
     "logged in as a Developer on an application" should {
       "return 403 for a prod app" in new Setup {
-        val application: Application = anApplication(developerEmail = session.developer.email)
-        givenApplicationAction(application, session)
+        val application: ApplicationWithCollaborators = standardApp
+        givenApplicationAction(application, devSession)
 
-        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInDevRequest)
 
         status(result) shouldBe FORBIDDEN
       }
 
       "return the push secret for a sandbox app" in new Setup {
-        showPushSecretsShouldRenderThePage(aSandboxApplication(developerEmail = session.developer.email))
+        val application: ApplicationWithCollaborators = standardApp.inSandbox()
+        showPushSecretsShouldRenderThePage(adminSession, loggedInAdminRequest)(application)
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-        val application: Application = aSandboxApplication(developerEmail = session.developer.email)
-        givenApplicationAction(application, session)
+        val application: ApplicationWithCollaborators = standardApp
+        givenApplicationAction(application, adminSession)
 
-        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInAdminRequest)
 
         status(result) shouldBe NOT_FOUND
       }
@@ -83,18 +71,18 @@ class PushPullNotificationsSpec
 
     "logged in as an Administrator on an application" should {
       "return the push secret for a production app" in new Setup {
-        showPushSecretsShouldRenderThePage(anApplication(adminEmail = session.developer.email))
+        showPushSecretsShouldRenderThePage(adminSession, loggedInAdminRequest)(standardApp)
       }
 
       "return the push secret for a sandbox app" in new Setup {
-        showPushSecretsShouldRenderThePage(aSandboxApplication(adminEmail = session.developer.email))
+        showPushSecretsShouldRenderThePage(adminSession, loggedInAdminRequest)(standardApp.inSandbox())
       }
 
       "return 404 when the application is not subscribed to an API with PPNS fields" in new Setup {
-        val application: Application = anApplication(adminEmail = session.developer.email)
-        givenApplicationAction(application, session)
+        val application: ApplicationWithCollaborators = standardApp
+        givenApplicationAction(application, adminSession)
 
-        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInAdminRequest)
 
         status(result) shouldBe NOT_FOUND
       }
@@ -102,10 +90,10 @@ class PushPullNotificationsSpec
 
     "not a team member on an application" should {
       "return not found" in new Setup {
-        val application: Application = aStandardApplication
-        givenApplicationAction(application, session)
+        val application: ApplicationWithCollaborators = standardApp.withCollaborators()
+        givenApplicationAction(application, devSession)
 
-        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInRequest)
+        val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInAdminRequest)
 
         status(result) shouldBe NOT_FOUND
       }
@@ -113,8 +101,8 @@ class PushPullNotificationsSpec
 
     "not logged in" should {
       "redirect to login" in new Setup {
-        val application: Application = aStandardApplication
-        givenApplicationAction(application, session)
+        val application: ApplicationWithCollaborators = standardApp
+        givenApplicationAction(application, devSession)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedOutRequest)
 
@@ -123,12 +111,13 @@ class PushPullNotificationsSpec
     }
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock
+      with SubscriptionTestHelper with FixedClock with SessionServiceMock {
     private val pushSecretsView                  = app.injector.instanceOf[PushSecretsView]
     private val pushPullNotificationsServiceMock = mock[PushPullNotificationsService]
 
     val underTest = new PushPullNotifications(
-      mock[SessionService],
+      sessionServiceMock,
       applicationServiceMock,
       mockErrorHandler,
       cookieSigner,
@@ -140,35 +129,28 @@ class PushPullNotificationsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val developer = buildTrackedUser()
-    val sessionId = UserSessionId.random
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-
-    when(underTest.sessionService.fetch(eqTo(sessionId))(*))
-      .thenReturn(successful(Some(session)))
-    when(underTest.sessionService.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
-
-    val sessionParams    = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    FetchSessionById.succeedsWith(devSession.sessionId, devSession)
+    UpdateUserFlowSessions.succeedsWith(devSession.sessionId)
+    FetchSessionById.succeedsWith(adminSession.sessionId, adminSession)
+    UpdateUserFlowSessions.succeedsWith(adminSession.sessionId)
 
     def redirectsToLogin(result: Future[Result]) = {
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def showPushSecretsShouldRenderThePage(application: Application) = {
-      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields("ppns", 1)
+    def showPushSecretsShouldRenderThePage(session: UserSession, request: FakeRequest[_])(application: ApplicationWithCollaborators) = {
+      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
-      givenApplicationAction(ApplicationWithSubscriptionData(application, asSubscriptions(subsData), asFields(subsData)), session, subsData)
+      givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), session, subsData)
 
       val expectedSecrets = Seq("some secret")
       when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))
 
-      val result = underTest.showPushSecrets(application.id)(loggedInRequest)
+      val result = underTest.showPushSecrets(application.id)(request)
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))

@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -42,7 +42,8 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
     with LocalUserIdTracker
     with DeveloperSessionBuilder
     with UserTestData
-    with FixedClock {
+    with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     val clientIdView = app.injector.instanceOf[ClientIdView]
@@ -56,21 +57,7 @@ class ClientIdSpec extends CommonViewSpec with WithCSRFAddToken with Collaborato
     val request          = FakeRequest().withCSRFToken
     val developerSession = standardDeveloper.loggedIn
 
-    val application = Application(
-      ApplicationId.random,
-      ClientId("Test Application Client ID"),
-      "Test Application",
-      instant,
-      Some(instant),
-      None,
-      Period.ofDays(547),
-      Environment.PRODUCTION,
-      Some("Test Application"),
-      collaborators = Set(developerSession.developer.email.asAdministratorCollaborator),
-      access = Access.Standard(),
-      state = ApplicationState(updatedOn = instant),
-      checkInformation = None
-    )
+    val application = standardApp
 
     "render" in new Setup {
       val page: Html = clientIdView.render(application, request, developerSession, messagesProvider, appConfig)

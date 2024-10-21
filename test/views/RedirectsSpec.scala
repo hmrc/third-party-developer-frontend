@@ -23,9 +23,10 @@ import views.html.RedirectsView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, Collaborator, RedirectUri, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, Collaborator, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
@@ -33,14 +34,16 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
-class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with CollaboratorTracker with UserBuilder
-    with SampleUserSession with SampleApplication {
-
-  val loggedInDeveloper1: UserSession = buildTrackedUser("developer@example.com".toLaxEmail, "John", "Doe").loggedIn
-  val loggedInDeveloper2: UserSession = buildTrackedUser("developer2@example.com".toLaxEmail, "Billy", "Fontaine").loggedIn
+class RedirectsSpec
+    extends CommonViewSpec
+    with WithCSRFAddToken
+    with ApplicationWithCollaboratorsFixtures
+    with CommonSessionFixtures
+    with FixedClock {
 
   "redirects page" should {
     val redirectLimit = 5
@@ -50,15 +53,12 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserI
       val redirects      = 1 to numberOfRedirectUris map (num => RedirectUri.unsafeApply(s"http://localhost:$num"))
       val standardAccess = Access.Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
 
-      val applicationWithRedirects =
-        sampleApp.copy(
-          access = standardAccess,
-          collaborators = Set(loggedInDeveloper1.developer.email.asAdministratorCollaborator, loggedInDeveloper2.developer.email.asDeveloperCollaborator)
-        )
-      val user                     = if (role.isAdministrator) {
-        loggedInDeveloper1
+      val applicationWithRedirects = standardApp.withAccess(standardAccess)
+
+      val userSession = if (role.isAdministrator) {
+        adminSession
       } else {
-        loggedInDeveloper2
+        devSession
       }
 
       val redirectsView = app.injector.instanceOf[RedirectsView]
@@ -68,7 +68,7 @@ class RedirectsSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserI
         redirects.toList,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
         request,
-        user,
+        userSession,
         messagesProvider,
         appConfig,
         "redirects"

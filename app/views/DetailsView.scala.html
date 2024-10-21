@@ -23,8 +23,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
 @import java.time.Clock
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
 
@@ -59,11 +59,11 @@
   <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 
   <p class="govuk-body govuk-!-margin-0">
-    Created @{DateFormatter.formatDate(app.createdOn)}
+    Created @{DateFormatter.formatDate(app.details.createdOn)}
   </p>
 
   <p class="govuk-body">
-    @{DateFormatter.formatLastAccessDate(app.lastAccess, app.createdOn, clock) match {
+    @{DateFormatter.formatLastAccessDate(app.details.lastAccess, app.details.createdOn, clock) match {
       case Some(formattedDate) => s"Last API call $formattedDate"
       case _ => "No API called"
     }}
@@ -115,12 +115,12 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application description</th>
-        <td class="govuk-table__cell" id="description">@if(app.description.nonEmpty) {@{app.description}} else {None}</td>
+        <td class="govuk-table__cell" id="description">@if(app.details.description.nonEmpty) {@{app.details.description}} else {None}</td>
         <td class="govuk-table__cell"></td>
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Privacy policy URL</th>
-        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyLocation.describe()}</td>
+        <td class="govuk-table__cell" id="privacyPolicyUrl">@{app.privacyPolicyLocation.map(_.describe())}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
           <a id="changePrivacyPolicyLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updatePrivacyPolicyLocation(app.id)">Change <span class="govuk-visually-hidden">privacy policy location details</span></a>
@@ -129,7 +129,7 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Terms and conditions URL</th>
-        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsLocation.describe()}</td>
+        <td class="govuk-table__cell" id="termsAndConditionsUrl">@{app.termsAndConditionsLocation.map(_.describe())}</td>
         <td class="govuk-table__cell">
         @if(app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
           <a id="changeTermsAndConditionsLocation" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.updateTermsAndConditionsLocation(app.id)">Change <span class="govuk-visually-hidden">terms and conditions location details</span></a>
@@ -139,7 +139,7 @@
       </tr>
       <tr class="govuk-table__row">
         <th scope="row" class="govuk-table__header">Application grant length</th>
-        <td class="govuk-table__cell" id="applicationGrantLength">@{app.grantLengthDisplayValue()}</td>
+        <td class="govuk-table__cell" id="applicationGrantLength">@{app.details.grantLength.show()}</td>
         <td class="govuk-table__cell"></td>
       </tr>
     </tbody>

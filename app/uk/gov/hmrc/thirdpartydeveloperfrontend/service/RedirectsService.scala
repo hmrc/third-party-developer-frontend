@@ -21,12 +21,11 @@ import javax.inject._
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, RedirectUri}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actor, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 @Singleton
 class RedirectsService @Inject() (
@@ -39,15 +38,15 @@ class RedirectsService @Inject() (
     applicationCmdDispatcher.dispatch(id, cmd, Set.empty)
   }
 
-  def addRedirect(actor: Actor, application: Application, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
+  def addRedirect(actor: Actor, application: ApplicationWithCollaborators, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
     issueCommand(application.id, ApplicationCommands.AddRedirectUri(actor, newRedirectUri, instant()))
   }
 
-  def changeRedirect(actor: Actor, application: Application, originalRedirectUri: RedirectUri, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
+  def changeRedirect(actor: Actor, application: ApplicationWithCollaborators, originalRedirectUri: RedirectUri, newRedirectUri: RedirectUri)(implicit hc: HeaderCarrier) = {
     issueCommand(application.id, ApplicationCommands.ChangeRedirectUri(actor, originalRedirectUri, newRedirectUri, instant()))
   }
 
-  def deleteRedirect(actor: Actor, application: Application, redirectUriToDelete: RedirectUri)(implicit hc: HeaderCarrier) = {
+  def deleteRedirect(actor: Actor, application: ApplicationWithCollaborators, redirectUriToDelete: RedirectUri)(implicit hc: HeaderCarrier) = {
     issueCommand(application.id, ApplicationCommands.DeleteRedirectUri(actor, redirectUriToDelete, instant()))
   }
 }

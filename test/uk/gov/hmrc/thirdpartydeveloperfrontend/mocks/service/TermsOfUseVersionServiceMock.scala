@@ -18,8 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
 
 trait TermsOfUseVersionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
@@ -27,6 +27,6 @@ trait TermsOfUseVersionServiceMock extends MockitoSugar with ArgumentMatchersSug
 
   def returnLatestTermsOfUseVersion = when(termsOfUseVersionServiceMock.getLatest()(*)).thenReturn(TermsOfUseVersion.latest)
 
-  def returnTermsOfUseVersionForApplication = when(termsOfUseVersionServiceMock.getForApplication(*[Application])(*)).thenReturn(TermsOfUseVersion.NEW_JOURNEY)
+  def returnTermsOfUseVersionForApplication = when(termsOfUseVersionServiceMock.getForApplication(*[ApplicationWithCollaborators])(*)).thenReturn(TermsOfUseVersion.NEW_JOURNEY)
 
 }

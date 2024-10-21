@@ -23,6 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, SellResellOrDistribute}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
@@ -130,7 +131,7 @@ class UpliftJourneyService @Inject() (
     }
   }
 
-  def createNewSubmission(appId: ApplicationId, application: Application, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
+  def createNewSubmission(appId: ApplicationId, application: ApplicationWithCollaborators, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
     (
       for {
         flow                   <- liftF(flowService.fetchFlow(userSession))
@@ -147,7 +148,7 @@ class UpliftJourneyService @Inject() (
   }
 
   private def updateSellResellOrDistributeIfNeeded(
-      application: Application,
+      application: ApplicationWithCollaborators,
       sellResellOrDistribute: SellResellOrDistribute,
       userSession: UserSession
     )(implicit hc: HeaderCarrier

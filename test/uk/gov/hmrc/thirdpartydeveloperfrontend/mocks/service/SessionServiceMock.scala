@@ -20,6 +20,8 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
@@ -40,4 +42,29 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
 
   def updateUserFlowSessionsReturnsSuccessfully(sessionId: UserSessionId) =
     when(sessionServiceMock.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
+
+  object FetchSessionById {
+
+    def succeedsWith(sessionId: UserSessionId, returns: UserSession) =
+      when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(returns)))
+
+    def returnsNoneForId(sessionId: UserSessionId) = when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(None))
+
+    def returnsNoneForAny() = when(sessionServiceMock.fetch(*)(*)).thenReturn(successful(None))
+  }
+
+  object UpdateUserFlowSessions {
+
+    def succeedsWith(sessionId: UserSessionId) = {
+      when(sessionServiceMock.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
+    }
+  }
+
+  object DestroySession {
+
+    def succeedsWith(sessionId: UserSessionId) = {
+      when(sessionServiceMock.destroy(eqTo(sessionId))(*))
+        .thenReturn(successful(NO_CONTENT))
+    }
+  }
 }

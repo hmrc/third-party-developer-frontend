@@ -19,7 +19,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
@@ -46,7 +46,7 @@
 
 @app = @{applicationView.application}
 
-@isPendingOrActiveProductionApplication(application: Application) = @{
+@isPendingOrActiveProductionApplication(application: ApplicationWithCollaborators) = @{
     application.deployedTo.isProduction && !application.isInTesting
 }
 

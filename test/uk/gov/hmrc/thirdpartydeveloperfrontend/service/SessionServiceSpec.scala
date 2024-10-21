@@ -22,8 +22,9 @@ import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
@@ -32,12 +33,12 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationWithSubscriptionIds
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
 
-class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock {
+class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserIdTracker with CollaboratorTracker with AppsByTeamMemberServiceMock with FixedClock
+    with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -63,34 +64,12 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
     val applicationsWhereUserIsDeveloperInProduction =
       Seq(
-        ApplicationWithSubscriptionIds(
-          applicationId,
-          clientId,
-          "myName",
-          instant,
-          Some(instant),
-          None,
-          grantLength,
-          Environment.PRODUCTION,
-          collaborators = Set(email.asDeveloperCollaborator),
-          subscriptions = Set.empty
-        )
+        standardApp.withSubscriptions(Set.empty)
       )
 
     val applicationsWhereUserIsAdminInProduction =
       Seq(
-        ApplicationWithSubscriptionIds(
-          applicationId,
-          clientId,
-          "myName",
-          instant,
-          Some(instant),
-          None,
-          grantLength,
-          Environment.PRODUCTION,
-          collaborators = Set(email.asAdministratorCollaborator),
-          subscriptions = Set.empty
-        )
+        standardApp.withSubscriptions(Set.empty)
       )
 
   }

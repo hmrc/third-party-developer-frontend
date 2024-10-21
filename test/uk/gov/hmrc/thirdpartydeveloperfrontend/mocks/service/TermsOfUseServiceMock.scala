@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 
@@ -26,6 +26,6 @@ trait TermsOfUseServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val termsOfUseServiceMock = mock[TermsOfUseService]
 
   def returnAgreementDetails(agreements: TermsOfUseAgreementDetails*) = {
-    when(termsOfUseServiceMock.getAgreementDetails(*[Application])).thenReturn(agreements.toList)
+    when(termsOfUseServiceMock.getAgreementDetails(*[ApplicationWithCollaborators])).thenReturn(agreements.toList)
   }
 }

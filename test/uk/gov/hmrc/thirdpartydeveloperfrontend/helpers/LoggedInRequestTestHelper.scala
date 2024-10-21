@@ -18,7 +18,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
@@ -39,10 +38,6 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding w
 
   fetchSessionByIdReturns(sessionId, session)
   updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-  private val sessionParams = Seq(
-    "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
-  )
 
   lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     .withLoggedIn(this, implicitly)(sessionId)

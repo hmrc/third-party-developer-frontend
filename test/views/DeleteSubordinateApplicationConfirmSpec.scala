@@ -25,7 +25,7 @@ import views.html.DeleteSubordinateApplicationConfirmView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, RedirectUri, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, RedirectUri, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -38,6 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithC
 
 class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with DeveloperSessionBuilder with UserTestData
     with CollaboratorTracker
+    with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
   val deleteSubordinateApplicationConfirmView = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
@@ -48,20 +49,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
     val appId             = ApplicationId.random
     val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
-    val application       = Application(
-      appId,
-      clientId,
-      "App name 1",
-      instant,
-      Some(instant),
-      None,
-      Period.ofDays(547),
-      Environment.SANDBOX,
-      Some("Description 1"),
-      Set(loggedInDeveloper.developer.email.asAdministratorCollaborator),
-      state = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant),
-      access = Access.Standard(redirectUris = List("https://red1", "https://red2").map(RedirectUri.unsafeApply), termsAndConditionsUrl = Some("http://tnc-url.com"))
-    )
+    val application       = standardApp
 
     "show link and text to confirm deletion" in {
 

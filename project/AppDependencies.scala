@@ -7,9 +7,9 @@ object AppDependencies {
   lazy val seleniumVersion = "4.14.0"
   lazy val bootstrapVersion = "9.4.0"
   lazy val mongoVersion = "1.7.0"
-  lazy val apiDomainVersion = "0.16.0"
-  lazy val appDomainVersion = "0.55.0"
-  lazy val tpdDomainVersion = "0.9.0"
+  lazy val apiDomainVersion = "0.19.1"
+  lazy val appDomainVersion = "0.61.17"
+  lazy val tpdDomainVersion = "0.10.0"
 
   lazy val compile = Seq(
     ws,
@@ -31,15 +31,15 @@ object AppDependencies {
   )
 
   lazy val test =  Seq(
-    "uk.gov.hmrc"                 %% "bootstrap-test-play-30"             % bootstrapVersion,
-    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"            % mongoVersion,
-    "org.mockito"                 %% "mockito-scala-scalatest"            % "1.17.29",
-    "org.jsoup"                   %  "jsoup"                              % "1.13.1",
-    "org.scalaj"                  %% "scalaj-http"                        % "2.4.2",
-    "org.scalacheck"              %% "scalacheck"                         % "1.17.0",
-    "org.scalatestplus"           %% "scalacheck-1-17"                    % "3.2.17.0",
-    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"       % apiDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"       % tpdDomainVersion
+    "uk.gov.hmrc"                 %% "bootstrap-test-play-30"                   % bootstrapVersion,
+    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"                  % mongoVersion,
+    "org.mockito"                 %% "mockito-scala-scalatest"                  % "1.17.29",
+    "org.jsoup"                   %  "jsoup"                                    % "1.13.1",
+    "org.scalacheck"              %% "scalacheck"                               % "1.17.0",
+    "org.scalatestplus"           %% "scalacheck-1-17"                          % "3.2.17.0",
+    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"             % apiDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-application-domain-fixtures" % appDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"             % tpdDomainVersion
   ).map(_ % "test")
 
   lazy val componentTestDependencies = Seq(

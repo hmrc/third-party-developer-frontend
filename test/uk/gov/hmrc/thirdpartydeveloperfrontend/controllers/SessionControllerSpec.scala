@@ -20,20 +20,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{redirectLocation, _}
-import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
-class SessionControllerSpec extends BaseControllerSpec with UserBuilder with LocalUserIdTracker {
+class SessionControllerSpec extends BaseControllerSpec {
 
-  trait Setup extends SessionServiceMock {
+  trait Setup {
 
     val sessionController = new SessionController(
       mock[AuditService],
@@ -47,20 +41,7 @@ class SessionControllerSpec extends BaseControllerSpec with UserBuilder with Loc
 
   "keepAlive" should {
     "reset the session if logged in" in new Setup {
-
-      val developer                            = buildTrackedUser()
-      val sessionId                            = UserSessionId.random
-      val session                              = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
-      val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-
-      fetchSessionByIdReturns(sessionId, session)
-      updateUserFlowSessionsReturnsSuccessfully(sessionId)
-
-      val loggedInRequest = FakeRequest()
-        .withLoggedIn(sessionController, implicitly)(session.sessionId)
-        .withSession(sessionParams: _*)
-
-      val result = sessionController.keepAlive()(loggedInRequest)
+      val result = sessionController.keepAlive()(loggedInDevRequest)
 
       status(result) shouldBe NO_CONTENT
     }

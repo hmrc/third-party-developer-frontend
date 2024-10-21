@@ -22,11 +22,11 @@ import scala.concurrent.Future.successful
 import org.mockito.captor.ArgCaptor
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 
 trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -39,18 +39,18 @@ trait ApplicationCommandConnectorMockModule extends MockitoSugar with ArgumentMa
 
     object DispatchWithThrow {
 
-      def thenReturnsSuccess(app: Application) = {
+      def thenReturnsSuccess(app: ApplicationWithCollaborators) = {
         when(aMock.dispatchWithThrow(*[ApplicationId], *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
       }
     }
 
     object Dispatch {
 
-      def thenReturnsSuccess(app: Application) = {
+      def thenReturnsSuccess(app: ApplicationWithCollaborators) = {
         when(aMock.dispatch(*[ApplicationId], *, *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
       }
 
-      def thenReturnsSuccessFor(command: ApplicationCommand)(app: Application) = {
+      def thenReturnsSuccessFor(command: ApplicationCommand)(app: ApplicationWithCollaborators) = {
         when(aMock.dispatch(*[ApplicationId], eqTo(command), *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
       }
 

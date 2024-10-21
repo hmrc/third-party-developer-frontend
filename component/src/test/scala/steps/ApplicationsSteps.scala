@@ -16,9 +16,6 @@
 
 package steps
 
-import java.util.UUID
-import java.util.UUID.randomUUID
-
 import io.cucumber.datatable.DataTable
 import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
@@ -33,52 +30,42 @@ import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 import play.api.http.Status._
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse, Collaborator, RedirectUri}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationWithSubscriptionIds, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationToken
 
 object AppWorld {
-  var userApplicationsOnBackend: List[Application] = Nil
-  var tokens: Map[String, ApplicationToken]        = Map.empty
+  var userApplicationsOnBackend: List[ApplicationWithCollaborators] = Nil
+  var tokens: Map[String, ApplicationToken]                         = Map.empty
 }
 
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with FixedClock with BrowserDriver
+    with ApplicationWithCollaboratorsFixtures
     with ApplicationStateHelper {
-
-  import java.time.Period
 
   val applicationId: ApplicationId = ApplicationId.random
   val clientId: ClientId           = ClientId("clientId")
 
   val collaboratorEmail: LaxEmailAddress = "john.smith@example.com".toLaxEmail
 
-  private def defaultApp(name: String, environment: String) = Application(
-    id = applicationId,
-    clientId = clientId,
-    name = name,
-    createdOn = instant,
-    lastAccess = Some(instant),
-    lastAccessTokenUsage = None,
-    Period.ofDays(547),
-    Environment.apply(environment).getOrElse(Environment.PRODUCTION),
-    description = None,
-    collaborators = Set(Collaborator(collaboratorEmail, Collaborator.Roles.ADMINISTRATOR, staticUserId))
-  )
+  private def defaultApp(name: String, environment: Environment) = standardApp
+    .withCollaborators(Set(Collaborator(collaboratorEmail, Collaborator.Roles.ADMINISTRATOR, staticUserId)))
+    .withEnvironment(environment)
+    .modify(_.copy(name = ApplicationName(name)))
 
   Given("""^application with name '(.*)' can be created$""") { (name: String) =>
     ApplicationStub.setupApplicationNameValidation()
 
-    val app = defaultApp(name, "PRODUCTION")
+    val app = defaultApp(name, Environment.PRODUCTION)
 
     Stubs.setupPostRequest("/application", CREATED, Json.toJson(app).toString())
 
     ApplicationStub.setUpFetchApplication(applicationId, OK, Json.toJson(app).toString())
 
-    configureUserApplications(app.collaborators.head.userId, List(ApplicationWithSubscriptionIds.from(app)))
+    configureUserApplications(app.collaborators.head.userId, List(app.withSubscriptions(Set.empty)))
   }
 
   Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
@@ -101,51 +88,16 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: LaxEmailAddress, name: String, data: DataTable) =>
     val applications = data.asScalaRawMaps[String, String].toList
 
-    val verificationCode = "aVerificationCode"
-
     AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
-      val applicationState = app.getOrElse("state", "TESTING") match {
-        case "TESTING"                        => InState.testing
-        case "PRODUCTION"                     => InState.production(email.text, name, verificationCode)
-        case "PENDING_GATEKEEPER_APPROVAL"    => InState.pendingGatekeeperApproval(email.text, name)
-        case "PENDING_REQUESTER_VERIFICATION" => InState.pendingRequesterVerification(email.text, name, verificationCode)
-        case unknownState: String             => fail(s"Unknown state '$unknownState'")
-      }
-      val access           = app.getOrElse("accessType", "STANDARD") match {
-        case "STANDARD"   => Access.Standard(redirectUris = app.getOrElse("redirectUris", "").split(",").toList.map(_.trim).filter(_.nonEmpty).map(RedirectUri.unsafeApply))
-        case "PRIVILEGED" => Access.Privileged()
-        case "ROPC"       => Access.Ropc()
-      }
-
-      val environment = app.getOrElse("environment", "PRODUCTION") match {
-        case "PRODUCTION" => Environment.PRODUCTION
-        case "SANDBOX"    => Environment.SANDBOX
-      }
-
-      val role = app.get("role").flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.ADMINISTRATOR)
-
-      Application(
-        app.get("id").map(text => ApplicationId(UUID.fromString(text))).getOrElse(ApplicationId.random),
-        ClientId(app.getOrElse("clientId", s"autogenerated-${randomUUID().toString}")),
-        app("name"),
-        instant,
-        Some(instant),
-        None,
-        Period.ofDays(547),
-        environment,
-        app.get("description"),
-        Set(Collaborator(email, role, UserId.random)),
-        access,
-        state = applicationState
-      )
+      standardApp
     }
     // configure get all apps for user email
     configureStubsForApplications(email, AppWorld.userApplicationsOnBackend)
   }
 
-  def configureStubsForApplications(email: LaxEmailAddress, applications: List[Application]): Unit = {
+  def configureStubsForApplications(email: LaxEmailAddress, applications: List[ApplicationWithCollaborators]): Unit = {
 
-    ApplicationStub.configureUserApplications(staticUserId, applications.map(ApplicationWithSubscriptionIds.from))
+    ApplicationStub.configureUserApplications(staticUserId, applications.map(_.withSubscriptions(Set.empty)))
     for (app <- applications) {
       // configure to be able to fetch apps and Subscriptions
       ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())

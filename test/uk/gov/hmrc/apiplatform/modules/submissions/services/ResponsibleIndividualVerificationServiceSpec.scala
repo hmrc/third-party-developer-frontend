@@ -24,6 +24,7 @@ import org.mockito.captor.ArgCaptor
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{SubmissionId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -34,19 +35,19 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker, TestApplications}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
 
 class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
+    with ApplicationWithCollaboratorsFixtures
     with CollaboratorTracker
     with LocalUserIdTracker
     with ApplicationServiceMock
-    with TestApplications
     with SubmissionsTestData {
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val applicationId              = ApplicationId.random
-    val application                = aStandardPendingResponsibleIndividualVerificationApplication()
+    val application                = standardApp.withState(appStatePendingRIVerification)
     val code                       = "12345678"
     val requesterName              = "Mr Submitter"
     val requesterEmail             = "submitter@example.com".toLaxEmail
@@ -56,7 +57,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       applicationId,
       SubmissionId.random,
       0,
-      "App name",
+      ApplicationName("App name"),
       instant,
       ResponsibleIndividualVerificationState.INITIAL
     )
@@ -105,7 +106,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "New application submitted for checking"
       deskproTicket.name shouldBe application.state.requestedByName.get
       deskproTicket.email.text shouldBe application.state.requestedByEmailAddress.get
-      deskproTicket.message should include(riVerification.applicationName)
+      deskproTicket.message should include(riVerification.applicationName.value)
       deskproTicket.message should include("submitted the following application for production use on the Developer Hub")
       deskproTicket.referrer should include(s"/application/${riVerification.applicationId.value}/check-answers")
     }
@@ -116,7 +117,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         applicationId,
         SubmissionId.random,
         0,
-        "App name",
+        ApplicationName("App name"),
         instant,
         requesterName,
         requesterEmail,
@@ -140,7 +141,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "Terms of use uplift application submitted for checking"
       deskproTicket.name shouldBe requesterName
       deskproTicket.email shouldBe requesterEmail
-      deskproTicket.message should include(riVerificationUplift.applicationName)
+      deskproTicket.message should include(riVerificationUplift.applicationName.value)
       deskproTicket.message should include("has submitted a Terms of Use application that has warnings or fails")
       deskproTicket.referrer should include("https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use")
     }
@@ -151,7 +152,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         applicationId,
         SubmissionId.random,
         0,
-        "App name",
+        ApplicationName("App name"),
         instant,
         requesterName,
         requesterEmail,
@@ -177,7 +178,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         applicationId,
         SubmissionId.random,
         0,
-        "App name",
+        ApplicationName("App name"),
         instant,
         responsibleIndividual,
         "Mr Admin",

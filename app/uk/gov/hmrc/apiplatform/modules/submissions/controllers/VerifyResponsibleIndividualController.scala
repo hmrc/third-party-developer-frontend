@@ -84,7 +84,7 @@ class VerifyResponsibleIndividualController @Inject() (
   def verifyPage(code: String) = Action.async { implicit request =>
     lazy val success = (riVerification: ResponsibleIndividualVerification) =>
       Ok(verifyResponsibleIndividualView(
-        VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code),
+        VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code),
         VerifyResponsibleIndividualController.hasVerifiedForm
       ))
 
@@ -110,14 +110,14 @@ class VerifyResponsibleIndividualController @Inject() (
         responsibleIndividualVerificationService.accept(code)
           .map(_ match {
             case Right(riVerification)      =>
-              Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
+              Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code)))
             case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg))
           })
       } else {
         responsibleIndividualVerificationService.decline(code)
           .map(_ match {
             case Right(riVerification)      =>
-              Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
+              Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code)))
             case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg))
           })
       }
@@ -125,7 +125,7 @@ class VerifyResponsibleIndividualController @Inject() (
 
     def handleInvalidForm(form: Form[VerifyResponsibleIndividualController.HasVerifiedForm]) = {
       lazy val formValidationError = (riVerification: ResponsibleIndividualVerification) =>
-        BadRequest(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code), form))
+        BadRequest(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code), form))
 
       (
         for {

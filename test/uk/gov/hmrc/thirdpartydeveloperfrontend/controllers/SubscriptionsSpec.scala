@@ -19,7 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
 import views.helper.EnvironmentNameService
 import views.html.include.ChangeSubscriptionConfirmationView
@@ -28,21 +27,16 @@ import views.html.{AddAppSubscriptionsView, ManageSubscriptionsView, SubscribeRe
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext, ApiIdentifier, ApiVersionNbr}
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, SubscriptionsServiceMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SubscriptionsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -50,12 +44,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class SubscriptionsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with LocalUserIdTracker
-    with UserBuilder
-    with SampleUserSession
-    with SampleApplications
-    with SubscriptionTestHelperSugar
-    with FixedClock {
+    with SubscriptionTestSugar
+    with ApplicationWithCollaboratorsFixtures {
 
   val apiName       = "api-1"
   val apiVersion    = ApiVersionNbr("1.0")
@@ -63,15 +53,20 @@ class SubscriptionsSpec
   val apiIdentifier = ApiIdentifier(apiContext, apiVersion)
   val displayStatus = "Status"
 
-  val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with SubscriptionsServiceMockModule
+      with SubscriptionTestHelper {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with SubscriptionsServiceMockModule {
     val manageSubscriptionsView                                 = app.injector.instanceOf[ManageSubscriptionsView]
     val addAppSubscriptionsView                                 = app.injector.instanceOf[AddAppSubscriptionsView]
     val changeSubscriptionConfirmationView                      = app.injector.instanceOf[ChangeSubscriptionConfirmationView]
     val unsubscribeRequestSubmittedView                         = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
     val subscribeRequestSubmittedView                           = app.injector.instanceOf[SubscribeRequestSubmittedView]
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
+
+    val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
     val underTest = new SubscriptionsController(
       mock[ThirdPartyDeveloperConnector],
@@ -93,41 +88,43 @@ class SubscriptionsSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    fetchSessionByIdReturns(sessionId, userSession)
-    updateUserFlowSessionsReturnsSuccessfully(sessionId)
-    fetchByApplicationIdReturns(activeApplication.id, activeApplication)
+    val developerApplication: ApplicationWithCollaborators = standardApp.inSandbox()
+
+    fetchByApplicationIdReturns(developerApplication.id, developerApplication)
 
     val subsData = List(
-      exampleSubscriptionWithFields("api1", 1),
-      exampleSubscriptionWithFields("api2", 1)
+      exampleSubscriptionWithFields(developerApplication.id, developerApplication.clientId)("api1", 1),
+      exampleSubscriptionWithFields(developerApplication.id, developerApplication.clientId)("api2", 1)
     )
 
     val requestor = Actors.AppCollaborator("Bob".toLaxEmail)
-
-    val sessionParams                                         = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val appl      = developerApplication
+    val appId     = appl.id
   }
 
   "manage subscriptions" should {
     "return the ROPC page for a ROPC app" in new Setup {
-      fetchByApplicationIdReturns(appId, ropcApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-      val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
+      val ropcApplication: ApplicationWithCollaborators = ropcApp
+
+      fetchByApplicationIdReturns(ropcApplication)
+      givenApplicationAction(ropcApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      val result = addToken(underTest.manageSubscriptions(ropcApplication.id))(loggedInDevRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
-      fetchByApplicationIdReturns(appId, privilegedApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-      val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
+      val privilegedApplication: ApplicationWithCollaborators = privilegedApp
+
+      fetchByApplicationIdReturns(privilegedApplication)
+      givenApplicationAction(privilegedApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      val result = addToken(underTest.manageSubscriptions(privilegedApplication.id))(loggedInDevRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
-      fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-      val result = addToken(underTest.manageSubscriptions(appId))(loggedInRequest)
+      fetchByApplicationIdReturns(developerApplication)
+      givenApplicationAction(developerApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      val result = addToken(underTest.manageSubscriptions(developerApplication.id))(loggedInAdminRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
     }
@@ -135,23 +132,27 @@ class SubscriptionsSpec
 
   "add app subscriptions" should {
     "return the ROPC page for a ROPC app" in new Setup {
-      fetchByApplicationIdReturns(appId, ropcApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(ropcApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      val ropcApplication: ApplicationWithCollaborators = ropcApp
+
+      fetchByApplicationIdReturns(ropcApplication)
+      givenApplicationAction(ropcApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      val result = addToken(underTest.addAppSubscriptions(ropcApplication.id))(loggedInDevRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the privileged page for a privileged app" in new Setup {
-      fetchByApplicationIdReturns(appId, privilegedApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(privilegedApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      val privilegedApplication: ApplicationWithCollaborators = privilegedApp
+
+      fetchByApplicationIdReturns(privilegedApplication)
+      givenApplicationAction(privilegedApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      val result = addToken(underTest.addAppSubscriptions(privilegedApplication.id))(loggedInDevRequest)
       status(result) shouldBe BAD_REQUEST
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
-      fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      fetchByApplicationIdReturns(developerApplication)
+      givenApplicationAction(developerApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), adminSession, List.empty)
+      val result = addToken(underTest.addAppSubscriptions(developerApplication.id))(loggedInAdminRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
     }
@@ -159,10 +160,10 @@ class SubscriptionsSpec
     "return the subscriptions page for a developer on a standard app in the Sandbox environment" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
-      fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(subsData), asFields(subsData)), userSession, subsData)
+      fetchByApplicationIdReturns(developerApplication)
+      givenApplicationAction(developerApplication.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), adminSession, subsData)
 
-      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      val result = addToken(underTest.addAppSubscriptions(developerApplication.id))(loggedInAdminRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include("Subscribe to the APIs you want to use in the sandbox")
@@ -171,10 +172,10 @@ class SubscriptionsSpec
     "return the subscriptions page for a developer on a standard app in the Development environment" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      fetchByApplicationIdReturns(appId, activeApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(activeApplication, asSubscriptions(subsData), asFields(subsData)), userSession, subsData)
+      fetchByApplicationIdReturns(developerApplication)
+      givenApplicationAction(developerApplication.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), devSession, subsData)
 
-      val result = addToken(underTest.addAppSubscriptions(appId))(loggedInRequest)
+      val result = addToken(underTest.addAppSubscriptions(developerApplication.id))(loggedInDevRequest)
       status(result) shouldBe OK
       titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
       contentAsString(result) should include("Subscribe to the APIs you want to use in development")
@@ -182,169 +183,183 @@ class SubscriptionsSpec
   }
 
   "changeApiSubscription" should {
-    def forbiddenSubscriptionChange(app: => Application): Unit = {
+    def forbiddenSubscriptionChange(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "return 400 Bad Request" in new Setup {
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+          s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
 
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
+        val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe BAD_REQUEST
       }
     }
 
-    def allowedSubscriptionChange(app: => Application): Unit = {
+    def allowedSubscriptionChange(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "successfully subscribe to an API and redirect" in new Setup {
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+          s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.SubscribeToApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
+        val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
-
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
-      }
-
-      "successfully unsubscribe from an API and redirect" in new Setup {
-        val redirectTo                                       = "MANAGE_PAGE"
-        val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
-          "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
-
-        fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-        SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
-        givenUpdateCheckInformationSucceeds(app)
-
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
-
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
-      }
-
-      "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
-        val redirectTo                                       = "APPLICATION_CHECK_PAGE"
-        val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
-          "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
-
-        fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-        SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
-        givenUpdateCheckInformationSucceeds(app)
-
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
-
-        status(result) shouldBe BAD_REQUEST
+        redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
 
         verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
 
-    def allowedSubscriptionChangeWithCheckUpdate(app: => Application): Unit = {
+    def allowedSubscriptionChangeWithCheckUpdate(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "successfully subscribe to an API, update the check information and redirect" in new Setup {
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+          s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.SubscribeToApi.succeeds(app, apiIdentifier)
         givenUpdateCheckInformationSucceeds(app)
 
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
+        val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
+        redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
 
         verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
-      }
-
-      "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
-        val redirectTo                                       = "MANAGE_PAGE"
-        val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
-          "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("subscribed" -> "false")
-
-        fetchByApplicationIdReturns(appId, app)
-
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-        SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
-        givenUpdateCheckInformationSucceeds(app)
-
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.Details.details(app.id).url)
-
-        verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
-      }
-
-      "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
-        val redirectTo                                       = "APPLICATION_CHECK_PAGE"
-        val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
-          "POST",
-          s"developer/applications/${app.id}/change-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
-
-        fetchByApplicationIdReturns(appId, app)
-
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-        SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(app, apiIdentifier)
-        givenUpdateCheckInformationSucceeds(app)
-
-        val result = underTest.changeApiSubscription(app.id, apiContext, apiVersion, redirectTo)(request)
-
-        status(result) shouldBe BAD_REQUEST
-
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
 
-    "an administrator attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(adminSubmittedProductionApplication) }
-    "an administrator attempts to change a created production application" should { behave like allowedSubscriptionChangeWithCheckUpdate(adminCreatedProductionApplication) }
-    "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like allowedSubscriptionChange(adminSubmittedSandboxApplication) }
-    "an administrator attempts to change a created sandbox application" should { behave like allowedSubscriptionChange(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(developerSubmittedProductionApplication) }
-    "a developer attempts to change a created production application" should { behave like allowedSubscriptionChangeWithCheckUpdate(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like allowedSubscriptionChange(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like allowedSubscriptionChange(devloperCreatedSandboxApplication) }
+    "successfully unsubscribe from an API and redirect" in new Setup {
+      val redirectTo                                       = "MANAGE_PAGE"
+      val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
+        "POST",
+        s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+      ).withCSRFToken.withLoggedIn(underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+
+      fetchByApplicationIdReturns(appId, appl)
+      givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(appl, apiIdentifier)
+      givenUpdateCheckInformationSucceeds(appl)
+
+      val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
+
+      verify(applicationServiceMock, never).updateCheckInformation(eqTo(appl), any[CheckInformation])(*)
+    }
+
+    "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
+      val redirectTo                                       = "APPLICATION_CHECK_PAGE"
+      val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
+        "POST",
+        s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+      ).withCSRFToken.withLoggedIn(underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody()
+
+      fetchByApplicationIdReturns(appId, appl)
+      givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(appl, apiIdentifier)
+      givenUpdateCheckInformationSucceeds(appl)
+
+      val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
+
+      status(result) shouldBe BAD_REQUEST
+
+      verify(applicationServiceMock, never).updateCheckInformation(eqTo(appl), any[CheckInformation])(*)
+    }
+
+    "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
+      val productionApp = standardApp.withId(applicationIdTwo).withState(appStateTesting)
+
+      val redirectTo                                       = "MANAGE_PAGE"
+      val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
+        "POST",
+        s"developer/applications/${applicationIdTwo}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+      ).withCSRFToken.withLoggedIn(underTest, implicitly)(adminSession.sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+
+      fetchByApplicationIdReturns(applicationIdTwo, productionApp)
+
+      givenApplicationAction(productionApp.withSubscriptions(Set.empty).withFieldValues(Map.empty), adminSession, List.empty)
+      SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(productionApp, apiIdentifier)
+      givenUpdateCheckInformationSucceeds(productionApp)
+
+      val result = underTest.changeApiSubscription(applicationIdTwo, apiContext, apiVersion, redirectTo)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.Details.details(applicationIdTwo).url)
+
+      verify(applicationServiceMock).updateCheckInformation(eqTo(productionApp), any[CheckInformation])(*)
+    }
+
+    "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
+      val redirectTo                                       = "APPLICATION_CHECK_PAGE"
+      val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
+        "POST",
+        s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+      ).withCSRFToken.withLoggedIn(underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody()
+
+      fetchByApplicationIdReturns(appId, appl)
+
+      givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
+      SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(appl, apiIdentifier)
+      givenUpdateCheckInformationSucceeds(appl)
+
+      val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
+
+      status(result) shouldBe BAD_REQUEST
+
+      verify(applicationServiceMock, never).updateCheckInformation(eqTo(appl), any[CheckInformation])(*)
+    }
+
+    "an administrator attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(adminSession)(standardApp) }
+    "an administrator attempts to change a created production application" should {
+      behave like allowedSubscriptionChangeWithCheckUpdate(adminSession)(standardApp.withState(appStateTesting))
+    }
+    "an administrator attempts to change a submitted-for-checking sandbox application" should {
+      behave like allowedSubscriptionChange(adminSession)(standardApp.inSandbox())
+    }
+    "an administrator attempts to change a created sandbox application" should {
+      behave like allowedSubscriptionChange(adminSession)(standardApp.inSandbox().withState(appStateTesting))
+    }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(devSession)(standardApp) }
+    "a developer attempts to change a created production application" should {
+      behave like allowedSubscriptionChangeWithCheckUpdate(devSession)(standardApp.withState(appStateTesting))
+    }
+    "a developer attempts to change a submitted-for-checking sandbox application" should {
+      behave like allowedSubscriptionChange(devSession)(standardApp.inSandbox())
+    }
+    "a developer attempts to change a created sandbox application" should {
+      behave like allowedSubscriptionChange(devSession)(standardApp.inSandbox().withState(appStateTesting))
+    }
   }
 
   "changeLockedApiSubscription" should {
-    def checkBadLockedSubscriptionChangeRequest(app: => Application, expectedStatus: Int): Unit = {
+    def checkBadLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators, expectedStatus: Int): Unit = {
       s"return $expectedStatus" in new Setup {
         val redirectTo                                   = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId)
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -355,78 +370,85 @@ class SubscriptionsSpec
       }
     }
 
-    def forbiddenLockedSubscriptionChangeRequest(app: => Application): Unit = {
-      checkBadLockedSubscriptionChangeRequest(app, FORBIDDEN)
+    def forbiddenLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
+      checkBadLockedSubscriptionChangeRequest(userSession)(app, FORBIDDEN)
     }
 
-    def badLockedSubscriptionChangeRequest(app: => Application): Unit = {
-      checkBadLockedSubscriptionChangeRequest(app, BAD_REQUEST)
+    def badLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
+      checkBadLockedSubscriptionChangeRequest(userSession)(app, BAD_REQUEST)
     }
 
-    def allowedLockedSubscriptionChangeRequest(app: => Application): Unit = {
+    def allowedLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "render the subscribe to locked subscription page when changing an unsubscribed api" in new Setup {
         val redirectTo                                   = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId)
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isFalse(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe OK
-        contentAsString(result) should include(s"Are you sure you want to request to subscribe to $apiName ${apiVersion.value}?")
+        contentAsString(result) should include(s"Are you sure you want to request to subscribe to $apiName ${apiVersion}?")
       }
 
       "render the unsubscribe from locked subscription page when changing a subscribed api" in new Setup {
         val redirectTo                                   = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId)
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId)
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscription(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe OK
-        contentAsString(result) should include(s"Are you sure you want to request to unsubscribe from $apiName ${apiVersion.value}?")
+        contentAsString(result) should include(s"Are you sure you want to request to unsubscribe from $apiName ${apiVersion}?")
       }
     }
 
-    "an administrator attempts to change a submitted-for-checking production application" should {
-      behave like allowedLockedSubscriptionChangeRequest(adminSubmittedProductionApplication)
+    "an administrator attempts to change a submitted-for-checking production application" should { behave like allowedLockedSubscriptionChangeRequest(adminSession)(standardApp) }
+    "an administrator attempts to change a created production application" should {
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withState(appStateTesting))
     }
-    "an administrator attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedProductionApplication) }
-    "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
-    "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should {
-      behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedProductionApplication)
+    "an administrator attempts to change a submitted-for-checking sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox())
     }
-    "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
+    "an administrator attempts to change a created sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox().withState(appStateTesting))
+    }
+
+    "a developer attempts to change a submitted-for-cecking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(devSession)(standardApp) }
+    "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withState(appStateTesting)) }
+    "a developer attempts to change a submitted-for-checking sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox())
+    }
+    "a developer attempts to change a created sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox().withState(appStateTesting))
+    }
   }
 
   "changeLockedApiSubscriptionAction" should {
-    def forbiddenLockedSubscriptionChangeRequest(app: => Application): Unit = {
+    def forbiddenLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "return 403 Forbidden" in new Setup {
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
 
@@ -434,39 +456,39 @@ class SubscriptionsSpec
       }
     }
 
-    def badLockedSubscriptionChangeRequest(app: => Application): Unit = {
+    def badLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "return 400 Bad Request" in new Setup {
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
-        val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
+        val result = underTest.changeLockedApiSubscriptionAction(appId, apiName, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(underTest.subscriptionsService, never).isSubscribedToApi(eqTo(app.id), eqTo(apiIdentifier))(*)
+        verify(underTest.subscriptionsService, never).isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)
       }
     }
 
-    def allowedLockedSubscriptionChangeRequest(app: => Application): Unit = {
+    def allowedLockedSubscriptionChangeRequest(userSession: UserSession)(app: => ApplicationWithCollaborators): Unit = {
       "successfully request to subscribe to the api" in new Setup {
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-        SubscriptionsServiceMock.IsSubscribedToApi.isFalse(app.id, apiIdentifier)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
+        SubscriptionsServiceMock.IsSubscribedToApi.isFalse(appId, apiIdentifier)
         SubscriptionsServiceMock.RequestApiSubscription.succeedsFor(userSession, app, apiName, apiVersion)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -480,13 +502,13 @@ class SubscriptionsSpec
         val redirectTo                                       = "MANAGE_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody("confirm" -> "true")
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
-        SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
+        SubscriptionsServiceMock.IsSubscribedToApi.isTrue(appId, apiIdentifier)
         SubscriptionsServiceMock.RequestApiUnsubscribe.succeedsFor(userSession, app, apiName, apiVersion)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -500,12 +522,12 @@ class SubscriptionsSpec
         val redirectTo                                       = "APPLICATION_CHECK_PAGE"
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
-          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext.value}&version=${apiVersion.value}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(sessionId).withFormUrlEncodedBody()
+          s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
+        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody()
 
-        fetchByApplicationIdReturns(appId, app)
+        fetchByApplicationIdReturns(app.id, app)
 
-        givenApplicationAction(ApplicationWithSubscriptionData(app, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+        givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.IsSubscribedToApi.isTrue(app.id, apiIdentifier)
 
         val result = underTest.changeLockedApiSubscriptionAction(app.id, apiName, apiContext, apiVersion, redirectTo)(request)
@@ -514,18 +536,24 @@ class SubscriptionsSpec
       }
     }
 
-    "an administrator attempts to change a submitted-for-checking production application" should {
-      behave like allowedLockedSubscriptionChangeRequest(adminSubmittedProductionApplication)
+    "an administrator attempts to change a submitted-for-checking production application" should { behave like allowedLockedSubscriptionChangeRequest(adminSession)(standardApp) }
+    "an administrator attempts to change a created production application" should {
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.withState(appStateTesting))
     }
-    "an administrator attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedProductionApplication) }
-    "an administrator attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminSubmittedSandboxApplication) }
-    "an administrator attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(adminCreatedSandboxApplication) }
-    "a developer attempts to change a submitted-for-checking production application" should {
-      behave like forbiddenLockedSubscriptionChangeRequest(developerSubmittedProductionApplication)
+    "an administrator attempts to change a submitted-for-checking sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox())
     }
-    "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(developerCreatedProductionApplication) }
-    "a developer attempts to change a submitted-for-checking sandbox application" should { behave like badLockedSubscriptionChangeRequest(developerSubmittedSandboxApplication) }
-    "a developer attempts to change a created sandbox application" should { behave like badLockedSubscriptionChangeRequest(devloperCreatedSandboxApplication) }
+    "an administrator attempts to change a created sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(adminSession)(standardApp.inSandbox().withState(appStateTesting))
+    }
+    "a developer attempts to change a submitted-for-checking production application" should { behave like forbiddenLockedSubscriptionChangeRequest(devSession)(standardApp) }
+    "a developer attempts to change a created production application" should { behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.withState(appStateTesting)) }
+    "a developer attempts to change a submitted-for-checking sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox())
+    }
+    "a developer attempts to change a created sandbox application" should {
+      behave like badLockedSubscriptionChangeRequest(devSession)(standardApp.inSandbox().withState(appStateTesting))
+    }
   }
 
   "Authorization" should {
@@ -533,16 +561,15 @@ class SubscriptionsSpec
     val apiVersion    = ApiVersionNbr("1.0")
     val apiAccessType = "PUBLIC"
 
-    "unauthorized user should get 404 Not Found on unsubscribe to an API" in new Setup {
-      val alteredActiveApplication = activeApplication.copy(collaborators = Set("randomEmail".toLaxEmail.asAdministratorCollaborator))
+    "return not found for unauthorized user on unsubscribe to an API" in new Setup {
+      val alteredActiveApplication = developerApplication.withCollaborators()
 
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(userSession)))
       fetchByApplicationIdReturns(appId, alteredActiveApplication)
-      givenApplicationAction(ApplicationWithSubscriptionData(alteredActiveApplication, asSubscriptions(List.empty), asFields(List.empty)), userSession, List.empty)
+      givenApplicationAction(alteredActiveApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), altDevSession, List.empty)
 
       val request: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest("GET", s"developer/applications/$appId/subscribe?context=${apiContext.value}&version=${apiVersion.value}&accessType=$apiAccessType&tab=subscriptions")
-          .withLoggedIn(underTest, implicitly)(sessionId)
+        FakeRequest("GET", s"developer/applications/$appId/subscribe?context=${apiContext}&version=${apiVersion}&accessType=$apiAccessType&tab=subscriptions")
+          .withLoggedIn(underTest, implicitly)(altDevSession.sessionId)
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request)
       status(result) shouldBe NOT_FOUND

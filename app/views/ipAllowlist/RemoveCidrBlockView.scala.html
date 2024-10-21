@@ -17,17 +17,17 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, NoBackButton}
 @import include._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
+
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
 
-@(app: Application, cidrBlock: String)(
+@(app: ApplicationWithCollaborators, cidrBlock: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
 @breadcrumbs = @{
-  if(app.ipAllowlist.allowlist.isEmpty) {
+  if(app.details.ipAllowlist.allowlist.isEmpty) {
     Seq.empty
   } else {
     Seq(
@@ -39,7 +39,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
   }
 }
 @backButton = @{
-  if(app.ipAllowlist.allowlist.isEmpty) {
+  if(app.details.ipAllowlist.allowlist.isEmpty) {
     BackButtonWithJavaScript
   } else {
     NoBackButton

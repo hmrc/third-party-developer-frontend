@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 
 trait FraudPreventionNavLinkHelper {
@@ -30,7 +30,7 @@ trait FraudPreventionNavLinkHelper {
   }
 
   def createOptionalFraudPreventionNavLinkViewModel(
-      application: Application,
+      application: ApplicationWithCollaborators,
       subscriptions: List[APISubscriptionStatus],
       fraudPreventionConfig: FraudPreventionConfig
     ): Option[FraudPreventionNavLinkViewModel] = {

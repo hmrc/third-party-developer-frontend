@@ -222,7 +222,7 @@ class UpliftJourneyController @Inject() (
           }
         }
       } else {
-        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.admins))
       }
 
     def showBeforeYouStart(invite: TermsOfUseInvitation) =
@@ -230,7 +230,7 @@ class UpliftJourneyController @Inject() (
         val completeDate = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneId.systemDefault()).format(invite.dueBy)
         Ok(beforeYouStartView(appId, Some(completeDate)))
       } else {
-        Ok(unauthorisedAppDetailsView(request.application.name, request.application.adminEmails))
+        Ok(unauthorisedAppDetailsView(request.application.name, request.application.admins))
       }
 
     (

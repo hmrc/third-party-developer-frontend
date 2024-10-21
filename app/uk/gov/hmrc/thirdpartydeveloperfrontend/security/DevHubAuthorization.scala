@@ -59,7 +59,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
           .flatMap(userSession => {
             EitherT.liftF[Future, Result, UserRequest[A]](
               sessionService.updateUserFlowSessions(userSession.sessionId)
-                .map(_ => new UserRequest(userSession, msgRequest))
+                .map { _ => new UserRequest(userSession, msgRequest) }
             )
           })
           .value

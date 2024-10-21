@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json._
 import play.api.mvc.Request
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -41,7 +41,7 @@ case class DeskproTicket(
 object DeskproTicket extends FieldTransformer {
   implicit val format: OFormat[DeskproTicket] = Json.format[DeskproTicket]
 
-  def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
+  def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""${requestorEmail.text} submitted the following application for production use on the Developer Hub:
          |$applicationName
@@ -58,7 +58,7 @@ object DeskproTicket extends FieldTransformer {
     )
   }
 
-  def createForTermsOfUseUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: String, applicationId: ApplicationId): DeskproTicket = {
+  def createForTermsOfUseUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId): DeskproTicket = {
     val message =
       s"""${requestorEmail.text} has submitted a Terms of Use application that has warnings or fails:
          |$applicationName
@@ -78,7 +78,7 @@ object DeskproTicket extends FieldTransformer {
   def createForApiSubscribe(
       requestorName: String,
       requestorEmail: LaxEmailAddress,
-      applicationName: String,
+      applicationName: ApplicationName,
       applicationId: ApplicationId,
       apiName: String,
       apiVersion: ApiVersionNbr
@@ -94,7 +94,7 @@ object DeskproTicket extends FieldTransformer {
   def createForApiUnsubscribe(
       requestorName: String,
       requestorEmail: LaxEmailAddress,
-      applicationName: String,
+      applicationName: ApplicationName,
       applicationId: ApplicationId,
       apiName: String,
       apiVersion: ApiVersionNbr
@@ -112,7 +112,7 @@ object DeskproTicket extends FieldTransformer {
       requestedByEmail: LaxEmailAddress,
       role: Collaborator.Role,
       environment: Environment,
-      applicationName: String,
+      applicationName: ApplicationName,
       applicationId: ApplicationId
     ): DeskproTicket = {
 
@@ -164,8 +164,8 @@ object DeskproTicket extends FieldTransformer {
   def createForRequestChangeOfProductionApplicationName(
       requestorName: String,
       requestorEmail: LaxEmailAddress,
-      previousApplicationName: String,
-      newApplicationName: String,
+      previousApplicationName: ApplicationName,
+      newApplicationName: ApplicationName,
       applicationId: ApplicationId
     ): DeskproTicket = {
     val message =

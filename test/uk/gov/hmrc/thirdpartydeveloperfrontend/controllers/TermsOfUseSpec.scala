@@ -35,26 +35,28 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseVersionServiceMock}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, TermsOfUseVersionServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
 
 class TermsOfUseSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with UserBuilder
-    with LocalUserIdTracker
-    with FixedClock {
+    with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup extends ApplicationServiceMock with SessionServiceMock with ApplicationActionServiceMock with TermsOfUseVersionServiceMock {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with TermsOfUseVersionServiceMock
+      with UserBuilder
+      with CollaboratorTracker
+      with LocalUserIdTracker {
 
     val termsOfUseView: TermsOfUseView = app.injector.instanceOf[TermsOfUseView]
 
@@ -78,7 +80,7 @@ class TermsOfUseSpec
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
 
-    val appId: ApplicationId = ApplicationId.random
+    val appId: ApplicationId = standardApp.id
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -87,21 +89,14 @@ class TermsOfUseSpec
         environment: Environment = Environment.PRODUCTION,
         checkInformation: Option[CheckInformation] = None,
         access: Access = Access.Standard()
-      ): Application = {
-      val application = Application(
-        appId,
-        ClientId("clientId"),
-        "appName",
-        instant,
-        Some(instant),
-        None,
-        grantLength,
-        environment,
-        collaborators = Set(loggedInDeveloper.email.asCollaborator(userRole)),
-        access = access,
-        state = ApplicationState(State.PRODUCTION, Some("dont-care"), Some("dont-care"), Some("dont-care"), instant),
-        checkInformation = checkInformation
-      )
+      ): ApplicationWithCollaborators = {
+
+      val application =
+        standardApp
+          .withCollaborators(loggedInDeveloper.email.asCollaborator(userRole))
+          .withEnvironment(environment)
+          .withAccess(access)
+          .modify(_.copy(checkInformation = checkInformation))
 
       givenApplicationAction(application, userSession)
 
@@ -173,9 +168,9 @@ class TermsOfUseSpec
   "agreeTermsOfUse" should {
 
     "record the terms of use agreement for an administrator on a standard production app" in new Setup {
-      val application: Application                 = givenApplicationExists()
+      val application: ApplicationWithCollaborators = givenApplicationExists()
       returnLatestTermsOfUseVersion
-      val captor: ArgumentCaptor[CheckInformation] = ArgumentCaptor.forClass(classOf[CheckInformation])
+      val captor: ArgumentCaptor[CheckInformation]  = ArgumentCaptor.forClass(classOf[CheckInformation])
       when(underTest.applicationService.updateCheckInformation(eqTo(application), captor.capture())(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("termsOfUseAgreed" -> "true")

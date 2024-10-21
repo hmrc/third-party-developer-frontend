@@ -14,8 +14,8 @@
  * limitations under the License.
  *@
 
-@(applicationName:String, upliftRequestedByEmail: LaxEmailAddress)
+@(applicationName: ApplicationName, upliftRequestedByEmail: LaxEmailAddress)
 
-<p>We checked <strong class="bold">@applicationName</strong>.</p>
+<p>We checked <strong class="bold">@{applicationName.value}</strong>.</p>
 <p>We sent a verification link to <strong class="bold">@upliftRequestedByEmail</strong>.</p>
 <p>Production credentials will appear here when they verify their email address.</p>

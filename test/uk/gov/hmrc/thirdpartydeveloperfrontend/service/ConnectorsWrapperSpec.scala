@@ -24,16 +24,16 @@ import scala.concurrent.Future.failed
 import play.api.http.Status
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Application
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
-class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock {
+class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
 
   val mockAppConfig = mock[ApplicationConfig]
 
@@ -50,12 +50,12 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock {
       mockAppConfig
     )
 
-    def theProductionConnectorWillReturnTheApplication(applicationId: ApplicationId, application: Application) = {
+    def theProductionConnectorWillReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators) = {
       when(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(Some(application)))
       when(connectors.sandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(None))
     }
 
-    def theSandboxConnectorWillReturnTheApplication(applicationId: ApplicationId, application: Application) = {
+    def theSandboxConnectorWillReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators) = {
       when(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(None))
       when(connectors.sandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(Some(application)))
     }
@@ -74,32 +74,11 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock {
   val productionClientId      = ClientId("hBnFo14C0y4SckYUbcoL2PbFA40a")
   val grantLength             = Period.ofDays(547)
 
-  val productionApplication =
-    Application(
-      productionApplicationId,
-      productionClientId,
-      "name",
-      instant,
-      Some(instant),
-      None,
-      grantLength,
-      Environment.PRODUCTION,
-      Some("description")
-    )
+  val productionApplication = standardApp
   val sandboxApplicationId  = ApplicationId.random
   val sandboxClientId       = ClientId("Client ID")
 
-  val sandboxApplication = Application(
-    sandboxApplicationId,
-    sandboxClientId,
-    "name",
-    instant,
-    Some(instant),
-    None,
-    grantLength,
-    Environment.SANDBOX,
-    Some("description")
-  )
+  val sandboxApplication = standardApp.inSandbox().withId(sandboxApplicationId)
 
   "fetchByApplicationId" when {
     "return the application fetched from the production connector when it exists there" in new Setup {
