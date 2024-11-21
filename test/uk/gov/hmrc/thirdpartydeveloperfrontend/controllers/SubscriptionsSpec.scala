@@ -109,7 +109,8 @@ class SubscriptionsSpec
       fetchByApplicationIdReturns(ropcApplication)
       givenApplicationAction(ropcApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       val result = addToken(underTest.manageSubscriptions(ropcApplication.id))(loggedInDevRequest)
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
     }
 
     "return the privileged page for a privileged app" in new Setup {
@@ -118,7 +119,8 @@ class SubscriptionsSpec
       fetchByApplicationIdReturns(privilegedApplication)
       givenApplicationAction(privilegedApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       val result = addToken(underTest.manageSubscriptions(privilegedApplication.id))(loggedInDevRequest)
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Manage API subscriptions - HMRC Developer Hub - GOV.UK"
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
@@ -137,7 +139,8 @@ class SubscriptionsSpec
       fetchByApplicationIdReturns(ropcApplication)
       givenApplicationAction(ropcApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       val result = addToken(underTest.addAppSubscriptions(ropcApplication.id))(loggedInDevRequest)
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
     }
 
     "return the privileged page for a privileged app" in new Setup {
@@ -146,7 +149,8 @@ class SubscriptionsSpec
       fetchByApplicationIdReturns(privilegedApplication)
       givenApplicationAction(privilegedApplication.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       val result = addToken(underTest.addAppSubscriptions(privilegedApplication.id))(loggedInDevRequest)
-      status(result) shouldBe BAD_REQUEST
+      status(result) shouldBe OK
+      titleOf(result) shouldBe "Which APIs do you want to use? - HMRC Developer Hub - GOV.UK"
     }
 
     "return the subscriptions page for a developer on a standard app" in new Setup {
