@@ -46,6 +46,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.PhoneNumberHelper.obfuscateNumber
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
@@ -174,7 +175,7 @@ class UserLoginAccount @Inject() (
       case true =>
         Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
           .withSession(session + ("userId" -> userId.value.toString))
-          .flashing("mobileNumber" -> smsMfaDetail.mobileNumber)
+          .flashing("mobileNumber" -> obfuscateNumber(smsMfaDetail.mobileNumber))
 
       case false => InternalServerError("Failed to send SMS")
     }
