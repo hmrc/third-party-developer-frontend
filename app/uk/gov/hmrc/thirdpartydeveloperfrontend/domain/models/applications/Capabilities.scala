@@ -49,7 +49,9 @@ object Capabilities {
     def hasCapability(app: ApplicationWithCollaborators) = true
   }
 
-  case object SupportsSubscriptions extends StandardAppCapability
+  case object SupportsSubscriptions extends Capability {
+    override def hasCapability(app: ApplicationWithCollaborators): Boolean = true
+  }
 
   case object EditSubscriptionFields extends Capability {
     override def hasCapability(app: ApplicationWithCollaborators): Boolean = !app.isPendingGatekeeperApproval

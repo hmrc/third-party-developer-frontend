@@ -68,10 +68,10 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       elementExistsById(document, "nav-manage-responsible-individual") shouldBe false
     }
 
-    "include links to manage team members but not API subscriptions for an app with privileged access" in new Setup {
+    "include links to manage team members and API subscriptions for an app with privileged access" in new Setup {
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(privilegedApp, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
-      elementExistsById(document, "nav-manage-subscriptions") shouldBe false
+      elementExistsById(document, "nav-manage-subscriptions") shouldBe true
       elementExistsById(document, "nav-manage-credentials") shouldBe true
       elementExistsById(document, "nav-manage-client-id") shouldBe false
       elementExistsById(document, "nav-manage-client-secrets") shouldBe false
@@ -80,10 +80,10 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
       elementExistsById(document, "nav-manage-responsible-individual") shouldBe false
     }
 
-    "include links to manage team members but not API subscriptions for an app with ROPC access" in new Setup {
+    "include links to manage team members and API subscriptions for an app with ROPC access" in new Setup {
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(ropcApp, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 
-      elementExistsById(document, "nav-manage-subscriptions") shouldBe false
+      elementExistsById(document, "nav-manage-subscriptions") shouldBe true
       elementExistsById(document, "nav-manage-credentials") shouldBe true
       elementExistsById(document, "nav-manage-client-id") shouldBe false
       elementExistsById(document, "nav-manage-client-secrets") shouldBe false
