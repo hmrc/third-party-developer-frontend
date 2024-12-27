@@ -35,7 +35,8 @@ class NavLinkSpec extends AsyncHmrcSpec {
     "return static navlinks for devhub" in {
       StaticNavLinks("http://localhost:9680", "http://localhost:9685") shouldBe
         Seq(
-          NavLink("Documentation", "http://localhost:9680/api-documentation/docs/using-the-hub"),
+          NavLink("Getting Started", "http://localhost:9680/api-documentation/docs/using-the-hub"),
+          NavLink("API documentation", "http://localhost:9680/api-documentation/docs/api"),
           NavLink("Applications", "http://localhost:9685/developer/applications"),
           NavLink("Support", "http://localhost:9685/developer/support"),
           NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)

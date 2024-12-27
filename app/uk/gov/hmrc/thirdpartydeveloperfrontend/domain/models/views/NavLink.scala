@@ -28,7 +28,8 @@ case object StaticNavLinks {
 
   def apply(apiDocumentationFrontendUrl: String, thirdPartyDeveloperFrontendUrl: String) = {
     Seq(
-      NavLink("Documentation", s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
+      NavLink("Getting Started", s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
+      NavLink("API documentation", s"$apiDocumentationFrontendUrl/api-documentation/docs/api"),
       NavLink("Applications", s"$thirdPartyDeveloperFrontendUrl/developer/applications"),
       NavLink("Support", s"$thirdPartyDeveloperFrontendUrl/developer/support"),
       NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)
