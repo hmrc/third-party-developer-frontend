@@ -15,9 +15,8 @@
  *@
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, FeedbackBanner, NoBackButton, StaticNavLinks, UserNavLinks}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, FeedbackBanner, NoBackButton, UserNavLinks}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
 @import play.twirl.api.HtmlFormat
 @import templates._
@@ -68,9 +67,6 @@
   title = s"$title - HMRC Developer Hub - GOV.UK",
   navTitle = Some(applicationConfig.title),
   navTitleLink = navTitleLink,
-  headerNavLinks = headerNavLinks(
-    StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)
-  ),
   Some(HtmlFormat.empty),
   breadcrumbs = breadcrumbs,
   leftNav = leftNav,

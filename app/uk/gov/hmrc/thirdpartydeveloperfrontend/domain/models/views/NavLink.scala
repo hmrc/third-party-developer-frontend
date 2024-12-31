@@ -17,22 +17,25 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 import play.api.libs.json._
+import uk.gov.hmrc.govukfrontend.views.html.components.Text
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.header.NavigationItem
 
 case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, isSensitive: Boolean = false)
 
 object NavLink {
   implicit val format: OFormat[NavLink] = Json.format[NavLink]
+
 }
 
-case object StaticNavLinks {
+case object StaticNavItems {
 
   def apply(apiDocumentationFrontendUrl: String, thirdPartyDeveloperFrontendUrl: String) = {
     Seq(
-      NavLink("Getting Started", s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
-      NavLink("API documentation", s"$apiDocumentationFrontendUrl/api-documentation/docs/api"),
-      NavLink("Applications", s"$thirdPartyDeveloperFrontendUrl/developer/applications"),
-      NavLink("Support", s"$thirdPartyDeveloperFrontendUrl/developer/support"),
-      NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)
+      NavigationItem(Text("Getting Started"), Some(s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub")),
+      NavigationItem(Text("API documentation"), Some(s"$apiDocumentationFrontendUrl/api-documentation/docs/api")),
+      NavigationItem(Text("Applications"), Some(s"$thirdPartyDeveloperFrontendUrl/developer/applications")),
+      NavigationItem(Text("Support"), Some(s"$thirdPartyDeveloperFrontendUrl/developer/support")),
+      NavigationItem(Text("Service availability"), Some("https://api-platform-status.production.tax.service.gov.uk/"), attributes = Map("target" -> "_blank"))
     )
   }
 }
