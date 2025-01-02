@@ -14,8 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavLinks
-@import include._
 @import templates.govUkWrapper
 @import play.twirl.api.HtmlFormat
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
@@ -27,7 +25,6 @@
 @govUkWrapper(
   title = "Your account verification link has expired",
   navTitle = Some(applicationConfig.title),
-  headerNavLinks = headerNavLinks(StaticNavLinks(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
   serviceInfoContent = Some(HtmlFormat.empty)
 ) {
   <h1 class="govuk-heading-l">Your account verification link has expired</h1>

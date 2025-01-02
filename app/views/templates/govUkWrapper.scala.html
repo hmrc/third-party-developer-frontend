@@ -18,19 +18,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import play.twirl.api.HtmlFormat
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
-
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavItems
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
-@import templates._
-@import views.templates._
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.components._
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.footer.Footer
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
-@import uk.gov.hmrc.govukfrontend.views.html.components.Text
 @import views.html.helper.CSPNonce
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.backlink.BackLink
@@ -49,7 +44,6 @@
   title: String,
   navTitle: Option[String] = None,
   navTitleLink: Option[play.api.mvc.Call] = None,
-  headerNavLinks: Html = HtmlFormat.empty,
   contentHeader: Option[Html] = None,
   sidebar: Option[Html] = None,
   serviceInfoContent : Option[Html] = None,
@@ -189,15 +183,6 @@
   @bodyEndBlock
 }
 
-@navigation = @{
-  Seq(
-      NavigationItem(content = Text("Documentation"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/using-the-hub")),
-      NavigationItem(content = Text("Applications"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/applications")),
-      NavigationItem(content = Text("Support"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/developer/support")),
-      NavigationItem(content = Text("Service Availability"), href = Some("https://api-platform-status.production.tax.service.gov.uk/"))
-  )
-}
-
 @siteFooter = {
   @hmrcFooter(new Footer(meta = Some(
     Meta(
@@ -220,7 +205,7 @@
   headerBlock = Some(hmrcHeader(Header(
         homepageUrl = "https://www.gov.uk",
         serviceName = Some(applicationConfig.title),
-        navigation = Some(navigation),
+        navigation = Some(StaticNavItems(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl)),
         serviceUrl = "/api-documentation",
         displayHmrcBanner = false,
         containerClasses = "govuk-width-container",

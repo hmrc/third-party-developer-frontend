@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{NavLink, StaticNavLinks, UserNavLinks}
+import uk.gov.hmrc.govukfrontend.views.html.components.Text
+import uk.gov.hmrc.hmrcfrontend.views.viewmodels.header.NavigationItem
+
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{NavLink, StaticNavItems, UserNavLinks}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class NavLinkSpec extends AsyncHmrcSpec {
@@ -32,14 +35,14 @@ class NavLinkSpec extends AsyncHmrcSpec {
         Seq(NavLink("Register", "/developer/registration"), NavLink("Sign in", "/developer/login"))
     }
 
-    "return static navlinks for devhub" in {
-      StaticNavLinks("http://localhost:9680", "http://localhost:9685") shouldBe
+    "return static navigation items for devhub" in {
+      StaticNavItems("http://localhost:9680", "http://localhost:9685") shouldBe
         Seq(
-          NavLink("Getting Started", "http://localhost:9680/api-documentation/docs/using-the-hub"),
-          NavLink("API documentation", "http://localhost:9680/api-documentation/docs/api"),
-          NavLink("Applications", "http://localhost:9685/developer/applications"),
-          NavLink("Support", "http://localhost:9685/developer/support"),
-          NavLink("Service availability", "https://api-platform-status.production.tax.service.gov.uk/", openInNewWindow = true)
+          NavigationItem(Text("Getting Started"), Some(s"http://localhost:9680/api-documentation/docs/using-the-hub")),
+          NavigationItem(Text("API documentation"), Some(s"http://localhost:9680/api-documentation/docs/api")),
+          NavigationItem(Text("Applications"), Some(s"http://localhost:9685/developer/applications")),
+          NavigationItem(Text("Support"), Some(s"http://localhost:9685/developer/support")),
+          NavigationItem(Text("Service availability"), Some("https://api-platform-status.production.tax.service.gov.uk/"), attributes = Map("target" -> "_blank"))
         )
     }
   }
