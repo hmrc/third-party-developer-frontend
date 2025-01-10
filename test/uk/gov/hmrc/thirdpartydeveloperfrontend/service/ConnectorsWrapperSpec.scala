@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -43,8 +42,6 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with Applicati
     val connectors = new ConnectorsWrapper(
       mock[ThirdPartyApplicationSandboxConnector],
       mock[ThirdPartyApplicationProductionConnector],
-      mock[SubscriptionFieldsConnector],
-      mock[SubscriptionFieldsConnector],
       mock[PushPullNotificationsConnector],
       mock[PushPullNotificationsConnector],
       mockAppConfig

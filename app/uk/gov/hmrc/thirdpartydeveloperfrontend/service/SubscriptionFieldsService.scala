@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.implicits._
@@ -30,9 +30,15 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, Fields}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
 @Singleton
-class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
+class SubscriptionFieldsService @Inject() (
+    @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+    @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
+    apmConnector: ApmConnector
+  )(implicit val ec: ExecutionContext
+  ) {
 
   def saveFieldValues(
       role: Collaborator.Role,
@@ -45,6 +51,9 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
 
+    def connector(environment: Environment): SubscriptionFieldsConnector =
+      if (environment.isProduction) productionSubscriptionFieldsConnector else sandboxSubscriptionFieldsConnector
+
     def isAllowedToAndCreateNewValue(oldValue: SubscriptionFieldValue, newValue: FieldValue) = {
       if (oldValue.definition.access.devhub.satisfiesWrite(DevhubAccessLevel.fromRole(role))) {
         Right(oldValue.copy(value = newValue))
@@ -54,10 +63,9 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
 
     def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = {
-      val connector    = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
       val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
 
-      connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
+      connector(application.deployedTo).saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
     }
 
     if (newValues.isEmpty) {

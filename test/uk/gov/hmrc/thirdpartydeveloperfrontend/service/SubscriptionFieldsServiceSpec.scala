@@ -55,15 +55,11 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockApmConnector: ApmConnector                                     = mock[ApmConnector]
 
-    val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
-
-    when(mockConnectorsWrapper.forEnvironment(application.deployedTo))
-      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector, mockPushPullNotificationsConnector))
+    val underTest = new SubscriptionFieldsService(mockSubscriptionFieldsConnector, mockSubscriptionFieldsConnector, mockApmConnector)
 
     when(
       mockThirdPartyApplicationConnector

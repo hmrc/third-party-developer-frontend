@@ -28,14 +28,11 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
 @Singleton
 class ConnectorsWrapper @Inject() (
     val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-    @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
-    @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
     @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
     @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
     applicationConfig: ApplicationConfig
@@ -44,8 +41,8 @@ class ConnectorsWrapper @Inject() (
 
   def forEnvironment(environment: Environment): Connectors = {
     environment match {
-      case Environment.PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector, productionPushPullNotificationsConnector)
-      case _                      => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector, sandboxPushPullNotificationsConnector)
+      case Environment.PRODUCTION => Connectors(productionApplicationConnector, productionPushPullNotificationsConnector)
+      case _                      => Connectors(sandboxApplicationConnector, sandboxPushPullNotificationsConnector)
     }
   }
 
@@ -66,6 +63,5 @@ class ConnectorsWrapper @Inject() (
 
 case class Connectors(
     thirdPartyApplicationConnector: ThirdPartyApplicationConnector,
-    apiSubscriptionFieldsConnector: SubscriptionFieldsConnector,
     pushPullNotificationsConnector: PushPullNotificationsConnector
   )

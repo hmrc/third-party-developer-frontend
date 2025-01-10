@@ -66,8 +66,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val connectorsWrapper = new ConnectorsWrapper(
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
-      mockSandboxSubscriptionFieldsConnector,
-      mockProductionSubscriptionFieldsConnector,
       mockPushPullNotificationsConnector,
       mockPushPullNotificationsConnector,
       mockAppConfig
