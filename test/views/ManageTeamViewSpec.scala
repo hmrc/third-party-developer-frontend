@@ -54,11 +54,15 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
 
-    def renderPage(role: Collaborator.Role, form: Form[AddTeamMemberForm] = AddTeamMemberForm.form) = {
+    def renderPage(
+        role: Collaborator.Role,
+        form: Form[AddTeamMemberForm] = AddTeamMemberForm.form,
+        model: ApplicationViewModel = ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)
+      ) = {
       val request = FakeRequest().withCSRFToken
 
       manageTeamView.render(
-        ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+        model,
         role,
         form,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
@@ -81,6 +85,31 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       withClue("Remove link present")(linkExistsWithHref(
         document,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url
+      ) shouldBe true)
+      withClue("Remove link present")(linkExistsWithHref(
+        document,
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, loggedInDeveloper.developer.email.text.toSha256).url
+      ) shouldBe false)
+    }
+
+    "show Remove buttons for when multiple Admin" in {
+      val document = Jsoup.parse(renderPage(
+        role = Collaborator.Roles.ADMINISTRATOR,
+        model = ApplicationViewModel(
+          standardApp.withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asAdministratorCollaborator),
+          hasSubscriptionsFields = false,
+          hasPpnsFields = false
+        )
+      ).body)
+
+      withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
+      withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe true)
+      withClue("Warning")(elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false)
+      withClue("Session email")(elementExistsByText(document, "td", loggedInDeveloper.developer.email.text) shouldBe true)
+      withClue("collaborator email")(elementExistsByText(document, "td", collaborator.developer.email.text) shouldBe true)
+      withClue("Remove link present")(linkExistsWithHref(
+        document,
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, loggedInDeveloper.developer.email.text.toSha256).url
       ) shouldBe true)
     }
 
