@@ -30,6 +30,8 @@ object ApiSubscriptionFields {
       access: AccessRequirements
     )
 
+      // case class SubscriptionFieldDefinition(name: FieldName, description: String, hint: String, `type`: String, shortDescription: String)
+
   case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: FieldValue)
 
   sealed trait FieldsDeleteResult

@@ -106,8 +106,6 @@ object SubscriptionFieldsService {
       )(implicit hc: HeaderCarrier
       ): Future[Seq[SubscriptionFieldValue]]
 
-    def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion]
-
     def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
     def saveFieldValues(

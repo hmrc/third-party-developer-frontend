@@ -124,17 +124,17 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       }
   }
 
-  def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
-    val url = s"$serviceBaseUrl/definition"
-    configureEbridgeIfRequired(
-      http.get(url"$url")
-    )
-      .execute[Option[AllApiFieldDefinitions]]
-      .map {
-        case Some(x) => toDomain(x)
-        case None    => DefinitionsByApiVersion.empty
-      }
-  }
+  // def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
+  //   val url = s"$serviceBaseUrl/definition"
+  //   configureEbridgeIfRequired(
+  //     http.get(url"$url")
+  //   )
+  //     .execute[Option[AllApiFieldDefinitions]]
+  //     .map {
+  //       case Some(x) => toDomain(x)
+  //       case None    => DefinitionsByApiVersion.empty
+  //     }
+  // }
 
   def saveFieldValues(
       clientId: ClientId,
