@@ -91,7 +91,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockApmConnector,
       connectorsWrapper,
       ApplicationCommandConnectorMock.aMock,
-      mockSubscriptionFieldsService,
       mockDeskproConnector,
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
