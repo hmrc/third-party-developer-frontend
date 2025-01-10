@@ -96,6 +96,8 @@ GET         /applications/:id/delete-principal-confirm                          
 POST        /applications/:id/delete-principal                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeletePrincipalApplicationAction(id: ApplicationId)
 GET         /applications/:id/delete-subordinate-confirm                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: ApplicationId)
 POST        /applications/:id/delete-subordinate                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteSubordinateApplicationAction(id: ApplicationId)
+GET         /applications/:id/delete-restricted-confirm                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.confirmRequestDeleteRestrictedApplication(id: ApplicationId, error: Option[String])
+POST        /applications/:id/delete-restricted                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeleteRestrictedApplicationAction(id: ApplicationId)
 
 GET         /applications/:id/ip-allowlist                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.viewIpAllowlist(id: ApplicationId)
 GET         /applications/:id/ip-allowlist/allowed-ips                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.allowedIps(id: ApplicationId)
