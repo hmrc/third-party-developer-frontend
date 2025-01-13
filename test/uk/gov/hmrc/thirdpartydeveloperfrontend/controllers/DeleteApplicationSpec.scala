@@ -152,7 +152,7 @@ class DeleteApplicationSpec
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
+      when(underTest.applicationService.requestRestrictedApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
         .thenReturn(Future.successful(TicketCreated))
 
       val result = addToken(underTest.requestDeleteRestrictedApplicationAction(standardApp.id))(requestWithFormBody)
@@ -161,7 +161,7 @@ class DeleteApplicationSpec
       val body = contentAsString(result)
 
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
+      verify(underTest.applicationService).requestRestrictedApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {

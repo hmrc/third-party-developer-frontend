@@ -118,7 +118,7 @@ class DeleteApplication @Inject() (
       validForm.deleteConfirm match {
         case Some("Yes") =>
           applicationService
-            .requestPrincipalApplicationDeletion(request.userSession, application)
+            .requestRestrictedApplicationDeletion(request.userSession, application)
             .map(_ => Ok(deleteRestrictedApplicationCompleteView(application)))
         case _           => Future(Redirect(routes.Details.details(applicationId)))
       }

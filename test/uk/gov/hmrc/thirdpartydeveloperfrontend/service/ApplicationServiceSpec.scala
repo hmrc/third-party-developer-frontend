@@ -204,7 +204,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
   }
 
-  "request application deletion" should {
+  "request principle application deletion" should {
 
     val adminRequester                        = adminSession
     val developerRequester                    = devSession
@@ -253,6 +253,32 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       intercept[ForbiddenException] {
         await(applicationService.requestPrincipalApplicationDeletion(developerRequester, productionApplication))
+      }
+      verifyZeroInteractions(mockDeskproConnector)
+      verifyZeroInteractions(mockAuditService)
+    }
+  }
+
+  "request restricted application deletion" should {
+    val adminRequester     = adminSession
+    val developerRequester = devSession
+
+    "create a deskpro ticket and audit record" in new Setup {
+
+      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*))
+        .thenReturn(successful(TicketCreated))
+      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
+        .thenReturn(successful(Success))
+
+      await(applicationService.requestRestrictedApplicationDeletion(adminRequester, productionApplication)) shouldBe TicketCreated
+      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
+    }
+
+    "not create a deskpro ticket or audit record for a Developer in a restricted app" in new Setup {
+
+      intercept[ForbiddenException] {
+        await(applicationService.requestRestrictedApplicationDeletion(developerRequester, productionApplication))
       }
       verifyZeroInteractions(mockDeskproConnector)
       verifyZeroInteractions(mockAuditService)
