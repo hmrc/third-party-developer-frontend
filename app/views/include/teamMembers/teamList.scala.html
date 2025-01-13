@@ -65,7 +65,7 @@
             <span>Developer</span>
           }
         </td>
-        @if(role.isAdministrator && (teamMember.role.isDeveloper || teamMember.emailAddress != loggedIn.developer.email)) {
+        @if(role.isAdministrator && (teamMember.role.isDeveloper || app.collaborators.count(_.isAdministrator) > 1)) {
           <td class="govuk-table__cell center-table-text">
             <a class="govuk-button govuk-button--secondary govuk-!-margin-0" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
               Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
