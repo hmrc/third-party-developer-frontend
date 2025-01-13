@@ -32,60 +32,76 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProv
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l">Delete application</h1>
-
-  @appEnvironment(app)
-
-  <br>
 
   @if(roleOfLoggedIn == Collaborator.Roles.ADMINISTRATOR) {
-    @if(app.details.deleteRestriction == DeleteRestriction.NoRestriction) {
-      @if(app.deployedTo == Environment.SANDBOX) {
-        <p class="govuk-body">
-          Before deleting this application, check with all your 
-          <a class="govuk-link" href="@routes.ManageTeam.manageTeam(app.id, None)">
-            team members
-          </a>.
-        </p>
+    @app.details.deleteRestriction match {
+      case DeleteRestriction.NoRestriction => {
+        @if(app.deployedTo == Environment.SANDBOX) {
+          <h1 class="govuk-heading-l">Delete application</h1>
 
-        <a class="govuk-button" href="@routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
-          Continue
-        </a>
-      } else {
-        <p class="govuk-body">
-          Before requesting to delete this application, check with all 
-          <a class="govuk-link" href="@routes.ManageTeam.manageTeam(app.id, None)">
-            team members
-          </a>.
-        </p>
+          @appEnvironment(app)
+          <br>
+
+          <p class="govuk-body">
+            Before deleting this application, check with all your 
+            <a class="govuk-link" href="@routes.ManageTeam.manageTeam(app.id, None)">
+              team members
+            </a>.
+          </p>
+
+          <a class="govuk-button" href="@routes.DeleteApplication.deleteSubordinateApplicationConfirm(app.id)">
+            Continue
+          </a>
+        } else {
+
+          <h1 class="govuk-heading-l">Delete application</h1>
+
+          @appEnvironment(app)
+          <br>
+     
+          <p class="govuk-body">
+            Before requesting to delete this application, check with all 
+            <a class="govuk-link" href="@routes.ManageTeam.manageTeam(app.id, None)">
+              team members
+            </a>.
+          </p>
+
+          <p class="govuk-body">
+            We'll respond to your request within 2 working days.
+          </p>
+
+          <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.confirmRequestDeletePrincipalApplication(app.id, None)">
+            Request deletion
+          </a>
+        }
+      }
+      case dnd: DeleteRestriction.DoNotDelete => {
+        <h1 class="govuk-heading-l">Application cannot be deleted</h1>
 
         <p class="govuk-body">
-          We'll respond to your request within 2 working days.
-        </p>
+          @{app.name} must be reviewed by the Developer Hub support team before it can be deleted from @{app.deployedTo.toString.toLowerCase}.
+        </p> 
+        <p class="govuk-body">
+          This is because:
+        </p> 
+        <div class="govuk-inset-text">
+          @{dnd.reason}
+        </div>
+        <p class="govuk-body">
+          If you still want to delete this application from the @{app.deployedTo.toString.toLowerCase} environment, submit a request to the support team. They will respond within 2 working days.
+        </p> 
 
-        <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.confirmRequestDeletePrincipalApplication(app.id, None)">
+        <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.confirmRequestDeleteRestrictedApplication(app.id, None)">
           Request deletion
         </a>
       }
-    } else {
-      <p class="govuk-body">
-        @{app.name} must be reviewed by the Developer Hub support team before it can be deleted from @{app.deployedTo}.
-      </p> 
-      <p class="govuk-body">
-        This is because:
-      </p> 
-      <div class="govuk-inset-text">
-        @{app.details.deleteRestriction}
-      </div>
-      <p class="govuk-body">
-        If you still want to delete this application from the @{app.deployedTo} environment, submit a request to the support team. They will respond within 2 working days.
-      </p> 
-
-      <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.confirmRequestDeleteRestrictedApplication(app.id, None)">
-        Request deletion
-      </a>
     }
   } else {
+    <h1 class="govuk-heading-l">Delete application</h1>
+
+    @appEnvironment(app)
+    <br>
+
     <div class="govuk-inset-text">
       You cannot delete this application because you're not an administrator.
     </div>
