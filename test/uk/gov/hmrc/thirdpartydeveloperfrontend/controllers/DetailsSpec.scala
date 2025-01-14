@@ -165,13 +165,13 @@ class DetailsSpec
     }
 
     "not a team member on an application" should {
-      "return not found" in new Setup {
+      "return see other" in new Setup {
         val application = approvedApplication
         givenApplicationAction(application, altDevSession)
 
         val result = application.callDetails
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldBe SEE_OTHER
       }
     }
 
@@ -218,13 +218,13 @@ class DetailsSpec
       status(result) shouldBe FORBIDDEN
     }
 
-    "return not found when not a teamMember on the app" in new Setup {
+    "return see other when not a teamMember on the app" in new Setup {
       val application = approvedApplication
       givenApplicationAction(application, altDevSession)
 
       val result = application.callChangeDetails
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
     }
 
     "redirect to login when not logged in" in new Setup {
@@ -302,13 +302,13 @@ class DetailsSpec
       status(result) shouldBe NOT_FOUND
     }
 
-    "return not found when not a teamMember on the app" in new Setup {
+    "return see other when not a teamMember on the app" in new Setup {
       val application = sandboxApplication.withCollaborators()
       givenApplicationAction(application, devSession)
 
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
     }
 
     "redirect to login when not logged in" in new Setup {
@@ -536,13 +536,13 @@ class DetailsSpec
       elementIdentifiedByIdContainsValue(document, "privacyPolicyUrl", privacyPolicyUrl)
     }
 
-    "return Not Found error if application cannot be retrieved" in new Setup {
+    "return See Other if application cannot be retrieved" in new Setup {
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
       givenApplicationActionReturnsNotFound(appWithPrivPolicyInDesktop.id)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
     }
 
     "return bad request if privacy policy location has not changed" in new Setup {
@@ -648,13 +648,13 @@ class DetailsSpec
       elementIdentifiedByIdContainsValue(document, "termsAndConditionsUrl", termsAndConditionsUrl)
     }
 
-    "return Not Found error if application cannot be retrieved" in new Setup {
+    "return see other error if application cannot be retrieved" in new Setup {
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocations.InDesktopSoftware)
       givenApplicationActionReturnsNotFound(appWithTermsAndConditionsInDesktop.id)
 
       val result = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(loggedInAdminRequest)
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
     }
 
     "return bad request if terms and conditions location has not changed" in new Setup {

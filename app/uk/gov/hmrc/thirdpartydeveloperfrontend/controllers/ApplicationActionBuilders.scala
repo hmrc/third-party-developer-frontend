@@ -38,7 +38,7 @@ trait ApplicationActionBuilders {
       override def refine[A](request: UserRequest[A]): Future[Either[Result, ApplicationRequest[A]]] = {
         implicit val implicitRequest: UserRequest[A] = request
 
-        ETR.fromOptionM(applicationActionService.process(applicationId, request), errorHandler.notFoundTemplate(Request(request, request.userSession)).map(NotFound(_)))
+        ETR.fromOptionM(applicationActionService.process(applicationId, request), Future.successful(Redirect(routes.ManageApplications.manageApps(), SEE_OTHER)))
           .value
       }
     }

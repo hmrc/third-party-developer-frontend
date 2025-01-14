@@ -565,7 +565,7 @@ class SubscriptionsSpec
     val apiVersion    = ApiVersionNbr("1.0")
     val apiAccessType = "PUBLIC"
 
-    "return not found for unauthorized user on unsubscribe to an API" in new Setup {
+    "return see other for unauthorized user on unsubscribe to an API" in new Setup {
       val alteredActiveApplication = developerApplication.withCollaborators()
 
       fetchByApplicationIdReturns(appId, alteredActiveApplication)
@@ -576,7 +576,7 @@ class SubscriptionsSpec
           .withLoggedIn(underTest, implicitly)(altDevSession.sessionId)
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request)
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
       verify(applicationServiceMock, never).updateCheckInformation(eqTo(alteredActiveApplication), eqTo(CheckInformation()))(*)
     }
   }

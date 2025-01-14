@@ -89,13 +89,13 @@ class PushPullNotificationsSpec
     }
 
     "not a team member on an application" should {
-      "return not found" in new Setup {
+      "return see other" in new Setup {
         val application: ApplicationWithCollaborators = standardApp.withCollaborators()
         givenApplicationAction(application, devSession)
 
         val result: Future[Result] = underTest.showPushSecrets(application.id)(loggedInAdminRequest)
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldBe SEE_OTHER
       }
     }
 

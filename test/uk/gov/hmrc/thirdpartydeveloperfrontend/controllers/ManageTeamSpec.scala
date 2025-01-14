@@ -362,7 +362,7 @@ class ManageTeamSpec
   "ManageTeam" when {
     "using an application pending approval" should {
 
-      trait PendingApprovalReturnsBadRequest extends Setup {
+      trait PendingApprovalReturnsSeeOther extends Setup {
         def executeAction: Future[Result]
 
         val pageNumber = 1
@@ -378,29 +378,29 @@ class ManageTeamSpec
 
         val result: Future[Result] = executeAction
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldBe SEE_OTHER
       }
 
-      "return a bad request for manageTeam action" in new PendingApprovalReturnsBadRequest {
+      "return a see other for manageTeam action" in new PendingApprovalReturnsSeeOther {
 
         def executeAction: Future[Result] = {
           underTest.manageTeam(app.id)(loggedInRequest)
         }
       }
 
-      "return a bad request for addTeamMember action" in new PendingApprovalReturnsBadRequest {
+      "return a see other for addTeamMember action" in new PendingApprovalReturnsSeeOther {
         def executeAction: Future[Result] = {
           underTest.addTeamMember(app.id)(loggedInRequest)
         }
       }
 
-      "return a bad request for removeTeamMember action" in new PendingApprovalReturnsBadRequest {
+      "return a see other for removeTeamMember action" in new PendingApprovalReturnsSeeOther {
         def executeAction: Future[Result] = {
           underTest.removeTeamMember(app.id, "fake-hash")(loggedInRequest)
         }
       }
 
-      "return a bad request for removeTeamMemberAction action" in new PendingApprovalReturnsBadRequest {
+      "return a see other for removeTeamMemberAction action" in new PendingApprovalReturnsSeeOther {
         def executeAction: Future[Result] = {
           underTest.removeTeamMemberAction(app.id)(loggedInRequest)
         }
