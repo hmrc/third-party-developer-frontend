@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeletePrincipalApplicationForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplicationForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrWithValueContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
@@ -54,7 +54,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
 
     "render with no errors" in {
 
-      val page = deletePrincipalApplicationConfirmView.render(application, DeletePrincipalApplicationForm.form, request, loggedInDeveloper, messagesProvider, appConfig)
+      val page = deletePrincipalApplicationConfirmView.render(application, DeleteApplicationForm.form, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
@@ -66,7 +66,7 @@ class DeletePrincipalApplicationConfirmSpec extends CommonViewSpec with WithCSRF
 
     "render with error when no radio button has been selected" in {
 
-      val formWithErrors = DeletePrincipalApplicationForm.form.withError("confirmation", "Confirmation error message")
+      val formWithErrors = DeleteApplicationForm.form.withError("confirmation", "Confirmation error message")
 
       val page = deletePrincipalApplicationConfirmView.render(application, formWithErrors, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")
