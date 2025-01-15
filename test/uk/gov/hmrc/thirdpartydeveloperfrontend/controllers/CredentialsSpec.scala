@@ -254,13 +254,13 @@ class CredentialsSpec
       status(result) shouldBe UNPROCESSABLE_ENTITY
     }
 
-    "display the NotFound page when the application does not exist" in new Setup with ApplicationProviderWithAdmin {
+    "display the See Other when the application does not exist" in new Setup with ApplicationProviderWithAdmin {
       reset(applicationActionServiceMock) // Wipe givenApplicationActionReturns
       givenApplicationActionReturnsNotFound(applicationId)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
     }
 
     "display the error page when a user with developer role tries to add production secrets" in new Setup with ApplicationProviderWithDev {

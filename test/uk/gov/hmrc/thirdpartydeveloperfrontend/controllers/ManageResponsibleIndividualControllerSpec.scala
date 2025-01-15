@@ -162,12 +162,12 @@ class ManageResponsibleIndividualControllerSpec
       viewModel.allowChanges shouldBe false
     }
 
-    "return an error if user is not a team member" in new Setup {
+    "return a redirect if user is not a team member" in new Setup {
       givenTheApplicationExistWithUserRole(altDevSession, List.empty)
 
       val result = underTest.showResponsibleIndividualDetails(appId)(loggedInAltDevRequest.withCSRFToken)
 
-      status(result) shouldBe NOT_FOUND
+      status(result) shouldBe SEE_OTHER
     }
   }
 
