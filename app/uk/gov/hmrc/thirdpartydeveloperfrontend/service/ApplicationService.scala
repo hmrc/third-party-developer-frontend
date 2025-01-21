@@ -147,6 +147,34 @@ class ApplicationService @Inject() (
     }
   }
 
+  def requestRestrictedApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+
+    val requesterName  = requester.developer.displayedName
+    val requesterEmail = requester.developer.email
+    val environment    = application.deployedTo
+    val requesterRole  = roleForApplication(application, requesterEmail)
+    val appId          = application.id
+
+    val deskproTicket = DeskproTicket.createForRestrictedApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
+
+    if (requesterRole.isAdministrator) {
+      for {
+        ticketResponse <- deskproConnector.createTicket(Some(requester.developer.userId), deskproTicket)
+        _              <- auditService.audit(
+                            ApplicationDeletionRequested,
+                            Map(
+                              "appId"                   -> appId.toString(),
+                              "requestedByName"         -> requesterName,
+                              "requestedByEmailAddress" -> requesterEmail.text,
+                              "timestamp"               -> instant().toString
+                            )
+                          )
+      } yield ticketResponse
+    } else {
+      Future.failed(new ForbiddenException("Developer cannot request to delete a restricted application"))
+    }
+  }
+
   def deleteSubordinateApplication(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val requesterEmail = requester.developer.email

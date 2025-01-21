@@ -333,15 +333,15 @@ object SignOutSurveyForm {
   )
 }
 
-final case class DeletePrincipalApplicationForm(deleteConfirm: Option[String] = Some(""))
+final case class DeleteApplicationForm(deleteConfirm: Option[String] = Some(""))
 
-object DeletePrincipalApplicationForm {
+object DeleteApplicationForm {
 
-  def form: Form[DeletePrincipalApplicationForm] = Form(
+  def form: Form[DeleteApplicationForm] = Form(
     mapping(
       "deleteConfirm" -> optional(text)
         .verifying(FormKeys.deleteApplicationConfirmNoChoiceKey, s => s.isDefined)
-    )(DeletePrincipalApplicationForm.apply)(DeletePrincipalApplicationForm.unapply)
+    )(DeleteApplicationForm.apply)(DeleteApplicationForm.unapply)
   )
 }
 

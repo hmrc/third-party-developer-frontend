@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,20 @@
   back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l">Delete application</h1>
-  @appEnvironment(app)
+  <h1 class="govuk-heading-l">Request deletion</h1>
   <br>
-  <br>
-  @helper.form(action = routes.DeleteApplication.requestDeletePrincipalApplicationAction(app.id), Symbol("class") -> "form") {
+  @helper.form(action = routes.DeleteApplication.requestDeleteRestrictedApplicationAction(app.id), Symbol("class") -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteConfirm").nonEmpty) {govuk-form-group--erro}">
       <fieldset id="deleteConfirm-fieldSet" class="govuk-fieldset" role="group">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-          <h2 class="govuk-heading-m">Are you sure you want us to delete this application?</h2>
+          <h2 class="govuk-heading-m">Are you sure you want to delete @{app.name}?</h2>
         </legend>
+        <p class="govuk-body">
+          If your request is approved, the application will be deleted, including your client ID, client secret and subscription to APIs.
+        </p>
+        <p class="govuk-body">
+          This will apply to all team members with access to @{app.name}
+        </p> 
         @fieldError(form.errors, "deleteConfirm")
         <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
           @helper.CSRF.formField
@@ -59,8 +63,8 @@
       </fieldset>
     </div>
     <div class="govuk-button-group">
-      <button id="submit" class="govuk-button" type="submit">Continue</button>
-      <a id="cancel" href="@routes.DeleteApplication.deleteApplication(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>
+      <button id="submit" class="govuk-button" type="submit">Submit request</button>
+      <a id="cancel" href="@controllers.routes.Details.details(app.id)" class="govuk-link">Back to application details</a>
     </div>
   }
 }

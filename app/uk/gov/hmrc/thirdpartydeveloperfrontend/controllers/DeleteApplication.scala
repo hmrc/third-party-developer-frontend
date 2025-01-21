@@ -44,7 +44,9 @@ class DeleteApplication @Inject() (
     deletePrincipalApplicationConfirmView: DeletePrincipalApplicationConfirmView,
     deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView,
     deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
-    deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView
+    deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView,
+    deleteRestrictedApplicationConfirmView: DeleteRestrictedApplicationConfirmView,
+    deleteRestrictedApplicationCompleteView: DeleteRestrictedApplicationCompleteView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
@@ -64,17 +66,23 @@ class DeleteApplication @Inject() (
 
   def confirmRequestDeletePrincipalApplication(applicationId: ApplicationId, error: Option[String] = None) =
     canDeleteApplicationAction(applicationId) { implicit request =>
-      val view = deletePrincipalApplicationConfirmView(request.application, DeletePrincipalApplicationForm.form.fill(DeletePrincipalApplicationForm(None)))
+      val view = deletePrincipalApplicationConfirmView(request.application, DeleteApplicationForm.form.fill(DeleteApplicationForm(None)))
+      Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
+    }
+
+  def confirmRequestDeleteRestrictedApplication(applicationId: ApplicationId, error: Option[String] = None) =
+    canDeleteApplicationAction(applicationId) { implicit request =>
+      val view = deleteRestrictedApplicationConfirmView(request.application, DeleteApplicationForm.form.fill(DeleteApplicationForm(None)))
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
   def requestDeletePrincipalApplicationAction(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>
     val application = request.application
 
-    def handleInvalidForm(formWithErrors: Form[DeletePrincipalApplicationForm]) =
+    def handleInvalidForm(formWithErrors: Form[DeleteApplicationForm]) =
       Future(BadRequest(deletePrincipalApplicationConfirmView(application, formWithErrors)))
 
-    def handleValidForm(validForm: DeletePrincipalApplicationForm) = {
+    def handleValidForm(validForm: DeleteApplicationForm) = {
       validForm.deleteConfirm match {
         case Some("Yes") =>
           applicationService
@@ -84,7 +92,7 @@ class DeleteApplication @Inject() (
       }
     }
 
-    DeletePrincipalApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    DeleteApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
   def deleteSubordinateApplicationConfirm(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>
@@ -98,5 +106,24 @@ class DeleteApplication @Inject() (
       .deleteSubordinateApplication(request.userSession, application)
       .map(_ => Ok(deleteSubordinateApplicationCompleteView(application)))
 
+  }
+
+  def requestDeleteRestrictedApplicationAction(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>
+    val application = request.application
+
+    def handleInvalidForm(formWithErrors: Form[DeleteApplicationForm]) =
+      Future(BadRequest(deletePrincipalApplicationConfirmView(application, formWithErrors)))
+
+    def handleValidForm(validForm: DeleteApplicationForm) = {
+      validForm.deleteConfirm match {
+        case Some("Yes") =>
+          applicationService
+            .requestRestrictedApplicationDeletion(request.userSession, application)
+            .map(_ => Ok(deleteRestrictedApplicationCompleteView(application)))
+        case _           => Future(Redirect(routes.Details.details(applicationId)))
+      }
+    }
+
+    DeleteApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 }

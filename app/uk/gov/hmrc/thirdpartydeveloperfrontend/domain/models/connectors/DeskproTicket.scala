@@ -128,6 +128,28 @@ object DeskproTicket extends FieldTransformer {
     DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
   }
 
+  def createForRestrictedApplicationDeletion(
+      name: String,
+      requestedByEmail: LaxEmailAddress,
+      role: Collaborator.Role,
+      environment: Environment,
+      applicationName: ApplicationName,
+      applicationId: ApplicationId
+    ): DeskproTicket = {
+
+    val actor = role match {
+      case Collaborator.Roles.ADMINISTRATOR => "an administrator"
+      case _                                => "a developer"
+    }
+
+    val message =
+      s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
+         |and the application id is '${applicationId}'. I want it to be deleted from the Developer Hub. 
+         |Please note that this application is marked as restricted for delete.""".stripMargin
+
+    DeskproTicket(name, requestedByEmail, "Request to delete an application", message, routes.DeleteApplication.deleteApplication(applicationId, None).url)
+  }
+
   def createFromSupportEnquiry(supportEnquiry: SupportEnquiryForm, appTitle: String)(implicit request: Request[_]) = {
 
     val message =
