@@ -80,7 +80,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       connector.environment,
       Some("Description"),
       List("admin@example.com".toLaxEmail.asAdministratorCollaborator),
-      Access.Standard(List(RedirectUri.unsafeApply("https://example.com/redirect")), Some("http://example.com/terms"), Some("http://example.com/privacy"))
+      Access.Standard(List(LoginRedirectUri.unsafeApply("https://example.com/redirect")), List.empty, Some("http://example.com/terms"), Some("http://example.com/privacy"))
     )
 
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =

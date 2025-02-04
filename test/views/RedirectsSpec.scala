@@ -23,7 +23,7 @@ import views.html.RedirectsView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, Collaborator, RedirectUri, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -50,7 +50,7 @@ class RedirectsSpec
 
     def renderPageWithRedirectUris(role: Collaborator.Role, numberOfRedirectUris: Int) = {
       val request        = FakeRequest().withCSRFToken
-      val redirects      = 1 to numberOfRedirectUris map (num => RedirectUri.unsafeApply(s"http://localhost:$num"))
+      val redirects      = 1 to numberOfRedirectUris map (num => LoginRedirectUri.unsafeApply(s"http://localhost:$num"))
       val standardAccess = Access.Standard(redirectUris = redirects.toList, termsAndConditionsUrl = None)
 
       val applicationWithRedirects = standardApp.withAccess(standardAccess)

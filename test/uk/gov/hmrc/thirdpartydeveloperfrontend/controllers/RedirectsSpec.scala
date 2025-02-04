@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, RedirectUri}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, LoginRedirectUri}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, RedirectsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -48,7 +48,7 @@ class RedirectsSpec
       }
     }
 
-    final def withRedirectUris(someRedirectUris: List[RedirectUri]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(redirectUris = someRedirectUris))
+    final def withRedirectUris(someRedirectUris: List[LoginRedirectUri]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(redirectUris = someRedirectUris))
   }
 
   trait Setup
@@ -56,7 +56,7 @@ class RedirectsSpec
       with ApplicationActionServiceMock
       with RedirectsServiceMockModule {
 
-    val redirectUris = List("https://www.example.com", "https://localhost:8080").map(RedirectUri.unsafeApply)
+    val redirectUris = List("https://www.example.com", "https://localhost:8080").map(LoginRedirectUri.unsafeApply)
 
     val redirectsView                  = app.injector.instanceOf[RedirectsView]
     val addRedirectView                = app.injector.instanceOf[AddRedirectView]
@@ -143,7 +143,7 @@ class RedirectsSpec
 
     def addRedirectActionShouldRenderRedirectsPageAfterAddingTheRedirectUri(application: ApplicationWithCollaborators, redirectUriToAdd: String) = {
       givenApplicationExists(application)
-      RedirectsServiceMock.AddRedirect.succeedsWith(RedirectUri.unsafeApply(redirectUriToAdd))
+      RedirectsServiceMock.AddLoginRedirect.succeedsWith(LoginRedirectUri.unsafeApply(redirectUriToAdd))
 
       val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd)
       val result  = underTest.addRedirectAction(application.id)(request)
@@ -178,7 +178,7 @@ class RedirectsSpec
         application: ApplicationWithCollaborators,
         resultStatus: Int,
         shouldShowDeleteControls: Boolean,
-        redirectUriToDelete: RedirectUri
+        redirectUriToDelete: LoginRedirectUri
       ) = {
       givenApplicationExists(application)
 
@@ -193,9 +193,9 @@ class RedirectsSpec
       elementIdentifiedByIdContainsText(document, "submit", "Submit") shouldBe shouldShowDeleteControls
     }
 
-    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: ApplicationWithCollaborators, resultStatus: Int, redirectUriToDelete: RedirectUri) = {
+    def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenSuccessful(application: ApplicationWithCollaborators, resultStatus: Int, redirectUriToDelete: LoginRedirectUri) = {
       givenApplicationExists(application)
-      RedirectsServiceMock.DeleteRedirect.succeedsWith(redirectUriToDelete)
+      RedirectsServiceMock.DeleteLoginRedirect.succeedsWith(redirectUriToDelete)
 
       val result =
         underTest.deleteRedirectAction(application.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody(
@@ -210,7 +210,7 @@ class RedirectsSpec
     def deleteRedirectsActionShouldRedirectToTheRedirectsPageWhenUserChoosesNotToDelete(
         application: ApplicationWithCollaborators,
         resultStatus: Int,
-        redirectUriToDelete: RedirectUri
+        redirectUriToDelete: LoginRedirectUri
       ) = {
       givenApplicationExists(application)
 
@@ -439,14 +439,14 @@ class RedirectsSpec
   "changeRedirectAction" should {
 
     "return the redirect page for an admin with a production application when submitted a changed uri" in new Setup {
-      val application         = standardApp.withRedirectUris(redirectUris)
-      val originalRedirectUri = redirectUris.head
-      val newRedirectUri      = RedirectUri.unsafeApply("https://localhost:1111")
+      val application              = standardApp.withRedirectUris(redirectUris)
+      val originalLoginRedirectUri = redirectUris.head
+      val newLoginRedirectUri      = LoginRedirectUri.unsafeApply("https://localhost:1111")
       givenApplicationExists(application)
-      RedirectsServiceMock.ChangeRedirect.succeedsWith(originalRedirectUri, newRedirectUri)
+      RedirectsServiceMock.ChangeLoginRedirect.succeedsWith(originalLoginRedirectUri, newLoginRedirectUri)
 
       val result = underTest.changeRedirectAction(application.id)(
-        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri.uri, "newRedirectUri" -> newRedirectUri.uri)
+        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalLoginRedirectUri.uri, "newRedirectUri" -> newLoginRedirectUri.uri)
       )
       status(result) shouldBe SEE_OTHER
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"

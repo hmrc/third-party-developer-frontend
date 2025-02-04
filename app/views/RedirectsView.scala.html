@@ -21,12 +21,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@(applicationViewModel: ApplicationViewModel, redirectUris: List[RedirectUri], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(applicationViewModel: ApplicationViewModel, loginRedirectUris: List[LoginRedirectUri], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @application = @{applicationViewModel.application}
 
@@ -64,7 +64,7 @@
     </details>
 
     <br>
-    @if(redirectUris.nonEmpty) {
+    @if(loginRedirectUris.nonEmpty) {
       <table class="govuk-table">
         <thead class="govuk-table__head">
           <tr class="govuk-table__row">
@@ -77,7 +77,7 @@
           </tr>
         </thead>
         <tbody class="govuk-table__body">
-          @for(uri <- redirectUris) {
+          @for(uri <- loginRedirectUris) {
             <tr class="govuk-table__row">
               <td class="govuk-table__cell center-table-text">@uri</td>
               <td class="govuk-table__cell center-table-text redirect-table-buttons">

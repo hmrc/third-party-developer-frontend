@@ -377,7 +377,7 @@ final case class AddRedirectForm(redirectUri: String)
 object AddRedirectForm {
 
   val form = Form(
-    mapping("redirectUri" -> redirectUriValidator)(AddRedirectForm.apply)(AddRedirectForm.unapply)
+    mapping("redirectUri" -> loginRedirectUriValidator)(AddRedirectForm.apply)(AddRedirectForm.unapply)
   )
 }
 
@@ -410,7 +410,7 @@ object ChangeRedirectForm {
   val form = Form(
     mapping(
       "originalRedirectUri" -> text,
-      "newRedirectUri"      -> redirectUriValidator
+      "newRedirectUri"      -> loginRedirectUriValidator
     )(ChangeRedirectForm.apply)(ChangeRedirectForm.unapply)
   )
 }

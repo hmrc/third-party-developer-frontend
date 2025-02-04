@@ -30,7 +30,7 @@ trait ApplicationBuilder extends FixedClock with ApplicationStateHelper with App
     val appId        = ApplicationId.random
     val appOwnerName = "App owner name"
     val access       = Access.Standard(
-      redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
+      redirectUris = List(LoginRedirectUri.unsafeApply("https://red1"), LoginRedirectUri.unsafeApply("https://red2")),
       termsAndConditionsUrl = Some("http://tnc-url.com")
     )
 

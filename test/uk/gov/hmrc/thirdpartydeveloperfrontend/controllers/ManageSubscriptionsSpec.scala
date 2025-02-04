@@ -66,7 +66,7 @@ class ManageSubscriptionsSpec
       .withName(ApplicationName("App name 1"))
       .inSandbox()
       .withAccess(standardAccess.copy(
-        redirectUris = List(RedirectUri.unsafeApply("https://red1"), RedirectUri.unsafeApply("https://red2")),
+        redirectUris = List(LoginRedirectUri.unsafeApply("https://red1"), LoginRedirectUri.unsafeApply("https://red2")),
         termsAndConditionsUrl = Some("http://tnc-url.com")
       ))
 

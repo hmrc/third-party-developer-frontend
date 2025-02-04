@@ -176,7 +176,7 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
   }
 
   "redirectUri validation" should {
-    val form = Form(single("redirectUri" -> redirectUriValidator))
+    val form = Form(single("redirectUri" -> loginRedirectUriValidator))
 
     val invalidCases = Map(
       "fragment in http url"      -> "http://example.com#test",
