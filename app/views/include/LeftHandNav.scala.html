@@ -80,7 +80,7 @@
           }
           @if(app.access.accessType == AccessType.STANDARD) {
             <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }">
-              <a id="nav-manage-redirects" class="side-nav__link" href="@controllers.routes.Redirects.redirects(app.id)">
+              <a id="nav-manage-redirects" class="side-nav__link" href="@controllers.routes.Redirects.loginRedirects(app.id)">
                 Redirect URIs
               </a>
             </li>

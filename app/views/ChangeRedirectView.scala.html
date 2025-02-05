@@ -43,7 +43,7 @@
   @appEnvironment(application)
   <br>
 
-  @helper.form(action = controllers.routes.Redirects.changeRedirectAction(application.id), Symbol("class") -> "form") {
+  @helper.form(action = controllers.routes.Redirects.changeLoginRedirectAction(application.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <div class="govuk-form-group @if(form.errors("newRedirectUri").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label govuk-!-font-weight-bold" for="newRedirectUri">Redirect URI</label>
@@ -61,6 +61,6 @@
     </div>
 
     <button id="add" class="govuk-button" type="submit">Continue</button>
-    <a href="@controllers.routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    <a href="@controllers.routes.Redirects.loginRedirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
   }
 }

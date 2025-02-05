@@ -153,7 +153,7 @@ class SubscriptionsController @Inject() (
         errorHandler.badRequestTemplate.map(BadRequest(_))
       }
 
-      ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm);
+      ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
 
   def requestChangeApiSubscription(
