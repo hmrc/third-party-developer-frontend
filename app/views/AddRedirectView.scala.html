@@ -44,7 +44,7 @@
   @appEnvironment(application)
   <br>
 
-  @helper.form(action = routes.Redirects.addRedirectAction(application.id), Symbol("class") -> "form") {
+  @helper.form(action = routes.Redirects.addLoginRedirectAction(application.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <div class="govuk-form-group @if(form.errors("redirectUri").nonEmpty) {govuk-form-group--error}">
       <label class="govuk-label" for="redirectUri">Redirect URI</label>
@@ -58,7 +58,7 @@
     </div>
     <div class="govuk-button-group">
       <button id="add" class="govuk-button" type="submit">Continue</button>
-      <a href="@routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+      <a href="@routes.Redirects.loginRedirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }
 }

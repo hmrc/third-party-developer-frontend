@@ -154,8 +154,8 @@ class UpliftJourneyService @Inject() (
     )(implicit hc: HeaderCarrier
     ) = {
     def existingSellResellOrDistribute = application.access match {
-      case Access.Standard(_, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
-      case _                                                      => None
+      case Access.Standard(_, _, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute
+      case _                                                         => None
     }
 
     // Only save if the value is different

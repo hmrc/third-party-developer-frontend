@@ -47,7 +47,7 @@
   <h2 class="govuk-heading-m">Redirect URI</h2>
   <p id="redirectUriToDelete" class="govuk-body">@redirectUri</p>
 
-  @helper.form(action = controllers.routes.Redirects.deleteRedirectAction(application.id), Symbol("class") -> "form") {
+  @helper.form(action = controllers.routes.Redirects.deleteLoginRedirectAction(application.id), Symbol("class") -> "form") {
     <div class="govuk-form-group @if(form.errors("deleteRedirectConfirm").nonEmpty) {govuk-form-group--error}">
       <fieldset id="deleteRedirectConfirm-fieldset" class="govuk-fieldset" aria-describedby="deleteRedirectConfirm-error">
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
@@ -72,7 +72,7 @@
     </div>
     <div class="govuk-button-group">
       <button id="submit" class="govuk-button" type="submit">Submit</button>
-      <a id="cancel" href="@controllers.routes.Redirects.redirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+      <a id="cancel" href="@controllers.routes.Redirects.loginRedirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }
 }

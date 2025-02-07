@@ -20,40 +20,40 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.RedirectsService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.LoginRedirectsService
 
 trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   trait AbstractRedirectsServiceMock {
-    def aMock: RedirectsService
+    def aMock: LoginRedirectsService
 
-    val mockDispatchSuccessResult = mock[DispatchSuccessResult]
+    val mockDispatchSuccessResult: DispatchSuccessResult = mock[DispatchSuccessResult]
 
-    object AddRedirect {
+    object AddLoginRedirect {
 
-      def succeedsWith(uri: RedirectUri) = {
-        when(aMock.addRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+      def succeedsWith(uri: LoginRedirectUri) = {
+        when(aMock.addLoginRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
-    object ChangeRedirect {
+    object ChangeLoginRedirect {
 
-      def succeedsWith(from: RedirectUri, to: RedirectUri) = {
-        when(aMock.changeRedirect(*, *, eqTo(from), eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+      def succeedsWith(from: LoginRedirectUri, to: LoginRedirectUri) = {
+        when(aMock.changeLoginRedirect(*, *, eqTo(from), eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
-    object DeleteRedirect {
+    object DeleteLoginRedirect {
 
-      def succeedsWith(uri: RedirectUri) = {
-        when(aMock.deleteRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+      def succeedsWith(uri: LoginRedirectUri) = {
+        when(aMock.deleteLoginRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
   }
 
   object RedirectsServiceMock extends AbstractRedirectsServiceMock {
-    val aMock = mock[RedirectsService]
+    val aMock = mock[LoginRedirectsService]
   }
 }

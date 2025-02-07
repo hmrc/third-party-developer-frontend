@@ -27,7 +27,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, Va
 import play.api.data.{Forms, Mapping}
 import uk.gov.hmrc.emailaddress.EmailAddress
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{RedirectUri, ValidatedApplicationName}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{LoginRedirectUri, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 
 package object controllers {
@@ -318,7 +318,7 @@ package object controllers {
     case _                                       => Valid
   }
 
-  def redirectUriValidator: Mapping[String] = Forms.text.verifying(redirectUriInvalidKey, s => RedirectUri(s).isDefined)
+  def loginRedirectUriValidator: Mapping[String] = Forms.text.verifying(redirectUriInvalidKey, s => LoginRedirectUri(s).isDefined)
 
   def privacyPolicyUrlValidator: Mapping[String] = Forms.text.verifying(privacyPolicyUrlInvalidKey, s => isBlank(s) || isValidUrl(s))
 

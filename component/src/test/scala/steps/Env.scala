@@ -32,7 +32,7 @@ import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
 import play.core.server.ServerConfig
-import uk.gov.hmrc.selenium.webdriver.{Browser, Driver}
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
@@ -41,7 +41,7 @@ object EnvConfig {
   val host = s"http://localhost:$port"
 }
 
-object Env extends ScalaDsl with EN with Matchers with ApplicationLogger with Browser {
+object Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   import EnvConfig._
 
   var passedTestCount: Int = 0

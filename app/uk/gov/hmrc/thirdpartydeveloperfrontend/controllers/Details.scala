@@ -259,11 +259,11 @@ class Details @Inject() (
   def updatePrivacyPolicyLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
     val application = request.application
     application.access match {
-      case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
+      case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) =>
         Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withNewJourneyData(privacyPolicyLocation), applicationId)))
-      case Access.Standard(_, _, maybePrivacyPolicyUrl, _, _, None)                                            =>
+      case Access.Standard(_, _, _, maybePrivacyPolicyUrl, _, _, None)                                            =>
         Future.successful(Ok(updatePrivacyPolicyLocationView(ChangeOfPrivacyPolicyLocationForm.withOldJourneyData(maybePrivacyPolicyUrl), applicationId)))
-      case _                                                                                                   => Future.successful(BadRequest)
+      case _                                                                                                      => Future.successful(BadRequest)
     }
   }
 
@@ -274,9 +274,9 @@ class Details @Inject() (
       val requestForm = ChangeOfPrivacyPolicyLocationForm.form.bindFromRequest()
 
       val oldLocation = application.access match {
-        case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-        case Access.Standard(_, _, Some(privacyPolicyUrl), _, _, None)                                           => PrivacyPolicyLocations.Url(privacyPolicyUrl)
-        case _                                                                                                   => PrivacyPolicyLocations.NoneProvided
+        case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
+        case Access.Standard(_, _, _, Some(privacyPolicyUrl), _, _, None)                                           => PrivacyPolicyLocations.Url(privacyPolicyUrl)
+        case _                                                                                                      => PrivacyPolicyLocations.NoneProvided
       }
       val newLocation = form.toLocation
 
@@ -300,11 +300,11 @@ class Details @Inject() (
   def updateTermsAndConditionsLocation(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
     val application = request.application
     application.access match {
-      case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
+      case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) =>
         Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withNewJourneyData(termsAndConditionsLocation), applicationId)))
-      case Access.Standard(_, maybeTermsAndConditionsUrl, _, _, _, None)                                            =>
+      case Access.Standard(_, _, maybeTermsAndConditionsUrl, _, _, _, None)                                            =>
         Future.successful(Ok(updateTermsAndConditionsLocationView(ChangeOfTermsAndConditionsLocationForm.withOldJourneyData(maybeTermsAndConditionsUrl), applicationId)))
-      case _                                                                                                        => Future.successful(BadRequest)
+      case _                                                                                                           => Future.successful(BadRequest)
     }
   }
 
@@ -315,9 +315,9 @@ class Details @Inject() (
       val requestForm = ChangeOfTermsAndConditionsLocationForm.form.bindFromRequest()
 
       val oldLocation = application.access match {
-        case Access.Standard(_, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-        case Access.Standard(_, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
-        case _                                                                                                        => PrivacyPolicyLocations.NoneProvided
+        case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
+        case Access.Standard(_, _, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
+        case _                                                                                                           => PrivacyPolicyLocations.NoneProvided
       }
       val newLocation = form.toLocation
 

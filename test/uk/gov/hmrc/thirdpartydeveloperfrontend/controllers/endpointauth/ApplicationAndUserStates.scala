@@ -49,10 +49,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
-  val applicationId: ApplicationId = applicationIdOne
-  val submissionId: SubmissionId   = submissionIdOne
-  val clientId: ClientId           = clientIdOne
-  val applicationName              = appNameOne
+  val applicationId: ApplicationId     = applicationIdOne
+  val submissionId: SubmissionId       = submissionIdOne
+  val clientId: ClientId               = clientIdOne
+  val applicationName: ApplicationName = appNameOne
 
   def describeApplication: String
   def access: Access
@@ -81,7 +81,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
       ))
       .withCollaborators(collabs.toList: _*)
 
-  lazy val redirectUrl                                  = RedirectUri.unsafeApply("https://example.com/redirect-here")
+  lazy val loginRedirectUri: LoginRedirectUri           = LoginRedirectUri.unsafeApply("https://example.com/redirect-here")
   lazy val apiContext: ApiContext                       = ApiContext("ctx")
   lazy val apiVersion: ApiVersionNbr                    = ApiVersionNbr("1.0")
   lazy val apiIdentifier: ApiIdentifier                 = ApiIdentifier(apiContext, apiVersion)
@@ -194,7 +194,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
 
 trait IsOldJourneyStandardApplication extends HasApplication {
   def describeApplication = "an Old Journey application with Standard access"
-  def access: Access      = Access.Standard(List(redirectUrl), None, None, Set.empty, None, None)
+  def access: Access      = Access.Standard(List(loginRedirectUri), List.empty, None, None, Set.empty, None, None)
 
   def checkInformation: Option[CheckInformation] = Some(CheckInformation(
     contactDetails = Some(ContactDetails(FullName(s"$userFirstName $userLastName"), userEmail, "01611234567")),
@@ -212,7 +212,8 @@ trait IsNewJourneyStandardApplication extends HasApplication {
   def describeApplication = "a New Journey application with Standard access"
 
   def access: Access                             = Access.Standard(
-    List(redirectUrl),
+    List(loginRedirectUri),
+    List.empty,
     None,
     None,
     Set.empty,
@@ -231,7 +232,7 @@ trait IsNewJourneyStandardApplication extends HasApplication {
 
 trait IsNewJourneyStandardApplicationWithoutSubmission extends HasApplication {
   def describeApplication                        = "a New Journey application with Standard access but no submission"
-  def access: Access                             = Access.Standard(List(redirectUrl), None, None, Set.empty, None, None)
+  def access: Access                             = Access.Standard(List(loginRedirectUri), List.empty, None, None, Set.empty, None, None)
   def checkInformation: Option[CheckInformation] = None
 }
 
@@ -287,10 +288,10 @@ trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
 }
 
 trait HasUserSession extends HasUserWithRole {
-  lazy val sessionId       = UserSessionId.random
+  lazy val sessionId: UserSessionId = UserSessionId.random
   def describeAuthenticationState: String
   def loggedInState: LoggedInState
-  def session: UserSession = UserSession(sessionId, loggedInState, developer)
+  def session: UserSession          = UserSession(sessionId, loggedInState, developer)
 }
 
 trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
@@ -304,7 +305,7 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
 
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = {
     request.withCookies(
-      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId.toString) + sessionId.toString, None, "path", None, false, false)
+      Cookie("PLAY2AUTH_SESS_ID", cookieSigner.sign(sessionId.toString) + sessionId.toString, None, "path", None, secure = false, httpOnly = false)
     ).withSession(
       ("email", userEmail.text),
       ("emailAddress", userEmail.text),

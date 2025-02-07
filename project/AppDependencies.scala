@@ -8,7 +8,7 @@ object AppDependencies {
   lazy val bootstrapVersion = "9.7.0"
   lazy val mongoVersion = "2.4.0"
   lazy val apiDomainVersion = "0.19.1"
-  lazy val appDomainVersion = "0.67.0"
+  lazy val appDomainVersion = "0.71.0"
   lazy val tpdDomainVersion = "0.10.0"
 
   lazy val compile = Seq(
@@ -46,7 +46,7 @@ object AppDependencies {
     "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
     "io.cucumber"                 %  "cucumber-junit"                     % "7.15.0",
     "com.novocode"                %  "junit-interface"                    % "0.11",
-    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.31.0",
+    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.45.0",
     "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36"
   ).map(_ % "test")
 }

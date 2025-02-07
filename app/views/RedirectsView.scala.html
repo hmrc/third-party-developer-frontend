@@ -21,12 +21,12 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.RedirectUri
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@(applicationViewModel: ApplicationViewModel, redirectUris: List[RedirectUri], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "redirects")
+@(applicationViewModel: ApplicationViewModel, loginRedirectUris: List[LoginRedirectUri], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
 @application = @{applicationViewModel.application}
 
@@ -64,7 +64,7 @@
     </details>
 
     <br>
-    @if(redirectUris.nonEmpty) {
+    @if(loginRedirectUris.nonEmpty) {
       <table class="govuk-table">
         <thead class="govuk-table__head">
           <tr class="govuk-table__row">
@@ -77,13 +77,13 @@
           </tr>
         </thead>
         <tbody class="govuk-table__body">
-          @for(uri <- redirectUris) {
+          @for(uri <- loginRedirectUris) {
             <tr class="govuk-table__row">
               <td class="govuk-table__cell center-table-text">@uri</td>
               <td class="govuk-table__cell center-table-text redirect-table-buttons">
               @if(application.permits(loggedIn.developer, SandboxOrAdmin)){
                 <div class="govuk-!-margin-right-6">
-                  @helper.form(action = routes.Redirects.changeRedirect(application.id)) {
+                  @helper.form(action = routes.Redirects.changeLoginRedirect(application.id)) {
                     @helper.CSRF.formField
                     <label class="govuk-visually-hidden" for="originalRedirectUri">Original Redirect Uri</label>
                     <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
@@ -93,7 +93,7 @@
                   }
                 </div>
                 <div>
-                  @helper.form(action = routes.Redirects.deleteRedirect(application.id)) {
+                  @helper.form(action = routes.Redirects.deleteLoginRedirect(application.id)) {
                     @helper.CSRF.formField
                     <label class="govuk-visually-hidden" for="redirectUri">Redirect Uri</label>
                     <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
@@ -112,7 +112,7 @@
     @if(developerCanModifyApp) {
       @if(application.canAddRedirectUri) {
         <p class="govuk-body">
-          <a href="@routes.Redirects.addRedirect(application.id)" class="govuk-button">Add a redirect URI</a>
+          <a href="@routes.Redirects.addLoginRedirect(application.id)" class="govuk-button">Add a redirect URI</a>
         </p>
       } else {
         <p class="govuk-inset-text">This is the maximum number of redirect URIs. To add another, delete one first.</p>

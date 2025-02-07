@@ -42,7 +42,7 @@ case class CreateApplicationRequest(
     environment: Environment,
     description: Option[String],
     collaborators: List[Collaborator],
-    access: Access = Access.Standard(List.empty, None, None, Set.empty)
+    access: Access = Access.Standard(List.empty, List.empty, None, None, Set.empty)
   )
 
 object CreateApplicationRequest extends ApplicationRequest {

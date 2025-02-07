@@ -70,8 +70,8 @@ object Capabilities {
   case object SupportsAppChecks extends Capability {
 
     def hasSubmissions(access: Access): Boolean                   = access match {
-      case Access.Standard(_, _, _, _, _, importantSubmissionData) => importantSubmissionData.nonEmpty
-      case _                                                       => false
+      case Access.Standard(_, _, _, _, _, _, importantSubmissionData) => importantSubmissionData.nonEmpty
+      case _                                                          => false
     }
     def hasCapability(app: ApplicationWithCollaborators): Boolean = app.isInTesting && false == hasSubmissions(app.access)
   }

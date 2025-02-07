@@ -743,13 +743,14 @@ class DetailsSpec
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
-      standardApp.withAccess(Access.Standard(List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
+      standardApp.withAccess(Access.Standard(List.empty, List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
 
     def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) =
-      standardApp.withAccess(Access.Standard(List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
+      standardApp.withAccess(Access.Standard(List.empty, List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
 
     def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = standardApp.withAccess(
       Access.Standard(
+        List.empty,
         List.empty,
         None,
         None,
@@ -770,6 +771,7 @@ class DetailsSpec
 
     def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = standardApp.withAccess(
       Access.Standard(
+        List.empty,
         List.empty,
         None,
         None,

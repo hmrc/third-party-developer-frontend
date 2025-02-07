@@ -56,7 +56,7 @@
         @if(model.showApiConfig) {
             <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageSubscriptions.listApiSubscriptions(model.appId).url">configure the APIs you subscribe to</a></li>
         }
-        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Redirects.redirects(model.appId).url">add a redirect URI</a></li>
+        <li><a class="govuk-link govuk-link--no-visited-state" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.Redirects.loginRedirects(model.appId).url">add a redirect URI</a></li>
     </ol>
 
     @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationAction(model.appId), Symbol("class") -> "form") {
