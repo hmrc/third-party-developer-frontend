@@ -27,6 +27,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.{Application, Configuration, Mode}
+import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.{HeaderCarrier, _}
 
 import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
@@ -85,7 +86,7 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
     val underTest                  = app.injector.instanceOf[ProductionSubscriptionFieldsConnector]
   }
 
-  trait ProxiedSetup {
+  trait SandboxSetup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val underTest                  = app.injector.instanceOf[SandboxSubscriptionFieldsConnector]
   }
@@ -155,10 +156,10 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
       result shouldBe Seq(subscriptionFieldValue.copy(value = FieldValue.empty))
     }
 
-    "send the x-api-header key when retrieving subscription fields for an API" in new ProxiedSetup {
+    "send the x-api-header key when retrieving subscription fields for an API" in new SandboxSetup {
       stubFor(
         get(urlEqualTo(getUrl))
-          .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
+          .withHeader(EbridgeConfigurator.API_KEY_HEADER_NAME, equalTo(apiKey))
           .willReturn(
             aResponse()
               .withStatus(NOT_FOUND)

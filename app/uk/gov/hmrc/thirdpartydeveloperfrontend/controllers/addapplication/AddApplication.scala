@@ -37,11 +37,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationCreatedResponse, Error => DomainError}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -99,7 +99,7 @@ class AddApplication @Inject() (
       upliftData <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
     } yield upliftData.upliftableSummaries match {
       case summary :: Nil => progressOnUpliftJourney(summary.id)(request)
-      case _              => successful(BadRequest(Json.toJson(BadRequestError)))
+      case _              => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
     }).flatten
   }
 
@@ -119,7 +119,7 @@ class AddApplication @Inject() (
     upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { upliftData =>
       flowService.resetFlow(request.userSession).flatMap { _ =>
         upliftData.upliftableApplicationIds.toList match {
-          case Nil                                                     => successful(BadRequest(Json.toJson(BadRequestError)))
+          case Nil                                                     => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
           case appId :: Nil if !upliftData.hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
           case _                                                       => chooseApplicationToUplift(upliftData.upliftableSummaries, upliftData.hasAppsThatCannotBeUplifted)(request)
         }
@@ -134,8 +134,8 @@ class AddApplication @Inject() (
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { upliftData =>
         (upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
-          case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-          case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
+          case (0, _)     => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
+          case (1, false) => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
           case _          => successful(
               BadRequest(
                 chooseApplicationToUpliftView(
