@@ -28,10 +28,9 @@ import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import play.twirl.api.Html
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, CheckInformation, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
@@ -135,7 +134,7 @@ class SubscriptionsController @Inject() (
         case Some(subscribe) =>
           def service = if (subscribe) subscriptionsService.subscribeToApi _ else subscriptionsService.unsubscribeFromApi _
 
-          service(request.application, apiIdentifier, requestingEmail) andThen { case _ => updateCheckInformation(request.application) }
+          service(request.application, apiIdentifier, requestingEmail)
         case _               =>
           Future.successful(ApplicationUpdateSuccessful)
       }
@@ -260,12 +259,4 @@ class SubscriptionsController @Inject() (
       val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
       requestChangeApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
     }
-
-  private def updateCheckInformation(app: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    app.deployedTo match {
-      case Environment.PRODUCTION =>
-        applicationService.updateCheckInformation(app, app.details.checkInformation.getOrElse(CheckInformation()).copy(apiSubscriptionsConfirmed = false))
-      case _                      => Future.successful(ApplicationUpdateSuccessful)
-    }
-  }
 }

@@ -700,8 +700,6 @@ class ManageSubscriptionsSpec
 
         givenApplicationAction(productionApplication.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-        givenUpdateCheckInformationSucceeds(productionApplication)
-
         private val result = manageSubscriptionController.subscriptionConfigurationStepPage(productionApplication.id, 2)(loggedInRequest)
 
         status(result) shouldBe SEE_OTHER

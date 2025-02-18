@@ -30,7 +30,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptions, CheckInformation}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptions}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -134,19 +134,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => ApplicationVerificationFailed
         case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))   => throw new ApplicationNotFound
         case Left(err)                                         => throw err
-      }
-  }
-
-  def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = metrics.record(api) {
-    configureEbridgeIfRequired(
-      http.post(url"$serviceBaseUrl/application/${id.value}/check-information")
-        .withBody(Json.toJson(approvalInformation))
-    )
-      .execute[ErrorOrUnit]
-      .map(throwOrOptionOf)
-      .map {
-        case Some(_) => ApplicationUpdateSuccessful
-        case None    => throw new ApplicationNotFound
       }
   }
 

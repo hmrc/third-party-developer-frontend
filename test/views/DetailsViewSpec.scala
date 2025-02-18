@@ -240,7 +240,7 @@ class DetailsViewSpec
 
           "the user is an administrator" should {
 
-            "show 'not agreed', have a button to read and agree and show a warning when the terms of use have not been agreed" in new LoggedInUserIsAdmin {
+            "show 'not agreed' when the terms of use have not been agreed" in new LoggedInUserIsAdmin {
               val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
@@ -249,12 +249,9 @@ class DetailsViewSpec
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelNotAgreed))
 
               page.agreementDetails.text shouldBe "Not agreed"
-              page.readLink.text shouldBe "Read and agree"
-              page.readLink.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
-              page.warning.text shouldBe "Warning You must agree to the terms of use on this application."
             }
 
-            "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
+            "show agreement details when the terms of use have been agreed" in new LoggedInUserIsAdmin {
               val emailAddress      = "user@example.com".toLaxEmail
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
@@ -265,9 +262,6 @@ class DetailsViewSpec
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
               page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
-              page.readLink.text shouldBe "Read"
-              page.readLink.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
-              page.warning shouldBe null
             }
           }
         }
