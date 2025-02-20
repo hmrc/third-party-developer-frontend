@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import play.api.libs.json.{Json, OFormat, OWrites}
+import play.api.libs.json.{Json, OFormat}
 
 class UserNotFound       extends RuntimeException("User not found")
 class InvalidCredentials extends RuntimeException("Login failed")
@@ -39,6 +39,4 @@ object Error {
   implicit val formatError: OFormat[Error] = Json.format[Error]
 
   object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
-
-  implicit val writeBRE: OWrites[BadRequestError.type] = Json.writes[BadRequestError.type]
 }

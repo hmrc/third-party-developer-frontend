@@ -25,6 +25,7 @@ import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
+import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
@@ -93,7 +94,7 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val connector = app.injector.instanceOf[ThirdPartyApplicationProductionConnector]
   }
 
-  trait ProxiedSetup extends BaseSetup {
+  trait SandboxSetup extends BaseSetup {
     val connector = app.injector.instanceOf[ThirdPartyApplicationSandboxConnector]
   }
 
@@ -159,10 +160,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       result shouldBe empty
     }
 
-    "when useProxy is enabled returns an application from proxy" in new ProxiedSetup {
+    "when useProxy is enabled returns an application from proxy" in new SandboxSetup {
       stubFor(
         get(urlEqualTo("/third-party-application" + url))
-          .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
+          .withHeader(EbridgeConfigurator.API_KEY_HEADER_NAME, equalTo(apiKey))
           .willReturn(
             aResponse()
               .withStatus(OK)

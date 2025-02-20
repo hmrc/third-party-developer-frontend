@@ -164,13 +164,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
   }
 
-  def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
-    configureEbridgeIfRequired(
-      http.get(url"$serviceBaseUrl/application/${applicationId}/subscription")
-    )
-      .execute[Set[ApiIdentifier]]
-  }
-
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
     metrics.record(api) {
       configureEbridgeIfRequired(

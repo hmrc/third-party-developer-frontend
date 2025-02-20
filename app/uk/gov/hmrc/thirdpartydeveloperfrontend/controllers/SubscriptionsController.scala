@@ -38,11 +38,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ManageLockedSubscriptions, SupportsSubscriptions}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationUpdateSuccessful, Error => DomainError}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -143,7 +143,7 @@ class SubscriptionsController @Inject() (
       def handleValidForm(form: ChangeSubscriptionForm) = {
         if (request.application.areSubscriptionsLocked) {
           import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
-          Future.successful(BadRequest(Json.toJson(BadRequestError)))
+          Future.successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
         } else {
           updateSubscription(form).map(_ => redirect(redirectTo, applicationId))
         }

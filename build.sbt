@@ -14,7 +14,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(PlayScala, SbtDistributablesPlugin)
+  .enablePlugins(PlayScala, SbtDistributablesPlugin, SbtWeb)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     pipelineStages := Seq(digest)
