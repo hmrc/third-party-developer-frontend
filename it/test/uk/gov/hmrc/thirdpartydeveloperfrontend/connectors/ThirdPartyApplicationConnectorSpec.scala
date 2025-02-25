@@ -211,39 +211,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  "unsubscribe from api" should {
-    val context       = ApiContext("app1")
-    val version       = ApiVersionNbr("2.0")
-    val apiIdentifier = ApiIdentifier(context, version)
-    val url           = s"/application/${applicationId}/subscription?context=${context.value}&version=${version.value}"
-
-    "unsubscribe application from an api" in new Setup {
-      stubFor(
-        delete(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-      val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
-
-      result shouldBe ApplicationUpdateSuccessful
-    }
-
-    "throw ApplicationNotFound if the application cannot be found" in new Setup {
-      stubFor(
-        delete(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound](
-        await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
-      )
-    }
-  }
-
   "verifyUplift" should {
     val verificationCode = "aVerificationCode"
     val url              = s"/verify-uplift/$verificationCode"
