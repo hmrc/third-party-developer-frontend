@@ -47,13 +47,15 @@ class ApplicationService @Inject() (
     developerConnector: ThirdPartyDeveloperConnector,
     sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     productionApplicationConnector: ThirdPartyApplicationProductionConnector,
+    thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
     auditService: AuditService,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends ClockNow {
 
   def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
-    connectorWrapper.forEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
+    // connectorWrapper.forEnvironment(createApplicationRequest.environment).thirdPartyApplicationConnector.create(createApplicationRequest)
+    thirdPartyOrchestratorConnector.create(createApplicationRequest)
 
   def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     appCmdConnector.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
@@ -303,7 +305,7 @@ object ApplicationService {
       }
 
   trait ApplicationConnector {
-    def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
+    // def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse]
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
