@@ -215,14 +215,11 @@ class SubscriptionsSpec
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.SubscribeToApi.succeeds(app, apiIdentifier)
-        givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
-
-        verify(applicationServiceMock, never).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
 
@@ -237,14 +234,11 @@ class SubscriptionsSpec
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
         SubscriptionsServiceMock.SubscribeToApi.succeeds(app, apiIdentifier)
-        givenUpdateCheckInformationSucceeds(app)
 
         val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
-
-        verify(applicationServiceMock).updateCheckInformation(eqTo(app), any[CheckInformation])(*)
       }
     }
 
@@ -258,14 +252,11 @@ class SubscriptionsSpec
       fetchByApplicationIdReturns(appId, appl)
       givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(appl, apiIdentifier)
-      givenUpdateCheckInformationSucceeds(appl)
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
-
-      verify(applicationServiceMock, never).updateCheckInformation(eqTo(appl), any[CheckInformation])(*)
     }
 
     "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
@@ -278,13 +269,10 @@ class SubscriptionsSpec
       fetchByApplicationIdReturns(appId, appl)
       givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(appl, apiIdentifier)
-      givenUpdateCheckInformationSucceeds(appl)
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe BAD_REQUEST
-
-      verify(applicationServiceMock, never).updateCheckInformation(eqTo(appl), any[CheckInformation])(*)
     }
 
     "successfully unsubscribe from an API, update the check information and redirect" in new Setup {
@@ -300,14 +288,11 @@ class SubscriptionsSpec
 
       givenApplicationAction(productionApp.withSubscriptions(Set.empty).withFieldValues(Map.empty), adminSession, List.empty)
       SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(productionApp, apiIdentifier)
-      givenUpdateCheckInformationSucceeds(productionApp)
 
       val result = underTest.changeApiSubscription(applicationIdTwo, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.Details.details(applicationIdTwo).url)
-
-      verify(applicationServiceMock).updateCheckInformation(eqTo(productionApp), any[CheckInformation])(*)
     }
 
     "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {
@@ -321,13 +306,10 @@ class SubscriptionsSpec
 
       givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
       SubscriptionsServiceMock.UnsubscribeFromApi.succeeds(appl, apiIdentifier)
-      givenUpdateCheckInformationSucceeds(appl)
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe BAD_REQUEST
-
-      verify(applicationServiceMock, never).updateCheckInformation(eqTo(appl), any[CheckInformation])(*)
     }
 
     "an administrator attempts to change a submitted-for-checking production application" should { behave like forbiddenSubscriptionChange(adminSession)(standardApp) }
@@ -577,7 +559,6 @@ class SubscriptionsSpec
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request)
       status(result) shouldBe SEE_OTHER
-      verify(applicationServiceMock, never).updateCheckInformation(eqTo(alteredActiveApplication), eqTo(CheckInformation()))(*)
     }
   }
 

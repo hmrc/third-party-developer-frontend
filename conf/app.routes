@@ -80,9 +80,6 @@ POST        /applications/:id/details/change-privacy-policy-location            
 GET         /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updateTermsAndConditionsLocation(id: ApplicationId)
 POST        /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updateTermsAndConditionsLocationAction(id: ApplicationId)
 
-GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
-POST        /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.agreeTermsOfUse(id: ApplicationId)
-
 GET         /applications/:id/redirect-uris                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.loginRedirects(id: ApplicationId)
 GET         /applications/:id/redirect-uris/add                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.addLoginRedirect(id: ApplicationId)
 POST        /applications/:id/redirect-uris/add                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.addLoginRedirectAction(id: ApplicationId)
@@ -158,8 +155,6 @@ GET         /applications/:id/add/subscriptions                                 
 
 GET         /application-verification                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationVerification.verifyUplift(code: String)
 GET         /user-navlinks                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Navigation.navLinks()
-
-GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial()
 
 GET         /assets/*file                                                                                @controllers.Assets.versioned(path="/public", file: Asset)
 
