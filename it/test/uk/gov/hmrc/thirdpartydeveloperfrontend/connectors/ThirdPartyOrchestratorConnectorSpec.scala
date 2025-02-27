@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -43,7 +41,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
     with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  private val applicationId  = ApplicationId.random
+  private val applicationId = ApplicationId.random
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-orchestrator.port" -> stubPort
