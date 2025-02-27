@@ -53,17 +53,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   val api: API = API("third-party-application")
 
-  // def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
-  //   metrics.record(api) {
-  //     configureEbridgeIfRequired(
-  //       http
-  //         .post(url"$serviceBaseUrl/application")
-  //         .withBody(Json.toJson(request))
-  //     )
-  //       .execute[ApplicationWithCollaborators]
-  //       .map(a => ApplicationCreatedResponse(a.id))
-  //   }
-
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
     if (isEnabled) {
       metrics.record(api) {
