@@ -17,10 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 
 case class UpliftData(
     sellResellOrDistribute: SellResellOrDistribute,
@@ -35,24 +32,4 @@ object UpliftData {
 
 trait ApplicationRequest {
   protected def normalizeDescription(description: Option[String]): Option[String] = description.map(_.trim.take(250))
-}
-
-case class CreateApplicationRequest(
-    name: String,
-    environment: Environment,
-    description: Option[String],
-    collaborators: List[Collaborator],
-    access: Access = Access.Standard(List.empty, List.empty, None, None, Set.empty)
-  )
-
-object CreateApplicationRequest extends ApplicationRequest {
-  import play.api.libs.json.{Json, OFormat}
-  implicit val format: OFormat[CreateApplicationRequest] = Json.format[CreateApplicationRequest]
-
-  def fromAddApplicationJourney(loggedInDeveloper: User, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequest(
-    name = form.applicationName.trim,
-    environment = environment,
-    description = None,
-    collaborators = List(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId))
-  )
 }

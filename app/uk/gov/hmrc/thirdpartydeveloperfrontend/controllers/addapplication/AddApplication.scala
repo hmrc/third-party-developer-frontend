@@ -29,7 +29,10 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
@@ -158,8 +161,17 @@ class AddApplication @Inject() (
     def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
       successful(Ok(addApplicationNameView(errors, environment)))
 
+    def fromAddApplicationJourney(loggedInDeveloper: User, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequestV1(
+      name = ApplicationName(form.applicationName.trim),
+      access = CreationAccess.Standard,
+      environment = environment,
+      description = None,
+      collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
+      subscriptions = None
+    )
+
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService.createForUser(CreateApplicationRequest.fromAddApplicationJourney(request.userSession.developer, form, environment))
+      applicationService.createForUser(fromAddApplicationJourney(request.userSession.developer, form, environment))
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =

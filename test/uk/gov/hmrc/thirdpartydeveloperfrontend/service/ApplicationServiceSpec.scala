@@ -42,7 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApplicationCommandConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
@@ -54,7 +54,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     with CommonSessionFixtures
     with FixedClock {
 
-  trait Setup extends FixedClock with ApplicationCommandConnectorMockModule {
+  trait Setup extends FixedClock with ApplicationCommandConnectorMockModule with ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
@@ -96,6 +96,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockDeveloperConnector,
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
+      ThirdPartyOrchestratorConnectorMock.aMock,
       mockAuditService,
       clock
     )
