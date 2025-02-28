@@ -29,7 +29,6 @@ import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -76,14 +75,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   trait BaseSetup {
     def connector: ThirdPartyApplicationConnector
 
-    lazy val createApplicationRequest = new CreateApplicationRequest(
-      "My Application",
-      connector.environment,
-      Some("Description"),
-      List("admin@example.com".toLaxEmail.asAdministratorCollaborator),
-      Access.Standard(List(LoginRedirectUri.unsafeApply("https://example.com/redirect")), List.empty, Some("http://example.com/terms"), Some("http://example.com/privacy"))
-    )
-
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =
       standardApp.withId(appId).modify(_.copy(clientId = clientId, name = appName))
 
@@ -101,27 +92,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   "api" should {
     "be third-party-application" in new Setup {
       connector.api shouldBe API("third-party-application")
-    }
-  }
-
-  "create application" should {
-    val url = "/application"
-
-    "successfully create an application" in new Setup {
-
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(createApplicationRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(applicationResponse(applicationId, ClientId("appName")))
-          )
-      )
-
-      val result = await(connector.create(createApplicationRequest))
-
-      result shouldBe ApplicationCreatedResponse(applicationId)
     }
   }
 
