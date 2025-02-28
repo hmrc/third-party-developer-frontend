@@ -35,6 +35,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val thirdPartyApplicationSandboxUseProxy: Boolean    = useProxy("third-party-application-sandbox")
   val thirdPartyApplicationProductionApiKey: String    = getConfString("third-party-application-production.api-key", "")
   val thirdPartyApplicationSandboxApiKey: String       = getConfString("third-party-application-sandbox.api-key", "")
+  val thirdPartyOrchestratorUrl: String                = baseUrl("third-party-orchestrator")
   val deskproUrl: String                               = baseUrl("deskpro-ticket-queue")
 
   lazy val contactPath: String = getConfigDefaulted("contactPath", "")

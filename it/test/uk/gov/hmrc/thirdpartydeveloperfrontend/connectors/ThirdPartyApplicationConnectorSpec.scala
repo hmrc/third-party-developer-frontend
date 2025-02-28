@@ -25,12 +25,11 @@ import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
+import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -74,14 +73,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   trait BaseSetup {
     def connector: ThirdPartyApplicationConnector
 
-    lazy val createApplicationRequest = new CreateApplicationRequest(
-      "My Application",
-      connector.environment,
-      Some("Description"),
-      List("admin@example.com".toLaxEmail.asAdministratorCollaborator),
-      Access.Standard(List(LoginRedirectUri.unsafeApply("https://example.com/redirect")), List.empty, Some("http://example.com/terms"), Some("http://example.com/privacy"))
-    )
-
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =
       standardApp.withId(appId).modify(_.copy(clientId = clientId, name = appName))
 
@@ -92,34 +83,13 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     val connector = app.injector.instanceOf[ThirdPartyApplicationProductionConnector]
   }
 
-  trait ProxiedSetup extends BaseSetup {
+  trait SandboxSetup extends BaseSetup {
     val connector = app.injector.instanceOf[ThirdPartyApplicationSandboxConnector]
   }
 
   "api" should {
     "be third-party-application" in new Setup {
       connector.api shouldBe API("third-party-application")
-    }
-  }
-
-  "create application" should {
-    val url = "/application"
-
-    "successfully create an application" in new Setup {
-
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(createApplicationRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(applicationResponse(applicationId, ClientId("appName")))
-          )
-      )
-
-      val result = await(connector.create(createApplicationRequest))
-
-      result shouldBe ApplicationCreatedResponse(applicationId)
     }
   }
 
@@ -158,10 +128,10 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       result shouldBe empty
     }
 
-    "when useProxy is enabled returns an application from proxy" in new ProxiedSetup {
+    "when useProxy is enabled returns an application from proxy" in new SandboxSetup {
       stubFor(
         get(urlEqualTo("/third-party-application" + url))
-          .withHeader(ProxiedHttpClient.API_KEY_HEADER_NAME, equalTo(apiKey))
+          .withHeader(EbridgeConfigurator.API_KEY_HEADER_NAME, equalTo(apiKey))
           .willReturn(
             aResponse()
               .withStatus(OK)
@@ -205,39 +175,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       )
       intercept[ApplicationNotFound](
         await(connector.fetchCredentials(applicationId))
-      )
-    }
-  }
-
-  "unsubscribe from api" should {
-    val context       = ApiContext("app1")
-    val version       = ApiVersionNbr("2.0")
-    val apiIdentifier = ApiIdentifier(context, version)
-    val url           = s"/application/${applicationId}/subscription?context=${context.value}&version=${version.value}"
-
-    "unsubscribe application from an api" in new Setup {
-      stubFor(
-        delete(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-      val result = await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
-
-      result shouldBe ApplicationUpdateSuccessful
-    }
-
-    "throw ApplicationNotFound if the application cannot be found" in new Setup {
-      stubFor(
-        delete(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound](
-        await(connector.unsubscribeFromApi(applicationId, apiIdentifier))
       )
     }
   }

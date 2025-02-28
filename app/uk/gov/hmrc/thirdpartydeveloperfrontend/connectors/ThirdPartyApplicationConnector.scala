@@ -53,17 +53,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   val api: API = API("third-party-application")
 
-  def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
-    metrics.record(api) {
-      configureEbridgeIfRequired(
-        http
-          .post(url"$serviceBaseUrl/application")
-          .withBody(Json.toJson(request))
-      )
-        .execute[ApplicationWithCollaborators]
-        .map(a => ApplicationCreatedResponse(a.id))
-    }
-
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
     if (isEnabled) {
       metrics.record(api) {
@@ -97,20 +86,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
     } else {
       Future.successful(None)
-    }
-
-  def unsubscribeFromApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] =
-    metrics.record(api) {
-      val url = s"$serviceBaseUrl/application/${applicationId}/subscription?context=${apiIdentifier.context.value}&version=${apiIdentifier.versionNbr.value}"
-      configureEbridgeIfRequired(
-        http.delete(url"$url")
-      )
-        .execute[ErrorOrUnit]
-        .map(throwOrOptionOf)
-        .map {
-          case Some(_) => ApplicationUpdateSuccessful
-          case None    => throw new ApplicationNotFound
-        }
     }
 
   def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
@@ -149,13 +124,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
         case Some(x) => ApplicationNameValidation(x)
         case None    => throw new ApplicationNotFound
       }
-  }
-
-  def fetchSubscription(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] = {
-    configureEbridgeIfRequired(
-      http.get(url"$serviceBaseUrl/application/${applicationId}/subscription")
-    )
-      .execute[Set[ApiIdentifier]]
   }
 
   def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {

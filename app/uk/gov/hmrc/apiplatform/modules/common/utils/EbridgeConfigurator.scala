@@ -20,8 +20,10 @@ import uk.gov.hmrc.http.client.RequestBuilder
 
 object EbridgeConfigurator {
 
+  val API_KEY_HEADER_NAME = "x-api-key"
+
   def configure(useProxy: Boolean, apiKey: String): RequestBuilder => RequestBuilder = (requestBuilder) => {
-    val apiKeyHeader = if (apiKey.isEmpty) Seq.empty[(String, String)] else Seq("x-api-key" -> apiKey)
+    val apiKeyHeader = if (apiKey.isEmpty) Seq.empty[(String, String)] else Seq(API_KEY_HEADER_NAME -> apiKey)
 
     if (useProxy)
       requestBuilder

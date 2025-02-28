@@ -29,7 +29,10 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
@@ -37,11 +40,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationCreatedResponse, Error => DomainError}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -99,7 +102,7 @@ class AddApplication @Inject() (
       upliftData <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
     } yield upliftData.upliftableSummaries match {
       case summary :: Nil => progressOnUpliftJourney(summary.id)(request)
-      case _              => successful(BadRequest(Json.toJson(BadRequestError)))
+      case _              => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
     }).flatten
   }
 
@@ -119,7 +122,7 @@ class AddApplication @Inject() (
     upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId).flatMap { upliftData =>
       flowService.resetFlow(request.userSession).flatMap { _ =>
         upliftData.upliftableApplicationIds.toList match {
-          case Nil                                                     => successful(BadRequest(Json.toJson(BadRequestError)))
+          case Nil                                                     => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
           case appId :: Nil if !upliftData.hasAppsThatCannotBeUplifted => progressOnUpliftJourney(appId)(request)
           case _                                                       => chooseApplicationToUplift(upliftData.upliftableSummaries, upliftData.hasAppsThatCannotBeUplifted)(request)
         }
@@ -134,8 +137,8 @@ class AddApplication @Inject() (
     def handleInvalidForm(formWithErrors: Form[ChooseApplicationToUpliftForm]) = {
       upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId) flatMap { upliftData =>
         (upliftData.upliftableApplicationIds.size, upliftData.hasAppsThatCannotBeUplifted) match {
-          case (0, _)     => successful(BadRequest(Json.toJson(BadRequestError)))
-          case (1, false) => successful(BadRequest(Json.toJson(BadRequestError)))
+          case (0, _)     => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
+          case (1, false) => successful(BadRequest(Json.toJson[DomainError](BadRequestError)))
           case _          => successful(
               BadRequest(
                 chooseApplicationToUpliftView(
@@ -158,8 +161,17 @@ class AddApplication @Inject() (
     def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
       successful(Ok(addApplicationNameView(errors, environment)))
 
+    def fromAddApplicationJourney(loggedInDeveloper: User, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequestV1(
+      name = ApplicationName(form.applicationName.trim),
+      access = CreationAccess.Standard,
+      environment = environment,
+      description = None,
+      collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
+      subscriptions = None
+    )
+
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService.createForUser(CreateApplicationRequest.fromAddApplicationJourney(request.userSession.developer, form, environment))
+      applicationService.createForUser(fromAddApplicationJourney(request.userSession.developer, form, environment))
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =

@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, SellResellOrDistribute}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
@@ -35,7 +36,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 @Singleton
 class UpliftJourneyService @Inject() (
@@ -73,8 +73,8 @@ class UpliftJourneyService @Inject() (
 
         apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftData           = UpliftData(sellResellOrDistribute, apiIdsToSubscribeTo, userSession.developer.email)
-        upliftedAppId       <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftData))
+        upliftRequest        = UpliftRequest(sellResellOrDistribute, apiIdsToSubscribeTo, userSession.developer.email.text)
+        upliftedAppId       <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftRequest))
       } yield upliftedAppId
     )
       .value
