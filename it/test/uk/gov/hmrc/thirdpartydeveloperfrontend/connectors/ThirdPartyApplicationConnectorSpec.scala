@@ -29,9 +29,7 @@ import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -209,38 +207,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
       val result = await(connector.verify(verificationCode))
 
       result shouldEqual ApplicationVerificationFailed
-    }
-  }
-
-  "updateApproval" should {
-    val updateRequest = CheckInformation(contactDetails = Some(ContactDetails(FullName("name"), "email".toLaxEmail, "telephone")))
-    val url           = s"/application/${applicationId}/check-information"
-
-    "return success response in case of a 204 on backend " in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(updateRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(NO_CONTENT)
-          )
-      )
-      val result = await(connector.updateApproval(applicationId, updateRequest))
-      result shouldEqual ApplicationUpdateSuccessful
-    }
-
-    "return ApplicationNotFound response in case of a 404 on backend " in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(updateRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound] {
-        await(connector.updateApproval(applicationId, updateRequest))
-      }
     }
   }
 

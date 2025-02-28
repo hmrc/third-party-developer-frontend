@@ -32,7 +32,7 @@ import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ExtendedApiDefinitionData, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{CheckInformation, ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
@@ -118,8 +118,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
   when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
-  when(tpaSandboxConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-  when(tpaProductionConnector.updateApproval(*[ApplicationId], *[CheckInformation])(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
   when(tpaProductionConnector.fetchTermsOfUseInvitations()(*)).thenReturn(Future.successful(List.empty))
   when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenReturn(Future.successful(Some(TermsOfUseInvitation(

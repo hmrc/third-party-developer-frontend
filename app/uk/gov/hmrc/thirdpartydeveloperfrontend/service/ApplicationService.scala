@@ -117,10 +117,6 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
-  def updateCheckInformation(application: ApplicationWithCollaborators, checkInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.updateApproval(application.id, checkInformation)
-  }
-
   def requestPrincipalApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
     val requesterName  = requester.developer.displayedName
@@ -309,7 +305,6 @@ object ApplicationService {
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
     def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
-    def updateApproval(id: ApplicationId, approvalInformation: CheckInformation)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
   }
 }

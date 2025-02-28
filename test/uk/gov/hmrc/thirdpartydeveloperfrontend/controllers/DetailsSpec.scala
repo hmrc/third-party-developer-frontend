@@ -369,7 +369,6 @@ class DetailsSpec
       await(application.withName(newName).callChangeDetailsAction)
 
       verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(*)
-      verify(underTest.applicationService, never).updateCheckInformation(eqTo(application), any[CheckInformation])(*)
     }
   }
 
@@ -737,9 +736,6 @@ class DetailsSpec
       .thenReturn(Future.successful(Valid))
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
-      .thenReturn(successful(ApplicationUpdateSuccessful))
-
-    when(underTest.applicationService.updateCheckInformation(any[ApplicationWithCollaborators], any[CheckInformation])(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
