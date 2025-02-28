@@ -28,9 +28,9 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, MappedApiDefinitions, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
 import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
@@ -40,7 +40,7 @@ object ApmConnector {
 
   case class RequestUpliftV1(subscriptions: Set[ApiIdentifier])
 
-  case class RequestUpliftV2(upliftRequest: UpliftData)
+  case class RequestUpliftV2(upliftRequest: UpliftRequest)
 
   implicit val writesV1: Writes[RequestUpliftV1] = play.api.libs.json.Json.writes[RequestUpliftV1]
   implicit val writesV2: Writes[RequestUpliftV2] = play.api.libs.json.Json.writes[RequestUpliftV2]
@@ -134,7 +134,7 @@ class ApmConnector @Inject() (http: HttpClientV2, config: ApmConnector.Config, m
       .execute[ApplicationId]
   }
 
-  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftData)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
     http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
       .execute[ApplicationId]
