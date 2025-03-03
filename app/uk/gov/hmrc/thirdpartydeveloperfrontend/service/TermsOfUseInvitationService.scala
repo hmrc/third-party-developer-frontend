@@ -29,10 +29,6 @@ class TermsOfUseInvitationService @Inject() (
     connectorWrapper: ConnectorsWrapper
   ) {
 
-  def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
-    connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchTermsOfUseInvitations()
-  }
-
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchTermsOfUseInvitation(applicationId)
   }

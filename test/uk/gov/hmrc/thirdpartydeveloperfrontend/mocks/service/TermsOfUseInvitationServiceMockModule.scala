@@ -31,10 +31,6 @@ trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMa
   protected trait BaseTermsOfUseInvitationServiceMock {
     def aMock: TermsOfUseInvitationService
 
-    object FetchTermsOfUseInvitations {
-      def thenReturnEmptyList() = when(aMock.fetchTermsOfUseInvitations()(*)).thenAnswer(successful(List.empty))
-    }
-
     object FetchTermsOfUseInvitation {
 
       def thenReturn() =

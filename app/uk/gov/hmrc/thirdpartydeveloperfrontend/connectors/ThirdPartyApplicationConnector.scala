@@ -126,15 +126,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
   }
 
-  def fetchTermsOfUseInvitations()(implicit hc: HeaderCarrier): Future[List[TermsOfUseInvitation]] = {
-    metrics.record(api) {
-      configureEbridgeIfRequired(
-        http.get(url"$serviceBaseUrl/terms-of-use")
-      )
-        .execute[List[TermsOfUseInvitation]]
-    }
-  }
-
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
       configureEbridgeIfRequired(
