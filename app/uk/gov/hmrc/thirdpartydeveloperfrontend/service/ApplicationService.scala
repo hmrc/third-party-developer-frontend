@@ -195,7 +195,7 @@ class ApplicationService @Inject() (
     application.collaborators.find(_.emailAddress == email).getOrElse(throw new ApplicationNotFound).role
 
   def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
-    connectorWrapper.productionApplicationConnector.verify(verificationCode)
+    thirdPartyOrchestratorConnector.verify(verificationCode)
   }
 
   def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
@@ -304,7 +304,6 @@ object ApplicationService {
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
-    def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse]
     def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
   }
 }
