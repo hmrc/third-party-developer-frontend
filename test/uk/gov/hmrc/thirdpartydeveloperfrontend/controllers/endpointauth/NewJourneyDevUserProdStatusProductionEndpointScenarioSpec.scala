@@ -34,7 +34,7 @@ class NewJourneyDevUserProdStatusProductionEndpointScenarioSpec extends Endpoint
       case Endpoint("GET", "/developer/applications/:id/add/success", _)                                  => NotFound()
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                         => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                            => Forbidden()
-      case Endpoint(_, "/developer/applications/:id/details/terms-of-use", _)                             => Forbidden()
+      case Endpoint("GET", "/developer/applications/:id/details/terms-of-use", _)                         => Forbidden()
       case Endpoint("GET", "/developer/submissions/application/:aid/terms-of-use-responses", _)           => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                         => BadRequest()
       case Endpoint("POST", "/developer/applications/:id/client-secret-new", _)                           => Forbidden()

@@ -251,7 +251,7 @@ class DetailsViewSpec
               page.agreementDetails.text shouldBe "Not agreed"
             }
 
-            "show agreement details when the terms of use have been agreed" in new LoggedInUserIsAdmin {
+            "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
               val emailAddress      = "user@example.com".toLaxEmail
               val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
               val version           = "1.0"
@@ -262,6 +262,9 @@ class DetailsViewSpec
               val page = Page(detailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModel))
 
               page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
+              page.readLink.text shouldBe "Read"
+              page.readLink.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
+              page.warning shouldBe null
             }
           }
         }

@@ -346,7 +346,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         =>
         Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                => Map("redirectUri" -> "https://example.com/redirect")
-      case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                             => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                =>
         Map("originalRedirectUri" -> loginRedirectUri.toString(), "newRedirectUri" -> (loginRedirectUri.toString() + "-new"))
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Map("redirectUri" -> loginRedirectUri.toString(), "deleteRedirectConfirm" -> "yes")
@@ -443,7 +442,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)           => Redirect(s"/developer/applications/${applicationId}/details")
       case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         => Redirect(s"/developer/applications/${applicationId}/details")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/details/terms-of-use", _)                             => Redirect(s"/developer/applications/${applicationId}/details")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")

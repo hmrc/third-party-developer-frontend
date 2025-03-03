@@ -49,7 +49,6 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_, "/developer/forgot-password", _)                                 => Success()
       case Endpoint("GET", "/developer/user-navlinks", _)                               => Success()
       case Endpoint("GET", "/developer/logout", _)                                      => Success()
-      case Endpoint("GET", "/developer/partials/terms-of-use", _)                       => Success()
       case Endpoint(_, "/developer/support", _)                                         => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/assets/*file", _)                                => Success()
       case Endpoint(_, "/developer/submissions/responsible-individual-verification", _) => Success()
