@@ -200,6 +200,15 @@
               case None => { Not agreed }
             }
           </td>
+          <td class="govuk-table__cell">
+            @if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+              @termsOfUse.agreement match {
+                case Some(agreement) => { <a id="termsOfUseReadLink" class="govuk-link" href="@routes.TermsOfUse.termsOfUse(app.id)">Read</a> }
+                case None => {}
+              }
+            }
+          </td>
+
         </tr>
       </tbody>
     </table>

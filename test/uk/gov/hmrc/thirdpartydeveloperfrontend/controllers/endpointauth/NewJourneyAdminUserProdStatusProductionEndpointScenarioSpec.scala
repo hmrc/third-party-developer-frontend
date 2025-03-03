@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,14 @@ class NewJourneyAdminUserProdStatusProductionEndpointScenarioSpec extends Endpoi
 
   override def getExpectedResponse(endpoint: Endpoint): Response = {
     endpoint match {
-      case Endpoint("GET", "/developer/registration", _)                                              => Redirect("/developer/applications")
-      case Endpoint("POST", "/developer/registration", _)                                             => BadRequest()
-      case Endpoint("GET", "/developer/reset-password/error", _)                                      => BadRequest()
-      case Endpoint("GET", "/developer/applications/:id/add/success", _)                              => NotFound()
-      case Endpoint(_, "/developer/applications/:id/details/change", _)                               => Forbidden()
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                     => BadRequest()
+      case Endpoint("GET", "/developer/registration", _)                          => Redirect("/developer/applications")
+      case Endpoint("POST", "/developer/registration", _)                         => BadRequest()
+      case Endpoint("GET", "/developer/reset-password/error", _)                  => BadRequest()
+      case Endpoint("GET", "/developer/applications/:id/add/success", _)          => NotFound()
+      case Endpoint(_, "/developer/applications/:id/details/change", _)           => Forbidden()
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _) => BadRequest()
+      case Endpoint("GET", "/developer/applications/:id/details/terms-of-use", _) => BadRequest()
+
       case Endpoint("POST", "/developer/applications/:id/delete-subordinate", _)                      =>
         Error("uk.gov.hmrc.http.ForbiddenException: Only standard subordinate applications can be deleted by admins")
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                   =>
