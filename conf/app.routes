@@ -82,6 +82,9 @@ POST        /applications/:id/details/change-terms-conditions-location          
 
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 
+# Used by DOCS Fe
+GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial()
+
 GET         /applications/:id/redirect-uris                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.loginRedirects(id: ApplicationId)
 GET         /applications/:id/redirect-uris/add                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.addLoginRedirect(id: ApplicationId)
 POST        /applications/:id/redirect-uris/add                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.addLoginRedirectAction(id: ApplicationId)

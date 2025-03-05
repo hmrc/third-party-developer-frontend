@@ -39,6 +39,7 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint(_, "/developer/confirmation", _)                                    => Success()
       case Endpoint("GET", "/developer/resend-confirmation", _)                         => Success()
       case Endpoint("GET", "/developer/support/submitted", _)                           => Success()
+      case Endpoint("GET", "/developer/partials/terms-of-use", _)                       => Success()
       case Endpoint("GET", "/developer/verification", _)                                => Success()
       case Endpoint("GET", "/developer/resend-verification", _)                         => BadRequest()
       case Endpoint("GET", "/developer/locked", _)                                      => Locked()
