@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -121,15 +120,12 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val verificationCode = "aVerificationCode"
 
     "verify an uplift successful" in new Setup {
-      ApplicationVerificationSuccessful
-      when(mockProductionApplicationConnector.verify(verificationCode)).thenReturn(successful(ApplicationVerificationSuccessful))
+      ThirdPartyOrchestratorConnectorMock.Verify.returns(ApplicationVerificationSuccessful)
       await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationSuccessful
     }
 
     "verify an uplift with failure" in new Setup {
-      when(mockProductionApplicationConnector.verify(verificationCode))
-        .thenReturn(successful(ApplicationVerificationFailed))
-
+      ThirdPartyOrchestratorConnectorMock.Verify.returns(ApplicationVerificationFailed)
       await(applicationService.verify(verificationCode)) shouldBe ApplicationVerificationFailed
     }
   }

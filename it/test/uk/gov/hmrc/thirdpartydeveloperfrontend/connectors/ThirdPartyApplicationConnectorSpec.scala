@@ -179,37 +179,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  "verifyUplift" should {
-    val verificationCode = "aVerificationCode"
-    val url              = s"/verify-uplift/$verificationCode"
-
-    "return success response in case of a 204 NO CONTENT on backend" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-          )
-      )
-      val result = await(connector.verify(verificationCode))
-
-      result shouldEqual ApplicationVerificationSuccessful
-    }
-
-    "return failure response in case of a 400 on backend" in new Setup {
-      stubFor(
-        post(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(BAD_REQUEST)
-          )
-      )
-      val result = await(connector.verify(verificationCode))
-
-      result shouldEqual ApplicationVerificationFailed
-    }
-  }
-
   "validateName" should {
     val url = s"/application/name/validate"
 

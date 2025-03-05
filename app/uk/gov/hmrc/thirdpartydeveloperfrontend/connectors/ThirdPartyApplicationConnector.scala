@@ -22,7 +22,6 @@ import scala.util.Success
 
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
-import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -96,19 +95,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       .map {
         case Some(applicationToken) => applicationToken
         case None                   => throw new ApplicationNotFound
-      }
-  }
-
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
-    configureEbridgeIfRequired(
-      http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
-    )
-      .execute[ErrorOrUnit]
-      .map {
-        case Right(_)                                          => ApplicationVerificationSuccessful
-        case Left(UpstreamErrorResponse(_, BAD_REQUEST, _, _)) => ApplicationVerificationFailed
-        case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _))   => throw new ApplicationNotFound
-        case Left(err)                                         => throw err
       }
   }
 

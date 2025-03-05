@@ -22,10 +22,11 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyOrchestratorConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationResponse
 
 trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
-  trait ThirdPartyOrchestratorConnectorMockModule {
+  trait AbstractThirdPartyOrchestratorConnectorMock {
     def aMock: ThirdPartyOrchestratorConnector
 
     object Create {
@@ -34,9 +35,16 @@ trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with Argume
         when(aMock.create(*)(*)).thenReturn(successful(response))
       }
     }
+
+    object Verify {
+
+      def returns(result: ApplicationVerificationResponse) = {
+        when(aMock.verify(*)(*)).thenReturn(successful(result))
+      }
+    }
   }
 
-  object ThirdPartyOrchestratorConnectorMock extends ThirdPartyOrchestratorConnectorMockModule {
+  object ThirdPartyOrchestratorConnectorMock extends AbstractThirdPartyOrchestratorConnectorMock {
     val aMock = mock[ThirdPartyOrchestratorConnector]
   }
 }

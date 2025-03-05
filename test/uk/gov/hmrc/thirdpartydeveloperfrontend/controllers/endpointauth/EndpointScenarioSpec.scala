@@ -84,6 +84,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   override def fakeApplication() = {
     GuiceApplicationBuilder()
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .overrides(bind[ThirdPartyOrchestratorConnector].toInstance(tpoConnector))
       .overrides(bind[ThirdPartyDeveloperConnector].toInstance(tpdConnector))
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
       .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
@@ -196,7 +197,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
   when(tpdConnector.authenticateMfaAccessCode(*)(*)).thenReturn(Future.successful(session))
   when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
-  when(tpaProductionConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
+  when(tpoConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
   when(tpdConnector.resendVerificationEmail(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
   when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
   when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))

@@ -33,6 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WireMockExtensions}
 
 class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
@@ -95,6 +96,37 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
       val result = await(connector.create(createApplicationRequest))
 
       result shouldBe ApplicationCreatedResponse(applicationId)
+    }
+  }
+
+  "verifyUplift" should {
+    val verificationCode = "aVerificationCode"
+    val url              = s"/verify-uplift/$verificationCode"
+
+    "return success response in case of a 204 NO CONTENT on backend" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+          )
+      )
+      val result = await(connector.verify(verificationCode))
+
+      result shouldEqual ApplicationVerificationSuccessful
+    }
+
+    "return failure response in case of a 400 on backend" in new Setup {
+      stubFor(
+        post(urlEqualTo(url))
+          .willReturn(
+            aResponse()
+              .withStatus(BAD_REQUEST)
+          )
+      )
+      val result = await(connector.verify(verificationCode))
+
+      result shouldEqual ApplicationVerificationFailed
     }
   }
 }
