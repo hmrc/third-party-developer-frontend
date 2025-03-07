@@ -220,11 +220,7 @@ class ApplicationService @Inject() (
     if (ValidatedApplicationName.validate(name).isInvalid) {
       Future.successful(Invalid(true, false))
     }
-
-    environment match {
-      case Environment.PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
-      case Environment.SANDBOX    => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)
-    }
+    thirdPartyOrchestratorConnector.validateName(name, selfApplicationId, environment)
   }
 
   def userLogoutSurveyCompleted(email: LaxEmailAddress, name: String, rating: String, improvementSuggestions: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
@@ -304,6 +300,5 @@ object ApplicationService {
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
-    def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
   }
 }

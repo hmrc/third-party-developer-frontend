@@ -179,46 +179,5 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
     }
   }
 
-  "validateName" should {
-    val url = s"/application/name/validate"
-
-    "returns a valid response" in new Setup {
-      val applicationName = "my valid application name"
-      val appId           = ApplicationId.random
-      val expectedRequest = ApplicationNameValidationJson.ApplicationNameValidationRequest(applicationName, Some(appId))
-
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(expectedRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(None))
-          )
-      )
-      val result = await(connector.validateName(applicationName, Some(appId)))
-      result shouldBe Valid
-    }
-
-    "returns a invalid response" in new Setup {
-
-      val applicationName = "my invalid application name"
-      val expectedRequest = ApplicationNameValidationJson.ApplicationNameValidationRequest(applicationName, None)
-
-      stubFor(
-        post(urlEqualTo(url))
-          .withJsonRequestBody(expectedRequest)
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(ApplicationNameValidationJson.ApplicationNameValidationResult(Some(ApplicationNameValidationJson.Errors(invalidName = true, duplicateName = false))))
-          )
-      )
-      val result = await(connector.validateName(applicationName, None))
-      result shouldBe Invalid(invalidName = true, duplicateName = false)
-    }
-
-  }
-
   private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, UUID.randomUUID.toString, FixedClock.instant)
 }

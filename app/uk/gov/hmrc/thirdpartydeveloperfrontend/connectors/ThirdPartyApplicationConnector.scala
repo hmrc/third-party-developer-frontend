@@ -22,7 +22,6 @@ import scala.util.Success
 
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
-import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
@@ -34,7 +33,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.{ApplicationNameValidationRequest, ApplicationNameValidationResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
@@ -95,20 +93,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       .map {
         case Some(applicationToken) => applicationToken
         case None                   => throw new ApplicationNotFound
-      }
-  }
-
-  def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
-    val body = ApplicationNameValidationRequest(name, selfApplicationId)
-
-    configureEbridgeIfRequired(
-      http.post(url"$serviceBaseUrl/application/name/validate")
-        .withBody(Json.toJson(body))
-    )
-      .execute[Option[ApplicationNameValidationResult]]
-      .map {
-        case Some(x) => ApplicationNameValidation(x)
-        case None    => throw new ApplicationNotFound
       }
   }
 

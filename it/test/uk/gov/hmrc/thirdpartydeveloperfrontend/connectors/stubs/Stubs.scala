@@ -27,6 +27,7 @@ import play.api.libs.json.{Json, OFormat, Writes}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ExtendedApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptionFields}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
@@ -34,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions.withJsonRequestBodySyntax
 
@@ -115,7 +115,7 @@ object ApplicationStub {
   implicit val apiIdentifierFormat: OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
 
   def setupApplicationNameValidation(): StubMapping = {
-    val validNameResult = ApplicationNameValidationResult(None)
+    val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
 
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }

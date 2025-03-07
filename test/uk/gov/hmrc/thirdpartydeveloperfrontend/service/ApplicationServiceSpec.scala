@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -369,32 +369,26 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      when(mockSandboxApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
-        .thenReturn(successful(Valid))
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.SANDBOX)(Valid)
 
       private val result =
         await(applicationService.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
 
       result shouldBe Valid
 
-      verify(mockSandboxApplicationConnector).validateName(eqTo(applicationName), eqTo(Some(applicationId)))(eqTo(hc))
     }
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      when(mockProductionApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
-        .thenReturn(successful(Valid))
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.PRODUCTION)(Valid)
 
       private val result =
         await(applicationService.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
 
       result shouldBe Valid
 
-      verify(mockProductionApplicationConnector).validateName(eqTo(applicationName), eqTo(Some(applicationId)))(
-        eqTo(hc)
-      )
     }
   }
 

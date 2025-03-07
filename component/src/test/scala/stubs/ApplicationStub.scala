@@ -22,14 +22,14 @@ import play.api.http.Status.OK
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationToken
 
 object ApplicationStub {
 
   def setupApplicationNameValidation() = {
-    val validNameResult = ApplicationNameValidationResult(None)
+    val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
 
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }

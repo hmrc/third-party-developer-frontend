@@ -27,11 +27,12 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationResponse, ApplicationVerificationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 @Singleton
 class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
@@ -60,4 +61,18 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
         case Left(err)                                         => throw err
       }
   }
+
+  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+
+    val body = selfApplicationId.fold[ApplicationNameValidationRequest](NewApplicationNameValidationRequest(name))(appId => ChangeApplicationNameValidationRequest(name, appId))
+
+    http.post(url"$serviceBaseUrl/environment/$environment/application/name/validate")
+      .withBody(Json.toJson[ApplicationNameValidationRequest](body))
+      .execute[Option[ApplicationNameValidationResult]]
+      .map {
+        case Some(x) => ApplicationNameValidation(x)
+        case None    => throw new ApplicationNotFound
+      }
+  }
+
 }

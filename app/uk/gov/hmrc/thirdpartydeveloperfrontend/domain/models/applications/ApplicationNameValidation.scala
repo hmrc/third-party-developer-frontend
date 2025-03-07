@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FieldMessageKey
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{applicationNameAlreadyExistsKey, applicationNameInvalidKey}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 
 sealed trait ApplicationNameValidation
 
@@ -27,9 +28,10 @@ case object Valid extends ApplicationNameValidation
 object ApplicationNameValidation {
 
   def apply(applicationNameValidationResult: ApplicationNameValidationResult): ApplicationNameValidation = {
-    applicationNameValidationResult.errors match {
-      case Some(errors) => Invalid(errors.invalidName, errors.duplicateName)
-      case None         => Valid
+    applicationNameValidationResult match {
+      case ValidApplicationName     => Valid
+      case InvalidApplicationName   => Invalid(invalidName = true, duplicateName = false)
+      case DuplicateApplicationName => Invalid(invalidName = false, duplicateName = true)
     }
   }
 }
