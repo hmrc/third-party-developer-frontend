@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, State, ValidatedApplicationName}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
@@ -43,12 +44,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
@@ -231,7 +231,7 @@ class Details @Inject() (
         applicationService
           .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
           .flatMap({
-            case Valid =>
+            case ApplicationNameValidationResult.Valid =>
               val cmds = deriveCommands(form)
               val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
 
@@ -239,11 +239,17 @@ class Details @Inject() (
                 Redirect(routes.Details.details(applicationId))
               )
 
-            case invalid: Invalid =>
-              def invalidNameCheckForm: Form[EditApplicationForm] =
-                requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+            case ApplicationNameValidationResult.Invalid =>
+              Future.successful(BadRequest(changeDetailsView(
+                requestForm.withError(appNameField, applicationNameInvalidKey),
+                applicationViewModelFromApplicationRequest()
+              )))
 
-              Future.successful(BadRequest(changeDetailsView(invalidNameCheckForm, applicationViewModelFromApplicationRequest())))
+            case ApplicationNameValidationResult.Duplicate =>
+              Future.successful(BadRequest(changeDetailsView(
+                requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
+                applicationViewModelFromApplicationRequest()
+              )))
           })
       }
 
@@ -364,7 +370,7 @@ class Details @Inject() (
           .isApplicationNameValid(newApplicationName, application.deployedTo, Some(applicationId))
           .flatMap({
 
-            case Valid =>
+            case ApplicationNameValidationResult.Valid =>
               for {
                 _ <-
                   applicationService.requestProductonApplicationNameChange(
@@ -376,11 +382,17 @@ class Details @Inject() (
                   )
               } yield Ok(changeOfApplicationNameConfirmationView(ApplicationNameModel(request.application), newApplicationName))
 
-            case invalid: Invalid =>
-              def invalidNameCheckForm: Form[ChangeOfApplicationNameForm] =
-                requestForm.withError(appNameField, invalid.validationErrorMessageKey)
+            case ApplicationNameValidationResult.Invalid =>
+              Future.successful(BadRequest(requestChangeOfApplicationNameView(
+                requestForm.withError(appNameField, applicationNameInvalidKey),
+                ApplicationNameModel(request.application)
+              )))
 
-              Future.successful(BadRequest(requestChangeOfApplicationNameView(invalidNameCheckForm, ApplicationNameModel(request.application))))
+            case ApplicationNameValidationResult.Duplicate =>
+              Future.successful(BadRequest(requestChangeOfApplicationNameView(
+                requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
+                ApplicationNameModel(request.application)
+              )))
           })
       }
     }

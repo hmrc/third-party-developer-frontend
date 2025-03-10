@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 object ApplicationStub {
 
   def setupApplicationNameValidation() = {
-    val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
+    val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
 
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }

@@ -20,10 +20,11 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyOrchestratorConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationNameValidation, ApplicationVerificationResponse}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationVerificationResponse
 
 trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -46,7 +47,7 @@ trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with Argume
 
     object ValidateName {
 
-      def succeedsWith(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(response: ApplicationNameValidation) = {
+      def succeedsWith(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(response: ApplicationNameValidationResult) = {
         when(aMock.validateName(eqTo(name), eqTo(selfApplicationId), eqTo(environment))(*)).thenReturn(successful(response))
       }
     }

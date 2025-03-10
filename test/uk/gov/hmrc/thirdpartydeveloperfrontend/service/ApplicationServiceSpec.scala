@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -38,7 +39,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
@@ -369,12 +369,12 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.SANDBOX)(Valid)
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.SANDBOX)(ApplicationNameValidationResult.Valid)
 
       private val result =
         await(applicationService.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
 
-      result shouldBe Valid
+      result shouldBe ApplicationNameValidationResult.Valid
 
     }
 
@@ -382,12 +382,12 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.PRODUCTION)(Valid)
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.PRODUCTION)(ApplicationNameValidationResult.Valid)
 
       private val result =
         await(applicationService.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
 
-      result shouldBe Valid
+      result shouldBe ApplicationNameValidationResult.Valid
 
     }
   }

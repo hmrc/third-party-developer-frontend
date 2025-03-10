@@ -30,7 +30,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
@@ -38,11 +38,11 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationCreatedResponse, Error => DomainError}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -178,15 +178,22 @@ class AddApplication @Inject() (
       applicationService
         .isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment, None)
         .flatMap {
-          case Valid =>
+          case ApplicationNameValidationResult.Valid =>
             addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
               Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
             )
 
-          case invalid: Invalid =>
-            def invalidApplicationNameForm = requestForm.withError(appNameField.value, invalid.validationErrorMessageKey.value)
+          case ApplicationNameValidationResult.Invalid =>
+            successful(BadRequest(addApplicationNameView(
+              requestForm.withError(appNameField, applicationNameInvalidKey),
+              environment
+            )))
 
-            successful(BadRequest(addApplicationNameView(invalidApplicationNameForm, environment)))
+          case ApplicationNameValidationResult.Duplicate =>
+            successful(BadRequest(addApplicationNameView(
+              requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
+              environment
+            )))
         }
 
     requestForm.fold(formWithErrors => nameApplicationWithErrors(formWithErrors, environment), nameApplicationWithValidForm)

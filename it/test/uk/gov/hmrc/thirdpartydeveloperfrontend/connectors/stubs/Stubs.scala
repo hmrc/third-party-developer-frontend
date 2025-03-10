@@ -115,7 +115,7 @@ object ApplicationStub {
   implicit val apiIdentifierFormat: OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
 
   def setupApplicationNameValidation(): StubMapping = {
-    val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.ValidApplicationName
+    val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
 
     Stubs.setupPostRequest("/application/name/validate", OK, Json.toJson(validNameResult).toString)
   }

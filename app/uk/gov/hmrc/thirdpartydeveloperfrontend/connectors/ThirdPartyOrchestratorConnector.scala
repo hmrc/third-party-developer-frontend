@@ -62,7 +62,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       }
   }
 
-  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidationResult] = {
 
     val body = selfApplicationId.fold[ApplicationNameValidationRequest](NewApplicationNameValidationRequest(name))(appId => ChangeApplicationNameValidationRequest(name, appId))
 
@@ -70,7 +70,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       .withBody(Json.toJson[ApplicationNameValidationRequest](body))
       .execute[Option[ApplicationNameValidationResult]]
       .map {
-        case Some(x) => ApplicationNameValidation(x)
+        case Some(x) => x
         case None    => throw new ApplicationNotFound
       }
   }

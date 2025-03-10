@@ -27,14 +27,13 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult.{InvalidApplicationName, ValidApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful, Invalid, Valid}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WireMockExtensions}
 
 class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
@@ -138,7 +137,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
       val applicationName                                   = "my valid application name"
       val appId                                             = ApplicationId.random
       val expectedRequest: ApplicationNameValidationRequest = ChangeApplicationNameValidationRequest(applicationName, appId)
-      val expectedResponse: ApplicationNameValidationResult = ValidApplicationName
+      val expectedResponse: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
 
       stubFor(
         post(urlEqualTo(url))
@@ -150,14 +149,14 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
           )
       )
       val result = await(connector.validateName(applicationName, Some(appId), Environment.PRODUCTION))
-      result shouldBe Valid
+      result shouldBe ApplicationNameValidationResult.Valid
     }
 
     "returns a invalid response" in new Setup {
 
       val applicationName                                   = "my invalid application name"
       val expectedRequest: ApplicationNameValidationRequest = NewApplicationNameValidationRequest(applicationName)
-      val expectedResponse: ApplicationNameValidationResult = InvalidApplicationName
+      val expectedResponse: ApplicationNameValidationResult = ApplicationNameValidationResult.Invalid
 
       stubFor(
         post(urlEqualTo(url))
@@ -169,7 +168,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
           )
       )
       val result = await(connector.validateName(applicationName, None, Environment.PRODUCTION))
-      result shouldBe Invalid(invalidName = true, duplicateName = false)
+      result shouldBe ApplicationNameValidationResult.Invalid
     }
 
   }

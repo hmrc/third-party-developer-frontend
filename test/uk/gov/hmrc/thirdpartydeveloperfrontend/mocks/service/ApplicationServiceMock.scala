@@ -21,6 +21,7 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -53,10 +54,13 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
     when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
 
   def givenApplicationNameIsValid() =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(Valid))
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Valid))
 
-  def givenApplicationNameIsInvalid(invalid: Invalid) =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(invalid))
+  def givenApplicationNameIsInvalid() =
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Invalid))
+
+  def givenApplicationNameIsDuplicate() =
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Duplicate))
 
   def givenApplicationExists(application: ApplicationWithCollaborators): Unit = givenApplicationExists(application.withSubscriptions(Set.empty))
 

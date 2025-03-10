@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -216,9 +216,10 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier)
+      : Future[ApplicationNameValidationResult] = {
     if (ValidatedApplicationName.validate(name).isInvalid) {
-      Future.successful(Invalid(true, false))
+      Future.successful(ApplicationNameValidationResult.Invalid)
     }
     thirdPartyOrchestratorConnector.validateName(name, selfApplicationId, environment)
   }
