@@ -33,6 +33,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -41,7 +42,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -276,7 +276,7 @@ class DetailsSpec
 
     "update name which contain HMRC should fail" in new Setup {
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
-        .thenReturn(Future.successful(Invalid.invalidName))
+        .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
 
       val application = sandboxApplication
       givenApplicationAction(application, adminSession)
@@ -410,7 +410,7 @@ class DetailsSpec
     "show error if application name is not valid" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
       when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
-        .thenReturn(Future.successful(Invalid(true, false)))
+        .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name")
 
@@ -733,7 +733,7 @@ class DetailsSpec
     val privacyPolicyUrl      = "http://example.com/priv-policy"
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
-      .thenReturn(Future.successful(Valid))
+      .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))

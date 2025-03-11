@@ -28,17 +28,17 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
@@ -369,32 +369,26 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      when(mockSandboxApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
-        .thenReturn(successful(Valid))
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.SANDBOX)(ApplicationNameValidationResult.Valid)
 
       private val result =
         await(applicationService.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
 
-      result shouldBe Valid
+      result shouldBe ApplicationNameValidationResult.Valid
 
-      verify(mockSandboxApplicationConnector).validateName(eqTo(applicationName), eqTo(Some(applicationId)))(eqTo(hc))
     }
 
     "call the application connector validate method in production" in new Setup {
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      when(mockProductionApplicationConnector.validateName(*, *[Option[ApplicationId]])(*))
-        .thenReturn(successful(Valid))
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.PRODUCTION)(ApplicationNameValidationResult.Valid)
 
       private val result =
         await(applicationService.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
 
-      result shouldBe Valid
+      result shouldBe ApplicationNameValidationResult.Valid
 
-      verify(mockProductionApplicationConnector).validateName(eqTo(applicationName), eqTo(Some(applicationId)))(
-        eqTo(hc)
-      )
     }
   }
 

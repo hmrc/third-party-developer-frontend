@@ -27,9 +27,9 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
@@ -129,4 +129,48 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
       result shouldEqual ApplicationVerificationFailed
     }
   }
+
+  "validateName" should {
+    val url = s"/environment/PRODUCTION/application/name/validate"
+
+    "returns a valid response" in new Setup {
+      val applicationName                                   = "my valid application name"
+      val appId                                             = ApplicationId.random
+      val expectedRequest: ApplicationNameValidationRequest = ChangeApplicationNameValidationRequest(applicationName, appId)
+      val expectedResponse: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
+
+      stubFor(
+        post(urlEqualTo(url))
+          .withJsonRequestBody(expectedRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(expectedResponse)
+          )
+      )
+      val result = await(connector.validateName(applicationName, Some(appId), Environment.PRODUCTION))
+      result shouldBe ApplicationNameValidationResult.Valid
+    }
+
+    "returns a invalid response" in new Setup {
+
+      val applicationName                                   = "my invalid application name"
+      val expectedRequest: ApplicationNameValidationRequest = NewApplicationNameValidationRequest(applicationName)
+      val expectedResponse: ApplicationNameValidationResult = ApplicationNameValidationResult.Invalid
+
+      stubFor(
+        post(urlEqualTo(url))
+          .withJsonRequestBody(expectedRequest)
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withJsonBody(expectedResponse)
+          )
+      )
+      val result = await(connector.validateName(applicationName, None, Environment.PRODUCTION))
+      result shouldBe ApplicationNameValidationResult.Invalid
+    }
+
+  }
+
 }

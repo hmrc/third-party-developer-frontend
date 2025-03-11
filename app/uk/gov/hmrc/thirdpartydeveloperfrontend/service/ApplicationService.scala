@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -216,15 +216,12 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation] = {
+  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier)
+      : Future[ApplicationNameValidationResult] = {
     if (ValidatedApplicationName.validate(name).isInvalid) {
-      Future.successful(Invalid(true, false))
+      Future.successful(ApplicationNameValidationResult.Invalid)
     }
-
-    environment match {
-      case Environment.PRODUCTION => connectorWrapper.productionApplicationConnector.validateName(name, selfApplicationId)
-      case Environment.SANDBOX    => connectorWrapper.sandboxApplicationConnector.validateName(name, selfApplicationId)
-    }
+    thirdPartyOrchestratorConnector.validateName(name, selfApplicationId, environment)
   }
 
   def userLogoutSurveyCompleted(email: LaxEmailAddress, name: String, rating: String, improvementSuggestions: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
@@ -304,6 +301,5 @@ object ApplicationService {
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
     def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
-    def validateName(name: String, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier): Future[ApplicationNameValidation]
   }
 }

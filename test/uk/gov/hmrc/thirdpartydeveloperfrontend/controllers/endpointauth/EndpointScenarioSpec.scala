@@ -33,7 +33,7 @@ import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ExtendedApiDefinitionData, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationResult, UpliftRequest}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -48,7 +48,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationNameValidationJson.ApplicationNameValidationResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
@@ -118,7 +117,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
-  when(tpaProductionConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(Valid))
+  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.PRODUCTION))(*)).thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
   when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenReturn(Future.successful(Some(TermsOfUseInvitation(
     ApplicationId.random,
@@ -137,7 +136,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields.Alias])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse
   ))
-  when(tpaSandboxConnector.validateName(*[String], *[Option[ApplicationId]])(*)).thenReturn(Future.successful(ApplicationNameValidation(ApplicationNameValidationResult(None))))
+  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.SANDBOX))(*)).thenReturn(Future.successful(
+    ApplicationNameValidationResult.Valid
+  ))
   when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftRequest])(*)).thenAnswer((appId: ApplicationId, _: UpliftRequest) => Future.successful(appId))
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
