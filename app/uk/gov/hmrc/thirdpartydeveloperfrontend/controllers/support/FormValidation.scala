@@ -17,10 +17,10 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import cats.data.NonEmptyList
+import org.apache.commons.validator.routines.EmailValidator
 
 import play.api.data.Forms._
 import play.api.data.Mapping
-import uk.gov.hmrc.emailaddress.EmailAddress
 
 trait FormValidation {
 
@@ -51,19 +51,19 @@ trait FormValidation {
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= maxLength)
     )
 
+  private val emailValidator = EmailValidator.getInstance()
+
   def emailValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[String]] =
-    (
-      fieldName -> default(text, "")
-        .verifying(s"$messagePrefix.error.not.valid.field", s => EmailAddress.isValid(s) || s.length == 0)
-        .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank())
-        .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 320)
-    )
+    fieldName -> default(text, "")
+      .verifying(s"$messagePrefix.error.required.field", s => !s.isBlank)
+      .verifying(s"$messagePrefix.error.maxLength.field", s => s.trim.length <= 320)
+      .verifying(s"$messagePrefix.error.not.valid.field", s => s.isBlank || s.trim.length > 320 || emailValidator.isValid(s))
 
   def optionalEmailValidator(fieldName: String, messagePrefix: String): Tuple2[String, Mapping[Option[String]]] =
     (
       fieldName -> optional(text)
-        .verifying(s"$messagePrefix.error.not.valid.field", s => s.fold(true)(EmailAddress.isValid))
         .verifying(s"$messagePrefix.error.maxLength.field", s => s.fold(true)(_.trim.length <= 320))
+        .verifying(s"$messagePrefix.error.not.valid.field", s => s.fold(true)(s => s.isBlank || s.trim.length > 320 || emailValidator.isValid(s)))
     )
 
   def oneOf(options: String*) =

@@ -20,11 +20,9 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"                     % mongoVersion,
     "uk.gov.hmrc"                 %% "crypto-json-play-30"                    % "7.6.0",
     "uk.gov.hmrc"                 %% "http-metrics"                           % "2.9.0",
-    "uk.gov.hmrc"                 %% "emailaddress-play-30"                   % "4.1.0",
     "uk.gov.hmrc"                 %% "play-conditional-form-mapping-play-30"  % "2.0.0",
     "commons-net"                 %  "commons-net"                            % "3.6",
     "com.google.zxing"            %  "core"                                   % "3.2.1",
-    "commons-validator"           %  "commons-validator"                      % "1.7",
     "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion

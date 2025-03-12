@@ -391,7 +391,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     }
 
     "return the login page when the email has not been registered" in new Setup {
-      private val unregisteredEmail = "unregistered@email.test".toLaxEmail
+      private val unregisteredEmail = "unregistered@email.com".toLaxEmail
       mockAuthenticate(unregisteredEmail, userPassword, failed(new InvalidEmail), successful(false))
 
       private val request = FakeRequest()

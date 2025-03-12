@@ -21,11 +21,11 @@ import scala.util.{Failure, Try}
 
 import cats.data.Validated
 import org.apache.commons.net.util.SubnetUtils
+import org.apache.commons.validator.routines.EmailValidator
 
 import play.api.data.Forms.{optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError, ValidationResult}
 import play.api.data.{Forms, Mapping}
-import uk.gov.hmrc.emailaddress.EmailAddress
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{LoginRedirectUri, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
@@ -291,12 +291,14 @@ package object controllers {
   def textValidator(requiredFieldMessageKey: FieldMessageKey, maxLengthKey: FieldMessageKey, maxLength: Int = 30): Mapping[String] =
     Forms.text.verifying(requiredFieldMessageKey, s => s.trim.length > 0).verifying(maxLengthKey, s => s.trim.length <= maxLength)
 
+  private val defaultEmailValidator = EmailValidator.getInstance()
+
   def emailValidator(emailRequiredMessage: String = emailaddressRequiredKey, maxLength: Int = 320): Mapping[String] = {
 
     Forms.text
-      .verifying(emailaddressNotValidKey, email => EmailAddress.isValid(email) || email.length == 0)
-      .verifying(emailMaxLengthKey, email => email.length <= maxLength)
-      .verifying(emailRequiredMessage, email => email.length > 0)
+      .verifying(emailRequiredMessage, email => !email.isBlank)
+      .verifying(emailMaxLengthKey, email => email.trim.length <= maxLength)
+      .verifying(emailaddressNotValidKey, email => email.isBlank || email.trim.length > maxLength || defaultEmailValidator.isValid(email))
   }
 
   def loginPasswordValidator: Mapping[String] =
