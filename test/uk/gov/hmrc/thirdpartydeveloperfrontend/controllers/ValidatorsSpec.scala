@@ -74,9 +74,9 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
       res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.not.valid.field"))
     }
 
-    "generate a field form error 'emailaddress.error.not.valid.field' when an invalid email with 6 spaces is provided" in {
+    "generate a field form error 'emailaddress.error.required.field' when an invalid email with 6 spaces is provided" in {
       val res = myForm.bind(Map("emailaddress" -> "      "))
-      res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.not.valid.field"))
+      res.errors shouldBe List(FormError("emailaddress", "emailaddress.error.required.field"))
     }
 
     "do not generate a field form error when a valid email 'admin@mailserver1.com' is provided" in {
