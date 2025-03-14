@@ -49,22 +49,6 @@ class UpliftJourneyService @Inject() (
   import cats.instances.future.catsStdInstancesForFuture
 
   def confirmAndUplift(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
-    confirmAndUpliftV2(sandboxAppId, userSession)
-
-  def confirmAndUpliftV1(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
-    (
-      for {
-        flow             <- liftF(flowService.fetchFlow(userSession))
-        subscriptionFlow <- fromOption(flow.apiSubscriptions, "No subscriptions set")
-
-        apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
-        _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
-        upliftedAppId       <- liftF(apmConnector.upliftApplicationV1(sandboxAppId, apiIdsToSubscribeTo))
-      } yield upliftedAppId
-    )
-      .value
-
-  def confirmAndUpliftV2(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
         flow                   <- liftF(flowService.fetchFlow(userSession))

@@ -29,15 +29,6 @@ trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
   object ApmConnectorMock {
     val aMock = mock[ApmConnector]
 
-    object UpliftApplicationV1 {
-
-      def willReturn(newAppId: ApplicationId) =
-        when(aMock.upliftApplicationV1(*[ApplicationId], *)(*)).thenReturn(successful(newAppId))
-
-      def willFailWith(exception: Exception) =
-        when(aMock.upliftApplicationV1(*[ApplicationId], *)(*)).thenReturn(failed(exception))
-    }
-
     object UpliftApplicationV2 {
 
       def willReturn(newAppId: ApplicationId) =

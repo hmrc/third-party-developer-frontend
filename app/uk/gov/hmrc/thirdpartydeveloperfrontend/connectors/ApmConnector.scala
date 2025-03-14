@@ -128,12 +128,6 @@ class ApmConnector @Inject() (http: HttpClientV2, config: ApmConnector.Config, m
         .map(_.wrapped.values.toList)
     }
 
-  def upliftApplicationV1(applicationId: ApplicationId, subs: Set[ApiIdentifier])(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
-      .withBody(Json.toJson(RequestUpliftV1(subs)))
-      .execute[ApplicationId]
-  }
-
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
     http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
