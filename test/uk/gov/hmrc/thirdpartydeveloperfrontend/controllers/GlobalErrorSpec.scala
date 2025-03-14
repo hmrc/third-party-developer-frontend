@@ -64,10 +64,10 @@ class GlobalErrorSpec extends AsyncHmrcSpec {
       boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "emailaddress.error.not.valid.global"))
     }
 
-    "add a global form error 'emailaddress.error.not.valid.global' when a field form error 'emailaddress.error.not.valid.field' for string of spaces" in {
+    "add a global form error 'emailaddress.error.required.global' when a field form error 'emailaddress.error.required.field' for string of spaces" in {
       val testForm              = Form("emailaddress" -> emailValidator()).bind(Map("emailaddress" -> "     "))
       val boundWithGlobalErrors = testForm.emailaddressGlobal()
-      boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "emailaddress.error.not.valid.global"))
+      boundWithGlobalErrors.globalErrors shouldBe Seq(FormError("", "emailaddress.error.required.global"))
     }
 
     "not add global form error when a valid value is provided" in {
