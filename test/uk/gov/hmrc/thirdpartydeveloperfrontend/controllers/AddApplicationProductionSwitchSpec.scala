@@ -171,28 +171,6 @@ class AddApplicationProductionSwitchSpec
       shouldNotShowMessageAboutNotNeedingProdCreds()
     }
 
-    "return ok when one app is upliftable out of 5" in new Setup {
-      val summaries     = sandboxAppSummaries
-      val upliftable    = summaries.take(1)
-      val notUpliftable = summaries.drop(1)
-
-      val prodAppId = ApplicationId.random
-
-      ApmConnectorMock.UpliftApplicationV1.willReturn(prodAppId)
-      when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
-
-      aUsersUplfitableAndNotUpliftableAppsReturns(summaries, upliftable.map(_.id), notUpliftable.map(_.id))
-
-      implicit val result: Future[Result] = underTest.addApplicationProductionSwitch()(loggedInDevRequest)
-
-      status(result) shouldBe OK
-
-      shouldShowWhichAppMessage()
-      shouldShowAppNamesFor(upliftable)
-      shouldNotShowAppNamesFor(notUpliftable)
-      shouldShowMessageAboutNotNeedingProdCreds()
-    }
-
     "return ok when some apps are upliftable" in new Setup {
       val summaries     = sandboxAppSummaries
       val upliftable    = summaries.drop(1)
