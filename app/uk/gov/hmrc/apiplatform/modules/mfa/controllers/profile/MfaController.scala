@@ -36,7 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, S
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -308,8 +308,7 @@ class MfaController @Inject() (
       accessCode: String,
       mfaIdToVerify: MfaId,
       mfaIdForRemoval: Option[MfaId]
-    )(implicit request: Request[_],
-      loggedIn: UserSession
+    )(implicit request: Request[_]
     ): Future[Result] = {
     mfaIdForRemoval match {
       case Some(mfaId) =>
