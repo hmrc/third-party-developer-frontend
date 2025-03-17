@@ -348,7 +348,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                =>
         Map("originalRedirectUri" -> loginRedirectUri.toString(), "newRedirectUri" -> (loginRedirectUri.toString() + "-new"))
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Map("redirectUri" -> loginRedirectUri.toString(), "deleteRedirectConfirm" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                 => Map("deleteConfirm" -> "yes")
+      case Endpoint("POST", "/developer/applications/:id/delete-request", _)                                   => Map("deleteConfirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/delete-restricted", _)                                => Map("deleteConfirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                 => Map("ipAddress" -> "1.2.3.4/24")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                              => Map("confirm" -> "yes")
@@ -438,7 +438,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/delete-principal", _)                                 => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/delete-request", _)                                   => Redirect(s"/developer/applications/${applicationId}/details")
       case Endpoint("POST", "/developer/applications/:id/delete-restricted", _)                                => Redirect(s"/developer/applications/${applicationId}/details")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                              => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/activate")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                 => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/change")

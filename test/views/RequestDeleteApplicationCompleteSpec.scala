@@ -18,7 +18,7 @@ package views
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
-import views.html.DeletePrincipalApplicationCompleteView
+import views.html.RequestDeleteApplicationCompleteView
 
 import play.api.test.FakeRequest
 
@@ -33,7 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class DeletePrincipalApplicationCompleteSpec
+class RequestDeleteApplicationCompleteSpec
     extends CommonViewSpec
     with WithCSRFAddToken
     with DeveloperSessionBuilder
@@ -42,7 +42,7 @@ class DeletePrincipalApplicationCompleteSpec
     with SampleApplication
     with LocalUserIdTracker {
 
-  val deletePrincipalApplicationCompleteView: DeletePrincipalApplicationCompleteView = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
+  val requestDeleteApplicationCompleteView: RequestDeleteApplicationCompleteView = app.injector.instanceOf[RequestDeleteApplicationCompleteView]
 
   "delete application complete page" should {
     "render with no errors" in {
@@ -54,7 +54,7 @@ class DeletePrincipalApplicationCompleteSpec
       val loggedInDeveloper = standardDeveloper.loggedIn
       val application       = sampleApp
 
-      val page = deletePrincipalApplicationCompleteView.render(application, request, loggedInDeveloper, messagesProvider, appConfig)
+      val page = requestDeleteApplicationCompleteView.render(application, request, loggedInDeveloper, messagesProvider, appConfig)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

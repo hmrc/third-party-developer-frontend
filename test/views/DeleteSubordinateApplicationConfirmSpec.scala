@@ -57,7 +57,7 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h1", "Are you sure you want us to delete your application?") shouldBe true
+      elementExistsByText(document, "h2", "Are you sure you want to delete this application?") shouldBe true
       elementExistsByText(document, "p", "This will be deleted immediately. We cannot restore applications once they have been deleted.") shouldBe true
 
     }

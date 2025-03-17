@@ -19,7 +19,6 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.successful
 
-import org.mockito.ArgumentCaptor
 import org.mockito.captor.ArgCaptor
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
@@ -205,12 +204,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
   }
 
-  "request principle application deletion" should {
+  "request application deletion" should {
 
-    val adminRequester                        = adminSession
-    val developerRequester                    = devSession
-    val subject                               = "Request to delete an application"
-    val captor: ArgumentCaptor[DeskproTicket] = ArgumentCaptor.forClass(classOf[DeskproTicket])
+    val adminRequester     = adminSession
+    val developerRequester = devSession
 
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
 
@@ -219,23 +216,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestPrincipalApplicationDeletion(adminRequester, sandboxApplication)) shouldBe TicketCreated
+      await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe TicketCreated
 
       verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
     }
 
-    "create a deskpro ticket and audit record for a Developer in a Sandbox app" in new Setup {
+    "not create a deskpro ticket or audit record for a Developer in a Sandbox app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(eqTo(Some(developerRequester.developer.userId)), captor.capture())(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
-        .thenReturn(successful(Success))
-
-      await(applicationService.requestPrincipalApplicationDeletion(developerRequester, sandboxApplication)) shouldBe TicketCreated
-      captor.getValue.email shouldBe devEmail
-      captor.getValue.subject shouldBe subject
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      intercept[ForbiddenException] {
+        await(applicationService.requestApplicationDeletion(developerRequester, sandboxApplication))
+      }
+      verifyZeroInteractions(mockDeskproConnector)
+      verifyZeroInteractions(mockAuditService)
     }
 
     "create a deskpro ticket and audit record for an Admin in a Production app" in new Setup {
@@ -245,7 +238,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestPrincipalApplicationDeletion(adminRequester, productionApplication)) shouldBe TicketCreated
+      await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe TicketCreated
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
       verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
     }
@@ -253,33 +246,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "not create a deskpro ticket or audit record for a Developer in a Production app" in new Setup {
 
       intercept[ForbiddenException] {
-        await(applicationService.requestPrincipalApplicationDeletion(developerRequester, productionApplication))
-      }
-      verifyZeroInteractions(mockDeskproConnector)
-      verifyZeroInteractions(mockAuditService)
-    }
-  }
-
-  "request restricted application deletion" should {
-    val adminRequester     = adminSession
-    val developerRequester = devSession
-
-    "create a deskpro ticket and audit record" in new Setup {
-
-      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*))
-        .thenReturn(successful(TicketCreated))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
-        .thenReturn(successful(Success))
-
-      await(applicationService.requestRestrictedApplicationDeletion(adminRequester, productionApplication)) shouldBe TicketCreated
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
-      verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
-    }
-
-    "not create a deskpro ticket or audit record for a Developer in a restricted app" in new Setup {
-
-      intercept[ForbiddenException] {
-        await(applicationService.requestRestrictedApplicationDeletion(developerRequester, productionApplication))
+        await(applicationService.requestApplicationDeletion(developerRequester, productionApplication))
       }
       verifyZeroInteractions(mockDeskproConnector)
       verifyZeroInteractions(mockAuditService)

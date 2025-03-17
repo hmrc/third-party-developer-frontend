@@ -42,12 +42,10 @@ class DeleteApplicationSpec
       extends ApplicationServiceMock
       with ApplicationActionServiceMock {
     val deleteApplicationView                    = app.injector.instanceOf[DeleteApplicationView]
-    val deletePrincipalApplicationConfirmView    = app.injector.instanceOf[DeletePrincipalApplicationConfirmView]
-    val deletePrincipalApplicationCompleteView   = app.injector.instanceOf[DeletePrincipalApplicationCompleteView]
+    val requestDeleteApplicationConfirmView      = app.injector.instanceOf[RequestDeleteApplicationConfirmView]
+    val requestDeleteApplicationCompleteView     = app.injector.instanceOf[RequestDeleteApplicationCompleteView]
     val deleteSubordinateApplicationConfirmView  = app.injector.instanceOf[DeleteSubordinateApplicationConfirmView]
     val deleteSubordinateApplicationCompleteView = app.injector.instanceOf[DeleteSubordinateApplicationCompleteView]
-    val deleteRestrictedApplicationConfirmView   = app.injector.instanceOf[DeleteRestrictedApplicationConfirmView]
-    val deleteRestrictedApplicationCompleteView  = app.injector.instanceOf[DeleteRestrictedApplicationCompleteView]
 
     val underTest = new DeleteApplication(
       mockErrorHandler,
@@ -57,12 +55,10 @@ class DeleteApplicationSpec
       mcc,
       cookieSigner,
       deleteApplicationView,
-      deletePrincipalApplicationConfirmView,
-      deletePrincipalApplicationCompleteView,
+      requestDeleteApplicationConfirmView,
+      requestDeleteApplicationCompleteView,
       deleteSubordinateApplicationConfirmView,
-      deleteSubordinateApplicationCompleteView,
-      deleteRestrictedApplicationConfirmView,
-      deleteRestrictedApplicationCompleteView
+      deleteSubordinateApplicationCompleteView
     )
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -90,85 +86,42 @@ class DeleteApplicationSpec
     }
   }
 
-  "delete application confirm page" should {
-    "return delete application confirm page" in new Setup {
+  "request delete application confirm page" should {
+    "return request delete application confirm page" in new Setup {
 
-      val result = addToken(underTest.requestDeletePrincipalApplicationConfirm(standardApp.id, None))(loggedInRequest)
+      val result = addToken(underTest.requestDeleteApplicationConfirm(standardApp.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
 
       body should include("Delete application")
       body should include("Are you sure you want us to delete this application?")
-      body should include("Continue")
-    }
-  }
-
-  "delete restricted application confirm page" should {
-    "return delete restricted application confirm page" in new Setup {
-
-      val result = addToken(underTest.requestDeleteRestrictedApplicationConfirm(standardApp.id, None))(loggedInRequest)
-
-      status(result) shouldBe OK
-      val body = contentAsString(result)
-
-      body should include("Request deletion")
-      body should include(s"Are you sure you want to delete ${standardApp.name}?")
       body should include("Submit request")
     }
   }
 
-  "delete principle application action" should {
-    "return delete application complete page when confirm selected" in new Setup {
+  "request delete application action" should {
+    "return request delete application complete page when confirm selected" in new Setup {
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
-      when(underTest.applicationService.requestPrincipalApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
+      when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
         .thenReturn(Future.successful(TicketCreated))
 
-      val result = addToken(underTest.requestDeletePrincipalApplicationAction(standardApp.id))(requestWithFormBody)
+      val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
 
       body should include("Request submitted")
-      verify(underTest.applicationService).requestPrincipalApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
+      verify(underTest.applicationService).requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
 
-      val result = addToken(underTest.requestDeletePrincipalApplicationAction(standardApp.id))(requestWithFormBody)
-
-      status(result) shouldBe SEE_OTHER
-
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${standardApp.id}/details")
-    }
-  }
-
-  "delete restricted application action" should {
-    "return delete restricted application complete page when confirm selected" in new Setup {
-
-      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
-
-      when(underTest.applicationService.requestRestrictedApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
-        .thenReturn(Future.successful(TicketCreated))
-
-      val result = addToken(underTest.requestDeleteRestrictedApplicationAction(standardApp.id))(requestWithFormBody)
-
-      status(result) shouldBe OK
-      val body = contentAsString(result)
-
-      body should include("Request submitted")
-      verify(underTest.applicationService).requestRestrictedApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
-    }
-
-    "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
-
-      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
-
-      val result = addToken(underTest.requestDeleteRestrictedApplicationAction(standardApp.id))(requestWithFormBody)
+      val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
 
       status(result) shouldBe SEE_OTHER
 
@@ -181,7 +134,7 @@ class DeleteApplicationSpec
 
     givenApplicationAction(nonApprovedApplication, adminSession)
 
-    when(underTest.applicationService.requestPrincipalApplicationDeletion(*, *)(*))
+    when(underTest.applicationService.requestApplicationDeletion(*, *)(*))
       .thenReturn(Future.successful(TicketCreated))
   }
 
@@ -192,13 +145,13 @@ class DeleteApplicationSpec
       status(result) shouldBe NOT_FOUND
     }
 
-    "confirmRequestDeletePrincipalApplication action is called" in new UnapprovedApplicationSetup {
-      val result = addToken(underTest.requestDeletePrincipalApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest)
+    "requestDeleteApplicationConfirm action is called" in new UnapprovedApplicationSetup {
+      val result = addToken(underTest.requestDeleteApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 
-    "requestDeletePrincipalApplicationAction action is called" in new UnapprovedApplicationSetup {
-      val result = addToken(underTest.requestDeletePrincipalApplicationAction(nonApprovedApplication.id))(loggedInRequest)
+    "requestDeleteApplicationAction action is called" in new UnapprovedApplicationSetup {
+      val result = addToken(underTest.requestDeleteApplicationAction(nonApprovedApplication.id))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 

@@ -66,7 +66,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProv
             We'll respond to your request within 2 working days.
           </p>
 
-          <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.requestDeletePrincipalApplicationConfirm(app.id, None)">
+          <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.requestDeleteApplicationConfirm(app.id, None)">
             Request deletion
           </a>
         }
@@ -88,13 +88,13 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProv
           If you still want to delete this application from the @{app.deployedTo.toString.toLowerCase} environment, submit a request to the support team. They will respond within 2 working days.
         </p> 
 
-        <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.requestDeleteRestrictedApplicationConfirm(app.id, None)">
+        <a class="govuk-button govuk-button--warning" href="@routes.DeleteApplication.requestDeleteApplicationConfirm(app.id, None)">
           Request deletion
         </a>
       }
     }
   } else {
-    
+
     <div class="govuk-inset-text">
       You cannot delete this application because you're not an administrator.
     </div>
