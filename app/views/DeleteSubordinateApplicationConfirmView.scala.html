@@ -34,13 +34,13 @@
 ) {
   <h1 class="govuk-heading-l">Delete application</h1>
   @appEnvironment(app)
-
+  <br>
+  <br>
   <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
     <h2 class="govuk-heading-m">Are you sure you want to delete this application?</h2>
   </legend>
 
   @helper.form(action = routes.DeleteApplication.deleteSubordinateApplicationAction(app.id), Symbol("class") -> "form") {
-    <br>
 
     <p class="govuk-body">This will be deleted immediately. We cannot restore applications once they have been deleted.</p>
 
