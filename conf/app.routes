@@ -94,11 +94,11 @@ POST        /applications/:id/redirect-uris/change                              
 POST        /applications/:id/redirect-uris/change-confirmation                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Redirects.changeLoginRedirectAction(id: ApplicationId)
 
 GET         /applications/:id/delete                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteApplication(id: ApplicationId, error: Option[String])
-GET         /applications/:id/delete-principal-confirm                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.confirmRequestDeletePrincipalApplication(id: ApplicationId, error: Option[String])
+GET         /applications/:id/delete-principal-confirm                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeletePrincipalApplicationConfirm(id: ApplicationId, error: Option[String])
 POST        /applications/:id/delete-principal                                                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeletePrincipalApplicationAction(id: ApplicationId)
 GET         /applications/:id/delete-subordinate-confirm                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteSubordinateApplicationConfirm(id: ApplicationId)
 POST        /applications/:id/delete-subordinate                                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.deleteSubordinateApplicationAction(id: ApplicationId)
-GET         /applications/:id/delete-restricted-confirm                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.confirmRequestDeleteRestrictedApplication(id: ApplicationId, error: Option[String])
+GET         /applications/:id/delete-restricted-confirm                                                  uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeleteRestrictedApplicationConfirm(id: ApplicationId, error: Option[String])
 POST        /applications/:id/delete-restricted                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplication.requestDeleteRestrictedApplicationAction(id: ApplicationId)
 
 GET         /applications/:id/ip-allowlist                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.IpAllowListController.viewIpAllowlist(id: ApplicationId)

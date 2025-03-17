@@ -52,27 +52,15 @@ class DeleteApplication @Inject() (
   ) extends ApplicationController(mcc)
     with WithUnsafeDefaultFormBinding {
 
-  private def canDeleteApplicationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    checkActionForApprovedApps(SupportsDeletion, AdministratorOnly)(applicationId)(fun)
-
-  private def canViewDeleteApplicationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
-    checkActionForApprovedApps(SupportsDeletion, TeamMembersOnly)(applicationId)(fun)
-
   def deleteApplication(applicationId: ApplicationId, error: Option[String] = None) =
     canViewDeleteApplicationAction(applicationId) { implicit request =>
       val view = deleteApplicationView(request.application, request.role)
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
-  def confirmRequestDeletePrincipalApplication(applicationId: ApplicationId, error: Option[String] = None) =
+  def requestDeletePrincipalApplicationConfirm(applicationId: ApplicationId, error: Option[String] = None) =
     canDeleteApplicationAction(applicationId) { implicit request =>
       val view = deletePrincipalApplicationConfirmView(request.application, DeleteApplicationForm.form.fill(DeleteApplicationForm(None)))
-      Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
-    }
-
-  def confirmRequestDeleteRestrictedApplication(applicationId: ApplicationId, error: Option[String] = None) =
-    canDeleteApplicationAction(applicationId) { implicit request =>
-      val view = deleteRestrictedApplicationConfirmView(request.application, DeleteApplicationForm.form.fill(DeleteApplicationForm(None)))
       Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
     }
 
@@ -108,6 +96,12 @@ class DeleteApplication @Inject() (
 
   }
 
+  def requestDeleteRestrictedApplicationConfirm(applicationId: ApplicationId, error: Option[String] = None) =
+    canDeleteApplicationAction(applicationId) { implicit request =>
+      val view = deleteRestrictedApplicationConfirmView(request.application, DeleteApplicationForm.form.fill(DeleteApplicationForm(None)))
+      Future(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
+    }
+
   def requestDeleteRestrictedApplicationAction(applicationId: ApplicationId) = canDeleteApplicationAction(applicationId) { implicit request =>
     val application = request.application
 
@@ -126,4 +120,10 @@ class DeleteApplication @Inject() (
 
     DeleteApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
+
+  private def canDeleteApplicationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    checkActionForApprovedApps(SupportsDeletion, AdministratorOnly)(applicationId)(fun)
+
+  private def canViewDeleteApplicationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
+    checkActionForApprovedApps(SupportsDeletion, TeamMembersOnly)(applicationId)(fun)
 }

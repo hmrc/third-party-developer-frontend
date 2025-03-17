@@ -93,7 +93,7 @@ class DeleteApplicationSpec
   "delete application confirm page" should {
     "return delete application confirm page" in new Setup {
 
-      val result = addToken(underTest.confirmRequestDeletePrincipalApplication(standardApp.id, None))(loggedInRequest)
+      val result = addToken(underTest.requestDeletePrincipalApplicationConfirm(standardApp.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
@@ -107,7 +107,7 @@ class DeleteApplicationSpec
   "delete restricted application confirm page" should {
     "return delete restricted application confirm page" in new Setup {
 
-      val result = addToken(underTest.confirmRequestDeleteRestrictedApplication(standardApp.id, None))(loggedInRequest)
+      val result = addToken(underTest.requestDeleteRestrictedApplicationConfirm(standardApp.id, None))(loggedInRequest)
 
       status(result) shouldBe OK
       val body = contentAsString(result)
@@ -193,7 +193,7 @@ class DeleteApplicationSpec
     }
 
     "confirmRequestDeletePrincipalApplication action is called" in new UnapprovedApplicationSetup {
-      val result = addToken(underTest.confirmRequestDeletePrincipalApplication(nonApprovedApplication.id, None))(loggedInRequest)
+      val result = addToken(underTest.requestDeletePrincipalApplicationConfirm(nonApprovedApplication.id, None))(loggedInRequest)
       status(result) shouldBe NOT_FOUND
     }
 
