@@ -34,8 +34,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.SubscriptionFieldsConnectorMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -49,7 +49,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
   val application = standardApp
 
-  trait Setup extends SubscriptionFieldsConnectorMock {
+  trait Setup {
 
     lazy val locked = false
 
@@ -58,6 +58,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
+    val mockSubscriptionFieldsConnector: SubscriptionFieldsConnector       = mock[SubscriptionFieldsConnector]
     val mockApmConnector: ApmConnector                                     = mock[ApmConnector]
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)

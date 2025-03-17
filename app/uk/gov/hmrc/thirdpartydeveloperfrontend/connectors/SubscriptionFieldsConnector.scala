@@ -61,18 +61,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
     internalFetchFieldValues(() => getDefinitions())(clientId, apiIdentifier)
   }
 
-  def fetchFieldValues(
-      clientId: ClientId,
-      context: ApiContext,
-      version: ApiVersionNbr
-    )(implicit hc: HeaderCarrier
-    ): Future[Seq[SubscriptionFieldValue]] = {
-
-    def getDefinitions() = fetchFieldDefinitions(context, version)
-
-    internalFetchFieldValues(() => getDefinitions())(clientId, ApiIdentifier(context, version))
-  }
-
   private def internalFetchFieldValues(
       getDefinitions: () => Future[Seq[SubscriptionFieldDefinition]]
     )(
@@ -106,35 +94,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   }
 
   import uk.gov.hmrc.http.HttpReads.Implicits._
-
-  def fetchFieldDefinitions(
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr
-    )(implicit hc: HeaderCarrier
-    ): Future[Seq[SubscriptionFieldDefinition]] = {
-    val url = urlSubscriptionFieldDefinition(apiContext, apiVersion)
-    logger.debug(s"fetchFieldDefinitions() - About to call $url in ${environment.toString}")
-    configureEbridgeIfRequired(
-      http.get(url"$url")
-    )
-      .execute[Option[ApiFieldDefinitions]]
-      .map {
-        case Some(x) => x.fieldDefinitions.map(toDomain)
-        case None    => Seq.empty
-      }
-  }
-
-  def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion] = {
-    val url = s"$serviceBaseUrl/definition"
-    configureEbridgeIfRequired(
-      http.get(url"$url")
-    )
-      .execute[Option[AllApiFieldDefinitions]]
-      .map {
-        case Some(x) => toDomain(x)
-        case None    => DefinitionsByApiVersion.empty
-      }
-  }
 
   def saveFieldValues(
       clientId: ClientId,
