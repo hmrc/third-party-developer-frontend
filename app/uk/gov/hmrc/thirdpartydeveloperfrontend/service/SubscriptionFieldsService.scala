@@ -89,18 +89,6 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
 object SubscriptionFieldsService {
 
   trait SubscriptionFieldsConnector {
-    def fetchFieldValues(clientId: ClientId, context: ApiContext, version: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldValue]]
-
-    def fetchFieldsValuesWithPrefetchedDefinitions(
-        clientId: ClientId,
-        apiIdentifier: ApiIdentifier,
-        definitionsCache: DefinitionsByApiVersion
-      )(implicit hc: HeaderCarrier
-      ): Future[Seq[SubscriptionFieldValue]]
-
-    def fetchAllFieldDefinitions()(implicit hc: HeaderCarrier): Future[DefinitionsByApiVersion]
-
-    def fetchFieldDefinitions(apiContext: ApiContext, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[Seq[SubscriptionFieldDefinition]]
 
     def saveFieldValues(
         clientId: ClientId,
@@ -110,7 +98,7 @@ object SubscriptionFieldsService {
       )(implicit hc: HeaderCarrier
       ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
-    def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
+
   }
 
   type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]

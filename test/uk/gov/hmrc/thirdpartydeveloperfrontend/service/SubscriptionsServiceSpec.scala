@@ -26,7 +26,6 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Dispa
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -110,9 +109,6 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
       theProductionConnectorthenReturnTheApplication(standardApp.id, standardApp)
 
       ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(standardApp)
-
-      when(mockProductionSubscriptionFieldsConnector.deleteFieldValues(standardApp.clientId, apiContextOne, apiVersionNbrOne))
-        .thenReturn(successful(FieldsDeleteSuccessResult))
 
       private val result =
         await(subscriptionsService.unsubscribeFromApi(standardApp, apiIdentifierOne, CommonEmailData.altDev))

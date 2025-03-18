@@ -2,7 +2,7 @@ import scoverage.ScoverageKeys._
 
 object ScoverageSettings {
   def apply() = Seq(
-    coverageMinimumStmtTotal := 84,
+    coverageMinimumStmtTotal := 84.10,
     coverageMinimumBranchTotal := 75.0,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
@@ -17,11 +17,9 @@ object ScoverageSettings {
       ".*definition.*",
       ".*BuildInfo.*",
       ".*javascript",
-      "controllers.binders",
-      "modules.submissions.controllers.binders",
-      "uk\\.gov\\.hmrc\\.apiplatform\\.modules\\.applications\\..*",
-      "uk\\.gov\\.hmrc\\.apiplatform\\.modules\\.developers\\..*",
-      "uk\\.gov\\.hmrc\\.apiplatform\\.modules\\.common\\..*"
+      """.*\.controllers\.binders\..*""",
+      """.*\.apiplatform\.modules\.applications\..*""",
+      """.*\.apiplatform\.modules\.common\..*"""
     ).mkString(";")
   )
 }
