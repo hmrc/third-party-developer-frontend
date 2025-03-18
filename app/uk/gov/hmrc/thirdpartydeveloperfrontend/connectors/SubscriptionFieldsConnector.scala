@@ -79,26 +79,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       }
   }
 
-//  def deleteFieldValues(
-//      clientId: ClientId,
-//      apiContext: ApiContext,
-//      apiVersion: ApiVersionNbr
-//    )(implicit hc: HeaderCarrier
-//    ): Future[FieldsDeleteResult] = {
-//    val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-//    configureEbridgeIfRequired(
-//      http.delete(url"$url")
-//    )
-//      .execute[HttpResponse]
-//      .map { response =>
-//        response.status match {
-//          case NO_CONTENT => FieldsDeleteSuccessResult
-//          case NOT_FOUND  => FieldsDeleteSuccessResult
-//          case _          => FieldsDeleteFailureResult
-//        }
-//      }
-//  }
-
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 
   private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =

@@ -98,7 +98,7 @@ object SubscriptionFieldsService {
       )(implicit hc: HeaderCarrier
       ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
-//    def deleteFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier): Future[FieldsDeleteResult]
+
   }
 
   type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]
