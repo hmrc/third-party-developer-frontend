@@ -24,7 +24,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
-import play.api.http.Status.{BAD_REQUEST, CREATED, NOT_FOUND, NO_CONTENT, OK}
+import play.api.http.Status.{BAD_REQUEST, CREATED, OK}
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
@@ -79,25 +79,25 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       }
   }
 
-  def deleteFieldValues(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr
-    )(implicit hc: HeaderCarrier
-    ): Future[FieldsDeleteResult] = {
-    val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    configureEbridgeIfRequired(
-      http.delete(url"$url")
-    )
-      .execute[HttpResponse]
-      .map { response =>
-        response.status match {
-          case NO_CONTENT => FieldsDeleteSuccessResult
-          case NOT_FOUND  => FieldsDeleteSuccessResult
-          case _          => FieldsDeleteFailureResult
-        }
-      }
-  }
+//  def deleteFieldValues(
+//      clientId: ClientId,
+//      apiContext: ApiContext,
+//      apiVersion: ApiVersionNbr
+//    )(implicit hc: HeaderCarrier
+//    ): Future[FieldsDeleteResult] = {
+//    val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
+//    configureEbridgeIfRequired(
+//      http.delete(url"$url")
+//    )
+//      .execute[HttpResponse]
+//      .map { response =>
+//        response.status match {
+//          case NO_CONTENT => FieldsDeleteSuccessResult
+//          case NOT_FOUND  => FieldsDeleteSuccessResult
+//          case _          => FieldsDeleteFailureResult
+//        }
+//      }
+//  }
 
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 
