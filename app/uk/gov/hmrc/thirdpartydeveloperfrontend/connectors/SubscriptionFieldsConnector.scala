@@ -38,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.{DefinitionsByApiVersion, SubscriptionFieldsConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
   val http: HttpClientV2
@@ -48,50 +48,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
   import SubscriptionFieldsConnectorJsonFormatters._
 
   def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
-
-  def fetchFieldsValuesWithPrefetchedDefinitions(
-      clientId: ClientId,
-      apiIdentifier: ApiIdentifier,
-      definitionsCache: DefinitionsByApiVersion
-    )(implicit hc: HeaderCarrier
-    ): Future[Seq[SubscriptionFieldValue]] = {
-
-    def getDefinitions() = Future.successful(definitionsCache.getOrElse(apiIdentifier, Seq.empty))
-
-    internalFetchFieldValues(() => getDefinitions())(clientId, apiIdentifier)
-  }
-
-  private def internalFetchFieldValues(
-      getDefinitions: () => Future[Seq[SubscriptionFieldDefinition]]
-    )(
-      clientId: ClientId,
-      apiIdentifier: ApiIdentifier
-    )(implicit hc: HeaderCarrier
-    ): Future[Seq[SubscriptionFieldValue]] = {
-
-    def joinFieldValuesToDefinitions(
-        defs: Seq[SubscriptionFieldDefinition],
-        fieldValues: Fields.Alias
-      ): Seq[SubscriptionFieldValue] = {
-      defs.map(field => SubscriptionFieldValue(field, fieldValues.getOrElse(field.name, FieldValue.empty)))
-    }
-
-    def ifDefinitionsGetValues(
-        definitions: Seq[SubscriptionFieldDefinition]
-      ): Future[Option[ApplicationApiFieldValues]] = {
-      if (definitions.isEmpty) {
-        Future.successful(None)
-      } else {
-        fetchApplicationApiValues(clientId, apiIdentifier.context, apiIdentifier.versionNbr)
-      }
-    }
-
-    for {
-      definitions: Seq[SubscriptionFieldDefinition] <- getDefinitions()
-      subscriptionFields                            <- ifDefinitionsGetValues(definitions)
-      fieldValues                                    = subscriptionFields.fold(Fields.empty)(_.fields)
-    } yield joinFieldValuesToDefinitions(definitions, fieldValues)
-  }
 
   import uk.gov.hmrc.http.HttpReads.Implicits._
 
@@ -143,19 +99,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       }
   }
 
-  private def fetchApplicationApiValues(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr
-    )(implicit hc: HeaderCarrier
-    ): Future[Option[ApplicationApiFieldValues]] = {
-    val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
-    configureEbridgeIfRequired(
-      http.get(url"$url")
-    )
-      .execute[Option[ApplicationApiFieldValues]]
-  }
-
   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 
   private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
@@ -163,23 +106,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 }
 
 private[connectors] object SubscriptionFieldsConnectorDomain {
-
-  def toDomain(f: FieldDefinition): SubscriptionFieldDefinition = {
-    SubscriptionFieldDefinition(
-      name = f.name,
-      description = f.description,
-      shortDescription = f.shortDescription,
-      `type` = f.`type`,
-      hint = f.hint,
-      access = f.access
-    )
-  }
-
-  def toDomain(fs: AllApiFieldDefinitions): DefinitionsByApiVersion = {
-    fs.apis
-      .map(fd => ApiIdentifier(fd.apiContext, fd.apiVersion) -> fd.fieldDefinitions.map(toDomain))
-      .toMap
-  }
 
   case class ApplicationApiFieldValues(
       clientId: ClientId,
@@ -212,7 +138,6 @@ private[connectors] object SubscriptionFieldsConnectorDomain {
       apiVersion: ApiVersionNbr,
       fields: Fields.Alias
     )
-
 }
 
 @Singleton
