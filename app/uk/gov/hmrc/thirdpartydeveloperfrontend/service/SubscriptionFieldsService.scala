@@ -98,7 +98,6 @@ object SubscriptionFieldsService {
       )(implicit hc: HeaderCarrier
       ): Future[ConnectorSaveSubscriptionFieldsResponse]
 
-
   }
 
   type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]
