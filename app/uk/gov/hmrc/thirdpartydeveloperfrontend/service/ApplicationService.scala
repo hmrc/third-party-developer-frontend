@@ -117,16 +117,17 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
-  def requestPrincipalApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
 
-    val requesterName  = requester.developer.displayedName
-    val requesterEmail = requester.developer.email
-    val environment    = application.deployedTo
-    val requesterRole  = roleForApplication(application, requesterEmail)
-    val appId          = application.id
+    val requesterName    = requester.developer.displayedName
+    val requesterEmail   = requester.developer.email
+    val environment      = application.deployedTo
+    val requesterRole    = roleForApplication(application, requesterEmail)
+    val appId            = application.id
+    val deleteRestricted = !(application.details.deleteRestriction == DeleteRestriction.NoRestriction)
 
-    if (environment.isSandbox || requesterRole.isAdministrator) {
-      val deskproTicket = DeskproTicket.createForPrincipalApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
+    if (requesterRole.isAdministrator) {
+      val deskproTicket = DeskproTicket.createForRequestApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId, deleteRestricted)
 
       for {
         ticketResponse <- deskproConnector.createTicket(Some(requester.developer.userId), deskproTicket)
@@ -145,43 +146,16 @@ class ApplicationService @Inject() (
     }
   }
 
-  def requestRestrictedApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-
-    val requesterName  = requester.developer.displayedName
-    val requesterEmail = requester.developer.email
-    val environment    = application.deployedTo
-    val requesterRole  = roleForApplication(application, requesterEmail)
-    val appId          = application.id
-
-    val deskproTicket = DeskproTicket.createForRestrictedApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId)
-
-    if (requesterRole.isAdministrator) {
-      for {
-        ticketResponse <- deskproConnector.createTicket(Some(requester.developer.userId), deskproTicket)
-        _              <- auditService.audit(
-                            ApplicationDeletionRequested,
-                            Map(
-                              "appId"                   -> appId.toString(),
-                              "requestedByName"         -> requesterName,
-                              "requestedByEmailAddress" -> requesterEmail.text,
-                              "timestamp"               -> instant().toString
-                            )
-                          )
-      } yield ticketResponse
-    } else {
-      Future.failed(new ForbiddenException("Developer cannot request to delete a restricted application"))
-    }
-  }
-
   def deleteSubordinateApplication(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
-    val requesterEmail = requester.developer.email
-    val environment    = application.deployedTo
-    val requesterRole  = roleForApplication(application, requesterEmail)
-    val reasons        = "Subordinate application deleted by DevHub user"
-    val instigator     = requester.developer.userId
+    val requesterEmail   = requester.developer.email
+    val environment      = application.deployedTo
+    val requesterRole    = roleForApplication(application, requesterEmail)
+    val reasons          = "Subordinate application deleted by DevHub user"
+    val instigator       = requester.developer.userId
+    val deleteRestricted = !(application.details.deleteRestriction == DeleteRestriction.NoRestriction)
 
-    if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD) {
+    if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD && !deleteRestricted) {
 
       val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant())
       dispatchCmd(application.id, deleteRequest)

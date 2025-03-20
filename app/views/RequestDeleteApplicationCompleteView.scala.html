@@ -36,9 +36,13 @@
     </h1>
   </div>
 
-  <p class="govuk-body">You have requested to delete your application.</p>
+  <p class="govuk-body">Your request to delete @{app.name} from @{app.deployedTo.toString.toLowerCase} has been submitted to the support team for review.</p>
 
   <h2 class="govuk-heading-m">What happens next?</h2>
 
-  <p class="govuk-body">We will respond to your request within 2 working days.</p>
+  <p class="govuk-body">The support team will review your request and respond within 2 working days.</p>
+
+  <p class="govuk-body">If your deletion request is approved, @{app.name} will be disabled from your account and all information removed.</p>
+
+  <a id="cancel" href="@controllers.routes.Details.details(app.id)" class="govuk-link">Back to application details</a>
 }
