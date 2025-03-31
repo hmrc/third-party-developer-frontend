@@ -19,12 +19,20 @@ package uk.gov.hmrc.apiplatform.modules.test_only.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import play.api.libs.json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+
+
+object TestOnlyTpdConnector {
+  case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
+
+  implicit val format: OFormat[CloneUserResponse] = Json.format[CloneUserResponse]
+}
 
 @Singleton
 class TestOnlyTpdConnector @Inject() (
@@ -33,10 +41,12 @@ class TestOnlyTpdConnector @Inject() (
   )(implicit val ec: ExecutionContext
   ) {
 
+  import TestOnlyTpdConnector._
+
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
 
-  def clone(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[UserId]] = {
-    http.post(url"$serviceBaseUrl/test-only/clone/$userId")
-      .execute[Option[UserId]]
+  def clone(userId: UserId)(implicit hc: HeaderCarrier): Future[CloneUserResponse] = {
+    http.post(url"$serviceBaseUrl/test-only/user/$userId/clone")
+      .execute[CloneUserResponse]
   }
 }

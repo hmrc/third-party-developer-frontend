@@ -45,10 +45,6 @@ class TestOnlyUserController @Inject() (
   ) extends LoggedInController(mcc) {
 
   def cloneUser(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
-    connector.clone(userId).flatMap {
-      _.fold(
-        errorHandler.notFoundTemplate.map(NotFound(_))
-      )(u => successful(Created(Json.toJson(u))))
-    }
+    connector.clone(userId).map(u => Created(Json.toJson(u)))
   }
 }
