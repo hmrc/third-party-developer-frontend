@@ -18,7 +18,6 @@ package uk.gov.hmrc.apiplatform.modules.test_only.controllers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Future.successful
 
 import views.helper.EnvironmentNameService
 

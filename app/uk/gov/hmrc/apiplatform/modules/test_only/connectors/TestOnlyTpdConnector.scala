@@ -27,7 +27,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
-
 object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
 

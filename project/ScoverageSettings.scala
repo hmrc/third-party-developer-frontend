@@ -19,7 +19,8 @@ object ScoverageSettings {
       ".*javascript",
       """.*\.controllers\.binders\..*""",
       """.*\.apiplatform\.modules\.applications\..*""",
-      """.*\.apiplatform\.modules\.common\..*"""
+      """.*\.apiplatform\.modules\.common\..*""",
+      """.*\.apiplatform\.modules\.test_only\..*"""
     ).mkString(";")
   )
 }
