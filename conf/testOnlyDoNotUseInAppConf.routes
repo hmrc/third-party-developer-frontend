@@ -9,7 +9,7 @@
 # !!!WARNING!!! Every route defined in this file MUST be prefixed with "/test-only/". This is because NGINX is blocking every uri containing the string "test-only" in production.
 # Failing to follow this rule may result in test routes deployed in production.
 
-POST        /test-only/user/:userId/clone     uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.cloneUser(userId: UserId)
+POST        /developer/test-only/user/:userId/clone     uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.cloneUser(userId: UserId)
 
 # Add all the application routes to the prod.routes file
-->          /                                 prod.Routes
+->          /                                           prod.Routes
