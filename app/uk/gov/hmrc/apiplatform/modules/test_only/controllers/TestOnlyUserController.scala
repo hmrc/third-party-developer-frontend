@@ -68,6 +68,9 @@ class TestOnlyUserController @Inject() (
   }
 
   def smsAccessCode(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
-    connector.smsAccessCode(userId).map(u => Created(Json.toJson(u)))
+    connector.smsAccessCode(userId).map {
+      case None             => NotFound
+      case Some(accessCode) => Ok(Json.toJson(accessCode))
+    }
   }
 }
