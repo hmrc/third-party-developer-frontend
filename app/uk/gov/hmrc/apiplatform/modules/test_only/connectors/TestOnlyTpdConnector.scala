@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.EmailIdentifier
 
 object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
@@ -54,5 +55,11 @@ class TestOnlyTpdConnector @Inject() (
     http.post(url"$serviceBaseUrl/test-only/user/find")
       .withBody(Json.toJson(email))
       .execute[Option[User]]
+  }
+
+  def peekAtPasswordResetCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    http.post(url"$serviceBaseUrl/test-only/user/peekAtPasswordResetCode")
+      .withBody(Json.toJson(email))
+      .execute[Option[String]]
   }
 }
