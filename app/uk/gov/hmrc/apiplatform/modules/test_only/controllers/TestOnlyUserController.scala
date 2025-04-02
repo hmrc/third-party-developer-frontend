@@ -30,6 +30,8 @@ import uk.gov.hmrc.apiplatform.modules.test_only.connectors.TestOnlyTpdConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
+import play.api.libs.json.JsValue
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 @Singleton
 class TestOnlyUserController @Inject() (
@@ -46,4 +48,13 @@ class TestOnlyUserController @Inject() (
   def cloneUser(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
     connector.clone(userId).map(u => Created(Json.toJson(u)))
   }
+
+  def findUserByEmail(): Action[JsValue] = Action.async(parse.tolerantJson) { implicit request =>
+    withJsonBody[LaxEmailAddress] { emailAddress =>
+      connector.findUserByEmail(emailAddress).map(_ match {
+        case None       => NotFound
+        case Some(user) => Ok(Json.toJson(user))
+      })
+    }
+  }   
 }

@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
 object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
@@ -47,5 +48,11 @@ class TestOnlyTpdConnector @Inject() (
   def clone(userId: UserId)(implicit hc: HeaderCarrier): Future[CloneUserResponse] = {
     http.post(url"$serviceBaseUrl/test-only/user/$userId/clone")
       .execute[CloneUserResponse]
+  }
+
+  def findUserByEmail(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[User]] = {
+    http.post(url"$serviceBaseUrl/test-only/user/find")
+      .withBody(Json.toJson(email))
+      .execute[Option[User]]
   }
 }
