@@ -11,5 +11,7 @@
 
 POST        /developer/test-only/user/:userId/clone     uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.cloneUser(userId: UserId)
 
+POST        /developer/test-only/user/find              uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.findUserByEmail()
+
 # Add all the application routes to the prod.routes file
 ->          /                                           prod.Routes
