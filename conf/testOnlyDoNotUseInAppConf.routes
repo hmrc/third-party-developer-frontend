@@ -15,5 +15,9 @@ POST        /developer/test-only/user/:userId/clone     uk.gov.hmrc.apiplatform.
 + nocsrf
 POST        /developer/test-only/user/find              uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.findUserByEmail()
 
++ nocsrf
+POST        /developer/test-only/user/peekAtPasswordResetCode            uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.peekAtPasswordResetCode()
+
+
 # Add all the application routes to the prod.routes file
 ->          /                                           prod.Routes
