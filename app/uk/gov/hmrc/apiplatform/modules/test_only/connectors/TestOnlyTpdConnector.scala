@@ -65,8 +65,8 @@ class TestOnlyTpdConnector @Inject() (
       .execute[Option[String]]
   }
 
-  def smsAccessCode(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[SmsAccessCodeResponse]] = {
+  def smsAccessCode(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     http.get(url"$serviceBaseUrl/test-only/user/$userId/smsAccessCode")
-      .execute[Option[SmsAccessCodeResponse]]
+      .execute[Option[String]]
   }
 }
