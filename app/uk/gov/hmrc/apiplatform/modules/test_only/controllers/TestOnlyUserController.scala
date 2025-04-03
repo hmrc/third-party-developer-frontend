@@ -57,13 +57,20 @@ class TestOnlyUserController @Inject() (
       })
     }
   }
-  
+
   def peekAtPasswordResetCode(): Action[JsValue] = Action.async(parse.tolerantJson) { implicit request =>
     withJsonBody[LaxEmailAddress] { emailAddress =>
       connector.peekAtPasswordResetCode(emailAddress).map(_ match {
         case None       => NotFound
         case Some(code) => Ok(Json.toJson(code))
       })
+    }
+  }
+
+  def smsAccessCode(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
+    connector.smsAccessCode(userId).map {
+      case None             => NotFound
+      case Some(accessCode) => Ok(Json.toJson(accessCode))
     }
   }
 }

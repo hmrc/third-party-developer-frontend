@@ -31,8 +31,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.EmailIdentifier
 
 object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
+  case class SmsAccessCodeResponse(accessCode: String)
 
-  implicit val format: OFormat[CloneUserResponse] = Json.format[CloneUserResponse]
+  implicit val formatCloneUserResponse: OFormat[CloneUserResponse]         = Json.format[CloneUserResponse]
+  implicit val formatSmsAccessCodeResponse: OFormat[SmsAccessCodeResponse] = Json.format[SmsAccessCodeResponse]
 }
 
 @Singleton
@@ -60,6 +62,11 @@ class TestOnlyTpdConnector @Inject() (
   def peekAtPasswordResetCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtPasswordResetCode")
       .withBody(Json.toJson(email))
+      .execute[Option[String]]
+  }
+
+  def smsAccessCode(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    http.get(url"$serviceBaseUrl/test-only/user/$userId/smsAccessCode")
       .execute[Option[String]]
   }
 }
