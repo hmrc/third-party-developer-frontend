@@ -25,9 +25,8 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.EmailIdentifier
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
@@ -48,8 +47,9 @@ class TestOnlyTpdConnector @Inject() (
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
 
-  def clone(userId: UserId)(implicit hc: HeaderCarrier): Future[CloneUserResponse] = {
-    http.post(url"$serviceBaseUrl/test-only/user/$userId/clone")
+  def clone(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[CloneUserResponse] = {
+    http.post(url"$serviceBaseUrl/test-only/user/clone")
+      .withBody(Json.toJson(email))
       .execute[CloneUserResponse]
   }
 
@@ -65,8 +65,15 @@ class TestOnlyTpdConnector @Inject() (
       .execute[Option[String]]
   }
 
-  def smsAccessCode(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[String]] = {
-    http.get(url"$serviceBaseUrl/test-only/user/$userId/smsAccessCode")
+  def peekAtRegistrationVerificationCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    http.post(url"$serviceBaseUrl/test-only/user/peekAtPasswordResetCode")
+      .withBody(Json.toJson(email))
+      .execute[Option[String]]
+  }
+
+  def peekAtSmsAccessCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    http.post(url"$serviceBaseUrl/test-only/user/peekAtSmsAccessCode")
+      .withBody(Json.toJson(email))
       .execute[Option[String]]
   }
 }
