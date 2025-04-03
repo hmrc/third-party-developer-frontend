@@ -22,16 +22,14 @@ import scala.concurrent.ExecutionContext
 import views.helper.EnvironmentNameService
 
 import play.api.libs.crypto.CookieSigner
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.test_only.connectors.TestOnlyTpdConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 @Singleton
 class TestOnlyUserController @Inject() (
@@ -45,8 +43,10 @@ class TestOnlyUserController @Inject() (
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {
 
-  def cloneUser(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
-    connector.clone(userId).map(u => Created(Json.toJson(u)))
+  def cloneUser(): Action[JsValue] = Action.async(parse.tolerantJson) { implicit request =>
+    withJsonBody[LaxEmailAddress] { emailAddress =>
+      connector.clone(emailAddress).map(u => Created(Json.toJson(u)))
+    }
   }
 
   def findUserByEmail(): Action[JsValue] = Action.async(parse.tolerantJson) { implicit request =>
@@ -67,10 +67,21 @@ class TestOnlyUserController @Inject() (
     }
   }
 
-  def smsAccessCode(userId: UserId): Action[AnyContent] = Action.async { implicit request =>
-    connector.smsAccessCode(userId).map {
-      case None             => NotFound
-      case Some(accessCode) => Ok(Json.toJson(accessCode))
+  def peekAtRegistrationVerificationCode(): Action[JsValue] = Action.async(parse.tolerantJson) { implicit request =>
+    withJsonBody[LaxEmailAddress] { emailAddress =>
+      connector.peekAtRegistrationVerificationCode(emailAddress).map(_ match {
+        case None       => NotFound
+        case Some(code) => Ok(Json.toJson(code))
+      })
+    }
+  }
+
+  def peekAtSmsAccessCode(): Action[JsValue] = Action.async(parse.tolerantJson) { implicit request =>
+    withJsonBody[LaxEmailAddress] { emailAddress =>
+      connector.peekAtSmsAccessCode(emailAddress).map {
+        case None             => NotFound
+        case Some(accessCode) => Ok(Json.toJson(accessCode))
+      }
     }
   }
 }

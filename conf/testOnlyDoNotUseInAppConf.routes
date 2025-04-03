@@ -10,15 +10,20 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 + nocsrf
-POST        /developer/test-only/user/:userId/clone     uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.cloneUser(userId: UserId)
+POST        /developer/test-only/user/clone                               uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.cloneUser()
 
 + nocsrf
-POST        /developer/test-only/user/find              uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.findUserByEmail()
+POST        /developer/test-only/user/find                                uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.findUserByEmail()
 
 + nocsrf
-POST        /developer/test-only/user/peekAtPasswordResetCode            uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.peekAtPasswordResetCode()
+POST        /developer/test-only/user/peekAtPasswordResetCode             uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.peekAtPasswordResetCode()
 
-GET         /developer/test-only/user/:userId/smsAccessCode   uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.smsAccessCode(userId: UserId)
++ nocsrf
+POST        /developer/test-only/user/peekAtRegistrationVerificationCode  uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.peekAtRegistrationVerificationCode()
+
++ nocsrf
+POST        /developer/test-only/user/peekAtSmsAccessCode                 uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.peekAtSmsAccessCode()
+
 
 # Add all the application routes to the prod.routes file
-->          /                                           prod.Routes
+->          /                                                             prod.Routes
