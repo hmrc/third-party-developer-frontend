@@ -66,7 +66,7 @@ class TestOnlyTpdConnector @Inject() (
   }
 
   def peekAtRegistrationVerificationCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
-    http.post(url"$serviceBaseUrl/test-only/user/peekAtPasswordResetCode")
+    http.post(url"$serviceBaseUrl/test-only/user/peekAtRegistrationVerificationCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]
   }
