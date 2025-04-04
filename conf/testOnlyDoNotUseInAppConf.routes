@@ -24,6 +24,8 @@ POST        /developer/test-only/user/peekAtRegistrationVerificationCode  uk.gov
 + nocsrf
 POST        /developer/test-only/user/peekAtSmsAccessCode                 uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyUserController.peekAtSmsAccessCode()
 
++ nocsrf
+POST        /developer/test-only/application/:id/clone                    uk.gov.hmrc.apiplatform.modules.test_only.controllers.TestOnlyApplicationController.cloneApplication(id: uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId)
 
 # Add all the application routes to the prod.routes file
 ->          /                                                             prod.Routes
