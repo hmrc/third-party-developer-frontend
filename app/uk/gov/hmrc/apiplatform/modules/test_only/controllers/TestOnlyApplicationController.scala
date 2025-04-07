@@ -25,15 +25,17 @@ import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc._
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment.PRODUCTION
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
-import uk.gov.hmrc.apiplatform.modules.test_only.connectors.TestOnlyTpaConnector
+import uk.gov.hmrc.apiplatform.modules.test_only.connectors.{TestOnlyTpaProductionConnector, TestOnlyTpaSandboxConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 @Singleton
 class TestOnlyApplicationController @Inject() (
-    connector: TestOnlyTpaConnector,
+    sandboxConnector: TestOnlyTpaSandboxConnector,
+    productionConnector: TestOnlyTpaProductionConnector,
     val errorHandler: ErrorHandler,
     val sessionService: SessionService,
     val cookieSigner: CookieSigner,
@@ -43,7 +45,11 @@ class TestOnlyApplicationController @Inject() (
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {
 
-  def cloneApplication(appId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
-    connector.clone(Environment.SANDBOX)(appId).map(app => Ok(Json.toJson(app)))
+  def cloneApplication(environment: Environment, appId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
+    val connector = environment match {
+      case PRODUCTION => productionConnector
+      case _          => sandboxConnector
+    }
+    connector.clone(environment)(appId).map(app => Ok(Json.toJson(app)))
   }
 }

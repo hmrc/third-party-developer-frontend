@@ -42,7 +42,7 @@ abstract class TestOnlyTpaConnector @Inject() (
 
   def clone(environment: Environment)(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = {
     if (isEnabled) {
-      val url = s"$serviceBaseUrl/developer/applications/test-only/applications"
+      val url = s"$serviceBaseUrl/test-only/application"
 
       configureEbridgeIfRequired(
         http.post(url"$url/$appId/clone")
