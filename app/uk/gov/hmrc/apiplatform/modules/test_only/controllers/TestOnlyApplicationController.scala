@@ -17,20 +17,19 @@
 package uk.gov.hmrc.apiplatform.modules.test_only.controllers
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext}
+import scala.concurrent.ExecutionContext
 
-
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.test_only.connectors.TestOnlyTpaConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import play.api.libs.crypto.CookieSigner
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import views.helper.EnvironmentNameService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
+
+import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.test_only.connectors.TestOnlyTpaConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.LoggedInController
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 @Singleton
 class TestOnlyApplicationController @Inject() (
