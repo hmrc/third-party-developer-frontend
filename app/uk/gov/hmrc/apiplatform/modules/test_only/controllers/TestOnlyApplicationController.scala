@@ -43,7 +43,7 @@ class TestOnlyApplicationController @Inject() (
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {
 
-  def cloneApplication(appId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
-    connector.clone(Environment.SANDBOX)(appId).map(app => Ok(Json.toJson(app)))
+  def cloneApplication(environment: Environment, appId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
+    connector.clone(environment)(appId).map(app => Ok(Json.toJson(app)))
   }
 }
