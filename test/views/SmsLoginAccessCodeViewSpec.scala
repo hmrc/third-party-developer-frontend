@@ -52,6 +52,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
       document.getElementById("paragraph-1").text shouldBe "We have sent a 6 digit access code to 0123456789"
       document.getElementById("paragraph-2").text shouldBe "It may take a few minutes to arrive"
       document.getElementById("paragraph-3").text shouldBe "If you have a UK phone number your 6-digit code will arrive from the phone number 60 551."
+      document.getElementById("help-page-link").text shouldBe "I cannot get an access code"
       document.getElementById("rememberMe-label").text shouldBe "Remember me for 7 days"
       document.getElementById("submit").text shouldBe "Continue"
       Option(document.getElementById("try-another-option")) shouldBe None
