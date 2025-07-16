@@ -40,7 +40,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApplicationCommandConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
@@ -112,9 +111,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
         .thenReturn(successful(Some(application)))
     }
   }
-
-  def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
   val productionApplication: ApplicationWithCollaborators = standardApp
 

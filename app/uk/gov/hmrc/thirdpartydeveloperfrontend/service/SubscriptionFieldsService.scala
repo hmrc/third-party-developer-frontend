@@ -25,11 +25,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{ApiFieldMap, DevhubAccessLevel, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{DevhubAccessLevel, Fields}
 
 @Singleton
 class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
@@ -40,7 +39,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
       oldValues: Seq[SubscriptionFieldValue],
-      newValues: Fields.Alias
+      newValues: Fields
     )(implicit hc: HeaderCarrier
     ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
@@ -94,7 +93,7 @@ object SubscriptionFieldsService {
         clientId: ClientId,
         apiContext: ApiContext,
         apiVersion: ApiVersionNbr,
-        fields: Fields.Alias
+        fields: Fields
       )(implicit hc: HeaderCarrier
       ): Future[ConnectorSaveSubscriptionFieldsResponse]
 

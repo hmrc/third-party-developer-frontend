@@ -22,9 +22,10 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldValue
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.NoOne
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
@@ -32,8 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
   SaveSubscriptionFieldsSuccessResponse,
   SubscriptionFieldValue
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -84,8 +83,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       val access = AccessRequirements.Default
 
-      val definition1 = buildSubscriptionFieldValue("field1", accessRequirements = access).definition
-      val definition2 = buildSubscriptionFieldValue("field2", accessRequirements = access).definition
+      val definition1 = buildSubscriptionFieldValue("fieldA", accessRequirements = access).definition
+      val definition2 = buildSubscriptionFieldValue("fieldB", accessRequirements = access).definition
 
       val value2 = SubscriptionFieldValue(definition2, FieldValue("oldValue2"))
 
@@ -119,7 +118,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       val access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
 
-      val definition = buildSubscriptionFieldValue("field-denied", accessRequirements = access).definition
+      val definition = buildSubscriptionFieldValue("fieldDenied", accessRequirements = access).definition
 
       val oldValues = Seq(SubscriptionFieldValue(definition, FieldValue("oldValue")))
 

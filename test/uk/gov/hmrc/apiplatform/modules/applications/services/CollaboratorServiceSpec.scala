@@ -20,7 +20,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
@@ -28,7 +27,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.VersionSubscription
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, _}
@@ -56,9 +54,6 @@ class CollaboratorServiceSpec
     )
 
   }
-
-  def version(version: ApiVersionNbr, status: ApiStatus, subscribed: Boolean): VersionSubscription =
-    VersionSubscription(ApiVersion(version, status, ApiAccess.PUBLIC, List.empty), subscribed)
 
   "add teamMember" should {
     "add teamMember successful" in new Setup {

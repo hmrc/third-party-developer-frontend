@@ -44,7 +44,8 @@ lazy val microservice = Project(appName, file("."))
         "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
         "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
         "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._",
-        "uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._"
+        "uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._",
+        "uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._"
     )
   )
   .settings(
@@ -57,7 +58,8 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._",
       "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
-      "uk.gov.hmrc.apiplatform.modules.common.domain.models._"
+      "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
+      "uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._"
     )
   )
   .settings(

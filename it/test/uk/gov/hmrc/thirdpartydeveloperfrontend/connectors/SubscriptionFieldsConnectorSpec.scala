@@ -29,13 +29,12 @@ import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, _}
 
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{AccessRequirements, FieldName, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorJsonFormatters._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions with SubscriptionsBuilder {
@@ -67,9 +66,9 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
     "api-subscription-fields-sandbox.use-proxy"                     -> true
   )
 
-  def fields(tpl: (FieldName, FieldValue)*): Fields.Alias = Map(tpl: _*)
+  def fields(tpl: (FieldName, FieldValue)*): Fields = Map(tpl: _*)
 
-  def rawFields(tpl: (String, String)*): Fields.Alias = tpl.toSeq.map(t => (FieldName(t._1), FieldValue(t._2))).toMap
+  def rawFields(tpl: (String, String)*): Fields = tpl.toSeq.map(t => (FieldName(t._1), FieldValue(t._2))).toMap
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
@@ -89,7 +88,7 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
   }
 
   "saveFieldValues" should {
-    val fieldsValues        = rawFields("field001" -> "value001", "field002" -> "value002")
+    val fieldsValues        = rawFields("fieldA" -> "value001", "fieldB" -> "value002")
     val subFieldsPutRequest = SubscriptionFieldsPutRequest(
       clientId,
       apiContext,
@@ -150,13 +149,13 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
           .willReturn(
             aResponse()
               .withStatus(BAD_REQUEST)
-              .withBody("""{"field1": "error1"}""")
+              .withBody("""{"fieldA": "error1"}""")
           )
       )
 
       val result = await(underTest.saveFieldValues(clientId, apiContext, apiVersion, fieldsValues))
 
-      result shouldBe SaveSubscriptionFieldsFailureResponse(Map("field1" -> "error1"))
+      result shouldBe SaveSubscriptionFieldsFailureResponse(Map("fieldA" -> "error1"))
     }
   }
 

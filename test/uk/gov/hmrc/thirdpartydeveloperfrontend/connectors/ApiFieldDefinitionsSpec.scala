@@ -18,11 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import play.api.libs.json.{JsSuccess, Json}
 
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.NoOne
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain.{ApiFieldDefinitions, FieldDefinition}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement.NoOne
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.{AccessRequirements, DevhubAccessRequirements}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
@@ -33,7 +32,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
       |    "apiVersion": "1.0",
       |    "fieldDefinitions": [
       |        {
-      |            "name": "field-name",
+      |            "name": "aFieldName",
       |            "description": "my-description",
       |            "shortDescription": "my-shortDescription",
       |            "hint": "my-hint",
@@ -47,7 +46,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
     ApiFieldDefinitions(
       ApiContext("my-context"),
       ApiVersionNbr("1.0"),
-      List(FieldDefinition(FieldName("field-name"), "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
+      List(FieldDefinition(FieldName("aFieldName"), "my-description", "my-shortDescription", "my-hint", "STRING", AccessRequirements.Default))
     )
   }
 
@@ -57,7 +56,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
       |    "apiVersion": "1.0",
       |    "fieldDefinitions": [
       |        {
-      |            "name": "field-name",
+      |            "name": "aFieldName",
       |            "description": "my-description",
       |            "shortDescription": "my-shortDescription",
       |            "hint": "my-hint",
@@ -85,7 +84,7 @@ class ApiFieldDefinitionsSpec extends AsyncHmrcSpec {
           ApiVersionNbr("1.0"),
           List(
             FieldDefinition(
-              name = FieldName("field-name"),
+              name = FieldName("aFieldName"),
               description = "my-description",
               shortDescription = "my-shortDescription",
               hint = "my-hint",

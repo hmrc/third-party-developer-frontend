@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.FieldName
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
 trait AccessRequirementsJsonFormatters {
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
   import play.api.libs.json.Json.JsValueWrapper
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.DevhubAccessRequirement._
 
   def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
     if (value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
@@ -33,15 +31,15 @@ trait AccessRequirementsJsonFormatters {
 
     override def writes(o: DevhubAccessRequirement): JsValue =
       JsString(o match {
-        case AdminOnly => "adminOnly"
-        case Anyone    => "anyone"
-        case NoOne     => "noOne"
+        case DevhubAccessRequirement.AdminOnly => "adminOnly"
+        case DevhubAccessRequirement.Anyone    => "anyone"
+        case DevhubAccessRequirement.NoOne     => "noOne"
       })
 
     override def reads(json: JsValue): JsResult[DevhubAccessRequirement] = json match {
-      case JsString("adminOnly") => JsSuccess(AdminOnly)
-      case JsString("anyone")    => JsSuccess(Anyone)
-      case JsString("noOne")     => JsSuccess(NoOne)
+      case JsString("adminOnly") => JsSuccess(DevhubAccessRequirement.AdminOnly)
+      case JsString("anyone")    => JsSuccess(DevhubAccessRequirement.Anyone)
+      case JsString("noOne")     => JsSuccess(DevhubAccessRequirement.NoOne)
       case _                     => JsError("Not a recognized DevhubAccessRequirement")
     }
   }
@@ -71,7 +69,6 @@ trait AccessRequirementsJsonFormatters {
 object AccessRequirementsJsonFormatters extends AccessRequirementsJsonFormatters
 
 trait SubscriptionsJsonFormatters extends ApplicationsJsonFormatters with AccessRequirementsJsonFormatters {
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
 
@@ -107,8 +104,6 @@ trait SubscriptionsJsonFormatters extends ApplicationsJsonFormatters with Access
        }).writes(o)
     }
   }
-
-  implicit val formatVersionSubscription: OFormat[VersionSubscription] = Json.format[VersionSubscription]
 
 }
 

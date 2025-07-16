@@ -26,17 +26,16 @@ import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.Status.{BAD_REQUEST, CREATED, OK}
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
@@ -55,7 +54,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      fields: Fields.Alias
+      fields: Fields
     )(implicit hc: HeaderCarrier
     ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -116,7 +115,7 @@ private[connectors] object SubscriptionFieldsConnectorDomain {
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      fields: Fields.Alias
+      fields: Fields
     )
 }
 
