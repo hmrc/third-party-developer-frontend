@@ -19,56 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
-trait AccessRequirementsJsonFormatters {
-  import play.api.libs.json._
-  import play.api.libs.functional.syntax._
-  import play.api.libs.json.Json.JsValueWrapper
-
-  def ignoreDefaultField[T](value: T, default: T, jsonFieldName: String)(implicit w: Writes[T]) =
-    if (value == default) None else Some((jsonFieldName, Json.toJsFieldJsValueWrapper(value)))
-
-  implicit val DevhubAccessRequirementFormat: Format[DevhubAccessRequirement] = new Format[DevhubAccessRequirement] {
-
-    override def writes(o: DevhubAccessRequirement): JsValue =
-      JsString(o match {
-        case DevhubAccessRequirement.AdminOnly => "adminOnly"
-        case DevhubAccessRequirement.Anyone    => "anyone"
-        case DevhubAccessRequirement.NoOne     => "noOne"
-      })
-
-    override def reads(json: JsValue): JsResult[DevhubAccessRequirement] = json match {
-      case JsString("adminOnly") => JsSuccess(DevhubAccessRequirement.AdminOnly)
-      case JsString("anyone")    => JsSuccess(DevhubAccessRequirement.Anyone)
-      case JsString("noOne")     => JsSuccess(DevhubAccessRequirement.NoOne)
-      case _                     => JsError("Not a recognized DevhubAccessRequirement")
-    }
-  }
-
-  implicit val DevhubAccessRequirementsReads: Reads[DevhubAccessRequirements] = (
-    ((JsPath \ "read").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default)) and
-      ((JsPath \ "write").read[DevhubAccessRequirement] or Reads.pure(DevhubAccessRequirement.Default))
-  )(DevhubAccessRequirements.apply _)
-
-  implicit val DevhubAccessRequirementsWrites: OWrites[DevhubAccessRequirements] = new OWrites[DevhubAccessRequirements] {
-
-    def writes(requirements: DevhubAccessRequirements) = {
-      Json.obj(
-        (
-          ignoreDefaultField(requirements.read, DevhubAccessRequirement.Default, "read") ::
-            ignoreDefaultField(requirements.write, DevhubAccessRequirement.Default, "write") ::
-            List.empty[Option[(String, JsValueWrapper)]]
-        ).filterNot(_.isEmpty).map(_.get): _*
-      )
-    }
-  }
-  implicit val AccessRequirementsReads: Reads[AccessRequirements] = Json.reads[AccessRequirements]
-
-  implicit val AccessRequirementsWrites: Writes[AccessRequirements] = Json.writes[AccessRequirements]
-}
-
-object AccessRequirementsJsonFormatters extends AccessRequirementsJsonFormatters
-
-trait SubscriptionsJsonFormatters extends ApplicationsJsonFormatters with AccessRequirementsJsonFormatters {
+trait SubscriptionsJsonFormatters extends ApplicationsJsonFormatters {
   import play.api.libs.json._
   import play.api.libs.functional.syntax._
 

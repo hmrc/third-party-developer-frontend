@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{AccessRequirementsJsonFormatters, ApplicationsJsonFormatters, SubscriptionsJsonFormatters}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.{ApplicationsJsonFormatters, SubscriptionsJsonFormatters}
 
 object SubscriptionFieldsConnectorJsonFormatters
     extends ApplicationsJsonFormatters
-    with SubscriptionsJsonFormatters
-    with AccessRequirementsJsonFormatters {
+    with SubscriptionsJsonFormatters {
 
   import SubscriptionFieldsConnectorDomain._
   import play.api.libs.json._
