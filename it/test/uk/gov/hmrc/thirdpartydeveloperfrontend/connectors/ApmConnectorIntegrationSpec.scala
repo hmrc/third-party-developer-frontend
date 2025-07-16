@@ -39,7 +39,6 @@ class ApmConnectorIntegrationSpec
     extends BaseConnectorIntegrationSpec
     with GuiceOneAppPerSuite
     with WireMockExtensions
-    with ApmConnectorJsonFormatters
     with FixedClock
     with ApplicationWithSubscriptionsFixtures
     with EitherValues {
