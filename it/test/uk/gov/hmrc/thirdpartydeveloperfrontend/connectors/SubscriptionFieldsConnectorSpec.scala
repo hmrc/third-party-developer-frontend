@@ -24,13 +24,11 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, _}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{AccessRequirements, FieldName, FieldValue, Fields}
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{FieldName, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorJsonFormatters._
@@ -43,19 +41,6 @@ class SubscriptionFieldsConnectorSpec extends BaseConnectorIntegrationSpec with 
   private val apiContext     = ApiContext("i-am-a-test")
   private val apiVersion     = ApiVersionNbr("1.0")
   private val urlPrefix      = "/field"
-
-  implicit val writesFieldDefinition: Writes[FieldDefinition] = (
-    (JsPath \ "name").write[FieldName] and
-      (JsPath \ "description").write[String] and
-      (JsPath \ "shortDescription").write[String] and
-      (JsPath \ "hint").write[String] and
-      (JsPath \ "type").write[String] and
-      (JsPath \ "access").write[AccessRequirements]
-  )(unlift(FieldDefinition.unapply))
-
-  implicit val writesApiFieldDefinitions: Writes[ApiFieldDefinitions]               = Json.writes[ApiFieldDefinitions]
-  implicit val writesApplicationApiFieldValues: Writes[ApplicationApiFieldValues]   = Json.writes[ApplicationApiFieldValues]
-  implicit val writesAllApiFieldDefinitionsResponse: Writes[AllApiFieldDefinitions] = Json.writes[AllApiFieldDefinitions]
 
   private val stubConfig = Configuration(
     "microservice.services.api-subscription-fields-production.port" -> stubPort,

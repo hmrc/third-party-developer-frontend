@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.net.URLEncoder.encode
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -85,31 +84,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 }
 
 private[connectors] object SubscriptionFieldsConnectorDomain {
-
-  case class ApplicationApiFieldValues(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fieldsId: UUID,
-      fields: Map[FieldName, FieldValue]
-    )
-
-  case class FieldDefinition(
-      name: FieldName,
-      description: String,
-      shortDescription: String,
-      hint: String,
-      `type`: String,
-      access: AccessRequirements
-    )
-
-  case class ApiFieldDefinitions(
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fieldDefinitions: List[FieldDefinition]
-    )
-
-  case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
 
   case class SubscriptionFieldsPutRequest(
       clientId: ClientId,

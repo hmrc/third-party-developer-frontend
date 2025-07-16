@@ -99,12 +99,6 @@ object SubscriptionFieldsService {
 
   }
 
-  type DefinitionsByApiVersion = Map[ApiIdentifier, Seq[SubscriptionFieldDefinition]]
-
-  object DefinitionsByApiVersion {
-    val empty = Map.empty[ApiIdentifier, Seq[SubscriptionFieldDefinition]]
-  }
-
   sealed trait AccessValidation
   case class ValidateAgainstRole(role: Collaborator.Role) extends AccessValidation
   case object SkipRoleValidation                          extends AccessValidation
