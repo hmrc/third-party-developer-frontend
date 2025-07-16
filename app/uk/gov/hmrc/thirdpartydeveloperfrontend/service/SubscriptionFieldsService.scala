@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{ApiFieldMap, DevhubAccessLevel, FieldValue, Fields}
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{ApiFieldMap, DevhubAccessLevel, FieldDefinition, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
@@ -80,7 +80,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     apmConnector.fetchAllPossibleSubscriptions(applicationId)
   }
 
-  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[SubscriptionFieldDefinition]] = {
+  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
     apmConnector.getAllFieldDefinitions(environment)
   }
 }

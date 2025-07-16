@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
@@ -142,7 +143,7 @@ class PushPullNotificationsSpec
     def showPushSecretsShouldRenderThePage(session: UserSession, request: FakeRequest[_])(application: ApplicationWithCollaborators) = {
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
-        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = "PPNSField")))
+        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), session, subsData)

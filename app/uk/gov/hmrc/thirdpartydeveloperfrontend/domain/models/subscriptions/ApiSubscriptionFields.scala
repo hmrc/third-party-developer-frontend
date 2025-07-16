@@ -21,17 +21,7 @@ import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 
 object ApiSubscriptionFields {
 
-  case class SubscriptionFieldDefinition(
-      name: FieldName,
-      description: String,
-      shortDescription: String,
-      hint: String,
-      `type`: String,
-      // validation: Option[ValidationGroup],
-      access: AccessRequirements
-    )
-
-  case class SubscriptionFieldValue(definition: SubscriptionFieldDefinition, value: FieldValue)
+  case class SubscriptionFieldValue(definition: FieldDefinition, value: FieldValue)
 
   sealed trait FieldsDeleteResult
 

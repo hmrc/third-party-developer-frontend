@@ -22,7 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
 trait ExtendedSubscriptionTestHelper extends SubscriptionTestHelper {
   self: SampleApplication =>
@@ -142,7 +142,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
     }
   }
 
-  def generateField(prefix: String, index: Int): SubscriptionFieldDefinition = {
+  def generateField(prefix: String, index: Int): FieldDefinition = {
     val name = generateName(prefix, index)
     if (FieldName.safeApply(name).isEmpty) println(s"BAD FIELD NAME $name")
     buildSubscriptionFieldValue(name).definition

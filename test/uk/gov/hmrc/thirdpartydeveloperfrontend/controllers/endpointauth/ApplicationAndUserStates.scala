@@ -36,7 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{AccessRequirements, FieldName, FieldValue}
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{AccessRequirements, FieldDefinition, FieldDefinitionType, FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
@@ -45,7 +45,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
   val applicationId: ApplicationId     = applicationIdOne
@@ -142,9 +141,9 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     )
   )
 
-  lazy val subscriptionFieldDefinitions: Map[FieldName, SubscriptionFieldDefinition] = Map(
-    apiFieldName     -> SubscriptionFieldDefinition(apiFieldName, "field desc", "field short desc", "hint", "STRING", AccessRequirements.Default),
-    apiPpnsFieldName -> SubscriptionFieldDefinition(apiPpnsFieldName, "field desc", "field short desc", "hint", "PPNSField", AccessRequirements.Default)
+  lazy val subscriptionFieldDefinitions: Map[FieldName, FieldDefinition] = Map(
+    apiFieldName     -> FieldDefinition(apiFieldName, "field desc", "hint", FieldDefinitionType.STRING, "field short desc", None, AccessRequirements.Default),
+    apiPpnsFieldName -> FieldDefinition(apiPpnsFieldName, "field desc", "hint", FieldDefinitionType.PPNS_FIELD, "field short desc", None, AccessRequirements.Default)
   )
 
   lazy val defaultApiVersion: ApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)

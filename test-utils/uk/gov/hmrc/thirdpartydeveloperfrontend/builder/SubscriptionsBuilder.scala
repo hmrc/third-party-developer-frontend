@@ -21,7 +21,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Applicati
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
 trait SubscriptionsBuilder {
 
@@ -59,7 +59,7 @@ trait SubscriptionsBuilder {
       hintOverride: Option[String] = None
     ): SubscriptionFieldValue = {
     val hint       = hintOverride.getOrElse(s"hint-$name")
-    val definition = SubscriptionFieldDefinition(FieldName(name), s"description-$name", s"shortDescription-$name", hint, "STRING", accessRequirements)
+    val definition = FieldDefinition(FieldName(name), s"description-$name", hint, FieldDefinitionType.STRING, s"shortDescription-$name", None, accessRequirements)
 
     SubscriptionFieldValue(definition, FieldValue(value.getOrElse(s"value-$name")))
   }
