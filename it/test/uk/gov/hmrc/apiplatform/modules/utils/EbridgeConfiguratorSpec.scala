@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.apiplatform.modules.utils
 
-import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.client.RequestBuilder
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class EbridgeConfiguratorSpec extends AsyncHmrcSpec {
@@ -46,7 +46,10 @@ class EbridgeConfiguratorSpec extends AsyncHmrcSpec {
         EbridgeConfigurator.configure(useProxy = true, "")(requestBuilder)
 
         verify(requestBuilder, times(1)).withProxy
-        verify(requestBuilder, never).setHeader(*)
+        verify(requestBuilder, never).setHeader(
+          eqTo(("x-api-key", ""))
+        )
+        verify(requestBuilder, times(1)).setHeader(*)
       }
 
       "not add a proxy or header to RequestBuilder when useProxy is false" in new Setup {

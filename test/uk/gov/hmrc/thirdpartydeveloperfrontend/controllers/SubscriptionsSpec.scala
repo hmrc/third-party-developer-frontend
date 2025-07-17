@@ -93,8 +93,8 @@ class SubscriptionsSpec
     fetchByApplicationIdReturns(developerApplication.id, developerApplication)
 
     val subsData = List(
-      exampleSubscriptionWithFields(developerApplication.id, developerApplication.clientId)("api1", 1),
-      exampleSubscriptionWithFields(developerApplication.id, developerApplication.clientId)("api2", 1)
+      exampleSubscriptionWithFields(developerApplication.id, developerApplication.clientId)("apiA", 1),
+      exampleSubscriptionWithFields(developerApplication.id, developerApplication.clientId)("apiB", 1)
     )
 
     val requestor = Actors.AppCollaborator("Bob".toLaxEmail)

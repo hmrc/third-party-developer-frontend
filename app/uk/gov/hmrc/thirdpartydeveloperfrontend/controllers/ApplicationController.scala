@@ -22,6 +22,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.State
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -34,7 +35,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
   def applicationService: ApplicationService
 
   def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
-    request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == "PPNSField"))
+    request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == FieldDefinitionType.PPNS_FIELD))
   }
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =

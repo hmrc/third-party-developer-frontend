@@ -30,13 +30,13 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{AccessRequirements, FieldDefinition, FieldDefinitionType, FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
@@ -45,8 +45,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SubscriptionFieldDefinition
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 
 trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole with HasAppState with MfaDetailBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
   val applicationId: ApplicationId     = applicationIdOne
@@ -85,9 +83,9 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val apiContext: ApiContext                       = ApiContext("ctx")
   lazy val apiVersion: ApiVersionNbr                    = ApiVersionNbr("1.0")
   lazy val apiIdentifier: ApiIdentifier                 = ApiIdentifier(apiContext, apiVersion)
-  lazy val apiFieldName: FieldName                      = FieldName("my_field")
+  lazy val apiFieldName: FieldName                      = FieldName("myField")
   lazy val apiFieldValue: FieldValue                    = FieldValue("my value")
-  lazy val apiPpnsFieldName: FieldName                  = FieldName("my_ppns_field")
+  lazy val apiPpnsFieldName: FieldName                  = FieldName("myPpnsField")
   lazy val apiPpnsFieldValue: FieldValue                = FieldValue("my ppns value")
   lazy val appWithSubsIds: ApplicationWithSubscriptions = application.withSubscriptions(Set(apiIdentifier))
   lazy val privacyPolicyUrl                             = "http://example.com/priv"
@@ -143,9 +141,9 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     )
   )
 
-  lazy val subscriptionFieldDefinitions: Map[FieldName, SubscriptionFieldDefinition] = Map(
-    apiFieldName     -> SubscriptionFieldDefinition(apiFieldName, "field desc", "field short desc", "hint", "STRING", AccessRequirements.Default),
-    apiPpnsFieldName -> SubscriptionFieldDefinition(apiPpnsFieldName, "field desc", "field short desc", "hint", "PPNSField", AccessRequirements.Default)
+  lazy val subscriptionFieldDefinitions: Map[FieldName, FieldDefinition] = Map(
+    apiFieldName     -> FieldDefinition(apiFieldName, "field desc", "hint", FieldDefinitionType.STRING, "field short desc", None, AccessRequirements.Default),
+    apiPpnsFieldName -> FieldDefinition(apiPpnsFieldName, "field desc", "hint", FieldDefinitionType.PPNS_FIELD, "field short desc", None, AccessRequirements.Default)
   )
 
   lazy val defaultApiVersion: ApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)

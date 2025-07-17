@@ -367,7 +367,7 @@ class ManageTeamSpec
 
         val pageNumber = 1
 
-        val apiVersion: APISubscriptionStatus    = exampleSubscriptionWithFields("api1", 1)
+        val apiVersion: APISubscriptionStatus    = exampleSubscriptionWithFields("apiA", 1)
         val subsData: Seq[APISubscriptionStatus] = Seq(
           apiVersion
         )

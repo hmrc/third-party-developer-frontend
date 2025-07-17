@@ -63,7 +63,7 @@ class ApplicationActionBuildersSpec
     val subscriptionWithSubFields =
       buildAPISubscriptionStatus(
         "api name",
-        fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionFields.asAppWithCollaborators, List(buildSubscriptionFieldValue("field1"))))
+        fields = Some(buildSubscriptionFieldsWrapper(applicationWithSubscriptionFields.asAppWithCollaborators, List(buildSubscriptionFieldValue("fieldA"))))
       )
 
     val underTest = new TestController(cookieSigner, mcc, sessionServiceMock, errorHandler, applicationServiceMock, applicationActionServiceMock)

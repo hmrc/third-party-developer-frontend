@@ -18,11 +18,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldDefinition, SubscriptionFieldValue, SubscriptionFieldsWrapper}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
 trait ExtendedSubscriptionTestHelper extends SubscriptionTestHelper {
   self: SampleApplication =>
@@ -129,10 +129,24 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
     )
   }
 
-  def generateName(prefix: String, index: Int = 1) = s"$prefix-name-$index"
+  def generateName(prefix: String, index: Int = 1) = {
+    def suffix(index: Int): Char = "ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwxyz".charAt(index - 1)
 
-  def generateField(prefix: String, index: Int): SubscriptionFieldDefinition =
-    buildSubscriptionFieldValue(name = generateName(prefix, index)).definition
+    if (index <= 52) {
+      s"${prefix}${suffix(index)}"
+
+    } else {
+      val tens  = index / 52
+      val units = index % 52
+      s"${prefix}${suffix(tens)}${suffix(units)}"
+    }
+  }
+
+  def generateField(prefix: String, index: Int): FieldDefinition = {
+    val name = generateName(prefix, index)
+    if (FieldName.safeApply(name).isEmpty) println(s"BAD FIELD NAME $name")
+    buildSubscriptionFieldValue(name).definition
+  }
 
   def generateValue(prefix: String) = s"$prefix-value"
 

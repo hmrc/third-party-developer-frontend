@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apiplatformmicroservice.common.utils
+package uk.gov.hmrc.apiplatform.modules.common.utils
 
 import uk.gov.hmrc.http.client.RequestBuilder
 

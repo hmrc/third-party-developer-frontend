@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.net.URLEncoder.encode
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,26 +25,38 @@ import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import play.api.http.Status.{BAD_REQUEST, CREATED, OK}
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.apiplatformmicroservice.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.applications.subscriptions.domain.models.{FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+
+private[connectors] object SubscriptionFieldsConnectorDomain {
+
+  case class SubscriptionFieldsPutRequest(
+      clientId: ClientId,
+      apiContext: ApiContext,
+      apiVersion: ApiVersionNbr,
+      fields: Fields
+    )
+
+  object SubscriptionFieldsPutRequest {
+    import play.api.libs.json.Format
+    implicit val formatSubscriptionFieldsPutRequest: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
+  }
+}
 
 abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
   val http: HttpClientV2
   val environment: Environment
   val serviceBaseUrl: String
-
-  import SubscriptionFieldsConnectorJsonFormatters._
 
   def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
@@ -55,7 +66,7 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
       clientId: ClientId,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
-      fields: Fields.Alias
+      fields: Fields
     )(implicit hc: HeaderCarrier
     ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
@@ -83,41 +94,6 @@ abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext
 
   private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
     s"$serviceBaseUrl/field/application/${urlEncode(clientId.value)}/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
-}
-
-private[connectors] object SubscriptionFieldsConnectorDomain {
-
-  case class ApplicationApiFieldValues(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fieldsId: UUID,
-      fields: Map[FieldName, FieldValue]
-    )
-
-  case class FieldDefinition(
-      name: FieldName,
-      description: String,
-      shortDescription: String,
-      hint: String,
-      `type`: String,
-      access: AccessRequirements
-    )
-
-  case class ApiFieldDefinitions(
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fieldDefinitions: List[FieldDefinition]
-    )
-
-  case class AllApiFieldDefinitions(apis: Seq[ApiFieldDefinitions])
-
-  case class SubscriptionFieldsPutRequest(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fields: Fields.Alias
-    )
 }
 
 @Singleton
