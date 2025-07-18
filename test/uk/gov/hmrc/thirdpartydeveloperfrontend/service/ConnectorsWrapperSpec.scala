@@ -54,5 +54,4 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with Applicati
   val sandboxClientId       = ClientId("Client ID")
 
   val sandboxApplication = standardApp.inSandbox().withId(sandboxApplicationId)
-
-z}
+}
