@@ -57,5 +57,4 @@ trait ApmConnectorApplicationModule extends ApmConnectorModule {
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
       .execute[ApplicationId]
   }
-
 }

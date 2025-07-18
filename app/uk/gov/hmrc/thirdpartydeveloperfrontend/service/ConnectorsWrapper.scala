@@ -42,20 +42,6 @@ class ConnectorsWrapper @Inject() (
       case _                      => Connectors(sandboxApplicationConnector, sandboxPushPullNotificationsConnector)
     }
   }
-
-  // def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
-  //   val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
-  //   val sandboxApplicationFuture    = sandboxApplicationConnector.fetchApplicationById(id) recover {
-  //     case _ => None
-  //   }
-
-  //   for {
-  //     productionApplication <- productionApplicationFuture
-  //     sandboxApplication    <- sandboxApplicationFuture
-  //   } yield {
-  //     productionApplication.orElse(sandboxApplication)
-  //   }
-  // }
 }
 
 case class Connectors(
