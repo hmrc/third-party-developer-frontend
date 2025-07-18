@@ -34,13 +34,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApplicationCommandConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
 
-  trait Setup extends FixedClock with ApplicationCommandConnectorMockModule with ThirdPartyOrchestratorConnectorMockModule {
+  trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
@@ -67,7 +67,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val applicationService = new ApplicationService(
       mock[ApmConnector],
       connectorsWrapper,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
       mockDeveloperConnector,
@@ -77,18 +77,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       mockAuditService,
       clock
     )
-
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
-      when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
-        .thenReturn(successful(Some(application)))
-      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
-    }
-
-    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
-      when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
-      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
-        .thenReturn(successful(Some(application)))
-    }
   }
 
   val productionApplication: ApplicationWithCollaborators = standardApp

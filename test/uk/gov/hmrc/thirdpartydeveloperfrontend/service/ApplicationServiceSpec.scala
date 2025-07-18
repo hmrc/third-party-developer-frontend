@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApplicationCommandConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -51,7 +51,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     with CommonSessionFixtures
     with FixedClock {
 
-  trait Setup extends FixedClock with ApplicationCommandConnectorMockModule with ThirdPartyOrchestratorConnectorMockModule {
+  trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
@@ -83,7 +83,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val applicationService = new ApplicationService(
       mockApmConnector,
       connectorsWrapper,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
       mockDeveloperConnector,
@@ -93,18 +93,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockAuditService,
       clock
     )
-
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
-      when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
-        .thenReturn(successful(Some(application)))
-      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
-    }
-
-    def theSandboxConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
-      when(mockProductionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
-      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId))
-        .thenReturn(successful(Some(application)))
-    }
   }
 
   val productionApplication: ApplicationWithCollaborators = standardApp
@@ -160,7 +148,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val userId      = UserId.random
       val newLocation = PrivacyPolicyLocations.Url("http://example.com")
       val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant, newLocation)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updatePrivacyPolicyLocation(productionApplication, userId, newLocation))
 
@@ -173,7 +161,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val userId      = UserId.random
       val newLocation = TermsAndConditionsLocations.Url("http://example.com")
       val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant, newLocation)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updateTermsConditionsLocation(productionApplication, userId, newLocation))
 
@@ -188,7 +176,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val riEmail       = "ri@example.com".toLaxEmail
       val requesterName = "ms admin"
       val cmd           = ApplicationCommands.VerifyResponsibleIndividual(userId, instant, requesterName, riName, riEmail)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
       val result        = await(applicationService.verifyResponsibleIndividual(productionApplication, userId, requesterName, riName, riEmail))
 
       result shouldBe ApplicationUpdateSuccessful
@@ -251,7 +239,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "delete standard subordinate application when requested by an admin" in new Setup {
       val cmd = ApplicationCommands.DeleteApplicationByCollaborator(adminSession.developer.userId, reasons, instant)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       await(applicationService.deleteSubordinateApplication(adminSession, sandboxApplication))
     }
@@ -377,7 +365,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val riName  = "Mr Responsible"
       val riEmail = "ri@example.com".toLaxEmail
       val cmd     = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, instant, riName, riEmail)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
       val result = await(applicationService.updateResponsibleIndividual(productionApplication, userId, riName, riEmail))
 

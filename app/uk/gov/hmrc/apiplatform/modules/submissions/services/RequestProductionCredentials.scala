@@ -32,13 +32,13 @@ import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, Clock
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, _}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 
 @Singleton
 class RequestProductionCredentials @Inject() (
     tpaConnector: ThirdPartyApplicationSubmissionsConnector,
-    applicationCommandConnector: ApplicationCommandConnector,
+    apmCmdModule: ApmConnectorCommandModule,
     deskproConnector: DeskproConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
@@ -90,7 +90,7 @@ class RequestProductionCredentials @Inject() (
     }
 
     for {
-      dispatchResult <- applicationCommandConnector.dispatch(application.id, getCommand(), Set.empty)
+      dispatchResult <- apmCmdModule.dispatch(application.id, getCommand(), Set.empty)
       result         <- handleCmdResult(application, dispatchResult) // if passed then continue else deal with errors
 
     } yield result

@@ -42,7 +42,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 class ApplicationService @Inject() (
     apmApplicationConnector: ApmConnectorApplicationModule,
     connectorWrapper: ConnectorsWrapper,
-    appCmdConnector: ApplicationCommandConnector,
+    apmCmdModule: ApmConnectorCommandModule,
     subscriptionFieldsService: SubscriptionFieldsService,
     deskproConnector: DeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
@@ -58,7 +58,7 @@ class ApplicationService @Inject() (
     thirdPartyOrchestratorConnector.create(createApplicationRequest)
 
   def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
-    appCmdConnector.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
+    apmCmdModule.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
   }
 
   def updatePrivacyPolicyLocation(application: ApplicationWithCollaborators, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier)
@@ -273,7 +273,7 @@ object ApplicationService {
 
   trait ApplicationConnector {
     def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
-    def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
+    // def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]]
     def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
   }
 }

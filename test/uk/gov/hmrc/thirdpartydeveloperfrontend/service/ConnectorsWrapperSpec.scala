@@ -18,12 +18,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.Period
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.failed
 
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -45,25 +43,6 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with Applicati
       mock[PushPullNotificationsConnector],
       mockAppConfig
     )
-
-    def theProductionConnectorWillReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators) = {
-      when(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(Some(application)))
-      when(connectors.sandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(None))
-    }
-
-    def theSandboxConnectorWillReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators) = {
-      when(connectors.productionApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(None))
-      when(connectors.sandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(Future.successful(Some(application)))
-    }
-
-    def givenProductionSuccess() = {
-      when(connectors.productionApplicationConnector.fetchApplicationById(productionApplicationId)).thenReturn(Future.successful(Some(productionApplication)))
-    }
-
-    def givenSandboxFailure(errorCode: Int): Any = {
-      val error = if (errorCode / 100 == 4) UpstreamErrorResponse("message", errorCode, errorCode) else UpstreamErrorResponse("message", errorCode, errorCode)
-      when(connectors.sandboxApplicationConnector.fetchApplicationById(productionApplicationId)).thenReturn(failed(error))
-    }
   }
 
   val productionApplicationId = ApplicationId.random
@@ -76,33 +55,4 @@ class ConnectorsWrapperSpec extends AsyncHmrcSpec with FixedClock with Applicati
 
   val sandboxApplication = standardApp.inSandbox().withId(sandboxApplicationId)
 
-  // "fetchByApplicationId" when {
-  //   "return the application fetched from the production connector when it exists there" in new Setup {
-  //     theProductionConnectorWillReturnTheApplication(productionApplicationId, productionApplication)
-  //     val result = await(connectors.fetchApplicationById(productionApplicationId))
-  //     result shouldBe Some(productionApplication)
-  //   }
-
-  //   "return the application fetched from the production connector when it exists there and sandbox throws 4xx" in new Setup {
-  //     givenProductionSuccess()
-  //     givenSandboxFailure(Status.BAD_REQUEST)
-
-  //     val result = await(connectors.fetchApplicationById(productionApplicationId))
-  //     result shouldBe Some(productionApplication)
-  //   }
-
-  //   "return the application fetched from the production connector when it exists there and sandbox throws 5xx" in new Setup {
-  //     givenProductionSuccess()
-  //     givenSandboxFailure(Status.BAD_REQUEST)
-
-  //     val result = await(connectors.fetchApplicationById(productionApplicationId))
-  //     result shouldBe Some(productionApplication)
-  //   }
-
-  //   "return the application fetched from the sandbox connector when it exists there" in new Setup {
-  //     theSandboxConnectorWillReturnTheApplication(sandboxApplicationId, sandboxApplication)
-  //     val result = await(connectors.fetchApplicationById(sandboxApplicationId))
-  //     result shouldBe Some(sandboxApplication)
-  //   }
-  // }
-}
+z}

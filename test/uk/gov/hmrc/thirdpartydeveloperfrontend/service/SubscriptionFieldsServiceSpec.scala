@@ -62,17 +62,6 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     when(mockConnectorsWrapper.forEnvironment(application.deployedTo))
       .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockPushPullNotificationsConnector))
-
-    when(
-      mockThirdPartyApplicationConnector
-        .fetchApplicationById(eqTo(applicationId))(*)
-    ).thenReturn(
-      Future.successful(
-        Some(
-          standardApp
-        )
-      )
-    )
   }
 
   "saveFieldsValues" should {

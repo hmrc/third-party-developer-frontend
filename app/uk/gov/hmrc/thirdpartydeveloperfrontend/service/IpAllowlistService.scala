@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{Appl
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnectorCommandModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
@@ -37,7 +37,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 class IpAllowlistService @Inject() (
     flowRepository: FlowRepository,
     connectorWrapper: ConnectorsWrapper,
-    applicationCommandConnector: ApplicationCommandConnector,
+    apmCmdModule: ApmConnectorCommandModule,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
@@ -92,7 +92,7 @@ class IpAllowlistService @Inject() (
                     app.details.ipAllowlist.allowlist.map(CidrBlock(_)).toList,
                     flow.allowlist.map(CidrBlock(_)).toList
                   )
-      response <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
+      response <- apmCmdModule.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
       _        <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
     } yield response
   }
@@ -111,7 +111,7 @@ class IpAllowlistService @Inject() (
       )
 
       for {
-        response <- applicationCommandConnector.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
+        response <- apmCmdModule.dispatch(app.id, command, Set.empty).map(_ => ApplicationUpdateSuccessful)
         _        <- flowRepository.deleteBySessionIdAndFlowType(sessionId, IP_ALLOW_LIST)
       } yield response
     }

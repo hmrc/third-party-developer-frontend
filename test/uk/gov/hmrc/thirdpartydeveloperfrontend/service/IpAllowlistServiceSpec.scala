@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
@@ -56,7 +56,8 @@ class IpAllowlistServiceSpec
 
   trait Setup extends FlowRepositoryMockModule
       with FixedClock
-      with ApplicationCommandConnectorMockModule {
+      with ApmConnectorMockModule
+      with ApmConnectorCommandModuleMockModule {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val sessionId                  = UserSessionId.random
@@ -69,7 +70,7 @@ class IpAllowlistServiceSpec
     val underTest = new IpAllowlistService(
       FlowRepositoryMock.aMock,
       mockConnectorsWrapper,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       clock
     )
   }
@@ -179,14 +180,14 @@ class IpAllowlistServiceSpec
         List(CidrBlock("1.1.1.1/24"), CidrBlock("2.2.2.2/24"))
       )
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(app)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(app)
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(sessionId, IP_ALLOW_LIST)
 
       val result = await(underTest.activateIpAllowlist(app, sessionId, standardDeveloper.email))
 
       result shouldBe ApplicationUpdateSuccessful
 
-      inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+      inside(ApmConnectorCommandModuleMock.Dispatch.verifyCommand()) {
         case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
           actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
           required shouldBe true
@@ -240,14 +241,14 @@ class IpAllowlistServiceSpec
         List(CidrBlock("1.1.1.1/24")),
         List.empty
       )
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(app)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(app)
       FlowRepositoryMock.DeleteBySessionIdAndFlowType.thenReturnSuccess(sessionId, IP_ALLOW_LIST)
 
       val result = await(underTest.deactivateIpAllowlist(app, sessionId, standardDeveloper.email))
 
       result shouldBe ApplicationUpdateSuccessful
 
-      inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+      inside(ApmConnectorCommandModuleMock.Dispatch.verifyCommand()) {
         case ApplicationCommands.ChangeIpAllowlist(actor, _, required, oldIpAllowlist, newIpAllowlist) =>
           actor shouldBe Actors.AppCollaborator(standardDeveloper.email)
           required shouldBe false

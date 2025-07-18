@@ -33,16 +33,15 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApplicationCommandConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApmConnectorCommandModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    apmApplicationModule: ApmConnectorApplicationModule,
+    apmConnector: ApmConnectorApplicationModule with ApmConnectorCommandModule,
     thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
-    appCmdConnector: ApplicationCommandConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends ClockNow with EitherTHelper[String] {
@@ -55,10 +54,10 @@ class UpliftJourneyService @Inject() (
         sellResellOrDistribute <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
         subscriptionFlow       <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
-        apiIdsToSubscribeTo <- liftF(apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
+        apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
         upliftRequest        = UpliftRequest(sellResellOrDistribute, apiIdsToSubscribeTo, userSession.developer.email.text)
-        upliftedAppId       <- liftF(apmApplicationModule.upliftApplicationV2(sandboxAppId, upliftRequest))
+        upliftedAppId       <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftRequest))
       } yield upliftedAppId
     )
       .value
@@ -73,14 +72,14 @@ class UpliftJourneyService @Inject() (
       for {
         flow                         <- flowService.fetchFlow(userSession)
         subscriptionFlow              = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
-        upliftableApiIds             <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
+        upliftableApiIds             <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
         subscriptionsWithFlowAdjusted = subscriptions.filter(SubscriptionsFilter(upliftableApiIds, subscriptionFlow))
       } yield subscriptionsWithFlowAdjusted
     )
 
   def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
     for {
-      upliftableSubscriptions <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
+      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
       _                       <- flowService.storeApiSubscriptions(apiSubscriptions, userSession)
     } yield apiSubscriptions
@@ -97,7 +96,7 @@ class UpliftJourneyService @Inject() (
         .map(_.name)
 
     for {
-      upliftableApiIds <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
+      upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       flow             <- flowService.fetchFlow(userSession)
       subscriptionFlow  = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
     } yield {
@@ -149,7 +148,7 @@ class UpliftJourneyService @Inject() (
         instant(),
         sellResellOrDistribute
       )
-      appCmdConnector.dispatch(application.id, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
+      apmConnector.dispatch(application.id, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
     } else {
       Future.successful(ApplicationUpdateSuccessful)
     }

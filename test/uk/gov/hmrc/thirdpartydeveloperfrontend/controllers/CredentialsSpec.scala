@@ -42,7 +42,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -79,7 +79,8 @@ class CredentialsSpec
     def anApplication: ApplicationWithCollaborators = standardApp.withCollaborators(userSession.developer.email.asDeveloperCollaborator)
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with ApplicationCommandConnectorMockModule {
+  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with ApmConnectorMockModule
+      with ApmConnectorCommandModuleMockModule {
     val credentialsView: CredentialsView                       = app.injector.instanceOf[CredentialsView]
     val clientIdView: ClientIdView                             = app.injector.instanceOf[ClientIdView]
     val clientSecretsView: ClientSecretsView                   = app.injector.instanceOf[ClientSecretsView]
@@ -92,7 +93,7 @@ class CredentialsSpec
       mockErrorHandler,
       applicationServiceMock,
       clientSecretHashingService,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       applicationActionServiceMock,
       mock[ThirdPartyDeveloperConnector],
       mock[AuditService],
@@ -229,7 +230,7 @@ class CredentialsSpec
   "addClientSecret" should {
     "add the client secret" in new Setup with ApplicationProviderWithAdmin {
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(application)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -237,7 +238,7 @@ class CredentialsSpec
     }
 
     "display the error when the maximum limit of secret has been exceeded in a production app" in new Setup with ApplicationProviderWithAdmin {
-      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
+      ApmConnectorCommandModuleMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -247,7 +248,7 @@ class CredentialsSpec
     "display the error when the maximum limit of secret has been exceeded for sandbox app" in new Setup with ApplicationProviderWithAdmin {
       override def modifiers = _.inSandbox()
 
-      ApplicationCommandConnectorMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
+      ApmConnectorCommandModuleMock.Dispatch.thenFailsWith(CommandFailures.ClientSecretLimitExceeded)
 
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
 
@@ -267,7 +268,7 @@ class CredentialsSpec
       val result: Future[Result] = underTest.addClientSecret(applicationId)(loggedInRequest)
 
       status(result) shouldBe FORBIDDEN
-      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
+      ApmConnectorCommandModuleMock.Dispatch.verifyNeverCalled()
     }
 
     "display the error page when the application has not reached production state" in new Setup with ApplicationProviderWithAdmin {
@@ -276,7 +277,7 @@ class CredentialsSpec
       val result: Future[Result] = (underTest.addClientSecret(applicationId)(loggedInRequest))
 
       status(result) shouldBe BAD_REQUEST
-      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
+      ApmConnectorCommandModuleMock.Dispatch.verifyNeverCalled()
     }
 
     "return to the login page when the user is not logged in" in new Setup with ApplicationProviderWithAdmin {
@@ -284,7 +285,7 @@ class CredentialsSpec
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      ApplicationCommandConnectorMock.Dispatch.verifyNeverCalled()
+      ApmConnectorCommandModuleMock.Dispatch.verifyNeverCalled()
     }
   }
 
@@ -325,7 +326,7 @@ class CredentialsSpec
     val clientSecretId = ClientSecret.Id.random
 
     "delete the selected client secret" in new Setup with ApplicationProviderWithAdmin {
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(application)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(application)
 
       val result: Future[Result] = underTest.deleteClientSecretAction(applicationId, clientSecretId)(loggedInRequest)
 

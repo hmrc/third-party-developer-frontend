@@ -21,20 +21,19 @@ import scala.concurrent.Future.successful
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptionsFixtures}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionsFixtures
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonEmailData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscriptionsFixtures {
 
-  trait Setup
-      extends ApplicationCommandConnectorMockModule {
+  trait Setup extends ApmConnectorMockModule with ApmConnectorCommandModuleMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
@@ -53,15 +52,9 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
     val subscriptionsService = new SubscriptionsService(
       mockDeskproConnector,
       mockApmConnector,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       FixedClock.clock
     )
-
-    def theProductionConnectorthenReturnTheApplication(applicationId: ApplicationId, application: ApplicationWithCollaborators): Unit = {
-      when(mockProductionApplicationConnector.fetchApplicationById(applicationId))
-        .thenReturn(successful(Some(application)))
-      when(mockSandboxApplicationConnector.fetchApplicationById(applicationId)).thenReturn(successful(None))
-    }
 
   }
 
@@ -89,9 +82,8 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
 
   "Subscribe to API" should {
     "with no subscription fields definitions" in new Setup {
-      theProductionConnectorthenReturnTheApplication(standardApp.id, standardApp)
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(standardApp)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(standardApp)
 
       private val result =
         await(subscriptionsService.subscribeToApi(standardApp, apiIdentifierFour, CommonEmailData.altDev))
@@ -103,9 +95,8 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
 
   "Unsubscribe from API" should {
     "unsubscribe application from an API version" in new Setup {
-      theProductionConnectorthenReturnTheApplication(standardApp.id, standardApp)
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(standardApp)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(standardApp)
 
       private val result =
         await(subscriptionsService.unsubscribeFromApi(standardApp, apiIdentifierOne, CommonEmailData.altDev))

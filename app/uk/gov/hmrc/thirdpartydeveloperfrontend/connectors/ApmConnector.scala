@@ -43,7 +43,8 @@ class ApmConnector @Inject() (val http: HttpClientV2, val config: ApmConnector.C
     with ApmConnectorSubscriptionFieldsModule
     with ApmConnectorApiDefinitionModule
     with ApmConnectorApplicationModule
-    with ApmConnectorCombinedApisModule {
+    with ApmConnectorCombinedApisModule
+    with ApmConnectorCommandModule {
 
   val api = API("api-platform-microservice")
 

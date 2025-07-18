@@ -34,13 +34,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{
   ThirdPartyDeveloperConnector
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApplicationCommandConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
 
-  trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with FixedClock with ApplicationCommandConnectorMockModule
+  trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule
       with ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -71,7 +71,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val applicationService = new ApplicationService(
       mockApmConnector,
       connectorsWrapper,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
       mockDeveloperConnector,

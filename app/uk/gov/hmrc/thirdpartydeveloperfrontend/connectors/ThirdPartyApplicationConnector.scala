@@ -27,7 +27,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptions}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
@@ -60,7 +60,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
         configureEbridgeIfRequired(
           http
-            .get(url"$url?${Seq[(String,String)]("userId" -> userId.toString(), "environment" -> environment.toString)}")
+            .get(url"$url?${Seq[(String, String)]("userId" -> userId.toString(), "environment" -> environment.toString)}")
         )
           .execute[Seq[ApplicationWithSubscriptions]]
           .andThen {
@@ -72,18 +72,6 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
     } else {
       Future.successful(Seq.empty)
-    }
-
-  def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
-    if (isEnabled) {
-      metrics.record(api) {
-        configureEbridgeIfRequired(
-          http.get(url"$serviceBaseUrl/application/${id}")
-        )
-          .execute[Option[ApplicationWithCollaborators]]
-      }
-    } else {
-      Future.successful(None)
     }
 
 // Move to APM

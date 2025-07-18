@@ -42,7 +42,8 @@ class ScalaBasedConfigurationModule extends Module {
       bind[ApmConnectorApiDefinitionModule].to[ApmConnector],
       bind[ApmConnectorSubscriptionFieldsModule].to[ApmConnector],
       bind[ApmConnectorApplicationModule].to[ApmConnector],
-      bind[ApmConnectorCombinedApisModule].to[ApmConnector]
+      bind[ApmConnectorCombinedApisModule].to[ApmConnector],
+      bind[ApmConnectorCommandModule].to[ApmConnector]
     )
   }
 }

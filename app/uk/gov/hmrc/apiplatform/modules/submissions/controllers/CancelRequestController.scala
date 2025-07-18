@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CancelledRequestForProductionCredentialsView, ConfirmCancelRequestForProductionCredentialsView}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnectorCommandModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
@@ -60,7 +60,7 @@ class CancelRequestController @Inject() (
     val applicationService: ApplicationService,
     mcc: MessagesControllerComponents,
     val submissionService: SubmissionService,
-    appCmdConnector: ApplicationCommandConnector,
+    appCmdModule: ApmConnectorCommandModule,
     confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
     cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
     val clock: Clock
@@ -105,7 +105,7 @@ class CancelRequestController @Inject() (
                             failed("Bad form data")
                           )
           cancelAction <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
-          _            <- ET.liftF(appCmdConnector.dispatchWithThrow(appId, deleteRequest, Set.empty))
+          _            <- ET.liftF(appCmdModule.dispatchWithThrow(appId, deleteRequest, Set.empty))
         } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
       )
     x.fold[Result](identity, identity)

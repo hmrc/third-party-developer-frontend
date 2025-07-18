@@ -26,11 +26,11 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchSuccessResult, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 
 @Singleton
 class CollaboratorService @Inject() (
-    applicationCommandConnector: ApplicationCommandConnector,
+    apmCmdModule: ApmConnectorCommandModule,
     developerConnector: ThirdPartyDeveloperConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
@@ -51,7 +51,7 @@ class CollaboratorService @Inject() (
       adminsToEmail  = adminsAsUsers.filter(_.verified).map(_.email).toSet
       userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail) // TODO - if we adding an admin, check they are registered and verified.
       addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), instant())
-      response      <- applicationCommandConnector.dispatch(app.id, addCommand, adminsToEmail)
+      response      <- apmCmdModule.dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }
 
@@ -75,7 +75,7 @@ class CollaboratorService @Inject() (
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified).map(_.email).toSet
       removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, instant())
-      response     <- applicationCommandConnector.dispatch(app.id, removeCommand, adminsToEmail)
+      response     <- apmCmdModule.dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
   }
 }

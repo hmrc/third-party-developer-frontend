@@ -37,7 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
 
-class ApplicationCommandConnectorSpec
+class ApmConnectorCommandModuleSpec
     extends AsyncHmrcSpec
     with WireMockSugar
     with GuiceOneAppPerSuite
@@ -67,7 +67,7 @@ class ApplicationCommandConnectorSpec
     val httpClient = app.injector.instanceOf[HttpClientV2]
 
     val config    = ApmConnector.Config(wireMockUrl)
-    val connector = new ApplicationCommandConnector(httpClient, config) {}
+    val connector = new ApmConnector(httpClient, config, new NoopConnectorMetrics) {}
   }
 
   "dispatch" should {
