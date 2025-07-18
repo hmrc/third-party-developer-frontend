@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 
 @Singleton
 class ApplicationService @Inject() (
-    apmConnector: ApmConnector,
+    apmApplicationConnector: ApmConnectorApplicationModule,
     connectorWrapper: ConnectorsWrapper,
     appCmdConnector: ApplicationCommandConnector,
     subscriptionFieldsService: SubscriptionFieldsService,
@@ -111,7 +111,7 @@ class ApplicationService @Inject() (
   }
 
   def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] = {
-    apmConnector.fetchApplicationById(applicationId)
+    apmApplicationConnector.fetchApplicationById(applicationId)
   }
 
   def fetchCredentials(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationToken] =

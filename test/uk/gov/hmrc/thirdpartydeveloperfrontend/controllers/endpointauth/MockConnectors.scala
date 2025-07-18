@@ -32,8 +32,6 @@ trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
   val deskproConnector: DeskproConnector                                                   = mock[DeskproConnector]
   val flowRepository: FlowRepository                                                       = mock[FlowRepository]
   val apmConnector: ApmConnector                                                           = mock[ApmConnector]
-  val sandboxSubsFieldsConnector: SandboxSubscriptionFieldsConnector                       = mock[SandboxSubscriptionFieldsConnector]
-  val productionSubsFieldsConnector: ProductionSubscriptionFieldsConnector                 = mock[ProductionSubscriptionFieldsConnector]
   val sandboxPushPullNotificationsConnector: SandboxPushPullNotificationsConnector         = mock[SandboxPushPullNotificationsConnector]
   val productionPushPullNotificationsConnector: ProductionPushPullNotificationsConnector   = mock[ProductionPushPullNotificationsConnector]
   val thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,118 +14,119 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
+// /*
+//  * Copyright 2023 HM Revenue & Customs
+//  *
+//  * Licensed under the Apache License, Version 2.0 (the "License");
+//  * you may not use this file except in compliance with the License.
+//  * You may obtain a copy of the License at
+//  *
+//  *     http://www.apache.org/licenses/LICENSE-2.0
+//  *
+//  * Unless required by applicable law or agreed to in writing, software
+//  * distributed under the License is distributed on an "AS IS" BASIS,
+//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  * See the License for the specific language governing permissions and
+//  * limitations under the License.
+//  */
 
-import java.net.URLEncoder.encode
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+// package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.pattern.FutureTimeoutSupport
+// import java.net.URLEncoder.encode
+// import javax.inject.{Inject, Singleton}
+// import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.http.Status.{BAD_REQUEST, CREATED, OK}
-import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
+// import org.apache.pekko.actor.ActorSystem
+// import org.apache.pekko.pattern.FutureTimeoutSupport
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.SubscriptionFieldsConnectorDomain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
+// import play.api.http.Status.{BAD_REQUEST, CREATED, OK}
+// import play.api.libs.json.{JsSuccess, Json}
+// import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+// import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 
-private[connectors] object SubscriptionFieldsConnectorDomain {
+// import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+// import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+// import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
+// import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+// import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
+// import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+// import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+// import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
+// import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
-  case class SubscriptionFieldsPutRequest(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fields: Fields
-    )
+// abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
+//   val http: HttpClientV2
+//   val environment: Environment
+//   val serviceBaseUrl: String
 
-  object SubscriptionFieldsPutRequest {
-    import play.api.libs.json.Format
-    implicit val formatSubscriptionFieldsPutRequest: Format[SubscriptionFieldsPutRequest] = Json.format[SubscriptionFieldsPutRequest]
-  }
-}
+//   def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
-abstract class AbstractSubscriptionFieldsConnector(implicit ec: ExecutionContext) extends SubscriptionFieldsConnector with Retries with ApplicationLogger {
-  val http: HttpClientV2
-  val environment: Environment
-  val serviceBaseUrl: String
+//   import uk.gov.hmrc.http.HttpReads.Implicits._
 
-  def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
+//   def saveFieldValues(
+//       clientId: ClientId,
+//       apiContext: ApiContext,
+//       apiVersion: ApiVersionNbr,
+//       fields: Fields
+//     )(implicit hc: HeaderCarrier
+//     ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
+//     val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
 
-  import uk.gov.hmrc.http.HttpReads.Implicits._
+//     configureEbridgeIfRequired(
+//       http
+//         .put(url"$url")
+//         .withBody(Json.toJson(UpsertFieldValuesRequest(fields)))
+//     )
+//       .execute[HttpResponse]
+//       .map { response =>
+//         response.status match {
+//           case BAD_REQUEST  =>
+//             Json.parse(response.body).validate[Map[String, String]] match {
+//               case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
+//               case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
+//             }
+//           case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
+//           case statusCode   => throw UpstreamErrorResponse("Failed to put subscription fields", statusCode)
+//         }
+//       }
+//   }
 
-  def saveFieldValues(
-      clientId: ClientId,
-      apiContext: ApiContext,
-      apiVersion: ApiVersionNbr,
-      fields: Fields
-    )(implicit hc: HeaderCarrier
-    ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
-    val url = urlSubscriptionFieldValues(clientId, apiContext, apiVersion)
+//   private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
 
-    configureEbridgeIfRequired(
-      http
-        .put(url"$url")
-        .withBody(Json.toJson(SubscriptionFieldsPutRequest(clientId, apiContext, apiVersion, fields)))
-    )
-      .execute[HttpResponse]
-      .map { response =>
-        response.status match {
-          case BAD_REQUEST  =>
-            Json.parse(response.body).validate[Map[String, String]] match {
-              case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
-              case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
-            }
-          case OK | CREATED => SaveSubscriptionFieldsSuccessResponse
-          case statusCode   => throw UpstreamErrorResponse("Failed to put subscription fields", statusCode)
-        }
-      }
-  }
+//   private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
+//     s"$serviceBaseUrl/field/application/${urlEncode(clientId.value)}/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
+// }
 
-  private def urlEncode(str: String, encoding: String = "UTF-8") = encode(str, encoding)
+// @Singleton
+// class SandboxSubscriptionFieldsConnector @Inject() (
+//     val appConfig: ApplicationConfig,
+//     val http: HttpClientV2,
+//     val actorSystem: ActorSystem,
+//     val futureTimeout: FutureTimeoutSupport
+//   )(implicit val ec: ExecutionContext
+//   ) extends AbstractSubscriptionFieldsConnector {
 
-  private def urlSubscriptionFieldValues(clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
-    s"$serviceBaseUrl/field/application/${urlEncode(clientId.value)}/context/${urlEncode(apiContext.value)}/version/${urlEncode(apiVersion.value)}"
-}
+//   val environment: Environment = Environment.SANDBOX
+//   val serviceBaseUrl: String   = appConfig.apiSubscriptionFieldsSandboxUrl
+//   val useProxy: Boolean        = appConfig.apiSubscriptionFieldsSandboxUseProxy
+//   val apiKey: String           = appConfig.apiSubscriptionFieldsSandboxApiKey
 
-@Singleton
-class SandboxSubscriptionFieldsConnector @Inject() (
-    val appConfig: ApplicationConfig,
-    val http: HttpClientV2,
-    val actorSystem: ActorSystem,
-    val futureTimeout: FutureTimeoutSupport
-  )(implicit val ec: ExecutionContext
-  ) extends AbstractSubscriptionFieldsConnector {
+//   lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
+//     EbridgeConfigurator.configure(useProxy, apiKey)
 
-  val environment: Environment = Environment.SANDBOX
-  val serviceBaseUrl: String   = appConfig.apiSubscriptionFieldsSandboxUrl
-  val useProxy: Boolean        = appConfig.apiSubscriptionFieldsSandboxUseProxy
-  val apiKey: String           = appConfig.apiSubscriptionFieldsSandboxApiKey
+// }
 
-  lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
-    EbridgeConfigurator.configure(useProxy, apiKey)
+// @Singleton
+// class ProductionSubscriptionFieldsConnector @Inject() (
+//     val appConfig: ApplicationConfig,
+//     val http: HttpClientV2,
+//     val actorSystem: ActorSystem,
+//     val futureTimeout: FutureTimeoutSupport
+//   )(implicit val ec: ExecutionContext
+//   ) extends AbstractSubscriptionFieldsConnector {
 
-}
+//   val environment: Environment = Environment.PRODUCTION
+//   val serviceBaseUrl: String   = appConfig.apiSubscriptionFieldsProductionUrl
 
-@Singleton
-class ProductionSubscriptionFieldsConnector @Inject() (
-    val appConfig: ApplicationConfig,
-    val http: HttpClientV2,
-    val actorSystem: ActorSystem,
-    val futureTimeout: FutureTimeoutSupport
-  )(implicit val ec: ExecutionContext
-  ) extends AbstractSubscriptionFieldsConnector {
-
-  val environment: Environment = Environment.PRODUCTION
-  val serviceBaseUrl: String   = appConfig.apiSubscriptionFieldsProductionUrl
-
-  val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
-}
+//   val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
+// }

@@ -26,7 +26,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -40,7 +39,7 @@ class PushPullNotificationsServiceSpec extends AsyncHmrcSpec with FixedClock wit
     val pushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockConnectorsWrapper: ConnectorsWrapper                       = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))
-      .thenReturn(Connectors(mock[ThirdPartyApplicationConnector], mock[SubscriptionFieldsConnector], pushPullNotificationsConnector))
+      .thenReturn(Connectors(mock[ThirdPartyApplicationConnector], pushPullNotificationsConnector))
 
     val underTest = new PushPullNotificationsService(mockConnectorsWrapper)
   }

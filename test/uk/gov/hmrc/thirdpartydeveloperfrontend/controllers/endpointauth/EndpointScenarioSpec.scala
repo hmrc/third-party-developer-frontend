@@ -90,8 +90,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[DeskproConnector].toInstance(deskproConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))
       .overrides(bind[ApmConnector].toInstance(apmConnector))
-      .overrides(bind[SandboxSubscriptionFieldsConnector].toInstance(sandboxSubsFieldsConnector))
-      .overrides(bind[ProductionSubscriptionFieldsConnector].toInstance(productionSubsFieldsConnector))
+      .overrides(bind[ApmConnectorApiDefinitionModule].toInstance(apmConnector))
+      .overrides(bind[ApmConnectorSubscriptionFieldsModule].toInstance(apmConnector))
       .overrides(bind[SandboxPushPullNotificationsConnector].toInstance(sandboxPushPullNotificationsConnector))
       .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
       .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
@@ -130,10 +130,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   when(cmdConnector.dispatchWithThrow(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
   when(cmdConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(application))))
-  when(productionSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(*)).thenReturn(Future.successful(
-    SaveSubscriptionFieldsSuccessResponse
-  ))
-  when(sandboxSubsFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(*)).thenReturn(Future.successful(
+  when(apmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(*)).thenReturn(Future.successful(
     SaveSubscriptionFieldsSuccessResponse
   ))
   when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.SANDBOX))(*)).thenReturn(Future.successful(

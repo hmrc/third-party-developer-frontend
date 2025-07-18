@@ -37,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_A
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class IpAllowlistServiceSpec
@@ -65,7 +64,7 @@ class IpAllowlistServiceSpec
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
     val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*))
-      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mock[SubscriptionFieldsConnector], mock[PushPullNotificationsConnector]))
+      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mock[PushPullNotificationsConnector]))
 
     val underTest = new IpAllowlistService(
       FlowRepositoryMock.aMock,

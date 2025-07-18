@@ -20,61 +20,37 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, MappedApiDefinitions, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{ApiFieldMap, FieldDefinition}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 
 object ApmConnector {
   case class Config(serviceBaseUrl: String)
+}
 
-  case class RequestUpliftV1(subscriptions: Set[ApiIdentifier])
-
-  case class RequestUpliftV2(upliftRequest: UpliftRequest)
-
-  implicit val writesV1: Writes[RequestUpliftV1] = play.api.libs.json.Json.writes[RequestUpliftV1]
-  implicit val writesV2: Writes[RequestUpliftV2] = play.api.libs.json.Json.writes[RequestUpliftV2]
+trait ApmConnectorModule {
+  def http: HttpClientV2
+  def config: ApmConnector.Config
+  def metrics: ConnectorMetrics
+  def api: API
+  implicit def ec: ExecutionContext
 }
 
 @Singleton
-class ApmConnector @Inject() (http: HttpClientV2, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
+class ApmConnector @Inject() (val http: HttpClientV2, val config: ApmConnector.Config, val metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
     extends OpenAccessApisConnector
-    with CommonResponseHandlers {
-
-  import ApmConnector._
+    with CommonResponseHandlers
+    with ApmConnectorSubscriptionFieldsModule
+    with ApmConnectorApiDefinitionModule
+    with ApmConnectorApplicationModule {
 
   val api = API("api-platform-microservice")
-
-  def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
-    http.get(url"${config.serviceBaseUrl}/applications/${applicationId}")
-      .execute[Option[ApplicationWithSubscriptionFields]]
-
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
-
-    http.get(url"${config.serviceBaseUrl}/subscription-fields?environment=$environment")
-      .execute[ApiFieldMap[FieldDefinition]]
-  }
-
-  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
-    http.get(url"${config.serviceBaseUrl}/api-definitions?applicationId=${applicationId}")
-      .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
-  }
-
-  def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
-    http.get(url"${config.serviceBaseUrl}/api-definitions/open?environment=$environment")
-      .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
-  }
 
   def fetchExtendedApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
     http.get(url"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
@@ -106,29 +82,4 @@ class ApmConnector @Inject() (http: HttpClientV2, config: ApmConnector.Config, m
       .recover {
         case NonFatal(e) => Left(e)
       }
-
-  def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
-    metrics.record(api) {
-      http.get(url"${config.serviceBaseUrl}/api-definitions/upliftable")
-        .execute[Set[ApiIdentifier]]
-    }
-
-  def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
-    metrics.record(api) {
-      http.get(url"${config.serviceBaseUrl}/applications/$applicationId/upliftableSubscriptions")
-        .execute[Set[ApiIdentifier]]
-    }
-
-  def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
-    metrics.record(api) {
-      http.get(url"${config.serviceBaseUrl}/api-definitions/all?environment=$environment")
-        .execute[MappedApiDefinitions]
-        .map(_.wrapped.values.toList)
-    }
-
-  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
-      .withBody(Json.toJson(RequestUpliftV2(upliftData)))
-      .execute[ApplicationId]
-  }
 }

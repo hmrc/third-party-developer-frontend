@@ -53,10 +53,8 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
 
     def doConnectorSave(valuesToSave: Seq[SubscriptionFieldValue]) = {
-      val connector    = connectorsWrapper.forEnvironment(application.deployedTo).apiSubscriptionFieldsConnector
       val fieldsToSave = valuesToSave.map(v => (v.definition.name -> v.value)).toMap
-
-      connector.saveFieldValues(application.clientId, apiContext, apiVersion, fieldsToSave)
+      apmConnector.saveFieldValues(application.deployedTo, application.clientId, apiContext, apiVersion, fieldsToSave)
     }
 
     if (newValues.isEmpty) {
@@ -86,18 +84,6 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
 }
 
 object SubscriptionFieldsService {
-
-  trait SubscriptionFieldsConnector {
-
-    def saveFieldValues(
-        clientId: ClientId,
-        apiContext: ApiContext,
-        apiVersion: ApiVersionNbr,
-        fields: Fields
-      )(implicit hc: HeaderCarrier
-      ): Future[ConnectorSaveSubscriptionFieldsResponse]
-
-  }
 
   sealed trait AccessValidation
   case class ValidateAgainstRole(role: Collaborator.Role) extends AccessValidation

@@ -34,7 +34,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
   SubscriptionFieldValue
 }
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -57,13 +56,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-    val mockSubscriptionFieldsConnector: SubscriptionFieldsConnector       = mock[SubscriptionFieldsConnector]
     val mockApmConnector: ApmConnector                                     = mock[ApmConnector]
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
 
     when(mockConnectorsWrapper.forEnvironment(application.deployedTo))
-      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockSubscriptionFieldsConnector, mockPushPullNotificationsConnector))
+      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockPushPullNotificationsConnector))
 
     when(
       mockThirdPartyApplicationConnector
@@ -96,7 +94,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val newValue1    = FieldValue("newValue")
       val newValuesMap = Map(definition1.name -> newValue1)
 
-      when(mockSubscriptionFieldsConnector.saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))
+      when(mockApmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValuesMap))
@@ -108,8 +106,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
         definition2.name -> value2.value
       )
 
-      verify(mockSubscriptionFieldsConnector)
-        .saveFieldValues(eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(*)
+      verify(mockApmConnector)
+        .saveFieldValues(eqTo(Environment.PRODUCTION), eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(*)
     }
 
     "save the fields fails with write access denied" in new Setup {
@@ -128,8 +126,8 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
       result shouldBe SaveSubscriptionFieldsAccessDeniedResponse
 
-      verify(mockSubscriptionFieldsConnector, never)
-        .saveFieldValues(*[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*)
+      verify(mockApmConnector, never)
+        .saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*)
     }
   }
 }
