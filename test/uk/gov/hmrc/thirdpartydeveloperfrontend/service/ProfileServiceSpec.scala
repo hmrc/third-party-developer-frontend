@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.{UpdateProfileFailed, UpdateProfileSuccess}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ProfileServiceSpec extends AsyncHmrcSpec
@@ -38,7 +38,7 @@ class ProfileServiceSpec extends AsyncHmrcSpec
     with DeveloperSessionBuilder
     with UserTestData {
 
-  trait Setup extends FixedClock with ApplicationCommandConnectorMockModule {
+  trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]

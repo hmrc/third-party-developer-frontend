@@ -39,7 +39,8 @@ class CollaboratorServiceSpec
 
   trait Setup
       extends ThirdPartyDeveloperConnectorMockModule
-      with ApplicationCommandConnectorMockModule {
+      with ApmConnectorMockModule
+      with ApmConnectorCommandModuleMockModule {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -47,8 +48,7 @@ class CollaboratorServiceSpec
     val mockApmConnector: ApmConnector         = mock[ApmConnector]
 
     val collaboratorService = new CollaboratorService(
-      mockApmConnector,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       TPDMock.aMock,
       FixedClock.clock
     )
@@ -62,7 +62,7 @@ class CollaboratorServiceSpec
 
       val mockResponse = mock[ApplicationWithCollaborators]
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(mockResponse)
 
       val result = await(collaboratorService.addTeamMember(standardApp, devEmail, Collaborator.Roles.DEVELOPER, adminEmail))
       result.isRight shouldBe true
@@ -70,7 +70,7 @@ class CollaboratorServiceSpec
       inside(result) {
         case Right(DispatchSuccessResult(response)) =>
           response shouldBe mockResponse
-          inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+          inside(ApmConnectorCommandModuleMock.Dispatch.verifyCommand()) {
             case ApplicationCommands.AddCollaborator(actor, collaborator, _) =>
               actor shouldBe Actors.AppCollaborator(adminEmail)
               collaborator shouldBe devAsCollaborator
@@ -84,7 +84,7 @@ class CollaboratorServiceSpec
 
       val mockResponse = mock[ApplicationWithCollaborators]
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 
       val result = await(collaboratorService.removeTeamMember(standardApp, devEmail, adminEmail))
       result.isRight shouldBe true
@@ -92,7 +92,7 @@ class CollaboratorServiceSpec
       inside(result) {
         case Right(DispatchSuccessResult(response)) =>
           response shouldBe mockResponse
-          inside(ApplicationCommandConnectorMock.Dispatch.verifyCommand()) {
+          inside(ApmConnectorCommandModuleMock.Dispatch.verifyCommand()) {
             case ApplicationCommands.RemoveCollaborator(actor, collaborator, _) =>
               actor shouldBe Actors.AppCollaborator(adminEmail)
               collaborator shouldBe devAsCollaborator
@@ -116,12 +116,12 @@ class CollaboratorServiceSpec
       ))
       val mockResponse = mock[ApplicationWithCollaborators]
 
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(mockResponse) // .thenReturnsSuccessFor(command)(productionApplication)
 
       val result = await(collaboratorService.removeTeamMember(application, teamMemberToRemove.emailAddress, removerAdmin.emailAddress))
       result.isRight shouldBe true
 
-      ApplicationCommandConnectorMock.Dispatch.verifyAdminsToEmail() shouldBe Set(verifiedAdmin.emailAddress)
+      ApmConnectorCommandModuleMock.Dispatch.verifyAdminsToEmail() shouldBe Set(verifiedAdmin.emailAddress)
     }
 
     "determineOtherAdmins" should {

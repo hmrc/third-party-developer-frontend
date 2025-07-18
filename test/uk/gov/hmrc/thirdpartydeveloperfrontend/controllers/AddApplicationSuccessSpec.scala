@@ -34,7 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -51,7 +50,6 @@ class AddApplicationSuccessSpec
   trait Setup
       extends UpliftLogicMock
       with ApplicationServiceMock
-      with ApmConnectorMockModule
       with ApplicationActionServiceMock
       with EmailPreferencesServiceMock
       with CombinedApiTestDataHelper {
@@ -72,7 +70,6 @@ class AddApplicationSuccessSpec
       applicationServiceMock,
       applicationActionServiceMock,
       emailPreferencesServiceMock,
-      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       upliftLogicMock,

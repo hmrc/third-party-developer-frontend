@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-import com.google.inject.{Inject, Singleton}
-
-import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, InternalServerException, StringContextOps}
 
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandHandlerTypes, _}
@@ -28,13 +25,13 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
-@Singleton
-class ApplicationCommandConnector @Inject() (
-    val http: HttpClientV2,
-    val config: ApmConnector.Config
-  )(implicit val ec: ExecutionContext
-  ) extends CommandHandlerTypes[DispatchSuccessResult]
+trait ApmConnectorCommandModule
+    extends ApmConnectorModule
+    with CommandHandlerTypes[DispatchSuccessResult]
     with ApplicationLogger {
+
+  private[this] val baseUrl                                          = s"${config.serviceBaseUrl}/applications"
+  private[this] def baseApplicationUrl(applicationId: ApplicationId) = s"$baseUrl/${applicationId}"
 
   // TODO - rework code so this is not required
   def dispatchWithThrow(
@@ -60,10 +57,6 @@ class ApplicationCommandConnector @Inject() (
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._
-
-    val serviceBaseUrl = config.serviceBaseUrl
-
-    def baseApplicationUrl(applicationId: ApplicationId) = s"$serviceBaseUrl/applications/${applicationId}"
 
     def parseWithLogAndThrow[T](input: String)(implicit reads: Reads[T]): T = {
       Json.parse(input).validate[T] match {

@@ -37,7 +37,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailP
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
@@ -53,7 +52,6 @@ class AddApplication @Inject() (
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     val emailPreferencesService: EmailPreferencesService,
-    val apmConnector: ApmConnector,
     val sessionService: SessionService,
     val auditService: AuditService,
     upliftLogic: UpliftLogic,

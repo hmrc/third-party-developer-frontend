@@ -25,17 +25,17 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandHandlerTypes, DispatchSuccessResult, RedirectCommand}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actor, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApplicationCommandConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnectorCommandModule
 
 @Singleton
 class LoginRedirectsService @Inject() (
-    applicationCmdDispatcher: ApplicationCommandConnector,
+    apmCmdModule: ApmConnectorCommandModule,
     val clock: Clock
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
   private def issueCommand(id: ApplicationId, cmd: RedirectCommand)(implicit hc: HeaderCarrier): AppCmdResult = {
-    applicationCmdDispatcher.dispatch(id, cmd, Set.empty)
+    apmCmdModule.dispatch(id, cmd, Set.empty)
   }
 
   def addLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, newRedirectUri: LoginRedirectUri)(implicit hc: HeaderCarrier) = {

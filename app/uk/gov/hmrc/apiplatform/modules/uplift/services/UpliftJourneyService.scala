@@ -33,16 +33,15 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApmConnectorCommandModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    apmConnector: ApmConnector,
+    apmConnector: ApmConnectorApplicationModule with ApmConnectorCommandModule,
     thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
-    appCmdConnector: ApplicationCommandConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends ClockNow with EitherTHelper[String] {
@@ -149,7 +148,7 @@ class UpliftJourneyService @Inject() (
         instant(),
         sellResellOrDistribute
       )
-      appCmdConnector.dispatch(application.id, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
+      apmConnector.dispatch(application.id, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
     } else {
       Future.successful(ApplicationUpdateSuccessful)
     }

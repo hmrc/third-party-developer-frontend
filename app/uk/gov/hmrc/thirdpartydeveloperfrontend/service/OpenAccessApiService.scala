@@ -23,10 +23,10 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnectorApiDefinitionModule
 
 @Singleton
-class OpenAccessApiService @Inject() (openAccessApisConnector: ApmConnector)(implicit val ec: ExecutionContext) {
+class OpenAccessApiService @Inject() (openAccessApisConnector: ApmConnectorApiDefinitionModule)(implicit val ec: ExecutionContext) {
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
     openAccessApisConnector.fetchAllOpenAccessApis(environment)

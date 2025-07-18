@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.utils.{EbridgeConfigurator, FixedClock}
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -89,60 +89,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   "api" should {
     "be third-party-application" in new Setup {
       connector.api shouldBe API("third-party-application")
-    }
-  }
-
-  "fetch application by id" should {
-    val url     = s"/application/${applicationId}"
-    val appName = ApplicationName("app name")
-
-    "return an application" in new Setup {
-      stubFor(
-        get(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(applicationResponse(applicationId, clientId, appName))
-          )
-      )
-
-      val result = await(connector.fetchApplicationById(applicationId))
-
-      result shouldBe defined
-      result.get.id shouldBe applicationId
-      result.get.name shouldBe appName
-    }
-
-    "return None if the application cannot be found" in new Setup {
-      stubFor(
-        get(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-
-      val result = await(connector.fetchApplicationById(applicationId))
-
-      result shouldBe empty
-    }
-
-    "when useProxy is enabled returns an application from proxy" in new SandboxSetup {
-      stubFor(
-        get(urlEqualTo("/third-party-application" + url))
-          .withHeader(EbridgeConfigurator.API_KEY_HEADER_NAME, equalTo(apiKey))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(applicationResponse(applicationId, clientId, appName))
-          )
-      )
-
-      val result = await(connector.fetchApplicationById(applicationId))
-
-      result shouldBe defined
-      result.get.id shouldBe applicationId
-      result.get.name shouldBe appName
     }
   }
 

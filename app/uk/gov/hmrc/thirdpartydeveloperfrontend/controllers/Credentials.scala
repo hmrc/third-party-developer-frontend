@@ -35,7 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.LocalDateConversionSyntax
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandConnector, ThirdPartyDeveloperConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
@@ -46,7 +46,7 @@ class Credentials @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     clientSecretHashingService: ClientSecretHashingService,
-    appCmdDispatcher: ApplicationCommandConnector,
+    apmCmdModule: ApmConnectorCommandModule,
     val applicationActionService: ApplicationActionService,
     val developerConnector: ThirdPartyDeveloperConnector,
     val auditService: AuditService,
@@ -110,7 +110,7 @@ class Credentials @Inject() (
       instant()
     )
 
-    appCmdDispatcher.dispatch(applicationId, cmd, Set.empty).flatMap {
+    apmCmdModule.dispatch(applicationId, cmd, Set.empty).flatMap {
       case Right(response)                                                                                          => successful(Ok(clientSecretsGeneratedView(response.applicationResponse, applicationId, secretValue)))
       case Left(NonEmptyList(CommandFailures.ApplicationNotFound, Nil))                                             => errorHandler.notFoundTemplate.map(NotFound(_))
       case Left(NonEmptyList(CommandFailures.GenericFailure("App is in PRODUCTION so User must be an ADMIN"), Nil)) => errorHandler.badRequestTemplate.map(Forbidden(_))
@@ -136,7 +136,7 @@ class Credentials @Inject() (
         clientSecretId,
         instant()
       )
-      appCmdDispatcher.dispatch(applicationId, cmd, Set.empty)
+      apmCmdModule.dispatch(applicationId, cmd, Set.empty)
         .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
     }
 }

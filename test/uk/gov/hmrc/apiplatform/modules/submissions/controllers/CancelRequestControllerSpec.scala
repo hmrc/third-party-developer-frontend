@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
@@ -64,7 +64,8 @@ class CancelRequestControllerSpec
   trait Setup
       extends ApplicationServiceMock
       with ApplicationActionServiceMock
-      with ApplicationCommandConnectorMockModule
+      with ApmConnectorMockModule
+      with ApmConnectorCommandModuleMockModule
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow
       with HasSubscriptions
@@ -81,7 +82,7 @@ class CancelRequestControllerSpec
       applicationServiceMock,
       mcc,
       SubmissionServiceMock.aMock,
-      ApplicationCommandConnectorMock.aMock,
+      ApmConnectorCommandModuleMock.aMock,
       confirmCancelRequestForProductionCredentialsView,
       cancelledRequestForProductionCredentialsView,
       clock
@@ -145,7 +146,7 @@ class CancelRequestControllerSpec
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request")
 
-      ApplicationCommandConnectorMock.DispatchWithThrow.thenReturnsSuccess(mock[ApplicationWithCollaborators])
+      ApmConnectorCommandModuleMock.DispatchWithThrow.thenReturnsSuccess(mock[ApplicationWithCollaborators])
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 

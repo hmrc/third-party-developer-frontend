@@ -17,25 +17,19 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 import com.google.inject.name.Named
 
-import uk.gov.hmrc.http.HeaderCarrier
-
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionFieldsService.SubscriptionFieldsConnector
 
 @Singleton
 class ConnectorsWrapper @Inject() (
     val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
-    @Named("SANDBOX") val sandboxSubscriptionFieldsConnector: SubscriptionFieldsConnector,
-    @Named("PRODUCTION") val productionSubscriptionFieldsConnector: SubscriptionFieldsConnector,
     @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
     @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
     applicationConfig: ApplicationConfig
@@ -44,28 +38,13 @@ class ConnectorsWrapper @Inject() (
 
   def forEnvironment(environment: Environment): Connectors = {
     environment match {
-      case Environment.PRODUCTION => Connectors(productionApplicationConnector, productionSubscriptionFieldsConnector, productionPushPullNotificationsConnector)
-      case _                      => Connectors(sandboxApplicationConnector, sandboxSubscriptionFieldsConnector, sandboxPushPullNotificationsConnector)
-    }
-  }
-
-  def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] = {
-    val productionApplicationFuture = productionApplicationConnector.fetchApplicationById(id)
-    val sandboxApplicationFuture    = sandboxApplicationConnector.fetchApplicationById(id) recover {
-      case _ => None
-    }
-
-    for {
-      productionApplication <- productionApplicationFuture
-      sandboxApplication    <- sandboxApplicationFuture
-    } yield {
-      productionApplication.orElse(sandboxApplication)
+      case Environment.PRODUCTION => Connectors(productionApplicationConnector, productionPushPullNotificationsConnector)
+      case _                      => Connectors(sandboxApplicationConnector, sandboxPushPullNotificationsConnector)
     }
   }
 }
 
 case class Connectors(
     thirdPartyApplicationConnector: ThirdPartyApplicationConnector,
-    apiSubscriptionFieldsConnector: SubscriptionFieldsConnector,
     pushPullNotificationsConnector: PushPullNotificationsConnector
   )

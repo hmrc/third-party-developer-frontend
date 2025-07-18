@@ -29,7 +29,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersVie
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsSubscriptions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.AdministratorOnly
@@ -48,7 +47,6 @@ class TermsOfUseResponsesController @Inject() (
     val applicationService: ApplicationService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
     termsOfUseResponsesView: TermsOfUseResponsesView
   )(implicit val ec: ExecutionContext,

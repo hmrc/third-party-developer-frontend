@@ -27,7 +27,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptions}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
@@ -50,44 +50,34 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   val api: API = API("third-party-application")
 
+  // Move to APM
   def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
     if (isEnabled) {
       metrics.record(api) {
         val url = s"$serviceBaseUrl/developer/applications"
 
-        logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment.toString}")
+        logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment}")
 
         configureEbridgeIfRequired(
           http
-            .get(url"$url?${Seq("userId" -> userId.toString(), "environment" -> environment.toString)}")
+            .get(url"$url?${Seq[(String, String)]("userId" -> userId.toString(), "environment" -> environment.toString)}")
         )
           .execute[Seq[ApplicationWithSubscriptions]]
           .andThen {
             case Success(_) =>
-              logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment.toString}")
+              logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment}")
             case _          =>
-              logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment.toString}")
+              logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment}")
           }
       }
     } else {
       Future.successful(Seq.empty)
     }
 
-  def fetchApplicationById(id: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
-    if (isEnabled) {
-      metrics.record(api) {
-        configureEbridgeIfRequired(
-          http.get(url"$serviceBaseUrl/application/${id.value}")
-        )
-          .execute[Option[ApplicationWithCollaborators]]
-      }
-    } else {
-      Future.successful(None)
-    }
-
+// Move to APM
   def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken] = metrics.record(api) {
     configureEbridgeIfRequired(
-      http.get(url"$serviceBaseUrl/application/${id.value}/credentials")
+      http.get(url"$serviceBaseUrl/application/${id}/credentials")
     )
       .execute[Option[ApplicationToken]]
       .map {
@@ -96,6 +86,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
       }
   }
 
+  // Move to APM
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
       configureEbridgeIfRequired(

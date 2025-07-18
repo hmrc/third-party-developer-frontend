@@ -28,14 +28,14 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldName
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApmConnectorCommandModule, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 
 @Singleton
 class SubscriptionsService @Inject() (
     deskproConnector: DeskproConnector,
-    apmConnector: ApmConnector,
-    applicationCommandConnector: ApplicationCommandConnector,
+    apmApplicationModule: ApmConnectorApplicationModule,
+    apmCmdModule: ApmConnectorCommandModule,
     val clock: Clock
   )(implicit ec: ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
@@ -72,18 +72,18 @@ class SubscriptionsService @Inject() (
 
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
     for {
-      app <- apmConnector.fetchApplicationById(applicationId)
+      app <- apmApplicationModule.fetchApplicationById(applicationId)
       subs = app.map(_.subscriptions).getOrElse(Set.empty)
     } yield subs.contains(apiIdentifier)
   }
 
   def subscribeToApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant())
-    applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
+    apmCmdModule.dispatch(application.id, cmd, Set.empty)
   }
 
   def unsubscribeFromApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant())
-    applicationCommandConnector.dispatch(application.id, cmd, Set.empty)
+    apmCmdModule.dispatch(application.id, cmd, Set.empty)
   }
 }

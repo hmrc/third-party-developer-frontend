@@ -31,7 +31,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -46,7 +45,6 @@ class ManageApplicationsSpec
       with ApplicationActionServiceMock
       with AppsByTeamMemberServiceMock
       with ApplicationServiceMock
-      with ApmConnectorMockModule
       with TermsOfUseInvitationServiceMockModule
       with SubmissionServiceMockModule {
 

@@ -40,7 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -56,8 +56,8 @@ class UpliftJourneyServiceSpec
     with LocalUserIdTracker {
 
   trait Setup
-      extends ApplicationCommandConnectorMockModule
-      with ApmConnectorMockModule
+      extends ApmConnectorMockModule
+      with ApmConnectorCommandModuleMockModule
       with GetProductionCredentialsFlowServiceMockModule
       with SessionServiceMock
       with FixedClock {
@@ -72,7 +72,6 @@ class UpliftJourneyServiceSpec
       GPCFlowServiceMock.aMock,
       ApmConnectorMock.aMock,
       mockSubmissionsConnector,
-      ApplicationCommandConnectorMock.aMock,
       clock
     )
 
@@ -263,7 +262,7 @@ class UpliftJourneyServiceSpec
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
       when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
       val cmd             = ApplicationCommands.ChangeApplicationSellResellOrDistribute(Actors.AppCollaborator(session.developer.email), instant, sellResellOrDistribute)
-      ApplicationCommandConnectorMock.Dispatch.thenReturnsSuccessFor(cmd)(sampleApp)
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(sampleApp)
 
       private val result = await(underTest.createNewSubmission(productionAppId, sampleApp, session))
 
