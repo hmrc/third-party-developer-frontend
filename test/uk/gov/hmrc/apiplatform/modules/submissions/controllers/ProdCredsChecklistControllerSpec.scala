@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -72,7 +71,6 @@ class ProdCredsChecklistControllerSpec
   trait Setup
       extends ApplicationServiceMock
       with ApplicationActionServiceMock
-      with ApmConnectorMockModule
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow
       with HasSubscriptions
@@ -87,7 +85,6 @@ class ProdCredsChecklistControllerSpec
       applicationServiceMock,
       mcc,
       cookieSigner,
-      ApmConnectorMock.aMock,
       SubmissionServiceMock.aMock,
       productionCredentialsChecklistView
     )

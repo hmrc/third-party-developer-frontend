@@ -33,14 +33,14 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApplicationCommandConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    apmConnector: ApmConnector,
+    apmApplicationModule: ApmConnectorApplicationModule,
     thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
     appCmdConnector: ApplicationCommandConnector,
     val clock: Clock
@@ -55,10 +55,10 @@ class UpliftJourneyService @Inject() (
         sellResellOrDistribute <- fromOption(flow.sellResellOrDistribute, "No sell or resell or distribute set")
         subscriptionFlow       <- fromOption(flow.apiSubscriptions, "No subscriptions set")
 
-        apiIdsToSubscribeTo <- liftF(apmConnector.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
+        apiIdsToSubscribeTo <- liftF(apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId).map(_.filter(subscriptionFlow.isSelected)))
         _                   <- cond(apiIdsToSubscribeTo.nonEmpty, (), "No apis found to subscribe to")
         upliftRequest        = UpliftRequest(sellResellOrDistribute, apiIdsToSubscribeTo, userSession.developer.email.text)
-        upliftedAppId       <- liftF(apmConnector.upliftApplicationV2(sandboxAppId, upliftRequest))
+        upliftedAppId       <- liftF(apmApplicationModule.upliftApplicationV2(sandboxAppId, upliftRequest))
       } yield upliftedAppId
     )
       .value
@@ -73,14 +73,14 @@ class UpliftJourneyService @Inject() (
       for {
         flow                         <- flowService.fetchFlow(userSession)
         subscriptionFlow              = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
-        upliftableApiIds             <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+        upliftableApiIds             <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
         subscriptionsWithFlowAdjusted = subscriptions.filter(SubscriptionsFilter(upliftableApiIds, subscriptionFlow))
       } yield subscriptionsWithFlowAdjusted
     )
 
   def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
     for {
-      upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      upliftableSubscriptions <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
       _                       <- flowService.storeApiSubscriptions(apiSubscriptions, userSession)
     } yield apiSubscriptions
@@ -97,7 +97,7 @@ class UpliftJourneyService @Inject() (
         .map(_.name)
 
     for {
-      upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+      upliftableApiIds <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
       flow             <- flowService.fetchFlow(userSession)
       subscriptionFlow  = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
     } yield {

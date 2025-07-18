@@ -30,7 +30,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApplicationCommandCon
 
 @Singleton
 class CollaboratorService @Inject() (
-    apmConnector: ApmConnector,
     applicationCommandConnector: ApplicationCommandConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     val clock: Clock

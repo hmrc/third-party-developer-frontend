@@ -38,7 +38,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -65,7 +64,6 @@ class AddApplicationProductionSwitchSpec
       extends UpliftLogicMock
       with AppsByTeamMemberServiceMock
       with ApplicationServiceMock
-      with ApmConnectorMockModule
       with ApplicationActionServiceMock
       with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
@@ -86,7 +84,6 @@ class AddApplicationProductionSwitchSpec
       applicationServiceMock,
       applicationActionServiceMock,
       emailPreferencesServiceMock,
-      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       upliftLogicMock,
@@ -142,9 +139,7 @@ class AddApplicationProductionSwitchSpec
     }
 
     "go to next stage in journey when one app is upliftable and no other apps are present" in new Setup {
-      val summaries             = sandboxAppSummaries.take(1)
-      val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
+      val summaries = sandboxAppSummaries.take(1)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
       when(flowServiceMock.resetFlow(*)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))

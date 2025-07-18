@@ -35,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
@@ -107,7 +106,6 @@ class ProdCredsChecklistController @Inject() (
     val applicationService: ApplicationService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    val apmConnector: ApmConnector,
     val submissionService: SubmissionService,
     productionCredentialsChecklistView: ProductionCredentialsChecklistView
   )(implicit val ec: ExecutionContext,

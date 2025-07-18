@@ -36,7 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorMockModule, ApplicationCommandConnectorMockModule}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApplicationCommandConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
 
 class RequestProductionCredentialsSpec extends AsyncHmrcSpec
@@ -46,7 +46,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with ApplicationWithCollaboratorsFixtures
     with UserTestData {
 
-  trait Setup extends ApmConnectorMockModule with ApplicationCommandConnectorMockModule {
+  trait Setup extends ApplicationCommandConnectorMockModule {
     implicit val hc: HeaderCarrier                                          = HeaderCarrier()
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
@@ -66,7 +66,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     when(devInSession.displayedName).thenReturn(name)
 
     val mockDeskproConnector = mock[DeskproConnector]
-    val underTest            = new RequestProductionCredentials(ApmConnectorMock.aMock, mockSubmissionsConnector, ApplicationCommandConnectorMock.aMock, mockDeskproConnector, clock)
+    val underTest            = new RequestProductionCredentials(mockSubmissionsConnector, ApplicationCommandConnectorMock.aMock, mockDeskproConnector, clock)
 
     val app           = standardApp.withCollaborators(email.asAdministratorCollaborator)
     val applicationId = app.id

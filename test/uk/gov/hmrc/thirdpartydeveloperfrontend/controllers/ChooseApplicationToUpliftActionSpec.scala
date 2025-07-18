@@ -36,7 +36,6 @@ import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
@@ -58,7 +57,6 @@ class ChooseApplicationToUpliftActionSpec
       extends UpliftLogicMock
       with AppsByTeamMemberServiceMock
       with ApplicationServiceMock
-      with ApmConnectorMockModule
       with ApplicationActionServiceMock
       with EmailPreferencesServiceMock {
     val accessTokenSwitchView                     = app.injector.instanceOf[AccessTokenSwitchView]
@@ -79,7 +77,6 @@ class ChooseApplicationToUpliftActionSpec
       applicationServiceMock,
       applicationActionServiceMock,
       emailPreferencesServiceMock,
-      ApmConnectorMock.aMock,
       sessionServiceMock,
       mock[AuditService],
       upliftLogicMock,
@@ -143,8 +140,6 @@ class ChooseApplicationToUpliftActionSpec
       val summaries    = sandboxAppSummaries
       val sandboxAppId = summaries.head.id
 
-      val subsetOfSubscriptions = summaries.head.subscriptionIds.take(1)
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(subsetOfSubscriptions)
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 

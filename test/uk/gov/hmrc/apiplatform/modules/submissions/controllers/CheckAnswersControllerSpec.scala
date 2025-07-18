@@ -41,7 +41,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsIdsHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -85,7 +84,6 @@ class CheckAnswersControllerSpec
   trait Setup
       extends ApplicationServiceMock
       with ApplicationActionServiceMock
-      with ApmConnectorMockModule
       with SubmissionServiceMockModule
       with HasSubscriptions
       with HasSessionDeveloperFlow
@@ -94,7 +92,6 @@ class CheckAnswersControllerSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockApmConnector     = ApmConnectorMock.aMock
     val mockRequestProdCreds = mock[RequestProductionCredentials]
 
     val completedProgress           = List(DevelopmentPractices.questionnaire, CustomersAuthorisingYourSoftware.questionnaire, OrganisationDetails.questionnaire)
@@ -118,7 +115,6 @@ class CheckAnswersControllerSpec
       applicationServiceMock,
       mcc,
       cookieSigner,
-      mockApmConnector,
       SubmissionServiceMock.aMock,
       mockRequestProdCreds,
       checkAnswersView,

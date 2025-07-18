@@ -17,17 +17,11 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
+import scala.concurrent.ExecutionContext
 
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OpenAccessApiService.OpenAccessApisConnector
 
 object ApmConnector {
@@ -48,38 +42,9 @@ class ApmConnector @Inject() (val http: HttpClientV2, val config: ApmConnector.C
     with CommonResponseHandlers
     with ApmConnectorSubscriptionFieldsModule
     with ApmConnectorApiDefinitionModule
-    with ApmConnectorApplicationModule {
+    with ApmConnectorApplicationModule
+    with ApmConnectorCombinedApisModule {
 
   val api = API("api-platform-microservice")
 
-  def fetchExtendedApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
-    http.get(url"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
-      .execute[ExtendedApiDefinition]
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
-
-  def fetchCombinedApi(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
-    http.get(url"${config.serviceBaseUrl}/combined-rest-xml-apis/$serviceName")
-      .execute[CombinedApi]
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
-
-  def fetchApiDefinitionsVisibleToUser(userId: Option[UserId])(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
-    val queryParams: Seq[(String, String)] = userId.fold(Seq.empty[(String, String)])(id => Seq("developerId" -> id.toString()))
-
-    http.get(url"${config.serviceBaseUrl}/combined-api-definitions?$queryParams")
-      .execute[List[ApiDefinition]]
-  }
-
-  def fetchCombinedApisVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[CombinedApi]]] =
-    http.get(url"${config.serviceBaseUrl}/combined-rest-xml-apis/developer?developerId=$userId")
-      .execute[List[CombinedApi]]
-      .map(Right(_))
-      .recover {
-        case NonFatal(e) => Left(e)
-      }
 }

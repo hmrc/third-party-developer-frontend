@@ -47,7 +47,6 @@ class CollaboratorServiceSpec
     val mockApmConnector: ApmConnector         = mock[ApmConnector]
 
     val collaboratorService = new CollaboratorService(
-      mockApmConnector,
       ApplicationCommandConnectorMock.aMock,
       TPDMock.aMock,
       FixedClock.clock

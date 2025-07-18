@@ -28,13 +28,13 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldName
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ApplicationCommandConnector, DeskproConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApplicationCommandConnector, DeskproConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
 
 @Singleton
 class SubscriptionsService @Inject() (
     deskproConnector: DeskproConnector,
-    apmConnector: ApmConnector,
+    apmApplicationModule: ApmConnectorApplicationModule,
     applicationCommandConnector: ApplicationCommandConnector,
     val clock: Clock
   )(implicit ec: ExecutionContext
@@ -72,7 +72,7 @@ class SubscriptionsService @Inject() (
 
   def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
     for {
-      app <- apmConnector.fetchApplicationById(applicationId)
+      app <- apmApplicationModule.fetchApplicationById(applicationId)
       subs = app.map(_.subscriptions).getOrElse(Set.empty)
     } yield subs.contains(apiIdentifier)
   }

@@ -41,7 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnectorApplicationModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
@@ -86,7 +86,7 @@ class UpliftJourneyController @Inject() (
     val cookieSigner: CookieSigner,
     confirmApisView: ConfirmApisView,
     turnOffApisMasterView: TurnOffApisMasterView,
-    val apmConnector: ApmConnector,
+    val apmApplicationModule: ApmConnectorApplicationModule,
     flowService: GetProductionCredentialsFlowService,
     sellResellOrDistributeSoftwareView: SellResellOrDistributeSoftwareView,
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
@@ -144,7 +144,7 @@ class UpliftJourneyController @Inject() (
 
     if (atLeastOneSubscription) {
       for {
-        upliftableApiIds <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+        upliftableApiIds <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
         apiLookups        = upliftableApiIds.map(id => IdFormatter.identifier(id) -> id).toMap
         newFlow           = ApiSubscriptions(
                               formSubmittedSubscriptions.map {
@@ -157,7 +157,7 @@ class UpliftJourneyController @Inject() (
       val errorForm = DummySubscriptionsForm.form.withError(FormError("apiSubscriptions", "error.turnoffapis.requires.at.least.one"))
       for {
         flow                 <- flowService.fetchFlow(request.userSession)
-        upliftableApiIds     <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
+        upliftableApiIds     <- apmApplicationModule.fetchUpliftableSubscriptions(sandboxAppId)
         subscriptionFlow      = flow.apiSubscriptions.getOrElse(ApiSubscriptions())
         sandboxSubscribedApis = request.subscriptions
                                   .filter(s => upliftableApiIds.contains(s.apiIdentifier))
