@@ -75,8 +75,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
       mockSubscriptionFieldsService,
       mockDeskproConnector,
       mockDeveloperConnector,
-      mockSandboxApplicationConnector,
-      mockProductionApplicationConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockAuditService,
       clock
