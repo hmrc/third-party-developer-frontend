@@ -46,8 +46,6 @@ class ApplicationService @Inject() (
     subscriptionFieldsService: SubscriptionFieldsService,
     deskproConnector: DeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
-    sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
-    productionApplicationConnector: ThirdPartyApplicationProductionConnector,
     thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
     auditService: AuditService,
     val clock: Clock
@@ -231,15 +229,6 @@ class ApplicationService @Inject() (
     val ticket = createDeskproTicket(application, newApplicationName, requesterName, requesterEmail)
     deskproConnector.createTicket(Some(userId), ticket)
   }
-
-  def applicationConnectorFor(application: ApplicationWithCollaborators): ThirdPartyApplicationConnector = applicationConnectorFor(Some(application.deployedTo))
-
-  def applicationConnectorFor(environment: Option[Environment]): ThirdPartyApplicationConnector =
-    if (environment.contains(Environment.PRODUCTION)) {
-      productionApplicationConnector
-    } else {
-      sandboxApplicationConnector
-    }
 }
 
 object ApplicationService {
@@ -270,9 +259,4 @@ object ApplicationService {
             if (filteredSubs.isEmpty) Map.empty[ApplicationId, Set[ApiIdentifier]] else Map(id -> filteredSubs)
         }
       }
-
-  trait ApplicationConnector {
-    def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]]
-    def fetchCredentials(id: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationToken]
-  }
 }

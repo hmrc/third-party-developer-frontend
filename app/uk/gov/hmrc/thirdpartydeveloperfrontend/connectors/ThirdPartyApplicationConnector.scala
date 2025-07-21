@@ -35,10 +35,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService.ApplicationConnector
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics) extends ApplicationConnector
-    with CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
+abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics)
+    extends CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   protected val http: HttpClientV2
   implicit val ec: ExecutionContext
