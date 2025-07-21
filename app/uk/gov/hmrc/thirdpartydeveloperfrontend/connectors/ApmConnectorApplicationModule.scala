@@ -48,12 +48,12 @@ trait ApmConnectorApplicationModule extends ApmConnectorModule {
 
   def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
-      http.get(url"${config.serviceBaseUrl}/applications/$applicationId/upliftableSubscriptions")
+      http.get(url"${baseUrl}/$applicationId/upliftableSubscriptions")
         .execute[Set[ApiIdentifier]]
     }
 
   def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
-    http.post(url"${config.serviceBaseUrl}/applications/${applicationId}/uplift")
+    http.post(url"${baseUrl}/${applicationId}/uplift")
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
       .execute[ApplicationId]
   }
