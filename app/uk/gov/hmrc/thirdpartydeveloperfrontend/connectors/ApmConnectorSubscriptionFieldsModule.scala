@@ -39,7 +39,7 @@ trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
   private[this] val baseUrl = s"${config.serviceBaseUrl}/subscription-fields"
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
-    http.get(url"${config.serviceBaseUrl}?environment=$environment")
+    http.get(url"${baseUrl}?environment=$environment")
       .execute[ApiFieldMap[FieldDefinition]]
   }
 
