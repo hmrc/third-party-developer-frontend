@@ -67,23 +67,23 @@
           @pageTitle
         </label>
       </h1>
-      <div id="@{viewModel.field.name.value}-hint" class="govuk-hint">
+      <div id="hint" class="govuk-hint">
         @{viewModel.field.hint}
       </div>
 
       @fieldError(viewModel.field.errors, viewModel.field.name.value)
       <input
         type="text"
-        name="@{viewModel.field.name.value}"
+        name="value"
         value="@{viewModel.field.value.value}"
         class="govuk-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
-        id="@{viewModel.field.name.value}"
-        aria-describedby="@{viewModel.field.name.value}-hint"
+        id="value"
+        aria-describedby="hint"
       />
     </div>
 
     <div class="govuk-button-group">
-      <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="govuk-button" type="submit">Save and continue</button>
+      <button id="submit" class="govuk-button" type="submit">Save and continue</button>
       <a href="@{routes.ManageSubscriptions.listApiSubscriptions(app.id)}" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }

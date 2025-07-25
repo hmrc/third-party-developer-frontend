@@ -58,7 +58,7 @@
   }
 
   <div class="govuk-button-group">
-    <button id="@{IdFormatter.identifier(viewModel.apiContext, viewModel.apiVersion)}-submit" class="govuk-button" type="submit">Save changes</button>
+    <button id="submit" class="govuk-button" type="submit">Save changes</button>
     @if(skipLink.isDefined){
       <a href="@{skipLink.get}" class="govuk-link govuk-link--no-visited-state">I'll do this later</a>
     }

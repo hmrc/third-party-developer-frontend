@@ -61,7 +61,7 @@
             <dt class="govuk-summary-list__key">@{field.shortDescription}</dt>
             <dd class="govuk-summary-list__value">@{field.value}</dd>
             @if(field.canWrite) {
-            <dd class="govuk-summary-list__actions"><a class="govuk-link" href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name)}" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-submit">Edit<span class="govuk-visually-hidden">@{field.value}</span></a></dd>
+            <dd class="govuk-summary-list__actions"><a class="govuk-link" href="@{routes.ManageSubscriptions.editApiMetadataFieldPage(app.id, api.context, api.version, field.name)}" id="@{IdFormatter.identifier(api.context, api.version)}-@{field.name}-edit">Edit<span class="govuk-visually-hidden">@{field.value}</span></a></dd>
             }
         </div>
         }

@@ -359,7 +359,7 @@ class ManageSubscriptionsSpec
 
           status(result) shouldBe OK
           private val dom = Jsoup.parse(contentAsString(result))
-          dom.getElementById(s"${fieldName}-hint").html() shouldBe field.definition.description
+          dom.getElementById("hint").html() shouldBe field.definition.description
         }
       }
 
