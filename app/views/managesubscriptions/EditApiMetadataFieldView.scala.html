@@ -74,7 +74,7 @@
       @fieldError(viewModel.field.errors, viewModel.field.name.value)
       <input
         type="text"
-        name="value"
+        name="@{viewModel.field.name.value}"
         value="@{viewModel.field.value.value}"
         class="govuk-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
         id="value"
