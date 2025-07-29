@@ -206,3 +206,9 @@ no.applications.choice.error.required.field=Please select an option
 
 choose.application.to.uplift.error=Select the application you want production credentials for
 
+dashboard.home=Home
+dashboard.applications.your=Your applications
+dashboard.applications.name=Name
+dashboard.applications.environment=Environment
+dashboard.applications.viewall=View all applications
+dashboard.applications.create=Create a new application
