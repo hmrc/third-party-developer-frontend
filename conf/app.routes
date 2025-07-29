@@ -180,4 +180,6 @@ GET         /applications/:id/before-you-start                                  
 GET         /applications/:id/we-will-check-your-answers                                                 uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.weWillCheckYourAnswers(id: ApplicationId)
 GET         /applications/:id/agree-new-terms-of-use                                                     uk.gov.hmrc.apiplatform.modules.uplift.controllers.UpliftJourneyController.agreeNewTermsOfUse(id: ApplicationId)
 
+GET         /dashboard                                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Dashboard.page()
+
 ->          /hmrc-frontend        hmrcfrontend.Routes

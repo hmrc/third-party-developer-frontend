@@ -80,4 +80,6 @@ object ApplicationSummary extends ApplicationSyntaxes {
       app.subscriptions
     )
   }
+
+  implicit val createdOnOrdering: Ordering[ApplicationSummary] = Ordering.by[ApplicationSummary, Instant](_.createdOn).reverse
 }
