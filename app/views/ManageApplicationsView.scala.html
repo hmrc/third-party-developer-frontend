@@ -118,14 +118,14 @@
 }
 
 @applicationList(model: ManageApplicationsViewModel) = {
-  @applicationTable(model.notYetLiveProductionApplications, s"Requests for ${appConfig.nameOfPrincipalEnvironment} credentials", false)
-  @applicationTable(model.liveProductionApplications, s"${appConfig.nameOfPrincipalEnvironment} applications")
-  @applicationTable(model.sandboxApplicationSummaries, s"${appConfig.nameOfSubordinateEnvironment} applications")
+  @applicationTable("notYetLive", model.notYetLiveProductionApplications, s"Requests for ${appConfig.nameOfPrincipalEnvironment} credentials", false)
+  @applicationTable("liveInProduction", model.liveProductionApplications, s"${appConfig.nameOfPrincipalEnvironment} applications")
+  @applicationTable("liveInSandbox", model.sandboxApplicationSummaries, s"${appConfig.nameOfSubordinateEnvironment} applications")
 }
 
-@applicationTable(applications: Seq[ApplicationSummary], heading: String, showLastApiCall: Boolean = true) = {
+@applicationTable(id: String, applications: Seq[ApplicationSummary], heading: String, showLastApiCall: Boolean = true) = {
   @if(applications.nonEmpty) {
-    <table class="govuk-table">
+    <table id="@id" class="govuk-table">
       <caption class="govuk-visually-hidden">Applications</caption>
       <thead class="govuk-table__head">
         <tr class="govuk-table__row">
