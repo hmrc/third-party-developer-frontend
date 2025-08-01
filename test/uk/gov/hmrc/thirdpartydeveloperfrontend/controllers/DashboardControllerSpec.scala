@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class DashboardSpec
+class DashboardControllerSpec
     extends BaseControllerSpec
     with WithCSRFAddToken {
 
@@ -42,7 +42,7 @@ class DashboardSpec
 
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
-    val dashboardController = new Dashboard(
+    val dashboardController = new DashboardController(
       mock[ErrorHandler],
       sessionServiceMock,
       cookieSigner,
@@ -65,7 +65,7 @@ class DashboardSpec
 
       DashboardServiceMock.FetchApplicationList.thenReturn(apps)
 
-      private val result = dashboardController.page()(loggedInAdminRequest)
+      private val result = dashboardController.home()(loggedInAdminRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include(userSession.developer.displayedName)
@@ -77,7 +77,7 @@ class DashboardSpec
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
-      private val result = dashboardController.page()(request)
+      private val result = dashboardController.home()(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

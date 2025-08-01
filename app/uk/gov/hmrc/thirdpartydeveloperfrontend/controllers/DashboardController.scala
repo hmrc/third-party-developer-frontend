@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
-class Dashboard @Inject() (
+class DashboardController @Inject() (
     val errorHandler: ErrorHandler,
     val sessionService: SessionService,
     val cookieSigner: CookieSigner,
@@ -41,7 +41,7 @@ class Dashboard @Inject() (
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {
 
-  def page(): Action[AnyContent] = loggedInAction { implicit request =>
+  def home(): Action[AnyContent] = loggedInAction { implicit request =>
     dashboardService.fetchApplicationList(request.developer.userId).map(apps => Ok(dashboardView(apps)))
   }
 
