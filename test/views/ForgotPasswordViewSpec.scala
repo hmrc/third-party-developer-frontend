@@ -49,11 +49,12 @@ class ForgotPasswordViewSpec extends CommonViewSpec
     "render as expected" in {
       val document = Jsoup.parse(renderPage(form = ForgotPasswordForm.form).body)
 
-      document.getElementById("reset-your-password-heading").text() shouldBe "Reset your password"
+      document.getElementById("reset-your-password-heading").text() shouldBe "Support Reset your password"
 
-      document.getElementById("emailaddress-note-1").text() shouldBe "We have received a request to set up or change your password."
-      document.getElementById("emailaddress-note-2").text() shouldBe "Give us your email address and we will send you a link to reset the password."
-      document.getElementById("emailaddress-note-3").text() shouldBe "The link will expire in one hour."
+      document.getElementById(
+        "emailaddress-note-1"
+      ).text() shouldBe "Enter the email address used to set up your Developer Hub account. We’ll send you a link to reset your password."
+      document.getElementById("emailaddress-note-2").text() shouldBe "The reset link will expire after 1 hour."
 
       elementExistsById(document, "submit") shouldBe true
       document.getElementById("submit").text() shouldBe "Send password reset email"
