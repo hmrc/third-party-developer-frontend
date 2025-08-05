@@ -5,8 +5,8 @@ object AppDependencies {
   def apply() : Seq[ModuleID] = compile ++ test
 
   lazy val seleniumVersion = "4.14.0"
-  lazy val bootstrapVersion = "9.16.0"
-  lazy val mongoVersion = "2.6.0"
+  lazy val bootstrapVersion = "9.18.0"
+  lazy val mongoVersion = "2.7.0"
   lazy val apiDomainVersion = "0.19.1"
   lazy val appDomainVersion = "0.81.0"
   lazy val tpdDomainVersion = "0.13.0"

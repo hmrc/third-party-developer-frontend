@@ -1,0 +1,75 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, HeadCell, HtmlContent, Table, TableRow, Text}
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import views.helper.EnvironmentNameService
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+
+@this(
+  devMain: DevMain, 
+  govukTable: GovukTable,
+  leftHandNav: LeftHandNav
+)
+
+@(apps: Seq[ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
+
+@buildAppLinkHtml(app: ApplicationSummary) = {
+  <a href='@controllers.routes.Details.details(app.id)' class='govuk-link govuk-link--no-visited-state'>@{app.name.toString()}</a>
+}
+
+@devMain(
+  title = "Home",
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb.home
+  ),
+  developerSession = Some(loggedIn)
+) {
+  <h1 class="govuk-heading-l">
+    <span class="govuk-caption-xl">@messages("dashboard.home")</span>
+    @loggedIn.loggedInName
+  </h1>
+
+    <div class="govuk-summary-card">
+      <div class="govuk-summary-card__content">
+
+        @govukTable(Table(
+          caption = Some(messages("dashboard.applications.your")),
+          captionClasses = "govuk-table__caption--m",
+          firstCellIsHeader = true,
+          head = Some(Seq(
+            HeadCell(content = Text(messages("dashboard.applications.name"))),
+            HeadCell(content = Text(messages("dashboard.applications.environment")))
+          )),
+          rows = apps.map(app => Seq(
+            TableRow(content = HtmlContent(buildAppLinkHtml(app))),
+            TableRow(content = Text(app.environment.displayText))
+          ))
+        ))
+
+        <ul class="govuk-list">
+          <li><a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.ManageApplications.manageApps()">@messages("dashboard.applications.viewall")</a></li>
+          <li><a class="govuk-link govuk-link--no-visited-state" href="@controllers.addapplication.routes.AddApplication.addApplicationSubordinate()">@messages("dashboard.applications.create")</a></li>
+        </ul>
+      </div>
+    </div>
+
+  }
