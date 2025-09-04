@@ -29,12 +29,12 @@ object NavLink {
 
 case object StaticNavItems {
 
-  def apply(apiDocumentationFrontendUrl: String, thirdPartyDeveloperFrontendUrl: String) = {
+  def apply(apiDocumentationFrontendUrl: String, thirdPartyDeveloperFrontendUrl: String, devhubSupportFrontendUrl: String) = {
     Seq(
       NavigationItem(Text("Getting started"), Some(s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub")),
       NavigationItem(Text("API documentation"), Some(s"$apiDocumentationFrontendUrl/api-documentation/docs/api")),
       NavigationItem(Text("Applications"), Some(s"$thirdPartyDeveloperFrontendUrl/developer/applications")),
-      NavigationItem(Text("Support"), Some(s"$thirdPartyDeveloperFrontendUrl/developer/support")),
+      NavigationItem(Text("Support"), Some(s"$devhubSupportFrontendUrl/devhub-support/")),
       NavigationItem(Text("Service availability"), Some("https://api-platform-status.production.tax.service.gov.uk/"), attributes = Map("target" -> "_blank"))
     )
   }

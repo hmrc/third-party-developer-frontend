@@ -330,7 +330,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/forgot-password", _)                                                   => Map("emailaddress" -> userEmail.text)
       case Endpoint("POST", "/developer/login-mfa", _)                                                         => Map("accessCode" -> "123456", "rememberMe" -> "false")
       case Endpoint("POST", "/developer/reset-password", _)                                                    => Map("password" -> userPassword, "confirmpassword" -> userPassword)
-      case Endpoint("POST", "/developer/support", _)                                                           => Map("fullname" -> userFullName, "emailaddress" -> userEmail.text, "comments" -> "I am very cross about something")
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 => Map("email" -> userEmail.text, "role" -> "developer")
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Map("email" -> userEmail.text, "confirm" -> "yes")
       case Endpoint("POST", "/developer/applications/:id/details/change-app-name", _)                          => Map("applicationName" -> ("new " + applicationName.value))
@@ -422,7 +421,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/locked", _)                                                             => Locked()
       case Endpoint("GET", "/developer/forgot-password", _)                                                    => Redirect("/developer/applications")
       case Endpoint("GET", "/developer/reset-password-link", _)                                                => Redirect("/developer/reset-password")
-      case Endpoint("POST", "/developer/support", _)                                                           => Redirect("/developer/support/submitted")
+      case Endpoint("GET", "/developer/support", _)                                                            => Redirect("http://localhost:9685/devhub-support/")
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Redirect(s"/developer/applications/${applicationId}/team-members")
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 =>
         Redirect(s"/developer/applications/$applicationId/team-members")

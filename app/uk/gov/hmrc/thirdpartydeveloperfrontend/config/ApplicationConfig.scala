@@ -44,6 +44,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   lazy val reportAProblemNonJSUrl                 = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   lazy val apiDocumentationFrontendUrl: String    = buildUrl("platform.internal.frontend").getOrElse(baseUrl("api-documentation-frontend"))
   lazy val thirdPartyDeveloperFrontendUrl: String = buildUrl("platform.internal.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
+  lazy val devhubSupportFrontendUrl: String       = buildUrl("platform.internal.frontend").getOrElse(baseUrl("devhub-support-frontend"))
   lazy val productionApiBaseUrl: Option[String]   = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl: Option[String]      = buildUrl("platform.api.sandbox")
 
