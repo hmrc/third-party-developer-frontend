@@ -36,12 +36,12 @@ class NavLinkSpec extends AsyncHmrcSpec {
     }
 
     "return static navigation items for devhub" in {
-      StaticNavItems("http://localhost:9680", "http://localhost:9685") shouldBe
+      StaticNavItems("http://localhost:9680", "http://localhost:9685", "http://localhost:9695") shouldBe
         Seq(
           NavigationItem(Text("Getting started"), Some(s"http://localhost:9680/api-documentation/docs/using-the-hub")),
           NavigationItem(Text("API documentation"), Some(s"http://localhost:9680/api-documentation/docs/api")),
           NavigationItem(Text("Applications"), Some(s"http://localhost:9685/developer/applications")),
-          NavigationItem(Text("Support"), Some(s"http://localhost:9685/developer/support")),
+          NavigationItem(Text("Support"), Some(s"http://localhost:9695/devhub-support/")),
           NavigationItem(Text("Service availability"), Some("https://api-platform-status.production.tax.service.gov.uk/"), attributes = Map("target" -> "_blank"))
         )
     }

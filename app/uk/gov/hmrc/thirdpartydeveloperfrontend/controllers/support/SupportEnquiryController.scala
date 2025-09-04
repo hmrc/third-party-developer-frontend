@@ -20,14 +20,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
-import views.html.{SupportEnquiryView, SupportThankyouView}
-
-import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -36,46 +32,12 @@ class SupportEnquiryController @Inject() (
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler,
-    val deskproService: DeskproService,
-    supportEnquiryView: SupportEnquiryView,
-    supportThankyouView: SupportThankyouView
+    val deskproService: DeskproService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) {
 
   def supportEnquiryPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    lazy val prefilledForm = fullyloggedInDeveloper
-      .fold[Form[SupportEnquiryForm]](supportForm) { userSession =>
-        supportForm.bind(Map("fullname" -> userSession.developer.displayedName, "emailaddress" -> userSession.developer.email.text)).discardingErrors
-      }
-
-    successful(Ok(supportEnquiryView(fullyloggedInDeveloper.map(_.developer.displayedName), prefilledForm)))
-  }
-
-  def submitSupportEnquiry() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val requestForm = supportForm.bindFromRequest()
-    val displayName = fullyloggedInDeveloper.map(_.developer.displayedName)
-    val userId      = fullyloggedInDeveloper.map(_.developer.userId)
-
-    requestForm.fold(
-      formWithErrors => {
-        logSpamSupportRequest(formWithErrors)
-        successful(BadRequest(supportEnquiryView(displayName, formWithErrors)))
-      },
-      formData => deskproService.submitSupportEnquiry(userId, formData).map { _ => Redirect(routes.SupportEnquiryController.thankyouPage(), SEE_OTHER) }
-    )
-  }
-
-  def thankyouPage() = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
-    val displayName = fullyloggedInDeveloper.map(_.developer.displayedName)
-    successful(Ok(supportThankyouView("Thank you", displayName)))
-  }
-
-  private def logSpamSupportRequest(form: Form[SupportEnquiryForm]) = {
-    form.errors("comments").map((formError: FormError) => {
-      if (formError.message == FormKeys.commentsSpamKey.value) {
-        logger.info("Spam support request attempted")
-      }
-    })
+    successful(MovedPermanently(s"${appConfig.devhubSupportFrontendUrl}/devhub-support/"))
   }
 }

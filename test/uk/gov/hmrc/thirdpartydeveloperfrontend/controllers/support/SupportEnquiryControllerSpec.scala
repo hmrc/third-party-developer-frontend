@@ -17,25 +17,17 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future.successful
 
-import org.jsoup.Jsoup
-import views.html.{SupportEnquiryView, SupportThankyouView}
-
-import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DeskproService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -44,17 +36,13 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
   trait Setup extends SessionServiceMock {
-    val supportEnquiryView  = app.injector.instanceOf[SupportEnquiryView]
-    val supportThankyouView = app.injector.instanceOf[SupportThankyouView]
 
     val underTest = new SupportEnquiryController(
       mcc,
       cookieSigner,
       sessionServiceMock,
       mock[ErrorHandler],
-      mock[DeskproService],
-      supportEnquiryView,
-      supportThankyouView
+      mock[DeskproService]
     )
 
     val sessionParams: Seq[(String, String)] = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
@@ -97,86 +85,20 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       "support form is prepopulated when user logged in" in new Setup with IsLoggedIn {
         val result = addToken(underTest.supportEnquiryPage())(request)
 
-        assertFullNameAndEmail(result, "John Doe", "thirdpartydeveloper@example.com")
+        status(result) shouldBe 301
       }
 
       "support form fields are blank when not logged in" in new Setup with NotLoggedIn {
         val result = addToken(underTest.supportEnquiryPage())(request)
-        assertFullNameAndEmail(result, "", "")
+        status(result) shouldBe 301
       }
 
       "support form fields are blank when part logged in enabling MFA" in new Setup with IsPartLoggedInEnablingMFA {
         val result = addToken(underTest.supportEnquiryPage())(request)
 
-        assertFullNameAndEmail(result, "", "")
-      }
-    }
-
-    "invoking the submitSupportEnquiry" should {
-      "submit request with name, email & comments from form" in new Setup {
-        val request = FakeRequest()
-          .withSession(sessionParams: _*)
-          .withFormUrlEncodedBody(
-            "fullname"     -> "Peter Smith",
-            "emailaddress" -> "peter@example.com",
-            "comments"     -> "A+++, good seller, would buy again"
-          )
-
-        when(underTest.deskproService.submitSupportEnquiry(*[Option[UserId]], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
-
-        val result = addToken(underTest.submitSupportEnquiry())(request)
-
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/developer/support/submitted")
-      }
-
-      "submit request with name, email and invalid comments returns BAD_REQUEST" in new Setup {
-        val request = FakeRequest()
-          .withSession(sessionParams: _*)
-          .withFormUrlEncodedBody(
-            "fullname"     -> "Peter Smith",
-            "emailaddress" -> "peter@example.com",
-            "comments"     -> "A+++, good como  puedo iniciar, would buy again"
-          )
-
-        when(underTest.deskproService.submitSupportEnquiry(*[Option[UserId]], *)(any[Request[AnyRef]], *)).thenReturn(successful(TicketCreated))
-
-        val result = addToken(underTest.submitSupportEnquiry())(request)
-
-        status(result) shouldBe 400
-
-      }
-
-      "submit request with incomplete form results in BAD_REQUEST" in new Setup {
-        val request = FakeRequest()
-          .withSession(sessionParams: _*)
-          .withFormUrlEncodedBody(
-            "fullname" -> "Peter Smith",
-            "comments" -> "A+++, good seller, would buy again"
-          )
-
-        val result = addToken(underTest.submitSupportEnquiry())(request)
-
-        status(result) shouldBe 400
-      }
-    }
-
-    "invoking thankyouPage" should {
-      "render the thankyou page" in new Setup with IsLoggedIn {
-        val result = addToken(underTest.thankyouPage())(request)
-
-        val dom = Jsoup.parse(contentAsString(result))
-
-        dom.title shouldEqual "Thank you - HMRC Developer Hub - GOV.UK"
+        status(result) shouldBe 301
       }
     }
   }
 
-  private def assertFullNameAndEmail(result: Future[Result], fullName: String, email: String): Any = {
-    status(result) shouldBe 200
-    val dom = Jsoup.parse(contentAsString(result))
-
-    dom.getElementsByAttributeValue("name", "fullname").attr("value") shouldEqual fullName
-    dom.getElementsByAttributeValue("name", "emailaddress").attr("value") shouldEqual email
-  }
 }
