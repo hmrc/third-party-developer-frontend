@@ -18,10 +18,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
@@ -32,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WireMockExtensions}
 
 class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
@@ -87,38 +84,6 @@ class ThirdPartyApplicationConnectorSpec extends BaseConnectorIntegrationSpec wi
   "api" should {
     "be third-party-application" in new Setup {
       connector.api shouldBe API("third-party-application")
-    }
-  }
-
-  "fetch credentials for application" should {
-    val tokens = ApplicationTokenData.one
-    val url    = s"/application/${applicationId}/credentials"
-
-    "return credentials" in new Setup {
-      stubFor(
-        get(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(OK)
-              .withJsonBody(tokens)
-          )
-      )
-      val result = await(connector.fetchCredentials(applicationId))
-
-      result shouldBe tokens
-    }
-
-    "throw ApplicationNotFound if the application cannot be found" in new Setup {
-      stubFor(
-        get(urlEqualTo(url))
-          .willReturn(
-            aResponse()
-              .withStatus(NOT_FOUND)
-          )
-      )
-      intercept[ApplicationNotFound](
-        await(connector.fetchCredentials(applicationId))
-      )
     }
   }
 }

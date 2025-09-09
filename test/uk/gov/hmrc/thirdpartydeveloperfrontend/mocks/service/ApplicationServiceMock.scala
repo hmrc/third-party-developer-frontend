@@ -48,9 +48,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
 
-  def fetchCredentialsReturns(application: ApplicationWithCollaborators, tokens: ApplicationToken): Unit =
-    when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
-
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Valid))
 
@@ -65,10 +62,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   def givenApplicationExists(application: ApplicationWithSubscriptions): Unit = givenApplicationExists(application.withFieldValues(Map.empty))
 
   def givenApplicationExists(application: ApplicationWithSubscriptionFields): Unit = {
-
     fetchByApplicationIdReturns(application.id, application)
-
-    when(applicationServiceMock.fetchCredentials(eqTo(application.asAppWithCollaborators))(*)).thenReturn(successful(application.details.token))
   }
 
   def acceptResponsibleIndividualVerification(appId: ApplicationId, code: String) = {

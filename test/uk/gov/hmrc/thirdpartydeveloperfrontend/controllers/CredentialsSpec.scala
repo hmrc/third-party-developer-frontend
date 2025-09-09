@@ -121,7 +121,6 @@ class CredentialsSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptions, userSession)
-    fetchCredentialsReturns(application, application.details.token)
     fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 

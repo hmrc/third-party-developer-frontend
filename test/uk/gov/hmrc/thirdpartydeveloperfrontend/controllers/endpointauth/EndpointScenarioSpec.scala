@@ -105,8 +105,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(List.empty))
   when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
   when(apmConnector.fetchCombinedApi(*[ServiceName])(*)).thenReturn(Future.successful(Right(CombinedApi(ServiceName("my service"), "my service display name", List.empty, REST_API))))
-  when(tpaSandboxConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationTokenData.one))
-  when(tpaProductionConnector.fetchCredentials(*[ApplicationId])(*)).thenReturn(Future.successful(ApplicationTokenData.one))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))

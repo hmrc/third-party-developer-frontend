@@ -105,7 +105,6 @@ class ManageResponsibleIndividualControllerSpec
           )
         )
       givenApplicationAction(application, userSession)
-      fetchCredentialsReturns(application, application.details.token)
 
       application
     }
