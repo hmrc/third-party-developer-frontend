@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import views.helper.EnvironmentNameService
@@ -25,11 +24,9 @@ import views.html._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -37,8 +34,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 class ManageApplicationsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken {
-
-  val tokens = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait Setup
       extends UpliftLogicMock
@@ -109,6 +104,4 @@ class ManageApplicationsSpec
       redirectLocation(result) shouldBe Some("/developer/login")
     }
   }
-
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 }

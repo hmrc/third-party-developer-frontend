@@ -68,7 +68,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
     )
 
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =
-      standardApp.withId(appId).modify(_.copy(clientId = clientId, name = appName))
+      standardApp.withId(appId).modify(_.copy(name = appName))
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
   }

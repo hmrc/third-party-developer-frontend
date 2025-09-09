@@ -26,11 +26,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TokenProvider
 
-trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TokenProvider {
+trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   self: ClockNow =>
 
   val applicationServiceMock = mock[ApplicationService]
@@ -70,7 +68,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
 
     fetchByApplicationIdReturns(application.id, application)
 
-    when(applicationServiceMock.fetchCredentials(eqTo(application.asAppWithCollaborators))(*)).thenReturn(successful(tokens()))
+    when(applicationServiceMock.fetchCredentials(eqTo(application.asAppWithCollaborators))(*)).thenReturn(successful(application.details.token))
   }
 
   def acceptResponsibleIndividualVerification(appId: ApplicationId, code: String) = {
@@ -82,4 +80,4 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   }
 }
 
-object ApplicationServiceMock extends ApplicationServiceMock with TokenProvider with FixedClock
+object ApplicationServiceMock extends ApplicationServiceMock with FixedClock
