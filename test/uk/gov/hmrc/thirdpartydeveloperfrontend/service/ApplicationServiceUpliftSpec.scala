@@ -48,7 +48,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                       = mock[DeskproConnector]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
@@ -68,7 +67,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
       connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
-      mockDeskproConnector,
       mockApiPlatformDeskproConnector,
       mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,

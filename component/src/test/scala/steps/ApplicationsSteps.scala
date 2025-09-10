@@ -68,7 +68,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     configureUserApplications(app.collaborators.head.userId, List(app.withSubscriptions(Set.empty)))
   }
 
-  Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => DeskproStub.verifyTicketCreationWithSubject(subject) }
+  Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => ApiPlatformDeskproStub.verifyTicketCreationWithSubject(subject) }
 
   Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
     ApplicationStub.configureUserApplications(staticUserId)
@@ -110,7 +110,7 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
   When("""^I click on the request account deletion link$""") { () => driver.findElement(By.cssSelector("[id=account-deletion]")).click() }
 
   When("""^I click on the account deletion confirmation submit button$""") { () =>
-    DeskproStub.setupTicketCreation()
+    ApiPlatformDeskproStub.setupTicketCreation()
     driver.findElement(By.cssSelector("[id=submit]")).click()
   }
 

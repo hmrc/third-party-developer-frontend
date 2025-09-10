@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -62,7 +62,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     )
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                       = mock[DeskproConnector]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
 
     val applicationService = new ApplicationService(
@@ -70,7 +69,6 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
-      mockDeskproConnector,
       mockApiPlatformDeskproConnector,
       mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
@@ -131,14 +129,14 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val developerUserId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {
-      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
+      when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
+        .thenReturn(successful("ref"))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, devEmail))
 
-      verify(mockDeskproConnector, times(1)).createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc))
+      verify(mockApiPlatformDeskproConnector, times(1)).createTicket(any[CreateTicketRequest], eqTo(hc))
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
     }
   }

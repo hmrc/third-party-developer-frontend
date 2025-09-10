@@ -35,7 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CreateTicketRequest, DeskproTicket, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 
 @Singleton
@@ -44,7 +44,6 @@ class ApplicationService @Inject() (
     connectorWrapper: ConnectorsWrapper,
     apmCmdModule: ApmConnectorCommandModule,
     subscriptionFieldsService: SubscriptionFieldsService,
-    deskproConnector: DeskproConnector,
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
@@ -116,7 +115,7 @@ class ApplicationService @Inject() (
   def fetchCredentials(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
     connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
 
-  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[TicketResult] = {
+  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[String] = {
 
     val requesterName    = requester.developer.displayedName
     val requesterEmail   = requester.developer.email
@@ -126,10 +125,11 @@ class ApplicationService @Inject() (
     val deleteRestricted = !(application.details.deleteRestriction == DeleteRestriction.NoRestriction)
 
     if (requesterRole.isAdministrator) {
-      val deskproTicket = DeskproTicket.createForRequestApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId, deleteRestricted)
+      val deskproTicket =
+        CreateTicketRequest.createForRequestApplicationDeletion(requesterName, requesterEmail, requesterRole, environment, application.name, appId, deleteRestricted)
 
       for {
-        ticketResponse <- deskproConnector.createTicket(Some(requester.developer.userId), deskproTicket)
+        ticketResponse <- apiPlatformDeskproConnector.createTicket(deskproTicket, hc)
         _              <- auditService.audit(
                             ApplicationDeletionRequested,
                             Map(
@@ -171,20 +171,20 @@ class ApplicationService @Inject() (
     thirdPartyOrchestratorConnector.verify(verificationCode)
   }
 
-  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-    val deleteDeveloperTicket = DeskproTicket.deleteDeveloperAccount(name, email)
+  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[String] = {
+    val deleteDeveloperTicket = CreateTicketRequest.deleteDeveloperAccount(name, email)
 
     for {
-      ticketResponse <- deskproConnector.createTicket(Some(userId), deleteDeveloperTicket)
+      ticketResponse <- apiPlatformDeskproConnector.createTicket(deleteDeveloperTicket, hc)
       _              <- auditService.audit(AccountDeletionRequested, Map("requestedByName" -> name, "requestedByEmailAddress" -> email.text, "timestamp" -> instant().toString))
     } yield ticketResponse
   }
 
-  def request2SVRemoval(userId: Option[UserId], name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[TicketResult] = {
-    val remove2SVTicket = DeskproTicket.removeDeveloper2SV(name, email)
+  def request2SVRemoval(userId: Option[UserId], name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[String] = {
+    val remove2SVTicket = CreateTicketRequest.removeDeveloper2SV(name, email)
 
     for {
-      ticketResponse <- deskproConnector.createTicket(userId, remove2SVTicket)
+      ticketResponse <- apiPlatformDeskproConnector.createTicket(remove2SVTicket, hc)
       _              <- auditService.audit(Remove2SVRequested, Map("requestedByEmailAddress" -> email.text, "timestamp" -> instant().toString))
     } yield ticketResponse
   }

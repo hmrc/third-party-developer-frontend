@@ -38,7 +38,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
@@ -77,7 +77,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     )
 
     val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                       = mock[DeskproConnector]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
     val mockApmConnector: ApmConnector                               = mock[ApmConnector]
 
@@ -86,7 +85,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
-      mockDeskproConnector,
       mockApiPlatformDeskproConnector,
       mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
@@ -190,15 +188,15 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*))
-        .thenReturn(successful(TicketCreated))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *))
+        .thenReturn(successful("ref"))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe TicketCreated
+      await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe "ref"
 
       verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
-      verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
+      verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
 
     "not create a deskpro ticket or audit record for a Developer in a Sandbox app" in new Setup {
@@ -206,20 +204,20 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       intercept[ForbiddenException] {
         await(applicationService.requestApplicationDeletion(developerRequester, sandboxApplication))
       }
-      verifyZeroInteractions(mockDeskproConnector)
+      verifyZeroInteractions(mockApiPlatformDeskproConnector)
       verifyZeroInteractions(mockAuditService)
     }
 
     "create a deskpro ticket and audit record for an Admin in a Production app" in new Setup {
 
-      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*))
-        .thenReturn(successful(TicketCreated))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *))
+        .thenReturn(successful("ref"))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe TicketCreated
+      await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe "ref"
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
-      verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
+      verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
 
     "not create a deskpro ticket or audit record for a Developer in a Production app" in new Setup {
@@ -227,7 +225,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       intercept[ForbiddenException] {
         await(applicationService.requestApplicationDeletion(developerRequester, productionApplication))
       }
-      verifyZeroInteractions(mockDeskproConnector)
+      verifyZeroInteractions(mockApiPlatformDeskproConnector)
       verifyZeroInteractions(mockAuditService)
     }
   }
@@ -277,17 +275,17 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val userId = UserId.random
 
     "correctly create a deskpro ticket and audit record" in new Setup {
-      val ticketCaptor = ArgCaptor[DeskproTicket]
-      when(mockDeskproConnector.createTicket(any[Option[UserId]], any[DeskproTicket])(eqTo(hc)))
-        .thenReturn(successful(TicketCreated))
+      val ticketCaptor = ArgCaptor[CreateTicketRequest]
+      when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
+        .thenReturn(successful("ref"))
       when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.request2SVRemoval(Some(userId), name, email))
 
-      verify(mockDeskproConnector, times(1)).createTicket(eqTo(Some(userId)), ticketCaptor)(eqTo(hc))
-      ticketCaptor.value.email shouldBe email
-      ticketCaptor.value.name shouldBe name
+      verify(mockApiPlatformDeskproConnector, times(1)).createTicket(ticketCaptor, eqTo(hc))
+      ticketCaptor.value.email shouldBe email.text
+      ticketCaptor.value.fullName shouldBe name
 
       verify(mockAuditService, times(1)).audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc))
     }

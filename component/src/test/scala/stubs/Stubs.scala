@@ -21,9 +21,10 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.matchers.should.Matchers
 
 import play.api.http.Status._
-import play.api.libs.json.Writes
+import play.api.libs.json.{Json, Writes}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.CreateTicketResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
 object Stubs extends ApplicationLogger {
@@ -82,6 +83,18 @@ object DeskproStub extends Matchers {
 
   def setupTicketCreation(status: Int = OK): StubMapping = {
     Stubs.setupPostRequest(deskproPath, status)
+  }
+
+  def verifyTicketCreationWithSubject(subject: String): Unit = {
+    verify(1, postRequestedFor(urlPathEqualTo(deskproPath)).withRequestBody(containing(s""""subject":"$subject"""")))
+  }
+}
+
+object ApiPlatformDeskproStub extends Matchers {
+  val deskproPath: String = "/ticket"
+
+  def setupTicketCreation(status: Int = CREATED): StubMapping = {
+    Stubs.setupPostRequest(deskproPath, status, Json.toJson(CreateTicketResponse("123")).toString())
   }
 
   def verifyTicketCreationWithSubject(subject: String): Unit = {
