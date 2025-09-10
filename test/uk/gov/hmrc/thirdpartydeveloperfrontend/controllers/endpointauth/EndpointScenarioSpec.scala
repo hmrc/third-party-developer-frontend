@@ -47,6 +47,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailP
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.UpdateProfileSuccess
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -88,6 +89,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
       .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
       .overrides(bind[DeskproConnector].toInstance(deskproConnector))
+      .overrides(bind[ApiPlatformDeskproConnector].toInstance(apiPlatformDeskproConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))
       .overrides(bind[ApmConnector].toInstance(apmConnector))
       .overrides(bind[ApmConnectorApiDefinitionModule].toInstance(apmConnector))
@@ -139,6 +141,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
   when(deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future.successful(TicketCreated))
   when(deskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(Future.successful(TicketCreated))
+  when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful("ref"))
+  when(apiPlatformDeskproConnector.updatePersonName(*[LaxEmailAddress], *, *)).thenReturn(Future.successful(UpdateProfileSuccess))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
   when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))

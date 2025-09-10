@@ -61,8 +61,9 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       mock[ApplicationConfig]
     )
 
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
+    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
+    val mockDeskproConnector: DeskproConnector                       = mock[DeskproConnector]
+    val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
 
     val applicationService = new ApplicationService(
       mock[ApmConnector],
@@ -70,6 +71,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
+      mockApiPlatformDeskproConnector,
       mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockAuditService,

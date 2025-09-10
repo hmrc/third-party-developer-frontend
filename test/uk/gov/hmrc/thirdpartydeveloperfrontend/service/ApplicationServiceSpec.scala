@@ -76,9 +76,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockAppConfig
     )
 
-    val mockSubscriptionFieldsService: SubscriptionFieldsService = mock[SubscriptionFieldsService]
-    val mockDeskproConnector: DeskproConnector                   = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector                           = mock[ApmConnector]
+    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
+    val mockDeskproConnector: DeskproConnector                       = mock[DeskproConnector]
+    val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
+    val mockApmConnector: ApmConnector                               = mock[ApmConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
@@ -86,6 +87,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       ApmConnectorCommandModuleMock.aMock,
       mockSubscriptionFieldsService,
       mockDeskproConnector,
+      mockApiPlatformDeskproConnector,
       mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockAuditService,
@@ -341,7 +343,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "correctly create a deskpro ticket" in new Setup {
       private val applicationName = ApplicationName("applicationName")
 
-      when(mockDeskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(successful(TicketCreated))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
 
       private val result =
         await(applicationService.requestProductonApplicationNameChange(
@@ -352,8 +354,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
           adminSession.developer.email
         ))
 
-      result shouldBe TicketCreated
-      verify(mockDeskproConnector).createTicket(*[Option[UserId]], *)(*)
+      result shouldBe "ref"
+      verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
   }
 

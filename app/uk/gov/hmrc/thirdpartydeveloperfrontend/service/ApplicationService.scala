@@ -35,7 +35,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{CreateTicketRequest, DeskproTicket, TicketResult}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
 
 @Singleton
@@ -45,6 +45,7 @@ class ApplicationService @Inject() (
     apmCmdModule: ApmConnectorCommandModule,
     subscriptionFieldsService: SubscriptionFieldsService,
     deskproConnector: DeskproConnector,
+    apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
     auditService: AuditService,
@@ -223,11 +224,11 @@ class ApplicationService @Inject() (
       val previousAppName = application.name
       val appId           = application.id
 
-      DeskproTicket.createForRequestChangeOfProductionApplicationName(requesterName, requesterEmail, previousAppName, newApplicationName, appId)
+      CreateTicketRequest.createForRequestChangeOfProductionApplicationName(requesterName, requesterEmail, previousAppName, newApplicationName, appId)
     }
 
     val ticket = createDeskproTicket(application, newApplicationName, requesterName, requesterEmail)
-    deskproConnector.createTicket(Some(userId), ticket)
+    apiPlatformDeskproConnector.createTicket(ticket, hc)
   }
 }
 
