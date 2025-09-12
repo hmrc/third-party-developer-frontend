@@ -39,7 +39,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Dispa
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.Fields
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{PasswordChangeRequest, UpdateRequest}
@@ -131,8 +131,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
-  when(deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future.successful(TicketCreated))
-  when(deskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(Future.successful(TicketCreated))
   when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful("ref"))
   when(apiPlatformDeskproConnector.updatePersonName(*[LaxEmailAddress], *, *)).thenReturn(Future.successful(UpdateProfileSuccess))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
