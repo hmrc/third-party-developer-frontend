@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, _}
@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.{UpdateProfileFailed, UpdateProfileResult, UpdateProfileSuccess}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 
 @Singleton
 class ApiPlatformDeskproConnector @Inject() (
@@ -37,12 +37,22 @@ class ApiPlatformDeskproConnector @Inject() (
   )(implicit ec: ExecutionContext
   ) extends CommonResponseHandlers with ApplicationLogger {
 
+  import ApiPlatformDeskproConnector._
+
   val api = API("api-platform-deskpro")
+
+  def createTicket(createRequest: CreateTicketRequest, hc: HeaderCarrier): Future[String] = metrics.record(api) {
+    implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
+    http.post(url"${config.serviceBaseUrl}/ticket")
+      .withBody(Json.toJson(createRequest))
+      .execute[CreateTicketResponse]
+      .map(_.ref)
+  }
 
   def updatePersonName(userEmailAddress: LaxEmailAddress, name: String, hc: HeaderCarrier): Future[UpdateProfileResult] = metrics.record(api) {
     implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
     http.put(url"${config.serviceBaseUrl}/person")
-      .withBody(Json.toJson(ApiPlatformDeskproConnector.UpdatePersonRequest(userEmailAddress, name)))
+      .withBody(Json.toJson(UpdatePersonRequest(userEmailAddress, name)))
       .execute[ErrorOrUnit]
       .map(throwOr(UpdateProfileSuccess))
       .recover(handleUpstreamErrors[UpdateProfileResult](UpdateProfileFailed))
@@ -65,6 +75,12 @@ object ApiPlatformDeskproConnector {
 
   object UpdatePersonRequest {
     implicit val format: OFormat[UpdatePersonRequest] = Json.format[UpdatePersonRequest]
+  }
+
+  case class CreateTicketResponse(ref: String)
+
+  object CreateTicketResponse {
+    implicit val createTicketResponseFormat: Format[CreateTicketResponse] = Json.format[CreateTicketResponse]
   }
 
   sealed trait UpdateProfileResult

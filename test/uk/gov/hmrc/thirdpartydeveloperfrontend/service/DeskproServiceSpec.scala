@@ -22,12 +22,10 @@ import scala.concurrent.Future
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketCreated, TicketId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Feedback, TicketId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class DeskproServiceSpec extends AsyncHmrcSpec {
@@ -71,42 +69,6 @@ class DeskproServiceSpec extends AsyncHmrcSpec {
         val expectedData = Feedback.createFromSurvey(form, Some(title))
         expectedData.message shouldBe "n/a"
         verify(underTest.deskproConnector).createFeedback(expectedData)(hc)
-      }
-    }
-
-    "A valid Support Enquiry is completed" should {
-      "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro" in {
-        val title  = "Title"
-        val userId = UserId.random
-        when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
-
-        implicit val fakeRequest = FakeRequest()
-        implicit val hc          = HeaderCarrier()
-
-        val form = SupportEnquiryForm("my name", "myemail@example.com", "my comments")
-
-        await(underTest.submitSupportEnquiry(Some(userId), form))
-
-        val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
-        verify(underTest.deskproConnector).createTicket(Some(userId), expectedData)(hc)
-      }
-
-      "Convert the SupportEnquiryForm into a DeskproTicket and sends it to Deskpro with fake user id" in {
-        val title = "Title"
-        when(underTest.appConfig.title).thenReturn(title)
-        when(underTest.deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future(TicketCreated))
-
-        implicit val fakeRequest = FakeRequest()
-        implicit val hc          = HeaderCarrier()
-
-        val form = SupportEnquiryForm("my name", "myemail@example.com", "my comments")
-
-        await(underTest.submitSupportEnquiry(None, form))
-
-        val expectedData = DeskproTicket.createFromSupportEnquiry(form, title)
-
-        verify(underTest.deskproConnector).createTicket(None, expectedData)(hc)
       }
     }
   }

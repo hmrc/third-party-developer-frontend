@@ -46,11 +46,11 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
 
     val mockAuditService: AuditService = mock[AuditService]
 
-    val mockDeskproConnector: DeskproConnector = mock[DeskproConnector]
-    val mockApmConnector: ApmConnector         = mock[ApmConnector]
+    val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
+    val mockApmConnector: ApmConnector                               = mock[ApmConnector]
 
     val subscriptionsService = new SubscriptionsService(
-      mockDeskproConnector,
+      mockApiPlatformDeskproConnector,
       mockApmConnector,
       ApmConnectorCommandModuleMock.aMock,
       FixedClock.clock

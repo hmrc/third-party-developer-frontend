@@ -119,6 +119,7 @@ object Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
             "microservice.services.api-documentation-frontend.port"             -> 11111,
             "microservice.services.third-party-developer-frontend.port"         -> 9685, // This is unused but here for the sake of completion
             "microservice.services.deskpro-ticket-queue.port"                   -> 11111,
+            "microservice.services.api-platform-deskpro.port"                   -> 11111,
             "microservice.services.api-subscription-fields-production.port"     -> 11111,
             "microservice.services.api-subscription-fields-sandbox.port"        -> 11111,
             "microservice.services.api-platform-microservice.port"              -> 11111,

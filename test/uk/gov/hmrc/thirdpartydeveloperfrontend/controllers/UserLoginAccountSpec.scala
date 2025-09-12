@@ -44,7 +44,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, User
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.AppsByTeamMemberServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
@@ -718,7 +717,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       TPDMock.FindUserId.thenReturn(sessionWithAuthAppMfa.developer.email)(userId)
       TPDMock.FetchDeveloper.thenReturn(userId)(Some(developerWithAuthAppMfa))
       when(underTest.applicationService.request2SVRemoval(*[Option[UserId]], *, eqTo(sessionWithAuthAppMfa.developer.email))(*))
-        .thenReturn(Future.successful(TicketCreated))
+        .thenReturn(Future.successful("ref"))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
 
