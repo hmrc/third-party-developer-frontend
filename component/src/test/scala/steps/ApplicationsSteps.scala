@@ -16,8 +16,6 @@
 
 package steps
 
-import io.cucumber.datatable.DataTable
-import io.cucumber.scala.Implicits._
 import io.cucumber.scala.{EN, ScalaDsl}
 import matchers.CustomMatchers
 import org.openqa.selenium.By
@@ -35,7 +33,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.Stri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationToken
 
 object AppWorld {
   var userApplicationsOnBackend: List[ApplicationWithCollaborators] = Nil
@@ -75,25 +72,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     AppWorld.userApplicationsOnBackend = Nil
   }
 
-  And("""^applications have the credentials:$""") { (data: DataTable) =>
-    val listOfCredentials = data.asScalaRawMaps[String, String].toList
-    val tuples            = listOfCredentials.map { credentials => credentials("id") -> ApplicationToken(splitToSecrets(credentials("prodClientSecrets")), credentials("prodAccessToken")) }
-    AppWorld.tokens = tuples.toMap
-    ApplicationStub.configureApplicationCredentials(AppWorld.tokens)
-  }
-
-  def splitToSecrets(input: String): List[ClientSecretResponse] =
-    input.split(",").map(_.trim).toList.map(s => ClientSecretResponse(ClientSecret.Id.random, s, instant))
-
-  Given("""^I have the following applications assigned to my email '(.*)':$""") { (email: LaxEmailAddress, name: String, data: DataTable) =>
-    val applications = data.asScalaRawMaps[String, String].toList
-
-    AppWorld.userApplicationsOnBackend = applications map { app: Map[String, String] =>
-      standardApp
-    }
-    // configure get all apps for user email
-    configureStubsForApplications(email, AppWorld.userApplicationsOnBackend)
-  }
+  def splitToSecrets(input: String): List[ClientSecret] =
+    input.split(",").map(_.trim).toList.map(s => ClientSecret(ClientSecret.Id.random, s, instant))
 
   def configureStubsForApplications(email: LaxEmailAddress, applications: List[ApplicationWithCollaborators]): Unit = {
 

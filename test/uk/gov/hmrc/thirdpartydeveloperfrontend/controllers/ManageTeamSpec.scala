@@ -107,7 +107,6 @@ class ManageTeamSpec
         .withCollaborators(collaborators.toList: _*)
 
       givenApplicationAction(application, session)
-      fetchCredentialsReturns(application, tokens())
 
       application
     }

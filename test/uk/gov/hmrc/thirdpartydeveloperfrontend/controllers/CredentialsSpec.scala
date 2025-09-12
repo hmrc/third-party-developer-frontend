@@ -41,7 +41,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
@@ -58,8 +57,7 @@ class CredentialsSpec
     with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  val appTokens: ApplicationToken  = ApplicationToken(List(aClientSecret("secret1"), aClientSecret("secret2")), "token")
-  val applicationId: ApplicationId = applicationIdOne
+  val applicationId: ApplicationId = standardApp.id
 
   trait ApplicationProvider {
     def anApplication: ApplicationWithCollaborators
@@ -73,14 +71,22 @@ class CredentialsSpec
 
   trait ApplicationProviderWithAdmin extends ApplicationProvider {
     def anApplication: ApplicationWithCollaborators = standardApp.withCollaborators(userSession.developer.email.asAdministratorCollaborator)
+    def clientSecretToDelete: ClientSecret          = standardApp.details.token.clientSecrets.last
   }
 
   trait ApplicationProviderWithDev extends ApplicationProvider {
     def anApplication: ApplicationWithCollaborators = standardApp.withCollaborators(userSession.developer.email.asDeveloperCollaborator)
+    def clientSecretToDelete: ClientSecret          = standardApp.details.token.clientSecrets.last
   }
 
-  trait Setup extends ApplicationServiceMock with ApplicationActionServiceMock with SessionServiceMock with ApplicationProvider with ApmConnectorMockModule
-      with ApmConnectorCommandModuleMockModule {
+  trait Setup
+      extends ApplicationServiceMock
+      with ApplicationActionServiceMock
+      with SessionServiceMock
+      with ApplicationProvider
+      with ApmConnectorMockModule
+      with ApmConnectorCommandModuleMockModule
+      with FixedClock {
     val credentialsView: CredentialsView                       = app.injector.instanceOf[CredentialsView]
     val clientIdView: ClientIdView                             = app.injector.instanceOf[ClientIdView]
     val clientSecretsView: ClientSecretsView                   = app.injector.instanceOf[ClientSecretsView]
@@ -115,7 +121,6 @@ class CredentialsSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptions, userSession)
-    fetchCredentialsReturns(application, appTokens)
     fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
@@ -290,7 +295,6 @@ class CredentialsSpec
   }
 
   "deleteClientSecret" should {
-    val clientSecretToDelete: ClientSecretResponse = appTokens.clientSecrets.last
     val nonExistantClientSecretId: ClientSecret.Id = ClientSecret.Id.random
 
     "return the confirmation page when the selected client secret exists" in new Setup with ApplicationProviderWithAdmin {
@@ -298,7 +302,7 @@ class CredentialsSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include("Are you sure you want to delete this client secret?")
-      contentAsString(result) should include("client secret ending ret2")
+      contentAsString(result) should include(s"client secret ending ${clientSecretToDelete.name.takeRight(4)}")
     }
 
     "return 404 when the selected client secret does not exist" in new Setup with ApplicationProviderWithAdmin {
@@ -348,7 +352,4 @@ class CredentialsSpec
       status(result) shouldBe BAD_REQUEST
     }
   }
-
-  private def aClientSecret(secretName: String) = ClientSecretResponse(ClientSecret.Id.random, secretName, instant)
-
 }

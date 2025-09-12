@@ -28,6 +28,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -43,7 +44,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
-  trait Setup extends ApplicationServiceMock {
+  trait Setup extends ApplicationServiceMock with FixedClock {
     val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
     val profileView                   = app.injector.instanceOf[ProfileView]
     val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]

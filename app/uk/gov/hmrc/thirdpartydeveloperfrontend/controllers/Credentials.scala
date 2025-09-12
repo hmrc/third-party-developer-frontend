@@ -80,13 +80,19 @@ class Credentials @Inject() (
 
   def clientSecrets(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService.fetchCredentials(request.application).map { tokens => Ok(clientSecretsView(request.application, tokens.clientSecrets)) }
+      val app     = request.application
+      val secrets = app.details.token.clientSecrets
+
+      successful(Ok(clientSecretsView(app, secrets)))
     }
 
   def serverToken(applicationId: ApplicationId): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
       if (request.application.details.createdOn.isBefore(serverTokenCutoffDate)) {
-        applicationService.fetchCredentials(request.application).map { tokens => Ok(serverTokenView(request.application, tokens.accessToken)) }
+        val app         = request.application
+        val accessToken = app.details.token.accessToken
+
+        successful(Ok(serverTokenView(app, accessToken)))
       } else {
         errorHandler.notFoundTemplate.map(NotFound(_))
       }
@@ -121,11 +127,12 @@ class Credentials @Inject() (
 
   def deleteClientSecret(applicationId: ApplicationId, clientSecretId: ClientSecret.Id): Action[AnyContent] =
     canChangeClientSecrets(applicationId) { implicit request =>
-      applicationService.fetchCredentials(request.application).flatMap { tokens =>
-        tokens.clientSecrets
-          .find(_.id == clientSecretId)
-          .fold(errorHandler.notFoundTemplate.map(NotFound(_)))(secret => successful(Ok(deleteClientSecretView(request.application, secret))))
-      }
+      val app           = request.application
+      val clientSecrets = app.details.token.clientSecrets
+
+      clientSecrets
+        .find(_.id == clientSecretId)
+        .fold(errorHandler.notFoundTemplate.map(NotFound(_)))(secret => successful(Ok(deleteClientSecretView(app, secret))))
     }
 
   def deleteClientSecretAction(applicationId: ApplicationId, clientSecretId: ClientSecret.Id): Action[AnyContent] =

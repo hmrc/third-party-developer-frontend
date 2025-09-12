@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.{failed, successful}
@@ -39,7 +38,6 @@ import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SubscriptionFieldsService}
@@ -72,9 +70,6 @@ class ManageSubscriptionsSpec
   val productionApplication: ApplicationWithCollaborators = application.withEnvironment(Environment.PRODUCTION)
 
   val privilegedApplication: ApplicationWithCollaborators = application.withAccess(Access.Privileged())
-
-  val tokens: ApplicationToken =
-    ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
   trait ManageSubscriptionsSetup extends AppsByTeamMemberServiceMock with ApplicationServiceMock with ApplicationActionServiceMock {
     val mockAuditService: AuditService                           = mock[AuditService]
@@ -755,6 +750,4 @@ class ManageSubscriptionsSpec
       }
     }
   }
-
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
 }

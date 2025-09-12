@@ -31,8 +31,13 @@ class ApplicationSummaryTest extends AnyWordSpec with Matchers with Collaborator
   "from" should {
     val user = "foo@bar.com".toLaxEmail.asDeveloperCollaborator
 
-    val serverTokenApplication   = standardApp.modify(_.copy(createdOn = instant, lastAccess = Some(instant), lastAccessTokenUsage = Some(instant))).withCollaborators(user)
-    val noServerTokenApplication = standardApp.modify(_.copy(createdOn = instant, lastAccess = Some(instant), lastAccessTokenUsage = None)).withCollaborators(user)
+    val serverTokenApplication   = standardApp.modify(_.copy(
+      createdOn = instant,
+      lastAccess = Some(instant),
+      token = standardApp.details.token.copy(lastAccessTokenUsage = Some(instant))
+    )).withCollaborators(user)
+    val noServerTokenApplication =
+      standardApp.modify(_.copy(createdOn = instant, lastAccess = Some(instant), token = standardApp.details.token.copy(lastAccessTokenUsage = None))).withCollaborators(user)
 
     "set serverTokenUsed if application has a date set for lastAccessTokenUsage" in {
       val summary = ApplicationSummary.from(serverTokenApplication.inSandbox(), user.userId)
