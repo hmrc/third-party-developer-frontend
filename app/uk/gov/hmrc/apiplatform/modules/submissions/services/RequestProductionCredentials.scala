@@ -33,13 +33,13 @@ import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicat
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 
 @Singleton
 class RequestProductionCredentials @Inject() (
     tpaConnector: ThirdPartyApplicationSubmissionsConnector,
     apmCmdModule: ApmConnectorCommandModule,
-    deskproConnector: DeskproConnector,
+    apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends ClockNow with ApplicationLogger {
@@ -104,19 +104,19 @@ class RequestProductionCredentials @Inject() (
       isNewTouUplift: Boolean,
       isSubmissionPassed: Boolean
     )(implicit hc: HeaderCarrier
-    ): Future[Option[TicketResult]] = {
+    ): Future[Option[String]] = {
     if (requesterIsResponsibleIndividual) {
       if (isNewTouUplift) {
         if (isSubmissionPassed) {
           // Don't create a Deskpro ticket if the submission passed when it was automatically marked
           Future.successful(None)
         } else {
-          val ticket = DeskproTicket.createForTermsOfUseUplift(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
-          deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
+          val ticket = CreateTicketRequest.createForTermsOfUseUplift(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
+          apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
         }
       } else {
-        val ticket = DeskproTicket.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
-        deskproConnector.createTicket(Some(requestedBy.developer.userId), ticket).map(Some(_))
+        val ticket = CreateTicketRequest.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
+        apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
       }
     } else {
       // Don't create a Deskpro ticket if the requester is not the responsible individual

@@ -165,4 +165,41 @@ object CreateTicketRequest {
       supportReason = Some("Production Application Unsubscribe Request")
     )
   }
+
+  def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId)
+      : CreateTicketRequest = {
+    val ticketMessage =
+      s"""${requestorEmail.text} submitted the following application for production use on the Developer Hub:
+         |$applicationName
+         |Please check it against our guidelines and send them a response within 2 working days.
+         |HMRC Developer Hub
+         |""".stripMargin
+
+    CreateTicketRequest(
+      fullName = requestorName,
+      email = requestorEmail.text,
+      subject = "Production Application Credential Request",
+      message = ticketMessage,
+      applicationId = Some(applicationId.toString()),
+      supportReason = Some("Production Application Credential Request")
+    )
+  }
+
+  def createForTermsOfUseUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId): CreateTicketRequest = {
+    val ticketMessage =
+      s"""${requestorEmail.text} has submitted a Terms of Use application that has warnings or fails:
+         |$applicationName
+         |Please check it against our guidelines and send them a response within 2 working days.
+         |HMRC Developer Hub
+         |""".stripMargin
+
+    CreateTicketRequest(
+      fullName = requestorName,
+      email = requestorEmail.text,
+      subject = "Terms of Use -  Uplift Request",
+      message = ticketMessage,
+      applicationId = Some(applicationId.toString()),
+      supportReason = Some("Terms of Use -  Uplift Request")
+    )
+  }
 }

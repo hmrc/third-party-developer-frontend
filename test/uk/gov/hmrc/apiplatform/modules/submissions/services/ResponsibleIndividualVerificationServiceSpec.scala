@@ -32,8 +32,8 @@ import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, TicketCreated}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, CollaboratorTracker}
 
@@ -64,8 +64,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     val responsibleIndividual = ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail)
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
-    val mockDeskproConnector                                                = mock[DeskproConnector]
-    val underTest                                                           = new ResponsibleIndividualVerificationService(mockSubmissionsConnector, ApplicationServiceMock.applicationServiceMock, mockDeskproConnector)
+    val mockApiPlatformDeskproConnector                                     = mock[ApiPlatformDeskproConnector]
+    val underTest                                                           = new ResponsibleIndividualVerificationService(mockSubmissionsConnector, ApplicationServiceMock.applicationServiceMock, mockApiPlatformDeskproConnector)
   }
 
   "fetchResponsibleIndividualVerification" should {
@@ -93,22 +93,22 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      when(mockDeskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(successful(TicketCreated))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
 
       val result = await(underTest.accept(code))
 
       result.isRight shouldBe true
       result shouldBe Right(riVerification)
 
-      val ticketCapture = ArgCaptor[DeskproTicket]
-      verify(mockDeskproConnector).createTicket(eqTo(riVerification.id), ticketCapture.capture)(*)
+      val ticketCapture = ArgCaptor[CreateTicketRequest]
+      verify(mockApiPlatformDeskproConnector).createTicket(ticketCapture.capture, *)
       val deskproTicket = ticketCapture.value
-      deskproTicket.subject shouldBe "New application submitted for checking"
-      deskproTicket.name shouldBe application.state.requestedByName.get
-      deskproTicket.email.text shouldBe application.state.requestedByEmailAddress.get
+      deskproTicket.subject shouldBe "Production Application Credential Request"
+      deskproTicket.fullName shouldBe application.state.requestedByName.get
+      deskproTicket.email shouldBe application.state.requestedByEmailAddress.get
       deskproTicket.message should include(riVerification.applicationName.value)
       deskproTicket.message should include("submitted the following application for production use on the Developer Hub")
-      deskproTicket.referrer should include(s"/application/${riVerification.applicationId.value}/check-answers")
+      deskproTicket.applicationId shouldBe Some(applicationId.toString())
     }
 
     "successfully return a riVerification record for accept and create a deskpro ticket for a terms of use uplift" in new Setup {
@@ -128,22 +128,22 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      when(mockDeskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(successful(TicketCreated))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
 
       val result = await(underTest.accept(code))
 
       result.isRight shouldBe true
       result shouldBe Right(riVerificationUplift)
 
-      val ticketCapture = ArgCaptor[DeskproTicket]
-      verify(mockDeskproConnector).createTicket(eqTo(riVerificationUplift.id), ticketCapture.capture)(*)
+      val ticketCapture = ArgCaptor[CreateTicketRequest]
+      verify(mockApiPlatformDeskproConnector).createTicket(ticketCapture.capture, *)
       val deskproTicket = ticketCapture.value
-      deskproTicket.subject shouldBe "Terms of use uplift application submitted for checking"
-      deskproTicket.name shouldBe requesterName
-      deskproTicket.email shouldBe requesterEmail
+      deskproTicket.subject shouldBe "Terms of Use -  Uplift Request"
+      deskproTicket.fullName shouldBe requesterName
+      deskproTicket.email shouldBe requesterEmail.text
       deskproTicket.message should include(riVerificationUplift.applicationName.value)
       deskproTicket.message should include("has submitted a Terms of Use application that has warnings or fails")
-      deskproTicket.referrer should include("https://admin.tax.service.gov.uk/api-gatekeeper/terms-of-use")
+      deskproTicket.applicationId shouldBe Some(applicationId.toString())
     }
 
     "successfully return a riVerification record for accept but don't create a deskpro ticket for a terms of use uplift where the submission status is passed" in new Setup {
@@ -163,13 +163,12 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      when(mockDeskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(successful(TicketCreated))
 
       val result = await(underTest.accept(code))
 
       result.isRight shouldBe true
       result shouldBe Right(riVerificationUplift)
-      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+      verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
 
     "successfully return a riVerification record for accept but don't create a deskpro ticket for an update" in new Setup {
@@ -195,7 +194,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       result.isRight shouldBe true
       result shouldBe Right(riUpdateVerification)
-      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+      verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
   }
 
@@ -208,7 +207,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
       result.isRight shouldBe true
       result shouldBe Right(riVerification)
-      verify(mockDeskproConnector, never).createTicket(*[ResponsibleIndividualVerificationId], *)(*)
+      verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
   }
 }
