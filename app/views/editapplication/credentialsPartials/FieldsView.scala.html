@@ -16,13 +16,13 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatDateWithShortPattern
 
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecretResponse
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 @import _root_.controllers.routes.Assets
 @import views.html.helper.CSPNonce
 
-@(app: ApplicationWithCollaborators, developer: User, clientSecrets: Seq[ClientSecretResponse])(
+@(app: ApplicationWithCollaborators, developer: User, clientSecrets: Seq[ClientSecret])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
 )
 

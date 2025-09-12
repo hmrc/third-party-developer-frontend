@@ -112,9 +112,6 @@ class ApplicationService @Inject() (
     apmApplicationConnector.fetchApplicationById(applicationId)
   }
 
-  def fetchCredentials(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationToken] =
-    connectorWrapper.forEnvironment(application.deployedTo).thirdPartyApplicationConnector.fetchCredentials(application.id)
-
   def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[String] = {
 
     val requesterName    = requester.developer.displayedName

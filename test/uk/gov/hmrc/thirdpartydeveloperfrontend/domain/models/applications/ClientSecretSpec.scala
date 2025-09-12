@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ClientSecret, ClientSecretResponse}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 import uk.gov.hmrc.apiplatform.modules.common.utils.{BaseJsonFormattersSpec, FixedClock}
 
-class ClientSecretResponseSpec extends BaseJsonFormattersSpec with FixedClock {
+class ClientSecretSpec extends BaseJsonFormattersSpec with FixedClock {
   val anId             = ClientSecret.Id.random
   val fakeHashedSecret = "blahblahblah"
-  val aClientSecret    = ClientSecretResponse(anId, "bob", instant, None)
+  val aClientSecret    = ClientSecret(anId, "bob", instant, None)
 
-  "ClientSecretResponse" should {
+  "ClientSecret" should {
     val expectedJsonText = s"""{"name":"bob","createdOn":"$nowAsText","id":"${anId.value}"}"""
 
     "convert to json" in {
@@ -36,7 +36,7 @@ class ClientSecretResponseSpec extends BaseJsonFormattersSpec with FixedClock {
     }
 
     "read from json" in {
-      testFromJson[ClientSecretResponse](expectedJsonText)(aClientSecret)
+      testFromJson[ClientSecret](expectedJsonText)(aClientSecret)
     }
   }
 }

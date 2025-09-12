@@ -26,11 +26,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.TokenProvider
 
-trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar with TokenProvider {
+trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   self: ClockNow =>
 
   val applicationServiceMock = mock[ApplicationService]
@@ -50,9 +48,6 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
     when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
 
-  def fetchCredentialsReturns(application: ApplicationWithCollaborators, tokens: ApplicationToken): Unit =
-    when(applicationServiceMock.fetchCredentials(eqTo(application))(*)).thenReturn(successful(tokens))
-
   def givenApplicationNameIsValid() =
     when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Valid))
 
@@ -67,10 +62,7 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   def givenApplicationExists(application: ApplicationWithSubscriptions): Unit = givenApplicationExists(application.withFieldValues(Map.empty))
 
   def givenApplicationExists(application: ApplicationWithSubscriptionFields): Unit = {
-
     fetchByApplicationIdReturns(application.id, application)
-
-    when(applicationServiceMock.fetchCredentials(eqTo(application.asAppWithCollaborators))(*)).thenReturn(successful(tokens()))
   }
 
   def acceptResponsibleIndividualVerification(appId: ApplicationId, code: String) = {
@@ -82,4 +74,4 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar wit
   }
 }
 
-object ApplicationServiceMock extends ApplicationServiceMock with TokenProvider with FixedClock
+object ApplicationServiceMock extends ApplicationServiceMock with FixedClock

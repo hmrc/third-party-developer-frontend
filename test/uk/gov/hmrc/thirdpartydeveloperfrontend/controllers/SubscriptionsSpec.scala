@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.util.UUID.randomUUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -35,7 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext,
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SubscriptionsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -45,6 +43,7 @@ class SubscriptionsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubscriptionTestSugar
+    with ApplicationTokenData
     with ApplicationWithCollaboratorsFixtures {
 
   val apiName       = "api-1"
@@ -65,8 +64,6 @@ class SubscriptionsSpec
     val unsubscribeRequestSubmittedView                         = app.injector.instanceOf[UnsubscribeRequestSubmittedView]
     val subscribeRequestSubmittedView                           = app.injector.instanceOf[SubscribeRequestSubmittedView]
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
-
-    val tokens: ApplicationToken = ApplicationToken(List(aClientSecret(), aClientSecret()), "token")
 
     val underTest = new SubscriptionsController(
       mock[ThirdPartyDeveloperConnector],
@@ -568,7 +565,4 @@ class SubscriptionsSpec
     title.isDefined shouldBe true
     title.get
   }
-
-  private def aClientSecret() = ClientSecretResponse(ClientSecret.Id.random, randomUUID.toString, instant)
-
 }

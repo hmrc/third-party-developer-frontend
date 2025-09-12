@@ -65,11 +65,10 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     standardApp
       .modify(_.copy(
         id = applicationId,
-        clientId = clientId,
+        token = standardApp.details.token.copy(lastAccessTokenUsage = None),
         name = applicationName,
         createdOn = instant,
         lastAccess = None,
-        lastAccessTokenUsage = None,
         grantLength = GrantLength.ONE_YEAR,
         deployedTo = environment,
         access = access,
