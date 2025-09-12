@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 import play.api.libs.json._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, Environment, LaxEmailAddress}
 
 case class CreateTicketRequest(
     fullName: String,
@@ -74,7 +74,7 @@ object CreateTicketRequest {
       case _                                => "a developer"
     }
 
-    def message() =
+    def ticketMessage() =
       if (deleteRestricted) {
         s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
            |and the application id is '${applicationId}'. I want it to be deleted from the Developer Hub. 
@@ -83,11 +83,12 @@ object CreateTicketRequest {
         s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
            |and the application id is '${applicationId}'. I want it to be deleted from the Developer Hub.""".stripMargin
       }
+
     CreateTicketRequest(
       fullName = name,
       email = requestedByEmail.text,
       subject = "Production Application Delete Request",
-      message = message(),
+      message = ticketMessage(),
       applicationId = Some(applicationId.toString()),
       supportReason = Some("Production Application Delete Request")
     )
@@ -116,6 +117,52 @@ object CreateTicketRequest {
       subject = "2SV Removal Request",
       message = ticketMessage,
       supportReason = Some("2SV Removal Request")
+    )
+  }
+
+  def createForApiSubscribe(
+      requestorName: String,
+      requestorEmail: LaxEmailAddress,
+      applicationName: ApplicationName,
+      applicationId: ApplicationId,
+      apiName: String,
+      apiVersion: ApiVersionNbr
+    ): CreateTicketRequest = {
+    val ticketMessage = s"""I '${requestorEmail.text}' want my application '$applicationName'
+                           |identified by '${applicationId}'
+                           |to be subscribed to the API '$apiName'
+                           |with version '${apiVersion.value}'""".stripMargin
+
+    CreateTicketRequest(
+      fullName = requestorName,
+      email = requestorEmail.text,
+      subject = "Production Application Subscription Request",
+      message = ticketMessage,
+      applicationId = Some(applicationId.toString()),
+      supportReason = Some("Production Application Subscription Request")
+    )
+  }
+
+  def createForApiUnsubscribe(
+      requestorName: String,
+      requestorEmail: LaxEmailAddress,
+      applicationName: ApplicationName,
+      applicationId: ApplicationId,
+      apiName: String,
+      apiVersion: ApiVersionNbr
+    ): CreateTicketRequest = {
+    val ticketMessage = s"""I '${requestorEmail.text}' want my application '$applicationName'
+                           |identified by '${applicationId}'
+                           |to be unsubscribed from the API '$apiName'
+                           |with version '${apiVersion.value}'""".stripMargin
+
+    CreateTicketRequest(
+      fullName = requestorName,
+      email = requestorEmail.text,
+      subject = "Production Application Unsubscribe Request",
+      message = ticketMessage,
+      applicationId = Some(applicationId.toString()),
+      supportReason = Some("Production Application Unsubscribe Request")
     )
   }
 }
