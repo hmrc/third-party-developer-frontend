@@ -27,7 +27,6 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketCreated
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -106,7 +105,7 @@ class DeleteApplicationSpec
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
       when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
-        .thenReturn(Future.successful(TicketCreated))
+        .thenReturn(Future.successful("ref"))
 
       val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
 
@@ -135,7 +134,7 @@ class DeleteApplicationSpec
     givenApplicationAction(nonApprovedApplication, adminSession)
 
     when(underTest.applicationService.requestApplicationDeletion(*, *)(*))
-      .thenReturn(Future.successful(TicketCreated))
+      .thenReturn(Future.successful("ref"))
   }
 
   "return not found if non-approved app" should {

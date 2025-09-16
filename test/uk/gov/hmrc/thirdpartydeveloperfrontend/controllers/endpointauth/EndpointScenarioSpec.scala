@@ -39,7 +39,7 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Dispa
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{Question, ResponsibleIndividualVerificationId}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.Fields
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{PasswordChangeRequest, UpdateRequest}
@@ -47,6 +47,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailP
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.UpdateProfileSuccess
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -88,6 +89,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
       .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
       .overrides(bind[DeskproConnector].toInstance(deskproConnector))
+      .overrides(bind[ApiPlatformDeskproConnector].toInstance(apiPlatformDeskproConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))
       .overrides(bind[ApmConnector].toInstance(apmConnector))
       .overrides(bind[ApmConnectorApiDefinitionModule].toInstance(apmConnector))
@@ -129,8 +131,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
-  when(deskproConnector.createTicket(*[Option[UserId]], *)(*)).thenReturn(Future.successful(TicketCreated))
-  when(deskproConnector.createTicket(*[ResponsibleIndividualVerificationId], *)(*)).thenReturn(Future.successful(TicketCreated))
+  when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful("ref"))
+  when(apiPlatformDeskproConnector.updatePersonName(*[LaxEmailAddress], *, *)).thenReturn(Future.successful(UpdateProfileSuccess))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
   when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))

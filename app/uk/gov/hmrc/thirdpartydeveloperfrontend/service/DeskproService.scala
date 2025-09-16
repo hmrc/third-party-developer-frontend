@@ -22,12 +22,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SignOutSurveyForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{DeskproTicket, Feedback, TicketId, TicketResult}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{Feedback, TicketId}
 
 @Singleton
 class DeskproService @Inject() (
@@ -39,11 +37,5 @@ class DeskproService @Inject() (
   def submitSurvey(survey: SignOutSurveyForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketId] = {
     val feedback = Feedback.createFromSurvey(survey, Option(appConfig.title))
     deskproConnector.createFeedback(feedback)
-  }
-
-  def submitSupportEnquiry(userId: Option[UserId], supportEnquiry: SupportEnquiryForm)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[TicketResult] = {
-    val ticket = DeskproTicket.createFromSupportEnquiry(supportEnquiry, appConfig.title)
-
-    deskproConnector.createTicket(userId, ticket)
   }
 }

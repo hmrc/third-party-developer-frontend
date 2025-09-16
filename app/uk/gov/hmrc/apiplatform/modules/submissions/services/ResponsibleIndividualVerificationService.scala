@@ -32,15 +32,15 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
   ResponsibleIndividualVerification,
   Submission
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.DeskproConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.DeskproTicket
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.ApplicationService
 
 @Singleton
 class ResponsibleIndividualVerificationService @Inject() (
     tpaSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
     applicationService: ApplicationService,
-    deskproConnector: DeskproConnector
+    apiPlatformDeskproConnector: ApiPlatformDeskproConnector
   )(implicit val ec: ExecutionContext
   ) {
 
@@ -108,8 +108,8 @@ class ResponsibleIndividualVerificationService @Inject() (
         val requesterName: String           = submitterName.getOrElse(throw new RuntimeException("requestedByName not found"))
         val requesterEmail: LaxEmailAddress = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
-        val ticket = DeskproTicket.createForRequestProductionCredentials(requesterName, requesterEmail, appName, appId)
-        deskproConnector.createTicket(riVerification.id, ticket).map(Some(_))
+        val ticket = CreateTicketRequest.createForRequestProductionCredentials(requesterName, requesterEmail, appName, appId)
+        apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
       }
       case riuv: ResponsibleIndividualTouUpliftVerification => {
         if (isSubmissionPassed) {
@@ -121,8 +121,8 @@ class ResponsibleIndividualVerificationService @Inject() (
           val requesterName: String           = riuv.requestingAdminName
           val requesterEmail: LaxEmailAddress = riuv.requestingAdminEmail
 
-          val ticket = DeskproTicket.createForTermsOfUseUplift(requesterName, requesterEmail, appName, appId)
-          deskproConnector.createTicket(riVerification.id, ticket).map(Some(_))
+          val ticket = CreateTicketRequest.createForTermsOfUseUplift(requesterName, requesterEmail, appName, appId)
+          apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
         }
       }
       // Do not send a deskpro ticket for a ResponsibleIndividualVerification of type ResponsibleIndividualUpdateVerification

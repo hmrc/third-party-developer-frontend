@@ -23,11 +23,12 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.{UpdateProfileFailed, UpdateProfileSuccess}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 
 class ApiPlatformDeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("microservice.services.api-platform-deskpro.port" -> stubPort)
@@ -93,6 +94,55 @@ class ApiPlatformDeskproConnectorIntegrationSpec extends BaseConnectorIntegratio
 
         await(connector.updatePersonName(email, name, hc)) shouldBe UpdateProfileFailed
         verify(1, putRequestedFor(urlEqualTo("/person")).withRequestBody(equalTo(expectedBody)))
+      }
+    }
+
+    "Create a ticket" should {
+
+      val email = "user@domain.com"
+      val name  = "Bob Fleming"
+      val ref   = "reference01"
+
+      val request = CreateTicketRequest(
+        name,
+        email,
+        "subject",
+        "message",
+        Some("apiName"),
+        Some("applicationId"),
+        Some("organisation"),
+        Some("supportReason"),
+        Some("teamMemberEmail@domain.com")
+      )
+
+      val expectedBody = Json.toJson(request).toString()
+
+      "Return ticket ref when DeskPro returns Ok (200)" in new Setup {
+        stubFor(
+          post(urlEqualTo("/ticket")).willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.parse(s"""{"ref":"$ref"}""").toString)
+              .withHeader("Content-Type", "application/json")
+          )
+        )
+
+        await(connector.createTicket(request, hc)) shouldBe ref
+        verify(1, postRequestedFor(urlEqualTo("/ticket")).withRequestBody(equalTo(expectedBody)))
+      }
+
+      "Fail when DeskPro returns an error" in new Setup {
+        stubFor(
+          post(urlEqualTo("/ticket"))
+            .willReturn(
+              aResponse()
+                .withStatus(500)
+            )
+        )
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.createTicket(request, hc))
+        }.statusCode shouldBe 500
       }
     }
   }

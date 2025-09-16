@@ -26,9 +26,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 
 class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
@@ -54,26 +52,6 @@ class DeskproConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with 
   }
 
   "DeskproConnector" when {
-
-    "Creating a Deskpro ticket" should {
-      val ticket       = DeskproTicket.createForRequestProductionCredentials("Joe Bloggs", "joe.bloggs@example.com".toLaxEmail, ApplicationName("Test App"), ApplicationId.random)
-      val ticketPath   = "/deskpro/ticket"
-      val expectedBody = Json.toJson(ticket).toString()
-
-      "create a ticket when DeskPro returns Ok (200)" in new Setup {
-        stubFor(
-          post(urlEqualTo(ticketPath)).willReturn(
-            aResponse()
-              .withStatus(200)
-              .withHeader("Content-Type", "application/json")
-              .withBody("""{"ticket_id":12345}""")
-          )
-        )
-
-        await(connector.createTicket(Some(UserId.random), ticket))
-        verify(1, postRequestedFor(urlEqualTo(ticketPath)).withRequestBody(equalTo(expectedBody)))
-      }
-    }
 
     "Submitting feedback" should {
 

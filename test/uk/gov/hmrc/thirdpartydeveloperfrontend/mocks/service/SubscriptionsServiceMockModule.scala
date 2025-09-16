@@ -25,7 +25,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Applicati
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TicketResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
 
 trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -70,14 +69,14 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
       def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
-          .thenReturn(successful(mock[TicketResult]))
+          .thenReturn(successful("ref"))
     }
 
     object RequestApiUnsubscribe {
 
       def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
-          .thenReturn(successful(mock[TicketResult]))
+          .thenReturn(successful("ref"))
     }
   }
 

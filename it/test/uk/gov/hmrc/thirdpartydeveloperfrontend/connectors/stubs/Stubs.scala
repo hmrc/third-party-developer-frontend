@@ -192,19 +192,6 @@ object ApplicationStub {
   }
 }
 
-object DeskproStub extends Matchers {
-  val deskproPath: String         = "/deskpro/ticket"
-  val deskproFeedbackPath: String = "/deskpro/feedback"
-
-  def setupTicketCreation(status: Int = OK): StubMapping = {
-    Stubs.setupPostRequest(deskproPath, status)
-  }
-
-  def verifyTicketCreationWithSubject(subject: String): Unit = {
-    verify(1, postRequestedFor(urlPathEqualTo(deskproPath)).withRequestBody(containing(s""""subject":"$subject"""")))
-  }
-}
-
 object AuditStub extends Matchers {
   val auditPath: String       = "/write/audit"
   val mergedAuditPath: String = "/write/audit/merged"

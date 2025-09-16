@@ -20,4 +20,4 @@ Feature: Developer requests their account to be deleted
     When I select the confirmation option with id 'deleteAccountYes'
     And I click on the account deletion confirmation submit button
     Then I am on the 'Account deletion request submitted' page
-    Then a deskpro ticket is generated with subject 'Request for developer account to be deleted'
+    Then a deskpro ticket is generated with subject 'Delete Developer Account Request'
