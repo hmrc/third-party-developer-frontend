@@ -30,6 +30,7 @@ case class CreateTicketRequest(
     applicationId: Option[String] = None,
     organisation: Option[String] = None,
     supportReason: Option[String] = None,
+    reasonKey: Option[String] = None,
     teamMemberEmail: Option[String] = None
   )
 
@@ -55,7 +56,8 @@ object CreateTicketRequest {
       subject = "Production Application Name Change",
       message = ticketMessage,
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Production Application Name Change")
+      supportReason = Some("Production Application Name Change"),
+      reasonKey = Some("prod-app-name-change")
     )
   }
 
@@ -90,7 +92,8 @@ object CreateTicketRequest {
       subject = "Production Application Delete Request",
       message = ticketMessage(),
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Production Application Delete Request")
+      supportReason = Some("Production Application Delete Request"),
+      reasonKey = Some("prod-app-delete")
     )
   }
 
@@ -103,7 +106,8 @@ object CreateTicketRequest {
       email = developerEmail.text,
       subject = "Delete Developer Account Request",
       message = ticketMessage,
-      supportReason = Some("Delete Developer Account Request")
+      supportReason = Some("Delete Developer Account Request"),
+      reasonKey = Some("developer-delete")
     )
   }
 
@@ -116,7 +120,8 @@ object CreateTicketRequest {
       email = developerEmail.text,
       subject = "2SV Removal Request",
       message = ticketMessage,
-      supportReason = Some("2SV Removal Request")
+      supportReason = Some("2SV Removal Request"),
+      reasonKey = Some("remove-2sv")
     )
   }
 
@@ -139,7 +144,8 @@ object CreateTicketRequest {
       subject = "Production Application Subscription Request",
       message = ticketMessage,
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Production Application Subscription Request")
+      supportReason = Some("Production Application Subscription Request"),
+      reasonKey = Some("prod-app-subscribe")
     )
   }
 
@@ -162,7 +168,8 @@ object CreateTicketRequest {
       subject = "Production Application Unsubscribe Request",
       message = ticketMessage,
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Production Application Unsubscribe Request")
+      supportReason = Some("Production Application Unsubscribe Request"),
+      reasonKey = Some("prod-app-unsubscribe")
     )
   }
 
@@ -181,7 +188,8 @@ object CreateTicketRequest {
       subject = "Production Application Credential Request",
       message = ticketMessage,
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Production Application Credential Request")
+      supportReason = Some("Production Application Credential Request"),
+      reasonKey = Some("prod-app-credentials")
     )
   }
 
@@ -196,10 +204,11 @@ object CreateTicketRequest {
     CreateTicketRequest(
       fullName = requestorName,
       email = requestorEmail.text,
-      subject = "Terms of Use -  Uplift Request",
+      subject = "Terms of Use - Uplift Request",
       message = ticketMessage,
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Terms of Use -  Uplift Request")
+      supportReason = Some("Terms of Use Uplift Request"),
+      reasonKey = Some("terms-of-use-uplift")
     )
   }
 }

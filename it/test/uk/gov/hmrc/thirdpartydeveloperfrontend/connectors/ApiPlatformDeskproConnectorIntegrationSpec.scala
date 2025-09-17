@@ -112,6 +112,7 @@ class ApiPlatformDeskproConnectorIntegrationSpec extends BaseConnectorIntegratio
         Some("applicationId"),
         Some("organisation"),
         Some("supportReason"),
+        Some("reasonKey"),
         Some("teamMemberEmail@domain.com")
       )
 
