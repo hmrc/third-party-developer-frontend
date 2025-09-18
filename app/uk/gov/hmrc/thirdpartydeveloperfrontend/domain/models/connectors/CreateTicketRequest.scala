@@ -44,10 +44,7 @@ object CreateTicketRequest {
       applicationId: ApplicationId
     ): CreateTicketRequest = {
     val ticketMessage =
-      s"""$requestorName wants to change the application name for $applicationId from $previousApplicationName to $newApplicationName.
-         |Check if the new application name meets the naming guidelines and update Gatekeeper within 2 working days.
-         |From HMRC Developer Hub
-         |""".stripMargin
+      s"""$requestorName has requested to change their application name from $previousApplicationName to $newApplicationName."""
 
     CreateTicketRequest(
       fullName = requestorName,
@@ -76,27 +73,27 @@ object CreateTicketRequest {
 
     def ticketMessage() =
       if (deleteRestricted) {
-        s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-           |and the application id is '${applicationId}'. I want it to be deleted from the Developer Hub. 
+        s"""$name ($actor) on the following ${environment.toString.toLowerCase} application '$applicationName'
+           |has requested it to be deleted from the Developer Hub. 
            |Please note that this application is marked as restricted for delete.""".stripMargin
       } else {
-        s"""I am $actor on the following ${environment.toString.toLowerCase} application '$applicationName'
-           |and the application id is '${applicationId}'. I want it to be deleted from the Developer Hub.""".stripMargin
+        s"""$name ($actor) on the following ${environment.toString.toLowerCase} application '$applicationName'
+           |has requested it to be deleted from the Developer Hub.""".stripMargin
       }
 
     CreateTicketRequest(
       fullName = name,
       email = requestedByEmail.text,
-      subject = "Production Application Delete Request",
+      subject = s"${environment.displayText} Application Delete Request",
       message = ticketMessage(),
       applicationId = Some(applicationId.toString()),
-      supportReason = Some("Production Application Delete Request")
+      supportReason = Some(s"${environment.displayText} Application Delete Request")
     )
   }
 
   def deleteDeveloperAccount(developerName: String, developerEmail: LaxEmailAddress): CreateTicketRequest = {
     val ticketMessage =
-      s"""I '${developerEmail.text}' want my Developer Hub account to be deleted"""
+      s"""$developerName (${developerEmail.text}) has requested their Developer Hub account to be deleted"""
 
     CreateTicketRequest(
       fullName = developerName,
@@ -109,7 +106,7 @@ object CreateTicketRequest {
 
   def removeDeveloper2SV(developerName: String, developerEmail: LaxEmailAddress): CreateTicketRequest = {
     val ticketMessage =
-      s"""I '${developerEmail.text}' want my 2SV to be removed"""
+      s"""$developerName (${developerEmail.text}) has requested their 2SV to be removed"""
 
     CreateTicketRequest(
       fullName = developerName,
@@ -128,8 +125,7 @@ object CreateTicketRequest {
       apiName: String,
       apiVersion: ApiVersionNbr
     ): CreateTicketRequest = {
-    val ticketMessage = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                           |identified by '${applicationId}'
+    val ticketMessage = s"""$requestorName has requested their application '$applicationName'
                            |to be subscribed to the API '$apiName'
                            |with version '${apiVersion.value}'""".stripMargin
 
@@ -151,8 +147,7 @@ object CreateTicketRequest {
       apiName: String,
       apiVersion: ApiVersionNbr
     ): CreateTicketRequest = {
-    val ticketMessage = s"""I '${requestorEmail.text}' want my application '$applicationName'
-                           |identified by '${applicationId}'
+    val ticketMessage = s"""$requestorName has requested their application '$applicationName'
                            |to be unsubscribed from the API '$apiName'
                            |with version '${apiVersion.value}'""".stripMargin
 
@@ -169,11 +164,7 @@ object CreateTicketRequest {
   def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId)
       : CreateTicketRequest = {
     val ticketMessage =
-      s"""${requestorEmail.text} submitted the following application for production use on the Developer Hub:
-         |$applicationName
-         |Please check it against our guidelines and send them a response within 2 working days.
-         |HMRC Developer Hub
-         |""".stripMargin
+      s"""$requestorName has submitted their application $applicationName for production use on the Developer Hub."""
 
     CreateTicketRequest(
       fullName = requestorName,
@@ -187,11 +178,7 @@ object CreateTicketRequest {
 
   def createForTermsOfUseUplift(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId): CreateTicketRequest = {
     val ticketMessage =
-      s"""${requestorEmail.text} has submitted a Terms of Use application that has warnings or fails:
-         |$applicationName
-         |Please check it against our guidelines and send them a response within 2 working days.
-         |HMRC Developer Hub
-         |""".stripMargin
+      s"""$requestorName has submitted their application $applicationName for Terms of Use review."""
 
     CreateTicketRequest(
       fullName = requestorName,
