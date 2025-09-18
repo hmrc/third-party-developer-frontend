@@ -107,7 +107,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.fullName shouldBe application.state.requestedByName.get
       deskproTicket.email shouldBe application.state.requestedByEmailAddress.get
       deskproTicket.message should include(riVerification.applicationName.value)
-      deskproTicket.message should include("submitted the following application for production use on the Developer Hub")
+      deskproTicket.message should include("for production use on the Developer Hub")
       deskproTicket.applicationId shouldBe Some(applicationId.toString())
     }
 
@@ -142,7 +142,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.fullName shouldBe requesterName
       deskproTicket.email shouldBe requesterEmail.text
       deskproTicket.message should include(riVerificationUplift.applicationName.value)
-      deskproTicket.message should include("has submitted a Terms of Use application that has warnings or fails")
+      deskproTicket.message should include("for Terms of Use review")
       deskproTicket.applicationId shouldBe Some(applicationId.toString())
     }
 

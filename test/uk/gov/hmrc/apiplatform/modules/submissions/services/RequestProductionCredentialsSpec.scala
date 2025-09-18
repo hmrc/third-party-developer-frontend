@@ -91,7 +91,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.fullName shouldBe name
       ticketCapture.value.email shouldBe email.text
       ticketCapture.value.message should include(appAfterCommand.name.value)
-      ticketCapture.value.message should include("submitted the following application for production use on the Developer Hub")
+      ticketCapture.value.message should include("for production use on the Developer Hub")
       ticketCapture.value.applicationId shouldBe Some(app.id.toString())
     }
 
@@ -110,7 +110,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.fullName shouldBe name
       ticketCapture.value.email shouldBe email.text
       ticketCapture.value.message should include(app.name.value)
-      ticketCapture.value.message should include("has submitted a Terms of Use application that has warnings or fails")
+      ticketCapture.value.message should include("for Terms of Use review")
       ticketCapture.value.applicationId shouldBe Some(app.id.toString())
     }
 
