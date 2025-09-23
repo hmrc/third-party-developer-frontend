@@ -93,6 +93,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.message should include(appAfterCommand.name.value)
       ticketCapture.value.message should include("for production use on the Developer Hub")
       ticketCapture.value.applicationId shouldBe Some(app.id.toString())
+      ticketCapture.value.supportReason shouldBe Some("Production Application Credential Request")
+      ticketCapture.value.reasonKey shouldBe Some("prod-app-credentials")
     }
 
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
@@ -106,12 +108,14 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
       val ticketCapture = ArgCaptor[CreateTicketRequest]
       verify(mockApiPlatformDeskproConnector).createTicket(ticketCapture.capture, *)
-      ticketCapture.value.subject shouldBe "Terms of Use -  Uplift Request"
+      ticketCapture.value.subject shouldBe "Terms of Use - Uplift Request"
       ticketCapture.value.fullName shouldBe name
       ticketCapture.value.email shouldBe email.text
       ticketCapture.value.message should include(app.name.value)
       ticketCapture.value.message should include("for Terms of Use review")
       ticketCapture.value.applicationId shouldBe Some(app.id.toString())
+      ticketCapture.value.supportReason shouldBe Some("Terms of Use Uplift Request")
+      ticketCapture.value.reasonKey shouldBe Some("terms-of-use-uplift")
     }
 
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {

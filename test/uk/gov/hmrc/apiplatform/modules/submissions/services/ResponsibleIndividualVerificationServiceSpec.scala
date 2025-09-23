@@ -109,6 +109,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.message should include(riVerification.applicationName.value)
       deskproTicket.message should include("for production use on the Developer Hub")
       deskproTicket.applicationId shouldBe Some(applicationId.toString())
+      deskproTicket.supportReason shouldBe Some("Production Application Credential Request")
+      deskproTicket.reasonKey shouldBe Some("prod-app-credentials")
     }
 
     "successfully return a riVerification record for accept and create a deskpro ticket for a terms of use uplift" in new Setup {
@@ -138,12 +140,14 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       val ticketCapture = ArgCaptor[CreateTicketRequest]
       verify(mockApiPlatformDeskproConnector).createTicket(ticketCapture.capture, *)
       val deskproTicket = ticketCapture.value
-      deskproTicket.subject shouldBe "Terms of Use -  Uplift Request"
+      deskproTicket.subject shouldBe "Terms of Use - Uplift Request"
       deskproTicket.fullName shouldBe requesterName
       deskproTicket.email shouldBe requesterEmail.text
       deskproTicket.message should include(riVerificationUplift.applicationName.value)
       deskproTicket.message should include("for Terms of Use review")
       deskproTicket.applicationId shouldBe Some(applicationId.toString())
+      deskproTicket.supportReason shouldBe Some("Terms of Use Uplift Request")
+      deskproTicket.reasonKey shouldBe Some("terms-of-use-uplift")
     }
 
     "successfully return a riVerification record for accept but don't create a deskpro ticket for a terms of use uplift where the submission status is passed" in new Setup {
