@@ -28,9 +28,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion,
-    "uk.gov.hmrc"      %% "api-platform-organisation-domain" % orgDomainVersion,
-
-
+    "uk.gov.hmrc"                 %% "api-platform-organisation-domain"       % orgDomainVersion
   )
 
   lazy val test =  Seq(
