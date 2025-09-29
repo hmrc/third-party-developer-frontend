@@ -10,6 +10,8 @@ object AppDependencies {
   lazy val apiDomainVersion = "0.19.1"
   lazy val appDomainVersion = "0.83.0"
   lazy val tpdDomainVersion = "0.14.0"
+  private val orgDomainVersion = "0.11.0"
+
 
   lazy val compile = Seq(
     ws,
@@ -25,7 +27,10 @@ object AppDependencies {
     "com.google.zxing"            %  "core"                                   % "3.2.1",
     "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion,
+    "uk.gov.hmrc"      %% "api-platform-organisation-domain" % orgDomainVersion,
+
+
   )
 
   lazy val test =  Seq(

@@ -22,54 +22,84 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+@import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 
 @this(
-  devMain: DevMain, 
-  govukTable: GovukTable,
-  leftHandNav: LeftHandNav
+        devMain: DevMain,
+        govukTable: GovukTable,
+        leftHandNav: LeftHandNav
 )
 
-@(apps: Seq[ApplicationSummary])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
+@(apps: Seq[ApplicationSummary], orgs: Seq[Organisation])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
 
 @buildAppLinkHtml(app: ApplicationSummary) = {
-  <a href='@controllers.routes.Details.details(app.id)' class='govuk-link govuk-link--no-visited-state'>@{app.name.toString()}</a>
+    <a href='@controllers.routes.Details.details(app.id)' class='govuk-link govuk-link--no-visited-state'>@{
+        app.name.toString()
+    }</a>
+}
+
+@buildOrgLinkHtml(org: Organisation) = {
+    <a href='@{s"${appConfig.organisationFrontendUrl}/api-platform-organisation/organisation/${org.id.value}"}' class='govuk-link govuk-link--no-visited-state'>@{
+        org.organisationName.toString()
+    }</a>
 }
 
 @devMain(
-  title = "Home",
-  userFullName = loggedIn.loggedInName,
-  breadcrumbs = Seq(
-    Crumb.home
-  ),
-  developerSession = Some(loggedIn)
+    title = "Home",
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb.home
+    ),
+    developerSession = Some(loggedIn),
+    fullWidth = true
 ) {
-  <h1 class="govuk-heading-l">
-    <span class="govuk-caption-xl">@messages("dashboard.home")</span>
-    @loggedIn.loggedInName
-  </h1>
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-three-quarters">
+            <h1 class="govuk-heading-l">
+                <span class="govuk-caption-xl">@messages("dashboard.home")</span>
+                @loggedIn.loggedInName
+            </h1>
+        </div>
 
-    <div class="govuk-summary-card">
-      <div class="govuk-summary-card__content">
+        <div class="govuk-grid-column-two-thirds">
+            <div class="govuk-summary-card">
+                <div class="govuk-summary-card__content">
 
-        @govukTable(Table(
-          caption = Some(messages("dashboard.applications.your")),
-          captionClasses = "govuk-table__caption--m",
-          firstCellIsHeader = true,
-          head = Some(Seq(
-            HeadCell(content = Text(messages("dashboard.applications.name"))),
-            HeadCell(content = Text(messages("dashboard.applications.environment")))
-          )),
-          rows = apps.map(app => Seq(
-            TableRow(content = HtmlContent(buildAppLinkHtml(app))),
-            TableRow(content = Text(app.environment.displayText))
-          ))
-        ))
+                    @govukTable(Table(
+                        caption = Some(messages("dashboard.applications.your")),
+                        captionClasses = "govuk-table__caption--m",
+                        firstCellIsHeader = true,
+                        head = Some(Seq(
+                            HeadCell(content = Text(messages("dashboard.applications.name"))),
+                            HeadCell(content = Text(messages("dashboard.applications.environment")))
+                        )),
+                        rows = apps.map(app => Seq(
+                            TableRow(content = HtmlContent(buildAppLinkHtml(app))),
+                            TableRow(content = Text(app.environment.displayText))
+                        ))
+                    ))
 
-        <ul class="govuk-list">
-          <li><a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.ManageApplications.manageApps()">@messages("dashboard.applications.viewall")</a></li>
-          <li><a class="govuk-link govuk-link--no-visited-state" href="@controllers.addapplication.routes.AddApplication.addApplicationSubordinate()">@messages("dashboard.applications.create")</a></li>
-        </ul>
-      </div>
+                    <ul class="govuk-list">
+                        <li><a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.ManageApplications.manageApps()">@messages("dashboard.applications.viewall")</a></li>
+                        <li><a class="govuk-link govuk-link--no-visited-state" href="@controllers.addapplication.routes.AddApplication.addApplicationSubordinate()">@messages("dashboard.applications.create")</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="govuk-grid-column-one-third">
+            <div class="govuk-summary-card">
+                <div class="govuk-summary-card__content">
+                    @govukTable(Table(
+                        caption = Some(messages("dashboard.organisations.your")),
+                        captionClasses = "govuk-table__caption--m",
+                        firstCellIsHeader = false,
+                        rows = orgs.map(app => Seq(
+                            TableRow(content = HtmlContent(buildOrgLinkHtml(app)))
+                        ))
+                    ))
+                </div>
+            </div>
+        </div>
     </div>
-
-  }
+}

@@ -25,11 +25,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.OrganisationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 
 @Singleton
 class DashboardService @Inject() (
     connectorWrapper: ConnectorsWrapper,
+    organisationConnector: OrganisationConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends ClockNow {
@@ -49,4 +52,7 @@ class DashboardService @Inject() (
     } yield combinedAppList
   }
 
+  def fetchOrganisationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Organisation]] = {
+    organisationConnector.fetchOrganisationsByUserId(userId)
+  }
 }

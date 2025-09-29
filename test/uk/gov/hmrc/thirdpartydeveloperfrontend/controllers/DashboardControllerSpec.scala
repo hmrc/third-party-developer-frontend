@@ -24,7 +24,9 @@ import views.html._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, CollaboratorData}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.OrganisationId
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -53,22 +55,28 @@ class DashboardControllerSpec
 
     val sessionId   = adminSession.sessionId
     val userSession = adminSession
+
+    val userId       = CollaboratorData.Administrator.one.userId
+    val orgId        = OrganisationId.random
+    val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Member(userId)))
+
   }
 
   "get dashboard page" should {
 
     "return the dashboard page with the user logged in" in new Setup {
       val prodSummary = ApplicationSummary.from(standardApp, userSession.developer.userId)
-      val apps        = Seq(
-        prodSummary
-      )
+      val apps        = Seq(prodSummary)
+      val orgs        = Seq(organisation)
 
       DashboardServiceMock.FetchApplicationList.thenReturn(apps)
+      DashboardServiceMock.FetchOrganisationsByUserId.thenReturn(orgs)
 
       private val result = dashboardController.home()(loggedInAdminRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include(organisation.organisationName.value)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include(standardApp.name.value)
       contentAsString(result) should not include "Sign in"
