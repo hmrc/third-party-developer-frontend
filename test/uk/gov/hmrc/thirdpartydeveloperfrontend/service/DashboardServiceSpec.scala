@@ -29,6 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -55,6 +56,8 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
+    val mockOrganisationConnector: OrganisationConnector = mock[OrganisationConnector]
+
     val connectorsWrapper = new ConnectorsWrapper(
       mockSandboxApplicationConnector,
       mockProductionApplicationConnector,
@@ -65,6 +68,7 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
     val dashboardService = new DashboardService(
       connectorsWrapper,
+      mockOrganisationConnector,
       clock
     )
   }
@@ -76,6 +80,9 @@ class DashboardServiceSpec extends AsyncHmrcSpec
   val sandboxApplication: ApplicationWithSubscriptions = productionApplication.withId(sandboxApplicationId).inSandbox()
 
   val userId = CollaboratorData.Administrator.one.userId
+
+  val orgId        = OrganisationId.random
+  val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Member(userId)))
 
   "get the list of applications for the given user" should {
     "successfully return the list of applications" in new Setup {
@@ -89,4 +96,13 @@ class DashboardServiceSpec extends AsyncHmrcSpec
     }
   }
 
+  "fetchByUserId" should {
+    "return organisations for given user id" in new Setup {
+      when(mockOrganisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
+
+      val result = await(dashboardService.fetchOrganisationsByUserId(userId))
+
+      result shouldBe List(organisation)
+    }
+  }
 }

@@ -21,6 +21,7 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.DashboardService
 
@@ -33,6 +34,12 @@ trait DashboardServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
 
       def thenReturn(apps: Seq[ApplicationSummary]) =
         when(aMock.fetchApplicationList(*[UserId])(*)).thenReturn(successful(apps))
+    }
+
+    object FetchOrganisationsByUserId {
+
+      def thenReturn(orgs: Seq[Organisation]) =
+        when(aMock.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(orgs))
     }
   }
 

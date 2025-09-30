@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import java.time.Instant
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
 import scala.io.Source
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -98,6 +99,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ProductionPushPullNotificationsConnector].toInstance(productionPushPullNotificationsConnector))
       .overrides(bind[ThirdPartyApplicationSubmissionsConnector].toInstance(thirdPartyApplicationSubmissionsConnector))
       .overrides(bind[ThirdPartyDeveloperMfaConnector].toInstance(thirdPartyDeveloperMfaConnector))
+      .overrides(bind[OrganisationConnector].toInstance(organisationConnector))
       .in(Mode.Test)
       .build()
   }
@@ -137,6 +139,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
   when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
+  when(organisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
 
   import scala.reflect.runtime.universe._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._

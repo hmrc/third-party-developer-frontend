@@ -42,7 +42,9 @@ class DashboardController @Inject() (
   ) extends LoggedInController(mcc) {
 
   def home(): Action[AnyContent] = loggedInAction { implicit request =>
-    dashboardService.fetchApplicationList(request.developer.userId).map(apps => Ok(dashboardView(apps)))
+    for {
+      apps <- dashboardService.fetchApplicationList(request.developer.userId)
+      orgs <- dashboardService.fetchOrganisationsByUserId(request.developer.userId)
+    } yield Ok(dashboardView(apps, orgs))
   }
-
 }

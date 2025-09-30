@@ -37,6 +37,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val thirdPartyApplicationSandboxApiKey: String       = getConfString("third-party-application-sandbox.api-key", "")
   val thirdPartyOrchestratorUrl: String                = baseUrl("third-party-orchestrator")
   val deskproUrl: String                               = baseUrl("deskpro-ticket-queue")
+  val organisationUrl: String                          = baseUrl("api-platform-organisation")
 
   lazy val contactPath: String = getConfigDefaulted("contactPath", "")
 
@@ -45,6 +46,7 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   lazy val apiDocumentationFrontendUrl: String    = buildUrl("platform.internal.frontend").getOrElse(baseUrl("api-documentation-frontend"))
   lazy val thirdPartyDeveloperFrontendUrl: String = buildUrl("platform.internal.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
   lazy val devhubSupportFrontendUrl: String       = buildUrl("platform.internal.frontend").getOrElse(baseUrl("devhub-support-frontend"))
+  lazy val organisationFrontendUrl: String        = baseUrl("api-platform-organisation-frontend")
   lazy val productionApiBaseUrl: Option[String]   = buildUrl("platform.api.production")
   lazy val sandboxApiBaseUrl: Option[String]      = buildUrl("platform.api.sandbox")
 
