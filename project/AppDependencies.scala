@@ -8,9 +8,10 @@ object AppDependencies {
   lazy val bootstrapVersion = "9.19.0"
   lazy val mongoVersion = "2.7.0"
   lazy val apiDomainVersion = "0.20.0"
-  lazy val appDomainVersion = "0.86.0"
+  lazy val appDomainVersion = "0.87.0"
   lazy val tpdDomainVersion = "0.14.0"
   private val orgDomainVersion = "0.11.0"
+  private val mockitoScalaVersion = "2.0.0"
 
 
   lazy val compile = Seq(
@@ -34,7 +35,7 @@ object AppDependencies {
   lazy val test =  Seq(
     "uk.gov.hmrc"                 %% "bootstrap-test-play-30"                   % bootstrapVersion,
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"                  % mongoVersion,
-    "org.mockito"                 %% "mockito-scala-scalatest"                  % "1.17.29",
+    "org.mockito"                 %% "mockito-scala-scalatest"                  % mockitoScalaVersion,
     "org.jsoup"                   %  "jsoup"                                    % "1.13.1",
     "org.scalacheck"              %% "scalacheck"                               % "1.17.0",
     "org.scalatestplus"           %% "scalacheck-1-17"                          % "3.2.17.0",
