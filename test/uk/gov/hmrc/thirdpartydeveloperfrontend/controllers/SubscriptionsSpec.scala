@@ -43,7 +43,7 @@ class SubscriptionsSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubscriptionTestSugar
-    with ApplicationTokenData
+    with ApplicationTokenFixtures
     with ApplicationWithCollaboratorsFixtures {
 
   val apiName       = "api-1"
