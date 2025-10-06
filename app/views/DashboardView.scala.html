@@ -87,9 +87,10 @@
             </div>
         </div>
 
-        <div class="govuk-grid-column-one-third">
-            <div class="govuk-summary-card">
-                <div class="govuk-summary-card__content">
+        @if(orgs.nonEmpty) {
+            <div class="govuk-grid-column-one-third">
+                <div class="govuk-summary-card">
+                    <div class="govuk-summary-card__content">
                     @govukTable(Table(
                         caption = Some(messages("dashboard.organisations.your")),
                         captionClasses = "govuk-table__caption--m",
@@ -98,8 +99,9 @@
                             TableRow(content = HtmlContent(buildOrgLinkHtml(app)))
                         ))
                     ))
+                    </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 }
