@@ -76,7 +76,26 @@ class DashboardControllerSpec
 
       status(result) shouldBe OK
       contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include("Your organisations")
       contentAsString(result) should include(organisation.organisationName.value)
+      contentAsString(result) should include("Sign out")
+      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should not include "Sign in"
+    }
+
+    "return the dashboard page without the orgs tile if the user has no orgs" in new Setup {
+      val prodSummary = ApplicationSummary.from(standardApp, userSession.developer.userId)
+      val apps        = Seq(prodSummary)
+      val orgs        = Seq.empty
+
+      DashboardServiceMock.FetchApplicationList.thenReturn(apps)
+      DashboardServiceMock.FetchOrganisationsByUserId.thenReturn(orgs)
+
+      private val result = dashboardController.home()(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) shouldNot include("Your organisations")
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include(standardApp.name.value)
       contentAsString(result) should not include "Sign in"
