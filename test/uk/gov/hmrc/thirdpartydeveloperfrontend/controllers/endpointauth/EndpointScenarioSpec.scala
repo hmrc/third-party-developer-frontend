@@ -88,7 +88,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyOrchestratorConnector].toInstance(tpoConnector))
       .overrides(bind[ThirdPartyDeveloperConnector].toInstance(tpdConnector))
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
-      .overrides(bind[ThirdPartyApplicationSandboxConnector].toInstance(tpaSandboxConnector))
       .overrides(bind[DeskproConnector].toInstance(deskproConnector))
       .overrides(bind[ApiPlatformDeskproConnector].toInstance(apiPlatformDeskproConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))

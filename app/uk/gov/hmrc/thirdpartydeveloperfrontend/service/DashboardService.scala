@@ -31,8 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 
 @Singleton
 class DashboardService @Inject() (
-    connectorWrapper: ConnectorsWrapper,
     organisationConnector: OrganisationConnector,
+    appSvc: AppsByTeamMemberService,
     val clock: Clock
   )(implicit val ec: ExecutionContext
   ) extends ClockNow {
@@ -46,8 +46,8 @@ class DashboardService @Inject() (
     }
 
     for {
-      productionApps <- connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchByTeamMember(userId)
-      sandboxApps    <- connectorWrapper.forEnvironment(Environment.SANDBOX).thirdPartyApplicationConnector.fetchByTeamMember(userId)
+      productionApps <- appSvc.fetchAppsByTeamMember(Environment.PRODUCTION)(userId)
+      sandboxApps    <- appSvc.fetchAppsByTeamMember(Environment.SANDBOX)(userId)
       combinedAppList = createDashboardAppList(productionApps, sandboxApps)
     } yield combinedAppList
   }

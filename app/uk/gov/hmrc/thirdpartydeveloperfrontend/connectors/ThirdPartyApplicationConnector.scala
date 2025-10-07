@@ -18,19 +18,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
 
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptions
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
@@ -39,67 +36,16 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   protected val http: HttpClientV2
   implicit val ec: ExecutionContext
-  val environment: Environment
   val serviceBaseUrl: String
-  def isEnabled: Boolean
-
-  def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
   val api: API = API("third-party-application")
 
-  // Move to APM
-  def fetchByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
-    if (isEnabled) {
-      metrics.record(api) {
-        val url = s"$serviceBaseUrl/developer/applications"
-
-        logger.info(s"fetchByTeamMember() - About to call $url for $userId in ${environment}")
-
-        configureEbridgeIfRequired(
-          http
-            .get(url"$url?${Seq[(String, String)]("userId" -> userId.toString(), "environment" -> environment.toString)}")
-        )
-          .execute[Seq[ApplicationWithSubscriptions]]
-          .andThen {
-            case Success(_) =>
-              logger.debug(s"fetchByTeamMember() - done call to $url for $userId in ${environment}")
-            case _          =>
-              logger.debug(s"fetchByTeamMember() - done errored call to $url for $userId in ${environment}")
-          }
-      }
-    } else {
-      Future.successful(Seq.empty)
-    }
-
-  // Move to APM
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
-      configureEbridgeIfRequired(
-        http.get(url"$serviceBaseUrl/terms-of-use/application/${applicationId}")
-      )
+      http.get(url"$serviceBaseUrl/terms-of-use/application/${applicationId}")
         .execute[Option[TermsOfUseInvitation]]
     }
   }
-}
-
-@Singleton
-class ThirdPartyApplicationSandboxConnector @Inject() (
-    val http: HttpClientV2,
-    val futureTimeout: FutureTimeoutSupport,
-    val appConfig: ApplicationConfig,
-    val metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
-  ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
-
-  val environment: Environment = Environment.SANDBOX
-  val serviceBaseUrl: String   = appConfig.thirdPartyApplicationSandboxUrl
-  val useProxy: Boolean        = appConfig.thirdPartyApplicationSandboxUseProxy
-  val apiKey: String           = appConfig.thirdPartyApplicationSandboxApiKey
-
-  lazy val configureEbridgeIfRequired: RequestBuilder => RequestBuilder =
-    EbridgeConfigurator.configure(useProxy, apiKey)
-
-  override val isEnabled: Boolean = appConfig.hasSandbox;
 }
 
 @Singleton
@@ -110,10 +56,5 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val metrics: ConnectorMetrics
   )(implicit val ec: ExecutionContext
   ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
-  val environment: Environment = Environment.PRODUCTION
-  val serviceBaseUrl: String   = appConfig.thirdPartyApplicationProductionUrl
-
-  val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
-
-  override val isEnabled = true
+  val serviceBaseUrl: String = appConfig.thirdPartyApplicationProductionUrl
 }

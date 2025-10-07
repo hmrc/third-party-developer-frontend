@@ -28,6 +28,8 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
@@ -75,4 +77,13 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       }
   }
 
+  def query[T](environment: Environment)(qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+    val qryStringMap = QueryParamsToQueryStringMap.toQuery(qry).map {
+      case (k, vs) => k -> vs.mkString
+    }
+
+    http
+      .get(url"${serviceBaseUrl}/environment/$environment/query?$qryStringMap")
+      .execute[T]
+  }
 }

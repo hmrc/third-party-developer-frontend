@@ -24,14 +24,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationSandboxConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 
 @Singleton
 class UpliftLogic @Inject() (
     apmConnector: ApmConnector,
-    sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
     appsByTeamMember: AppsByTeamMemberService
   )(implicit ec: ExecutionContext
   ) {

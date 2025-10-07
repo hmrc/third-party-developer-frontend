@@ -86,6 +86,7 @@ lazy val component = (project in file("component"))
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
     Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
     DefaultBuildSettings.itSettings(),
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
   )
 

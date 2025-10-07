@@ -43,19 +43,11 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
-      mock[ThirdPartyApplicationProductionConnector]
-
-    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
-      mock[ThirdPartyApplicationSandboxConnector]
-
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
     val mockAuditService: AuditService = mock[AuditService]
 
     val connectorsWrapper = new ConnectorsWrapper(
-      mockSandboxApplicationConnector,
-      mockProductionApplicationConnector,
       mock[PushPullNotificationsConnector],
       mock[PushPullNotificationsConnector],
       mock[ApplicationConfig]

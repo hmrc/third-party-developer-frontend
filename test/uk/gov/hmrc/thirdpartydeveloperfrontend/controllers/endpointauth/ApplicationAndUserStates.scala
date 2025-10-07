@@ -265,8 +265,8 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder with FixedClo
 }
 
 trait UserIsTeamMember extends HasUserWithRole with HasApplication {
-  when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
-  when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.PRODUCTION))(*)(*, *)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.SANDBOX))(*)(*, *)).thenReturn(Future.successful(List(appWithSubsIds)))
 }
 
 trait UserIsAdmin extends UserIsTeamMember {
@@ -282,8 +282,8 @@ trait UserIsDeveloper extends UserIsTeamMember {
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
   val otherApp: ApplicationWithCollaborators            = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
   val otherAppWithSubsIds: ApplicationWithSubscriptions = otherApp.withSubscriptions(Set(apiIdentifier))
-  when(tpaProductionConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
-  when(tpaSandboxConnector.fetchByTeamMember(*[UserId])(*)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.PRODUCTION))(*)(*, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.SANDBOX))(*)(*, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   def describeUserRole                                  = "The user is not a member of the application team"
   def maybeCollaborator: Option[Collaborator]           = None
 }

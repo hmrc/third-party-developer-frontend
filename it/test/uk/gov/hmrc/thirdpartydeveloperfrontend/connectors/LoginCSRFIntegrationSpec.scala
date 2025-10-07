@@ -52,7 +52,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     "play.filters.csrf.token.sign"                                      -> false,
     "microservice.services.third-party-developer.port"                  -> stubPort,
     "microservice.services.third-party-application-production.port"     -> stubPort,
-    "microservice.services.third-party-application-sandbox.port"        -> stubPort,
+    "microservice.services.third-party-orchestrator.port"               -> stubPort,
     "microservice.services.api-definition.port"                         -> stubPort,
     "microservice.services.api-documentation-frontend.port"             -> stubPort,
     "microservice.services.third-party-developer-frontend.port"         -> 9685,
@@ -166,7 +166,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         )
 
         setupThirdPartyDeveloperFindUserIdByEmailAddress(userEmail, userId)
-        setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
+        setupTPOQueryApplicationByUserIdStub(userId)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
 
@@ -196,7 +196,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         )
 
         setupThirdPartyDeveloperFindUserIdByEmailAddress(userEmail, userId)
-        setupThirdPartyApplicationSearchApplicationByUserIdStub(userId)
+        setupTPOQueryApplicationByUserIdStub(userId)
         fetchDeveloper(developer)
 
         private val request = loginRequestWithCSRF.withFormUrlEncodedBody("emailaddress" -> userEmail.text, "password" -> userPassword, "csrfToken" -> csrftoken.get.value)
@@ -221,9 +221,9 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     )
   }
 
-  private def setupThirdPartyApplicationSearchApplicationByUserIdStub(userId: UserId): Unit = {
+  private def setupTPOQueryApplicationByUserIdStub(userId: UserId): Unit = {
     stubFor(
-      get(urlEqualTo(s"/developer/applications?userId=${userId.toString()}&environment=PRODUCTION"))
+      get(urlEqualTo(s"/environment/PRODUCTION/query?userId=${userId.toString()}&status=EXCLUDING_DELETED&wantSubscriptions="))
         .willReturn(
           aResponse()
             .withStatus(OK)
