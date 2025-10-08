@@ -6,7 +6,7 @@ object AppDependencies {
 
   lazy val seleniumVersion = "4.14.0"
   lazy val bootstrapVersion = "9.19.0"
-  lazy val mongoVersion = "2.8.0"
+  lazy val mongoVersion = "2.9.0"
   lazy val apiDomainVersion = "0.20.0"
   lazy val appDomainVersion = "0.87.0"
   lazy val tpdDomainVersion = "0.14.0"
@@ -17,7 +17,7 @@ object AppDependencies {
   lazy val compile = Seq(
     ws,
     "uk.gov.hmrc"                 %% "bootstrap-frontend-play-30"             % bootstrapVersion,
-    "uk.gov.hmrc"                 %% "play-partials-play-30"                  % "10.1.0",
+    "uk.gov.hmrc"                 %% "play-partials-play-30"                  % "10.2.0",
     "uk.gov.hmrc"                 %% "domain-play-30"                         % "11.0.0",
     "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"             % "12.17.0",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"                     % mongoVersion,
