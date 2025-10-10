@@ -56,12 +56,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     private val mockAppConfig = mock[ApplicationConfig]
 
-    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
-      mock[ThirdPartyApplicationProductionConnector]
-
-    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
-      mock[ThirdPartyApplicationSandboxConnector]
-
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
@@ -69,8 +63,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val mockAuditService: AuditService = mock[AuditService]
 
     val connectorsWrapper = new ConnectorsWrapper(
-      mockSandboxApplicationConnector,
-      mockProductionApplicationConnector,
       mockPushPullNotificationsConnector,
       mockPushPullNotificationsConnector,
       mockAppConfig

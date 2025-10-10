@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
-import scala.concurrent.Future.successful
+import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
@@ -49,6 +49,17 @@ trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with Argume
 
       def succeedsWith(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(response: ApplicationNameValidationResult) = {
         when(aMock.validateName(eqTo(name), eqTo(selfApplicationId), eqTo(environment))(*)).thenReturn(successful(response))
+      }
+    }
+
+    object Query {
+
+      def returnsFor[T](environment: Environment)(results: T) = {
+        when(aMock.query[T](eqTo(environment))(*)(*, *)).thenReturn(successful(results))
+      }
+
+      def failsFor(environment: Environment)(err: Throwable) = {
+        when(aMock.query(eqTo(environment))(*)(*, *)).thenReturn(failed(err))
       }
     }
   }

@@ -76,9 +76,10 @@ object ApplicationStub {
 
     def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptions]) = {
       stubFor(
-        get(urlPathEqualTo("/developer/applications"))
+        get(urlPathEqualTo(s"/environment/${environment}/query"))
           .withQueryParam("userId", equalTo(userId.toString()))
-          .withQueryParam("environment", equalTo(environment.toString))
+          // .withQueryParam("wantSubscriptions", matching("*"))
+          .withQueryParam("status", equalTo("EXCLUDING_DELETED"))
           .willReturn(
             aResponse()
               .withStatus(status)

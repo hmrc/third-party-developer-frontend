@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future.{failed, successful}
 
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 
@@ -25,10 +24,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Applicat
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyOrchestratorConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker {
@@ -40,24 +37,10 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
   val versionOne = ApiVersionNbr("1.0")
   val versionTwo = ApiVersionNbr("2.0")
 
-  trait Setup {
+  trait Setup extends ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
-      mock[ThirdPartyApplicationProductionConnector]
-
-    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
-      mock[ThirdPartyApplicationSandboxConnector]
-
-    val connectorsWrapper = new ConnectorsWrapper(
-      mockSandboxApplicationConnector,
-      mockProductionApplicationConnector,
-      mock[PushPullNotificationsConnector],
-      mock[PushPullNotificationsConnector],
-      mock[ApplicationConfig]
-    )
-
-    val appsByTeamMemberService = new AppsByTeamMemberService(connectorsWrapper)
+    val appsByTeamMemberService = new AppsByTeamMemberService(ThirdPartyOrchestratorConnectorMock.aMock)
   }
 
   "Fetch by teamMember" should {
@@ -81,31 +64,24 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     }
 
     "sort the returned applications by name" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(productionApps))
-
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(sandboxApps))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(productionApps)
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(sandboxApps)
 
       private val result = await(appsByTeamMemberService.fetchAllSummariesByTeamMember(userId))
       result shouldBe ((List(sandboxApp1.asSandboxSummary), List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
     "tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(productionApps))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(productionApps)
+      ThirdPartyOrchestratorConnectorMock.Query.failsFor(Environment.SANDBOX)(UpstreamErrorResponse("Expected exception", 504, 504))
 
       private val result = await(appsByTeamMemberService.fetchAllSummariesByTeamMember(userId))
       result shouldBe ((Nil, List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      when(mockProductionApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(failed(UpstreamErrorResponse("Expected exception", 504, 504)))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(userId))
-        .thenReturn(successful(sandboxApps))
+      ThirdPartyOrchestratorConnectorMock.Query.failsFor(Environment.PRODUCTION)(UpstreamErrorResponse("Expected exception", 504, 504))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(sandboxApps)
 
       intercept[UpstreamErrorResponse] {
         await(appsByTeamMemberService.fetchAllSummariesByTeamMember(userId))

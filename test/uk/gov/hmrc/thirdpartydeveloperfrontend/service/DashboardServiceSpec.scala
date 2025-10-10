@@ -31,9 +31,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyOrchestratorConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -43,32 +42,15 @@ class DashboardServiceSpec extends AsyncHmrcSpec
     with CommonSessionFixtures
     with FixedClock {
 
-  trait Setup extends FixedClock {
+  trait Setup extends FixedClock with ThirdPartyOrchestratorConnectorMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    private val mockAppConfig = mock[ApplicationConfig]
-
-    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
-      mock[ThirdPartyApplicationProductionConnector]
-
-    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
-      mock[ThirdPartyApplicationSandboxConnector]
-
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-
     val mockOrganisationConnector: OrganisationConnector = mock[OrganisationConnector]
-
-    val connectorsWrapper = new ConnectorsWrapper(
-      mockSandboxApplicationConnector,
-      mockProductionApplicationConnector,
-      mockPushPullNotificationsConnector,
-      mockPushPullNotificationsConnector,
-      mockAppConfig
-    )
+    val mockAppsByTeamMemberService                      = mock[AppsByTeamMemberService]
 
     val dashboardService = new DashboardService(
-      connectorsWrapper,
       mockOrganisationConnector,
+      new AppsByTeamMemberService(ThirdPartyOrchestratorConnectorMock.aMock),
       clock
     )
   }
@@ -86,9 +68,8 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
   "get the list of applications for the given user" should {
     "successfully return the list of applications" in new Setup {
-
-      when(mockProductionApplicationConnector.fetchByTeamMember(eqTo(userId))(*)).thenReturn(successful(Seq(productionApplication)))
-      when(mockSandboxApplicationConnector.fetchByTeamMember(eqTo(userId))(*)).thenReturn(successful(Seq(sandboxApplication)))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(Seq(productionApplication))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(Seq(sandboxApplication))
 
       val result = await(dashboardService.fetchApplicationList(userId))
 

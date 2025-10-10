@@ -22,14 +22,15 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationProductionConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
 @Singleton
 class TermsOfUseInvitationService @Inject() (
-    connectorWrapper: ConnectorsWrapper
+    tpaConnector: ThirdPartyApplicationProductionConnector
   ) {
 
   def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
-    connectorWrapper.forEnvironment(Environment.PRODUCTION).thirdPartyApplicationConnector.fetchTermsOfUseInvitation(applicationId)
+    tpaConnector.fetchTermsOfUseInvitation(applicationId)
   }
 }

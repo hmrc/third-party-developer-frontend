@@ -31,7 +31,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.FlowRepositoryMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyApplicationConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
@@ -62,10 +61,8 @@ class IpAllowlistServiceSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val sessionId                  = UserSessionId.random
 
-    val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
-    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
-    when(mockConnectorsWrapper.forEnvironment(*))
-      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mock[PushPullNotificationsConnector]))
+    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
+    when(mockConnectorsWrapper.forEnvironment(*)).thenReturn(mock[PushPullNotificationsConnector])
 
     val underTest = new IpAllowlistService(
       FlowRepositoryMock.aMock,
@@ -207,7 +204,6 @@ class IpAllowlistServiceSpec
       }
 
       expectedException.getMessage shouldBe s"IP allowlist for session ID $sessionId cannot be activated because it is empty"
-      verifyZeroInteractions(mockThirdPartyApplicationConnector)
     }
 
     "fail when no flow exists for the given session ID" in new Setup {
@@ -218,7 +214,6 @@ class IpAllowlistServiceSpec
       }
 
       expectedException.getMessage shouldBe s"No IP allowlist flow exists for session ID $sessionId"
-      verifyZeroInteractions(mockThirdPartyApplicationConnector)
     }
   }
 
@@ -265,7 +260,6 @@ class IpAllowlistServiceSpec
       }
 
       expectedException.getMessage shouldBe s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"
-      verifyZeroInteractions(mockThirdPartyApplicationConnector)
     }
   }
 }

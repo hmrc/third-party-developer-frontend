@@ -23,28 +23,20 @@ import com.google.inject.name.Named
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 
 @Singleton
 class ConnectorsWrapper @Inject() (
-    val sandboxApplicationConnector: ThirdPartyApplicationSandboxConnector,
-    val productionApplicationConnector: ThirdPartyApplicationProductionConnector,
     @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
     @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
     applicationConfig: ApplicationConfig
   )(implicit val ec: ExecutionContext
   ) {
 
-  def forEnvironment(environment: Environment): Connectors = {
+  def forEnvironment(environment: Environment): PushPullNotificationsConnector = {
     environment match {
-      case Environment.PRODUCTION => Connectors(productionApplicationConnector, productionPushPullNotificationsConnector)
-      case _                      => Connectors(sandboxApplicationConnector, sandboxPushPullNotificationsConnector)
+      case Environment.PRODUCTION => productionPushPullNotificationsConnector
+      case _                      => sandboxPushPullNotificationsConnector
     }
   }
 }
-
-case class Connectors(
-    thirdPartyApplicationConnector: ThirdPartyApplicationConnector,
-    pushPullNotificationsConnector: PushPullNotificationsConnector
-  )

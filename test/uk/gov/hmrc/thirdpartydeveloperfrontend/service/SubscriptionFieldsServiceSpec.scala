@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.NoOne
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyApplicationConnector}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
   SaveSubscriptionFieldsAccessDeniedResponse,
   SaveSubscriptionFieldsSuccessResponse,
@@ -54,14 +54,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
-    val mockThirdPartyApplicationConnector: ThirdPartyApplicationConnector = mock[ThirdPartyApplicationConnector]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
     val mockApmConnector: ApmConnector                                     = mock[ApmConnector]
 
     val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
 
-    when(mockConnectorsWrapper.forEnvironment(application.deployedTo))
-      .thenReturn(Connectors(mockThirdPartyApplicationConnector, mockPushPullNotificationsConnector))
+    when(mockConnectorsWrapper.forEnvironment(application.deployedTo)).thenReturn(mockPushPullNotificationsConnector)
   }
 
   "saveFieldsValues" should {

@@ -36,12 +36,6 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
   trait Setup extends ApmConnectorMockModule with ApmConnectorCommandModuleMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector =
-      mock[ThirdPartyApplicationProductionConnector]
-
-    val mockSandboxApplicationConnector: ThirdPartyApplicationSandboxConnector =
-      mock[ThirdPartyApplicationSandboxConnector]
-
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
     val mockAuditService: AuditService = mock[AuditService]

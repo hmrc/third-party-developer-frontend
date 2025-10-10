@@ -23,19 +23,23 @@ import scala.util.control.NonFatal
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithSubscriptions, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQueries
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyOrchestratorConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 
 @Singleton
 class AppsByTeamMemberService @Inject() (
-    connectorWrapper: ConnectorsWrapper
+    tpoConnector: ThirdPartyOrchestratorConnector
   )(implicit val ec: ExecutionContext
   ) {
 
   def fetchAppsByTeamMember(environment: Environment)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] = {
-    connectorWrapper.forEnvironment(environment).thirdPartyApplicationConnector.fetchByTeamMember(userId).map(_.sorted)
+    tpoConnector.query[List[ApplicationWithSubscriptions]](environment)(ApplicationQueries.applicationsByUserId(userId, includeDeleted = false).copy(wantSubscriptions = true))
   }
 
+  // TODO : Use query enpoint with role query param
+  //
   def fetchByTeamMemberWithRole(
       environment: Environment
     )(

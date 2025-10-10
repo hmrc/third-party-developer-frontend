@@ -29,7 +29,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsServ
 class PushPullNotificationsService @Inject() (connectorsWrapper: ConnectorsWrapper) {
 
   def fetchPushSecrets(application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
-    val connector: PushPullNotificationsConnector = connectorsWrapper.forEnvironment(application.deployedTo).pushPullNotificationsConnector
+    val connector: PushPullNotificationsConnector = connectorsWrapper.forEnvironment(application.deployedTo)
     connector.fetchPushSecrets(application.clientId)
   }
 }
