@@ -62,7 +62,7 @@
         </div>
 
         <div class="govuk-grid-column-two-thirds">
-            <div class="govuk-summary-card">
+            <div class="govuk-summary-card" id="application-tile">
                 <div class="govuk-summary-card__content">
 
                     @govukTable(Table(
@@ -89,7 +89,7 @@
 
         @if(orgs.nonEmpty) {
             <div class="govuk-grid-column-one-third">
-                <div class="govuk-summary-card">
+                <div class="govuk-summary-card" id="organisation-tile">
                     <div class="govuk-summary-card__content">
                     @govukTable(Table(
                         caption = Some(messages("dashboard.organisations.your")),
