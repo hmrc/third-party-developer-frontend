@@ -69,14 +69,14 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
       def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
-          .thenReturn(successful("ref"))
+          .thenReturn(successful(Some("ref")))
     }
 
     object RequestApiUnsubscribe {
 
       def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
         when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
-          .thenReturn(successful("ref"))
+          .thenReturn(successful(Some("ref")))
     }
   }
 

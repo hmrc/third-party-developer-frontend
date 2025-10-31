@@ -112,11 +112,11 @@ class RequestProductionCredentials @Inject() (
           Future.successful(None)
         } else {
           val ticket = CreateTicketRequest.createForTermsOfUseUplift(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
-          apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
+          apiPlatformDeskproConnector.createTicket(ticket, hc)
         }
       } else {
         val ticket = CreateTicketRequest.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
-        apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
+        apiPlatformDeskproConnector.createTicket(ticket, hc)
       }
     } else {
       // Don't create a Deskpro ticket if the requester is not the responsible individual

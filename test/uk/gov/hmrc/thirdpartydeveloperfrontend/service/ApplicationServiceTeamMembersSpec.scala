@@ -122,7 +122,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
-        .thenReturn(successful("ref"))
+        .thenReturn(successful(Some("ref")))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 

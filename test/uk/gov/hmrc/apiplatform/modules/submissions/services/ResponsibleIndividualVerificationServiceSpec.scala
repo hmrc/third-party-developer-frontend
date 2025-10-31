@@ -93,7 +93,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
 
       val result = await(underTest.accept(code))
 
@@ -130,7 +130,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
-      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
 
       val result = await(underTest.accept(code))
 

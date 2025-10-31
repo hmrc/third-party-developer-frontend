@@ -94,7 +94,7 @@ object ApiPlatformDeskproStub extends Matchers {
   val deskproPath: String = "/ticket"
 
   def setupTicketCreation(status: Int = CREATED): StubMapping = {
-    Stubs.setupPostRequest(deskproPath, status, Json.toJson(CreateTicketResponse("123")).toString())
+    Stubs.setupPostRequest(deskproPath, status, Json.toJson(CreateTicketResponse(Some("123"))).toString())
   }
 
   def verifyTicketCreationWithSubject(subject: String): Unit = {

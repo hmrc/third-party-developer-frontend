@@ -41,7 +41,7 @@ class ApiPlatformDeskproConnector @Inject() (
 
   val api = API("api-platform-deskpro")
 
-  def createTicket(createRequest: CreateTicketRequest, hc: HeaderCarrier): Future[String] = metrics.record(api) {
+  def createTicket(createRequest: CreateTicketRequest, hc: HeaderCarrier): Future[Option[String]] = metrics.record(api) {
     implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
     http.post(url"${config.serviceBaseUrl}/ticket")
       .withBody(Json.toJson(createRequest))
@@ -77,7 +77,7 @@ object ApiPlatformDeskproConnector {
     implicit val format: OFormat[UpdatePersonRequest] = Json.format[UpdatePersonRequest]
   }
 
-  case class CreateTicketResponse(ref: String)
+  case class CreateTicketResponse(ref: Option[String])
 
   object CreateTicketResponse {
     implicit val createTicketResponseFormat: Format[CreateTicketResponse] = Json.format[CreateTicketResponse]

@@ -79,7 +79,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val appAfterCommand = app.withName(ApplicationName("New app name"))
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(appAfterCommand)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
-      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result          = await(underTest.requestProductionCredentials(app, userSession, true, false))
 
       result.isRight shouldBe true
@@ -100,7 +100,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
-      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true))
 
       result.isRight shouldBe true
