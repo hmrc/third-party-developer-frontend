@@ -128,7 +128,7 @@ class ApiPlatformDeskproConnectorIntegrationSpec extends BaseConnectorIntegratio
           )
         )
 
-        await(connector.createTicket(request, hc)) shouldBe ref
+        await(connector.createTicket(request, hc)) shouldBe Some(ref)
         verify(1, postRequestedFor(urlEqualTo("/ticket")).withRequestBody(equalTo(expectedBody)))
       }
 

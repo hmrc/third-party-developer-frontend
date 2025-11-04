@@ -58,12 +58,12 @@ class SubscriptionsService @Inject() (
       apiName: String,
       apiVersion: ApiVersionNbr
     )(implicit hc: HeaderCarrier
-    ): Future[String] = {
+    ): Future[Option[String]] = {
     apiPlatformDeskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(CreateTicketRequest.createForApiSubscribe), hc)
   }
 
   def requestApiUnsubscribe(requester: UserSession, application: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier)
-      : Future[String] = {
+      : Future[Option[String]] = {
     apiPlatformDeskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(CreateTicketRequest.createForApiUnsubscribe), hc)
   }
 

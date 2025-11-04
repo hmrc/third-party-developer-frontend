@@ -132,7 +132,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
   when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
   when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
-  when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful("ref"))
+  when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful(Some("ref")))
   when(apiPlatformDeskproConnector.updatePersonName(*[LaxEmailAddress], *, *)).thenReturn(Future.successful(UpdateProfileSuccess))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 

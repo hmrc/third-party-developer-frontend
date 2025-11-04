@@ -105,7 +105,7 @@ class DeleteApplicationSpec
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
 
       when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
-        .thenReturn(Future.successful("ref"))
+        .thenReturn(Future.successful(Some("ref")))
 
       val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
 
@@ -134,7 +134,7 @@ class DeleteApplicationSpec
     givenApplicationAction(nonApprovedApplication, adminSession)
 
     when(underTest.applicationService.requestApplicationDeletion(*, *)(*))
-      .thenReturn(Future.successful("ref"))
+      .thenReturn(Future.successful(Some("ref")))
   }
 
   "return not found if non-approved app" should {

@@ -109,7 +109,7 @@ class ResponsibleIndividualVerificationService @Inject() (
         val requesterEmail: LaxEmailAddress = submitterEmail.getOrElse(throw new RuntimeException("requestedByEmailAddress not found"))
 
         val ticket = CreateTicketRequest.createForRequestProductionCredentials(requesterName, requesterEmail, appName, appId)
-        apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
+        apiPlatformDeskproConnector.createTicket(ticket, hc)
       }
       case riuv: ResponsibleIndividualTouUpliftVerification => {
         if (isSubmissionPassed) {
@@ -122,7 +122,7 @@ class ResponsibleIndividualVerificationService @Inject() (
           val requesterEmail: LaxEmailAddress = riuv.requestingAdminEmail
 
           val ticket = CreateTicketRequest.createForTermsOfUseUplift(requesterName, requesterEmail, appName, appId)
-          apiPlatformDeskproConnector.createTicket(ticket, hc).map(Some(_))
+          apiPlatformDeskproConnector.createTicket(ticket, hc)
         }
       }
       // Do not send a deskpro ticket for a ResponsibleIndividualVerification of type ResponsibleIndividualUpdateVerification

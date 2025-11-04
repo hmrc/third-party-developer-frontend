@@ -181,11 +181,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "create a deskpro ticket and audit record for an Admin in a Sandbox app" in new Setup {
 
       when(mockApiPlatformDeskproConnector.createTicket(*, *))
-        .thenReturn(successful("ref"))
+        .thenReturn(successful(Some("ref")))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe "ref"
+      await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe Some("ref")
 
       verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
@@ -203,11 +203,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "create a deskpro ticket and audit record for an Admin in a Production app" in new Setup {
 
       when(mockApiPlatformDeskproConnector.createTicket(*, *))
-        .thenReturn(successful("ref"))
+        .thenReturn(successful(Some("ref")))
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe "ref"
+      await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe Some("ref")
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
@@ -269,7 +269,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "correctly create a deskpro ticket and audit record" in new Setup {
       val ticketCaptor = ArgCaptor[CreateTicketRequest]
       when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
-        .thenReturn(successful("ref"))
+        .thenReturn(successful(Some("ref")))
       when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
@@ -333,7 +333,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     "correctly create a deskpro ticket" in new Setup {
       private val applicationName = ApplicationName("applicationName")
 
-      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful("ref"))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
 
       private val result =
         await(applicationService.requestProductonApplicationNameChange(
@@ -344,7 +344,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
           adminSession.developer.email
         ))
 
-      result shouldBe "ref"
+      result shouldBe Some("ref")
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
   }

@@ -395,7 +395,7 @@ class DetailsSpec
       givenApplicationAction(approvedApplication, adminSession)
 
       when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*))
-        .thenReturn(Future.successful("ref"))
+        .thenReturn(Future.successful(Some("ref")))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
 

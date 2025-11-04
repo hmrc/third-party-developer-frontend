@@ -112,7 +112,7 @@ class ApplicationService @Inject() (
     apmApplicationConnector.fetchApplicationById(applicationId)
   }
 
-  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[String] = {
+  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[Option[String]] = {
 
     val requesterName    = requester.developer.displayedName
     val requesterEmail   = requester.developer.email
@@ -168,7 +168,7 @@ class ApplicationService @Inject() (
     thirdPartyOrchestratorConnector.verify(verificationCode)
   }
 
-  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[String] = {
+  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     val deleteDeveloperTicket = CreateTicketRequest.deleteDeveloperAccount(name, email)
 
     for {
@@ -177,7 +177,7 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def request2SVRemoval(userId: Option[UserId], name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[String] = {
+  def request2SVRemoval(userId: Option[UserId], name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     val remove2SVTicket = CreateTicketRequest.removeDeveloper2SV(name, email)
 
     for {

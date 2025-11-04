@@ -39,7 +39,7 @@ class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationCo
 
   def fetchOrganisationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[List[Organisation]] = {
     metrics.record(api) {
-    // TODO: remove the swallowing of errors once api-platform-organisation is in Production
+      // TODO: remove the swallowing of errors once api-platform-organisation is in Production
       http.get(requestUrl(s"/organisation/user/$userId"))
         .execute[List[Organisation]] recover {
         case _: Throwable => List.empty[Organisation]

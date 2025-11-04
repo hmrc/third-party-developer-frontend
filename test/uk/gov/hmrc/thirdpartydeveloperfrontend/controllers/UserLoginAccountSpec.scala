@@ -717,7 +717,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       TPDMock.FindUserId.thenReturn(sessionWithAuthAppMfa.developer.email)(userId)
       TPDMock.FetchDeveloper.thenReturn(userId)(Some(developerWithAuthAppMfa))
       when(underTest.applicationService.request2SVRemoval(*[Option[UserId]], *, eqTo(sessionWithAuthAppMfa.developer.email))(*))
-        .thenReturn(Future.successful("ref"))
+        .thenReturn(Future.successful(Some("ref")))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
 
