@@ -25,9 +25,6 @@ GET         /login/2SV-not-set                                                  
 
 GET         /logout                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logout()
 
-GET         /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurvey()
-POST        /logout/survey                                                                               uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLogoutAccount.logoutSurveyAction()
-
 GET         /support                                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support.SupportEnquiryController.supportEnquiryPage()
 
 GET         /locked                                                                                      uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UserLoginAccount.accountLocked()

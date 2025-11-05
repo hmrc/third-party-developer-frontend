@@ -310,11 +310,6 @@ object ResetPasswordLinkNoLongerValidPage extends FormPage {
   override val url: String = s"${EnvConfig.host}/developer/reset-password/error"
 }
 
-case object SignOutSurveyPage extends FormPage {
-  override val pageHeading = "Are you sure you want to sign out?"
-  override val url: String = s"${EnvConfig.host}/developer/logout/survey"
-}
-
 case object SignOutPage extends WebLink {
   override val url: String = s"${EnvConfig.host}/developer/logout"
 }
