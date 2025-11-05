@@ -23,7 +23,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class UserLogoutAccountSpec
@@ -33,9 +32,7 @@ class UserLogoutAccountSpec
   trait Setup {
 
     val underTest = new UserLogoutAccount(
-      mock[DeskproService],
       sessionServiceMock,
-      mock[ApplicationService],
       mock[ErrorHandler],
       mcc,
       cookieSigner
@@ -54,7 +51,7 @@ class UserLogoutAccountSpec
       val result  = underTest.logout()(request)
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some("/feedback/devhub")
+      redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/devhub")
     }
 
     "display the logout confirmation page when a user that is not signed in attempts to log out" in new Setup {
@@ -62,7 +59,7 @@ class UserLogoutAccountSpec
       val result  = underTest.logout()(request)
 
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some("/feedback/devhub")
+      redirectLocation(result) shouldBe Some("http://localhost:9514/feedback/devhub")
     }
 
     "destroy session on logout" in new Setup {

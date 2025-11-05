@@ -36,7 +36,6 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   val thirdPartyApplicationProductionApiKey: String    = getConfString("third-party-application-production.api-key", "")
   val thirdPartyApplicationSandboxApiKey: String       = getConfString("third-party-application-sandbox.api-key", "")
   val thirdPartyOrchestratorUrl: String                = baseUrl("third-party-orchestrator")
-  val deskproUrl: String                               = baseUrl("deskpro-ticket-queue")
   val organisationUrl: String                          = baseUrl("api-platform-organisation")
 
   lazy val contactPath: String = getConfigDefaulted("contactPath", "")
@@ -67,6 +66,8 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   lazy val nameOfSubordinateEnvironment: String = getConfigDefaulted("features.nameOfSubordinateEnvironment", "Sandbox")
 
   lazy val platformFrontendHost: String = getConfigDefaulted("platform.frontend.host", "http://localhost:9685")
+  lazy val feedbackFrontendHost: String = getConfigDefaulted("platform.frontend.host", "http://localhost:9514")
+  lazy val feedbackFrontendUrl: String  = s"$feedbackFrontendHost/feedback/devhub"
 
   lazy val reportProblemHost: String =
     config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")

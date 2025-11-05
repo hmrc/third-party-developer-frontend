@@ -31,8 +31,7 @@ class SupportEnquiryController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
-    val errorHandler: ErrorHandler,
-    val deskproService: DeskproService
+    val errorHandler: ErrorHandler
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends AbstractController(mcc) {

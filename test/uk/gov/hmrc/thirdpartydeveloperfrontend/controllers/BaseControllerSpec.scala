@@ -47,6 +47,7 @@ abstract class BaseControllerSpec
   implicit val appConfig: ApplicationConfig = mock[ApplicationConfig]
   when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
   when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+  when(appConfig.feedbackFrontendUrl).thenReturn("http://localhost:9514/feedback/devhub")
 
   def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = false, List.empty, "")
   implicit val cookieSigner: CookieSigner          = app.injector.instanceOf[CookieSigner]

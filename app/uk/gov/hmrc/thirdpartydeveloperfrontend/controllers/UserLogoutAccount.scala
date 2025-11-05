@@ -25,13 +25,11 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorization
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, DeskproService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
 
 @Singleton
 class UserLogoutAccount @Inject() (
-    val deskproService: DeskproService,
     val sessionService: SessionService,
-    val applicationService: ApplicationService,
     val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner
@@ -41,36 +39,10 @@ class UserLogoutAccount @Inject() (
     with ExtendedDevHubAuthorization
     with ApplicationLogger {
 
-  // def logoutSurvey = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-  //   val page = signoutSurveyView("Are you sure you want to sign out?", SignOutSurveyForm.form)
-
-  //   Future.successful(Ok(page))
-  // }
-
-  // def logoutSurveyAction = atLeastPartLoggedInEnablingMfaAction { implicit request =>
-  //   SignOutSurveyForm.form.bindFromRequest().value match {
-  //     case Some(form) =>
-  //       val res: Future[TicketId] = deskproService.submitSurvey(form)
-  //       res.onComplete {
-  //         case Failure(_) => logger.error("Failed to create deskpro ticket")
-  //         case _          => ()
-  //       }
-
-  //       applicationService
-  //         .userLogoutSurveyCompleted(form.email.toLaxEmail, form.name, form.rating.map(_.toString).getOrElse(""), form.improvementSuggestions)
-  //         .flatMap(_ => {
-  //           Future.successful(Redirect(routes.UserLogoutAccount.logout()))
-  //         })
-  //     case None       =>
-  //       logger.error("Survey form invalid.")
-  //       Future.successful(Redirect(routes.UserLogoutAccount.logout()))
-  //   }
-  // }
-
   def logout = Action.async { implicit request: MessagesRequest[AnyContent] =>
     destroyUserSession(request)
       .getOrElse(Future.successful(()))
-      .map(_ => Redirect(s"${appConfig.platformFrontendHost}/feedback/devhub").withNewSession)
+      .map(_ => Redirect(appConfig.feedbackFrontendUrl).withNewSession)
       .map(removeUserSessionCookieFromResult)
   }
 }
