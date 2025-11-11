@@ -685,7 +685,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return the remove 2SV confirmation page when user does not have an access code" in new Setup {
 
-      private val request = FakeRequest().withSession(sessionParams: _*)
+      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> sessionWithAuthAppMfa.developer.email.text: _*)
 
       private val result = addToken(underTest.get2SVHelpConfirmationPage())(request)
 
@@ -694,6 +694,16 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       body should include("Get help accessing your account")
       body should include("We will remove 2-step verification so you can sign in to your account.")
+    }
+
+    "redirect to the login page when no email in the session" in new Setup {
+
+      private val request = FakeRequest().withSession(sessionParams: _*)
+
+      private val result = addToken(underTest.get2SVHelpConfirmationPage())(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "return the remove 2SV complete page when user selects yes" in new Setup {

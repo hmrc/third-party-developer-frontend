@@ -371,7 +371,11 @@ class UserLoginAccount @Inject() (
   }
 
   def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(requestMfaRemovalView()))
+    request.session.get("emailAddress") match {
+      case Some(userEmail) => successful(Ok(requestMfaRemovalView()))
+      case _               => successful(Redirect(routes.UserLoginAccount.login()))
+    }
+
   }
 
   def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction { implicit request =>
