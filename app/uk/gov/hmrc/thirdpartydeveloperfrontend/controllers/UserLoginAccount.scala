@@ -382,14 +382,11 @@ class UserLoginAccount @Inject() (
     successful(Ok(requestMfaRemovalCompleteView()))
   }
 
-  // TODO - this whole piece of code looks like it should be handling the lack of an emailAddress much better - perhaps dropping through all the for comp to return a BadRequest
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     import cats.data.OptionT
     import cats.implicits._
 
-    val email = request.session.get("emailAddress").getOrElse("").toLaxEmail
-
-    def findDeveloper = {
+    def findDeveloper(email: LaxEmailAddress) = {
       (for {
         details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
         developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
@@ -398,15 +395,22 @@ class UserLoginAccount @Inject() (
 
     def getFullName(developer: Option[User]) = developer.map(d => s"${d.firstName} ${d.lastName}").getOrElse("Unknown")
 
-    for {
-      developer <- findDeveloper
-      userId     = developer.map(d => d.userId)
-      fullName   = getFullName(developer)
-      _         <- applicationService.request2SVRemoval(
-                     userId,
-                     name = fullName,
-                     email
-                   )
-    } yield Ok(requestMfaRemovalCompleteView())
+    def request2SVRemoval(email: LaxEmailAddress) = {
+      for {
+        developer <- findDeveloper(email)
+        userId     = developer.map(d => d.userId)
+        fullName   = getFullName(developer)
+        _         <- applicationService.request2SVRemoval(
+                       userId,
+                       name = fullName,
+                       email
+                     )
+      } yield Ok(requestMfaRemovalCompleteView())
+    }
+
+    request.session.get("emailAddress") match {
+      case Some(emailAddress) => request2SVRemoval(emailAddress.toLaxEmail)
+      case _                  => successful(Redirect(routes.UserLoginAccount.login()))
+    }
   }
 }
