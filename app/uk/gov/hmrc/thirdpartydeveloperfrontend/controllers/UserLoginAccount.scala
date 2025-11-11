@@ -386,6 +386,8 @@ class UserLoginAccount @Inject() (
     import cats.data.OptionT
     import cats.implicits._
 
+    lazy val showRequestMfaRemovalCompleteView = (resp: Option[String]) => Ok(requestMfaRemovalCompleteView())
+
     def findDeveloper(email: LaxEmailAddress) = {
       (for {
         details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
@@ -393,19 +395,18 @@ class UserLoginAccount @Inject() (
       } yield developer).value
     }
 
-    def getFullName(developer: Option[User]) = developer.map(d => s"${d.firstName} ${d.lastName}").getOrElse("Unknown")
+    def getFullName(developer: User) = s"${developer.firstName} ${developer.lastName}"
 
     def request2SVRemoval(email: LaxEmailAddress) = {
-      for {
-        developer <- findDeveloper(email)
-        userId     = developer.map(d => d.userId)
-        fullName   = getFullName(developer)
-        _         <- applicationService.request2SVRemoval(
-                       userId,
-                       name = fullName,
-                       email
-                     )
-      } yield Ok(requestMfaRemovalCompleteView())
+      (
+        for {
+          developer <- ETR.fromOptionF(findDeveloper(email), BadRequest("Developer not found"))
+          userId     = developer.userId
+          fullName   = getFullName(developer)
+          response  <- ETR.liftF(applicationService.request2SVRemoval(userId, fullName, email))
+        } yield response
+      )
+        .fold[Result](identity(_), showRequestMfaRemovalCompleteView)
     }
 
     request.session.get("emailAddress") match {

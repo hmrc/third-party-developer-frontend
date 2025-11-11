@@ -273,7 +273,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.request2SVRemoval(Some(userId), name, email))
+      await(applicationService.request2SVRemoval(userId, name, email))
 
       verify(mockApiPlatformDeskproConnector, times(1)).createTicket(ticketCaptor, eqTo(hc))
       ticketCaptor.value.email shouldBe email.text

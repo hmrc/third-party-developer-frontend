@@ -33,6 +33,9 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
 
       def thenReturn(email: LaxEmailAddress)(userId: UserId) =
         when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+
+      def thenReturnNone(email: LaxEmailAddress) =
+        when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(None))
     }
 
     object FetchDeveloper {
