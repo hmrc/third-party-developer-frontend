@@ -51,7 +51,7 @@ case object UserNavLinks {
 
   private def loggedInNavLinks(userFullName: String) = List(
     NavLink(userFullName, "/developer/profile", isSensitive = true),
-    NavLink("Sign out", "/developer/logout/survey")
+    NavLink("Sign out", "/developer/logout")
   )
 
   private val loggedOutNavLinks = List(

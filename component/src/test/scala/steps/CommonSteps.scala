@@ -83,7 +83,6 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
     "Manage profile"                               -> ManageProfilePage,
     "Change profile details"                       -> ChangeProfileDetailsPage,
     "Edit password success"                        -> ChangePasswordSuccessPage,
-    "Logout survey"                                -> SignOutSurveyPage,
     "Account deletion confirmation"                -> AccountDeletionConfirmationPage,
     "Account deletion request submitted"           -> AccountDeletionRequestSubmittedPage,
     "Recommend Mfa"                                -> RecommendMfaPage,

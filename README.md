@@ -56,7 +56,6 @@ Various security tests can be run within ZAP and the different types of attacks 
   * Add team members Admin/Dev
   * Change profile
   * Edit application details
-  * Sign out survey
 
 
 ## Testing approach

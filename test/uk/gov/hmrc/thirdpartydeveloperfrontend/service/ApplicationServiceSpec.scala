@@ -283,23 +283,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
   }
 
-  "userLogoutSurveyCompleted" should {
-
-    val email                  = "testy@example.com".toLaxEmail
-    val name                   = "John Smith"
-    val rating                 = "5"
-    val improvementSuggestions = "Test"
-
-    "audit user logout survey" in new Setup {
-      when(mockAuditService.audit(eqTo(AuditAction.UserLogoutSurveyCompleted), any[Map[String, String]])(eqTo(hc)))
-        .thenReturn(successful(Success))
-
-      await(applicationService.userLogoutSurveyCompleted(email, name, rating, improvementSuggestions))
-
-      verify(mockAuditService, times(1)).audit(eqTo(AuditAction.UserLogoutSurveyCompleted), any[Map[String, String]])(eqTo(hc))
-    }
-  }
-
   "validate application name" should {
     "call the application connector validate method in sandbox" in new Setup {
       private val applicationName = "applicationName"

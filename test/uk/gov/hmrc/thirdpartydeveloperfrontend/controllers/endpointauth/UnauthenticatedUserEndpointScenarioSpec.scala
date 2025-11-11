@@ -48,7 +48,7 @@ class UnauthenticatedUserEndpointScenarioSpec extends EndpointScenarioSpec
       case Endpoint("GET", "/developer/reset-password/error", _)                        => BadRequest()
       case Endpoint(_, "/developer/forgot-password", _)                                 => Success()
       case Endpoint("GET", "/developer/user-navlinks", _)                               => Success()
-      case Endpoint("GET", "/developer/logout", _)                                      => Success()
+      case Endpoint("GET", "/developer/logout", _)                                      => Redirect("http://localhost:9514/feedback/devhub")
       case Endpoint("GET", "/developer/support", _)                                     => Redirect("http://localhost:9685/devhub-support/")
       case Endpoint("GET", "/developer/assets/*file", _)                                => Success()
       case Endpoint(_, "/developer/submissions/responsible-individual-verification", _) => Success()

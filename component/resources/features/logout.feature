@@ -13,10 +13,6 @@ Feature:
       And I successfully log in with 'john.smith@example.com' and 'StrongPassword1!' skipping 2SV
       And I am on the 'No Applications' page
       When I attempt to Sign out when the session expires
-      Then I am on the 'Logout survey' page
-      When I click on the 'Yes, sign me out' link
-      Then I see on current page:
-        | You are now signed out |
-      And I am not logged in
+      Then I am not logged in
 
 

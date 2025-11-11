@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
@@ -36,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested, UserLogoutSurveyCompleted}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested}
 
 @Singleton
 class ApplicationService @Inject() (
@@ -192,20 +191,6 @@ class ApplicationService @Inject() (
       Future.successful(ApplicationNameValidationResult.Invalid)
     }
     thirdPartyOrchestratorConnector.validateName(name, selfApplicationId, environment)
-  }
-
-  def userLogoutSurveyCompleted(email: LaxEmailAddress, name: String, rating: String, improvementSuggestions: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
-
-    auditService.audit(
-      UserLogoutSurveyCompleted,
-      Map(
-        "userEmailAddress"       -> email.text,
-        "userName"               -> name,
-        "satisfactionRating"     -> rating,
-        "improvementSuggestions" -> improvementSuggestions,
-        "timestamp"              -> instant().toString
-      )
-    )
   }
 
   def requestProductonApplicationNameChange(
