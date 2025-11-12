@@ -685,7 +685,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return the remove 2SV confirmation page when user does not have an access code" in new Setup {
 
-      private val request = FakeRequest().withSession(sessionParams: _*)
+      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> sessionWithAuthAppMfa.developer.email.text: _*)
 
       private val result = addToken(underTest.get2SVHelpConfirmationPage())(request)
 
@@ -694,6 +694,16 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       body should include("Get help accessing your account")
       body should include("We will remove 2-step verification so you can sign in to your account.")
+    }
+
+    "redirect to the login page when no email in the session" in new Setup {
+
+      private val request = FakeRequest().withSession(sessionParams: _*)
+
+      private val result = addToken(underTest.get2SVHelpConfirmationPage())(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "return the remove 2SV complete page when user selects yes" in new Setup {
@@ -716,7 +726,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       val userId = UserId.random
       TPDMock.FindUserId.thenReturn(sessionWithAuthAppMfa.developer.email)(userId)
       TPDMock.FetchDeveloper.thenReturn(userId)(Some(developerWithAuthAppMfa))
-      when(underTest.applicationService.request2SVRemoval(*[Option[UserId]], *, eqTo(sessionWithAuthAppMfa.developer.email))(*))
+      when(underTest.applicationService.request2SVRemoval(*[UserId], *, eqTo(sessionWithAuthAppMfa.developer.email))(*))
         .thenReturn(Future.successful(Some("ref")))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
@@ -726,7 +736,30 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       body should include("We have received your request to remove 2-step verification from your account")
       body should include("Request submitted")
-      verify(underTest.applicationService).request2SVRemoval(*[Option[UserId]], *, eqTo(sessionWithAuthAppMfa.developer.email))(*)
+      verify(underTest.applicationService).request2SVRemoval(*[UserId], *, eqTo(sessionWithAuthAppMfa.developer.email))(*)
+    }
+
+    "redirect to login page if no email in the session on submission" in new Setup {
+
+      private val request = FakeRequest().withSession(sessionParams: _*)
+
+      private val result = addToken(underTest.confirm2SVHelp())(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("/developer/login")
+      verify(underTest.applicationService, never).request2SVRemoval(*[UserId], *, *[LaxEmailAddress])(*)
+    }
+
+    "return bad request if user not found on submission" in new Setup {
+
+      private val request = FakeRequest().withSession(sessionParams :+ "emailAddress" -> sessionWithAuthAppMfa.developer.email.text: _*)
+
+      TPDMock.FindUserId.thenReturnNone(sessionWithAuthAppMfa.developer.email)
+
+      private val result = addToken(underTest.confirm2SVHelp())(request)
+
+      status(result) shouldBe BAD_REQUEST
+      verify(underTest.applicationService, never).request2SVRemoval(*[UserId], *, *[LaxEmailAddress])(*)
     }
   }
 

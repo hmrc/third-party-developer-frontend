@@ -371,38 +371,47 @@ class UserLoginAccount @Inject() (
   }
 
   def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
-    successful(Ok(requestMfaRemovalView()))
+    request.session.get("emailAddress") match {
+      case Some(userEmail) => successful(Ok(requestMfaRemovalView()))
+      case _               => successful(Redirect(routes.UserLoginAccount.login()))
+    }
+
   }
 
   def get2SVHelpCompletionPage(): Action[AnyContent] = loggedOutAction { implicit request =>
     successful(Ok(requestMfaRemovalCompleteView()))
   }
 
-  // TODO - this whole piece of code looks like it should be handling the lack of an emailAddress much better - perhaps dropping through all the for comp to return a BadRequest
   def confirm2SVHelp(): Action[AnyContent] = loggedOutAction { implicit request =>
     import cats.data.OptionT
     import cats.implicits._
 
-    val email = request.session.get("emailAddress").getOrElse("").toLaxEmail
+    lazy val showRequestMfaRemovalCompleteView = (resp: Option[String]) => Ok(requestMfaRemovalCompleteView())
 
-    def findDeveloper = {
+    def findDeveloper(email: LaxEmailAddress) = {
       (for {
         details   <- OptionT(thirdPartyDeveloperConnector.findUserId(email))
         developer <- OptionT(thirdPartyDeveloperConnector.fetchDeveloper(details.id))
       } yield developer).value
     }
 
-    def getFullName(developer: Option[User]) = developer.map(d => s"${d.firstName} ${d.lastName}").getOrElse("Unknown")
+    def getFullName(developer: User) = s"${developer.firstName} ${developer.lastName}"
 
-    for {
-      developer <- findDeveloper
-      userId     = developer.map(d => d.userId)
-      fullName   = getFullName(developer)
-      _         <- applicationService.request2SVRemoval(
-                     userId,
-                     name = fullName,
-                     email
-                   )
-    } yield Ok(requestMfaRemovalCompleteView())
+    def request2SVRemoval(email: LaxEmailAddress) = {
+      (
+        for {
+          developer <- ETR.fromOptionF(findDeveloper(email), BadRequest("Developer not found"))
+          userId     = developer.userId
+          fullName   = getFullName(developer)
+          response  <- ETR.liftF(applicationService.request2SVRemoval(userId, fullName, email))
+        } yield response
+      )
+        .fold[Result](identity(_), showRequestMfaRemovalCompleteView)
+    }
+
+    request.session.get("emailAddress") match {
+      case Some(emailAddress) => request2SVRemoval(emailAddress.toLaxEmail)
+      case _                  => successful(Redirect(routes.UserLoginAccount.login()))
+    }
   }
 }
