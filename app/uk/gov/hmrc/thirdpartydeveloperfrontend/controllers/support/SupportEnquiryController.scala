@@ -24,6 +24,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TpdfeBaseController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -34,7 +35,7 @@ class SupportEnquiryController @Inject() (
     val errorHandler: ErrorHandler
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends AbstractController(mcc) {
+  ) extends TpdfeBaseController(mcc) {
 
   def supportEnquiryPage(): Action[AnyContent] = maybeAtLeastPartLoggedInEnablingMfa { implicit request =>
     successful(MovedPermanently(s"${appConfig.devhubSupportFrontendUrl}/devhub-support/"))
