@@ -80,21 +80,11 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
   "SupportEnquiryController" when {
 
     "invoking supportEnquiryPage for old support" should {
-      "support form is prepopulated when user logged in" in new Setup with IsLoggedIn {
+      "redirect to new devhub support frontend" in new Setup with IsLoggedIn {
         val result = addToken(underTest.supportEnquiryPage())(request)
 
-        status(result) shouldBe 301
-      }
-
-      "support form fields are blank when not logged in" in new Setup with NotLoggedIn {
-        val result = addToken(underTest.supportEnquiryPage())(request)
-        status(result) shouldBe 301
-      }
-
-      "support form fields are blank when part logged in enabling MFA" in new Setup with IsPartLoggedInEnablingMFA {
-        val result = addToken(underTest.supportEnquiryPage())(request)
-
-        status(result) shouldBe 301
+        status(result) shouldBe MOVED_PERMANENTLY
+        redirectLocation(result) shouldBe Some("/devhub-support/")
       }
     }
   }
