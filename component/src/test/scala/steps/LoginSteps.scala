@@ -27,26 +27,13 @@ import stubs.{DeveloperStub, MfaStub, Stubs}
 import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
-
-case class MfaSecret(secret: String)
-
-object MfaSecret {
-  implicit val format: Format[MfaSecret] = Json.format[MfaSecret]
-}
-
-object TestContext {
-  var developer: User = _
-
-  var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
-  var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
-}
 
 class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
 
@@ -98,7 +85,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     DeveloperStub.setupGettingDeveloperByUserId(developer)
   }
 
-  Given("""^'(.*)' session is uplifted to LoggedIn$""") { email: String =>
+  Given("""^'(.*)' session is uplifted to LoggedIn$""") { (email: String) =>
     if (email.toLaxEmail != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
     }
@@ -110,7 +97,7 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     Form.populate(form)
   }
 
-  Then("""^I am logged in as '(.+)'$""") { userFullName: String =>
+  Then("""^I am logged in as '(.+)'$""") { (userFullName: String) =>
     val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie should not be null
     AnyWebPageWithUserLinks.userLink(userFullName) shouldBe ("defined")
@@ -137,11 +124,11 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     }
   }
 
-  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { email: String =>
+  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { (email: String) =>
     DeveloperStub.verifyResetPassword(EmailIdentifier(email.toLaxEmail))
   }
 
-  Given("""^I click on a valid password reset link for code '(.*)'$""") { resetPwdCode: String =>
+  Given("""^I click on a valid password reset link for code '(.*)'$""") { (resetPwdCode: String) =>
     val email = "bob@example.com"
     DeveloperStub.stubResetPasswordJourney(email.toLaxEmail, resetPwdCode)
 
@@ -149,14 +136,14 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     go(new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$resetPwdCode'" })
   }
 
-  Given("""^I click on an invalid password reset link for code '(.*)'$""") { invalidResetPwdCode: String =>
+  Given("""^I click on an invalid password reset link for code '(.*)'$""") { (invalidResetPwdCode: String) =>
     DeveloperStub.stubResetPasswordJourneyFail()
 
     driver.manage().deleteAllCookies()
     go(new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$invalidResetPwdCode'" })
   }
 
-  Then("""^I am on the 'Reset Password' page with code '(.*)'$""") { resetPwdCode: String =>
+  Then("""^I am on the 'Reset Password' page with code '(.*)'$""") { (resetPwdCode: String) =>
     eventually {
       withClue(s"Fail to be on page: 'Reset Password'")(on(ResetPasswordPage(resetPwdCode)))
     }

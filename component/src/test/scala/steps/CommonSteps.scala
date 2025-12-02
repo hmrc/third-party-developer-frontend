@@ -34,20 +34,6 @@ import utils.BrowserDriver
 
 import uk.gov.hmrc.selenium.webdriver.Driver
 
-object TableMisuseAdapters {
-
-  def asListOfKV(dataTable: DataTable): Map[String, String] = {
-    dataTable.asScalaRawLists[String].map(_.toList match {
-      case a :: b :: c => a -> b
-      case _           => throw new RuntimeException("Badly constructed table")
-    }).toMap
-  }
-
-  def valuesInColumn(n: Int)(data: DataTable): List[String] = {
-    data.asLists().asScala.map(_.get(n)).toList
-  }
-}
-
 class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with NavigationSugar with CustomMatchers with BrowserDriver {
 
   val mfaPages = Map(
@@ -144,7 +130,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
     Driver.instance.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
   }
 
-  When("""^I click on the '(.*)' link$""") { linkText: String =>
+  When("""^I click on the '(.*)' link$""") { (linkText: String) =>
     val link    = driver.findElement(By.linkText(linkText))
     val actions = new Actions(driver)
     actions.moveToElement(link)
@@ -152,7 +138,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
     actions.perform()
   }
 
-  When("""^I click on the button with id '(.*)'$""") { id: String =>
+  When("""^I click on the button with id '(.*)'$""") { (id: String) =>
     val link    = driver.findElement(By.id(id))
     val actions = new Actions(driver)
     actions.moveToElement(link)
@@ -160,7 +146,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
     actions.perform()
   }
 
-  When("""^I click on the '(.*)' button""") { buttonText: String =>
+  When("""^I click on the '(.*)' button""") { (buttonText: String) =>
     val element = driver.findElement(By.xpath(s"//button[text()='$buttonText']"))
     val actions = new Actions(driver)
     actions.moveToElement(element)
@@ -168,7 +154,7 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
     actions.perform()
   }
 
-  When("""^I click on the radio button with id '(.*)'""") { id: String =>
+  When("""^I click on the radio button with id '(.*)'""") { (id: String) =>
     val button = driver.findElement(By.id(id))
     button.click()
   }

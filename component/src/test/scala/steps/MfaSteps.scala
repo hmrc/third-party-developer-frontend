@@ -37,6 +37,8 @@ import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, M
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
 
+
+
 class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with BrowserDriver
     with CustomMatchers with MfaData {
 
@@ -97,7 +99,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     authCookie shouldBe null
   }
 
-  Given("""^I have SMS enabled as MFA method, without a DeviceSession and registered with$""") { data: DataTable =>
+  Given("""^I have SMS enabled as MFA method, without a DeviceSession and registered with$""") { (data: DataTable) =>
     val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
     val password = result("Password")
@@ -112,7 +114,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
     MfaStub.setupVerificationOfAccessCode(developer, smsMfaId)
   }
 
-  Given("""^I have Authenticator App enabled as MFA method, without a DeviceSession and registered with$""") { data: DataTable =>
+  Given("""^I have Authenticator App enabled as MFA method, without a DeviceSession and registered with$""") { (data: DataTable) =>
     val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
     val password = result("Password")
@@ -129,7 +131,7 @@ class MfaSteps extends ScalaDsl with EN with Matchers with NavigationSugar with 
 
   }
 
-  Given("""^I am mfaEnabled and with a DeviceSession registered with$""") { data: DataTable =>
+  Given("""^I am mfaEnabled and with a DeviceSession registered with$""") { (data: DataTable) =>
     val result: Map[String, String] = data.asScalaRawMaps[String, String].head
 
     val password = result("Password")

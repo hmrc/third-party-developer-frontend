@@ -45,10 +45,6 @@ object AppDependencies {
   ).map(_ % "test")
 
   lazy val componentTestDependencies = Seq(
-    "io.cucumber"                 %% "cucumber-scala"                     % "8.20.0",
-    "io.cucumber"                 %  "cucumber-junit"                     % "7.15.0",
-    "com.novocode"                %  "junit-interface"                    % "0.11",
-    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.45.0",
-    "org.slf4j"                   %  "slf4j-simple"                       % "1.7.36"
+    "uk.gov.hmrc"                 %% "ui-test-runner"                     % "0.49.0",
   ).map(_ % "test")
 }

@@ -36,11 +36,6 @@ import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
-object EnvConfig {
-  val port = 6001
-  val host = s"http://localhost:$port"
-}
-
 object Env extends ScalaDsl with EN with Matchers with ApplicationLogger {
   import EnvConfig._
 

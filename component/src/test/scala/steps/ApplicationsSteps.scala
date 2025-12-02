@@ -34,11 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 
-object AppWorld {
-  var userApplicationsOnBackend: List[ApplicationWithCollaborators] = Nil
-  var tokens: Map[String, ApplicationToken]                         = Map.empty
-}
-
 class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with FixedClock with BrowserDriver
     with ApplicationWithCollaboratorsFixtures
     with ApplicationStateHelper {

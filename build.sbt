@@ -90,6 +90,17 @@ lazy val component = (project in file("component"))
     Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
   )
 
+lazy val convert = (project in file("convert"))
+  .dependsOn(microservice % "test->test")
+  .settings(
+    name := "convert-tests",
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
+    Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    DefaultBuildSettings.itSettings(),
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
+  )
+
 commands ++= Seq(
   Command.command("cleanAll") { state => "clean" :: "it/clean" :: "component/clean" :: state },
   Command.command("fmtAll") { state => "scalafmtAll" :: "it/scalafmtAll" :: "component/scalafmtAll" :: state },
