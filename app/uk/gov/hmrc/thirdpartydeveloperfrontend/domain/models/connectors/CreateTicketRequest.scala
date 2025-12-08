@@ -31,7 +31,8 @@ case class CreateTicketRequest(
     organisation: Option[String] = None,
     supportReason: Option[String] = None,
     reasonKey: Option[String] = None,
-    teamMemberEmail: Option[String] = None
+    teamMemberEmail: Option[String] = None,
+    attachments: List[FileAttachment] = List.empty
   )
 
 object CreateTicketRequest {
