@@ -16,17 +16,31 @@
 
 import CommonStepsSteps._
 import MfaStepsSteps._
+import ApplicationsStepsSteps._
 
-class smsMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
+class smsMfaEnabledWithoutDeviceSessionSpec extends Env {
 
   Feature("Sms Enabled as MFA Method Journey User with No Device Session") {
-
     Scenario("Signing with a valid credentials and no MFA mandated but is setup, select email preferences") {
+      Given("I have SMS enabled as MFA method, without a DeviceSession and registered with")
+        givenIHaveSMSEnabledAsMFAMethodWithoutADeviceSessionAndRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith",
+        ))
+        
+      And("I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
       Given("I navigate to the Sign in page")
         givenINavigateToThePage("Sign in")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I enter all the fields:")
-        givenIEnterAllTheFields(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        givenIEnterAllTheFields(Map(
+          "email address" -> "john.smith@example.com",
+          "password" -> "StrongPassword1!"
+        ))  // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       When("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -59,7 +73,7 @@ class smsMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
         thenIAmOnThePage("No Applications")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       When("I click on the radio button with id get-emails")
-        whenIClickOnTheButton("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
+        whenIClickOnTheButtonWithId("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -70,11 +84,25 @@ class smsMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
     }
 
     Scenario("Signing with a valid credentials and no MFA mandated but is setup, select email preferences part 2") {
+      Given("I have SMS enabled as MFA method, without a DeviceSession and registered with")
+        givenIHaveSMSEnabledAsMFAMethodWithoutADeviceSessionAndRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith",
+        ))
+        
+      And("I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
       Given("I navigate to the Sign in page")
         givenINavigateToThePage("Sign in")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I enter all the fields:")
-        givenIEnterAllTheFields(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        givenIEnterAllTheFields(Map(
+          "email address" -> "john.smith@example.com",
+          "password" -> "StrongPassword1!"
+        ))  //   // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       When("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -107,7 +135,7 @@ class smsMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
         thenMyDeviceSessionIsNotSet()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
       When("I click on the radio button with id get-emails")
-        whenIClickOnTheButton("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
+        whenIClickOnTheButtonWithId("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)

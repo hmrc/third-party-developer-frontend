@@ -16,12 +16,25 @@
 
 import CommonStepsSteps._
 import LoginStepsSteps._
+import ApplicationsStepsSteps._
 
-class logoutSpec extends BaseSpec {
+class logoutSpec extends Env {
 
   Feature("Logout") {
 
     Scenario("TPDF should respond properly if logout fails") {
+      Given("I am registered with") 
+        givenIAmRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith",
+          "Mfa Setup" -> ""
+      ))
+
+      And("And I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
       Given("I navigate to the Sign in page")
         givenINavigateToThePage("Sign in")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 

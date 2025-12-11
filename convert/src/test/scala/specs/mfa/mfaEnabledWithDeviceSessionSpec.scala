@@ -16,17 +16,31 @@
 
 import CommonStepsSteps._
 import MfaStepsSteps._
+import ApplicationsStepsSteps._
 
-class mfaEnabledWithDeviceSessionSpec extends BaseSpec {
+class mfaEnabledWithDeviceSessionSpec extends Env {
 
-  Feature("MFA Enabled Journey  MFA Enabled Journey User with Existing Device Session") {
-
+  Feature("MFA Enabled Journey MFA Enabled Journey User with Existing Device Session") {
     Scenario("Signing with a valid credentials and no MFA mandated or setup, select email preferences") {
+      Given("I am mfaEnabled and with a DeviceSession registered with")
+        givenIAmMfaEnabledAndWithADeviceSessionRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith",
+        ))
+
+      And("I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
       Given("I navigate to the Sign in page")
         givenINavigateToThePage("Sign in")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I enter all the fields:")
-        givenIEnterAllTheFields(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        givenIEnterAllTheFields(Map(
+          "email address" -> "john.smith@example.com",
+          "password" -> "StrongPassword1!"
+        ))  // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       And("I already have a device cookie")
         givenIAlreadyHaveADeviceCookie()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
@@ -41,7 +55,7 @@ class mfaEnabledWithDeviceSessionSpec extends BaseSpec {
         thenMyDeviceSessionIsSet()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
       When("I click on the radio button with id get-emails")
-        whenIClickOnTheButton("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
+        whenIClickOnTheButtonWithId("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)

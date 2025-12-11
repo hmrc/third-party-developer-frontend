@@ -16,17 +16,31 @@
 
 import CommonStepsSteps._
 import MfaStepsSteps._
+import ApplicationsStepsSteps._
 
-class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
+class authAppMfaEnabledWithoutDeviceSessionSpec extends Env {
 
   Feature("Authenticator App Enabled as MFA Method Journey User with No Device Session") {
-
     Scenario("Signing with a valid credentials and no MFA mandated but is setup, select email preferences") {
+      Given("I have Authenticator App enabled as MFA method, without a DeviceSession and registered with")
+        givenIHaveAuthenticatorAppEnabledAsMFAMethodWithoutADeviceSessionAndRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith"          
+        ))
+
+      And("And I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
       Given("I navigate to the Sign in page")
         givenINavigateToThePage("Sign in")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I enter all the fields:")
-        givenIEnterAllTheFields(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        givenIEnterAllTheFields(Map(
+          "email address" -> "john.smith@example.com",
+          "password" -> "StrongPassword1!"
+        ))  // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       When("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -40,11 +54,11 @@ class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
       When("I enter the correct access code for Authenticator App and click remember me for 7 days then click continue")
         whenIEnterTheCorrectAccessCodeForAuthenticatorAppAndClickRememberMeFor7DaysThenClickContinue()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
-      Then("My device session is set")
-        thenMyDeviceSessionIsSet()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
-
       And("I am on the Sms Mfa Setup Reminder page")
         thenIAmOnThePage("Sms Mfa Setup Reminder")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
+
+      Then("My device session is set")
+        thenMyDeviceSessionIsSet()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
       And("I click on the button with id link")
         whenIClickOnTheButtonWithId("link")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -59,7 +73,7 @@ class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
         thenIAmOnThePage("No Applications")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       When("I click on the radio button with id get-emails")
-        whenIClickOnTheButton("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
+        whenIClickOnTheButtonWithId("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -70,11 +84,25 @@ class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
     }
 
     Scenario("Signing with a valid credentials and no MFA mandated but is setup, select email preferences part 2") {
+      Given("I have Authenticator App enabled as MFA method, without a DeviceSession and registered with")
+        givenIHaveAuthenticatorAppEnabledAsMFAMethodWithoutADeviceSessionAndRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith"          
+        ))
+
+      And("And I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
       Given("I navigate to the Sign in page")
         givenINavigateToThePage("Sign in")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I enter all the fields:")
-        givenIEnterAllTheFields(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        givenIEnterAllTheFields(Map(
+          "email address" -> "john.smith@example.com",
+          "password" -> "StrongPassword1!"
+        )) // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       When("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)
@@ -107,7 +135,7 @@ class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
         thenMyDeviceSessionIsNotSet()  // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
       When("I click on the radio button with id get-emails")
-        whenIClickOnTheButton("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
+        whenIClickOnTheButtonWithId("get-emails")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I click on the button with id submit")
         whenIClickOnTheButtonWithId("submit")  // auto-chosen (score=0.91, CommonStepsSteps.scala)

@@ -17,19 +17,31 @@
 import CommonStepsSteps._
 import RegisterStepsSteps._
 
-class registerAndResendVerificationSpec extends BaseSpec {
+class registerAndResendVerificationSpec extends Env {
 
   Feature("Resend verification") {
-
     Scenario("Resend verification email successfully in the Developer Hub") {
       Given("I navigate to the Registration page")
         givenINavigateToThePage("Registration")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I see:")
-        thenISee(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        thenISeeInOrder(
+          "First name",
+          "Last name",
+          "Email address",
+          "Create password",
+          "Your password must be at least 12 characters and contain at least one number, lowercase letter, uppercase letter and special character",
+          "Confirm password"
+        )  // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       And("I enter valid information for all fields:")
-        givenIEnterValidInformationForAllFields(null)  // auto-chosen (score=1.00, RegisterStepsSteps.scala)
+        givenIEnterValidInformationForAllFields(
+          "first name" -> "John",  
+          "last name" -> "Smith",
+          "email address" -> "john.smith@example.com",  
+          "password" -> "A1@wwwwwwwww",  
+          "confirm password" -> "A1@wwwwwwwww"
+        )  // auto-chosen (score=1.00, RegisterStepsSteps.scala)
 
       Then("I click on submit")
         whenIClickOnSubmit()  // auto-chosen (score=1.00, RegisterStepsSteps.scala)
@@ -41,25 +53,33 @@ class registerAndResendVerificationSpec extends BaseSpec {
         thenIAmOnThePage("Email confirmation")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I see:")
-        thenISee(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        thenISeeInOrder(
+          "We have sent a confirmation email to john.smith@example.com.",
+          "Click on the link in the email to verify your account.",
+          "I have not received the email"
+        ) // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       When("I click on the I have not received the email link")
-        // ⚠️ No step-def match found for: I click on the I have not received the email link
+        whenIClickOnTheLink("I have not received the email")  // ⚠️ No step-def match found for: I click on the I have not received the email link
 
       Then("I am on the Resend confirmation page")
         thenIAmOnThePage("Resend confirmation")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I see:")
-        thenISee(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        thenISeeInOrder("Emails can take a few minutes to arrive. If you have not received it check your spam folder, or we can resend it.")  // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
       Then("I click on the Resend link")
-        // ⚠️ No step-def match found for: I click on the Resend link
+        whenIClickOnTheLink("Resend") // ⚠️ No step-def match found for: I click on the Resend link
 
       Then("I am on the Email confirmation page")
         thenIAmOnThePage("Email confirmation")  // auto-chosen (score=0.88, CommonStepsSteps.scala)
 
       And("I see:")
-        thenISee(null)  // auto-chosen (score=1.00, CommonStepsSteps.scala)
+        thenISeeInOrder(
+          "We have sent a confirmation email to john.smith@example.com.",
+          "Click on the link in the email to verify your account.",
+          "I have not received the email"
+        )  // auto-chosen (score=1.00, CommonStepsSteps.scala)
 
     }
   }

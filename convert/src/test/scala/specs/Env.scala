@@ -46,7 +46,10 @@ trait Env extends BaseSpec {
 
   def shutdown() = {
     wireMockServer.stop()
-    if (server != null) server.stop()
+    if (server != null) {
+      server.stop()
+      server = null
+    }
   }
 
   override def beforeEach(): Unit = {
@@ -67,6 +70,8 @@ trait Env extends BaseSpec {
     quitBrowser()
 
     if (wireMockServer.isRunning) WireMock.reset()
+
+    shutdown()
     super.afterEach()
   }
 

@@ -131,6 +131,13 @@ object CommonStepsSteps extends NavigationSugar with OptionValues with CustomMat
         }
   }
 
+  def thenISeeInOrder(data: String*): Unit = {
+    val textsToFind: List[String] = data.toList
+        eventually {
+          CurrentPage.bodyText() should containInOrder(textsToFind)
+        }
+  }
+
   // // ^I see on current page:$
   // def thenISeeOnCurrentPage(labels: DataTable): Unit = {
   //   val textsToFind = TableMisuseAdapters.valuesInColumn(0)(labels)
@@ -152,6 +159,17 @@ object CommonStepsSteps extends NavigationSugar with OptionValues with CustomMat
         actions.perform()
   }
 
+  
+  // ^I click on submit$
+  def whenIClickOnSubmit(): Unit = {
+    val element = Driver.instance.findElement(By.id("submit"))
+    val actions = new Actions(Driver.instance)
+    actions.moveToElement(element)
+    actions.click()
+    actions.perform()
+  }
+
+
   // ^I click on the button with id '(.*)'$
   def whenIClickOnTheButtonWithId(id: String) = {
         val link    = Driver.instance.findElement(By.id(id))
@@ -159,15 +177,6 @@ object CommonStepsSteps extends NavigationSugar with OptionValues with CustomMat
         actions.moveToElement(link)
         actions.click()
         actions.perform()
-  }
-
-  // ^I click on the '(.*)' button
-  def whenIClickOnTheButton(buttonText: String) = {
-    val element = Driver.instance.findElement(By.xpath(s"//button[text()='$buttonText']"))
-    val actions = new Actions(Driver.instance)
-    actions.moveToElement(element)
-    actions.click()
-    actions.perform()
   }
 
   // ^I click on the radio button with id '(.*)'

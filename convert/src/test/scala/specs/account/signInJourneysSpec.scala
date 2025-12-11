@@ -18,7 +18,6 @@ import CommonStepsSteps._
 import LoginStepsSteps._
 import ApplicationsStepsSteps._
 import MfaStepsSteps._
-import RegisterStepsSteps._
 import org.scalatest.BeforeAndAfter
 
 class signInJourneysSpec extends Env with BeforeAndAfter {

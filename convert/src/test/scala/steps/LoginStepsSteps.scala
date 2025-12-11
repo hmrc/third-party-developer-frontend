@@ -31,7 +31,8 @@ object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilde
   var developer: User = _
   var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
   var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
-  private val mobileNumber = "+440126"
+
+  private val mobileNumber = "+447890123456"
 
   // ^I successfully log in with '(.*)' and '(.*)' skipping 2SV$
   def givenISuccessfullyLogInWithAndSkipping2SV(email: String, password: String): Unit = {

@@ -16,13 +16,39 @@
 
 import CommonStepsSteps._
 import ApplicationsStepsSteps._
+import LoginStepsSteps._
 import org.scalatest.BeforeAndAfter
 
 class deleteDeveloperAccountSpec extends Env with BeforeAndAfter {
  
   Feature("Developer requests their account to be deleted") {
-
     Scenario("TPSD sees account deletion link and clicks it") {
+      Given("I am registered with") 
+        givenIAmRegisteredWith(Map(
+          "Email address" -> "john.smith@example.com",
+          "Password" -> "StrongPassword1!",
+          "First name" -> "John",
+          "Last name" -> "Smith",
+          "Mfa Setup" -> ""
+      ))
+
+      And("And I have no application assigned to my email 'john.smith@example.com'")
+        givenIHaveNoApplicationAssignedToMyEmail("john.smith@example.com")
+
+      Given("I successfully log in with 'john.smith@example.com' and 'StrongPassword1!' skipping 2SV")
+        givenISuccessfullyLogInWithAndSkipping2SV("john.smith@example.com", "StrongPassword1!")  // auto-chosen (score=1.00, LoginStepsSteps.scala)
+
+      When("I click on the 'John Smith' link")
+        whenIClickOnTheLink("John Smith")
+
+      Then("I am on the 'Manage profile' page")
+        thenIAmOnThePage("Manage profile")
+
+      And("I see text in fields")
+        thenISeeTextInFields(
+          "name" -> "John Smith"
+        )
+
       When("I see a link to request account deletion")
         whenISeeALinkToRequestAccountDeletion()
 

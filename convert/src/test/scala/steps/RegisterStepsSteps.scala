@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import org.openqa.selenium.interactions.Actions
-import org.openqa.selenium.{By}
 import play.api.http.Status
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
-import uk.gov.hmrc.selenium.webdriver.Driver
 
 object RegisterStepsSteps extends ComponentTestDeveloperBuilder with NavigationSugar {
 
@@ -37,15 +34,6 @@ object RegisterStepsSteps extends ComponentTestDeveloperBuilder with NavigationS
   // ^I expect a resend call from '(.*)'$
   def givenIExpectAResendCallFrom(email: String) = {
     DeveloperStub.setupResend(email.toLaxEmail, Status.NO_CONTENT)
-  }
-
-  // ^I click on submit$
-  def whenIClickOnSubmit(): Unit = {
-    val element = Driver.instance.findElement(By.id("submit"))
-        new Actions(Driver.instance)
-          .moveToElement(element)
-          .click()
-          .perform()
   }
 
 }
