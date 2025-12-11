@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case class SubscriptionLink(id: String) extends WebLink {
   override val url: String = s"${EnvConfig.host}/developer/applications/$id/subscriptions"
 }

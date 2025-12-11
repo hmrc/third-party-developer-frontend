@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object ChangeProfileDetailsPage extends FormPage {
   override val pageHeading = "Change profile details"
   override val url: String = s"${EnvConfig.host}/developer/profile/change"

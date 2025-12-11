@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object AuthAppStartPage extends FormPage {
   override val pageHeading: String = "You need an authenticator app on your device"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/start"

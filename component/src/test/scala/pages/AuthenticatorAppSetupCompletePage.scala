@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object AuthenticatorAppSetupCompletePage extends FormPage {
   override val pageHeading: String = "You can now get access codes by authenticator app"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/setup/complete"

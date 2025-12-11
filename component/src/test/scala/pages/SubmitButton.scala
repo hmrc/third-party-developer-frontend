@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
 
 trait SubmitButton {

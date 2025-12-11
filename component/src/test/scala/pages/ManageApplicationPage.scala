@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object ManageApplicationPage extends FormPage {
   override val pageHeading = "View all applications"
   override val url: String = s"${EnvConfig.host}/developer/applications/"

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object EmailConfirmationPage extends FormPage {
   override val url: String = s"${EnvConfig.host}/developer/confirmation"
   override val pageHeading = "Confirm your email address"

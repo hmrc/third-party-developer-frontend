@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object RegistrationPage extends FormPage {
   override val url: String = s"${EnvConfig.host}/developer/registration"
   override val pageHeading = "Register for a developer account"

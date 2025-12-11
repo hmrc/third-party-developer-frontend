@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package steps
-
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSessionId}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 
 object TestContext {
   var developer: User = _

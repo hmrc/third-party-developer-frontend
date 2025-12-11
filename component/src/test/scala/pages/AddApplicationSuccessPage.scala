@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object AddApplicationSuccessPage extends FormPage {
   override val pageHeading = "You added"
   override val url: String = s"${EnvConfig.host}/developer/applications/add"

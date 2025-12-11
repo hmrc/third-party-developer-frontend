@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-package steps
-
-import io.cucumber.datatable.DataTable
-import io.cucumber.scala.Implicits._
-import io.cucumber.scala.{EN, ScalaDsl}
-import matchers.CustomMatchers
 import org.openqa.selenium.By
-import org.scalatest.matchers.should.Matchers
-import pages._
-import stubs.{DeveloperStub, MfaStub, Stubs}
-import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
-import play.api.libs.json.{Json}
+import play.api.libs.json.Json
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{SessionCreateWithDeviceRequest, UserAuthenticationResponse}
 
-class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with BrowserDriver {
+object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilder {
+
+  var developer: User                              = _
+  var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
+  var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
 
   private val mobileNumber = "+447890123456"
 
-  Given("""^I successfully log in with '(.*)' and '(.*)' skipping 2SV$""") { (email: String, password: String) =>
+  // ^I successfully log in with '(.*)' and '(.*)' skipping 2SV$
+  def givenISuccessfullyLogInWithAndSkipping2SV(email: String, password: String): Unit = {
     goOn(SignInPage.default)
     SignInPage.default.signInWith(email, password)
     on(RecommendMfaPage)
@@ -48,9 +44,8 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     RecommendMfaSkipAcknowledgePage.confirmSkip2SV()
   }
 
-  Given("""^I am registered with$""") { data: DataTable =>
-    val result: Map[String, String] = data.asScalaRawMaps[String, String].head
-
+  // ^I am registered with$
+  def givenIAmRegisteredWith(result: Map[String, String]) = {
     val password  = result("Password")
     val developer = buildUser(emailAddress = result("Email address").toLaxEmail, firstName = result("First name"), lastName = result("Last name"))
 
@@ -85,65 +80,73 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
     DeveloperStub.setupGettingDeveloperByUserId(developer)
   }
 
-  Given("""^'(.*)' session is uplifted to LoggedIn$""") { (email: String) =>
+  // ^'(.*)' session is uplifted to LoggedIn$
+  def givenSessionIsUpliftedToLoggedIn(email: String) = {
     if (email.toLaxEmail != TestContext.developer.email) {
       throw new IllegalArgumentException(s"Can only know how to uplift ${TestContext.developer.email}'s session")
     }
     MfaStub.setupMfaMandated()
   }
 
-  Given("""^I fill in the login form with$""") { (data: DataTable) =>
-    val form = data.asScalaRawMaps[String, String].head
+  // ^I fill in the login form with$
+  def givenIFillInTheLoginFormWith(form: Map[String, String]): Unit = {
     Form.populate(form)
   }
 
-  Then("""^I am logged in as '(.+)'$""") { (userFullName: String) =>
-    val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
+  // ^I am logged in as '(.+)'$
+  def thenIAmLoggedInAs(userFullName: String) = {
+    val authCookie = Driver.instance.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie should not be null
     AnyWebPageWithUserLinks.userLink(userFullName) shouldBe ("defined")
   }
 
-  Then("""^I am not logged in$""") { () =>
-    val authCookie = driver.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
+  // ^I am not logged in$
+  def thenIAmNotLoggedIn(): Unit = {
+    val authCookie = Driver.instance.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie shouldBe null
   }
 
-  When("""^I attempt to Sign out when the session expires""") {
+  // ^I attempt to Sign out when the session expires
+  def whenIAttemptToSignOutWhenTheSessionExpires(): Unit = {
     val sessionId = UserSessionId.random
     Stubs.setupDeleteRequest(s"/session/$sessionId", NOT_FOUND)
     try {
-      val link = driver.findElement(By.linkText("Sign out"))
+      val link = Driver.instance.findElement(By.linkText("Sign out"))
       link.click()
     } catch {
       case _: NoSuchElementException =>
-        val menu = driver.findElement(By.linkText("Menu"))
+        val menu = Driver.instance.findElement(By.linkText("Menu"))
         menu.click()
 
-        val link2 = driver.findElement(By.linkText("Sign out"))
+        val link2 = Driver.instance.findElement(By.linkText("Sign out"))
         link2.click()
     }
   }
 
-  Then("""^I should be sent an email with a link to reset for '(.*)'$""") { (email: String) =>
+  // ^I should be sent an email with a link to reset for '(.*)'$
+  def thenIShouldBeSentAnEmailWithALinkToResetFor(email: String) = {
     DeveloperStub.verifyResetPassword(EmailIdentifier(email.toLaxEmail))
   }
 
-  Given("""^I click on a valid password reset link for code '(.*)'$""") { (resetPwdCode: String) =>
+  // ^I click on a valid password reset link for code '(.*)'$
+  def givenIClickOnAValidPasswordResetLinkForCode(resetPwdCode: String) = {
     val email = "bob@example.com"
     DeveloperStub.stubResetPasswordJourney(email.toLaxEmail, resetPwdCode)
 
-    driver.manage().deleteAllCookies()
+    Driver.instance.manage().deleteAllCookies()
     go(new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$resetPwdCode'" })
   }
 
-  Given("""^I click on an invalid password reset link for code '(.*)'$""") { (invalidResetPwdCode: String) =>
+  // ^I click on an invalid password reset link for code '(.*)'$
+  def givenIClickOnAnInvalidPasswordResetLinkForCode(invalidResetPwdCode: String) = {
     DeveloperStub.stubResetPasswordJourneyFail()
 
-    driver.manage().deleteAllCookies()
+    Driver.instance.manage().deleteAllCookies()
     go(new WebLink() { val url = s"http://localhost:${EnvConfig.port}/developer/reset-password-link?code='$invalidResetPwdCode'" })
   }
 
-  Then("""^I am on the 'Reset Password' page with code '(.*)'$""") { (resetPwdCode: String) =>
+  // ^I am on the 'Reset Password' page with code '(.*)'$
+  def thenIAmOnTheResetPasswordPageWithCode(resetPwdCode: String) = {
     eventually {
       withClue(s"Fail to be on page: 'Reset Password'")(on(ResetPasswordPage(resetPwdCode)))
     }
@@ -169,4 +172,5 @@ class LoginSteps extends ScalaDsl with EN with Matchers with NavigationSugar wit
 
     sessionId
   }
+
 }

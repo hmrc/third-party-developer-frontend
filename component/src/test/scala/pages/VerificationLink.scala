@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case class VerificationLink(verificationCode: String) extends WebLink {
   override val url: String = s"${EnvConfig.host}/developer/verification?code=$verificationCode"
 }

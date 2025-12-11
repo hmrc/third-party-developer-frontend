@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object SelectMfaPage extends FormPage {
   override val pageHeading: String = "How do you want to get access codes?"
   override val url: String         = s"${EnvConfig.host}/developer/login/select-mfa"

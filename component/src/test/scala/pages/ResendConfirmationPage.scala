@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object ResendConfirmationPage extends FormPage {
   override val url: String = s"${EnvConfig.host}/developer/resend-confirmation"
   override val pageHeading = "Resend confirmation email"

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object SmsSetupSkippedPage extends FormPage {
   override val pageHeading: String = "Get access codes by text later"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/setup/skip"

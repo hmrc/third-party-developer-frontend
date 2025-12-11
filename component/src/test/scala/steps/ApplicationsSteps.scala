@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package steps
-
-import io.cucumber.scala.{EN, ScalaDsl}
-import matchers.CustomMatchers
+import ApplicationStub.configureUserApplications
 import org.openqa.selenium.By
-import org.scalatest.matchers.should.Matchers
-import pages._
-import stubs.ApplicationStub.configureUserApplications
-import stubs._
-import utils.{BrowserDriver, ComponentTestDeveloperBuilder}
 
 import play.api.http.Status._
 import play.api.libs.json.Json
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationStateHelper
 
-class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSugar with CustomMatchers with ComponentTestDeveloperBuilder with FixedClock with BrowserDriver
-    with ApplicationWithCollaboratorsFixtures
-    with ApplicationStateHelper {
+object ApplicationsSteps extends NavigationSugar with ComponentTestDeveloperBuilder with ApplicationWithCollaboratorsFixtures {
 
-  val applicationId: ApplicationId = ApplicationId.random
-  val clientId: ClientId           = ClientId("clientId")
-
+  val applicationId: ApplicationId       = ApplicationId.random
+  val clientId: ClientId                 = ClientId("clientId")
   val collaboratorEmail: LaxEmailAddress = "john.smith@example.com".toLaxEmail
 
   private def defaultApp(name: String, environment: Environment) = standardApp
@@ -48,7 +36,8 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     .withEnvironment(environment)
     .modify(_.copy(name = ApplicationName(name)))
 
-  Given("""^application with name '(.*)' can be created$""") { (name: String) =>
+  // ^application with name '(.*)' can be created$
+  def givenApplicationWithNameCanBeCreated(name: String): Unit = {
     ApplicationStub.setupApplicationNameValidation()
 
     val app = defaultApp(name, Environment.PRODUCTION)
@@ -60,47 +49,50 @@ class ApplicationsSteps extends ScalaDsl with EN with Matchers with NavigationSu
     configureUserApplications(app.collaborators.head.userId, List(app.withSubscriptions(Set.empty)))
   }
 
-  Then("""^a deskpro ticket is generated with subject '(.*)'$""") { (subject: String) => ApiPlatformDeskproStub.verifyTicketCreationWithSubject(subject) }
+  // ^a deskpro ticket is generated with subject '(.*)'$
+  def thenADeskproTicketIsGeneratedWithSubject(subject: String): Unit = {
+    ApiPlatformDeskproStub.verifyTicketCreationWithSubject(subject)
+  }
 
-  Given("""^I have no application assigned to my email '(.*)'$""") { (unusedEmail: String) =>
+  // ^I have no application assigned to my email '(.*)'$
+  def givenIHaveNoApplicationAssignedToMyEmail(unusedEmail: String): Unit = {
     ApplicationStub.configureUserApplications(staticUserId)
     AppWorld.userApplicationsOnBackend = Nil
   }
 
-  def splitToSecrets(input: String): List[ClientSecret] =
-    input.split(",").map(_.trim).toList.map(s => ClientSecret(ClientSecret.Id.random, s, instant))
-
-  def configureStubsForApplications(email: LaxEmailAddress, applications: List[ApplicationWithCollaborators]): Unit = {
-
-    ApplicationStub.configureUserApplications(staticUserId, applications.map(_.withSubscriptions(Set.empty)))
-    for (app <- applications) {
-      // configure to be able to fetch apps and Subscriptions
-      ApplicationStub.setUpFetchApplication(app.id, OK, Json.toJson(app).toString())
-      ApplicationStub.setUpFetchEmptySubscriptions(app.id, OK)
-    }
+  // ^I see a link to request account deletion$
+  def whenISeeALinkToRequestAccountDeletion(): Unit = {
+    Driver.instance.findElements(By.cssSelector("[id=account-deletion]")).size() shouldBe 1
   }
 
-  When("""^I see a link to request account deletion$""") { () => driver.findElements(By.cssSelector("[id=account-deletion]")).size() shouldBe 1 }
+  // ^I click on the request account deletion link$
+  def whenIClickOnTheRequestAccountDeletionLink(): Unit = {
+    Driver.instance.findElement(By.cssSelector("[id=account-deletion]")).click()
+  }
 
-  When("""^I click on the request account deletion link$""") { () => driver.findElement(By.cssSelector("[id=account-deletion]")).click() }
-
-  When("""^I click on the account deletion confirmation submit button$""") { () =>
+  // ^I click on the account deletion confirmation submit button$
+  def whenIClickOnTheAccountDeletionConfirmationSubmitButton(): Unit = {
     ApiPlatformDeskproStub.setupTicketCreation()
-    driver.findElement(By.cssSelector("[id=submit]")).click()
+    Driver.instance.findElement(By.cssSelector("[id=submit]")).click()
   }
 
-  When("""^I select the confirmation option with id '(.*)'$""") { (id: String) => driver.findElement(By.cssSelector(s"[id=$id]")).click() }
-
-  When("""^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$""") {
-    (id: String, apiName: String, apiContext: String, apiVersion: String) =>
-      driver.getCurrentUrl shouldBe s"${EnvConfig.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
+  // ^I select the confirmation option with id '(.*)'$
+  def whenISelectTheConfirmationOptionWithId(id: String): Unit = {
+    Driver.instance.findElement(By.cssSelector(s"[id=$id]")).click()
   }
 
-  When("""^I am on the subscriptions page for application with id '(.*)'$""") { (id: String) =>
-    driver.getCurrentUrl shouldBe s"${EnvConfig.host}/developer/applications/$id/subscriptions"
+  // ^I am on the unsubcribe request submitted page for application with id '(.*)' and api with name '(.*)', context '(.*)' and version '(.*)'$
+  def whenIAmOnTheUnsubcribeRequestSubmittedPageForApplicationWithIdAndApiWithNameContextAndVersion(id: String, apiName: String, apiContext: String, apiVersion: String): Unit = {
+    Driver.instance.getCurrentUrl shouldBe s"${EnvConfig.host}/developer/applications/$id/unsubscribe?name=$apiName&context=$apiContext&version=$apiVersion&redirectTo=MANAGE_PAGE"
   }
 
-  When("""^I navigate to the Subscription page for application with id '(.*)'$""") { id: String =>
+  // ^I am on the subscriptions page for application with id '(.*)'$
+  def whenIAmOnTheSubscriptionsPageForApplicationWithId(id: String): Unit = {
+    Driver.instance.getCurrentUrl shouldBe s"${EnvConfig.host}/developer/applications/$id/subscriptions"
+  }
+
+  // ^I navigate to the Subscription page for application with id '(.*)'$
+  def whenINavigateToTheSubscriptionPageForApplicationWithId(id: String) = {
     go(SubscriptionLink(id))
   }
 

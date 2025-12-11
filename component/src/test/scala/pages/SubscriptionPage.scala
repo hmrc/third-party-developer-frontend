@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case class SubscriptionPage(id: String) extends FormPage {
   override val pageHeading = "Manage API subscriptions"
   override val url: String = s"${EnvConfig.host}/developer/applications/$id/subscriptions"

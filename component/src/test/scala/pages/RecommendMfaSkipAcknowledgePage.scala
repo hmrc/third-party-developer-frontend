@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
-import steps.EnvConfig
 
 case object RecommendMfaSkipAcknowledgePage extends FormPage {
   override val pageHeading: String = "Add 2-step verification"

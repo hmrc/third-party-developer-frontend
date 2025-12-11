@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object PasswordResetConfirmationPage extends FormPage {
   override val pageHeading: String = "Password reset email sent"
   override val url: String         = s"${EnvConfig.host}/developer/developer/forgot-password"

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
-import steps.EnvConfig
 
 case object CreateNameForAuthAppPage extends FormPage {
 

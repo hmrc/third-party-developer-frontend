@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 case class ResendVerificationLink(email: LaxEmailAddress) extends WebLink {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
 
 trait FormPage extends WebPage {
@@ -31,4 +29,3 @@ trait FormPage extends WebPage {
 
   def hasElementWithId(id: String) = findElements(By.id(id)).size == 1
 }
-

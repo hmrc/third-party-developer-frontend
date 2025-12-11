@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case class DeleteApplicationConfirmPage(id: String) extends FormPage {
   override val pageHeading = "Delete application"
   override val url: String = s"${EnvConfig.host}/developer/applications/$id/delete-confirm"

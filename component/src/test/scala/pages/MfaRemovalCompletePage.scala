@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object MfaRemovalCompletePage extends FormPage {
   override val pageHeading: String = "You've removed this security preference"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/remove-mfa/complete"

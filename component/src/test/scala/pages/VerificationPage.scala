@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case class VerificationPage(verificationCode: String) extends FormPage {
   override val pageHeading: String = "Email address verified"
   override val url: String         = s"${EnvConfig.host}/developer/verification?code=$verificationCode"

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import utils.MfaData
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 
 case object AuthAppLoginAccessCodePage extends MfaData {

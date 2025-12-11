@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object AccountDeletionRequestSubmittedPage extends FormPage {
   override val pageHeading: String = "Request submitted"
   override val url: String         = s"${EnvConfig.host}/developer/profile/delete"

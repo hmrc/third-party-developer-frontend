@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object ResetPasswordLinkNoLongerValidPage extends FormPage {
   override val pageHeading = "Reset password link no longer valid"
   override val url: String = s"${EnvConfig.host}/developer/reset-password/error"

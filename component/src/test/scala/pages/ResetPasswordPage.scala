@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case class ResetPasswordPage(code: String) extends FormPage {
   override val pageHeading: String = "Create a new password"
   override val url: String         = s"${EnvConfig.host}/developer/reset-password"

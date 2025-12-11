@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
-import steps.EnvConfig
 
-case object SmsMobileNumberPage extends FormPage with SubmitButton {
+case object SmsMobileNumberPage extends FormPage with SubmitButton with BrowserDriver {
 
   override val pageHeading: String = "Enter a mobile phone number"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/setup"

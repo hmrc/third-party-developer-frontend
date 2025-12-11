@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object AddApplicationEmptyPage extends FormPage {
   override val pageHeading = "Start using our REST APIs"
   override val url: String = s"${EnvConfig.host}/developer/no-applications-start/"

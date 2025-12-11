@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
-import steps.EnvConfig
+
 import uk.gov.hmrc.selenium.webdriver.Driver
 
 class SignInPage private (override val pageHeading: String) extends FormPage with SubmitButton {

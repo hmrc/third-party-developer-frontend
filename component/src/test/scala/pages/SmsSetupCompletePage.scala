@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object SmsSetupCompletePage extends FormPage {
   override val pageHeading: String = "You can now get access codes by text"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/sms/setup/complete"

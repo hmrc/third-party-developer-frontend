@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 object ChangePasswordSuccessPage extends FormPage {
   override val pageHeading = "Password changed"
   override val url: String = s"${EnvConfig.host}/developer/profile/password"

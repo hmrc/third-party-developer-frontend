@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
-import steps.EnvConfig
-
 case object AuthAppSetupReminderPage extends FormPage {
   override val pageHeading: String = "Get access codes by an authenticator app"
   override val url: String         = s"${EnvConfig.host}/developer/profile/security-preferences/auth-app/setup/reminder"

@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.openqa.selenium.By
-import steps.EnvConfig
+
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 
 case class LoginAccessCodePage(mfaId: String, mfaType: MfaType, headingVal: String) extends FormPage with SubmitButton {
