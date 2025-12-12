@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package stubs
-
 import com.github.tomakehurst.wiremock.client.WireMock._
-import steps.TestContext
 
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json

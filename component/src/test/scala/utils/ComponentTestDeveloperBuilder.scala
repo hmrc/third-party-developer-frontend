@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package utils
-
 import java.time.Instant
 import java.util.UUID
 

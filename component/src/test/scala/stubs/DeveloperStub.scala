@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package stubs
-
 import com.github.tomakehurst.wiremock.client.WireMock._
-import utils.ComponentTestDeveloperBuilder
 
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json

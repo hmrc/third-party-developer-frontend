@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package stubs
-
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._

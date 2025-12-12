@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package stubs
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.matchers.should.Matchers

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
 import org.mockito.MockitoSugar
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers

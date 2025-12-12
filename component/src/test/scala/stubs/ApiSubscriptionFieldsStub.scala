@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package stubs
-
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, get, stubFor, urlEqualTo}
 
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT}

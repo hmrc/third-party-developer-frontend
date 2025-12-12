@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package pages
-
 import java.time.Duration
 import scala.jdk.CollectionConverters._
 
