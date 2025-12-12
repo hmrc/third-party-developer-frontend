@@ -57,7 +57,6 @@ object ApplicationsSteps extends NavigationSugar with ComponentTestDeveloperBuil
   // ^I have no application assigned to my email '(.*)'$
   def givenIHaveNoApplicationAssignedToMyEmail(unusedEmail: String): Unit = {
     ApplicationStub.configureUserApplications(staticUserId)
-    AppWorld.userApplicationsOnBackend = Nil
   }
 
   // ^I see a link to request account deletion$

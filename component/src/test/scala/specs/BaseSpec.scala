@@ -34,8 +34,7 @@ import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterEach, GivenWhenThen}
 
-import uk.gov.hmrc.selenium.webdriver.{Browser, ScreenshotOnFailure}
-import uk.gov.hmrc.selenium.webdriver.Driver
+import uk.gov.hmrc.selenium.webdriver.{Browser, Driver, ScreenshotOnFailure}
 
 trait BaseSpec
     extends AnyFeatureSpec
@@ -59,4 +58,3 @@ trait BaseSpec
     super.afterEach()
   }
 }
-

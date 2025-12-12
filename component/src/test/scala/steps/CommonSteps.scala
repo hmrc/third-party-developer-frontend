@@ -101,25 +101,11 @@ object CommonStepsSteps extends NavigationSugar with OptionValues with CustomMat
     verifyData(data.toMap, _.getText, By.id)
   }
 
-  // Overload for ScalaTest (no DataTable, accepts varargs)
-  def thenISee(data: (String, String)*): Unit = {
-    val textsToFind: List[String] = TableMisuseAdapters.valuesInColumn(0)(data.toMap)
-    eventually {
-      CurrentPage.bodyText() should containInOrder(textsToFind)
-    }
-  }
-
   def thenISeeInOrder(data: String*): Unit = {
     val textsToFind: List[String] = data.toList
     eventually {
       CurrentPage.bodyText() should containInOrder(textsToFind)
     }
-  }
-
-  // Overload for ScalaTest (no DataTable, accepts varargs)
-  def thenISeeOnCurrentPage(data: (String, String)*): Unit = {
-    val textsToFind = TableMisuseAdapters.valuesInColumn(0)(data.toMap)
-    Driver.instance.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
   }
 
   // ^I click on the '(.*)' link$

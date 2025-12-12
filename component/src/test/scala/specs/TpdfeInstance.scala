@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import play.api.test.TestServer
-import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.Mode
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.TestServer
 import play.core.server.ServerConfig
+
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 object TpdfeInstance extends ApplicationLogger {
   import EnvConfig._
@@ -27,7 +28,7 @@ object TpdfeInstance extends ApplicationLogger {
   var server: TestServer = null
 
   def start() = {
-    if(server == null) {
+    if (server == null) {
       server = startServer()
     }
   }
@@ -58,7 +59,7 @@ object TpdfeInstance extends ApplicationLogger {
         .build()
 
     val serverConfig = ServerConfig(port = Some(port))
-    val localServer = new TestServer(serverConfig, application, None)
+    val localServer  = new TestServer(serverConfig, application, None)
     localServer.start()
     localServer
   }

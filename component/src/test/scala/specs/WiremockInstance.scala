@@ -17,6 +17,7 @@
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 
 object WiremockInstance extends ApplicationLogger {
@@ -29,7 +30,7 @@ object WiremockInstance extends ApplicationLogger {
 
   private val wireMockConfiguration = wireMockConfig().port(stubPort)
 
-  val wireMockServer     = new WireMockServer(wireMockConfiguration)
+  val wireMockServer = new WireMockServer(wireMockConfiguration)
 
   def ensureIsRunning() = {
     if (!wireMockServer.isRunning) {
