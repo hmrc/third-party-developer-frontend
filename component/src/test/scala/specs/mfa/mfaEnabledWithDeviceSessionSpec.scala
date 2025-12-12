@@ -18,7 +18,7 @@ import ApplicationsSteps._
 import CommonStepsSteps._
 import MfaStepsSteps._
 
-class mfaEnabledWithDeviceSessionSpec extends Env {
+class mfaEnabledWithDeviceSessionSpec extends BaseSpec {
 
   Feature("MFA Enabled Journey MFA Enabled Journey User with Existing Device Session") {
     Scenario("Signing with a valid credentials and no MFA mandated or setup, select email preferences") {

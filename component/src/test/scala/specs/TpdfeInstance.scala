@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,68 +14,25 @@
  * limitations under the License.
  */
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-
-import play.api.Mode
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.TestServer
+import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.Mode
 import play.core.server.ServerConfig
 
-trait Env extends BaseSpec {
+object TpdfeInstance extends ApplicationLogger {
   import EnvConfig._
+  logger.info("Loading Server")
 
-  // please do not change this port as it is used for acceptance tests
-  // when the service is run with "service manager"
-  val stubPort    = sys.env.getOrElse("WIREMOCK_PORT", "11111").toInt
-  val stubHost    = "localhost"
-  val wireMockUrl = s"http://$stubHost:$stubPort"
-
-  private val wireMockConfiguration = wireMockConfig().port(stubPort)
-
-  val wireMockServer     = new WireMockServer(wireMockConfiguration)
   var server: TestServer = null
 
-  Runtime.getRuntime addShutdownHook new Thread {
-
-    override def run(): Unit = {
-      shutdown()
+  def start() = {
+    if(server == null) {
+      server = startServer()
     }
   }
 
-  def shutdown() = {
-    wireMockServer.stop()
-    if (server != null) {
-      server.stop()
-      server = null
-    }
-  }
-
-  override def beforeEach(): Unit = {
-    if (server == null)
-      startServer()
-
-    logger.warn("Starting wiremock et al")
-    if (!wireMockServer.isRunning) {
-      wireMockServer.start()
-    }
-    WireMock.configureFor(stubHost, stubPort)
-    AuditStub.setupAudit()
-
-    startBrowser()
-  }
-
-  override def afterEach(): Unit = {
-    quitBrowser()
-
-    if (wireMockServer.isRunning) WireMock.reset()
-
-    shutdown()
-    super.afterEach()
-  }
-
-  def startServer(): Unit = {
+  private def startServer(): TestServer = {
     logger.warn("Starting server")
     val application =
       GuiceApplicationBuilder()
@@ -101,7 +58,8 @@ trait Env extends BaseSpec {
         .build()
 
     val serverConfig = ServerConfig(port = Some(port))
-    server = new TestServer(serverConfig, application, None)
-    server.start()
+    val localServer = new TestServer(serverConfig, application, None)
+    localServer.start()
+    localServer
   }
 }

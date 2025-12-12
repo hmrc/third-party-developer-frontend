@@ -18,7 +18,7 @@ import ApplicationsSteps._
 import CommonStepsSteps._
 import LoginStepsSteps._
 
-class logoutSpec extends Env {
+class logoutSpec extends BaseSpec {
 
   Feature("Logout") {
 

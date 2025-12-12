@@ -19,7 +19,7 @@ import CommonStepsSteps._
 import LoginStepsSteps._
 import org.scalatest.BeforeAndAfter
 
-class deleteDeveloperAccountSpec extends Env with BeforeAndAfter {
+class deleteDeveloperAccountSpec extends BaseSpec with BeforeAndAfter {
 
   Feature("Developer requests their account to be deleted") {
     Scenario("TPSD sees account deletion link and clicks it") {

@@ -20,7 +20,7 @@ import LoginStepsSteps._
 import MfaStepsSteps._
 import org.scalatest.BeforeAndAfter
 
-class signInJourneysSpec extends Env with BeforeAndAfter {
+class signInJourneysSpec extends BaseSpec with BeforeAndAfter {
 
   Feature("Sign in") {
 

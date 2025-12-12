@@ -18,7 +18,7 @@ import ApplicationsSteps._
 import CommonStepsSteps._
 import MfaStepsSteps._
 
-class authAppMfaEnabledWithoutDeviceSessionSpec extends Env {
+class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
 
   Feature("Authenticator App Enabled as MFA Method Journey User with No Device Session") {
     Scenario("Signing with a valid credentials and no MFA mandated but is setup, select email preferences") {

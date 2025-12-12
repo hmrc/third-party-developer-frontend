@@ -19,7 +19,7 @@ import CommonStepsSteps._
 import LoginStepsSteps._
 import MfaStepsSteps._
 
-class mfaAuthAppSetupJourneysSpec extends Env {
+class mfaAuthAppSetupJourneysSpec extends BaseSpec {
 
   Feature("MFA Setup") {
 

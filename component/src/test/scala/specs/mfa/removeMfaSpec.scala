@@ -18,7 +18,7 @@ import ApplicationsSteps._
 import CommonStepsSteps._
 import MfaStepsSteps._
 
-class removeMfaSpec extends Env {
+class removeMfaSpec extends BaseSpec {
 
   Feature("Remove MFA. User with MFA enabled and Existing Device Session") {
     Scenario("Signing with a valid credentials and no MFA mandated or setup, remove MFA") {

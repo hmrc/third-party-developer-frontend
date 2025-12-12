@@ -17,7 +17,7 @@
 import CommonStepsSteps._
 import RegisterSteps._
 
-class registerAndResendVerificationSpec extends Env {
+class registerAndResendVerificationSpec extends BaseSpec {
 
   Feature("Resend verification") {
     Scenario("Resend verification email successfully in the Developer Hub") {

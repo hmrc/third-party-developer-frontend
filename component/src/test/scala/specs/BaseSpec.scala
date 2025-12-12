@@ -35,6 +35,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterEach, GivenWhenThen}
 
 import uk.gov.hmrc.selenium.webdriver.{Browser, ScreenshotOnFailure}
+import uk.gov.hmrc.selenium.webdriver.Driver
 
 trait BaseSpec
     extends AnyFeatureSpec
@@ -44,10 +45,18 @@ trait BaseSpec
     with Browser
     with ScreenshotOnFailure {
 
-  // override def beforeEach(): Unit =
-  //   startBrowser()
+  override def beforeEach(): Unit = {
+    TpdfeInstance.start()
+    WiremockInstance.ensureIsRunning()
+    AuditStub.setupAudit()
+    startBrowser()
+    Driver.instance.manage().deleteAllCookies()
+  }
 
-  // override def afterEach(): Unit =
-  //   quitBrowser()
-
+  override def afterEach(): Unit = {
+    quitBrowser()
+    WiremockInstance.reset()
+    super.afterEach()
+  }
 }
+

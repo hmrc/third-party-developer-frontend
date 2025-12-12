@@ -18,7 +18,7 @@ import ApplicationsSteps._
 import CommonStepsSteps._
 import MfaStepsSteps._
 
-class smsMfaEnabledWithoutDeviceSessionSpec extends Env {
+class smsMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
 
   Feature("Sms Enabled as MFA Method Journey User with No Device Session") {
     Scenario("Signing with a valid credentials and no MFA mandated but is setup, select email preferences") {
@@ -54,11 +54,11 @@ class smsMfaEnabledWithoutDeviceSessionSpec extends Env {
       When("I enter the correct access code for SMS and click remember me for 7 days then click continue")
       whenIEnterTheCorrectAccessCodeForSMSAndClickRememberMeFor7DaysThenClickContinue() // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
-      Then("My device session is set")
-      thenMyDeviceSessionIsSet() // auto-chosen (score=1.00, MfaStepsSteps.scala)
-
       And("I am on the Authenticator App Mfa Setup Reminder page")
       thenIAmOnThePage("Authenticator App Mfa Setup Reminder") // auto-chosen (score=0.88, CommonStepsSteps.scala)
+
+      And("My device session is set")
+      thenMyDeviceSessionIsSet() // auto-chosen (score=1.00, MfaStepsSteps.scala)
 
       And("I click on the button with id link")
       whenIClickOnTheButtonWithId("link") // auto-chosen (score=0.91, CommonStepsSteps.scala)

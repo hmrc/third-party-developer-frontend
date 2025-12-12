@@ -19,7 +19,7 @@ import CommonStepsSteps._
 import LoginStepsSteps._
 import ProfileSteps._
 
-class profileSpec extends Env {
+class profileSpec extends BaseSpec {
 
   Feature("Developer views/updates profile") {
 
