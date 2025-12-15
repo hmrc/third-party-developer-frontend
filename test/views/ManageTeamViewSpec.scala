@@ -63,6 +63,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
 
       manageTeamView.render(
         model,
+        List.empty,
         role,
         form,
         Some(createFraudPreventionNavLinkViewModel(isVisible = true, "some/url")),
@@ -80,8 +81,8 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
       withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe true)
       withClue("Warning")(elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false)
-      withClue("Session email")(elementExistsByText(document, "td", loggedInDeveloper.developer.email.text) shouldBe true)
-      withClue("collaborator email")(elementExistsByText(document, "td", collaborator.developer.email.text) shouldBe true)
+      withClue("Session email")(elementExistsByText(document, "td", s"${loggedInDeveloper.developer.email.text} (Unverified)") shouldBe true)
+      withClue("collaborator email")(elementExistsByText(document, "td", s"${collaborator.developer.email.text} (Unverified)") shouldBe true)
       withClue("Remove link present")(linkExistsWithHref(
         document,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url
@@ -105,8 +106,8 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
       withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe true)
       withClue("Warning")(elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe false)
-      withClue("Session email")(elementExistsByText(document, "td", loggedInDeveloper.developer.email.text) shouldBe true)
-      withClue("collaborator email")(elementExistsByText(document, "td", collaborator.developer.email.text) shouldBe true)
+      withClue("Session email")(elementExistsByText(document, "td", s"${loggedInDeveloper.developer.email.text} (Unverified)") shouldBe true)
+      withClue("collaborator email")(elementExistsByText(document, "td", s"${collaborator.developer.email.text} (Unverified)") shouldBe true)
       withClue("Remove link present")(linkExistsWithHref(
         document,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, loggedInDeveloper.developer.email.text.toSha256).url
@@ -119,8 +120,8 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
       withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe false)
       withClue("Warning")(elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true)
-      withClue("Session email")(elementExistsByText(document, "td", loggedInDeveloper.developer.email.text) shouldBe true)
-      elementExistsByText(document, "td", collaborator.developer.email.text) shouldBe true
+      withClue("Session email")(elementExistsByText(document, "td", s"${loggedInDeveloper.developer.email.text} (Unverified)") shouldBe true)
+      elementExistsByText(document, "td", s"${collaborator.developer.email.text} (Unverified)") shouldBe true
       withClue("Remove link present")(linkExistsWithHref(
         document,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url

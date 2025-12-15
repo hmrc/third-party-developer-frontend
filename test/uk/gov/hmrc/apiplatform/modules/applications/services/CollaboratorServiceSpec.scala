@@ -140,4 +140,21 @@ class CollaboratorServiceSpec
       }
     }
   }
+
+  "getCollaboratorUsers" should {
+    "return the User instances relating to the supplied Collaborator instances" in new Setup with CollaboratorTracker with LocalUserIdTracker{
+      val adminCollaborator = ("admin-email@example.com".toLaxEmail.asAdministratorCollaborator)
+      val developerCollaborator = ("dev-email@example.com".toLaxEmail.asAdministratorCollaborator)
+      val collaborators = Set[Collaborator](adminCollaborator, developerCollaborator)
+      val adminUserFromCollaborator = adminUser.copy(email = adminCollaborator.emailAddress)
+      val developerUserFromCollaborator = devUser.copy(email = adminCollaborator.emailAddress, verified = true)
+
+      TPDMock.FetchByEmails.returnsSuccessFor(collaborators.map(_.emailAddress))(Seq(
+        adminUserFromCollaborator, developerUserFromCollaborator
+      ))
+      val result = await(collaboratorService.getCollaboratorUsers(collaborators))
+
+      result shouldBe List(adminUserFromCollaborator, developerUserFromCollaborator)
+    }
+  }
 }

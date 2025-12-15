@@ -21,7 +21,8 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
-@(app: ApplicationWithCollaborators,role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
+@import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+@(app: ApplicationWithCollaborators, collaboratorUsers: Seq[User], role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
  <div class="govuk-warning-text">
@@ -54,9 +55,29 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
+   @registered(collaborator: Collaborator) = @{
+       collaboratorUsers.exists(_.email == collaborator.emailAddress)
+   }
+   @unregistered(collaborator: Collaborator) = @{
+       !registered(collaborator)
+   }
+   @verified(user: Option[User]) = @{
+        user match {
+            case Some(u) => u.verified
+            case None => false
+        }
+   }
+    @displayUnverified(collaborator: Collaborator)=@{
+        unregistered(collaborator) || !verified(collaboratorUsers.find(_.email == collaborator.emailAddress))
+    }
     @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
-        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text</td>
+        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
+            @if(displayUnverified(teamMember)){
+            &nbsp;(Unverified)
+            }
+
+        </td>
         <td class="govuk-table__cell center-table-text">
           @if(teamMember.role.isAdministrator) {
             <span>Admin</span>

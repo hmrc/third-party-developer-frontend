@@ -17,5 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
 case class ApplicationViewModel(application: ApplicationWithCollaborators, hasSubscriptionsFields: Boolean, hasPpnsFields: Boolean)

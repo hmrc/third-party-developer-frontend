@@ -60,6 +60,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
         case Some(role) => successful(Some(
             new ApplicationRequest(
               application = appData.asAppWithCollaborators,
+              collaboratorUsers = Seq.empty,
               deployedTo = appData.deployedTo,
               subscriptions,
               openAccessApis,

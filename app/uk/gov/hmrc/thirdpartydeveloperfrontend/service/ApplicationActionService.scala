@@ -18,13 +18,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import cats.data.OptionT
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ApiVersion}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
+import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{ApiFieldMap, FieldDefinition, FieldValue}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
@@ -35,7 +33,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 class ApplicationActionService @Inject() (
     applicationService: ApplicationService,
     subscriptionFieldsService: SubscriptionFieldsService,
-    openAccessApisService: OpenAccessApiService
+    openAccessApisService: OpenAccessApiService,
+    collaboratorService: CollaboratorService
   )(implicit val ec: ExecutionContext
   ) {
 
@@ -51,8 +50,9 @@ class ApplicationActionService @Inject() (
         fieldDefinitions    <- OptionT.liftF(subscriptionFieldsService.fetchAllFieldDefinitions(environment))
         openAccessApis      <- OptionT.liftF(openAccessApisService.fetchAllOpenAccessApis(environment))
         subscriptionData    <- OptionT.liftF(subscriptionFieldsService.fetchAllPossibleSubscriptions(applicationId))
+        collaboratorUsers   <- OptionT.liftF(collaboratorService.getCollaboratorUsers(application.collaborators))
         subs                 = toApiSubscriptionStatusList(applicationWithSubs, fieldDefinitions, subscriptionData)
-      } yield new ApplicationRequest(application, environment, subs, openAccessApis, role, userRequest)
+      } yield new ApplicationRequest(application, collaboratorUsers, environment, subs, openAccessApis, role, userRequest)
     )
       .value
   }

@@ -58,6 +58,7 @@ trait HasApplication {
 
 class ApplicationRequest[A](
     val application: ApplicationWithCollaborators,
+    val collaboratorUsers: Seq[User],
     val deployedTo: Environment,
     val subscriptions: List[APISubscriptionStatus],
     val openAccessApis: List[ApiDefinition],
@@ -75,6 +76,7 @@ class ApplicationWithFieldDefinitionsRequest[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
+      applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,
@@ -90,6 +92,7 @@ class ApplicationWithSubscriptionFieldPageRequest[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
+  applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,
@@ -102,6 +105,7 @@ class ApplicationWithSubscriptionFieldsRequest[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
+  applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,
@@ -114,6 +118,7 @@ class ApplicationWithWritableSubscriptionField[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
+  applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,
