@@ -67,9 +67,16 @@
             case None => false
         }
    }
-    @displayUnverified(collaborator: Collaborator)=@{
+   @oneOnlyVerifiedAdmin = @{
+        val admins = app.collaborators.filter(_.isAdministrator)
+        collaboratorUsers.filter(u=>admins.map(_.emailAddress==u.email)).count(_.verified)==1
+   }
+  @loggedInUserIsOnlyVerifiedAdmin = @{
+      role.isAdministrator && loggedIn.developer.verified && oneOnlyVerifiedAdmin
+  }
+   @displayUnverified(collaborator: Collaborator)=@{
         unregistered(collaborator) || !verified(collaboratorUsers.find(_.email == collaborator.emailAddress))
-    }
+   }
     @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
         <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
@@ -87,11 +94,15 @@
           }
         </td>
         @if(role.isAdministrator && (teamMember.role.isDeveloper || app.collaborators.count(_.isAdministrator) > 1)) {
-          <td class="govuk-table__cell center-table-text">
-            <a class="govuk-button govuk-button--secondary govuk-!-margin-0" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
-              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
-            </a>
-          </td>
+            @if(loggedInUserIsOnlyVerifiedAdmin && teamMember.emailAddress == loggedIn.developer.email){
+                <td class="govuk-table__cell center-table-text">Not available</td>
+            } else {
+                <td class="govuk-table__cell center-table-text">
+                    <a class="govuk-link govuk-link--no-visited-state" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
+                        Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
+                    </a>
+                </td>
+            }
         } else {
           <td class="govuk-table__cell center-table-text" aria-hidden="true"></td>
         }
@@ -100,6 +111,19 @@
   </tbody>
 </table>
 <br>
+@if(loggedInUserIsOnlyVerifiedAdmin){
+    <details class="govuk-details">
+        <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text">
+                Why can't I remove myself from this application?
+            </span>
+        </summary>
+        <div class="govuk-details__text">
+            <p class="govuk-body">Each application must have at least one verified admin.</p>
+            <p>If you want to remove yourself, first add another user with the admin role and wait until they're verified.</p>
+        </div>
+    </details>
+}
 @if(role.isAdministrator) {
   <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="govuk-button" } else { class="govuk-link" } >Add a team member</a><br/>
 }

@@ -79,7 +79,6 @@ class ManageTeam @Inject() (
       cu =>
         val view =
           manageTeamView(applicationViewModelFromApplicationRequest(), cu, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
-
         error.map(_ => BadRequest(view)).getOrElse(Ok(view))
     }
   }
