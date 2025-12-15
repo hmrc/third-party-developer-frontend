@@ -19,7 +19,9 @@ package uk.gov.hmrc.apiplatform.modules.applications.services
 import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchSuccessResult, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
@@ -78,7 +80,7 @@ class CollaboratorService @Inject() (
     } yield response
   }
 
-  def getCollaboratorUsers (collaborators: Set[Collaborator])(implicit hc:HeaderCarrier): Future[Seq[User]] = {
+  def getCollaboratorUsers(collaborators: Set[Collaborator])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
     developerConnector.fetchByEmails(collaborators.map(_.emailAddress))
   }
 }

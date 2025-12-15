@@ -19,19 +19,20 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeamMemberView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailures, CommandHandlerTypes, DispatchSuccessResult}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
@@ -40,9 +41,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-
-import java.time.Instant
-import java.util.UUID
 
 @Singleton
 class ManageTeam @Inject() (
@@ -77,24 +75,13 @@ class ManageTeam @Inject() (
     }
 
   def manageTeam(applicationId: ApplicationId, error: Option[String] = None): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-
-  collaboratorService.getCollaboratorUsers(applicationViewModelFromApplicationRequest().application.collaborators).map {
+    collaboratorService.getCollaboratorUsers(applicationViewModelFromApplicationRequest().application.collaborators).map {
       cu =>
-        println(cu)
         val view =
-        manageTeamView(applicationViewModelFromApplicationRequest(), cu, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
+          manageTeamView(applicationViewModelFromApplicationRequest(), cu, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
 
-  error.map(_ => BadRequest(view)).getOrElse(Ok(view))
-
-
-      //    manageTeamView(applicationViewModelFromApplicationRequest(), Seq.empty, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
-      //  val user: User = User(email = LaxEmailAddress("neil.frow@digital.hmrc.gov.uk"), "Neil", "Frow", Instant.now(), Instant.now(), verified = false, None, List.empty, None, EmailPreferences.noPreferences, UserId(UUID.randomUUID()), 1, None)
-      //  val user1: User = User(email = LaxEmailAddress("jonny.fox@hoopla.co.uk"), "Jonny", "Fox", Instant.now(), Instant.now(), verified = true, None, List.empty, None, EmailPreferences.noPreferences, UserId(UUID.randomUUID()), 1, None)
-      //  val user2: User = User(email = LaxEmailAddress("wicky.dicky@digital.hmrc.gov.uk"), "Mary", "Fairy", Instant.now(), Instant.now(), verified = false, None, List.empty, None, EmailPreferences.noPreferences, UserId(UUID.randomUUID()), 1, None)
-
-      //    val view = manageTeamView(applicationViewModelFromApplicationRequest(), Seq[User](user, user1, user2),request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
-
-  }
+        error.map(_ => BadRequest(view)).getOrElse(Ok(view))
+    }
   }
 
   def addTeamMember(applicationId: ApplicationId): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>

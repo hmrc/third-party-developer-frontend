@@ -92,7 +92,7 @@ class ApplicationWithSubscriptionFieldPageRequest[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
-  applicationRequest.collaboratorUsers,
+      applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,
@@ -105,7 +105,7 @@ class ApplicationWithSubscriptionFieldsRequest[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
-  applicationRequest.collaboratorUsers,
+      applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,
@@ -118,7 +118,7 @@ class ApplicationWithWritableSubscriptionField[A](
     applicationRequest: ApplicationRequest[A]
   ) extends ApplicationRequest[A](
       applicationRequest.application,
-  applicationRequest.collaboratorUsers,
+      applicationRequest.collaboratorUsers,
       applicationRequest.deployedTo,
       applicationRequest.subscriptions,
       applicationRequest.openAccessApis,

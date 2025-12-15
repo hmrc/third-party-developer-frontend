@@ -17,14 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-
-import scala.concurrent.Future
 
 trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
@@ -72,6 +73,7 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
     }
 
     object GetCollaboratorUsers {
+
       def succeeds() = {
         when(aMock.getCollaboratorUsers(*)(*)).thenReturn(Future.successful(List.empty[User]))
       }
