@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package steps
-
-import io.cucumber.scala.{EN, ScalaDsl}
-import org.scalatest.matchers.should.Matchers
-import pages._
-import stubs.{DeveloperStub, Stubs}
-
 import play.api.http.Status._
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.UpdateRequest
 
-class ProfileSteps extends ScalaDsl with EN with Matchers with NavigationSugar {
+object ProfileSteps {
 
-  Given("""^I want to successfully change my profile$""") { () =>
+  // ^I want to successfully change my profile$
+  def givenIWantToSuccessfullyChangeMyProfile(): Unit = {
     // Pulling the user id from the developer in the test context defined in LoginSteps
     val userId = TestContext.developer.userId
     DeveloperStub.update(userId, UpdateRequest("Joe", "Bloggs"), OK)
   }
 
-  Given("""^I want to successfully change my password""") { () =>
+  // ^I want to successfully change my password
+  def givenIWantToSuccessfullyChangeMyPassword(): Unit = {
     Stubs.setupPostRequest("/change-password", NO_CONTENT)
   }
+
 }

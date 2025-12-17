@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,15 @@
  * limitations under the License.
  */
 
-package steps
-
-import scala.collection.mutable
 import scala.concurrent.duration._
-import scala.jdk.CollectionConverters._
-import scala.language.postfixOps
 
-import io.cucumber.datatable.DataTable
-import io.cucumber.scala.Implicits._
-import io.cucumber.scala.{EN, ScalaDsl}
-import matchers.CustomMatchers
 import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebElement}
 import org.scalatest.OptionValues
-import org.scalatest.matchers.should.Matchers
-import pages._
-import utils.BrowserDriver
 
 import uk.gov.hmrc.selenium.webdriver.Driver
 
-object TableMisuseAdapters {
-
-  def asListOfKV(dataTable: DataTable): Map[String, String] = {
-    dataTable.asScalaRawLists[String].map(_.toList match {
-      case a :: b :: c => a -> b
-      case _           => throw new RuntimeException("Badly constructed table")
-    }).toMap
-  }
-
-  def valuesInColumn(n: Int)(data: DataTable): List[String] = {
-    data.asLists().asScala.map(_.get(n)).toList
-  }
-}
-
-class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with NavigationSugar with CustomMatchers with BrowserDriver {
+object CommonStepsSteps extends NavigationSugar with OptionValues with CustomMatchers {
 
   val mfaPages = Map(
     "Authenticator App Start Page"         -> AuthAppStartPage,
@@ -92,84 +66,89 @@ class CommonSteps extends ScalaDsl with EN with Matchers with OptionValues with 
     "Reset password link no longer valid"          -> ResetPasswordLinkNoLongerValidPage
   ) ++ mfaPages
 
-  Given("""^I navigate to the '(.*)' page$""") { (pageName: String) =>
+  // ^I navigate to the '(.*)' page$
+  def givenINavigateToThePage(pageName: String): Unit = {
     withClue(s"Fail to load page: $pageName")(goOn(pages(pageName)))
   }
 
-  Given("""^I enter all the fields:$""") { (data: DataTable) =>
-    val form: Map[String, String] = data.asScalaRawMaps[String, String].head
-    Form.populate(form)
+  // Overload for ScalaTest (no DataTable, accepts varargs)
+  def givenIEnterAllTheFields(data: Map[String, String]): Unit = {
+    Form.populate(data)
   }
 
-  Then("""^I am on the '(.*)' page$""") { (pageName: String) =>
+  // ^I am on the '(.*)' page$
+  def thenIAmOnThePage(pageName: String): Unit = {
     eventually {
       withClue(s"Fail to be on page: $pageName")(on(pages(pageName)))
     }
   }
 
-  Then("""^the user-nav header contains a '(.*)' link""") { (linkText: String) =>
-    val header = driver.findElement(By.id("proposition-links"))
+  // ^the user-nav header contains a '(.*)' link
+  def thenTheUserNavHeaderContainsALink(linkText: String): Unit = {
+    val header = Driver.instance.findElement(By.id("proposition-links"))
     header.findElement(By.linkText(linkText)).isDisplayed shouldBe true
   }
 
-  Then("""^The current page contains link '(.*)' to '(.*)'$""") { (linkText: String, pageName: String) =>
+  // ^The current page contains link '(.*)' to '(.*)'$
+  def thenTheCurrentPageContainsLinkTo(linkText: String, pageName: String): Unit = {
     val href = CurrentPage.linkTextHref(linkText)
     val page = withClue(s"page not found: $pageName")(pages(pageName))
     href.value shouldBe page.url()
   }
 
-  Then("""^I see text in fields:$""") { (fieldData: DataTable) =>
-    verifyData(fieldData, _.getText, By.id)
+  // Overload for ScalaTest (no DataTable, accepts varargs)
+  def thenISeeTextInFields(data: (String, String)*): Unit = {
+    verifyData(data.toMap, _.getText, By.id)
   }
 
-  Then("""^I see:$""") { (labels: DataTable) =>
-    val textsToFind: List[String] = TableMisuseAdapters.valuesInColumn(0)(labels)
+  def thenISeeInOrder(data: String*): Unit = {
+    val textsToFind: List[String] = data.toList
     eventually {
       CurrentPage.bodyText() should containInOrder(textsToFind)
     }
   }
 
-  def verifyData(fieldData: DataTable, f: WebElement => String, selector: String => By): Unit = {
-    val keyValues: mutable.Map[String, String] = fieldData.asMap(classOf[String], classOf[String]).asScala
-    val body                                   = Driver.instance.findElement(By.tagName("body"))
-    keyValues.foreach(keyValue =>
-      withClue(s"The field '${keyValue._1}' does not have value: '${keyValue._2}'") {
-        eventually(timeout(1 second)) { f(body.findElement(selector(keyValue._1))) shouldBe keyValue._2 }
-      }
-    )
-  }
-
-  Then("""^I see on current page:$""") { (labels: DataTable) =>
-    val textsToFind = TableMisuseAdapters.valuesInColumn(0)(labels)
-    Driver.instance.findElement(By.tagName("body")).getText should containInOrder(textsToFind)
-  }
-
-  When("""^I click on the '(.*)' link$""") { linkText: String =>
-    val link    = driver.findElement(By.linkText(linkText))
-    val actions = new Actions(driver)
+  // ^I click on the '(.*)' link$
+  def whenIClickOnTheLink(linkText: String) = {
+    val link    = Driver.instance.findElement(By.linkText(linkText))
+    val actions = new Actions(Driver.instance)
     actions.moveToElement(link)
     actions.click()
     actions.perform()
   }
 
-  When("""^I click on the button with id '(.*)'$""") { id: String =>
-    val link    = driver.findElement(By.id(id))
-    val actions = new Actions(driver)
-    actions.moveToElement(link)
-    actions.click()
-    actions.perform()
-  }
-
-  When("""^I click on the '(.*)' button""") { buttonText: String =>
-    val element = driver.findElement(By.xpath(s"//button[text()='$buttonText']"))
-    val actions = new Actions(driver)
+  // ^I click on submit$
+  def whenIClickOnSubmit(): Unit = {
+    val element = Driver.instance.findElement(By.id("submit"))
+    val actions = new Actions(Driver.instance)
     actions.moveToElement(element)
     actions.click()
     actions.perform()
   }
 
-  When("""^I click on the radio button with id '(.*)'""") { id: String =>
-    val button = driver.findElement(By.id(id))
+  // ^I click on the button with id '(.*)'$
+  def whenIClickOnTheButtonWithId(id: String) = {
+    val link    = Driver.instance.findElement(By.id(id))
+    val actions = new Actions(Driver.instance)
+    actions.moveToElement(link)
+    actions.click()
+    actions.perform()
+  }
+
+  // ^I click on the radio button with id '(.*)'
+  def whenIClickOnTheRadioButtonWithId(id: String) = {
+    val button = Driver.instance.findElement(By.id(id))
     button.click()
   }
+
+  def verifyData(data: Map[String, String], f: WebElement => String, selector: String => By): Unit = {
+    val body = Driver.instance.findElement(By.tagName("body"))
+    data.foreach {
+      case (key, value) =>
+        withClue(s"The field '${key}' does not have value: '${value}'") {
+          eventually(timeout(1.second)) { f(body.findElement(selector(key))) shouldBe value }
+        }
+    }
+  }
+
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package utils
-
 import org.openqa.selenium.WebDriver
 
 import uk.gov.hmrc.selenium.webdriver.Driver
