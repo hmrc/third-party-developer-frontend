@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+@import views.include.teamMembers.TeamMember._
 @(app: ApplicationWithCollaborators, collaboratorUsers: Seq[User], role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
@@ -43,9 +44,7 @@
       Role
     </th>
     <th scope="col" class="govuk-table__header">
-      <span class="govuk-visually-hidden">
-        Delete button column
-      </span>
+      Remove
     </th>
   </tr>
   </thead>
@@ -55,32 +54,10 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
-   @registered(collaborator: Collaborator) = @{
-       collaboratorUsers.exists(_.email == collaborator.emailAddress)
-   }
-   @unregistered(collaborator: Collaborator) = @{
-       !registered(collaborator)
-   }
-   @verified(user: Option[User]) = @{
-        user match {
-            case Some(u) => u.verified
-            case None => false
-        }
-   }
-   @oneOnlyVerifiedAdmin = @{
-        val admins = app.collaborators.filter(_.isAdministrator)
-        collaboratorUsers.filter(u=>admins.map(_.emailAddress==u.email)).count(_.verified)==1
-   }
-  @loggedInUserIsOnlyVerifiedAdmin = @{
-      role.isAdministrator && loggedIn.developer.verified && oneOnlyVerifiedAdmin
-  }
-   @displayUnverified(collaborator: Collaborator)=@{
-        unregistered(collaborator) || !verified(collaboratorUsers.find(_.email == collaborator.emailAddress))
-   }
-    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
+  @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
         <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
-            @if(displayUnverified(teamMember)){
+            @if(displayUnverified(teamMember, collaboratorUsers)){
             &nbsp;(Unverified)
             }
 
@@ -94,11 +71,11 @@
           }
         </td>
         @if(role.isAdministrator && (teamMember.role.isDeveloper || app.collaborators.count(_.isAdministrator) > 1)) {
-            @if(loggedInUserIsOnlyVerifiedAdmin && teamMember.emailAddress == loggedIn.developer.email){
-                <td class="govuk-table__cell center-table-text">Not available</td>
+            @if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators) && teamMember.emailAddress == loggedIn.developer.email){
+                <td class="govuk-table__cell">Not available</td>
             } else {
-                <td class="govuk-table__cell center-table-text">
-                    <a class="govuk-link govuk-link--no-visited-state" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
+                <td class="govuk-table__cell">
+                    <a class="govuk-link" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
                         Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
                     </a>
                 </td>
@@ -111,7 +88,7 @@
   </tbody>
 </table>
 <br>
-@if(loggedInUserIsOnlyVerifiedAdmin){
+@if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators)){
     <details class="govuk-details">
         <summary class="govuk-details__summary">
             <span class="govuk-details__summary-text">

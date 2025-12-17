@@ -26,6 +26,10 @@ object ViewHelpers {
     doc.select(elementType).asScala.exists(node => node.text.trim == elementText)
   }
 
+  /*def elementExistsByCssSelector(doc: Document, cssSelector: String, elementText: String): Boolean = {
+    doc.select(cssSelector).asScala.exists(node => node.text.trim == elementText)
+  }*/
+
   def elementExistsById(doc: Document, id: String): Boolean = doc.select(s"#$id").asScala.nonEmpty
 
   def elementExistsByAttr(doc: Document, elementType: String, attr: String): Boolean = {
