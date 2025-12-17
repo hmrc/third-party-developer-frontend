@@ -113,9 +113,9 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       ) shouldBe false)
       withClue("Why can't I remove myself details")(elementExistsByText(
         document,
-        "details",
+        """[class="govuk-details__summary-text"]""",
         "Why can't I remove myself from this application?"
-      ) shouldBe false)
+      ) shouldBe true)
     }
 
     "show Remove links for when multiple verified Admin" in {
@@ -191,7 +191,6 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
         document,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, loggedInDeveloper.developer.email.text.toSha256).url
       ) shouldBe false)
-      println(document.select("""[class="govuk-details__summary-text"]"""))
       withClue("Why can't I remove myself details")(elementExistsByText(
         document,
         """[class="govuk-details__summary-text"]""",
@@ -210,6 +209,11 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       withClue("Remove link present")(linkExistsWithHref(
         document,
         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url
+      ) shouldBe false)
+      withClue("Why can't I remove myself details")(elementExistsByText(
+        document,
+        """[class="govuk-details__summary-text"]""",
+        "Why can't I remove myself from this application?"
       ) shouldBe false)
     }
   }
