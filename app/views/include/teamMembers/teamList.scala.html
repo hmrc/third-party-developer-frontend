@@ -43,9 +43,11 @@
     <th scope="col" class="govuk-table__header">
       Role
     </th>
-    <th scope="col" class="govuk-table__header">
-      Remove
-    </th>
+    @if(role.isAdministrator) {
+        <th scope="col" class="govuk-table__header">
+            Remove
+        </th>
+  }
   </tr>
   </thead>
 
@@ -57,10 +59,9 @@
   @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
         <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
-            @if(displayUnverified(teamMember, collaboratorUsers)){
+        @if(displayUnverified(teamMember, collaboratorUsers)){
             &nbsp;(Unverified)
-            }
-
+        }
         </td>
         <td class="govuk-table__cell center-table-text">
           @if(teamMember.role.isAdministrator) {

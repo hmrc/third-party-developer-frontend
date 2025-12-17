@@ -23,20 +23,16 @@ import views.html.manageTeamViews.ManageTeamView
 import play.api.data.Form
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, Collaborator, RedirectUri, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaDetail
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
@@ -46,11 +42,11 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     with ApplicationWithCollaboratorsFixtures
     with FixedClock {
 
-  val appId: ApplicationId                                = standardApp.id
-  val clientId: ClientId                                  = standardApp.clientId
-  val loggedInDeveloper: UserSession                      = adminDeveloper.loggedIn
-  val collaborator: UserSession                           = standardDeveloper.loggedIn
-  val collaborators: Set[Collaborator]                    = Set(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asDeveloperCollaborator)
+  val appId: ApplicationId             = standardApp.id
+  val clientId: ClientId               = standardApp.clientId
+  val loggedInDeveloper: UserSession   = adminDeveloper.loggedIn
+  val collaborator: UserSession        = standardDeveloper.loggedIn
+  val collaborators: Set[Collaborator] = Set(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asDeveloperCollaborator)
 
   def unverifiedUser(emailAddress: LaxEmailAddress): User =
     User(
@@ -139,7 +135,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       ) shouldBe true)
       withClue("Why can't I remove myself details")(elementExistsByText(
         document,
-        """[class="govuk-details__summary-text"]""",
+        "summary",
         "Why can't I remove myself from this application?"
       ) shouldBe false)
     }
@@ -166,7 +162,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       ) shouldBe false)
       withClue("Why can't I remove myself details")(elementExistsByText(
         document,
-        """[class="govuk-details__summary-text"]""",
+        "summary",
         "Why can't I remove myself from this application?"
       ) shouldBe true)
     }
@@ -193,12 +189,12 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       ) shouldBe false)
       withClue("Why can't I remove myself details")(elementExistsByText(
         document,
-        """[class="govuk-details__summary-text"]""",
+        "summary",
         "Why can't I remove myself from this application?"
       ) shouldBe true)
     }
 
-    "not show Add and Remove buttons for Developer" in {
+    "not show Add and Remove links for Developer" in {
       val document = Jsoup.parse(renderPage(role = Collaborator.Roles.DEVELOPER).body)
 
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
@@ -212,7 +208,26 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
       ) shouldBe false)
       withClue("Why can't I remove myself details")(elementExistsByText(
         document,
-        """[class="govuk-details__summary-text"]""",
+        "summary",
+        "Why can't I remove myself from this application?"
+      ) shouldBe false)
+    }
+
+    "not show Remove link table column for Developer" in {
+      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.DEVELOPER).body)
+
+      withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
+      withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe false)
+      withClue("Warning")(elementExistsByText(document, "strong", "Warning You need admin rights to add or remove team members.") shouldBe true)
+      withClue("Session email")(elementExistsByText(document, "td", s"${loggedInDeveloper.developer.email.text}") shouldBe true)
+      withClue("Not showing 'Remove' column")(document.select("table thead tr th").size() shouldBe 2)
+      withClue("Remove link present")(linkExistsWithHref(
+        document,
+        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageTeam.removeTeamMember(appId, collaborator.developer.email.text.toSha256).url
+      ) shouldBe false)
+      withClue("Why can't I remove myself details")(elementExistsByText(
+        document,
+        "summary",
         "Why can't I remove myself from this application?"
       ) shouldBe false)
     }
