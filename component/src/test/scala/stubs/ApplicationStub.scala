@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package stubs
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 
 import play.api.http.Status.OK
