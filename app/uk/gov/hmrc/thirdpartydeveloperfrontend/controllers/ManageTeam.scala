@@ -75,8 +75,12 @@ class ManageTeam @Inject() (
     }
 
   def manageTeam(applicationId: ApplicationId, error: Option[String] = None): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>
-    val view = manageTeamView(applicationViewModelFromApplicationRequest(), request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
-    Future.successful(error.map(_ => BadRequest(view)).getOrElse(Ok(view)))
+    collaboratorService.getCollaboratorUsers(applicationViewModelFromApplicationRequest().application.collaborators).map {
+      cu =>
+        val view =
+          manageTeamView(applicationViewModelFromApplicationRequest(), cu, request.role, AddTeamMemberForm.form, createFraudNavModel(fraudPreventionConfig))
+        error.map(_ => BadRequest(view)).getOrElse(Ok(view))
+    }
   }
 
   def addTeamMember(applicationId: ApplicationId): Action[AnyContent] = whenAppSupportsTeamMembers(applicationId) { implicit request =>

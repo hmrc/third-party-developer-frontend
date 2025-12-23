@@ -21,7 +21,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
-@(app: ApplicationWithCollaborators,role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
+@import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+@import views.include.teamMembers.TeamMember._
+@(app: ApplicationWithCollaborators, collaboratorUsers: Seq[User], role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
  <div class="govuk-warning-text">
@@ -41,11 +43,11 @@
     <th scope="col" class="govuk-table__header">
       Role
     </th>
-    <th scope="col" class="govuk-table__header">
-      <span class="govuk-visually-hidden">
-        Delete button column
-      </span>
-    </th>
+    @if(role.isAdministrator) {
+        <th scope="col" class="govuk-table__header">
+            Remove
+        </th>
+  }
   </tr>
   </thead>
 
@@ -54,9 +56,13 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
-    @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
+  @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
-        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text</td>
+        <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
+        @if(displayUnverified(teamMember, collaboratorUsers)){
+            &nbsp;(Unverified)
+        }
+        </td>
         <td class="govuk-table__cell center-table-text">
           @if(teamMember.role.isAdministrator) {
             <span>Admin</span>
@@ -66,11 +72,15 @@
           }
         </td>
         @if(role.isAdministrator && (teamMember.role.isDeveloper || app.collaborators.count(_.isAdministrator) > 1)) {
-          <td class="govuk-table__cell center-table-text">
-            <a class="govuk-button govuk-button--secondary govuk-!-margin-0" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
-              Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
-            </a>
-          </td>
+            @if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators) && teamMember.emailAddress == loggedIn.developer.email){
+                <td class="govuk-table__cell">Not available</td>
+            } else {
+                <td class="govuk-table__cell">
+                    <a class="govuk-link" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
+                        Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
+                    </a>
+                </td>
+            }
         } else {
           <td class="govuk-table__cell center-table-text" aria-hidden="true"></td>
         }
@@ -79,6 +89,19 @@
   </tbody>
 </table>
 <br>
+@if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators)){
+    <details class="govuk-details">
+        <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text">
+                Why can't I remove myself from this application?
+            </span>
+        </summary>
+        <div class="govuk-details__text">
+            <p class="govuk-body">Each application must have at least one verified admin.</p>
+            <p>If you want to remove yourself, first add another user with the admin role and wait until they're verified.</p>
+        </div>
+    </details>
+}
 @if(role.isAdministrator) {
   <a href="@addTeamMemberUrl" @if(addMemberStyle == Button) { class="govuk-button" } else { class="govuk-link" } >Add a team member</a><br/>
 }

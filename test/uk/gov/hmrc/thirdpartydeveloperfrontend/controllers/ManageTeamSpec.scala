@@ -86,6 +86,7 @@ class ManageTeamSpec
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
     CollaboratorServiceMock.AddTeamMember.succeeds()
+    CollaboratorServiceMock.GetCollaboratorUsers.succeeds()
     CollaboratorServiceMock.RemoveTeamMember.succeeds(mock[ApplicationWithCollaborators])
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
