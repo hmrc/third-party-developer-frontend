@@ -71,7 +71,7 @@
             <span>Developer</span>
           }
         </td>
-        @if(role.isAdministrator && (teamMember.role.isDeveloper || app.collaborators.count(_.isAdministrator) > 1)) {
+        @if(role.isAdministrator) {
             @if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators) && teamMember.emailAddress == loggedIn.developer.email){
                 <td class="govuk-table__cell">Not available</td>
             } else {
