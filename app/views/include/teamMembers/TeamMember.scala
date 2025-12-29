@@ -18,6 +18,7 @@ package views.include.teamMembers
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator.Role
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
@@ -31,8 +32,8 @@ object TeamMember {
   }
 
   private def oneOnlyVerifiedAdmin(collaboratorUsers: Seq[User], appCollaborators: Set[Collaborator]) = {
-    val admins: Set[Collaborator] = appCollaborators.filter(_.isAdministrator)
-    collaboratorUsers.filter(u => admins.exists(_.emailAddress == u.email)).count(_.verified) == 1
+    val adminEmails: Set[LaxEmailAddress] = appCollaborators.filter(_.isAdministrator).map(_.emailAddress)
+    collaboratorUsers.filter(u => adminEmails.contains(u.email)).count(_.verified) == 1
   }
 
   def displayUnverified(collaborator: Collaborator, collaboratorUsers: Seq[User]): Boolean = {
