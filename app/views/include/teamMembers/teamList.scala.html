@@ -73,7 +73,7 @@
         </td>
         @if(role.isAdministrator) {
             @if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators) && teamMember.emailAddress == loggedIn.developer.email){
-                <td class="govuk-table__cell">Not available</td>
+                <td class="govuk-table__cell">Not&nbsp;available</td>
             } else {
                 <td class="govuk-table__cell">
                     <a class="govuk-link" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
