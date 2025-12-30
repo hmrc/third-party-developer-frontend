@@ -73,9 +73,9 @@
         </td>
         @if(role.isAdministrator) {
             @if(loggedInUserIsOnlyVerifiedAdmin(role, loggedIn, collaboratorUsers, app.collaborators) && teamMember.emailAddress == loggedIn.developer.email){
-                <td class="govuk-table__cell">Not&nbsp;available</td>
+                <td class="govuk-table__cell center-table-text">Not&nbsp;available</td>
             } else {
-                <td class="govuk-table__cell">
+                <td class="govuk-table__cell center-table-text">
                     <a class="govuk-link" href="@createRemoveLink(app.id, teamMember.emailAddress).url">
                         Remove <span class="govuk-visually-hidden">@teamMember.emailAddress.text</span>
                     </a>
