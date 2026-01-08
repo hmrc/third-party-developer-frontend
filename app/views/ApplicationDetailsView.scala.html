@@ -1,0 +1,113 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import include._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+@import java.util.Locale
+@import java.time.Instant
+@import java.time.ZoneId
+@import java.time.format.DateTimeFormatter
+
+@this(
+  devMain: DevMain, 
+  govukTable: GovukTable
+)
+
+@(applicationViewModel: ApplicationViewModel, subscriptions: List[APISubscriptionStatus])(
+        implicit request: play.api.mvc.Request[Any],
+        loggedIn: UserSession,
+        messages: Messages,
+        appConfig: ApplicationConfig,
+        navSection: String = "details"
+)
+
+@formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
+  maybeDate match {
+    case Some(date) => dateFormatter.format(date)
+    case _          => defaultString
+  }
+}
+
+@app = @{applicationViewModel.application}
+
+@title = @{ "Application details" }
+
+@devMain(
+  title = title,
+  userFullName = loggedIn.loggedInName,
+  breadcrumbs = Seq(
+    Crumb.viewAllApplications,
+    Crumb.home
+  ),
+  leftNav = None,
+  developerSession = Some(loggedIn)
+) {
+
+  <h1 class="govuk-heading-l">
+    <span class="govuk-caption-l">@{app.details.name.toString()}</span>
+    @title
+  </h1>
+
+  @defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
+      @govukTable(Table(
+          firstCellIsHeader = true,
+          rows = Seq(
+            Seq(TableRow(content = Text(messages("application.details.name"))), TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName"))),
+            Seq(TableRow(content = Text(messages("application.details.environment"))), TableRow(content = Text(app.details.deployedTo.displayText))),
+            Seq(TableRow(content = Text(messages("application.details.created"))), TableRow(content = Text(dateFormatter.format(app.details.createdOn)))),
+            Seq(TableRow(content = Text(messages("application.details.last.api.call"))), TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")))),
+            Seq(TableRow(content = Text(messages("application.details.description"))), TableRow(content = Text(app.details.description.getOrElse("")), attributes = Map("id" -> "description")))
+          )
+      ))
+  }
+
+  <h2 class="govuk-heading-m">APIs added</h2>
+  <p class="govuk-body">
+    These are the authenticated REST APIs you have added to your application.
+  </p>
+
+  @govukTable(Table(
+    head = Some(Seq(
+      HeadCell(content = Text(messages("application.details.api.name"))),
+    )),
+    rows = subscriptions.map(subscription => Seq(
+      TableRow(content = Text(s"${subscription.name} ${subscription.apiVersion.versionNbr.toString()}"))
+    ))
+  ))
+
+  <h2 class="govuk-heading-m">Authorisation details</h2>
+  <p class="govuk-body">
+    To use authenticated REST APIs you need to use your client ID and a client secret to authorise your calls.
+  </p>
+
+  @govukTable(Table(
+      firstCellIsHeader = true,
+      rows = Seq(
+        Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()))),
+        Seq(TableRow(content = Text(messages("application.details.client.secrets"))), TableRow(content = Text(""))),
+        Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = Text("None added"))),
+        Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = Text("No IP addresses added")))
+      )
+  ))
+
+}
