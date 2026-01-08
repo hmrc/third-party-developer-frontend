@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 import play.api.libs.json._
 import uk.gov.hmrc.govukfrontend.views.html.components.Text
-import uk.gov.hmrc.hmrcfrontend.views.viewmodels.header.NavigationItem
+import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.{ServiceNavigation, ServiceNavigationItem}
 
 case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, isSensitive: Boolean = false)
 
@@ -31,11 +31,11 @@ case object StaticNavItems {
 
   def apply(apiDocumentationFrontendUrl: String, thirdPartyDeveloperFrontendUrl: String, devhubSupportFrontendUrl: String) = {
     Seq(
-      NavigationItem(Text("Getting started"), Some(s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub")),
-      NavigationItem(Text("API documentation"), Some(s"$apiDocumentationFrontendUrl/api-documentation/docs/api")),
-      NavigationItem(Text("Applications"), Some(s"$thirdPartyDeveloperFrontendUrl/developer/applications")),
-      NavigationItem(Text("Support"), Some(s"$devhubSupportFrontendUrl/devhub-support/")),
-      NavigationItem(Text("Service availability"), Some("https://api-platform-status.production.tax.service.gov.uk/"), attributes = Map("target" -> "_blank"))
+      ServiceNavigationItem(Text("Getting started"), s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
+      ServiceNavigationItem(Text("API documentation"), s"$apiDocumentationFrontendUrl/api-documentation/docs/api"),
+      ServiceNavigationItem(Text("Applications"), s"$thirdPartyDeveloperFrontendUrl/developer/applications", active = true),
+      ServiceNavigationItem(Text("Support"), s"$devhubSupportFrontendUrl/devhub-support/"),
+      ServiceNavigationItem(Text("Service availability"), "https://api-platform-status.production.tax.service.gov.uk/", attributes = Map("target" -> "_blank"))
     )
   }
 }

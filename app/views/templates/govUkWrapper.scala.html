@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavItems
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.{ServiceNavigation, ServiceNavigationItem}
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
@@ -32,7 +33,7 @@
 
 @this(
   govukLayout: GovukLayout,
-  hmrcHeader: HmrcHeader,
+  hmrcStandardHeader: HmrcStandardHeader,
   hmrcFooter: HmrcFooter,
   govukBackLink: GovukBackLink,
   applicationConfig: ApplicationConfig,
@@ -202,16 +203,14 @@
 @govukLayout(
   pageTitle = Some(title),
   headBlock = Some(head),
-  headerBlock = Some(hmrcHeader(Header(
-        homepageUrl = "https://www.gov.uk",
-        serviceName = Some(applicationConfig.title),
-        navigation = Some(StaticNavItems(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl, applicationConfig.devhubSupportFrontendUrl)),
-        serviceUrl = "/api-documentation",
-        displayHmrcBanner = false,
-        containerClasses = "govuk-width-container",
-        signOutHref = None,
-        language = En
-  ))),
+  headerBlock = Some(hmrcStandardHeader(
+        serviceNavigation = Some(ServiceNavigation(
+          serviceName = Some(applicationConfig.title),
+          serviceUrl = Some("/api-documentation"),
+          navigation = StaticNavItems(applicationConfig.apiDocumentationFrontendUrl, applicationConfig.thirdPartyDeveloperFrontendUrl, applicationConfig.devhubSupportFrontendUrl))
+        ),
+        serviceUrl = Some("/api-documentation")
+  )),
   beforeContentBlock = Some(beforeContentBlock),
   mainContentLayout = None,
   footerBlock = Some(siteFooter),
