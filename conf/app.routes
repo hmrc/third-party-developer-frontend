@@ -77,6 +77,9 @@ POST        /applications/:id/details/change-terms-conditions-location          
 
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 
+GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
+
+
 # Used by DOCS Fe
 GET         /partials/terms-of-use                                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUsePartial()
 

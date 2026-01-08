@@ -213,3 +213,15 @@ dashboard.applications.environment=Environment
 dashboard.applications.viewall=View all applications
 dashboard.applications.create=Create a new application
 dashboard.organisations.your=Your organisations
+
+application.details.name=Application name
+application.details.environment=Environment
+application.details.created=Created
+application.details.last.api.call=Last API call
+application.details.description=Application description
+application.details.api.name=Name
+application.details.client.id=Client ID
+application.details.client.secrets=Client secrets
+application.details.redirect.uris=Redirect URIs
+application.details.ip.allow.list=IP allow list
+
