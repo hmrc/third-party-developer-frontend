@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 @import java.util.Locale
 @import java.time.Instant
@@ -50,10 +51,8 @@
 
 @app = @{applicationViewModel.application}
 
-@title = @{ "Application details" }
-
 @devMain(
-  title = title,
+  title = messages("application.details"),
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
     Crumb.viewAllApplications,
@@ -65,7 +64,7 @@
 
   <h1 class="govuk-heading-l">
     <span class="govuk-caption-l">@{app.details.name.toString()}</span>
-    @title
+    @messages("application.details")
   </h1>
 
   @defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
@@ -73,40 +72,62 @@
           firstCellIsHeader = true,
           rows = Seq(
             Seq(TableRow(content = Text(messages("application.details.name"))), TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName"))),
-            Seq(TableRow(content = Text(messages("application.details.environment"))), TableRow(content = Text(app.details.deployedTo.displayText))),
-            Seq(TableRow(content = Text(messages("application.details.created"))), TableRow(content = Text(dateFormatter.format(app.details.createdOn)))),
-            Seq(TableRow(content = Text(messages("application.details.last.api.call"))), TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")))),
-            Seq(TableRow(content = Text(messages("application.details.description"))), TableRow(content = Text(app.details.description.getOrElse("")), attributes = Map("id" -> "description")))
+            Seq(TableRow(content = Text(messages("application.details.environment"))), TableRow(content = Text(app.details.deployedTo.displayText), attributes = Map("id" -> "environment"))),
+            Seq(TableRow(content = Text(messages("application.details.created"))), TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn"))),
+            Seq(TableRow(content = Text(messages("application.details.last.api.call"))), TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")), attributes = Map("id" -> "lastAccess"))),
+            Seq(TableRow(content = Text(messages("application.details.description"))), TableRow(content = Text(app.details.description.getOrElse("None")), attributes = Map("id" -> "description")))
           )
       ))
   }
 
-  <h2 class="govuk-heading-m">APIs added</h2>
-  <p class="govuk-body">
-    These are the authenticated REST APIs you have added to your application.
-  </p>
+  <h2 class="govuk-heading-m">@messages("application.details.apis.added")</h2>
+  <p class="govuk-body">@messages("application.details.apis.hint")</p>
 
   @govukTable(Table(
     head = Some(Seq(
-      HeadCell(content = Text(messages("application.details.api.name"))),
+      HeadCell(content = Text(messages("application.details.api.name")))
     )),
-    rows = subscriptions.map(subscription => Seq(
+    rows = subscriptions.filter(sub => sub.subscribed == true).map(subscription => Seq(
       TableRow(content = Text(s"${subscription.name} ${subscription.apiVersion.versionNbr.toString()}"))
     ))
   ))
 
-  <h2 class="govuk-heading-m">Authorisation details</h2>
-  <p class="govuk-body">
-    To use authenticated REST APIs you need to use your client ID and a client secret to authorise your calls.
-  </p>
+  <h2 class="govuk-heading-m">@messages("application.details.authorisation.details")</h2>
+  <p class="govuk-body">@messages("application.details.authorisation.hint")</p>
 
   @govukTable(Table(
       firstCellIsHeader = true,
       rows = Seq(
-        Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()))),
+        Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()), attributes = Map("id" -> "clientId"))),
         Seq(TableRow(content = Text(messages("application.details.client.secrets"))), TableRow(content = Text(""))),
         Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = Text("None added"))),
         Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = Text("No IP addresses added")))
+      )
+  ))
+
+  <h2 class="govuk-heading-m">@messages("application.details.team.members")</h2>
+  <p class="govuk-body">@messages("application.details.team.hint")</p>
+
+  @govukTable(Table(
+    head = Some(Seq(
+      HeadCell(content = Text(messages("application.details.team.email"))),
+      HeadCell(content = Text(messages("application.details.team.role")))
+    )),
+    rows = app.collaborators.toList.map(collaborator => Seq(
+      TableRow(content = Text(collaborator.emailAddress.text)),
+      TableRow(content = Text(collaborator.role.displayText))
+    ))
+  ))
+
+  <h2 class="govuk-heading-m">@messages("application.details.customer.usage")</h2>
+  <p class="govuk-body">@messages("application.details.customer.hint")</p>
+
+  @govukTable(Table(
+      firstCellIsHeader = true,
+      rows = Seq(
+        Seq(TableRow(content = Text(messages("application.details.privacy.policy.url"))), TableRow(content = Text(app.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()), attributes = Map("id" -> "privacyPolicy"))),
+        Seq(TableRow(content = Text(messages("application.details.terms.conditions.url"))), TableRow(content = Text(app.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()), attributes = Map("id" -> "termsAndConditions"))),
+        Seq(TableRow(content = Text(messages("application.details.grant.length"))), TableRow(content = Text(app.details.grantLength.show()), attributes = Map("id" -> "grantLength")))
       )
   ))
 

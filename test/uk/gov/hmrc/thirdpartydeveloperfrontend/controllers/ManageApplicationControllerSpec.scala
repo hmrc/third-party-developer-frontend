@@ -200,7 +200,20 @@ class ManageApplicationControllerSpec
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
       withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
+      withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
       withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
+      withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
+      withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
+        doc,
+        "privacyPolicy",
+        application.details.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()
+      ) shouldBe true)
+      withClue("termsAndConditions")(elementIdentifiedByIdContainsText(
+        doc,
+        "termsAndConditions",
+        application.details.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()
+      ) shouldBe true)
+      withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {
