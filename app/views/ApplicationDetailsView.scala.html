@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 @import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 @import java.util.Locale
@@ -46,6 +47,20 @@
   maybeDate match {
     case Some(date) => dateFormatter.format(date)
     case _          => defaultString
+  }
+}
+
+@formatRedirectUris(access: Access, defaultString: String) = @{
+  access match {
+    case Access.Standard(redirectUris, _, _, _, _, _, _) => formatListOfStrings(redirectUris.toList.map(r => r.toString()), defaultString)
+    case _                                               => defaultString
+  }
+}
+
+@formatListOfStrings(values: List[String], defaultString: String) = @{
+  values.isEmpty match {
+    case false => values.mkString("<br>")
+    case true  => defaultString
   }
 }
 
@@ -88,7 +103,7 @@
       HeadCell(content = Text(messages("application.details.api.name")))
     )),
     rows = subscriptions.filter(sub => sub.subscribed == true).map(subscription => Seq(
-      TableRow(content = Text(s"${subscription.name} ${subscription.apiVersion.versionNbr.toString()}"))
+      TableRow(content = HtmlContent(s"<a href='${appConfig.apiDocumentationFrontendUrl}/api-documentation/docs/api/service/${subscription.serviceName}/${subscription.apiVersion.versionNbr}' class='govuk-link govuk-link--no-visited-state' target='_blank'>${subscription.name} ${subscription.apiVersion.versionNbr.toString()}</a>"))
     ))
   ))
 
@@ -100,8 +115,8 @@
       rows = Seq(
         Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()), attributes = Map("id" -> "clientId"))),
         Seq(TableRow(content = Text(messages("application.details.client.secrets"))), TableRow(content = Text(""))),
-        Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = Text("None added"))),
-        Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = Text("No IP addresses added")))
+        Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = HtmlContent(formatRedirectUris(app.details.access, "None added")))),
+        Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = HtmlContent(formatListOfStrings(app.details.ipAllowlist.allowlist.toList, "No IP addresses added"))))
       )
   ))
 
