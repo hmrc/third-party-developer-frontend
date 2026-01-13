@@ -33,7 +33,7 @@
 @(apps: Seq[ApplicationSummary], orgs: Seq[Organisation])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
 
 @buildAppLinkHtml(app: ApplicationSummary) = {
-    <a href='@controllers.routes.Details.details(app.id)' class='govuk-link govuk-link--no-visited-state'>@{
+    <a href='@controllers.routes.ManageApplicationController.applicationDetails(app.id)' class='govuk-link govuk-link--no-visited-state'>@{
         app.name.toString()
     }</a>
 }
