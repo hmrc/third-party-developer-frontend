@@ -39,8 +39,7 @@
         implicit request: play.api.mvc.Request[Any],
         loggedIn: UserSession,
         messages: Messages,
-        appConfig: ApplicationConfig,
-        navSection: String = "details"
+        appConfig: ApplicationConfig
 )
 
 @formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{

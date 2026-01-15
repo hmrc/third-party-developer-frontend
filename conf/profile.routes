@@ -2,6 +2,8 @@ GET         /                                                                   
 GET         /change                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.changeProfile()
 POST        /                                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.Profile.updateProfile()
 
+GET         /manage                                                                              uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.ManageProfileController.profileDetails()
+
 GET         /email-preferences                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.emailPreferencesSummaryPage()
 GET         /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllPage()
 POST        /email-preferences/unsubscribe                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController.unsubscribeAllAction()
