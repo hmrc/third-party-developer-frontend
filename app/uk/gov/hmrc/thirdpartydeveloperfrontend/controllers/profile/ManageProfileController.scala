@@ -45,6 +45,6 @@ class ManageProfileController @Inject() (
   ) extends LoggedInController(mcc) with PasswordChange {
 
   def profileDetails(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(profileDetailsView()))
+    Future.successful(Ok(profileDetailsView(request.developer)))
   }
 }

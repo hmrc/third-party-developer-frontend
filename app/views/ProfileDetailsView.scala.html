@@ -18,6 +18,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import java.util.Locale
@@ -30,7 +31,7 @@
   govukTable: GovukTable
 )
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
+@(user: User)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
 @formatMaybeDate(maybeDate: Option[Instant], defaultString: String) = @{
   maybeDate match {
@@ -55,18 +56,27 @@
   <h2 class="govuk-heading-m">@messages("profile.details.your.details")</h2>
 
   @govukTable(Table(
-      firstCellIsHeader = true,
-      rows = Seq(
-        Seq(TableRow(content = Text(messages("profile.details.name"))), TableRow(content = Text(loggedIn.developer.displayedName), attributes = Map("id" -> "name"))),
-        Seq(TableRow(content = Text(messages("profile.details.email"))), TableRow(content = Text(loggedIn.developer.email.text), attributes = Map("id" -> "email"))),
-        Seq(TableRow(content = Text(messages("profile.details.organisation"))), TableRow(content = Text("None"), attributes = Map("id" -> "organisation")))
-      )
+    firstCellIsHeader = true,
+    rows = Seq(
+      Seq(TableRow(content = Text(messages("profile.details.name"))), TableRow(content = Text(user.displayedName), attributes = Map("id" -> "name"))),
+      Seq(TableRow(content = Text(messages("profile.details.email"))), TableRow(content = Text(user.email.text), attributes = Map("id" -> "email"))),
+      Seq(TableRow(content = Text(messages("profile.details.organisation"))), TableRow(content = Text("None"), attributes = Map("id" -> "organisation")))
+    )
   ))
 
   <h2 class="govuk-heading-m">@messages("profile.details.security.preferences")</h2>
   <p class="govuk-body">
     @messages("profile.details.security.hint")
   </p>
+  @defining(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mm a").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
+    @govukTable(Table(
+      firstCellIsHeader = true,
+      rows = user.mfaDetails.map(mfaDetail => Seq(
+        TableRow(content = Text(mfaDetail.mfaType.displayText)),
+        TableRow(content = HtmlContent(s"${mfaDetail.name}<p class='govuk-body govuk-hint govuk-!-margin-bottom-1'>Added ${dateFormatter.format(mfaDetail.createdOn)}</p>"))
+      ))
+    ))
+  }
 
   <h2 class="govuk-heading-m">@messages("profile.details.your.password")</h2>
   <p class="govuk-body">
@@ -76,7 +86,7 @@
 
   <h2 class="govuk-heading-m">@messages("profile.details.your.history")</h2>
   <p class="govuk-body">
-    @{messages("profile.details.last.signin") + " " + formatMaybeDate(loggedIn.developer.lastLogin, "Not set")}
+    @{messages("profile.details.last.signin") + " " + formatMaybeDate(user.lastLogin, "Not set")}
   </p>
 
   <h2 class="govuk-heading-m">@messages("profile.details.delete.account")</h2>
