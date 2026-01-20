@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
 
-import views.html._
+import views.html.manageapplication.ApplicationDetailsView
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._

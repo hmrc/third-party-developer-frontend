@@ -22,7 +22,7 @@ import scala.concurrent.Future._
 
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
-import views.html._
+import views.html.manageapplication._
 
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result

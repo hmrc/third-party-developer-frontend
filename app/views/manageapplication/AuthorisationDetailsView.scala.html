@@ -1,0 +1,51 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+
+@this(govukTable: GovukTable)
+
+@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+@formatRedirectUris(access: Access, defaultString: String) = @{
+    access match {
+        case Access.Standard(redirectUris, _, _, _, _, _, _) => formatListOfStrings(redirectUris.toList.map(r => r.toString()), defaultString)
+        case _ => defaultString
+    }
+}
+
+@formatListOfStrings(values: List[String], defaultString: String) = @{
+    values.isEmpty match {
+        case false => values.mkString("<br>")
+        case true => defaultString
+    }
+}
+    {
+
+<h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.authorisation.details")</h2>
+<p class="govuk-body">@messages("application.details.authorisation.hint")</p>
+
+@govukTable(Table(
+    firstCellIsHeader = true,
+    rows = Seq(
+        Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()), attributes = Map("id" -> "clientId"))),
+        Seq(TableRow(content = Text(messages("application.details.client.secrets"))), TableRow(content = Text(""))),
+        Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = HtmlContent(formatRedirectUris(app.details.access, "None added")))),
+        Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = HtmlContent(formatListOfStrings(app.details.ipAllowlist.allowlist.toList, "No IP addresses added"))))
+    )
+))
+    }
