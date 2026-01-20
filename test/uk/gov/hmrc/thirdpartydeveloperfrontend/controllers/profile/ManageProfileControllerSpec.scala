@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.jsoup.Jsoup
-import views.html._
+import views.html.manageprofile._
 
 import play.api.http.Status.OK
 import play.api.mvc.AnyContentAsEmpty
