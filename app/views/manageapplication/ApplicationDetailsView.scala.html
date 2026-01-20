@@ -1,0 +1,79 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import include._
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, Crumb}
+@import views.html.manageapplication._
+
+@import java.time.Instant
+@import java.time.format.DateTimeFormatter
+
+@this(
+        devMain: DevMain,
+        govukTable: GovukTable,
+        customerUsageInformation: CustomerUsageInformationView,
+        teamMembersView: TeamMembersView,
+        authorisationDetailsView: AuthorisationDetailsView,
+        apisAddedView: ApisAddedView,
+        applicationView: ApplicationView)
+
+@(applicationViewModel: ApplicationViewModel, subscriptions: List[APISubscriptionStatus])(
+        implicit request: play.api.mvc.Request[Any],
+        loggedIn: UserSession,
+        messages: Messages,
+        appConfig: ApplicationConfig,
+        navSection: String = "details"
+)
+
+@formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
+    maybeDate match {
+        case Some(date) => dateFormatter.format(date)
+        case _ => defaultString
+    }
+}
+
+@app = @{
+    applicationViewModel.application
+}
+
+@devMain(
+    title = messages("application.details"),
+    userFullName = loggedIn.loggedInName,
+    breadcrumbs = Seq(
+        Crumb.viewAllApplications,
+        Crumb.home
+    ),
+    leftNav = None,
+    developerSession = Some(loggedIn)
+) {
+
+    <h1 class="govuk-heading-l">
+        <span class="govuk-caption-l">@{
+            app.details.name.toString()
+        }</span>
+        @messages("application.details")
+    </h1>
+
+    @applicationView(app)
+    @apisAddedView(app, subscriptions)
+    @authorisationDetailsView(app)
+    @teamMembersView(app)
+    @customerUsageInformation(app)
+
+}

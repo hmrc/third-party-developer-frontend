@@ -1,0 +1,49 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+
+@import java.time.{Instant, ZoneId}
+@import java.time.format.DateTimeFormatter
+@import java.util.Locale
+
+@this(govukTable: GovukTable)
+
+@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+
+@formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
+    maybeDate match {
+        case Some(date) => dateFormatter.format(date)
+        case _ => defaultString
+    }
+}
+
+    {
+@defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
+    @govukTable(Table(
+        firstCellIsHeader = true,
+        rows = Seq(
+            Seq(TableRow(content = Text(messages("application.details.name"))), TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName"))),
+            Seq(TableRow(content = Text(messages("application.details.environment"))), TableRow(content = Text(app.details.deployedTo.displayText), attributes = Map("id" -> "environment"))),
+            Seq(TableRow(content = Text(messages("application.details.created"))), TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn"))),
+            Seq(TableRow(content = Text(messages("application.details.last.api.call"))), TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")), attributes = Map("id" -> "lastAccess"))),
+            Seq(TableRow(content = Text(messages("application.details.description"))), TableRow(content = Text(app.details.description.getOrElse("None")), attributes = Map("id" -> "description")))
+        )
+    ))
+}
+
+    }
