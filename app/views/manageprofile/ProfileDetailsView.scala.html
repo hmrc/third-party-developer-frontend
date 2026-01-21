@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+@import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import java.util.Locale
@@ -31,13 +32,20 @@
   govukTable: GovukTable
 )
 
-@(user: User)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
+@(user: User, organisations: Seq[Organisation])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
 @formatMaybeDate(maybeDate: Option[Instant], defaultString: String) = @{
   maybeDate match {
     case Some(date) => DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mm a").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK).format(date)
     case _          => defaultString
   }
+}
+
+@formatListOfOrganisations(orgs: Seq[Organisation], defaultString: String) = @{
+    orgs.isEmpty match {
+        case false => orgs.map(org => org.organisationName.value)mkString("<br>")
+        case true => defaultString
+    }
 }
 
 @devMain(
@@ -60,7 +68,7 @@
     rows = Seq(
       Seq(TableRow(content = Text(messages("profile.details.name"))), TableRow(content = Text(user.displayedName), attributes = Map("id" -> "name"))),
       Seq(TableRow(content = Text(messages("profile.details.email"))), TableRow(content = Text(user.email.text), attributes = Map("id" -> "email"))),
-      Seq(TableRow(content = Text(messages("profile.details.organisation"))), TableRow(content = Text("None"), attributes = Map("id" -> "organisation")))
+      Seq(TableRow(content = Text(messages("profile.details.organisation"))), TableRow(content = HtmlContent(formatListOfOrganisations(organisations, "None")), attributes = Map("id" -> "organisation")))
     )
   ))
 

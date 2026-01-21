@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 import views.html.manageprofile._
 
@@ -27,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, ProfileService, SessionService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, DashboardService, ProfileService, SessionService}
 
 @Singleton
 class ManageProfileController @Inject() (
@@ -39,12 +39,15 @@ class ManageProfileController @Inject() (
     val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
+    dashboardService: DashboardService,
     profileDetailsView: ProfileDetailsView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) with PasswordChange {
 
   def profileDetails(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(profileDetailsView(request.developer)))
+    dashboardService.fetchOrganisationsByUserId(request.userId).map {
+      orgs => Ok(profileDetailsView(request.developer, orgs))
+    }
   }
 }

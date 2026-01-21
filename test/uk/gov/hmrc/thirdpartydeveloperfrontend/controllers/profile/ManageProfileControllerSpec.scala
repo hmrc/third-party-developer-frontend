@@ -17,31 +17,32 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 import org.jsoup.Jsoup
 import views.html.manageprofile._
 
 import play.api.http.Status.OK
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{OrganisationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ProfileService}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, DashboardService, ProfileService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
 
 class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with FixedClock {
-    val profileDetailsView = app.injector.instanceOf[ProfileDetailsView]
+    val profileDetailsView   = app.injector.instanceOf[ProfileDetailsView]
+    val mockDashboardService = mock[DashboardService]
 
     val underTest = new ManageProfileController(
       applicationServiceMock,
@@ -52,18 +53,20 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
       mock[ErrorHandler],
       mcc,
       cookieSigner,
+      mockDashboardService,
       profileDetailsView
     )
 
     val loggedInDeveloper: User = devUser
     val sessionId               = devSession.sessionId
-
-    def createRequest: FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken
+    val organisations           = List(Organisation(OrganisationId.random, OrganisationName("Pete's organisation"), Organisation.OrganisationType.UkLimitedCompany, instant, Set.empty))
   }
 
   "profileDetails" should {
     "display users profile details" in new Setup {
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(*))
+        .thenReturn(Future.successful(organisations))
+
       val result = addToken(underTest.profileDetails())(loggedInDevRequest)
 
       status(result) shouldBe OK
