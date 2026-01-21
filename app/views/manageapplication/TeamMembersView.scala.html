@@ -19,18 +19,17 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages) {
-    <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.team.members")</h2>
-    <p class="govuk-body">@messages("application.details.team.hint")</p>
+@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+<h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.team.members")</h2>
+<p class="govuk-body">@messages("application.details.team.hint")</p>
 
-    @govukTable(Table(
-        head = Some(Seq(
-            HeadCell(content = Text(messages("application.details.team.email"))),
-            HeadCell(content = Text(messages("application.details.team.role")))
-        )),
-        rows = app.collaborators.toList.map(collaborator => Seq(
-            TableRow(content = Text(collaborator.emailAddress.text)),
-            TableRow(content = Text(collaborator.role.displayText))
-        ))
+@govukTable(Table(
+    head = Some(Seq(
+        HeadCell(content = Text(messages("application.details.team.email"))),
+        HeadCell(content = Text(messages("application.details.team.role")))
+    )),
+    rows = app.collaborators.toList.map(collaborator => Seq(
+        TableRow(content = Text(collaborator.emailAddress.text)),
+        TableRow(content = Text(collaborator.role.displayText))
     ))
-}
+))

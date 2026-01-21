@@ -34,7 +34,7 @@
         case true => defaultString
     }
 }
-    {
+
 
 <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.authorisation.details")</h2>
 <p class="govuk-body">@messages("application.details.authorisation.hint")</p>
@@ -48,4 +48,3 @@
         Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = HtmlContent(formatListOfStrings(app.details.ipAllowlist.allowlist.toList, "No IP addresses added"))))
     )
 ))
-    }
