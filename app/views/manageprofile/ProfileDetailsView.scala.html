@@ -64,7 +64,7 @@
     )
   ))
 
-  <h2 class="govuk-heading-m">@messages("profile.details.security.preferences")</h2>
+  <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.security.preferences")</h2>
   <p class="govuk-body">
     @messages("profile.details.security.hint")
   </p>
@@ -78,18 +78,18 @@
     ))
   }
 
-  <h2 class="govuk-heading-m">@messages("profile.details.your.password")</h2>
+  <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.your.password")</h2>
   <p class="govuk-body">
     @messages("profile.details.last.changed") Not set
   </p>
 
 
-  <h2 class="govuk-heading-m">@messages("profile.details.your.history")</h2>
+  <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.your.history")</h2>
   <p class="govuk-body">
     @{messages("profile.details.last.signin") + " " + formatMaybeDate(user.lastLogin, "Not set")}
   </p>
 
-  <h2 class="govuk-heading-m">@messages("profile.details.delete.account")</h2>
+  <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.delete.account")</h2>
   <p class="govuk-body">
     @messages("profile.details.delete.hint")
   </p>
