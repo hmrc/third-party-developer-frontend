@@ -32,7 +32,7 @@
     }
 }
 
-    {
+
 @defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
     @govukTable(Table(
         firstCellIsHeader = true,
@@ -46,4 +46,3 @@
     ))
 }
 
-    }
