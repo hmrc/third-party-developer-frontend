@@ -214,6 +214,7 @@ class ManageApplicationControllerSpec
         application.details.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()
       ) shouldBe true)
       withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
+      withClue("subscription")(elementIdentifiedByIdContainsText(doc, "manage-subscriptions", "Change APIs") shouldBe true)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {
