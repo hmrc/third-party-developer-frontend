@@ -34,13 +34,6 @@
 
 @(user: User, organisations: Seq[Organisation])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
-@formatMaybeDate(maybeDate: Option[Instant], defaultString: String) = @{
-  maybeDate match {
-    case Some(date) => DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mm a").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK).format(date)
-    case _          => defaultString
-  }
-}
-
 @formatListOfOrganisations(orgs: Seq[Organisation], defaultString: String) = @{
     orgs.isEmpty match {
         case false => orgs.map(org => org.organisationName.value)mkString("<br>")
@@ -85,17 +78,6 @@
       ))
     ))
   }
-
-  <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.your.password")</h2>
-  <p class="govuk-body">
-    @messages("profile.details.last.changed") Not set
-  </p>
-
-
-  <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.your.history")</h2>
-  <p class="govuk-body">
-    @{messages("profile.details.last.signin") + " " + formatMaybeDate(user.lastLogin, "Not set")}
-  </p>
 
   <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.delete.account")</h2>
   <p class="govuk-body">
