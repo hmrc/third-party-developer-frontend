@@ -238,3 +238,17 @@ application.details.customer.hint=If you are building software for customers, th
 application.details.privacy.policy.url=Privacy policy URL
 application.details.terms.conditions.url=Terms and conditions URL
 application.details.grant.length=Application grant length
+
+profile.details=Manage profile
+profile.details.your.details=Your details
+profile.details.name=Name
+profile.details.email=Email address
+profile.details.organisation=Organisation
+profile.details.security.preferences=Your security preferences
+profile.details.security.hint=This is how you get your access codes.
+profile.details.your.password=Your password
+profile.details.last.changed=Last changed
+profile.details.your.history=Your sign in history
+profile.details.last.signin=Last signed in
+profile.details.delete.account=Delete account
+profile.details.delete.hint=You can ask us to delete your account and we’ll respond within 2 working days.
