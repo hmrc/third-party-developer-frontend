@@ -76,9 +76,11 @@
     @teamMembersView(app)
     @customerUsageInformation(app)
 
-    <p class="govuk-body govuk-!-margin-top-8">
-      <a class="govuk-link govuk-link--no-visited-state" href="@controllers.routes.DeleteApplication.deleteApplication(applicationViewModel.application.id, None)" id="delete-link">
-        @messages("application.details.delete")
-      </a>
-    </p>
+    @if(app.access.accessType == AccessType.STANDARD) {
+        <p class="govuk-body govuk-!-margin-top-9">
+            <a class="govuk-button govuk-button--warning govuk-link--no-visited-state" href="@controllers.routes.DeleteApplication.deleteApplication(app.id, None)" id="delete-link">
+                @messages("application.details.delete")
+            </a>
+        </p>
+    }
 }

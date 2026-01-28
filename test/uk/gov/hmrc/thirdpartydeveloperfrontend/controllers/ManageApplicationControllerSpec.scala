@@ -56,7 +56,6 @@ class ManageApplicationControllerSpec
 
   "details" when {
     "logged in as a Developer on an application" should {
-
       "return the view for a standard production app with no change link" in new Setup {
         detailsShouldRenderThePage(devSession)(approvedApplication)
       }
