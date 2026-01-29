@@ -17,6 +17,7 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
@@ -32,11 +33,7 @@
     title = "IP allow list",
     userFullName = loggedIn.loggedInName,
     developerSession = Some(loggedIn),
-    breadcrumbs = Seq(
-        Crumb.application(app),
-        Crumb.viewAllApplications,
-        Crumb.home
-    )
+    back = BackButtonWithJavaScript
 ) {
 
     <div class="ip-allowlist">
