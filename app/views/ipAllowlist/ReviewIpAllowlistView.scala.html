@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButtonWithJavaScript, NoBackButton}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
@@ -27,31 +26,11 @@
 @(app: ApplicationWithCollaborators, ipAllowlistFlow: IpAllowlistFlow)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
-@breadcrumbs = @{
-  if(app.details.ipAllowlist.allowlist.isEmpty) {
-    Seq.empty
-  } else {
-    Seq(
-      Crumb.application(app),
-      Crumb.viewAllApplications,
-      Crumb.home
-    )
-  }
-}
-@backButton = @{
-  if(app.details.ipAllowlist.allowlist.isEmpty) {
-    BackButtonWithJavaScript
-  } else {
-    NoBackButton
-  }
-}
-
 @devMain(
   title = "Review IP allow list",
   userFullName = loggedIn.loggedInName,
-  back = backButton,
-  developerSession = Some(loggedIn),
-  breadcrumbs = breadcrumbs
+  back = BackButtonWithJavaScript,
+  developerSession = Some(loggedIn)
 ) {
   <div class="ip-allowlist">
     <h1 class="govuk-heading-l">
