@@ -238,6 +238,7 @@ application.details.customer.hint=If you are building software for customers, th
 application.details.privacy.policy.url=Privacy policy URL
 application.details.terms.conditions.url=Terms and conditions URL
 application.details.grant.length=Application grant length
+application.details.delete=Delete application
 
 profile.details=Manage profile
 profile.details.your.details=Your details
