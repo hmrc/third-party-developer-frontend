@@ -239,6 +239,7 @@ application.details.privacy.policy.url=Privacy policy URL
 application.details.terms.conditions.url=Terms and conditions URL
 application.details.grant.length=Application grant length
 application.details.delete=Delete application
+application.details.request.delete=Request application deletion
 
 profile.details=Manage profile
 profile.details.your.details=Your details
