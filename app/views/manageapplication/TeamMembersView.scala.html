@@ -20,16 +20,23 @@
 @this(govukTable: GovukTable)
 
 @(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+
+@formatTeamMembers(app: ApplicationWithCollaborators): String = @{
+    app.collaborators.size match {
+        case size if size == 1 => s"$size team member"
+        case size => s"$size team members"
+    }
+}
+
 <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.team.members")</h2>
 <p class="govuk-body">@messages("application.details.team.hint")</p>
 
 @govukTable(Table(
-    head = Some(Seq(
-        HeadCell(content = Text(messages("application.details.team.email"))),
-        HeadCell(content = Text(messages("application.details.team.role")))
-    )),
-    rows = app.collaborators.toList.map(collaborator => Seq(
-        TableRow(content = Text(collaborator.emailAddress.text)),
-        TableRow(content = Text(collaborator.role.displayText))
-    ))
+    firstCellIsHeader = true,
+    rows = Seq(
+        Seq(TableRow(content = Text(messages("application.details.team.members"))),
+            TableRow(content = Text(formatTeamMembers(app)), attributes = Map("id" -> "teamMembers")),
+            TableRow(content = HtmlContent(s"<a href='${controllers.routes.ManageTeam.manageTeam(app.id, None)}' class='govuk-link govuk-link--no-visited-state'>Change</a>")))
+    )
 ))
+
