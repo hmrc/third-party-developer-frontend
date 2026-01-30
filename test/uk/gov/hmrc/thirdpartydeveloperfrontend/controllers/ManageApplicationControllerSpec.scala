@@ -214,9 +214,8 @@ class ManageApplicationControllerSpec
       withClue("ipAllowList")(elementIdentifiedByIdContainsText(
         doc,
         "ipAllowListText",
-        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added"
-      ) shouldBe true)
-
+        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added") shouldBe true)
+      withClue("teamMembers")(elementIdentifiedByIdContainsText(doc, "teamMembers", s"${application.collaborators.size.toString} team members") shouldBe true)
       withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
         doc,
         "privacyPolicy",
