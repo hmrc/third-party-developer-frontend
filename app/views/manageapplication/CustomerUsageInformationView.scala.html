@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(govukTable: GovukTable)
 
@@ -27,8 +28,20 @@
 @govukTable(Table(
     firstCellIsHeader = true,
     rows = Seq(
-        Seq(TableRow(content = Text(messages("application.details.privacy.policy.url"))), TableRow(content = Text(app.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()), attributes = Map("id" -> "privacyPolicy"))),
-        Seq(TableRow(content = Text(messages("application.details.terms.conditions.url"))), TableRow(content = Text(app.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()), attributes = Map("id" -> "termsAndConditions"))),
-        Seq(TableRow(content = Text(messages("application.details.grant.length"))), TableRow(content = Text(app.details.grantLength.show()), attributes = Map("id" -> "grantLength")))
+        Seq(
+            TableRow(content = Text(messages("application.details.privacy.policy.url"))), 
+            TableRow(content = Text(app.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()), attributes = Map("id" -> "privacyPolicy")),
+            TableRow(content = HtmlContent(s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updatePrivacyPolicyLocation(app.id)}'>${messages("""application.details.change""")}</a>"))
+        ),
+        Seq(
+            TableRow(content = Text(messages("application.details.terms.conditions.url"))), 
+            TableRow(content = Text(app.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()), attributes = Map("id" -> "termsAndConditions")),
+            TableRow(content = HtmlContent(s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updateTermsAndConditionsLocation(app.id)}'>${messages("""application.details.change""")}</a>"))
+        ),
+        Seq(
+            TableRow(content = Text(messages("application.details.grant.length"))), 
+            TableRow(content = Text(app.details.grantLength.show()), attributes = Map("id" -> "grantLength")),
+            TableRow(content = Text(""))
+        )
     )
 ))
