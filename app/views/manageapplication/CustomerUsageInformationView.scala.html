@@ -22,6 +22,7 @@
 @this(govukTable: GovukTable)
 
 @(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+
 <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.customer.usage")</h2>
 <p class="govuk-body">@messages("application.details.customer.hint")</p>
 
@@ -31,12 +32,12 @@
         Seq(
             TableRow(content = Text(messages("application.details.privacy.policy.url"))), 
             TableRow(content = Text(app.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()), attributes = Map("id" -> "privacyPolicy")),
-            TableRow(content = HtmlContent(s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updatePrivacyPolicyLocation(app.id)}'>${messages("""application.details.change""")}</a>"))
+            TableRow(content = HtmlContent(if (app.deployedTo.isProduction) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updatePrivacyPolicyLocation(app.id)}' id='changePrivacyPolicy'>${messages("""application.details.change""")}</a>"} else {""}))
         ),
         Seq(
             TableRow(content = Text(messages("application.details.terms.conditions.url"))), 
             TableRow(content = Text(app.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()), attributes = Map("id" -> "termsAndConditions")),
-            TableRow(content = HtmlContent(s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updateTermsAndConditionsLocation(app.id)}'>${messages("""application.details.change""")}</a>"))
+            TableRow(content = HtmlContent(if (app.deployedTo.isProduction) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updateTermsAndConditionsLocation(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else {""}))
         ),
         Seq(
             TableRow(content = Text(messages("application.details.grant.length"))), 

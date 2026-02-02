@@ -215,6 +215,8 @@ class ManageApplicationControllerSpec
       withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
       withClue("subscription")(elementIdentifiedByIdContainsText(doc, "manage-subscriptions", "Change APIs") shouldBe true)
       withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
+      withClue("changePrivacyPolicy")(elementIdentifiedByIdContainsText(doc, "changePrivacyPolicy", "Change") shouldBe true)
+      withClue("changeTermsAndConditions")(elementIdentifiedByIdContainsText(doc, "changeTermsAndConditions", "Change") shouldBe true)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {
