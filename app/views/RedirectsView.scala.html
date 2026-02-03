@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain)
 
 @(applicationViewModel: ApplicationViewModel, loginRedirectUris: List[LoginRedirectUri], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
@@ -38,7 +38,7 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)),
+  leftNav = None,
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">Manage redirect URIs</h1>
