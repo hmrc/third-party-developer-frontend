@@ -1,0 +1,57 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+
+@this(govukTable: GovukTable)
+
+@(applicationViewModel: ApplicationViewModel, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+
+@if(
+    applicationViewModel.hasSubscriptionsFields ||
+    (applicationViewModel.hasPpnsFields && applicationViewModel.application.canViewPushSecret(loggedIn.developer)) ||
+    (fraudPreventionModel match {
+        case Some(fraudPreventionViewModel) if (fraudPreventionViewModel.isVisible) => true
+        case _ => false
+    })
+) {
+    <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.apisetup")</h2>
+    <p class="govuk-body">@messages("application.details.apisetup.hint")</p>
+}
+
+    <div class="govuk-button-group govuk-!-margin-bottom-7">
+        @if(applicationViewModel.hasSubscriptionsFields) {
+            <a class="govuk-link" href="@controllers.routes.ManageSubscriptions.listApiSubscriptions(applicationViewModel.application.id)">
+                API configuration</a>
+        }
+
+        @if(applicationViewModel.hasPpnsFields && applicationViewModel.application.canViewPushSecret(loggedIn.developer)) {
+            <a class="govuk-link" href="@controllers.routes.PushPullNotifications.showPushSecrets(applicationViewModel.application.id)">
+                Push secret</a>
+        }
+
+        @(fraudPreventionModel) match {
+            case Some(fraudPreventionViewModel) if (fraudPreventionViewModel.isVisible) => {
+                <a class="govuk-link" href="@fraudPreventionViewModel.generateLink(applicationViewModel.application.id.toString())">Fraud prevention</a>
+            }
+            case _ => {}
+        }
+    </div>
