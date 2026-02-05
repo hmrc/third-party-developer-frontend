@@ -17,11 +17,28 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary.ApplicationWithCollaboratorsSyntax
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
-@formatRedirectUris(access: Access, defaultString: String): String = @{
+@(app: ApplicationWithCollaborators)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+
+@formatCreateClientSecretsLink(clientSecrets: List[ClientSecret]): TableRow = @{
+    clientSecrets.isEmpty match {
+        case false => TableRow(content = Text(s"${clientSecrets.size} of 5 created"), attributes = Map("id" -> "createClientSecrets"))
+        case _ => TableRow(content = HtmlContent(s"<a href='${controllers.routes.Credentials.clientSecrets(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Create client secrets</a>"), attributes = Map("id" -> "createClientSecrets"))
+    }
+}
+
+@formatChangeClientSecretsLink(clientSecrets: List[ClientSecret]): TableRow = @{
+    clientSecrets.isEmpty match {
+        case false => TableRow(content = HtmlContent(s"<a href='${controllers.routes.Credentials.clientSecrets(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>"), attributes = Map("id" -> "changeClientSecrets"))
+        case _ => TableRow(content = Text(""), attributes = Map("id" -> "changeClientSecrets"))
+    }
+}
+
+@formatRedirectUrisText(access: Access, defaultString: String): String = @{
     access match {
         case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
         case _ => defaultString
@@ -35,6 +52,29 @@
     }
 }
 
+@showClientId(app: ApplicationWithCollaborators): Seq[TableRow] = @{
+    if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
+        Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()), attributes = Map("id" -> "clientId")), TableRow(content = Text("")))
+    } else {
+        Seq.empty
+    }
+}
+
+@showClientSecrets(app: ApplicationWithCollaborators): Seq[TableRow] = @{
+    if(loggedIn != null && app.canChangeClientCredentials(loggedIn.developer)) {
+        Seq(TableRow(content = Text(messages("application.details.client.secrets"))), formatCreateClientSecretsLink(app.details.token.clientSecrets), formatChangeClientSecretsLink(app.details.token.clientSecrets))
+    } else {
+        Seq.empty
+    }
+}
+
+@showRedirectUris(app: ApplicationWithCollaborators): Seq[TableRow] = @{
+    app.access match {
+        case Access.Standard(_, _, _, _, _, _, _) => Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = Text(formatRedirectUrisText(app.details.access, "None added")), attributes = Map("id" -> "redirectUrisText")), TableRow(content = HtmlContent(s"<a href='${controllers.routes.Redirects.loginRedirects(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>"), attributes = Map("id" -> "redirectUrisLink")))
+        case _ => Seq.empty
+    }
+}
+
 
 <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.authorisation.details")</h2>
 <p class="govuk-body">@messages("application.details.authorisation.hint")</p>
@@ -42,9 +82,9 @@
 @govukTable(Table(
     firstCellIsHeader = true,
     rows = Seq(
-        Seq(TableRow(content = Text(messages("application.details.client.id"))), TableRow(content = Text(app.details.token.clientId.toString()), attributes = Map("id" -> "clientId")), TableRow(content = Text(""))),
-        Seq(TableRow(content = Text(messages("application.details.client.secrets"))), TableRow(content = HtmlContent(s"<a href='${controllers.routes.Credentials.clientSecrets(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Create client secrets</a>"), attributes = Map("id" -> "createClientSecrets")), TableRow(content = Text(""))),
-        Seq(TableRow(content = Text(messages("application.details.redirect.uris"))), TableRow(content = Text(formatRedirectUris(app.details.access, "None added")), attributes = Map("id" -> "redirectUris")), TableRow(content = HtmlContent(s"<a href='${controllers.routes.Redirects.loginRedirects(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>"))),
-        Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = Text(formatIPAllowLists(app.details.ipAllowlist.allowlist.toList, "No IP addresses added")), attributes = Map("id" -> "ipAllowList")), TableRow(content = HtmlContent(s"<a href='${controllers.routes.IpAllowListController.viewIpAllowlist(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>")))
+        showClientId(app),
+        showClientSecrets(app),
+        showRedirectUris(app),
+        Seq(TableRow(content = Text(messages("application.details.ip.allow.list"))), TableRow(content = Text(formatIPAllowLists(app.details.ipAllowlist.allowlist.toList, "No IP addresses added")), attributes = Map("id" -> "ipAllowListText")), TableRow(content = HtmlContent(s"<a href='${controllers.routes.IpAllowListController.viewIpAllowlist(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>"), attributes = Map("id" -> "ipAllowListLink")))
     )
 ))
