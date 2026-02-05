@@ -79,7 +79,11 @@
     @if(app.access.accessType == AccessType.STANDARD) {
         <p class="govuk-body govuk-!-margin-top-9">
             <a class="govuk-button govuk-button--warning govuk-link--no-visited-state" href="@controllers.routes.DeleteApplication.deleteApplication(app.id, None)" id="delete-link">
-                @messages("application.details.delete")
+                @if(app.deployedTo.isProduction) {
+                    @messages("application.details.request.delete")
+                } else {
+                    @messages("application.details.delete")
+                }
             </a>
         </p>
     }
