@@ -16,11 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
+import views.html.manageapplication._
+
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -36,11 +43,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html.manageapplication._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
 
 class ManageApplicationControllerSpec
     extends BaseControllerSpec
@@ -48,21 +50,24 @@ class ManageApplicationControllerSpec
     with SubmissionsTestData
     with ApplicationWithCollaboratorsFixtures {
 
-  val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description")))
+  val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description"))).withToken(ApplicationTokenData.one)
   val sandboxApplication  = approvedApplication.inSandbox()
   val inTestingApp        = approvedApplication.withState(appStateTesting)
 
   "details" when {
     "logged in as a Developer on an application" should {
       "return the view for a standard production app with no change link" in new Setup {
-        detailsShouldRenderThePage(devSession)(approvedApplication)
+        detailsShouldRenderThePageForDeveloper(devSession)(approvedApplication)
+      }
+      "return the view for a standard sandbox app" in new Setup {
+        detailsShouldRenderThePageForAdminOrSandbox(devSession)(sandboxApplication)
       }
     }
 
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
-        detailsShouldRenderThePage(adminSession)(approvedApplication)
+        detailsShouldRenderThePageForAdminOrSandbox(adminSession)(approvedApplication)
       }
     }
 
@@ -71,7 +76,7 @@ class ManageApplicationControllerSpec
         val application = approvedApplication
         givenApplicationAction(application, altDevSession)
 
-        val result = application.callDetails
+        val result = application.callDetailsDev
 
         status(result) shouldBe SEE_OTHER
       }
@@ -187,25 +192,30 @@ class ManageApplicationControllerSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePage(userSession: UserSession)(application: ApplicationWithCollaborators) = {
+    def detailsShouldRenderThePageForDeveloper(userSession: UserSession)(application: ApplicationWithCollaborators) = {
       givenApplicationAction(application, userSession)
 
       returnAgreementDetails()
 
-      val redirectUriWording = application.access match {
-        case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
-        case _ => "None added"
-      }
-
-      val result = application.callDetails
+      val result = application.callDetailsDev
       status(result) shouldBe OK
-      val doc = Jsoup.parse(contentAsString(result))
+      val doc    = Jsoup.parse(contentAsString(result))
+
       withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
       withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
       withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
-      withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
-      withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUris", redirectUriWording) shouldBe true)
-      withClue("ipAllowList")(elementIdentifiedByIdContainsText(doc, "ipAllowList", s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added") shouldBe true)
+      if (application.isStandard) {
+        val redirectUriWording = application.access match {
+          case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
+          case _                                               => "None added"
+        }
+        withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUrisText", redirectUriWording) shouldBe true)
+      }
+      withClue("ipAllowList")(elementIdentifiedByIdContainsText(
+        doc,
+        "ipAllowListText",
+        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added"
+      ) shouldBe true)
 
       withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
         doc,
@@ -220,6 +230,17 @@ class ManageApplicationControllerSpec
       withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
       withClue("subscription")(elementIdentifiedByIdContainsText(doc, "manage-subscriptions", "Change APIs") shouldBe true)
       withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
+    }
+
+    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession)(application: ApplicationWithCollaborators) = {
+      detailsShouldRenderThePageForDeveloper(userSession)(application)
+
+      val result = application.callDetailsAdmin
+      status(result) shouldBe OK
+      val doc    = Jsoup.parse(contentAsString(result))
+      withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
+      withClue("createClientSecrets")(elementIdentifiedByIdContainsText(doc, "createClientSecrets", s"${application.details.token.clientSecrets.size} of 5 created") shouldBe true)
+
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {
@@ -238,7 +259,9 @@ class ManageApplicationControllerSpec
       final def toForm =
         EditApplicationForm(app.id, app.details.name.value, app.details.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.details.grantLength.show())
 
-      final def callDetails: Future[Result] = underTest.applicationDetails(app.id)(loggedInDevRequest)
+      final def callDetailsDev: Future[Result] = underTest.applicationDetails(app.id)(loggedInDevRequest)
+
+      final def callDetailsAdmin: Future[Result] = underTest.applicationDetails(app.id)(loggedInAdminRequest)
 
       final def callDetailsNotLoggedIn: Future[Result] = underTest.applicationDetails(app.id)(loggedOutRequest)
     }
