@@ -216,6 +216,7 @@ dashboard.organisations.your=Your organisations
 
 application.details=Application details
 application.details.name=Application name
+application.details.change=Change
 application.details.environment=Environment
 application.details.created=Created
 application.details.last.api.call=Last API call
