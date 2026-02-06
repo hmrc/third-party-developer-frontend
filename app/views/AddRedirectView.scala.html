@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[AddRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "redirects")
 
@@ -36,7 +36,7 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
+  leftNav = None,
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">Add a redirect URI</h1>
