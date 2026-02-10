@@ -14,12 +14,10 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukTable
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, FraudPreventionNavLinkViewModel}
 
 @this(govukTable: GovukTable)
 
@@ -33,24 +31,22 @@
         case _ => false
     })
 ) {
-    <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.apisetup")</h2>
-    <p class="govuk-body">@messages("application.details.apisetup.hint")</p>
+    <h2 id="apiSetupHeading" class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.apisetup")</h2>
+    <p id="apiSetupHint" class="govuk-body">@messages("application.details.apisetup.hint")</p>
 }
 
     <div class="govuk-button-group govuk-!-margin-bottom-7">
         @if(applicationViewModel.hasSubscriptionsFields) {
-            <a class="govuk-link" href="@controllers.routes.ManageSubscriptions.listApiSubscriptions(applicationViewModel.application.id)">
-                API configuration</a>
+            <a id="apiConfiguration" class="govuk-link" href="@controllers.routes.ManageSubscriptions.listApiSubscriptions(applicationViewModel.application.id)">API configuration</a>
         }
 
         @if(applicationViewModel.hasPpnsFields && applicationViewModel.application.canViewPushSecret(loggedIn.developer)) {
-            <a class="govuk-link" href="@controllers.routes.PushPullNotifications.showPushSecrets(applicationViewModel.application.id)">
-                Push secret</a>
+            <a id="pushSecret" class="govuk-link" href="@controllers.routes.PushPullNotifications.showPushSecrets(applicationViewModel.application.id)">Push secret</a>
         }
 
         @(fraudPreventionModel) match {
             case Some(fraudPreventionViewModel) if (fraudPreventionViewModel.isVisible) => {
-                <a class="govuk-link" href="@fraudPreventionViewModel.generateLink(applicationViewModel.application.id.toString())">Fraud prevention</a>
+                <a id="fraudPrevention" class="govuk-link" href="@fraudPreventionViewModel.generateLink(applicationViewModel.application.id.toString())">Fraud prevention</a>
             }
             case _ => {}
         }
