@@ -23,17 +23,19 @@
 
 @import java.time.Instant
 @import java.time.format.DateTimeFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 
 @this(
-        devMain: DevMain,
-        govukTable: GovukTable,
-        customerUsageInformation: CustomerUsageInformationView,
-        teamMembersView: TeamMembersView,
-        authorisationDetailsView: AuthorisationDetailsView,
-        apisAddedView: ApisAddedView,
-        applicationView: ApplicationView)
+devMain: DevMain,
+govukTable: GovukTable,
+customerUsageInformation: CustomerUsageInformationView,
+teamMembersView: TeamMembersView,
+authorisationDetailsView: AuthorisationDetailsView,
+apisAddedView: ApisAddedView,
+apiSetupView: ApiSetupView,
+applicationView: ApplicationView)
 
-@(applicationViewModel: ApplicationViewModel, subscriptions: List[APISubscriptionStatus])(
+@(applicationViewModel: ApplicationViewModel, subscriptions: List[APISubscriptionStatus], fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: UserSession,
         messages: Messages,
@@ -72,6 +74,7 @@
 
     @applicationView(app)
     @apisAddedView(app, subscriptions)
+    @apiSetupView(applicationViewModel, fraudPreventionModel)
     @authorisationDetailsView(app)
     @teamMembersView(app)
     @customerUsageInformation(app)

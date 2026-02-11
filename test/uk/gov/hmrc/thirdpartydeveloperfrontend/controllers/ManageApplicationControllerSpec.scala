@@ -28,6 +28,7 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -38,8 +39,12 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -48,9 +53,13 @@ class ManageApplicationControllerSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubmissionsTestData
-    with ApplicationWithCollaboratorsFixtures {
+    with ApplicationWithCollaboratorsFixtures
+    with ApplicationWithSubscriptionFieldsData
+    with SubscriptionTestHelper {
 
-  val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description"))).withToken(ApplicationTokenData.one)
+  val approvedApplication = appWithSubsFieldsOne.withAccess(standardAccessOne)
+    .modify(_.copy(description = Some("Some App Description")))
+    .withToken(ApplicationTokenData.one)
   val sandboxApplication  = approvedApplication.inSandbox()
   val inTestingApp        = approvedApplication.withState(appStateTesting)
 
@@ -100,13 +109,15 @@ class ManageApplicationControllerSpec
       with SubmissionServiceMockModule
       with TermsOfUseServiceMock {
 
-    val detailsView = app.injector.instanceOf[ApplicationDetailsView]
+    val detailsView                                  = app.injector.instanceOf[ApplicationDetailsView]
+    def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List(ServiceName("ppns-api")), "/")
 
     val underTest = new ManageApplicationController(
       mockErrorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
       sessionServiceMock,
+      fraudPreventionConfig,
       mcc,
       cookieSigner,
       clock,
@@ -192,8 +203,14 @@ class ManageApplicationControllerSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePageForDeveloper(userSession: UserSession)(application: ApplicationWithCollaborators) = {
-      givenApplicationAction(application, userSession)
+    def detailsShouldRenderThePageForDeveloper(userSession: UserSession)(application: ApplicationWithSubscriptionFields) = {
+
+      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
+      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
+        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
+      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+
+      givenApplicationAction(application, userSession, subsData)
 
       returnAgreementDetails()
 
@@ -228,35 +245,53 @@ class ManageApplicationControllerSpec
       ) shouldBe true)
       withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
       withClue("subscription")(elementIdentifiedByIdContainsText(doc, "manage-subscriptions", "Change APIs") shouldBe true)
+      withClue("apiSetupHeading")(elementIdentifiedByIdContainsText(doc, "apiSetupHeading", "API setup") shouldBe true)
+      withClue("apiSetupHint")(elementIdentifiedByIdContainsText(
+        doc,
+        "apiSetupHint",
+        "Some of the REST APIs you have added to this application need to be set up before you can use their endpoints."
+      ) shouldBe true)
+      withClue("apiConfiguration")(elementIdentifiedByIdContainsText(doc, "apiConfiguration", "API configuration") shouldBe true)
       withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
       if (application.isProduction) {
+        withClue("fraudPrevention")(elementIdentifiedByIdContainsText(doc, "fraudPrevention", "Fraud prevention") shouldBe true)
         withClue("changePrivacyPolicy")(elementIdentifiedByIdContainsText(doc, "changePrivacyPolicy", "Change") shouldBe true)
         withClue("changeTermsAndConditions")(elementIdentifiedByIdContainsText(doc, "changeTermsAndConditions", "Change") shouldBe true)
       }
     }
 
-    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession)(application: ApplicationWithCollaborators) = {
+    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession)(application: ApplicationWithSubscriptionFields) = {
+
+      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
+      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
+        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
+      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+
+      givenApplicationAction(application, userSession, subsData)
+
       detailsShouldRenderThePageForDeveloper(userSession)(application)
 
       val result = application.callDetailsAdmin
       status(result) shouldBe OK
       val doc    = Jsoup.parse(contentAsString(result))
+
       withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
       withClue("createClientSecrets")(elementIdentifiedByIdContainsText(doc, "createClientSecrets", s"${application.details.token.clientSecrets.size} of 5 created") shouldBe true)
 
+      withClue("pushSecret")(elementIdentifiedByIdContainsText(doc, "pushSecret", "Push secret") shouldBe true)
     }
 
-    implicit class AppAugment(val app: ApplicationWithCollaborators) {
-      final def withDescription(description: Option[String]): ApplicationWithCollaborators = app.modify(_.copy(description = description))
+    implicit class AppAugment(val app: ApplicationWithSubscriptionFields) {
+      final def withDescription(description: Option[String]): ApplicationWithSubscriptionFields = app.modify(_.copy(description = description))
 
-      final def withTermsAndConditionsUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(termsAndConditionsUrl = url))
+      final def withTermsAndConditionsUrl(url: Option[String]): ApplicationWithSubscriptionFields = app.withAccess(standardAccess.copy(termsAndConditionsUrl = url))
 
-      final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
+      final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithSubscriptionFields = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
     }
 
     implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
 
-    implicit class ChangeDetailsAppAugment(val app: ApplicationWithCollaborators) {
+    implicit class ChangeDetailsAppAugment(val app: ApplicationWithSubscriptionFields) {
       private val appAccess = app.access.asInstanceOf[Access.Standard]
 
       final def toForm =

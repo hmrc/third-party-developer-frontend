@@ -28,7 +28,8 @@ import play.api.mvc._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -37,6 +38,7 @@ class ManageApplicationController @Inject() (
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
+    val fraudPreventionConfig: FraudPreventionConfig,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val clock: Clock,
@@ -44,9 +46,18 @@ class ManageApplicationController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
+    with FraudPreventionNavLinkHelper
     with ClockNow {
 
   def applicationDetails(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    successful(Ok(applicationDetailsView(applicationViewModelFromApplicationRequest(), request.subscriptions)))
+    successful(Ok(applicationDetailsView(
+      applicationViewModelFromApplicationRequest(),
+      request.subscriptions,
+      createOptionalFraudPreventionNavLinkViewModel(
+        request.application,
+        request.subscriptions,
+        fraudPreventionConfig
+      )
+    )))
   }
 }
