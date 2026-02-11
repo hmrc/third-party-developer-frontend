@@ -54,12 +54,12 @@ class ManageApplicationControllerSpec
     with ApplicationWithSubscriptionFieldsData
     with SubscriptionTestHelper {
 
-  val approvedStandardApplication = appWithSubsFieldsOne.withAccess(standardAccessOne)
+  val approvedStandardApplication: ApplicationWithSubscriptionFields = appWithSubsFieldsOne.withAccess(standardAccessOne)
     .modify(_.copy(description = Some("Some App Description")))
     .withToken(ApplicationTokenData.one)
-  val sandboxStandardApplication  = approvedStandardApplication.inSandbox()
-  val productionPrivApplication   = approvedStandardApplication.withAccess(privilegedAccess)
-  val productionRopcApplication   = approvedStandardApplication.withAccess(ropcAccess)
+  val sandboxStandardApplication: ApplicationWithSubscriptionFields  = approvedStandardApplication.inSandbox()
+  val productionPrivApplication: ApplicationWithSubscriptionFields   = approvedStandardApplication.withAccess(privilegedAccess)
+  val productionRopcApplication: ApplicationWithSubscriptionFields   = approvedStandardApplication.withAccess(ropcAccess)
 
   "details" when {
     "logged in as a Developer on an application" should {
@@ -94,10 +94,10 @@ class ManageApplicationControllerSpec
 
     "not a team member on an application" should {
       "return see other" in new Setup {
-        val application = approvedStandardApplication
+        val application: ApplicationWithSubscriptionFields = approvedStandardApplication
         givenApplicationAction(application, altDevSession)
 
-        val result = application.callDetailsDev
+        val result: Future[Result] = application.callDetailsDev
 
         status(result) shouldBe SEE_OTHER
       }
@@ -105,10 +105,10 @@ class ManageApplicationControllerSpec
 
     "not logged in" should {
       "redirect to login" in new Setup {
-        val application = approvedStandardApplication
+        val application: ApplicationWithSubscriptionFields = approvedStandardApplication
         givenApplicationAction(application, devSession)
 
-        val result = application.callDetailsNotLoggedIn
+        val result: Future[Result] = application.callDetailsNotLoggedIn
 
         redirectsToLogin(result)
       }
@@ -121,7 +121,7 @@ class ManageApplicationControllerSpec
       with SubmissionServiceMockModule
       with TermsOfUseServiceMock {
 
-    val detailsView                                  = app.injector.instanceOf[ApplicationDetailsView]
+    val detailsView: ApplicationDetailsView          = app.injector.instanceOf[ApplicationDetailsView]
     def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List(ServiceName("ppns-api")), "/")
 
     val underTest = new ManageApplicationController(
@@ -193,13 +193,16 @@ class ManageApplicationControllerSpec
       }
     }
 
-    def detailsShouldRenderThePageForDeveloper(userSession: UserSession)(application: ApplicationWithSubscriptionFields): Any = {
-
+    private def createPpnsSubsFields(application: ApplicationWithSubscriptionFields) = {
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
         .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+      subsData
+    }
 
+    def detailsShouldRenderThePageForDeveloper(userSession: UserSession)(application: ApplicationWithSubscriptionFields): Any = {
+      val subsData: List[APISubscriptionStatus] = createPpnsSubsFields(application)
       givenApplicationAction(application, userSession, subsData)
       returnAgreementDetails()
 
@@ -211,12 +214,7 @@ class ManageApplicationControllerSpec
     }
 
     def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession)(application: ApplicationWithSubscriptionFields): Assertion = {
-
-      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
-      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
-        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
-      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
-
+      val subsData: List[APISubscriptionStatus] = createPpnsSubsFields(application)
       givenApplicationAction(application, userSession, subsData)
 
       val result = application.callDetailsAdmin
