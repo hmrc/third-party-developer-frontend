@@ -26,7 +26,7 @@
 
 @formatCreateClientSecretsLink(clientSecrets: List[ClientSecret]): TableRow = @{
     clientSecrets.isEmpty match {
-        case false => TableRow(content = Text(s"${clientSecrets.size} of 5 created"), attributes = Map("id" -> "createClientSecrets"))
+        case false => TableRow(content = Text(s"${clientSecrets.size} of 5 client secrets created"), attributes = Map("id" -> "createClientSecrets"))
         case _ => TableRow(content = HtmlContent(s"<a href='${controllers.routes.Credentials.clientSecrets(app.details.id)}' class='govuk-link govuk-link--no-visited-state'>Create client secrets</a>"), attributes = Map("id" -> "createClientSecrets"))
     }
 }
@@ -47,7 +47,7 @@
 
 @formatIPAllowLists(ipAllowlist: List[String], defaultString: String): String = @{
     ipAllowlist.isEmpty match {
-        case false => s"${ipAllowlist.size} IP addresses added"
+        case false => if(ipAllowlist.size == 1) {s"${ipAllowlist.size} IP address added"} else {s"${ipAllowlist.size} IP addresses added"}
         case _ => defaultString
     }
 }

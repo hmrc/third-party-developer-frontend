@@ -154,7 +154,7 @@ class ManageApplicationControllerSpec
       withClue("ipAllowList")(elementIdentifiedByIdContainsText(
         doc,
         "ipAllowListText",
-        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added"
+        s"${application.details.ipAllowlist.allowlist.toList.size} IP address added"
       ) shouldBe true)
       withClue("teamMembers")(elementIdentifiedByIdContainsText(doc, "teamMembers", s"${application.collaborators.size.toString} team members") shouldBe true)
       withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
@@ -226,7 +226,11 @@ class ManageApplicationControllerSpec
       assertCommonAppDetails(application, doc)
 
       withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
-      withClue("createClientSecrets")(elementIdentifiedByIdContainsText(doc, "createClientSecrets", s"${application.details.token.clientSecrets.size} of 5 created") shouldBe true)
+      withClue("createClientSecrets")(elementIdentifiedByIdContainsText(
+        doc,
+        "createClientSecrets",
+        s"${application.details.token.clientSecrets.size} of 5 client secrets created"
+      ) shouldBe true)
       withClue("pushSecret")(elementIdentifiedByIdContainsText(doc, "pushSecret", "Push secret") shouldBe true)
     }
 
