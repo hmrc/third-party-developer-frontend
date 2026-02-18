@@ -16,6 +16,7 @@
 
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
@@ -30,11 +31,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
 @devMain(
   title = "IP allow list",
   userFullName = loggedIn.loggedInName,
-  breadcrumbs = Seq(
-      Crumb.application(app),
-      Crumb.viewAllApplications,
-      Crumb.home
-  ),
+  back = BackButtonWithJavaScript,
   developerSession = Some(loggedIn)
 ) {
   <div class="ip-allowlist">
