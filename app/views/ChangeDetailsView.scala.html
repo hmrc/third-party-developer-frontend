@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm], applicationViewModel: ApplicationViewModel)(
   implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details"
@@ -41,7 +41,6 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationViewModel), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">Change application details</h1>
