@@ -26,7 +26,7 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors)
 @(applicationView: ApplicationViewModel, collaboratorUsers: Seq[User], role: Collaborator.Role, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
         implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig, navSection: String = "manage-team", loggedIn: UserSession)
 
@@ -41,7 +41,6 @@
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">Manage team members</h1>
