@@ -23,7 +23,10 @@
 
 @(app: ApplicationWithCollaborators, subscriptions: List[APISubscriptionStatus])(implicit request: Request[Any], messages: Messages, appConfig: ApplicationConfig)
 <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.apis.added")</h2>
-<p class="govuk-body">@messages("application.details.apis.hint")</p>
+<p class="govuk-body">
+    @messages("application.details.apis.hint")
+    @messages("application.details.apis.hint2")
+</p>
 
 @govukTable(Table(
     head = Some(Seq(
