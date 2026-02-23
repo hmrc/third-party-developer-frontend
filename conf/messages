@@ -217,6 +217,7 @@ dashboard.organisations.your=Your organisations
 application.details=Application details
 application.details.name=Application name
 application.details.change=Change
+application.details.view=View
 application.details.environment=Environment
 application.details.created=Created
 application.details.last.api.call=Last API call
@@ -241,6 +242,8 @@ application.details.customer.hint=If you are building software for customers, th
 application.details.privacy.policy.url=Privacy policy URL
 application.details.terms.conditions.url=Terms and conditions URL
 application.details.grant.length=Application grant length
+application.details.terms.of.use=Terms of use
+application.details.responsible.individual=Responsible individual
 application.details.delete=Delete application
 
 profile.details=Manage profile

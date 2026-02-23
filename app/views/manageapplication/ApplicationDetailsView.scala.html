@@ -19,11 +19,13 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, Crumb}
+@import views.html.manageapplication.TermsOfUseView
 @import views.html.manageapplication._
 
 @import java.time.Instant
 @import java.time.format.DateTimeFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
 
 @this(
 devMain: DevMain,
@@ -33,9 +35,10 @@ teamMembersView: TeamMembersView,
 authorisationDetailsView: AuthorisationDetailsView,
 apisAddedView: ApisAddedView,
 apiSetupView: ApiSetupView,
+termsOfUseView: TermsOfUseView,
 applicationView: ApplicationView)
 
-@(applicationViewModel: ApplicationViewModel, subscriptions: List[APISubscriptionStatus], fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(
+@(applicationViewModel: ApplicationViewModel, subscriptions: List[APISubscriptionStatus], fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None, termsOfUseModel: TermsOfUseViewModel)(
         implicit request: play.api.mvc.Request[Any],
         loggedIn: UserSession,
         messages: Messages,
@@ -78,6 +81,7 @@ applicationView: ApplicationView)
     @authorisationDetailsView(app)
     @teamMembersView(app)
     @customerUsageInformation(app)
+    @termsOfUseView(app, termsOfUseModel)
 
     @if(app.access.accessType == AccessType.STANDARD) {
         <p class="govuk-body govuk-!-margin-top-9">
