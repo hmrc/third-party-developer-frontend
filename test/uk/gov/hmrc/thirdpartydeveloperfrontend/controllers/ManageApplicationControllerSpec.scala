@@ -150,7 +150,7 @@ class ManageApplicationControllerSpec
     private def assertCommonAppDetails(application: ApplicationWithSubscriptionFields, doc: Document) = {
       withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
       withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
-      withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
+      withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("Enter application description")) shouldBe true)
       withClue("ipAllowList")(elementIdentifiedByIdContainsText(
         doc,
         "ipAllowListText",
