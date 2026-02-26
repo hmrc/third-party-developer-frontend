@@ -61,10 +61,10 @@ class ManageApplicationControllerSpec
     with ResponsibleIndividualFixtures
     with SubscriptionTestHelper {
 
-  val approvedApplication               = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
+  val approvedApplication = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description")))
-  val sandboxApplication                = approvedApplication.inSandbox()
-  val inTestingApp                      = approvedApplication.withState(appStateTesting)
+  val sandboxApplication  = approvedApplication.inSandbox()
+  val inTestingApp        = approvedApplication.withState(appStateTesting)
 
   val prodAppWithRespIndAndV1TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description"), checkInformation = Some(checkInformationOne)))
@@ -79,7 +79,7 @@ class ManageApplicationControllerSpec
   ).get.head
   val v1AgreementWording: String              = s"Agreed by ${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}"
 
-  val v2Agreement        = TermsOfUseAgreementDetails(
+  val v2Agreement = TermsOfUseAgreementDetails(
     TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,
     Some(TermsOfUseAcceptanceData.one.responsibleIndividual.fullName.value),
     TermsOfUseAcceptanceData.one.dateTime,
