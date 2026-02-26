@@ -21,22 +21,19 @@ import scala.concurrent.Future
 import scala.concurrent.Future._
 
 import org.jsoup.Jsoup
-import org.mockito.captor.ArgCaptor
+import org.jsoup.nodes.Document
+import org.scalatest.Assertion
 import views.html.manageapplication._
 
-import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
@@ -61,10 +58,14 @@ class ManageApplicationControllerSpec
     with ResponsibleIndividualFixtures
     with SubscriptionTestHelper {
 
-  val approvedApplication = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
+  val approvedApplication = appWithSubsFieldsOne
+    .withAccess(standardAccessOne)
+    .withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description")))
   val sandboxApplication  = approvedApplication.inSandbox()
   val inTestingApp        = approvedApplication.withState(appStateTesting)
+  val productionPrivApplication   = approvedStandardApplication.withAccess(privilegedAccess)
+  val productionRopcApplication   = approvedStandardApplication.withAccess(ropcAccess)
 
   val prodAppWithRespIndAndV1TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description"), checkInformation = Some(checkInformationOne)))
@@ -107,6 +108,14 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         detailsShouldRenderThePageForAdminOrSandbox(devSession)(sandboxApplication)
       }
+      "return the view for a Privileged production app" in new Setup {
+        returnAgreementDetails()
+        detailsShouldRenderThePageForDeveloper(devSession)(productionPrivApplication)
+      }
+      "return the view for a ROPC production app" in new Setup {
+        returnAgreementDetails()
+        detailsShouldRenderThePageForDeveloper(devSession)(productionRopcApplication)
+      }
     }
 
     "logged in as an Administrator on an application" should {
@@ -118,6 +127,14 @@ class ManageApplicationControllerSpec
       "return the view for a standard production app with link to view V1 terms of use" in new Setup {
         returnAgreementDetails(v1Agreement)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
+      }
+      "return the view for a Privileged production app" in new Setup {
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
+        detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionPrivApplication)
+      }
+      "return the view for a ROPC production app" in new Setup {
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
+        detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionRopcApplication)
       }
     }
 
@@ -166,92 +183,20 @@ class ManageApplicationControllerSpec
       detailsView
     )
 
-    val newName        = ApplicationName("new name")
-    val newDescription = Some("new description")
-    val newTermsUrl    = Some("http://example.com/new-terms")
-    val newPrivacyUrl  = Some("http://example.com/new-privacy")
-
-    val termsAndConditionsUrl = "http://example.com/terms-conds"
-    val privacyPolicyUrl      = "http://example.com/priv-policy"
-
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
-    def legacyAppWithTermsAndConditionsLocation(maybeTermsAndConditionsUrl: Option[String]) =
-      standardApp.withAccess(Access.Standard(List.empty, List.empty, maybeTermsAndConditionsUrl, None, Set.empty, None, None))
-
-    def legacyAppWithPrivacyPolicyLocation(maybePrivacyPolicyUrl: Option[String]) =
-      standardApp.withAccess(Access.Standard(List.empty, List.empty, None, maybePrivacyPolicyUrl, Set.empty, None, None))
-
-    def appWithTermsAndConditionsLocation(termsAndConditionsLocation: TermsAndConditionsLocation) = standardApp.withAccess(
-      Access.Standard(
-        List.empty,
-        List.empty,
-        None,
-        None,
-        Set.empty,
-        None,
-        Some(
-          ImportantSubmissionData(
-            None,
-            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
-            Set.empty,
-            termsAndConditionsLocation,
-            PrivacyPolicyLocations.InDesktopSoftware,
-            List.empty
-          )
-        )
-      )
-    )
-
-    def appWithPrivacyPolicyLocation(privacyPolicyLocation: PrivacyPolicyLocation) = standardApp.withAccess(
-      Access.Standard(
-        List.empty,
-        List.empty,
-        None,
-        None,
-        Set.empty,
-        None,
-        Some(
-          ImportantSubmissionData(
-            None,
-            ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
-            Set.empty,
-            TermsAndConditionsLocations.InDesktopSoftware,
-            privacyPolicyLocation,
-            List.empty
-          )
-        )
-      )
-    )
-
-    def captureApplicationCmd: ApplicationCommand = {
-      val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService).dispatchCmd(*[ApplicationId], captor)(*)
-      captor.value
-    }
-
-    def captureAllApplicationCmds: List[ApplicationCommand] = {
-      val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
-      captor.values
-    }
-
-    def redirectsToLogin(result: Future[Result]) = {
+    def redirectsToLogin(result: Future[Result]): Assertion = {
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePageForDeveloper(
-        userSession: UserSession,
-        v1TOUWording: Option[String] = None,
-        v2TOUWording: Option[String] = None
-      )(
-        application: ApplicationWithSubscriptionFields
-      ) = {
+    def detailsShouldRenderThePageForDeveloper(userSession: UserSession,
+                                               v1TOUWording: Option[String] = None,
+                                               v2TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields) = {
 
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
@@ -259,6 +204,8 @@ class ManageApplicationControllerSpec
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(application, userSession, subsData)
+
+      returnAgreementDetails()
 
       val result = application.callDetailsDev
       status(result) shouldBe OK
@@ -268,29 +215,16 @@ class ManageApplicationControllerSpec
       withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
       withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
       if (application.isStandard) {
-
-        // Redirect URIs
         val redirectUriWording = application.access match {
           case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
           case _                                               => "None added"
         }
         withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUrisText", redirectUriWording) shouldBe true)
-
-        // Responsible Individual
-        application.access match {
-          case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, _))) =>
-            withClue("responsibleIndividual")(elementIdentifiedByIdContainsText(doc, "responsibleIndividual", "Responsible individual") shouldBe true)
-            withClue("responsibleIndividualName")(elementIdentifiedByIdContainsText(doc, "responsibleIndividualName", ResponsibleIndividualData.one.fullName.value) shouldBe true)
-            withClue("changeResponsibleIndividual")(elementIdentifiedByIdContainsText(doc, "changeResponsibleIndividual", "Change") shouldBe true)
-          case _                                                                                                      => succeed
-        }
-
       }
       withClue("ipAllowList")(elementIdentifiedByIdContainsText(
         doc,
         "ipAllowListText",
-        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added"
-      ) shouldBe true)
+        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added") shouldBe true)
       withClue("teamMembers")(elementIdentifiedByIdContainsText(doc, "teamMembers", s"${application.collaborators.size.toString} team members") shouldBe true)
       withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
         doc,
@@ -334,7 +268,26 @@ class ManageApplicationControllerSpec
       }
     }
 
-    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession, v1TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields) = {
+    def detailsShouldRenderThePageForDeveloper(userSession: UserSession,
+                                               v1TOUWording: Option[String] = None,
+                                               v2TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields): Any = {
+
+      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
+      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
+        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
+      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+
+      givenApplicationAction(application, userSession, subsData)
+      returnAgreementDetails()
+
+      val result = application.callDetailsDev
+      status(result) shouldBe OK
+      val doc    = Jsoup.parse(contentAsString(result))
+
+      assertCommonAppDetails(application, doc)
+    }
+
+    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession, v1TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields): Assertion = {
 
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
@@ -343,15 +296,18 @@ class ManageApplicationControllerSpec
 
       givenApplicationAction(application, userSession, subsData)
 
-      detailsShouldRenderThePageForDeveloper(userSession)(application)
-
       val result = application.callDetailsAdmin
       status(result) shouldBe OK
       val doc    = Jsoup.parse(contentAsString(result))
 
-      withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
-      withClue("createClientSecrets")(elementIdentifiedByIdContainsText(doc, "createClientSecrets", s"${application.details.token.clientSecrets.size} of 5 created") shouldBe true)
+      assertCommonAppDetails(application, doc)
 
+      withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
+      withClue("createClientSecrets")(elementIdentifiedByIdContainsText(
+        doc,
+        "createClientSecrets",
+        s"${application.details.token.clientSecrets.size} of 5 client secrets created"
+      ) shouldBe true)
       withClue("pushSecret")(elementIdentifiedByIdContainsText(doc, "pushSecret", "Push secret") shouldBe true)
 
       v1TOUWording match {
@@ -361,21 +317,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    implicit class AppAugment(val app: ApplicationWithSubscriptionFields) {
-      final def withDescription(description: Option[String]): ApplicationWithSubscriptionFields = app.modify(_.copy(description = description))
-
-      final def withTermsAndConditionsUrl(url: Option[String]): ApplicationWithSubscriptionFields = app.withAccess(standardAccess.copy(termsAndConditionsUrl = url))
-
-      final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithSubscriptionFields = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
-    }
-
-    implicit val format: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
-
     implicit class ChangeDetailsAppAugment(val app: ApplicationWithSubscriptionFields) {
-      private val appAccess = app.access.asInstanceOf[Access.Standard]
-
-      final def toForm =
-        EditApplicationForm(app.id, app.details.name.value, app.details.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.details.grantLength.show())
 
       final def callDetailsDev: Future[Result] = underTest.applicationDetails(app.id)(loggedInDevRequest)
 

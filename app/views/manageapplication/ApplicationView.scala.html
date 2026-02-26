@@ -32,16 +32,39 @@
     }
 }
 
+@changeAppDetailsLink = @{
+    HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+}
+
+@appDescriptionOrEnterDescLink = @{
+    app.details.description.map(desc => Text(desc)).getOrElse(
+        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' " +
+                "class='govuk-link govuk-link--no-visited-state'>Enter application description</a>"))
+}
+
+@changeAppDescriptionIfPresentLink = @{
+    app.details.description.map(_ => changeAppDetailsLink).getOrElse(Text(""))
+}
 
 @defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
     @govukTable(Table(
         firstCellIsHeader = true,
         rows = Seq(
-            Seq(TableRow(content = Text(messages("application.details.name"))), TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName"))),
-            Seq(TableRow(content = Text(messages("application.details.environment"))), TableRow(content = Text(app.details.deployedTo.displayText), attributes = Map("id" -> "environment"))),
-            Seq(TableRow(content = Text(messages("application.details.created"))), TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn"))),
-            Seq(TableRow(content = Text(messages("application.details.last.api.call"))), TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")), attributes = Map("id" -> "lastAccess"))),
-            Seq(TableRow(content = Text(messages("application.details.description"))), TableRow(content = Text(app.details.description.getOrElse("None")), attributes = Map("id" -> "description")))
+            Seq(TableRow(content = Text(messages("application.details.name"))),
+                TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName")),
+                TableRow(content = changeAppDetailsLink)),
+            Seq(TableRow(content = Text(messages("application.details.environment"))),
+                TableRow(content = Text(app.details.deployedTo.displayText), attributes = Map("id" -> "environment")),
+                TableRow(content = Text(""))),
+            Seq(TableRow(content = Text(messages("application.details.created"))),
+                TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn")),
+                TableRow(content = Text(""))),
+            Seq(TableRow(content = Text(messages("application.details.last.api.call"))),
+                TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")), attributes = Map("id" -> "lastAccess")),
+                TableRow(content = Text(""))),
+            Seq(TableRow(content = Text(messages("application.details.description"))),
+                TableRow(content = appDescriptionOrEnterDescLink, attributes = Map("id" -> "description")),
+                TableRow(content = changeAppDescriptionIfPresentLink))
         )
     ))
 }
