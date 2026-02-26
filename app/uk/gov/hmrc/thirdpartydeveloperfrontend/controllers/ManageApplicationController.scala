@@ -20,9 +20,12 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future.successful
+
 import views.html.manageapplication.ApplicationDetailsView
+
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
