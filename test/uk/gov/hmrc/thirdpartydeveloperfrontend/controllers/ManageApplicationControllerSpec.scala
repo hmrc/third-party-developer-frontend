@@ -58,14 +58,14 @@ class ManageApplicationControllerSpec
     with ResponsibleIndividualFixtures
     with SubscriptionTestHelper {
 
-  val approvedApplication = appWithSubsFieldsOne
+  val approvedApplication       = appWithSubsFieldsOne
     .withAccess(standardAccessOne)
     .withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description")))
-  val sandboxApplication  = approvedApplication.inSandbox()
-  val inTestingApp        = approvedApplication.withState(appStateTesting)
-  val productionPrivApplication   = approvedStandardApplication.withAccess(privilegedAccess)
-  val productionRopcApplication   = approvedStandardApplication.withAccess(ropcAccess)
+  val sandboxApplication        = approvedApplication.inSandbox()
+  val inTestingApp              = approvedApplication.withState(appStateTesting)
+  val productionPrivApplication = approvedApplication.withAccess(privilegedAccess)
+  val productionRopcApplication = approvedApplication.withAccess(ropcAccess)
 
   val prodAppWithRespIndAndV1TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description"), checkInformation = Some(checkInformationOne)))
@@ -129,10 +129,12 @@ class ManageApplicationControllerSpec
         detailsShouldRenderThePageForAdminOrSandbox(adminSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a Privileged production app" in new Setup {
+        returnAgreementDetails()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
+        returnAgreementDetails()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionRopcApplication)
       }
@@ -194,37 +196,24 @@ class ManageApplicationControllerSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def detailsShouldRenderThePageForDeveloper(userSession: UserSession,
-                                               v1TOUWording: Option[String] = None,
-                                               v2TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields) = {
-
-      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
-      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
-        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
-      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
-
-      givenApplicationAction(application, userSession, subsData)
-
-      returnAgreementDetails()
-
-      val result = application.callDetailsDev
-      status(result) shouldBe OK
-      val doc    = Jsoup.parse(contentAsString(result))
-
+    private def assertCommonAppDetails(application: ApplicationWithSubscriptionFields, doc: Document, v1TOUWording: Option[String] = None, v2TOUWording: Option[String] = None) = {
       withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
       withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
       withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
       if (application.isStandard) {
+
         val redirectUriWording = application.access match {
           case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
           case _                                               => "None added"
         }
         withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUrisText", redirectUriWording) shouldBe true)
+        withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
       }
       withClue("ipAllowList")(elementIdentifiedByIdContainsText(
         doc,
         "ipAllowListText",
-        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added") shouldBe true)
+        s"${application.details.ipAllowlist.allowlist.toList.size} IP address added"
+      ) shouldBe true)
       withClue("teamMembers")(elementIdentifiedByIdContainsText(doc, "teamMembers", s"${application.collaborators.size.toString} team members") shouldBe true)
       withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
         doc,
@@ -246,7 +235,6 @@ class ManageApplicationControllerSpec
       ) shouldBe true)
       withClue("apiConfiguration")(elementIdentifiedByIdContainsText(doc, "apiConfiguration", "API configuration") shouldBe true)
 
-      withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
       if (application.isProduction) {
         withClue("fraudPrevention")(elementIdentifiedByIdContainsText(doc, "fraudPrevention", "Fraud prevention") shouldBe true)
         withClue("changePrivacyPolicy")(elementIdentifiedByIdContainsText(doc, "changePrivacyPolicy", "Change") shouldBe true)
@@ -266,11 +254,92 @@ class ManageApplicationControllerSpec
           case _             => succeed
         }
       }
+
     }
 
-    def detailsShouldRenderThePageForDeveloper(userSession: UserSession,
-                                               v1TOUWording: Option[String] = None,
-                                               v2TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields): Any = {
+//    def detailsShouldRenderThePageForDeveloper(userSession: UserSession,
+//                                               v1TOUWording: Option[String] = None,
+//                                               v2TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields) = {
+//
+//      val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
+//      val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
+//        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
+//      val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
+//
+//      givenApplicationAction(application, userSession, subsData)
+//
+//      returnAgreementDetails()
+//
+//      val result = application.callDetailsDev
+//      status(result) shouldBe OK
+//      val doc    = Jsoup.parse(contentAsString(result))
+//
+//      assertCommonAppDetails(application, doc, v1TOUWording, v2TOUWording)
+//
+//      withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
+//      withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
+//      withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
+//      if (application.isStandard) {
+//        val redirectUriWording = application.access match {
+//          case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
+//          case _                                               => "None added"
+//        }
+//        withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUrisText", redirectUriWording) shouldBe true)
+//      }
+//      withClue("ipAllowList")(elementIdentifiedByIdContainsText(
+//        doc,
+//        "ipAllowListText",
+//        s"${application.details.ipAllowlist.allowlist.toList.size} IP addresses added") shouldBe true)
+//      withClue("teamMembers")(elementIdentifiedByIdContainsText(doc, "teamMembers", s"${application.collaborators.size.toString} team members") shouldBe true)
+//      withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
+//        doc,
+//        "privacyPolicy",
+//        application.details.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()
+//      ) shouldBe true)
+//      withClue("termsAndConditions")(elementIdentifiedByIdContainsText(
+//        doc,
+//        "termsAndConditions",
+//        application.details.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()
+//      ) shouldBe true)
+//      withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
+//      withClue("subscription")(elementIdentifiedByIdContainsText(doc, "manage-subscriptions", "Change APIs") shouldBe true)
+//      withClue("apiSetupHeading")(elementIdentifiedByIdContainsText(doc, "apiSetupHeading", "API setup") shouldBe true)
+//      withClue("apiSetupHint")(elementIdentifiedByIdContainsText(
+//        doc,
+//        "apiSetupHint",
+//        "Some of the REST APIs you have added to this application need to be set up before you can use their endpoints."
+//      ) shouldBe true)
+//      withClue("apiConfiguration")(elementIdentifiedByIdContainsText(doc, "apiConfiguration", "API configuration") shouldBe true)
+//
+//      withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
+//      if (application.isProduction) {
+//        withClue("fraudPrevention")(elementIdentifiedByIdContainsText(doc, "fraudPrevention", "Fraud prevention") shouldBe true)
+//        withClue("changePrivacyPolicy")(elementIdentifiedByIdContainsText(doc, "changePrivacyPolicy", "Change") shouldBe true)
+//        withClue("changeTermsAndConditions")(elementIdentifiedByIdContainsText(doc, "changeTermsAndConditions", "Change") shouldBe true)
+//
+//        v1TOUWording match {
+//          case Some(wording) =>
+//            withClue("termsOfUse")(elementIdentifiedByIdContainsText(doc, "termsOfUse", "Terms of use") shouldBe true)
+//            withClue("termsOfUseAgreementV1")(elementIdentifiedByIdContainsText(doc, "termsOfUseAgreementV1", wording) shouldBe true)
+//          case _             => succeed
+//        }
+//        v2TOUWording match {
+//          case Some(wording) =>
+//            withClue("termsOfUse")(elementIdentifiedByIdContainsText(doc, "termsOfUse", "Terms of use") shouldBe true)
+//            withClue("termsOfUseAgreementV2")(elementIdentifiedByIdContainsText(doc, "termsOfUseAgreementV2", wording) shouldBe true)
+//            withClue("termsOfUseLinkV2")(elementIdentifiedByIdContainsText(doc, "termsOfUseLinkV2", "View") shouldBe true)
+//          case _             => succeed
+//        }
+//      }
+//    }
+
+    def detailsShouldRenderThePageForDeveloper(
+        userSession: UserSession,
+        v1TOUWording: Option[String] = None,
+        v2TOUWording: Option[String] = None
+      )(
+        application: ApplicationWithSubscriptionFields
+      ): Any = {
 
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
@@ -278,7 +347,6 @@ class ManageApplicationControllerSpec
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(application, userSession, subsData)
-      returnAgreementDetails()
 
       val result = application.callDetailsDev
       status(result) shouldBe OK
@@ -287,7 +355,13 @@ class ManageApplicationControllerSpec
       assertCommonAppDetails(application, doc)
     }
 
-    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession, v1TOUWording: Option[String] = None)(application: ApplicationWithSubscriptionFields): Assertion = {
+    def detailsShouldRenderThePageForAdminOrSandbox(
+        userSession: UserSession,
+        v1TOUWording: Option[String] = None,
+        v2TOUWording: Option[String] = None
+      )(
+        application: ApplicationWithSubscriptionFields
+      ): Assertion = {
 
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
@@ -300,7 +374,7 @@ class ManageApplicationControllerSpec
       status(result) shouldBe OK
       val doc    = Jsoup.parse(contentAsString(result))
 
-      assertCommonAppDetails(application, doc)
+      assertCommonAppDetails(application, doc, v1TOUWording, v2TOUWording)
 
       withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
       withClue("createClientSecrets")(elementIdentifiedByIdContainsText(
