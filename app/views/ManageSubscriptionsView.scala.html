@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
-@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups, leftHandNav: LeftHandNav)
+@this(devMain: DevMain, subscriptionGroups: SubscriptionGroups)
 
 @(
   role: Collaborator.Role,
@@ -58,7 +58,6 @@
         Crumb.viewAllApplications,
         Crumb.home
     ),
-    leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)),
     developerSession = Some(loggedIn)
 ) {
     <h1 class="govuk-heading-l">Manage API subscriptions</h1>
