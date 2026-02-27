@@ -26,10 +26,15 @@ import views.html.manageapplication.ApplicationDetailsView
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 @Singleton
@@ -39,6 +44,7 @@ class ManageApplicationController @Inject() (
     val applicationActionService: ApplicationActionService,
     val sessionService: SessionService,
     val fraudPreventionConfig: FraudPreventionConfig,
+    val termsOfUseService: TermsOfUseService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val clock: Clock,
@@ -57,7 +63,23 @@ class ManageApplicationController @Inject() (
         request.application,
         request.subscriptions,
         fraudPreventionConfig
-      )
+      ),
+      buildTermsOfUseViewModel
     )))
+  }
+
+  private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
+    val application = request.application
+
+    val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
+
+    val hasTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
+    latestTermsOfUseAgreementDetails match {
+      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
+        val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
+        TermsOfUseViewModel(hasTermsOfUse, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(Agreement(maybeName.getOrElse(emailAddress.text), date)))
+      }
+      case _                                                                                   => TermsOfUseViewModel(hasTermsOfUse, false, None)
+    }
   }
 }

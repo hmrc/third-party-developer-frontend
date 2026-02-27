@@ -42,6 +42,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -52,41 +54,87 @@ class ManageApplicationControllerSpec
     with SubmissionsTestData
     with ApplicationWithCollaboratorsFixtures
     with ApplicationWithSubscriptionFieldsData
+    with CheckInformationFixtures
+    with ResponsibleIndividualFixtures
     with SubscriptionTestHelper {
 
-  val approvedStandardApplication = appWithSubsFieldsOne.withAccess(standardAccessOne)
-    .modify(_.copy(description = Some("Some App Description")))
+  val approvedApplication       = appWithSubsFieldsOne
+    .withAccess(standardAccessOne)
     .withToken(ApplicationTokenData.one)
-  val sandboxStandardApplication  = approvedStandardApplication.inSandbox()
-  val productionPrivApplication   = approvedStandardApplication.withAccess(privilegedAccess)
-  val productionRopcApplication   = approvedStandardApplication.withAccess(ropcAccess)
+    .modify(_.copy(description = Some("Some App Description")))
+  val sandboxApplication        = approvedApplication.inSandbox()
+  val inTestingApp              = approvedApplication.withState(appStateTesting)
+  val productionPrivApplication = approvedApplication.withAccess(privilegedAccess)
+  val productionRopcApplication = approvedApplication.withAccess(ropcAccess)
+
+  val prodAppWithRespIndAndV1TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessOne).withToken(ApplicationTokenData.one)
+    .modify(_.copy(description = Some("Some App Description"), checkInformation = Some(checkInformationOne)))
+
+  val prodAppWithRespIndAndV2TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessWithSubmission).withToken(ApplicationTokenData.one)
+    .modify(_.copy(description = Some("Some App Description")))
+
+  val v1Agreement: TermsOfUseAgreementDetails = prodAppWithRespIndAndV1TermsOfUse.details.checkInformation.map((checkInfo: CheckInformation) =>
+    checkInfo.termsOfUseAgreements.map((toua: TermsOfUseAgreement) =>
+      TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version))
+    )
+  ).get.head
+  val v1AgreementWording: String              = s"Agreed by ${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}"
+
+  val v2Agreement = TermsOfUseAgreementDetails(
+    TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,
+    Some(TermsOfUseAcceptanceData.one.responsibleIndividual.fullName.value),
+    TermsOfUseAcceptanceData.one.dateTime,
+    None
+  )
+
+  val v2AgreementWording =
+    s"${v2Agreement.name.getOrElse(v2Agreement.emailAddress)} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(v2Agreement.date)}"
 
   "details" when {
     "logged in as a Developer on an application" should {
       "return the view for a standard production app with no change link" in new Setup {
-        detailsShouldRenderThePageForDeveloper(devSession)(approvedStandardApplication)
+        returnAgreementDetails()
+        detailsShouldRenderThePageForDeveloper(devSession)(approvedApplication)
+      }
+      "return the view for a standard production app with V1 terms of use" in new Setup {
+        returnAgreementDetails(v1Agreement)
+        detailsShouldRenderThePageForDeveloper(devSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
+      }
+      "return the view for a standard production app with V2 terms of use" in new Setup {
+        returnAgreementDetails(v2Agreement)
+        detailsShouldRenderThePageForDeveloper(devSession, v2TOUWording = Some(v2AgreementWording))(prodAppWithRespIndAndV2TermsOfUse)
       }
       "return the view for a standard sandbox app" in new Setup {
-        detailsShouldRenderThePageForAdminOrSandbox(devSession)(sandboxStandardApplication)
+        returnAgreementDetails()
+        detailsShouldRenderThePageForAdminOrSandbox(devSession)(sandboxApplication)
       }
       "return the view for a Privileged production app" in new Setup {
+        returnAgreementDetails()
         detailsShouldRenderThePageForDeveloper(devSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
+        returnAgreementDetails()
         detailsShouldRenderThePageForDeveloper(devSession)(productionRopcApplication)
       }
     }
 
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
+        returnAgreementDetails()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
-        detailsShouldRenderThePageForAdminOrSandbox(adminSession)(approvedStandardApplication)
+        detailsShouldRenderThePageForAdminOrSandbox(adminSession)(approvedApplication)
+      }
+      "return the view for a standard production app with link to view V1 terms of use" in new Setup {
+        returnAgreementDetails(v1Agreement)
+        detailsShouldRenderThePageForAdminOrSandbox(adminSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a Privileged production app" in new Setup {
+        returnAgreementDetails()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
+        returnAgreementDetails()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionRopcApplication)
       }
@@ -94,7 +142,7 @@ class ManageApplicationControllerSpec
 
     "not a team member on an application" should {
       "return see other" in new Setup {
-        val application = approvedStandardApplication
+        val application = approvedApplication
         givenApplicationAction(application, altDevSession)
 
         val result = application.callDetailsDev
@@ -105,7 +153,7 @@ class ManageApplicationControllerSpec
 
     "not logged in" should {
       "redirect to login" in new Setup {
-        val application = approvedStandardApplication
+        val application = approvedApplication
         givenApplicationAction(application, devSession)
 
         val result = application.callDetailsNotLoggedIn
@@ -130,6 +178,7 @@ class ManageApplicationControllerSpec
       applicationActionServiceMock,
       sessionServiceMock,
       fraudPreventionConfig,
+      termsOfUseServiceMock,
       mcc,
       cookieSigner,
       clock,
@@ -147,10 +196,19 @@ class ManageApplicationControllerSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    private def assertCommonAppDetails(application: ApplicationWithSubscriptionFields, doc: Document) = {
+    private def assertCommonAppDetails(application: ApplicationWithSubscriptionFields, doc: Document, v1TOUWording: Option[String] = None, v2TOUWording: Option[String] = None) = {
       withClue("name")(elementIdentifiedByIdContainsText(doc, "applicationName", application.name.value) shouldBe true)
       withClue("environment")(elementIdentifiedByIdContainsText(doc, "environment", application.details.deployedTo.displayText) shouldBe true)
-      withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("Enter application description")) shouldBe true)
+      withClue("description")(elementIdentifiedByIdContainsText(doc, "description", application.details.description.getOrElse("None")) shouldBe true)
+      if (application.isStandard) {
+
+        val redirectUriWording = application.access match {
+          case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
+          case _                                               => "None added"
+        }
+        withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUrisText", redirectUriWording) shouldBe true)
+        withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
+      }
       withClue("ipAllowList")(elementIdentifiedByIdContainsText(
         doc,
         "ipAllowListText",
@@ -177,23 +235,35 @@ class ManageApplicationControllerSpec
       ) shouldBe true)
       withClue("apiConfiguration")(elementIdentifiedByIdContainsText(doc, "apiConfiguration", "API configuration") shouldBe true)
 
-      if (application.isStandard) {
-        val redirectUriWording = application.access match {
-          case Access.Standard(redirectUris, _, _, _, _, _, _) => s"${redirectUris.size} of 5 URIs added"
-          case _                                               => "None added"
-        }
-        withClue("redirectUris")(elementIdentifiedByIdContainsText(doc, "redirectUrisText", redirectUriWording) shouldBe true)
-        withClue("delete")(elementIdentifiedByIdContainsText(doc, "delete-link", "Delete application") shouldBe true)
-      }
-
       if (application.isProduction) {
         withClue("fraudPrevention")(elementIdentifiedByIdContainsText(doc, "fraudPrevention", "Fraud prevention") shouldBe true)
         withClue("changePrivacyPolicy")(elementIdentifiedByIdContainsText(doc, "changePrivacyPolicy", "Change") shouldBe true)
         withClue("changeTermsAndConditions")(elementIdentifiedByIdContainsText(doc, "changeTermsAndConditions", "Change") shouldBe true)
+
+        v1TOUWording match {
+          case Some(wording) =>
+            withClue("termsOfUse")(elementIdentifiedByIdContainsText(doc, "termsOfUse", "Terms of use") shouldBe true)
+            withClue("termsOfUseAgreementV1")(elementIdentifiedByIdContainsText(doc, "termsOfUseAgreementV1", wording) shouldBe true)
+          case _             => succeed
+        }
+        v2TOUWording match {
+          case Some(wording) =>
+            withClue("termsOfUse")(elementIdentifiedByIdContainsText(doc, "termsOfUse", "Terms of use") shouldBe true)
+            withClue("termsOfUseAgreementV2")(elementIdentifiedByIdContainsText(doc, "termsOfUseAgreementV2", wording) shouldBe true)
+            withClue("termsOfUseLinkV2")(elementIdentifiedByIdContainsText(doc, "termsOfUseLinkV2", "View") shouldBe true)
+          case _             => succeed
+        }
       }
+
     }
 
-    def detailsShouldRenderThePageForDeveloper(userSession: UserSession)(application: ApplicationWithSubscriptionFields): Any = {
+    def detailsShouldRenderThePageForDeveloper(
+        userSession: UserSession,
+        v1TOUWording: Option[String] = None,
+        v2TOUWording: Option[String] = None
+      )(
+        application: ApplicationWithSubscriptionFields
+      ): Any = {
 
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
@@ -201,7 +271,6 @@ class ManageApplicationControllerSpec
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(application, userSession, subsData)
-      returnAgreementDetails()
 
       val result = application.callDetailsDev
       status(result) shouldBe OK
@@ -210,7 +279,13 @@ class ManageApplicationControllerSpec
       assertCommonAppDetails(application, doc)
     }
 
-    def detailsShouldRenderThePageForAdminOrSandbox(userSession: UserSession)(application: ApplicationWithSubscriptionFields): Assertion = {
+    def detailsShouldRenderThePageForAdminOrSandbox(
+        userSession: UserSession,
+        v1TOUWording: Option[String] = None,
+        v2TOUWording: Option[String] = None
+      )(
+        application: ApplicationWithSubscriptionFields
+      ): Assertion = {
 
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
@@ -223,7 +298,7 @@ class ManageApplicationControllerSpec
       status(result) shouldBe OK
       val doc    = Jsoup.parse(contentAsString(result))
 
-      assertCommonAppDetails(application, doc)
+      assertCommonAppDetails(application, doc, v1TOUWording, v2TOUWording)
 
       withClue("clientId")(elementIdentifiedByIdContainsText(doc, "clientId", application.details.token.clientId.value) shouldBe true)
       withClue("createClientSecrets")(elementIdentifiedByIdContainsText(
@@ -232,6 +307,12 @@ class ManageApplicationControllerSpec
         s"${application.details.token.clientSecrets.size} of 5 client secrets created"
       ) shouldBe true)
       withClue("pushSecret")(elementIdentifiedByIdContainsText(doc, "pushSecret", "Push secret") shouldBe true)
+
+      v1TOUWording match {
+        case Some(_) =>
+          withClue("termsOfUseLinkV1")(elementIdentifiedByIdContainsText(doc, "termsOfUseLinkV1", "View") shouldBe true)
+        case _       => succeed
+      }
     }
 
     implicit class ChangeDetailsAppAugment(val app: ApplicationWithSubscriptionFields) {

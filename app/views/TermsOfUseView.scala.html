@@ -25,7 +25,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav)
+@this(devMain: DevMain)
 
 
 @(applicationView: ApplicationViewModel, termsOfUseVersion: TermsOfUseVersion)(
@@ -45,7 +45,6 @@
     Crumb.viewAllApplications,
     Crumb.home 
   ),
-  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection))),
   developerSession = Some(loggedIn)
 ) {
   <h1 id="terms-of-use-header" class="govuk-heading-l">@title</h1>

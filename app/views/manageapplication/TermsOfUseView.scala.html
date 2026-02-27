@@ -1,0 +1,99 @@
+@*
+ * Copyright 2026 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsOfUseAcceptance
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.TermsOfUseViewModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary.ApplicationWithCollaboratorsSyntax
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.ImportantSubmissionData
+
+@this(govukTable: GovukTable)
+
+@(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+
+@getResponsibleIndividualName(access: Access): Option[String] = @{
+    access match {
+        case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, responsibleIndividual, _, _, _, _))) => Some(responsibleIndividual.fullName.value)
+        case _ => None
+    }
+}
+
+@showResponsibleIndividual(app: ApplicationWithCollaborators, maybeResponsibleIndividualName: Option[String]): Seq[TableRow] = @{
+    if(app.isApproved && app.hasResponsibleIndividual && maybeResponsibleIndividualName.isDefined) {
+        Seq(
+            TableRow(content = Text(messages("application.details.responsible.individual")), attributes = Map("id" -> "responsibleIndividual")),
+            TableRow(content = Text(maybeResponsibleIndividualName.get), attributes = Map("id" -> "responsibleIndividualName")),
+            TableRow(content = HtmlContent(
+                    s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)}' id='changeResponsibleIndividual'>${messages("""application.details.change""")}</a>"
+            ))
+        )
+    } else {
+        Seq.empty
+    }
+}
+
+@showTermsOfUse(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
+    if(termsOfUseModel.exists) {
+      if(termsOfUseModel.appUsesOldVersion) {
+          termsOfUseModel.agreement match {
+              case Some(agreement) =>
+                  Seq(
+                      TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+                      TableRow(content = Text(s"Agreed by ${agreement.who} on ${DateFormatter.formatTwoDigitDay(agreement.when)}"), attributes = Map("id" -> "termsOfUseAgreementV1")),
+                      TableRow(content = HtmlContent(
+                          if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                              s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.TermsOfUse.termsOfUse(app.id)}' id='termsOfUseLinkV1'>${messages("""application.details.view""")}</a>"}
+                      else ""
+                      ))
+                  )
+              case _ => Seq.empty
+          }
+      }
+      else {
+          termsOfUseModel.agreement match {
+              case Some(agreement) =>
+                  Seq(
+                      TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+                      TableRow(content = Text(s"${agreement.who} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(agreement.when)}"), attributes = Map("id" -> "termsOfUseAgreementV2")),
+                      TableRow(content = HtmlContent(
+                              s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseLinkV2'>${messages("""application.details.view""")}</a>"
+                      ))
+                  )
+              case _ => Seq.empty
+          }
+      }
+    } else {
+        Seq.empty
+    }
+}
+
+    @if((app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access)) || (termsOfUseModel.exists && termsOfUseModel.agreement.isDefined)) {
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.terms.of.use")</h2>
+
+    @govukTable(Table(
+        firstCellIsHeader = true,
+        rows = Seq(
+            showTermsOfUse(app, termsOfUseModel),
+            showResponsibleIndividual(app, getResponsibleIndividualName(app.access))
+        )
+    ))
+}
+
+
