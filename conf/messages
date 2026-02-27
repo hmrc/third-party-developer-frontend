@@ -224,6 +224,7 @@ application.details.last.api.call=Last API call
 application.details.description=Application description
 application.details.apis.added=APIs added
 application.details.apis.hint=These are the authenticated REST APIs you have added to your application.
+application.details.apis.hint2=The following links to the API documentation open in a new tab.
 application.details.api.name=Name
 application.details.apisetup=API setup
 application.details.apisetup.hint=Some of the REST APIs you have added to this application need to be set up before you can use their endpoints.
