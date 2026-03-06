@@ -35,14 +35,6 @@
     }
 }
 
-@changeAppDetailsLink = @{
-    if (app.isPermittedToEditAppDetails(loggedIn.developer)) {
-        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}'  id='changeAppDetailsLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
-    } else {
-        Text("")
-    }
-}
-
 @changeAppNameLink = @{
     if (app.isSandbox) {
         HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
@@ -65,7 +57,7 @@
 
 @changeAppDescriptionIfPresentLink = @{
     if (app.isPermittedToEditAppDetails(loggedIn.developer) && app.details.description.nonEmpty) {
-        changeAppDetailsLink
+        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}'  id='changeAppDetailsLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else {
         Text("")
     }
