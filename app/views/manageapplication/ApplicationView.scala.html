@@ -64,7 +64,7 @@
 }
 
 @changeAppDescriptionIfPresentLink = @{
-    if (app.isPermittedToEditAppDetails(loggedIn.developer) && app.details.description.nonEmpty && app.details.deployedTo.isSandbox) {
+    if (app.isPermittedToEditAppDetails(loggedIn.developer) && app.details.description.nonEmpty) {
         changeAppDetailsLink
     } else {
         Text("")
