@@ -18,9 +18,13 @@ package views
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
+import views.helper.CommonViewSpec
+import views.html.manageapplication.ApplicationDetailsView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
@@ -33,8 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.helper.CommonViewSpec
-import views.html.manageapplication.ApplicationDetailsView
 
 class ApplicationDetailsViewSpec
     extends CommonViewSpec
@@ -269,7 +271,7 @@ class ApplicationDetailsViewSpec
 
       "managing a sandbox application" should {
         val appWithNoDesc = sandboxApp.modify(_.copy(description = None))
-        val appWithDesc = sandboxApp.modify(_.copy(description = Some("Test description")))
+        val appWithDesc   = sandboxApp.modify(_.copy(description = Some("Test description")))
 
         "show 'Enter application description' link for description when logged in as a developer and there is no description" in new LoggedInUserIsDev {
           val page = Page(applicationDetailsView(ApplicationViewModel(appWithNoDesc, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
@@ -320,7 +322,7 @@ class ApplicationDetailsViewSpec
 
       "managing a production application" should {
         val appWithNoDesc = prodApp.modify(_.copy(description = None))
-        val appWithDesc = prodApp.modify(_.copy(description = Some("Test description")))
+        val appWithDesc   = prodApp.modify(_.copy(description = Some("Test description")))
 
         "show 'None' and no Change link for description when logged in as a developer and there is no description" in new LoggedInUserIsDev {
           val page = Page(applicationDetailsView(ApplicationViewModel(appWithNoDesc, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))

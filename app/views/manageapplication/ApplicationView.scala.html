@@ -44,7 +44,9 @@
 }
 
 @changeAppNameLink = @{
-    if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
+    if (app.isSandbox) {
+        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+    } else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
         HtmlContent(s"<a href='${controllers.routes.Details.requestChangeOfAppName(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else {
         Text("")
