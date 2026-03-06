@@ -16,6 +16,9 @@
 
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+@import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
 @import java.time.{Instant, ZoneId}
 @import java.time.format.DateTimeFormatter
@@ -23,7 +26,7 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+@(app: ApplicationWithCollaborators)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
 
 @formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
     maybeDate match {
@@ -32,18 +35,32 @@
     }
 }
 
-@changeAppDetailsLink = @{
-    HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+@changeAppNameLink = @{
+    if (app.isSandbox) {
+        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+    } else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
+        HtmlContent(s"<a href='${controllers.routes.Details.requestChangeOfAppName(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+    } else {
+        Text("")
+    }
 }
 
 @appDescriptionOrEnterDescLink = @{
-    app.details.description.map(desc => Text(desc)).getOrElse(
-        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' " +
-                "class='govuk-link govuk-link--no-visited-state'>Enter application description</a>"))
+    if (app.isPermittedToEditAppDetails(loggedIn.developer)) {
+        app.details.description.map(desc => Text(desc)).getOrElse(
+            HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' " +
+                    "class='govuk-link govuk-link--no-visited-state'>Enter application description</a>"))
+    } else {
+        app.details.description.map(desc => Text(desc)).getOrElse(Text("None"))
+    }
 }
 
 @changeAppDescriptionIfPresentLink = @{
-    app.details.description.map(_ => changeAppDetailsLink).getOrElse(Text(""))
+    if (app.isPermittedToEditAppDetails(loggedIn.developer) && app.details.description.nonEmpty) {
+        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}'  id='changeAppDetailsLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+    } else {
+        Text("")
+    }
 }
 
 @defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
@@ -52,7 +69,7 @@
         rows = Seq(
             Seq(TableRow(content = Text(messages("application.details.name"))),
                 TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName")),
-                TableRow(content = changeAppDetailsLink)),
+                TableRow(content = changeAppNameLink)),
             Seq(TableRow(content = Text(messages("application.details.environment"))),
                 TableRow(content = Text(app.details.deployedTo.displayText), attributes = Map("id" -> "environment")),
                 TableRow(content = Text(""))),
@@ -69,3 +86,22 @@
     ))
 }
 
+@if(app.isProductionAppButEditDetailsNotAllowed(loggedIn.developer)) {
+    <details class="govuk-details" data-module="govuk-details" id="changingAppDetails">
+        <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text" id="changingAppDetailsLink">
+                Changing these application details
+            </span>
+        </summary>
+
+        <div class="govuk-details__text">
+            <p class="govuk-body">Only admins can change application details. If you want to make changes, email:</p>
+
+            <ul class="govuk-list" id="changingAppDetailsAdminList">
+                @for(adminEmail <- app.collaborators.filter(_.role == Collaborator.Roles.ADMINISTRATOR).map(_.emailAddress.text)) {
+                    <li><a href="mailto:@adminEmail" class="govuk-link">@adminEmail</a></li>
+                }
+            </ul>
+        </div>
+    </details>
+}
