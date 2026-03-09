@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
@@ -189,8 +189,15 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   lazy val registerAuthAppResponse: RegisterAuthAppResponse                                           = RegisterAuthAppResponse("secret", authAppMfaId)
   lazy val registerSmsResponse: RegisterSmsResponse                                                   = RegisterSmsResponse(smsMfaId, verifiedSmsMfaDetail.mobileNumber)
 
-  val orgId        = OrganisationId.random
-  val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Member(userId)))
+  val orgId = OrganisationId.random
+
+  val organisation = Organisation(
+    orgId,
+    OrganisationName("My org"),
+    Organisation.OrganisationType.UkLimitedCompany,
+    instant,
+    Set(uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Collaborators.Member(userId))
+  )
 }
 
 trait IsOldJourneyStandardApplication extends HasApplication {

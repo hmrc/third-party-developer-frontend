@@ -29,7 +29,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
 }
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Collaborators, Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyOrchestratorConnectorMockModule
@@ -64,7 +64,7 @@ class DashboardServiceSpec extends AsyncHmrcSpec
   val userId = CollaboratorData.Administrator.one.userId
 
   val orgId        = OrganisationId.random
-  val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Member(userId)))
+  val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Collaborators.Member(userId)))
 
   "get the list of applications for the given user" should {
     "successfully return the list of applications" in new Setup {
