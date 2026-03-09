@@ -53,7 +53,7 @@ class ApplicationDetailsViewSpec
 
   case class Page(doc: Appendable) {
     lazy val body: Document                             = Jsoup.parse(doc.body)
-    lazy val environmentName: Element                   = body.getElementById("environmentName")
+    lazy val environmentName: Element                   = body.getElementById("environment")
     lazy val warning: Element                           = body.getElementById("terms-of-use-header")
     lazy val termsOfUse: Element                        = body.getElementById("termsOfUse")
     lazy val agreementDetails: Element                  = body.getElementById("termsOfUseAgreementDetails")
@@ -81,6 +81,40 @@ class ApplicationDetailsViewSpec
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val navSection: String                           = "details"
+
+    "rendering Environment " when {
+      "managing a principal application" should {
+
+        "Show Production when environment is Production" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+          val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "Production"
+        }
+        "Show QA when environment is QA" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+          val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "QA"
+        }
+      }
+
+      "managing a subordinate application" should {
+
+        "Show Sandbox when environment is Sandbox" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "Sandbox"
+        }
+        "Show Development when environment is Development" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "Development"
+        }
+      }
+    }
 
     "showing Change links for application details" when {
 
