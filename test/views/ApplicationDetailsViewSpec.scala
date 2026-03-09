@@ -16,13 +16,18 @@
 
 package views
 
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import views.helper.CommonViewSpec
 import views.html.manageapplication.ApplicationDetailsView
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, CheckInformation, TermsOfUseAgreement}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
@@ -35,9 +40,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 class ApplicationDetailsViewSpec
     extends CommonViewSpec
@@ -59,7 +61,9 @@ class ApplicationDetailsViewSpec
     lazy val termsOfUse: Element                        = body.getElementById("termsOfUse")
     lazy val agreementDetails: Element                  = body.getElementById("termsOfUseAgreementV1")
     lazy val termsOfUseLink: Element                    = body.getElementById("termsOfUseLinkV1")
+    lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
     lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")
+    lazy val termsAndConditions: Element                = body.getElementById("termsAndConditions")
     lazy val changeTermsConditionsLocationLink: Element = body.getElementById("changeTermsAndConditions")
     lazy val changingAppDetailsAdminList: Element       = body.getElementById("changingAppDetailsAdminList")
     lazy val descriptionCell: Element                   = body.getElementById("description")
@@ -118,22 +122,29 @@ class ApplicationDetailsViewSpec
     }
 
     "showing Change links for Privacy Policy and Terms & Conditions locations" when {
+      val notSet = "Not set"
       "managing a sandbox application" should {
 
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
-          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
+          page.privacyPolicy.text shouldBe notSet
           page.changePrivacyPolicyLocationLink shouldBe null
+          page.termsAndConditions.text shouldBe notSet
           page.changeTermsConditionsLocationLink shouldBe null
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {
 
-          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
+          page.privacyPolicy.text shouldBe notSet
           page.changePrivacyPolicyLocationLink shouldBe null
+          page.termsAndConditions.text shouldBe notSet
           page.changeTermsConditionsLocationLink shouldBe null
         }
       }
@@ -142,7 +153,9 @@ class ApplicationDetailsViewSpec
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
+          page.privacyPolicy.text shouldBe notSet
           page.changePrivacyPolicyLocationLink shouldBe null
+          page.termsAndConditions.text shouldBe notSet
           page.changeTermsConditionsLocationLink shouldBe null
         }
 
@@ -160,13 +173,15 @@ class ApplicationDetailsViewSpec
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
-          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
           page.termsOfUse shouldBe null
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {
-          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
           page.termsOfUse shouldBe null
         }
@@ -178,13 +193,15 @@ class ApplicationDetailsViewSpec
           val application                   = prodApp.withAccess(Access.Privileged())
 
           "show nothing when a developer" in new LoggedInUserIsDev {
-            val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
 
             page.termsOfUse shouldBe null
           }
 
           "show nothing when an admin" in new LoggedInUserIsAdmin {
-            val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
 
             page.termsOfUse shouldBe null
           }
@@ -195,13 +212,15 @@ class ApplicationDetailsViewSpec
           val application                   = prodApp.withAccess(Access.Ropc())
 
           "show nothing when a developer" in new LoggedInUserIsDev {
-            val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
 
             page.termsOfUse shouldBe null
           }
 
           "show nothing when an admin" in new LoggedInUserIsAdmin {
-            val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
 
             page.termsOfUse shouldBe null
           }
@@ -215,7 +234,8 @@ class ApplicationDetailsViewSpec
               val application                  = prodApp.withCheckInformation(checkInformation)
               val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
 
-              val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
 
               page.agreementDetails.text shouldBe "Not agreed"
               page.termsOfUseLink shouldBe null
@@ -228,7 +248,8 @@ class ApplicationDetailsViewSpec
               val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
               val application       = prodApp.withCheckInformation(checkInformation)
 
-              val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
               page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
               page.termsOfUseLink shouldBe null
@@ -243,7 +264,8 @@ class ApplicationDetailsViewSpec
 
               val application = prodApp.withCheckInformation(checkInformation)
 
-              val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
 
               page.agreementDetails.text shouldBe "Not agreed"
             }
@@ -256,7 +278,8 @@ class ApplicationDetailsViewSpec
 
               val application = prodApp.withCheckInformation(checkInformation)
 
-              val page = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
               page.agreementDetails.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
               page.termsOfUseLink.text shouldBe "View"

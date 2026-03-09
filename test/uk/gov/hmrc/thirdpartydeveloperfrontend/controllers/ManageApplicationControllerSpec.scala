@@ -215,16 +215,6 @@ class ManageApplicationControllerSpec
         s"${application.details.ipAllowlist.allowlist.toList.size} IP address added"
       ) shouldBe true)
       withClue("teamMembers")(elementIdentifiedByIdContainsText(doc, "teamMembers", s"${application.collaborators.size.toString} team members") shouldBe true)
-      withClue("privacyPolicy")(elementIdentifiedByIdContainsText(
-        doc,
-        "privacyPolicy",
-        application.details.privacyPolicyLocation.getOrElse(PrivacyPolicyLocations.NoneProvided).describe()
-      ) shouldBe true)
-      withClue("termsAndConditions")(elementIdentifiedByIdContainsText(
-        doc,
-        "termsAndConditions",
-        application.details.termsAndConditionsLocation.getOrElse(TermsAndConditionsLocations.NoneProvided).describe()
-      ) shouldBe true)
       withClue("grantLength")(elementIdentifiedByIdContainsText(doc, "grantLength", application.details.grantLength.show()) shouldBe true)
       withClue("subscription")(elementIdentifiedByIdContainsText(doc, "manage-subscriptions", "Change APIs") shouldBe true)
       withClue("apiSetupHeading")(elementIdentifiedByIdContainsText(doc, "apiSetupHeading", "API setup") shouldBe true)
@@ -237,8 +227,6 @@ class ManageApplicationControllerSpec
 
       if (application.isProduction) {
         withClue("fraudPrevention")(elementIdentifiedByIdContainsText(doc, "fraudPrevention", "Fraud prevention") shouldBe true)
-        withClue("changePrivacyPolicy")(elementIdentifiedByIdContainsText(doc, "changePrivacyPolicy", "Change") shouldBe true)
-        withClue("changeTermsAndConditions")(elementIdentifiedByIdContainsText(doc, "changeTermsAndConditions", "Change") shouldBe true)
 
         v1TOUWording match {
           case Some(wording) =>
