@@ -74,6 +74,8 @@
             Seq(TableRow(content = Text(messages("application.details.name"))),
                 TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName")),
                 TableRow(content = changeAppNameLink)),
+            Seq(TableRow(content = Text(messages("application.details.applicationid"))),
+                TableRow(content = Text(app.id.toString()), attributes = Map("id" -> "applicationId"), colspan = Some(2))),
             Seq(TableRow(content = Text(messages("application.details.environment"))),
                 TableRow(content = Text(envName), attributes = Map("id" -> "environment")),
                 TableRow(content = Text(""))),

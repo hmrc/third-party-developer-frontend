@@ -67,6 +67,7 @@ class ApplicationDetailsViewSpec
   case class Page(doc: Appendable) {
     lazy val body: Document                     = Jsoup.parse(doc.body)
     lazy val environmentName: Element           = body.getElementById("environment")
+    lazy val applicationId: Element             = body.getElementById("applicationId")
     lazy val descriptionCell: Element           = body.getElementById("description")
     lazy val changeAppDescriptionLink: Element  = body.getElementById("changeAppDetailsLink")
     lazy val applicationNameChangeLink: Element = body.getElementById("changeAppNameLink")
@@ -148,6 +149,13 @@ class ApplicationDetailsViewSpec
           val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
           page.environmentName.text shouldBe "Development"
         }
+      }
+    }
+
+    "rendering Application ID " should  {
+      "Show Production when environment is Production" in new LoggedInUserIsDev {
+        val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+        page.applicationId.text shouldBe prodApp.id.toString
       }
     }
 
