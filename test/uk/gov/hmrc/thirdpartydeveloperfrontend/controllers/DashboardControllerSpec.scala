@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, CollaboratorData}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.OrganisationId
-import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Collaborators, Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -58,7 +58,7 @@ class DashboardControllerSpec
 
     val userId       = CollaboratorData.Administrator.one.userId
     val orgId        = OrganisationId.random
-    val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Member(userId)))
+    val organisation = Organisation(orgId, OrganisationName("My org"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Collaborators.Member(userId)))
 
   }
 

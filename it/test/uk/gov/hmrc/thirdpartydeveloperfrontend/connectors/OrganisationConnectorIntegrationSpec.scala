@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{OrganisationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Member, Organisation, OrganisationName}
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Collaborators, Organisation, OrganisationName}
 
 class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
   private val stubConfig = Configuration("microservice.services.api-platform-organisation.port" -> stubPort)
@@ -47,7 +47,7 @@ class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec 
 
     val userId       = UserId.random
     val orgId        = OrganisationId.random
-    val organisation = Organisation(orgId, OrganisationName("Org name"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Member(userId)))
+    val organisation = Organisation(orgId, OrganisationName("Org name"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Collaborators.Member(userId)))
   }
 
   "api" should {
