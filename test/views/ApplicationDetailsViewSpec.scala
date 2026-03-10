@@ -237,7 +237,7 @@ class ApplicationDetailsViewSpec
               val page =
                 Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
 
-              page.agreementDetails.text shouldBe "Not agreed"
+              page.agreementDetails shouldBe null
               page.termsOfUseLink shouldBe null
             }
 
@@ -267,7 +267,7 @@ class ApplicationDetailsViewSpec
               val page =
                 Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
 
-              page.agreementDetails.text shouldBe "Not agreed"
+              page.agreementDetails shouldBe null
             }
 
             "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
