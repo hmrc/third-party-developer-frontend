@@ -96,14 +96,14 @@ class ApplicationDetailsViewSpec
   val prodAppWithRespIndAndV2TermsOfUse = prodApp.withAccess(standardAccessWithSubmission).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description")))
 
-  val v2Agreement                       = TermsOfUseAgreementDetails(
+  val v2Agreement = TermsOfUseAgreementDetails(
     TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,
     Some(TermsOfUseAcceptanceData.one.responsibleIndividual.fullName.value),
     TermsOfUseAcceptanceData.one.dateTime,
     None
   )
 
-  val v2AgreementWording                =
+  val v2AgreementWording =
     s"${v2Agreement.name.getOrElse(v2Agreement.emailAddress)} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(v2Agreement.date)}"
 
   trait LoggedInUserIsAdmin {
@@ -152,7 +152,7 @@ class ApplicationDetailsViewSpec
       }
     }
 
-    "rendering Application ID " should  {
+    "rendering Application ID " should {
       "Show Production when environment is Production" in new LoggedInUserIsDev {
         val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
         page.applicationId.text shouldBe prodApp.id.toString
@@ -496,6 +496,23 @@ class ApplicationDetailsViewSpec
 
           page.applicationNameChangeLink shouldBe null
           page.body.getElementById("applicationName").text shouldBe prodApp.details.name.toString
+        }
+      }
+
+      "managing a non-standard (ROPC or Privileged) application" should {
+
+        "show no Change link for application name when a non-standard sandbox app and logged in as an admin" in new LoggedInUserIsAdmin {
+          val application = sandboxApp.withAccess(Access.Ropc())
+          val page        = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+
+          page.applicationNameChangeLink shouldBe null
+        }
+
+        "show no Change link for application name when a non-standard production app and logged in as an admin" in new LoggedInUserIsAdmin {
+          val application = prodApp.withAccess(Access.Privileged())
+          val page        = Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+
+          page.applicationNameChangeLink shouldBe null
         }
       }
     }
