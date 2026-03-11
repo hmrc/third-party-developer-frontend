@@ -26,7 +26,11 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+@(app: ApplicationWithCollaborators)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
+
+@principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
+@subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
+@envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}
 
 @formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
     maybeDate match {
@@ -70,8 +74,10 @@
             Seq(TableRow(content = Text(messages("application.details.name"))),
                 TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName")),
                 TableRow(content = changeAppNameLink)),
+            Seq(TableRow(content = Text(messages("application.details.applicationid"))),
+                TableRow(content = Text(app.id.toString()), attributes = Map("id" -> "applicationId"), colspan = Some(2))),
             Seq(TableRow(content = Text(messages("application.details.environment"))),
-                TableRow(content = Text(app.details.deployedTo.displayText), attributes = Map("id" -> "environment")),
+                TableRow(content = Text(envName), attributes = Map("id" -> "environment")),
                 TableRow(content = Text(""))),
             Seq(TableRow(content = Text(messages("application.details.created"))),
                 TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn")),

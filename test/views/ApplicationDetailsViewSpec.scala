@@ -16,6 +16,9 @@
 
 package views
 
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import views.helper.CommonViewSpec
@@ -26,7 +29,14 @@ import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat.Appendable
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, CheckInformation, TermsOfUseAgreement}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
+  ApplicationTokenData,
+  ApplicationWithCollaborators,
+  ApplicationWithCollaboratorsFixtures,
+  CheckInformation,
+  TermsOfUseAgreement
+}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividualFixtures, TermsOfUseAcceptanceData}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -35,6 +45,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, T
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -43,6 +55,7 @@ class ApplicationDetailsViewSpec
     with WithCSRFAddToken
     with CommonSessionFixtures
     with ApplicationWithCollaboratorsFixtures
+    with ResponsibleIndividualFixtures
     with FixedClock {
 
   implicit class AppAugment(val app: ApplicationWithCollaborators) {
@@ -52,23 +65,46 @@ class ApplicationDetailsViewSpec
   val applicationDetailsView = app.injector.instanceOf[ApplicationDetailsView]
 
   case class Page(doc: Appendable) {
-    lazy val body: Document                             = Jsoup.parse(doc.body)
-    lazy val environmentName: Element                   = body.getElementById("environmentName")
-    lazy val warning: Element                           = body.getElementById("terms-of-use-header")
-    lazy val termsOfUse: Element                        = body.getElementById("termsOfUse")
-    lazy val agreementDetails: Element                  = body.getElementById("termsOfUseAgreementDetails")
-    lazy val readLink: Element                          = body.getElementById("termsOfUseReadLink")
-    lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicyLocation")
-    lazy val changeTermsConditionsLocationLink: Element = body.getElementById("changeTermsAndConditionsLocation")
+    lazy val body: Document                     = Jsoup.parse(doc.body)
+    lazy val environmentName: Element           = body.getElementById("environment")
+    lazy val applicationId: Element             = body.getElementById("applicationId")
+    lazy val descriptionCell: Element           = body.getElementById("description")
+    lazy val changeAppDescriptionLink: Element  = body.getElementById("changeAppDetailsLink")
+    lazy val applicationNameChangeLink: Element = body.getElementById("changeAppNameLink")
+    lazy val warning: Element                   = body.getElementById("terms-of-use-header")
+
+    lazy val termsOfUse: Element                = body.getElementById("termsOfUse")
+    lazy val termsOfUseAgreementV1: Element     = body.getElementById("termsOfUseAgreementV1")
+    lazy val termsOfUseLinkV1: Element          = body.getElementById("termsOfUseLinkV1")
+    lazy val termsOfUseAgreementV2: Element     = body.getElementById("termsOfUseAgreementV2")
+    lazy val termsOfUseLinkV2: Element          = body.getElementById("termsOfUseLinkV2")
+    lazy val responsibleIndividual: Element     = body.getElementById("responsibleIndividual")
+    lazy val responsibleIndividualName: Element = body.getElementById("responsibleIndividualName")
+    lazy val responsibleIndividualLink: Element = body.getElementById("changeResponsibleIndividual")
+
+    lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
+    lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")
+    lazy val termsAndConditions: Element                = body.getElementById("termsAndConditions")
+    lazy val changeTermsConditionsLocationLink: Element = body.getElementById("changeTermsAndConditions")
     lazy val changingAppDetailsAdminList: Element       = body.getElementById("changingAppDetailsAdminList")
-    lazy val descriptionCell: Element                   = body.getElementById("description")
-    lazy val changeAppDescriptionLink: Element          = body.getElementById("changeAppDetailsLink")
-    lazy val applicationNameChangeLink: Element         = body.getElementById("changeAppNameLink")
   }
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", instant)))
   val sandboxApp          = standardApp.inSandbox()
   val prodApp             = standardApp.withEnvironment(Environment.PRODUCTION)
+
+  val prodAppWithRespIndAndV2TermsOfUse = prodApp.withAccess(standardAccessWithSubmission).withToken(ApplicationTokenData.one)
+    .modify(_.copy(description = Some("Some App Description")))
+
+  val v2Agreement                       = TermsOfUseAgreementDetails(
+    TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,
+    Some(TermsOfUseAcceptanceData.one.responsibleIndividual.fullName.value),
+    TermsOfUseAcceptanceData.one.dateTime,
+    None
+  )
+
+  val v2AgreementWording                =
+    s"${v2Agreement.name.getOrElse(v2Agreement.emailAddress)} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(v2Agreement.date)}"
 
   trait LoggedInUserIsAdmin {
     implicit val loggedIn: UserSession = adminSession
@@ -81,6 +117,286 @@ class ApplicationDetailsViewSpec
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
     implicit val navSection: String                           = "details"
+
+    "rendering Environment " when {
+      "managing a principal application" should {
+
+        "Show Production when environment is Production" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+          val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "Production"
+        }
+        "Show QA when environment is QA" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+          val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "QA"
+        }
+      }
+
+      "managing a subordinate application" should {
+
+        "Show Sandbox when environment is Sandbox" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
+          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "Sandbox"
+        }
+        "Show Development when environment is Development" in new LoggedInUserIsDev {
+          when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
+          when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
+          val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+          page.environmentName.text shouldBe "Development"
+        }
+      }
+    }
+
+    "rendering Application ID " should  {
+      "Show Production when environment is Production" in new LoggedInUserIsDev {
+        val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+        page.applicationId.text shouldBe prodApp.id.toString
+      }
+    }
+
+    "showing Change links for Privacy Policy and Terms & Conditions locations" when {
+      val notSet = "Not set"
+      "managing a sandbox application" should {
+
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+
+          page.privacyPolicy.text shouldBe notSet
+          page.changePrivacyPolicyLocationLink shouldBe null
+          page.termsAndConditions.text shouldBe notSet
+          page.changeTermsConditionsLocationLink shouldBe null
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+
+          page.privacyPolicy.text shouldBe notSet
+          page.changePrivacyPolicyLocationLink shouldBe null
+          page.termsAndConditions.text shouldBe notSet
+          page.changeTermsConditionsLocationLink shouldBe null
+        }
+      }
+      "managing a production application" should {
+
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+
+          page.privacyPolicy.text shouldBe notSet
+          page.changePrivacyPolicyLocationLink shouldBe null
+          page.termsAndConditions.text shouldBe notSet
+          page.changeTermsConditionsLocationLink shouldBe null
+        }
+
+        "show Change links when an admin" in new LoggedInUserIsAdmin {
+          val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+
+          page.changePrivacyPolicyLocationLink.text should startWith("Change")
+          page.changeTermsConditionsLocationLink.text should startWith("Change")
+        }
+      }
+    }
+
+    "showing Terms of Use details" when {
+      "managing a sandbox application" should {
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+
+          page.termsOfUse shouldBe null
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+
+          page.termsOfUse shouldBe null
+        }
+      }
+
+      "managing a production application" when {
+        "the app is a privileged app" should {
+          val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(exists = false)
+          val application                   = prodApp.withAccess(Access.Privileged())
+
+          "show nothing when a developer" in new LoggedInUserIsDev {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
+
+            page.termsOfUse shouldBe null
+          }
+
+          "show nothing when an admin" in new LoggedInUserIsAdmin {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
+
+            page.termsOfUse shouldBe null
+          }
+        }
+
+        "the app is an ROPC app" should {
+          val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(exists = false)
+          val application                   = prodApp.withAccess(Access.Ropc())
+
+          "show nothing when a developer" in new LoggedInUserIsDev {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
+
+            page.termsOfUse shouldBe null
+          }
+
+          "show nothing when an admin" in new LoggedInUserIsAdmin {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
+
+            page.termsOfUse shouldBe null
+          }
+        }
+
+        "the app is a standard app" when {
+
+          "the user is a developer" should {
+            "have no link to read and agree when the terms of use have not been agreed" in new LoggedInUserIsDev {
+              val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
+              val application                  = prodApp.withCheckInformation(checkInformation)
+              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
+
+              page.termsOfUseAgreementV1 shouldBe null
+              page.termsOfUseLinkV1 shouldBe null
+              page.termsOfUseAgreementV2 shouldBe null
+              page.termsOfUseLinkV2 shouldBe null
+            }
+
+            "show V1 agreement details and have no link to read when the terms of use have been agreed" in new LoggedInUserIsDev {
+              val emailAddress      = "user@example.com".toLaxEmail
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
+              val version           = "1.0"
+              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
+              val application       = prodApp.withCheckInformation(checkInformation)
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+
+              page.termsOfUseAgreementV1.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
+              page.termsOfUseLinkV1 shouldBe null
+            }
+
+            "show V2 agreement details and have no link to read when the terms of use have been agreed" in new LoggedInUserIsDev {
+
+              val termsOfUseViewModelV2 = TermsOfUseViewModel(true, false, Some(Agreement(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date)))
+              val page                  =
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelV2
+                ))
+
+              page.termsOfUseAgreementV2.text shouldBe v2AgreementWording
+              page.termsOfUseLinkV2 shouldBe null
+            }
+          }
+
+          "the user is an administrator" should {
+
+            "have no link to read and agree when the terms of use have not been agreed" in new LoggedInUserIsAdmin {
+              val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
+              val termsOfUseViewModelNotAgreed = termsOfUseViewModel.copy(agreement = None)
+
+              val application = prodApp.withCheckInformation(checkInformation)
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotAgreed))
+
+              page.termsOfUseAgreementV1 shouldBe null
+            }
+
+            "show agreement details, have a link to read and not show a warning when the terms of use have been agreed" in new LoggedInUserIsAdmin {
+              val emailAddress      = "user@example.com".toLaxEmail
+              val expectedTimeStamp = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC).format(instant)
+              val version           = "1.0"
+              val checkInformation  = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement(emailAddress, instant, version)))
+
+              val application = prodApp.withCheckInformation(checkInformation)
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
+
+              page.termsOfUseAgreementV1.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
+              page.termsOfUseLinkV1.text shouldBe "View"
+              page.termsOfUseLinkV1.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
+              page.warning shouldBe null
+            }
+          }
+        }
+      }
+    }
+
+    "showing Responsible individual details" when {
+      "managing a sandbox application" should {
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+
+          page.responsibleIndividual shouldBe null
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val page =
+            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+
+          page.responsibleIndividual shouldBe null
+        }
+      }
+
+      "managing a production application" should {
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = true, appUsesOldVersion = false)
+
+        "show nothing when a developer" in new LoggedInUserIsDev {
+          val page =
+            Page(applicationDetailsView(
+              ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+              List.empty,
+              None,
+              termsOfUseViewModelForSandboxApp
+            ))
+
+          page.responsibleIndividual.text() shouldBe "Responsible individual"
+          page.responsibleIndividualName.text() shouldBe responsibleIndividualOne.fullName.toString()
+          page.responsibleIndividualLink.text() shouldBe "View"
+        }
+
+        "show nothing when an admin" in new LoggedInUserIsAdmin {
+          val page =
+            Page(applicationDetailsView(
+              ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+              List.empty,
+              None,
+              termsOfUseViewModelForSandboxApp
+            ))
+
+          page.responsibleIndividual.text() shouldBe "Responsible individual"
+          page.responsibleIndividualName.text() shouldBe responsibleIndividualOne.fullName.toString()
+          page.responsibleIndividualLink.text() shouldBe "Change"
+        }
+      }
+    }
 
     "showing Change links for application details" when {
 
