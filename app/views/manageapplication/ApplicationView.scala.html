@@ -14,11 +14,12 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @import java.time.{Instant, ZoneId}
 @import java.time.format.DateTimeFormatter
@@ -30,7 +31,9 @@
 
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
-@envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}
+@envName = @{ if(app.deployedTo.isProduction) principalEnvName else subordinateEnvName}
+
+@changeDetailsRoute = @{routes.Details.changeDetails(app.id)}
 
 @formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
     maybeDate match {
@@ -40,20 +43,19 @@
 }
 
 @changeAppNameLink = @{
-    if (app.isSandbox) {
-        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+    if (app.isSandbox && app.isPermittedToEditAppDetails(loggedIn.developer)) {
+        HtmlContent(s"<a href='${routes.Details.changeDetails(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
-        HtmlContent(s"<a href='${controllers.routes.Details.requestChangeOfAppName(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+        HtmlContent(s"<a href='${routes.Details.requestChangeOfAppName(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else {
-        Text("")
+        Empty
     }
 }
 
 @appDescriptionOrEnterDescLink = @{
     if (app.isPermittedToEditAppDetails(loggedIn.developer)) {
         app.details.description.map(desc => Text(desc)).getOrElse(
-            HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}' " +
-                    "class='govuk-link govuk-link--no-visited-state'>Enter application description</a>"))
+            HtmlContent(s"<a href='$changeDetailsRoute' class='govuk-link govuk-link--no-visited-state'>Enter application description</a>"))
     } else {
         app.details.description.map(desc => Text(desc)).getOrElse(Text("None"))
     }
@@ -61,36 +63,36 @@
 
 @changeAppDescriptionIfPresentLink = @{
     if (app.isPermittedToEditAppDetails(loggedIn.developer) && app.details.description.nonEmpty) {
-        HtmlContent(s"<a href='${controllers.routes.Details.changeDetails(app.id)}'  id='changeAppDetailsLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+        HtmlContent(s"<a href='$changeDetailsRoute' id='changeAppDetailsLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else {
-        Text("")
+        Empty
     }
 }
 
-@defining(DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)) { dateFormatter =>
-    @govukTable(Table(
-        firstCellIsHeader = true,
-        rows = Seq(
-            Seq(TableRow(content = Text(messages("application.details.name"))),
-                TableRow(content = Text(app.details.name.toString()), attributes = Map("id" -> "applicationName")),
-                TableRow(content = changeAppNameLink)),
-            Seq(TableRow(content = Text(messages("application.details.applicationid"))),
-                TableRow(content = Text(app.id.toString()), attributes = Map("id" -> "applicationId"), colspan = Some(2))),
-            Seq(TableRow(content = Text(messages("application.details.environment"))),
-                TableRow(content = Text(envName), attributes = Map("id" -> "environment")),
-                TableRow(content = Text(""))),
-            Seq(TableRow(content = Text(messages("application.details.created"))),
-                TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn")),
-                TableRow(content = Text(""))),
-            Seq(TableRow(content = Text(messages("application.details.last.api.call"))),
-                TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")), attributes = Map("id" -> "lastAccess")),
-                TableRow(content = Text(""))),
-            Seq(TableRow(content = Text(messages("application.details.description"))),
-                TableRow(content = appDescriptionOrEnterDescLink, attributes = Map("id" -> "description")),
-                TableRow(content = changeAppDescriptionIfPresentLink))
-        )
-    ))
-}
+@dateFormatter = @{DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneId.of("Europe/London")).withLocale(Locale.UK)}
+
+@govukTable(Table(
+    firstCellIsHeader = true,
+    rows = Seq(
+        Seq(TableRow(content = Text(messages("application.details.name"))),
+            TableRow(content = Text(app.details.name.value), attributes = Map("id" -> "applicationName")),
+            TableRow(content = changeAppNameLink)),
+        Seq(TableRow(content = Text(messages("application.details.applicationid"))),
+            TableRow(content = Text(app.id.toString()), attributes = Map("id" -> "applicationId"), colspan = Some(2))),
+        Seq(TableRow(content = Text(messages("application.details.environment"))),
+            TableRow(content = Text(envName), attributes = Map("id" -> "environment")),
+            TableRow(content = Empty)),
+        Seq(TableRow(content = Text(messages("application.details.created"))),
+            TableRow(content = Text(dateFormatter.format(app.details.createdOn)), attributes = Map("id" -> "createdOn")),
+            TableRow(content = Empty)),
+        Seq(TableRow(content = Text(messages("application.details.last.api.call"))),
+            TableRow(content = Text(formatMaybeDate(app.details.lastAccess, dateFormatter, "No API called")), attributes = Map("id" -> "lastAccess")),
+            TableRow(content = Empty)),
+        Seq(TableRow(content = Text(messages("application.details.description"))),
+            TableRow(content = appDescriptionOrEnterDescLink, attributes = Map("id" -> "description")),
+            TableRow(content = changeAppDescriptionIfPresentLink))
+    )
+))
 
 @if(app.isProductionAppButEditDetailsNotAllowed(loggedIn.developer)) {
     <details class="govuk-details" data-module="govuk-details" id="changingAppDetails">
