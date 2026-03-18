@@ -56,14 +56,14 @@ class RequestProductionCredentials @Inject() (
       if (isNewTouUplift) {
         ApplicationCommands.SubmitTermsOfUseApproval(
           Actors.AppCollaborator(requestedBy.developer.email),
-          instant(),
+          instant,
           requestedBy.developer.displayedName,
           requestedBy.developer.email
         )
       } else {
         ApplicationCommands.SubmitApplicationApprovalRequest(
           Actors.AppCollaborator(requestedBy.developer.email),
-          instant(),
+          instant,
           requestedBy.developer.displayedName,
           requestedBy.developer.email
         )

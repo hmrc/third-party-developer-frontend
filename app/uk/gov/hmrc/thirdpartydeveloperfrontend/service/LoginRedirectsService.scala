@@ -39,7 +39,7 @@ class LoginRedirectsService @Inject() (
   }
 
   def addLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, newRedirectUri: LoginRedirectUri)(implicit hc: HeaderCarrier) = {
-    issueCommand(application.id, ApplicationCommands.AddLoginRedirectUri(actor, newRedirectUri, instant()))
+    issueCommand(application.id, ApplicationCommands.AddLoginRedirectUri(actor, newRedirectUri, instant))
   }
 
   def changeLoginRedirect(
@@ -49,10 +49,10 @@ class LoginRedirectsService @Inject() (
       newRedirectUri: LoginRedirectUri
     )(implicit hc: HeaderCarrier
     ) = {
-    issueCommand(application.id, ApplicationCommands.ChangeLoginRedirectUri(actor, originalRedirectUri, newRedirectUri, instant()))
+    issueCommand(application.id, ApplicationCommands.ChangeLoginRedirectUri(actor, originalRedirectUri, newRedirectUri, instant))
   }
 
   def deleteLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, redirectUriToDelete: LoginRedirectUri)(implicit hc: HeaderCarrier) = {
-    issueCommand(application.id, ApplicationCommands.DeleteLoginRedirectUri(actor, redirectUriToDelete, instant()))
+    issueCommand(application.id, ApplicationCommands.DeleteLoginRedirectUri(actor, redirectUriToDelete, instant))
   }
 }
