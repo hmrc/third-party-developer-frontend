@@ -82,16 +82,13 @@
         </span>
       </label>
       <textarea
-        class="js-char-count govuk-textarea @if(form.errors("description").nonEmpty) {govuk-textarea--error}"
+        class="govuk-textarea @if(form.errors("description").nonEmpty) {govuk-textarea--error}"
         id="description"
         name="description"
         cols="50"
         rows="3"
         maxlength="250"
-        aria-labelledby="description-label-hint description-label-error"
-      >
-        @form.data.get("description")
-      </textarea>
+        aria-labelledby="description-label-hint description-label-error">@form.data.get("description")</textarea>
     </div>
 
     <div class="govuk-form-group @if(form.errors("privacyPolicyUrl").nonEmpty) {govuk-form-group--error}">

@@ -423,7 +423,7 @@ class ApplicationDetailsViewSpec
 
           page.descriptionCell.text shouldBe "Test description"
           page.changeAppDescriptionLink.text shouldBe "Change"
-          page.changeAppDescriptionLink.attr("href") shouldBe routes.Details.changeDetails(appWithDesc.id).url
+          page.changeAppDescriptionLink.attr("href") shouldBe routes.ManageApplicationController.changeAppNameAndDesc(appWithDesc.id).url
         }
 
         "show description with Change link for description when logged in as an admin and there is a description" in new LoggedInUserIsAdmin {
@@ -431,14 +431,14 @@ class ApplicationDetailsViewSpec
 
           page.descriptionCell.text shouldBe "Test description"
           page.changeAppDescriptionLink.text shouldBe "Change"
-          page.changeAppDescriptionLink.attr("href") shouldBe routes.Details.changeDetails(appWithDesc.id).url
+          page.changeAppDescriptionLink.attr("href") shouldBe routes.ManageApplicationController.changeAppNameAndDesc(appWithDesc.id).url
         }
 
         "show Change link for application name when logged in as a developer" in new LoggedInUserIsDev {
           val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
           page.applicationNameChangeLink.text shouldBe "Change"
-          page.applicationNameChangeLink.attr("href") shouldBe routes.Details.changeDetails(sandboxApp.id).url
+          page.applicationNameChangeLink.attr("href") shouldBe routes.ManageApplicationController.changeAppNameAndDesc(sandboxApp.id).url
           page.body.getElementById("applicationName").text shouldBe sandboxApp.details.name.toString
         }
 
@@ -446,7 +446,7 @@ class ApplicationDetailsViewSpec
           val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
           page.applicationNameChangeLink.text shouldBe "Change"
-          page.applicationNameChangeLink.attr("href") shouldBe routes.Details.changeDetails(sandboxApp.id).url
+          page.applicationNameChangeLink.attr("href") shouldBe routes.ManageApplicationController.changeAppNameAndDesc(sandboxApp.id).url
           page.body.getElementById("applicationName").text shouldBe sandboxApp.details.name.toString
         }
       }

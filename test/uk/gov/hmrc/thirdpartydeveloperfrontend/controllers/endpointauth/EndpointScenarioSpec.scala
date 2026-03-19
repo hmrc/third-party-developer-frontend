@@ -377,6 +377,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
           "termsAndConditionsUrl" -> termsConditionsUrl,
           "grantLength"           -> "1"
         )
+      case Endpoint("POST", "/developer/applications/:id/change-app-name-and-desc", _)                         => Map(
+          "applicationName" -> applicationName.value,
+          "description"     -> "my description"
+        )
       case Endpoint("POST", "/developer/applications/add/switch", _)                                           => Map("applicationId" -> applicationId.toString())
       case Endpoint("POST", "/developer/profile/email-preferences/topics-from-subscriptions", _)               =>
         Map("topic[]" -> "BUSINESS_AND_POLICY", "applicationId" -> applicationId.toString())

@@ -330,7 +330,7 @@ package object controllers {
     Forms.text.verifying(applicationNameInvalidKeyLengthAndCharacters, s => ValidatedApplicationName.validate(s).isValid)
   }
 
-  val applicationNameContraint: Constraint[String] = Constraint("constraints.applicationname") { plainText =>
+  val applicationNameConstraint: Constraint[String] = Constraint("constraints.applicationname") { plainText =>
     ValidatedApplicationName.validate(plainText) match {
       case Validated.Invalid(e) => Invalid(Seq(ValidationError(applicationNameInvalidKeyLengthAndCharacters)))
       case Validated.Valid(e)   => Valid
