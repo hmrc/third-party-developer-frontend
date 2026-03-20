@@ -18,7 +18,11 @@ package views
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import views.helper.CommonViewSpec
+import views.html.manageapplication.ChangeAppNameAndDescView
+
 import play.api.test.FakeRequest
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
@@ -26,10 +30,8 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeAppNameAndDescForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementExistsContainsText, textareaExistsWithText, elementIdentifiedByIdContainsText}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementExistsContainsText, elementIdentifiedByIdContainsText, textareaExistsWithText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.helper.CommonViewSpec
-import views.html.manageapplication.ChangeAppNameAndDescView
 
 class ChangeAppNameAndDescViewSpec extends CommonViewSpec
     with WithCSRFAddToken
@@ -47,8 +49,8 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
 
     def renderPage(application: ApplicationWithCollaborators) = {
 
-      val loggedIn              = adminDeveloper.loggedIn
-      val request               = FakeRequest().withCSRFToken
+      val loggedIn = adminDeveloper.loggedIn
+      val request  = FakeRequest().withCSRFToken
 
       val form = ChangeAppNameAndDescForm.form.fill(
         ChangeAppNameAndDescForm(application.details.name.value, application.details.description)
@@ -86,9 +88,9 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
     }
 
     "pre-populate existing data fields" in {
-      val aDescription           = Some("a helpful description")
-      val application            = standardApp.inSandbox().withState(appStateTesting).modify(_.copy(description = aDescription))
-      val document               = Jsoup.parse(renderPage(application).body)
+      val aDescription = Some("a helpful description")
+      val application  = standardApp.inSandbox().withState(appStateTesting).modify(_.copy(description = aDescription))
+      val document     = Jsoup.parse(renderPage(application).body)
 
       withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.value) shouldBe true)
       withClue("Description")(textareaExistsWithText(document, "description", aDescription.get) shouldBe true)
