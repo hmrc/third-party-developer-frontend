@@ -104,7 +104,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
       elementExistsByText(document, "label", "Application name") shouldBe false
     }
 
-    "not display the option to change the app name if in prod pending requestor verification" in {
+    "not display the option to change the app name if in prod pending requester verification" in {
 
       val application = standardApp.withState(appStatePendingRequesterVerification)
       val document    = Jsoup.parse(renderPage(application).body)
