@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
@@ -60,6 +61,9 @@
 
     <br />
 
-    <button id="submit" class="govuk-button" type="submit">Continue</button>
+    @govukButton(Button(
+      content = Text("Continue"),
+      preventDoubleClick = Some(true)
+     ))
   }
 }
