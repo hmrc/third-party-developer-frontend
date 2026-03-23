@@ -56,7 +56,7 @@
         case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if !termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isEmpty =>
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-            TableRow(content = HtmlContent(s"<p class='govuk-body' id='termsOfUseNotAgreed'>Not agreed</p>"), attributes = Map("id" -> "termsOfUseNotAgreed")),
+            TableRow(content = Text("Not agreed"), attributes = Map("id" -> "termsOfUseNotAgreed")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
                 s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseStartLink'>Start</a>"
@@ -70,7 +70,7 @@
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = HtmlContent(
-              s"<div id='termsOfUseV2UpliftDetails'><p class='govuk-body'>Our terms of use have changed.</p><p class='govuk-body'>Agree to version 2 of the terms of use $deadlineText.</p></div>"
+              s"<p class='govuk-body'>Our terms of use have changed.</p><p class='govuk-body'>Agree to version 2 of the terms of use $deadlineText.</p>"
             ), attributes = Map("id" -> "termsOfUseV2UpliftDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
@@ -85,7 +85,7 @@
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = HtmlContent(
-              s"<div id='termsOfUseStartedDetails'><p class='govuk-body'>Terms of use started by $startedBy.</p><p class='govuk-body'>Complete the version 2 of the terms of use $deadlineText.</p></div>"
+              s"<p class='govuk-body'>Terms of use started by $startedBy.</p><p class='govuk-body'>Complete the version 2 of the terms of use $deadlineText.</p>"
             ), attributes = Map("id" -> "termsOfUseStartedDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
@@ -100,7 +100,7 @@
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = HtmlContent(
-              s"<div id='termsOfUseSubmittedDetails'><p class='govuk-body'>Terms of use submitted by $submittedBy on $submittedDate.</p><p class='govuk-body'>Your submission is being checked.</p></div>"
+              s"<p class='govuk-body'>Terms of use submitted by $submittedBy on $submittedDate.</p><p class='govuk-body'>Your submission is being checked.</p>"
             ), attributes = Map("id" -> "termsOfUseSubmittedDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
@@ -173,14 +173,7 @@
     }
 }
 
-@{
-    // todo `s => s.isInstanceOf[TermsOfUseV2State.NotStarted] || s.isInstanceOf[TermsOfUseV2State.Started] || s.isInstanceOf[TermsOfUseV2State.Submitted] || s.isInstanceOf[TermsOfUseV2State.Approved]` is maybe not needed
-    val hasV2State = termsOfUseModel.termsOfUseV2State.exists(s => s.isInstanceOf[TermsOfUseV2State.NotStarted] || s.isInstanceOf[TermsOfUseV2State.Started] || s.isInstanceOf[TermsOfUseV2State.Submitted] || s.isInstanceOf[TermsOfUseV2State.Approved])
-    val shouldShowSection = (app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access).isDefined) ||
-                           (termsOfUseModel.exists && (termsOfUseModel.agreement.isDefined || hasV2State))
-}
-
-    @if(shouldShowSection) {
+    @if((app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access).isDefined) || (termsOfUseModel.exists && (termsOfUseModel.agreement.isDefined || termsOfUseModel.termsOfUseV2State.isDefined))) {
 
     <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.terms.of.use")</h2>
 
