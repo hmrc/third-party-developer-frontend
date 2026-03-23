@@ -89,8 +89,8 @@ class ApplicationDetailsViewSpec
     lazy val termsOfUseStartedDetails: Element    = body.getElementById("termsOfUseStartedDetails")
     lazy val termsOfUseContinueLink: Element      = body.getElementById("termsOfUseContinueLink")
     lazy val termsOfUseSubmittedDetails: Element  = body.getElementById("termsOfUseSubmittedDetails")
-    lazy val termsOfUseSubmittedViewLink: Element  = body.getElementById("termsOfUseSubmittedViewLink")
-    lazy val termsOfUseV2UpliftDetails: Element    = body.getElementById("termsOfUseV2UpliftDetails")
+    lazy val termsOfUseSubmittedViewLink: Element = body.getElementById("termsOfUseSubmittedViewLink")
+    lazy val termsOfUseV2UpliftDetails: Element   = body.getElementById("termsOfUseV2UpliftDetails")
 
     lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
     lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")
@@ -459,7 +459,12 @@ class ApplicationDetailsViewSpec
               )
 
               val page =
-                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelV1AgreedV2Started))
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelV1AgreedV2Started
+                ))
 
               page.termsOfUseStartedDetails.text should include(s"Terms of use started by $testUserName.")
               page.termsOfUseStartedDetails.text should include(s"Complete the version 2 of the terms of use by $expectedDeadline.")
@@ -477,7 +482,12 @@ class ApplicationDetailsViewSpec
               )
 
               val page =
-                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelV1AgreedV2Submitted))
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelV1AgreedV2Submitted
+                ))
 
               page.termsOfUseSubmittedDetails.text should include(s"Terms of use submitted by $testUserName on $expectedDate.")
               page.termsOfUseSubmittedDetails.text should include("Your submission is being checked.")

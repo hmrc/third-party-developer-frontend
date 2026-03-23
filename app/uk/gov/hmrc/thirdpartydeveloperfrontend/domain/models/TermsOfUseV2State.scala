@@ -21,8 +21,8 @@ import java.time.Instant
 sealed trait TermsOfUseV2State
 
 object TermsOfUseV2State {
-  case class NotStarted(deadline: Option[Instant] = None)               extends TermsOfUseV2State
-  case class Started(startedBy: String, deadline: Instant)              extends TermsOfUseV2State
-  case class Submitted(submittedBy: String, submittedOn: Instant)       extends TermsOfUseV2State
-  case class Approved(agreedBy: String, agreedOn: Instant)              extends TermsOfUseV2State
+  case class NotStarted(deadline: Option[Instant] = None)         extends TermsOfUseV2State
+  case class Started(startedBy: String, deadline: Instant)        extends TermsOfUseV2State
+  case class Submitted(submittedBy: String, submittedOn: Instant) extends TermsOfUseV2State
+  case class Approved(agreedBy: String, agreedOn: Instant)        extends TermsOfUseV2State
 }

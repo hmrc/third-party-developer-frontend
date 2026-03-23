@@ -66,7 +66,7 @@
         
         // AC2: V2 NotStarted with V1 agreement (Uplift scenario)
         case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined =>
-          val deadlineText = maybeDeadline.map(d => s"by ${DateFormatter.formatDateWithShortPattern(d)}").getOrElse("")
+          val deadlineText = maybeDeadline.map(d => s"by ${DateFormatter.formatTwoDigitDay(d)}").getOrElse("")
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = HtmlContent(
@@ -81,7 +81,7 @@
         
         // AC3/AC6: V2 Started (with or without V1 agreement)
         case Some(TermsOfUseV2State.Started(startedBy, deadline)) =>
-          val deadlineText = s"by ${DateFormatter.formatDateWithShortPattern(deadline)}"
+          val deadlineText = s"by ${DateFormatter.formatTwoDigitDay(deadline)}"
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = HtmlContent(
@@ -96,7 +96,7 @@
         
         // AC4/AC7: V2 Submitted (with or without V1 agreement)
         case Some(TermsOfUseV2State.Submitted(submittedBy, submittedOn)) =>
-          val submittedDate = DateFormatter.formatDateWithShortPattern(submittedOn)
+          val submittedDate = DateFormatter.formatTwoDigitDay(submittedOn)
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = HtmlContent(
