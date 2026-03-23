@@ -30,6 +30,7 @@ class NewJourneyAdminUserProdStatusProductionEndpointScenarioSpec extends Endpoi
       case Endpoint("GET", "/developer/reset-password/error", _)                  => BadRequest()
       case Endpoint("GET", "/developer/applications/:id/add/success", _)          => NotFound()
       case Endpoint(_, "/developer/applications/:id/details/change", _)           => Forbidden()
+      case Endpoint(_, "/developer/applications/:id/change-app-name-and-desc", _) => Forbidden()
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _) => BadRequest()
       case Endpoint("GET", "/developer/applications/:id/details/terms-of-use", _) => BadRequest()
 

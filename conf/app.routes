@@ -78,6 +78,8 @@ POST        /applications/:id/details/change-terms-conditions-location          
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 
 GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
+GET         /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.changeAppNameAndDesc(id: ApplicationId)
+POST        /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.changeAppNameAndDescAction(id: ApplicationId)
 
 
 # Used by DOCS Fe

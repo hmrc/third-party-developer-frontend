@@ -275,7 +275,7 @@ object EditApplicationForm {
   val form: Form[EditApplicationForm] = Form(
     mapping(
       "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.toString()),
-      "applicationName"       -> nonEmptyText.verifying(applicationNameContraint),
+      "applicationName"       -> nonEmptyText.verifying(applicationNameConstraint),
       "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
       "termsAndConditionsUrl" -> optional(tNcUrlValidator),
@@ -316,6 +316,28 @@ object SubmitApplicationNameForm {
       "password"                -> nonEmptyText
     )(SubmitApplicationNameForm.apply)(SubmitApplicationNameForm.unapply)
   )
+}
+
+case class ChangeAppNameAndDescForm(applicationName: String, description: Option[String] = None)
+
+object ChangeAppNameAndDescForm {
+
+  val form: Form[ChangeAppNameAndDescForm] = Form(
+    mapping(
+      "applicationName" -> nonEmptyText.verifying(applicationNameConstraint),
+      "description"     -> optional(text)
+    )(ChangeAppNameAndDescForm.apply)(ChangeAppNameAndDescForm.unapply)
+  )
+
+  def withData(app: ApplicationWithCollaborators) = {
+
+    form.fillAndValidate(
+      ChangeAppNameAndDescForm(
+        app.name.value,
+        app.details.description
+      )
+    )
+  }
 }
 
 case class SignOutSurveyForm(rating: Option[Int], improvementSuggestions: String, name: String, email: String, isJavascript: Boolean)
