@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary.ApplicationWithCollaboratorsSyntax
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.ImportantSubmissionData
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 
 @this(govukTable: GovukTable)
 
@@ -50,34 +51,121 @@
 
 @showTermsOfUse(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
     if(termsOfUseModel.exists) {
-      if(termsOfUseModel.appUsesOldVersion) {
+      termsOfUseModel.termsOfUseV2State match {
+        // AC1: V2 NotStarted with no V1 agreement
+        case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if !termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isEmpty =>
+          Seq(
+            TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+            TableRow(content = HtmlContent(s"<p class='govuk-body' id='termsOfUseNotAgreed'>Not agreed</p>"), attributes = Map("id" -> "termsOfUseNotAgreed")),
+            TableRow(content = HtmlContent(
+              if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseStartLink'>Start</a>"
+              } else ""
+            ))
+          )
+        
+        // AC2: V2 NotStarted with V1 agreement (Uplift scenario)
+        case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined =>
+          val deadlineText = maybeDeadline.map(d => s"by ${DateFormatter.formatDateWithShortPattern(d)}").getOrElse("")
+          Seq(
+            TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+            TableRow(content = HtmlContent(
+              s"<div id='termsOfUseV2UpliftDetails'><p class='govuk-body'>Our terms of use have changed.</p><p class='govuk-body'>Agree to version 2 of the terms of use $deadlineText.</p></div>"
+            ), attributes = Map("id" -> "termsOfUseV2UpliftDetails")),
+            TableRow(content = HtmlContent(
+              if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseV2StartLink'>Start</a>"
+              } else ""
+            ))
+          )
+        
+        // AC3/AC6: V2 Started (with or without V1 agreement)
+        case Some(TermsOfUseV2State.Started(startedBy, deadline)) =>
+          val deadlineText = s"by ${DateFormatter.formatDateWithShortPattern(deadline)}"
+          Seq(
+            TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+            TableRow(content = HtmlContent(
+              s"<div id='termsOfUseStartedDetails'><p class='govuk-body'>Terms of use started by $startedBy.</p><p class='govuk-body'>Complete the version 2 of the terms of use $deadlineText.</p></div>"
+            ), attributes = Map("id" -> "termsOfUseStartedDetails")),
+            TableRow(content = HtmlContent(
+              if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseContinueLink'>Continue</a>"
+              } else ""
+            ))
+          )
+        
+        // AC4/AC7: V2 Submitted (with or without V1 agreement)
+        case Some(TermsOfUseV2State.Submitted(submittedBy, submittedOn)) =>
+          val submittedDate = DateFormatter.formatDateWithShortPattern(submittedOn)
+          Seq(
+            TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+            TableRow(content = HtmlContent(
+              s"<div id='termsOfUseSubmittedDetails'><p class='govuk-body'>Terms of use submitted by $submittedBy on $submittedDate.</p><p class='govuk-body'>Your submission is being checked.</p></div>"
+            ), attributes = Map("id" -> "termsOfUseSubmittedDetails")),
+            TableRow(content = HtmlContent(
+              if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseSubmittedViewLink'>View</a>"
+              } else ""
+            ))
+          )
+        
+        // AC5/AC8: V2 Approved (existing approved logic)
+        case Some(TermsOfUseV2State.Approved(_, _)) | None if !termsOfUseModel.appUsesOldVersion =>
           termsOfUseModel.agreement match {
-              case Some(agreement) =>
-                  Seq(
-                      TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-                      TableRow(content = Text(s"Agreed by ${agreement.who} on ${DateFormatter.formatTwoDigitDay(agreement.when)}"), attributes = Map("id" -> "termsOfUseAgreementV1")),
-                      TableRow(content = HtmlContent(
-                          if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                              s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.TermsOfUse.termsOfUse(app.id)}' id='termsOfUseLinkV1'>${messages("""application.details.view""")}</a>"}
-                      else ""
-                      ))
-                  )
-              case _ => Seq.empty
+            case Some(agreement) =>
+              Seq(
+                TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+                TableRow(content = Text(s"${agreement.who} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(agreement.when)}."), attributes = Map("id" -> "termsOfUseAgreementV2")),
+                TableRow(content = HtmlContent(
+                  if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                    s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseLinkV2'>${messages("""application.details.view""")}</a>"
+                  } else ""
+                ))
+              )
+            case _ => Seq.empty
           }
-      }
-      else {
+
+          //todo This is invalid. That would never happen, to not have a V2 uplift path (so, it would be the AC2 flow)
+        // Legacy V1 only (no V2 state)
+        case _ if termsOfUseModel.appUsesOldVersion =>
           termsOfUseModel.agreement match {
-              case Some(agreement) =>
-                  Seq(
-                      TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-                      TableRow(content = Text(s"${agreement.who} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(agreement.when)}"), attributes = Map("id" -> "termsOfUseAgreementV2")),
-                      TableRow(content = HtmlContent(
-                          if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                              s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseLinkV2'>${messages("""application.details.view""")}</a>"}
-                          else ""
-                      ))
-                  )
-              case _ => Seq.empty
+            case Some(agreement) =>
+              Seq(
+                TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+                TableRow(content = Text(s"Agreed by ${agreement.who} on ${DateFormatter.formatTwoDigitDay(agreement.when)}"), attributes = Map("id" -> "termsOfUseAgreementV1")),
+                TableRow(content = HtmlContent(
+                  if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                    s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.TermsOfUse.termsOfUse(app.id)}' id='termsOfUseLinkV1'>${messages("""application.details.view""")}</a>"
+                  } else ""
+                ))
+              )
+            case _ => Seq.empty
+          }
+        
+        case _ => Seq.empty
+      }
+    } else {
+        Seq.empty
+    }
+}
+
+@showV1Agreement(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
+    if(termsOfUseModel.exists && termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined) {
+      termsOfUseModel.termsOfUseV2State match {
+        // Don't show V1 agreement row if V2 is approved (V2 supersedes V1)
+        case Some(TermsOfUseV2State.Approved(_, _)) => Seq.empty
+        case _ =>
+          termsOfUseModel.agreement match {
+            case Some(agreement) =>
+              Seq(
+                TableRow(content = Text(s"${agreement.who} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(agreement.when)}."), attributes = Map("id" -> "termsOfUseAgreementV1")),
+                TableRow(content = HtmlContent(
+                  if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                    s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.TermsOfUse.termsOfUse(app.id)}' id='termsOfUseLinkV1'>${messages("""application.details.view""")}</a>"
+                  } else ""
+                ))
+              )
+            case _ => Seq.empty
           }
       }
     } else {
@@ -85,7 +173,14 @@
     }
 }
 
-    @if((app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access)) || (termsOfUseModel.exists && termsOfUseModel.agreement.isDefined)) {
+@{
+    // todo `s => s.isInstanceOf[TermsOfUseV2State.NotStarted] || s.isInstanceOf[TermsOfUseV2State.Started] || s.isInstanceOf[TermsOfUseV2State.Submitted] || s.isInstanceOf[TermsOfUseV2State.Approved]` is maybe not needed
+    val hasV2State = termsOfUseModel.termsOfUseV2State.exists(s => s.isInstanceOf[TermsOfUseV2State.NotStarted] || s.isInstanceOf[TermsOfUseV2State.Started] || s.isInstanceOf[TermsOfUseV2State.Submitted] || s.isInstanceOf[TermsOfUseV2State.Approved])
+    val shouldShowSection = (app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access).isDefined) ||
+                           (termsOfUseModel.exists && (termsOfUseModel.agreement.isDefined || hasV2State))
+}
+
+    @if(shouldShowSection) {
 
     <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.terms.of.use")</h2>
 
@@ -93,6 +188,7 @@
         firstCellIsHeader = true,
         rows = Seq(
             showTermsOfUse(app, termsOfUseModel),
+            showV1Agreement(app, termsOfUseModel),
             showResponsibleIndividual(app, getResponsibleIndividualName(app.access))
         )
     ))

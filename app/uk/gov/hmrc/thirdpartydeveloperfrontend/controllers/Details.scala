@@ -46,7 +46,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -58,9 +58,10 @@ object Details {
   case class Agreement(who: String, when: Instant)
 
   case class TermsOfUseViewModel(
-      exists: Boolean,
-      appUsesOldVersion: Boolean,
-      agreement: Option[Agreement]
+                                  exists: Boolean,
+                                  appUsesOldVersion: Boolean,
+                                  agreement: Option[Agreement],
+                                  termsOfUseV2State: Option[TermsOfUseV2State] = None
     ) {
     lazy val agreementNeeded = exists && !agreement.isDefined
   }

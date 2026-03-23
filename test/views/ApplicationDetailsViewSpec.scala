@@ -43,6 +43,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
@@ -82,6 +83,15 @@ class ApplicationDetailsViewSpec
     lazy val responsibleIndividualName: Element = body.getElementById("responsibleIndividualName")
     lazy val responsibleIndividualLink: Element = body.getElementById("changeResponsibleIndividual")
 
+    lazy val termsOfUseNotAgreed: Element         = body.getElementById("termsOfUseNotAgreed")
+    lazy val termsOfUseStartLink: Element         = body.getElementById("termsOfUseStartLink")
+    lazy val termsOfUseV2StartLink: Element       = body.getElementById("termsOfUseV2StartLink")
+    lazy val termsOfUseStartedDetails: Element    = body.getElementById("termsOfUseStartedDetails")
+    lazy val termsOfUseContinueLink: Element      = body.getElementById("termsOfUseContinueLink")
+    lazy val termsOfUseSubmittedDetails: Element  = body.getElementById("termsOfUseSubmittedDetails")
+    lazy val termsOfUseSubmittedViewLink: Element  = body.getElementById("termsOfUseSubmittedViewLink")
+    lazy val termsOfUseV2UpliftDetails: Element    = body.getElementById("termsOfUseV2UpliftDetails")
+
     lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
     lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")
     lazy val termsAndConditions: Element                = body.getElementById("termsAndConditions")
@@ -104,7 +114,7 @@ class ApplicationDetailsViewSpec
   )
 
   val v2AgreementWording =
-    s"${v2Agreement.name.getOrElse(v2Agreement.emailAddress)} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(v2Agreement.date)}"
+    s"${v2Agreement.name.getOrElse(v2Agreement.emailAddress)} agreed to version 2 of the terms of use on ${DateFormatter.formatTwoDigitDay(v2Agreement.date)}."
 
   trait LoggedInUserIsAdmin {
     implicit val loggedIn: UserSession = adminSession
@@ -312,6 +322,10 @@ class ApplicationDetailsViewSpec
           }
 
           "the user is an administrator" should {
+            val testUserName     = "Test User"
+            val deadline         = instant.plus(java.time.Duration.ofDays(365))
+            val expectedDeadline = DateFormatter.formatTwoDigitDay(deadline)
+            val expectedDate     = DateFormatter.formatTwoDigitDay(instant)
 
             "have no link to read and agree when the terms of use have not been agreed" in new LoggedInUserIsAdmin {
               val checkInformation             = CheckInformation(termsOfUseAgreements = List.empty)
@@ -340,6 +354,158 @@ class ApplicationDetailsViewSpec
               page.termsOfUseLinkV1.text shouldBe "View"
               page.termsOfUseLinkV1.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
               page.warning shouldBe null
+            }
+
+            "show 'Not agreed' and 'Start' link when V1 has no agreement and V2 is not started" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelNotStarted = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = false,
+                agreement = None,
+                termsOfUseV2State = Some(TermsOfUseV2State.NotStarted())
+              )
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelNotStarted))
+
+              page.termsOfUseNotAgreed.text shouldBe "Not agreed"
+              page.termsOfUseStartLink.text shouldBe "Start"
+            }
+
+            "show V1 agreement with 'View' link and V2 uplift 'Start' link when V1 is agreed and V2 is not started" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelV1AgreedV2NotStarted = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = true,
+                agreement = Some(Agreement(testUserName, instant)),
+                termsOfUseV2State = Some(TermsOfUseV2State.NotStarted(Some(deadline)))
+              )
+
+              val checkInformation = CheckInformation(termsOfUseAgreements = List(TermsOfUseAgreement("user@example.com".toLaxEmail, instant, "1.0")))
+              val application      = prodApp.withCheckInformation(checkInformation)
+
+              val page =
+                Page(applicationDetailsView(
+                  ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelV1AgreedV2NotStarted
+                ))
+
+              page.termsOfUseV2UpliftDetails.text should include("Our terms of use have changed.")
+              page.termsOfUseV2UpliftDetails.text should include(s"Agree to version 2 of the terms of use by $expectedDeadline.")
+              page.termsOfUseV2StartLink.text shouldBe "Start"
+              page.termsOfUseAgreementV1.text shouldBe s"$testUserName agreed to version 1 of the terms of use on $expectedDate."
+              page.termsOfUseLinkV1.text shouldBe "View"
+            }
+
+            "show started details and 'Continue' link when V1 has no agreement and V2 is started" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelStarted = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = false,
+                agreement = None,
+                termsOfUseV2State = Some(TermsOfUseV2State.Started(testUserName, deadline))
+              )
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelStarted))
+
+              page.termsOfUseStartedDetails.text should include(s"Terms of use started by $testUserName.")
+              page.termsOfUseStartedDetails.text should include(s"Complete the version 2 of the terms of use by $expectedDeadline.")
+              page.termsOfUseContinueLink.text shouldBe "Continue"
+            }
+
+            "show submitted details and 'View' link when V1 has no agreement and V2 is submitted" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelSubmitted = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = false,
+                agreement = None,
+                termsOfUseV2State = Some(TermsOfUseV2State.Submitted(testUserName, instant))
+              )
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelSubmitted))
+
+              page.termsOfUseSubmittedDetails.text should include(s"Terms of use submitted by $testUserName on $expectedDate.")
+              page.termsOfUseSubmittedDetails.text should include("Your submission is being checked.")
+              page.termsOfUseSubmittedViewLink.text shouldBe "View"
+            }
+
+            "show V2 agreement details with 'View' link and RI 'Change' link when V1 has no agreement and V2 is approved" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelV2Approved = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = false,
+                agreement = Some(Agreement(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date)),
+                termsOfUseV2State = Some(TermsOfUseV2State.Approved(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date))
+              )
+
+              val page =
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelV2Approved
+                ))
+
+              page.termsOfUseAgreementV2.text shouldBe v2AgreementWording
+              page.termsOfUseLinkV2.text shouldBe "View"
+              page.responsibleIndividualLink.text shouldBe "Change"
+            }
+
+            "show V1 agreement with 'View' link and V2 started details with 'Continue' link when V1 is agreed and V2 is started" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelV1AgreedV2Started = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = true,
+                agreement = Some(Agreement(testUserName, instant)),
+                termsOfUseV2State = Some(TermsOfUseV2State.Started(testUserName, deadline))
+              )
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelV1AgreedV2Started))
+
+              page.termsOfUseStartedDetails.text should include(s"Terms of use started by $testUserName.")
+              page.termsOfUseStartedDetails.text should include(s"Complete the version 2 of the terms of use by $expectedDeadline.")
+              page.termsOfUseContinueLink.text shouldBe "Continue"
+              page.termsOfUseAgreementV1.text shouldBe s"$testUserName agreed to version 1 of the terms of use on $expectedDate."
+              page.termsOfUseLinkV1.text shouldBe "View"
+            }
+
+            "show V1 agreement with 'View' link and V2 submitted details with 'View' link when V1 is agreed and V2 is submitted" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelV1AgreedV2Submitted = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = true,
+                agreement = Some(Agreement(testUserName, instant)),
+                termsOfUseV2State = Some(TermsOfUseV2State.Submitted(testUserName, instant))
+              )
+
+              val page =
+                Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelV1AgreedV2Submitted))
+
+              page.termsOfUseSubmittedDetails.text should include(s"Terms of use submitted by $testUserName on $expectedDate.")
+              page.termsOfUseSubmittedDetails.text should include("Your submission is being checked.")
+              page.termsOfUseSubmittedViewLink.text shouldBe "View"
+              page.termsOfUseAgreementV1.text shouldBe s"$testUserName agreed to version 1 of the terms of use on $expectedDate."
+              page.termsOfUseLinkV1.text shouldBe "View"
+            }
+
+            "show V2 agreement details with 'View' link, RI 'Change' link, and no V1 details when V1 was agreed and V2 is approved" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelV1AgreedV2Approved = TermsOfUseViewModel(
+                exists = true,
+                appUsesOldVersion = false,
+                agreement = Some(Agreement(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date)),
+                termsOfUseV2State = Some(TermsOfUseV2State.Approved(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date))
+              )
+
+              val page =
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelV1AgreedV2Approved
+                ))
+
+              page.termsOfUseAgreementV2.text shouldBe v2AgreementWording
+              page.termsOfUseLinkV2.text shouldBe "View"
+              page.termsOfUseAgreementV1 shouldBe null
+              page.responsibleIndividualLink.text shouldBe "Change"
             }
           }
         }
