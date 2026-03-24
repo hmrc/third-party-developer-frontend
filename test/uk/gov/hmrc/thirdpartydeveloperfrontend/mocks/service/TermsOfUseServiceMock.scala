@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service
 
-import scala.concurrent.Future.successful
-
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators

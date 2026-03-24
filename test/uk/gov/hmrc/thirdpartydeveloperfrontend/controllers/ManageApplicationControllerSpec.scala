@@ -39,7 +39,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -420,7 +419,8 @@ class ManageApplicationControllerSpec
         viewModel.required shouldBe true
         viewModel.appUsesOldVersion shouldBe false
         viewModel.agreement should contain(Agreement(v2Agreement.name.get, v2Agreement.date))
-        val submittedStatus = submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
+        val submittedStatus =
+          submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
         viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submittedStatus.timestamp)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(*)
@@ -446,7 +446,8 @@ class ManageApplicationControllerSpec
         viewModel.required shouldBe true
         viewModel.appUsesOldVersion shouldBe false
         viewModel.agreement should contain(Agreement(v2Agreement.name.get, v2Agreement.date))
-        val submittedStatus = submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
+        val submittedStatus =
+          submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
         viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submittedStatus.timestamp)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(*)

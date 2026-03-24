@@ -19,31 +19,34 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 import views.html.manageapplication.{ApplicationDetailsView, ChangeAppNameAndDescView}
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 @Singleton
 class ManageApplicationController @Inject() (
@@ -165,7 +168,7 @@ class ManageApplicationController @Inject() (
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): Future[TermsOfUseViewModel] = {
     implicit val hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(request)
-    val application = request.application
+    val application                                 = request.application
 
     val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
 
@@ -182,7 +185,14 @@ class ManageApplicationController @Inject() (
             // No submission - check for invitation
             maybeInvitation match {
               case Some(invitation) => Some(NotStarted(Some(invitation.dueBy)))
-              case None             => Some(NotStarted(None))
+              case None             =>
+                // No invitation either - check if V1 agreement exists
+                // If V1 only (no V2 journey), return None to display V1 in view
+                // If no V1, show NotStarted to prompt V2 acceptance
+                latestTermsOfUseAgreementDetails match {
+                  case Some(TermsOfUseAgreementDetails(_, _, _, Some(_))) => None                   // V1 exists, no V2 journey - let view display V1 todo is that even possible?
+                  case _                                                  => Some(NotStarted(None)) // No V1, show V2 not started todo is that even possible too? No V1, no V2 invitation - if possible, what do we display here
+                }
             }
 
           case (true, Some(submission: Submission)) =>
@@ -190,17 +200,17 @@ class ManageApplicationController @Inject() (
             status match {
               case s if s.isCreated || s.isAnswering =>
                 val requestedBy = extractRequestedByFromHistory(submission)
-                //todo is it possible to have a submission without an invitation? Clarify business rules
-                val deadline = maybeInvitation.map(_.dueBy).getOrElse(instant())
+                // todo is it possible to have a submission without an invitation? Clarify business rules
+                val deadline    = maybeInvitation.map(_.dueBy).getOrElse(instant())
                 Some(Started(requestedBy, deadline))
-                
+
               case submitted: Submission.Status.Submitted =>
                 Some(Submitted(submitted.requestedBy, submitted.timestamp))
-                
+
               case s if s.isGranted || s.isGrantedWithWarnings =>
                 extractSubmittedFromHistory(submission)
                   .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
-                
+
               case _ =>
                 None
             }
@@ -208,7 +218,7 @@ class ManageApplicationController @Inject() (
           case (false, _) => None
 
         }
-      
+
       latestTermsOfUseAgreementDetails match {
         case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) =>
           val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString)
@@ -218,26 +228,26 @@ class ManageApplicationController @Inject() (
             Some(Agreement(maybeName.getOrElse(emailAddress.text), date)),
             termsOfUseV2State
           )
-        case _ =>
-          TermsOfUseViewModel(requiresTermsOfUse, false, None, termsOfUseV2State) //todo check when would that happen?
+        case _                                                                                   =>
+          TermsOfUseViewModel(requiresTermsOfUse, false, None, termsOfUseV2State) // todo check when would that happen?
       }
     }
   }
-  
+
   private def extractRequestedByFromHistory(submission: Submission): String = {
     submission.latestInstance.statusHistory.toList
       .find(_.isCreated)
       .collect {
-        case created: Submission.Status.Created => created.requestedBy //todo is this case check needed?
+        case created: Submission.Status.Created => created.requestedBy // todo is this case check needed?
       }
       .getOrElse("unknown")
   }
-  
+
   private def extractSubmittedFromHistory(submission: Submission): Option[Submission.Status.Submitted] = {
     submission.latestInstance.statusHistory.toList
       .find(_.isSubmitted)
       .collect {
-        case submitted: Submission.Status.Submitted => submitted //todo is this case check pattern match/collect needed?
+        case submitted: Submission.Status.Submitted => submitted // todo is this case check pattern match/collect needed?
       }
   }
 }
