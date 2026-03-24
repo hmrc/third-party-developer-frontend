@@ -28,7 +28,7 @@ object DateFormatter {
   val standardFormatter: DateTimeFormatter            = DateTimeFormatter.ofPattern("d MMMM yyyy").withZone(ZoneOffset.UTC)
   val twoDigitDayFormatter: DateTimeFormatter         = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(ZoneOffset.UTC)
   val twoDigitDayWithTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm").withZone(ZoneOffset.UTC)
-  val initialLastAccessDate                           = LocalDate.of(2019, 6, 25).asInstant // scalastyle:ignore magic.number
+  val initialLastAccessDate                           = LocalDate.of(2019, 6, 25).asInstant
 
   def formatDateWithShortPattern(dateTime: Instant): String = {
     shortFormatter.format(dateTime)

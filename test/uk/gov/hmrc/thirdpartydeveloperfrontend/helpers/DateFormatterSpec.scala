@@ -38,28 +38,28 @@ class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll with FixedC
 
   "formatDateWithShortPattern" should {
     "use short date format" in {
-      val dateTime = LocalDate.of(2019, 1, 1).asInstant // scalastyle:ignore magic.number
+      val dateTime = LocalDate.of(2019, 1, 1).asInstant
       DateFormatter.formatDateWithShortPattern(dateTime) shouldBe "1 Jan 2019"
     }
   }
 
   "formatDate" should {
     "use long date format" in {
-      val dateTime = LocalDate.of(2019, 1, 1).asInstant // scalastyle:ignore magic.number
+      val dateTime = LocalDate.of(2019, 1, 1).asInstant
       DateFormatter.formatDate(dateTime) shouldBe "1 January 2019"
     }
   }
 
   "formatTwoDigitDay" should {
     "use long date format" in {
-      val dateTime = LocalDate.of(2019, 1, 1).asInstant // scalastyle:ignore magic.number
+      val dateTime = LocalDate.of(2019, 1, 1).asInstant
       DateFormatter.formatTwoDigitDay(dateTime) shouldBe "01 January 2019"
     }
   }
 
   "formatTwoDigitDayWithTime" should {
     "use long date format" in {
-      val dateTime = LocalDateTime.of(2019, 1, 1, 2, 3).asInstant // scalastyle:ignore magic.number
+      val dateTime = LocalDateTime.of(2019, 1, 1, 2, 3).asInstant
       DateFormatter.formatTwoDigitDayWithTime(dateTime) shouldBe "01 January 2019 02:03"
     }
   }
@@ -95,8 +95,8 @@ class DateFormatterSpec extends AsyncHmrcSpec with BeforeAndAfterAll with FixedC
 
     "return None if the last access date is within a second of the created date" in {
       val createdDate = initialLastAccessDate.plus(3, HOURS)
-      DateFormatter.formatLastAccessDate(Some(createdDate.plus(900, MILLIS)), createdDate, clock) shouldBe None  // scalastyle:ignore magic.number
-      DateFormatter.formatLastAccessDate(Some(createdDate.minus(900, MILLIS)), createdDate, clock) shouldBe None // scalastyle:ignore magic.number
+      DateFormatter.formatLastAccessDate(Some(createdDate.plus(900, MILLIS)), createdDate, clock) shouldBe None
+      DateFormatter.formatLastAccessDate(Some(createdDate.minus(900, MILLIS)), createdDate, clock) shouldBe None
     }
   }
 }
