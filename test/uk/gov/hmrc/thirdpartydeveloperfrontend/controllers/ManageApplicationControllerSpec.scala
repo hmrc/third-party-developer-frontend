@@ -108,26 +108,38 @@ class ManageApplicationControllerSpec
     "logged in as a Developer on an application" should {
       "return the view for a standard production app with no change link" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession)(approvedApplication)
       }
       "return the view for a standard production app with V1 terms of use" in new Setup {
         returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a standard production app with V2 terms of use" in new Setup {
         returnAgreementDetails(v2Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession, v2TOUWording = Some(v2AgreementWording))(prodAppWithRespIndAndV2TermsOfUse)
       }
       "return the view for a standard sandbox app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForAdminOrSandbox(devSession)(sandboxApplication)
       }
       "return the view for a Privileged production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession)(productionRopcApplication)
       }
     }
@@ -135,20 +147,25 @@ class ManageApplicationControllerSpec
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(approvedApplication)
       }
       "return the view for a standard production app with link to view V1 terms of use" in new Setup {
         returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForAdminOrSandbox(adminSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a Privileged production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionRopcApplication)
       }
@@ -414,7 +431,7 @@ class ManageApplicationControllerSpec
         val submission = grantedSubmission
 
         returnAgreementDetails(v2Agreement)
-//        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
 
         givenApplicationAction(prodAppWithRespIndWithV1AndV2TermsOfUse, adminSession)
@@ -437,6 +454,8 @@ class ManageApplicationControllerSpec
     "sandbox and non-standard apps" should {
       "returns ViewModel indicating no terms of use required for sandbox app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
         givenApplicationAction(sandboxApplication, adminSession)
 
@@ -452,6 +471,8 @@ class ManageApplicationControllerSpec
 
       "returns ViewModel indicating no terms of use required for privileged app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
 
         givenApplicationAction(productionPrivApplication, adminSession)
 

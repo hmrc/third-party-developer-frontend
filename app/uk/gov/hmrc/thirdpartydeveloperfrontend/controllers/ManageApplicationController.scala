@@ -19,13 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
 import views.html.manageapplication.{ApplicationDetailsView, ChangeAppNameAndDescView}
-
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
@@ -38,13 +35,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 
 @Singleton
 class ManageApplicationController @Inject() (
@@ -165,21 +164,80 @@ class ManageApplicationController @Inject() (
     Future.successful(BadRequest(changeAppNameAndDescView(form, applicationViewModel)))
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): Future[TermsOfUseViewModel] = {
+    implicit val hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(request)
     val application = request.application
 
     val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
 
-    val hasTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
+    val requiresTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
 
-    // For now, return existing behavior wrapped in Future - will implement V2 state logic next
-    val baseViewModel = latestTermsOfUseAgreementDetails match {
-      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
-        val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
-        TermsOfUseViewModel(hasTermsOfUse, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(Agreement(maybeName.getOrElse(emailAddress.text), date)), None)
+    // Query both services to derive V2 state
+    for {
+      maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(application.id)
+      maybeSubmission <- submissionService.fetchLatestSubmission(application.id)
+    } yield {
+      val termsOfUseV2State =
+        (requiresTermsOfUse, maybeSubmission) match {
+          case (true, None) =>
+            // No submission - check for invitation
+            maybeInvitation match {
+              case Some(invitation) => Some(NotStarted(Some(invitation.dueBy)))
+              case None             => Some(NotStarted(None))
+            }
+
+          case (true, Some(submission: Submission)) =>
+            val status = submission.status
+            status match {
+              case s if s.isCreated || s.isAnswering =>
+                val requestedBy = extractRequestedByFromHistory(submission)
+                //todo is it possible to have a submission without an invitation? Clarify business rules
+                val deadline = maybeInvitation.map(_.dueBy).getOrElse(instant())
+                Some(Started(requestedBy, deadline))
+                
+              case submitted: Submission.Status.Submitted =>
+                Some(Submitted(submitted.requestedBy, submitted.timestamp))
+                
+              case s if s.isGranted || s.isGrantedWithWarnings =>
+                extractSubmittedFromHistory(submission)
+                  .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
+                
+              case _ =>
+                None
+            }
+
+          case (false, _) => None
+
+        }
+      
+      latestTermsOfUseAgreementDetails match {
+        case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) =>
+          val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString)
+          TermsOfUseViewModel(
+            requiresTermsOfUse,
+            maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY),
+            Some(Agreement(maybeName.getOrElse(emailAddress.text), date)),
+            termsOfUseV2State
+          )
+        case _ =>
+          TermsOfUseViewModel(requiresTermsOfUse, false, None, termsOfUseV2State) //todo check when would that happen?
       }
-      case _                                                                                   => TermsOfUseViewModel(hasTermsOfUse, false, None, None)
     }
-
-    Future.successful(baseViewModel)
+  }
+  
+  private def extractRequestedByFromHistory(submission: Submission): String = {
+    submission.latestInstance.statusHistory.toList
+      .find(_.isCreated)
+      .collect {
+        case created: Submission.Status.Created => created.requestedBy //todo is this case check needed?
+      }
+      .getOrElse("unknown")
+  }
+  
+  private def extractSubmittedFromHistory(submission: Submission): Option[Submission.Status.Submitted] = {
+    submission.latestInstance.statusHistory.toList
+      .find(_.isSubmitted)
+      .collect {
+        case submitted: Submission.Status.Submitted => submitted //todo is this case check pattern match/collect needed?
+      }
   }
 }
