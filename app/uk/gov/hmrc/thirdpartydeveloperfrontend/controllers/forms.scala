@@ -34,8 +34,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 
-// scalastyle:off number.of.types
-
 trait ConfirmPassword {
   val password: String
   val confirmPassword: String
@@ -688,5 +686,3 @@ object ResponsibleIndividualChangeToOtherForm {
     )(ResponsibleIndividualChangeToOtherForm.apply)(ResponsibleIndividualChangeToOtherForm.unapply)
   )
 }
-
-// scalastyle:on number.of.types

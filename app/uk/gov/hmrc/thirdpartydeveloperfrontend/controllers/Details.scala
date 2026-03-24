@@ -97,7 +97,6 @@ class Details @Inject() (
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
-  // scalastyle:off cyclomatic.complexity method.length
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     def appDetailsPage = Ok(
       detailsView(
@@ -150,7 +149,6 @@ class Details @Inject() (
         successful(BadRequest)
     }
   }
-  // scalastyle:on cyclomatic.complexity method.length
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
     val application = request.application
