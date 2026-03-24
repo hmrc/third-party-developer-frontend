@@ -50,7 +50,7 @@
 }
 
 @showTermsOfUse(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
-    if(termsOfUseModel.exists) {
+    if(termsOfUseModel.required) {
       termsOfUseModel.termsOfUseV2State match {
         // AC1: V2 NotStarted with no V1 agreement
         case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if !termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isEmpty =>
@@ -150,7 +150,7 @@
 }
 
 @showV1Agreement(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
-    if(termsOfUseModel.exists && termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined) {
+    if(termsOfUseModel.required && termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined) {
       termsOfUseModel.termsOfUseV2State match {
         // Don't show V1 agreement row if V2 is approved (V2 supersedes V1)
         case Some(TermsOfUseV2State.Approved(_, _)) => Seq.empty
@@ -173,7 +173,7 @@
     }
 }
 
-    @if((app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access).isDefined) || (termsOfUseModel.exists && (termsOfUseModel.agreement.isDefined || termsOfUseModel.termsOfUseV2State.isDefined))) {
+    @if((app.isApproved && app.hasResponsibleIndividual && getResponsibleIndividualName(app.access).isDefined) || (termsOfUseModel.required && (termsOfUseModel.agreement.isDefined || termsOfUseModel.termsOfUseV2State.isDefined))) {
 
     <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.terms.of.use")</h2>
 

@@ -173,7 +173,7 @@ class ApplicationDetailsViewSpec
       val notSet = "Not set"
       "managing a sandbox application" should {
 
-        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page =
@@ -218,7 +218,7 @@ class ApplicationDetailsViewSpec
 
     "showing Terms of Use details" when {
       "managing a sandbox application" should {
-        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page =
@@ -237,7 +237,7 @@ class ApplicationDetailsViewSpec
 
       "managing a production application" when {
         "the app is a privileged app" should {
-          val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(exists = false)
+          val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(required = false)
           val application                   = prodApp.withAccess(Access.Privileged())
 
           "show nothing when a developer" in new LoggedInUserIsDev {
@@ -256,7 +256,7 @@ class ApplicationDetailsViewSpec
         }
 
         "the app is an ROPC app" should {
-          val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(exists = false)
+          val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(required = false)
           val application                   = prodApp.withAccess(Access.Ropc())
 
           "show nothing when a developer" in new LoggedInUserIsDev {
@@ -358,7 +358,7 @@ class ApplicationDetailsViewSpec
 
             "show 'Not agreed' and 'Start' link when V1 has no agreement and V2 is not started" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelNotStarted = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = false,
                 agreement = None,
                 termsOfUseV2State = Some(TermsOfUseV2State.NotStarted())
@@ -373,7 +373,7 @@ class ApplicationDetailsViewSpec
 
             "show V1 agreement with 'View' link and V2 uplift 'Start' link when V1 is agreed and V2 is not started" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelV1AgreedV2NotStarted = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = true,
                 agreement = Some(Agreement(testUserName, instant)),
                 termsOfUseV2State = Some(TermsOfUseV2State.NotStarted(Some(deadline)))
@@ -399,7 +399,7 @@ class ApplicationDetailsViewSpec
 
             "show started details and 'Continue' link when V1 has no agreement and V2 is started" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelStarted = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = false,
                 agreement = None,
                 termsOfUseV2State = Some(TermsOfUseV2State.Started(testUserName, deadline))
@@ -415,7 +415,7 @@ class ApplicationDetailsViewSpec
 
             "show submitted details and 'View' link when V1 has no agreement and V2 is submitted" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelSubmitted = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = false,
                 agreement = None,
                 termsOfUseV2State = Some(TermsOfUseV2State.Submitted(testUserName, instant))
@@ -431,7 +431,7 @@ class ApplicationDetailsViewSpec
 
             "show V2 agreement details with 'View' link and RI 'Change' link when V1 has no agreement and V2 is approved" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelV2Approved = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = false,
                 agreement = Some(Agreement(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date)),
                 termsOfUseV2State = Some(TermsOfUseV2State.Approved(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date))
@@ -452,7 +452,7 @@ class ApplicationDetailsViewSpec
 
             "show V1 agreement with 'View' link and V2 started details with 'Continue' link when V1 is agreed and V2 is started" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelV1AgreedV2Started = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = true,
                 agreement = Some(Agreement(testUserName, instant)),
                 termsOfUseV2State = Some(TermsOfUseV2State.Started(testUserName, deadline))
@@ -475,7 +475,7 @@ class ApplicationDetailsViewSpec
 
             "show V1 agreement with 'View' link and V2 submitted details with 'View' link when V1 is agreed and V2 is submitted" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelV1AgreedV2Submitted = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = true,
                 agreement = Some(Agreement(testUserName, instant)),
                 termsOfUseV2State = Some(TermsOfUseV2State.Submitted(testUserName, instant))
@@ -498,7 +498,7 @@ class ApplicationDetailsViewSpec
 
             "show V2 agreement details with 'View' link, RI 'Change' link, and no V1 details when V1 was agreed and V2 is approved" in new LoggedInUserIsAdmin {
               val termsOfUseViewModelV1AgreedV2Approved = TermsOfUseViewModel(
-                exists = true,
+                required = true,
                 appUsesOldVersion = false,
                 agreement = Some(Agreement(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date)),
                 termsOfUseV2State = Some(TermsOfUseV2State.Approved(v2Agreement.name.getOrElse(v2Agreement.emailAddress.toString()), v2Agreement.date))
@@ -524,7 +524,7 @@ class ApplicationDetailsViewSpec
 
     "showing Responsible individual details" when {
       "managing a sandbox application" should {
-        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page =
@@ -542,7 +542,7 @@ class ApplicationDetailsViewSpec
       }
 
       "managing a production application" should {
-        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = true, appUsesOldVersion = false)
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = true, appUsesOldVersion = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page =

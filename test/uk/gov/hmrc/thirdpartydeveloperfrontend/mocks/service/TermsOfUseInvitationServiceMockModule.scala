@@ -42,7 +42,7 @@ trait TermsOfUseInvitationServiceMockModule extends MockitoSugar with ArgumentMa
           None,
           EMAIL_SENT
         ))))
-      
+
       def thenReturnWith(invitation: TermsOfUseInvitation) =
         when(aMock.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenAnswer(successful(Some(invitation)))
 

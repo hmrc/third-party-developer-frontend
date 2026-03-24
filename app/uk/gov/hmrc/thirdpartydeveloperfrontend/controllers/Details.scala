@@ -58,12 +58,12 @@ object Details {
   case class Agreement(who: String, when: Instant)
 
   case class TermsOfUseViewModel(
-      exists: Boolean,
+      required: Boolean,
       appUsesOldVersion: Boolean,
       agreement: Option[Agreement],
       termsOfUseV2State: Option[TermsOfUseV2State] = None
     ) {
-    lazy val agreementNeeded = exists && !agreement.isDefined
+    lazy val agreementNeeded = required && !agreement.isDefined
   }
   case class ApplicationNameModel(application: ApplicationWithCollaborators)
   case class PrivacyPolicyLocationModel(applicationId: ApplicationId, privacyPolicyUrl: String, isInDesktop: Boolean)
