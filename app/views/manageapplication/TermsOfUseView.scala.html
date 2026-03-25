@@ -125,8 +125,6 @@
             case _ => Seq.empty
           }
 
-          //todo This is invalid. That would never happen, to not have a V2 uplift path (so, it would be the AC2 flow)
-        // Legacy V1 only (no V2 state)
         case _ if termsOfUseModel.appUsesOldVersion =>
           termsOfUseModel.agreement match {
             case Some(agreement) =>

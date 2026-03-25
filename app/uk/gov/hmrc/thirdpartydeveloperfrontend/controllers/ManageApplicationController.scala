@@ -40,10 +40,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, T
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -169,85 +169,89 @@ class ManageApplicationController @Inject() (
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): Future[TermsOfUseViewModel] = {
     implicit val hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(request)
     val application                                 = request.application
+    val requiresTermsOfUse                          = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
 
-    val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
+    if (requiresTermsOfUse) {
+      val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
+      val (appUsesOldVersion, agreement)   = buildAgreementData(latestTermsOfUseAgreementDetails)
 
-    val requiresTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
+      for {
+        termsOfUseV2State <- buildV2TermsOfUseState(application.id, latestTermsOfUseAgreementDetails)
+      } yield {
+        TermsOfUseViewModel(requiresTermsOfUse, appUsesOldVersion, agreement, termsOfUseV2State)
+      }
+    } else {
+      Future.successful(TermsOfUseViewModel(false, false, None, None))
+    }
+  }
 
-    // Query both services to derive V2 state
+  private def buildAgreementData(latestTermsOfUseAgreementDetails: Option[TermsOfUseAgreementDetails]): (Boolean, Option[Agreement]) = {
+    latestTermsOfUseAgreementDetails match {
+      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) =>
+        val maybeVersion      = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString)
+        val appUsesOldVersion = maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY)
+        val agreement         = Some(Agreement(maybeName.getOrElse(emailAddress.text), date))
+        (appUsesOldVersion, agreement)
+      case _                                                                                   =>
+        (false, None)
+    }
+  }
+
+  private def buildV2TermsOfUseState(
+      applicationId: ApplicationId,
+      latestTermsOfUseAgreementDetails: Option[TermsOfUseAgreementDetails]
+    )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
+    ): Future[Option[TermsOfUseV2State]] = {
     for {
-      maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(application.id)
-      maybeSubmission <- submissionService.fetchLatestSubmission(application.id)
+      maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(applicationId)
+      maybeSubmission <- submissionService.fetchLatestSubmission(applicationId)
     } yield {
-      val termsOfUseV2State =
-        (requiresTermsOfUse, maybeSubmission) match {
-          case (true, None) =>
-            // No submission - check for invitation
-            maybeInvitation match {
-              case Some(invitation) => Some(NotStarted(Some(invitation.dueBy)))
-              case None             =>
-                // No invitation either - check if V1 agreement exists
-                // If V1 only (no V2 journey), return None to display V1 in view
-                // If no V1, show NotStarted to prompt V2 acceptance
-                latestTermsOfUseAgreementDetails match {
-                  case Some(TermsOfUseAgreementDetails(_, _, _, Some(_))) => None                   // V1 exists, no V2 journey - let view display V1 todo is that even possible?
-                  case _                                                  => Some(NotStarted(None)) // No V1, show V2 not started todo is that even possible too? No V1, no V2 invitation - if possible, what do we display here
-                }
-            }
+      (maybeInvitation, maybeSubmission) match {
+        case (Some(invitation), None) =>
+          Some(NotStarted(Some(invitation.dueBy)))
 
-          case (true, Some(submission: Submission)) =>
-            val status = submission.status
-            status match {
-              case s if s.isCreated || s.isAnswering =>
-                val requestedBy = extractRequestedByFromHistory(submission)
-                // todo is it possible to have a submission without an invitation? Clarify business rules
-                val deadline    = maybeInvitation.map(_.dueBy).getOrElse(instant())
-                Some(Started(requestedBy, deadline))
+        case (Some(invitation), Some(submission)) =>
+          submission.status match {
+            case s if s.isCreated || s.isAnswering =>
+              Some(Started(extractRequestedByFromHistory(submission), invitation.dueBy))
 
-              case submitted: Submission.Status.Submitted =>
-                Some(Submitted(submitted.requestedBy, submitted.timestamp))
+            case submittedSubmission: Submission.Status.Submitted =>
+              Some(Submitted(submittedSubmission.requestedBy, submittedSubmission.timestamp))
 
-              case s if s.isGranted || s.isGrantedWithWarnings =>
-                extractSubmittedFromHistory(submission)
-                  .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
+            case s if s.isGranted || s.isGrantedWithWarnings =>
+              extractSubmittedFromHistory(submission)
+                .map(submittedSubmission => Approved(submittedSubmission.requestedBy, submittedSubmission.timestamp))
 
-              case _ =>
-                None
-            }
+            case _ =>
+              None
+          }
 
-          case (false, _) => None
+        case (None, Some(submission)) =>
+          None // todo ???
 
-        }
-
-      latestTermsOfUseAgreementDetails match {
-        case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) =>
-          val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString)
-          TermsOfUseViewModel(
-            requiresTermsOfUse,
-            maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY),
-            Some(Agreement(maybeName.getOrElse(emailAddress.text), date)),
-            termsOfUseV2State
-          )
-        case _                                                                                   =>
-          TermsOfUseViewModel(requiresTermsOfUse, false, None, termsOfUseV2State) // todo check when would that happen?
+        case (None, None) =>
+          // If V1 only (no V2 journey), return None to display V1 in view
+          // If no V1, show NotStarted to prompt V2 acceptance
+          if (latestTermsOfUseAgreementDetails.isDefined)
+            None
+          else
+            Some(NotStarted(None)) // todo can you start submission without invitation ??
       }
     }
   }
 
   private def extractRequestedByFromHistory(submission: Submission): String = {
     submission.latestInstance.statusHistory.toList
-      .find(_.isCreated)
-      .collect {
-        case created: Submission.Status.Created => created.requestedBy // todo is this case check needed?
+      .collectFirst {
+        case created: Submission.Status.Created => created.requestedBy
       }
       .getOrElse("unknown")
   }
 
   private def extractSubmittedFromHistory(submission: Submission): Option[Submission.Status.Submitted] = {
     submission.latestInstance.statusHistory.toList
-      .find(_.isSubmitted)
-      .collect {
-        case submitted: Submission.Status.Submitted => submitted // todo is this case check pattern match/collect needed?
+      .collectFirst {
+        case submitted: Submission.Status.Submitted => submitted
       }
   }
 }

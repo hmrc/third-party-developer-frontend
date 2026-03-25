@@ -404,9 +404,11 @@ class ManageApplicationControllerSpec
     "V2 approved - AC5" should {
       "returns ViewModel showing V2 terms agreed when submission approved" in new Setup {
         val submission = grantedSubmission
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV2TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
 
         returnAgreementDetails(v2Agreement)
-        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
 
         givenApplicationAction(prodAppWithRespIndAndV2TermsOfUse, adminSession)
@@ -431,9 +433,11 @@ class ManageApplicationControllerSpec
     "V2 approved replacing V1 - AC8" should {
       "returns ViewModel showing only V2 agreement, V1 no longer displayed after V2 approval" in new Setup {
         val submission = grantedSubmission
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV2TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
 
         returnAgreementDetails(v2Agreement)
-        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
 
         givenApplicationAction(prodAppWithRespIndWithV1AndV2TermsOfUse, adminSession)
