@@ -92,7 +92,7 @@ class ManageApplicationControllerSpec
       TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version))
     )
   ).get.head
-  val v1AgreementWording: String              = s"Agreed by ${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}"
+  val v1AgreementWording: String              = s"${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}."
 
   val v2Agreement = TermsOfUseAgreementDetails(
     TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,
@@ -236,7 +236,7 @@ class ManageApplicationControllerSpec
         viewModel.required shouldBe true
         viewModel.appUsesOldVersion shouldBe false
         viewModel.agreement shouldBe None
-        viewModel.termsOfUseV2State shouldBe Some(NotStarted(None))
+        viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(instant)))
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
         verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
