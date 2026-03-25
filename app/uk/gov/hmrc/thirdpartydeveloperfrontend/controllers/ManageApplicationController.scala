@@ -210,32 +210,24 @@ class ManageApplicationController @Inject() (
         case (Some(invitation), None) =>
           Some(NotStarted(Some(invitation.dueBy)))
 
-        case (Some(invitation), Some(submission)) =>
-          submission.status match {
-            case s if s.isCreated || s.isAnswering =>
-              Some(Started(extractRequestedByFromHistory(submission), invitation.dueBy))
-
-            case submittedSubmission: Submission.Status.Submitted =>
-              Some(Submitted(submittedSubmission.requestedBy, submittedSubmission.timestamp))
-
-            case s if s.isGranted || s.isGrantedWithWarnings =>
-              extractSubmittedFromHistory(submission)
-                .map(submittedSubmission => Approved(submittedSubmission.requestedBy, submittedSubmission.timestamp))
-
-            case _ =>
-              None
-          }
-
-        case (None, Some(submission)) =>
-          None // todo ???
-
         case (None, None) =>
-          // If V1 only (no V2 journey), return None to display V1 in view
-          // If no V1, show NotStarted to prompt V2 acceptance
-          if (latestTermsOfUseAgreementDetails.isDefined)
-            None
-          else
-            Some(NotStarted(None)) // todo can you start submission without invitation ??
+          Some(NotStarted(Some(instant())))
+
+        case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
+          val requestedBy = extractRequestedByFromHistory(submission)
+          val deadline    = maybeInv.map(_.dueBy).getOrElse(instant())
+          Some(Started(requestedBy, deadline))
+
+        case (_, Some(submission)) if submission.status.isSubmitted =>
+          val submitted = submission.status.asInstanceOf[Submission.Status.Submitted]
+          Some(Submitted(submitted.requestedBy, submitted.timestamp))
+
+        case (_, Some(submission)) if submission.status.isGranted || submission.status.isGrantedWithWarnings =>
+          extractSubmittedFromHistory(submission)
+            .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
+
+        case (_, Some(_)) =>
+          None
       }
     }
   }
