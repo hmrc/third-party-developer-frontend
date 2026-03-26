@@ -59,7 +59,7 @@
             TableRow(content = Text("Not agreed"), attributes = Map("id" -> "termsOfUseNotAgreed")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseStartLink'>Start</a>"
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseStartLink'>Start</a>"
               } else ""
             ))
           )
@@ -74,7 +74,7 @@
             ), attributes = Map("id" -> "termsOfUseV2UpliftDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseV2StartLink'>Start</a>"
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseV2StartLink'>Start</a>"
               } else ""
             ))
           )
@@ -89,7 +89,7 @@
             ), attributes = Map("id" -> "termsOfUseStartedDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(app.id)}' id='termsOfUseContinueLink'>Continue</a>"
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseContinueLink'>Continue</a>"
               } else ""
             ))
           )
@@ -152,6 +152,7 @@
           termsOfUseModel.agreement match {
             case Some(agreement) =>
               Seq(
+                TableRow(content = Text("")),
                 TableRow(content = Text(s"${agreement.who} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(agreement.when)}."), attributes = Map("id" -> "termsOfUseAgreementV1")),
                 TableRow(content = HtmlContent(
                   if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
