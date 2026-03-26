@@ -536,7 +536,7 @@ class ApplicationDetailsViewSpec
                   termsOfUseViewModelFailed
                 ))
 
-              page.termsOfUseFailedDetails.text shouldBe "Submission failed"
+              page.termsOfUseFailedDetails.text shouldBe "We are checking your answers to version 2 of the terms of use."
               page.termsOfUseFailedViewLink.text shouldBe "View"
             }
 
@@ -558,7 +558,7 @@ class ApplicationDetailsViewSpec
 
               page.termsOfUseAgreementV1.text should include("bob@example.com agreed to version 1")
               page.termsOfUseLinkV1.text shouldBe "View"
-              page.termsOfUseFailedDetails.text shouldBe "Submission failed"
+              page.termsOfUseFailedDetails.text shouldBe "We are checking your answers to version 2 of the terms of use."
               page.termsOfUseFailedViewLink.text shouldBe "View"
             }
           }

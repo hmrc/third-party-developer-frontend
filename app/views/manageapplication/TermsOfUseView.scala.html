@@ -128,10 +128,10 @@
         case Some(TermsOfUseV2State.Failed()) =>
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-            TableRow(content = Text("Submission failed"), attributes = Map("id" -> "termsOfUseFailedDetails")),
+            TableRow(content = Text("We are checking your answers to version 2 of the terms of use."), attributes = Map("id" -> "termsOfUseFailedDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseFailedViewLink'>${messages("""application.details.view""")}</a>"
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseFailedViewLink'>${messages("""application.details.view""")}</a>"
               } else ""
             ))
           )
