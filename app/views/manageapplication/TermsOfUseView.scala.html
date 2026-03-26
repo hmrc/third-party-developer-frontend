@@ -125,13 +125,16 @@
             case _ => Seq.empty
           }
 
-        case Some(TermsOfUseV2State.Failed()) =>
+        case Some(TermsOfUseV2State.InReview(submittedBy, submittedOn)) =>
+            val submittedDate = DateFormatter.formatTwoDigitDay(submittedOn)
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-            TableRow(content = Text("We are checking your answers to version 2 of the terms of use."), attributes = Map("id" -> "termsOfUseFailedDetails")),
+            TableRow(content = HtmlContent(
+                s"<p class='govuk-body'>Terms of use submitted by $submittedBy on $submittedDate.</p><p class='govuk-body'>Your submission is being checked.</p>"
+            ), attributes = Map("id" -> "termsOfUseInReviewDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseFailedViewLink'>${messages("""application.details.view""")}</a>"
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseInReviewViewLink'>${messages("""application.details.view""")}</a>"
               } else ""
             ))
           )

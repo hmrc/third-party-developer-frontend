@@ -91,8 +91,8 @@ class ApplicationDetailsViewSpec
     lazy val termsOfUseSubmittedDetails: Element  = body.getElementById("termsOfUseSubmittedDetails")
     lazy val termsOfUseSubmittedViewLink: Element = body.getElementById("termsOfUseSubmittedViewLink")
     lazy val termsOfUseV2UpliftDetails: Element   = body.getElementById("termsOfUseV2UpliftDetails")
-    lazy val termsOfUseFailedDetails: Element     = body.getElementById("termsOfUseFailedDetails")
-    lazy val termsOfUseFailedViewLink: Element    = body.getElementById("termsOfUseFailedViewLink")
+    lazy val termsOfUseInReviewDetails: Element     = body.getElementById("termsOfUseInReviewDetails")
+    lazy val termsOfUseInReviewViewLink: Element    = body.getElementById("termsOfUseInReviewViewLink")
 
     lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
     lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")
@@ -520,12 +520,12 @@ class ApplicationDetailsViewSpec
               page.responsibleIndividualLink.text shouldBe "Change"
             }
 
-            "show 'Submission failed' with 'View' link when V2 submission has failed" in new LoggedInUserIsAdmin {
-              val termsOfUseViewModelFailed = TermsOfUseViewModel(
+            "show Submission is in review with 'View' link when V2 submission is in review" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelInReview = TermsOfUseViewModel(
                 required = true,
                 appUsesOldVersion = false,
                 agreement = None,
-                termsOfUseV2State = Some(TermsOfUseV2State.Failed())
+                termsOfUseV2State = Some(TermsOfUseV2State.InReview(testUserName, instant))
               )
 
               val page =
@@ -533,19 +533,19 @@ class ApplicationDetailsViewSpec
                   ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
                   List.empty,
                   None,
-                  termsOfUseViewModelFailed
+                  termsOfUseViewModelInReview
                 ))
 
-              page.termsOfUseFailedDetails.text shouldBe "We are checking your answers to version 2 of the terms of use."
-              page.termsOfUseFailedViewLink.text shouldBe "View"
+              page.termsOfUseInReviewDetails.text shouldBe s"Terms of use submitted by $testUserName on $expectedDate. Your submission is being checked."
+              page.termsOfUseInReviewViewLink.text shouldBe "View"
             }
 
-            "show V1 agreement with 'View' link and 'Submission failed' with 'View' link when V1 is agreed and V2 submission has failed" in new LoggedInUserIsAdmin {
+            "show V1 agreement with 'View' link and Submission is in review with 'View' link when V1 is agreed and V2 submission is in review" in new LoggedInUserIsAdmin {
               val termsOfUseModel = TermsOfUseViewModel(
                 required = true,
                 appUsesOldVersion = true,
                 agreement = Some(Agreement("bob@example.com", instant)),
-                termsOfUseV2State = Some(TermsOfUseV2State.Failed())
+                termsOfUseV2State = Some(TermsOfUseV2State.InReview(testUserName, instant))
               )
 
               val page =
@@ -558,8 +558,8 @@ class ApplicationDetailsViewSpec
 
               page.termsOfUseAgreementV1.text should include("bob@example.com agreed to version 1")
               page.termsOfUseLinkV1.text shouldBe "View"
-              page.termsOfUseFailedDetails.text shouldBe "We are checking your answers to version 2 of the terms of use."
-              page.termsOfUseFailedViewLink.text shouldBe "View"
+              page.termsOfUseInReviewDetails.text shouldBe s"Terms of use submitted by $testUserName on $expectedDate. Your submission is being checked."
+              page.termsOfUseInReviewViewLink.text shouldBe "View"
             }
           }
         }

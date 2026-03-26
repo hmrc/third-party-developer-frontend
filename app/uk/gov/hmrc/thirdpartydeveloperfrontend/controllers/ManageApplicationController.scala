@@ -226,8 +226,9 @@ class ManageApplicationController @Inject() (
           extractSubmittedFromHistory(submission)
             .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
 
-        case (_, Some(submission)) if submission.status.isFailed =>
-          Some(Failed())
+        case (_, Some(submission)) if submission.status.isFailed || submission.status.isWarnings =>
+          extractSubmittedFromHistory(submission)
+            .map(submitted => InReview(submitted.requestedBy, submitted.timestamp))
 
         case (_, Some(_)) =>
           None
