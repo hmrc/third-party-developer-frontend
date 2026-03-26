@@ -92,7 +92,9 @@ class ManageApplicationControllerSpec
       TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version))
     )
   ).get.head
-  val v1AgreementWording: String              = s"${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}."
+
+  val v1AgreementWording: String =
+    s"${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}."
 
   val v2Agreement = TermsOfUseAgreementDetails(
     TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,

@@ -91,8 +91,8 @@ class ApplicationDetailsViewSpec
     lazy val termsOfUseSubmittedDetails: Element  = body.getElementById("termsOfUseSubmittedDetails")
     lazy val termsOfUseSubmittedViewLink: Element = body.getElementById("termsOfUseSubmittedViewLink")
     lazy val termsOfUseV2UpliftDetails: Element   = body.getElementById("termsOfUseV2UpliftDetails")
-    lazy val termsOfUseInReviewDetails: Element     = body.getElementById("termsOfUseInReviewDetails")
-    lazy val termsOfUseInReviewViewLink: Element    = body.getElementById("termsOfUseInReviewViewLink")
+    lazy val termsOfUseInReviewDetails: Element   = body.getElementById("termsOfUseInReviewDetails")
+    lazy val termsOfUseInReviewViewLink: Element  = body.getElementById("termsOfUseInReviewViewLink")
 
     lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
     lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")

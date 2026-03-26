@@ -181,7 +181,7 @@
             showTermsOfUse(app, termsOfUseModel),
             showV1Agreement(app, termsOfUseModel),
             showResponsibleIndividual(app, getResponsibleIndividualName(app.access))
-        )
+        ).filter(_.nonEmpty)
     ))
 }
 

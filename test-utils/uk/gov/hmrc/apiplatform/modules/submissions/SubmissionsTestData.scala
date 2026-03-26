@@ -123,7 +123,7 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   val declinedSubmission  = Submission.decline(instant, gatekeeperUserName, reasons)(submittedSubmission)
   val grantedSubmission   = Submission.grant(instant, gatekeeperUserName, None, None)(submittedSubmission)
   val failedSubmission    = Submission.addStatusHistory(Submission.Status.Failed(instant, "bob@example.com"))(submittedSubmission)
-  val warningsSubmission    = Submission.addStatusHistory(Submission.Status.Warnings(instant, "bob@example.com"))(submittedSubmission)
+  val warningsSubmission  = Submission.addStatusHistory(Submission.Status.Warnings(instant, "bob@example.com"))(submittedSubmission)
 
   def buildSubmissionWithQuestions(appId: ApplicationId = ApplicationId.random): Submission = {
     val subId = SubmissionId.random
