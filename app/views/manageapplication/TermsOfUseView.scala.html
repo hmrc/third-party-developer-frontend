@@ -125,20 +125,16 @@
             case _ => Seq.empty
           }
 
-        case _ if termsOfUseModel.appUsesOldVersion =>
-          termsOfUseModel.agreement match {
-            case Some(agreement) =>
-              Seq(
-                TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-                TableRow(content = Text(s"${agreement.who} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(agreement.when)}."), attributes = Map("id" -> "termsOfUseAgreementV1")),
-                TableRow(content = HtmlContent(
-                  if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                    s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.TermsOfUse.termsOfUse(app.id)}' id='termsOfUseLinkV1'>${messages("""application.details.view""")}</a>"
-                  } else ""
-                ))
-              )
-            case _ => Seq.empty
-          }
+        case Some(TermsOfUseV2State.Failed()) =>
+          Seq(
+            TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
+            TableRow(content = Text("Submission failed"), attributes = Map("id" -> "termsOfUseFailedDetails")),
+            TableRow(content = HtmlContent(
+              if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseFailedViewLink'>${messages("""application.details.view""")}</a>"
+              } else ""
+            ))
+          )
         
         case _ => Seq.empty
       }

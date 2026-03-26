@@ -91,6 +91,8 @@ class ApplicationDetailsViewSpec
     lazy val termsOfUseSubmittedDetails: Element  = body.getElementById("termsOfUseSubmittedDetails")
     lazy val termsOfUseSubmittedViewLink: Element = body.getElementById("termsOfUseSubmittedViewLink")
     lazy val termsOfUseV2UpliftDetails: Element   = body.getElementById("termsOfUseV2UpliftDetails")
+    lazy val termsOfUseFailedDetails: Element     = body.getElementById("termsOfUseFailedDetails")
+    lazy val termsOfUseFailedViewLink: Element    = body.getElementById("termsOfUseFailedViewLink")
 
     lazy val privacyPolicy: Element                     = body.getElementById("privacyPolicy")
     lazy val changePrivacyPolicyLocationLink: Element   = body.getElementById("changePrivacyPolicy")
@@ -516,6 +518,26 @@ class ApplicationDetailsViewSpec
               page.termsOfUseLinkV2.text shouldBe "View"
               page.termsOfUseAgreementV1 shouldBe null
               page.responsibleIndividualLink.text shouldBe "Change"
+            }
+
+            "show 'Submission failed' with 'View' link when V2 submission has failed" in new LoggedInUserIsAdmin {
+              val termsOfUseViewModelFailed = TermsOfUseViewModel(
+                required = true,
+                appUsesOldVersion = false,
+                agreement = None,
+                termsOfUseV2State = Some(TermsOfUseV2State.Failed())
+              )
+
+              val page =
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseViewModelFailed
+                ))
+
+              page.termsOfUseFailedDetails.text shouldBe "Submission failed"
+              page.termsOfUseFailedViewLink.text shouldBe "View"
             }
           }
         }
