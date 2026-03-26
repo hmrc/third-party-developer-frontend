@@ -222,11 +222,11 @@ class ManageApplicationController @Inject() (
           val submitted = submission.status.asInstanceOf[Submission.Status.Submitted]
           Some(Submitted(submitted.requestedBy, submitted.timestamp))
 
-        case (_, Some(submission)) if submission.status.isGranted || submission.status.isGrantedWithWarnings =>
+        case (_, Some(submission)) if submission.status.isGranted =>
           extractSubmittedFromHistory(submission)
             .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
 
-        case (_, Some(submission)) if submission.status.isFailed || submission.status.isWarnings =>
+        case (_, Some(submission)) if submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
           extractSubmittedFromHistory(submission)
             .map(submitted => InReview(submitted.requestedBy, submitted.timestamp))
 
