@@ -97,7 +97,6 @@ class Details @Inject() (
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
-  // scalastyle:off cyclomatic.complexity method.length
   def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
     def appDetailsPage = Ok(
       detailsView(
@@ -150,7 +149,6 @@ class Details @Inject() (
         successful(BadRequest)
     }
   }
-  // scalastyle:on cyclomatic.complexity method.length
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
     val application = request.application
@@ -189,7 +187,7 @@ class Details @Inject() (
       else {
         val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
         if (validateAppName.isValid) // This has already been validated
-          List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant(), validateAppName.toOption.get))
+          List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant, validateAppName.toOption.get))
         else
           List.empty
       },
@@ -197,24 +195,24 @@ class Details @Inject() (
         List.empty
       } else {
         if (effectiveDescription.isDefined)
-          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant(), effectiveDescription.get))
+          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant, effectiveDescription.get))
         else
-          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant()))
+          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant))
       },
       if (form.privacyPolicyUrl == access.privacyPolicyUrl) {
         List.empty
       } else {
         form.privacyPolicyUrl match {
-          case Some(ppu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant(), ppu))
-          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant()))
+          case Some(ppu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant, ppu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant))
         }
       },
       if (form.termsAndConditionsUrl == access.termsAndConditionsUrl) {
         List.empty
       } else {
         form.termsAndConditionsUrl match {
-          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationTermsAndConditionsUrl(actor, instant(), tcu))
-          case None      => List(ApplicationCommands.RemoveSandboxApplicationTermsAndConditionsUrl(actor, instant()))
+          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationTermsAndConditionsUrl(actor, instant, tcu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationTermsAndConditionsUrl(actor, instant))
         }
       }
     ).flatten

@@ -74,7 +74,7 @@ class ManageApplicationController @Inject() (
         request.subscriptions,
         fraudPreventionConfig
       ),
-      buildTermsOfUseViewModel
+      buildTermsOfUseViewModel()
     )))
   }
 

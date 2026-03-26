@@ -113,7 +113,7 @@ class Credentials @Inject() (
       name = secretValue.takeRight(4),
       id = ClientSecret.Id.random,
       hashedSecret = hashedSecret,
-      instant()
+      instant
     )
 
     apmCmdModule.dispatch(applicationId, cmd, Set.empty).flatMap {
@@ -141,7 +141,7 @@ class Credentials @Inject() (
       val cmd       = ApplicationCommands.RemoveClientSecret(
         actor = Actors.AppCollaborator(developer.email),
         clientSecretId,
-        instant()
+        instant
       )
       apmCmdModule.dispatch(applicationId, cmd, Set.empty)
         .map(_ => Redirect(routes.Credentials.clientSecrets(applicationId)))
@@ -149,5 +149,5 @@ class Credentials @Inject() (
 }
 
 object Credentials {
-  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).asInstant // scalastyle:ignore magic.number
+  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).asInstant
 }

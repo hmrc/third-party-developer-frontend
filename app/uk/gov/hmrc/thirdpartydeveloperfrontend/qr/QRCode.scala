@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.qr
 
-// scalastyle:off illegal.imports
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
@@ -27,7 +26,6 @@ import scala.jdk.CollectionConverters._
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.{BarcodeFormat, EncodeHintType}
-//scalastyle:on illegal.imports
 
 case class QRCode(scale: Int = 1) {
   private val pixels = Array.fill(scale)(QRCode.white)
