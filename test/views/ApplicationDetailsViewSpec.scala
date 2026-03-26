@@ -303,7 +303,7 @@ class ApplicationDetailsViewSpec
               val page =
                 Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
-              page.termsOfUseAgreementV1.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
+              page.termsOfUseAgreementV1.text shouldBe s"${emailAddress.text} agreed to version 1 of the terms of use on $expectedTimeStamp."
               page.termsOfUseLinkV1 shouldBe null
             }
 
@@ -352,7 +352,7 @@ class ApplicationDetailsViewSpec
               val page =
                 Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
-              page.termsOfUseAgreementV1.text shouldBe s"Agreed by ${emailAddress.text} on $expectedTimeStamp"
+              page.termsOfUseAgreementV1.text shouldBe s"${emailAddress.text} agreed to version 1 of the terms of use on $expectedTimeStamp."
               page.termsOfUseLinkV1.text shouldBe "View"
               page.termsOfUseLinkV1.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
               page.warning shouldBe null
