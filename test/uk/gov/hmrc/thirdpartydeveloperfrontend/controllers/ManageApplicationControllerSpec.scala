@@ -483,6 +483,33 @@ class ManageApplicationControllerSpec
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
         }
       }
+
+      "when V2 failed with V1 agreement" should {
+        "returns ViewModel showing V1 agreement and V2 failed state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = failedSubmission
+
+          returnAgreementDetails(v1Agreement)
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.appUsesOldVersion shouldBe true
+          viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+          viewModel.termsOfUseV2State.get shouldBe Failed()
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
     }
 
     "sandbox and non-standard apps" should {

@@ -539,6 +539,28 @@ class ApplicationDetailsViewSpec
               page.termsOfUseFailedDetails.text shouldBe "Submission failed"
               page.termsOfUseFailedViewLink.text shouldBe "View"
             }
+
+            "show V1 agreement with 'View' link and 'Submission failed' with 'View' link when V1 is agreed and V2 submission has failed" in new LoggedInUserIsAdmin {
+              val termsOfUseModel = TermsOfUseViewModel(
+                required = true,
+                appUsesOldVersion = true,
+                agreement = Some(Agreement("bob@example.com", instant)),
+                termsOfUseV2State = Some(TermsOfUseV2State.Failed())
+              )
+
+              val page =
+                Page(applicationDetailsView(
+                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
+                  List.empty,
+                  None,
+                  termsOfUseModel
+                ))
+
+              page.termsOfUseAgreementV1.text should include("bob@example.com agreed to version 1")
+              page.termsOfUseLinkV1.text shouldBe "View"
+              page.termsOfUseFailedDetails.text shouldBe "Submission failed"
+              page.termsOfUseFailedViewLink.text shouldBe "View"
+            }
           }
         }
       }
