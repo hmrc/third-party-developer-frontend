@@ -43,8 +43,12 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.Agreement
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TermsOfUseInvitation, TermsOfUseInvitationState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
@@ -80,12 +84,17 @@ class ManageApplicationControllerSpec
   val prodAppWithRespIndAndV2TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessWithSubmission).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description")))
 
+  val prodAppWithRespIndWithV1AndV2TermsOfUse = appWithSubsFieldsOne.withAccess(standardAccessWithSubmission).withToken(ApplicationTokenData.one)
+    .modify(_.copy(description = Some("Some App Description"), checkInformation = Some(checkInformationOne)))
+
   val v1Agreement: TermsOfUseAgreementDetails = prodAppWithRespIndAndV1TermsOfUse.details.checkInformation.map((checkInfo: CheckInformation) =>
     checkInfo.termsOfUseAgreements.map((toua: TermsOfUseAgreement) =>
       TermsOfUseAgreementDetails(toua.emailAddress, None, toua.timeStamp, Some(toua.version))
     )
   ).get.head
-  val v1AgreementWording: String              = s"Agreed by ${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}"
+
+  val v1AgreementWording: String =
+    s"${v1Agreement.name.getOrElse(v1Agreement.emailAddress)} agreed to version 1 of the terms of use on ${DateFormatter.formatTwoDigitDay(v1Agreement.date)}."
 
   val v2Agreement = TermsOfUseAgreementDetails(
     TermsOfUseAcceptanceData.one.responsibleIndividual.emailAddress,
@@ -101,26 +110,38 @@ class ManageApplicationControllerSpec
     "logged in as a Developer on an application" should {
       "return the view for a standard production app with no change link" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession)(approvedApplication)
       }
       "return the view for a standard production app with V1 terms of use" in new Setup {
         returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a standard production app with V2 terms of use" in new Setup {
         returnAgreementDetails(v2Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession, v2TOUWording = Some(v2AgreementWording))(prodAppWithRespIndAndV2TermsOfUse)
       }
       "return the view for a standard sandbox app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForAdminOrSandbox(devSession)(sandboxApplication)
       }
       "return the view for a Privileged production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForDeveloper(devSession)(productionRopcApplication)
       }
     }
@@ -128,20 +149,25 @@ class ManageApplicationControllerSpec
     "logged in as an Administrator on an application" should {
       "return the view for a standard production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(approvedApplication)
       }
       "return the view for a standard production app with link to view V1 terms of use" in new Setup {
         returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
         detailsShouldRenderThePageForAdminOrSandbox(adminSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a Privileged production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionPrivApplication)
       }
       "return the view for a ROPC production app" in new Setup {
         returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(aSubmission)
         detailsShouldRenderThePageForAdminOrSandbox(adminSession)(productionRopcApplication)
       }
@@ -166,6 +192,467 @@ class ManageApplicationControllerSpec
         val result = application.callDetailsNotLoggedIn
 
         redirectsToLogin(result)
+      }
+    }
+  }
+
+  "buildTermsOfUseViewModel for production standard apps" when {
+
+    "V2 not started - AC1" should {
+      "returns ViewModel showing V2 terms not yet started with deadline when invitation sent but no submission begun" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+
+        givenApplicationAction(approvedApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe false
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(dueBy)))
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+      }
+
+      "returns ViewModel showing V2 terms not started when no invitation exists" in new Setup {
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+
+        givenApplicationAction(approvedApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe false
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(instant)))
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+      }
+    }
+
+    "V2 not started with V1 agreement - AC2" should {
+      "returns ViewModel showing both V1 agreement and V2 uplift invitation when upgrading from V1 to V2" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV1TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+
+        returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+
+        givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(prodAppWithRespIndAndV1TermsOfUse.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe true
+        viewModel.agreement shouldBe defined
+        viewModel.agreement.get.who shouldBe v1Agreement.name.getOrElse(v1Agreement.emailAddress.text)
+        viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(dueBy)))
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+      }
+    }
+
+    "V2 started - AC3" should {
+      "returns ViewModel showing who started V2 terms and deadline when submission is created but not yet in progress" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+        val submission = createdSubmission
+
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(approvedApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe false
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State.get shouldBe Started("bob@example.com", dueBy)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+      }
+
+      "returns ViewModel showing who started V2 terms and deadline when user is actively answering questions" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+        val submission = answeringSubmission
+
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(approvedApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State.get shouldBe Started("bob@example.com", dueBy)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+      }
+    }
+
+    "V2 started with V1 agreement - AC6" should {
+      "returns ViewModel showing V1 historical agreement alongside who started the V2 process" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV1TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+        val submission = answeringSubmission
+
+        returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(prodAppWithRespIndAndV1TermsOfUse.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe true
+        viewModel.agreement should contain(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+        viewModel.termsOfUseV2State.get shouldBe Started("bob@example.com", dueBy)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+      }
+    }
+
+    "V2 submitted - AC4" should {
+      "returns ViewModel showing who submitted V2 terms and when, pending approval" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+        val submission = submittedSubmission
+
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(approvedApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+      }
+    }
+
+    "V2 submitted with V1 agreement - AC7" should {
+      "returns ViewModel showing V1 historical agreement alongside the pending V2 submission details" in new Setup {
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV1TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+        val submission = submittedSubmission
+
+        returnAgreementDetails(v1Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(prodAppWithRespIndAndV1TermsOfUse.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe true
+        viewModel.agreement should contain(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+        viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+      }
+    }
+
+    "V2 approved - AC5" should {
+      "returns ViewModel showing V2 terms agreed when submission approved" in new Setup {
+        val submission = grantedSubmission
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV2TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+
+        returnAgreementDetails(v2Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(prodAppWithRespIndAndV2TermsOfUse, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(prodAppWithRespIndAndV2TermsOfUse.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe false
+        viewModel.agreement should contain(Agreement(v2Agreement.name.get, v2Agreement.date))
+        val submittedStatus =
+          submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
+        viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submittedStatus.timestamp)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(*)
+      }
+    }
+
+    "V2 approved replacing V1 - AC8" should {
+      "returns ViewModel showing only V2 agreement, V1 no longer displayed after V2 approval" in new Setup {
+        val submission = grantedSubmission
+        val dueBy      = instant.plusSeconds(86400 * 30)
+        val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV2TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+
+        returnAgreementDetails(v2Agreement)
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+        SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+        givenApplicationAction(prodAppWithRespIndWithV1AndV2TermsOfUse, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(prodAppWithRespIndAndV2TermsOfUse.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe true
+        viewModel.appUsesOldVersion shouldBe false
+        viewModel.agreement should contain(Agreement(v2Agreement.name.get, v2Agreement.date))
+        val submittedStatus =
+          submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
+        viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submittedStatus.timestamp)
+
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(*)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(*)
+      }
+
+      "when V2 failed" should {
+        "returns ViewModel showing submission in Submitted state when V2 submission has failed" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = failedSubmission
+
+          returnAgreementDetails()
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.agreement shouldBe None
+          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 failed with V1 agreement" should {
+        "returns ViewModel showing V1 agreement and V2 Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = failedSubmission
+
+          returnAgreementDetails(v1Agreement)
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.appUsesOldVersion shouldBe true
+          viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 in warning state" should {
+        "returns ViewModel showing V2 submission in Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = warningsSubmission
+
+          returnAgreementDetails()
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.agreement shouldBe None
+          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 in warning state with V1 agreement" should {
+        "returns ViewModel showing V1 agreement and V2 in Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = warningsSubmission
+
+          returnAgreementDetails(v1Agreement)
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.appUsesOldVersion shouldBe true
+          viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 in GrantedWithWarning state" should {
+        "returns ViewModel showing V2 submission in Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = grantedWithWarningsSubmission
+
+          returnAgreementDetails()
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.agreement shouldBe None
+          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 in GrantedWithWarning state with V1 agreement" should {
+        "returns ViewModel showing V1 agreement and V2 in Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = grantedWithWarningsSubmission
+
+          returnAgreementDetails(v1Agreement)
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.appUsesOldVersion shouldBe true
+          viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+    }
+
+    "sandbox and non-standard apps" should {
+      "returns ViewModel indicating no terms of use required for sandbox app" in new Setup {
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+
+        givenApplicationAction(sandboxApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(sandboxApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe false
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State shouldBe None
+      }
+
+      "returns ViewModel indicating no terms of use required for privileged app" in new Setup {
+        returnAgreementDetails()
+        TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+        SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+
+        givenApplicationAction(productionPrivApplication, adminSession)
+
+        val result = underTestWithMockView.applicationDetails(productionPrivApplication.id)(loggedInAdminRequest)
+        status(result) shouldBe OK
+
+        val viewModel = captureTermsOfUseViewModel()
+
+        viewModel.required shouldBe false
+        viewModel.agreement shouldBe None
+        viewModel.termsOfUseV2State shouldBe None
       }
     }
   }
@@ -359,8 +846,10 @@ class ManageApplicationControllerSpec
       extends ApplicationServiceMock
       with ApplicationActionServiceMock
       with SubmissionServiceMockModule
+      with TermsOfUseInvitationServiceMockModule
       with TermsOfUseServiceMock {
 
+    val mockDetailsView                              = mock[ApplicationDetailsView]
     val detailsView                                  = app.injector.instanceOf[ApplicationDetailsView]
     val changeAppNameAndDescView                     = app.injector.instanceOf[ChangeAppNameAndDescView]
     def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List(ServiceName("ppns-api")), "/")
@@ -374,6 +863,8 @@ class ManageApplicationControllerSpec
       sessionServiceMock,
       fraudPreventionConfig,
       termsOfUseServiceMock,
+      SubmissionServiceMock.aMock,
+      TermsOfUseInvitationServiceMock.aMock,
       changeAppNameAndDescView,
       mcc,
       cookieSigner,
@@ -381,11 +872,36 @@ class ManageApplicationControllerSpec
       detailsView
     )
 
+    // Controller with mocked view for capturing ViewModel
+    val underTestWithMockView = new ManageApplicationController(
+      mockErrorHandler,
+      applicationServiceMock,
+      applicationActionServiceMock,
+      sessionServiceMock,
+      fraudPreventionConfig,
+      termsOfUseServiceMock,
+      SubmissionServiceMock.aMock,
+      TermsOfUseInvitationServiceMock.aMock,
+      changeAppNameAndDescView,
+      mcc,
+      cookieSigner,
+      clock,
+      mockDetailsView
+    )
+
+    when(mockDetailsView.apply(*, *, *, *)(*, *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
+
+    def captureTermsOfUseViewModel(): Details.TermsOfUseViewModel = {
+      val captor = ArgCaptor[Details.TermsOfUseViewModel]
+      verify(mockDetailsView).apply(*, *, *, captor)(*, *, *, *, *)
+      captor.value
+    }
 
     def redirectsToLogin(result: Future[Result]): Assertion = {
       status(result) shouldBe SEE_OTHER

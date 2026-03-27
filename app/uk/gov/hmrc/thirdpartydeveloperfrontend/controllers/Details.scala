@@ -46,10 +46,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
@@ -58,11 +58,12 @@ object Details {
   case class Agreement(who: String, when: Instant)
 
   case class TermsOfUseViewModel(
-      exists: Boolean,
+      required: Boolean,
       appUsesOldVersion: Boolean,
-      agreement: Option[Agreement]
+      agreement: Option[Agreement],
+      termsOfUseV2State: Option[TermsOfUseV2State] = None
     ) {
-    lazy val agreementNeeded = exists && !agreement.isDefined
+    lazy val agreementNeeded = required && !agreement.isDefined
   }
   case class ApplicationNameModel(application: ApplicationWithCollaborators)
   case class PrivacyPolicyLocationModel(applicationId: ApplicationId, privacyPolicyUrl: String, isInDesktop: Boolean)

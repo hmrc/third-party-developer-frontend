@@ -123,7 +123,7 @@ class DetailsViewSpec
     "showing Change links for Privacy Policy and Terms & Conditions locations" when {
       "managing a sandbox application" should {
 
-        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
@@ -160,7 +160,7 @@ class DetailsViewSpec
 
     "showing Terms of Use details" when {
       "managing a sandbox application" should {
-        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(exists = false)
+        val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
         "show nothing when a developer" in new LoggedInUserIsDev {
           val page = Page(detailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), termsOfUseViewModelForSandboxApp))
@@ -177,7 +177,7 @@ class DetailsViewSpec
 
       "managing a production application" when {
         "the app is a privileged app" should {
-          val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(exists = false)
+          val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(required = false)
           val application                   = prodApp.withAccess(Access.Privileged())
 
           "show nothing when a developer" in new LoggedInUserIsDev {
@@ -194,7 +194,7 @@ class DetailsViewSpec
         }
 
         "the app is an ROPC app" should {
-          val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(exists = false)
+          val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(required = false)
           val application                   = prodApp.withAccess(Access.Ropc())
 
           "show nothing when a developer" in new LoggedInUserIsDev {

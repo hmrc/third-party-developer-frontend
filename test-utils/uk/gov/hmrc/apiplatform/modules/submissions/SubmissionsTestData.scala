@@ -116,12 +116,15 @@ trait SubmissionsTestData extends QuestionBuilder with QuestionnaireTestData wit
   val gatekeeperUserName = "gatekeeperUserName"
   val reasons            = "some reasons"
 
-  val createdSubmission   = aSubmission
-  val answeringSubmission = createdSubmission.answeringWith(answersToQuestions)
-  val answeredSubmission  = createdSubmission.hasCompletelyAnsweredWith(answersToQuestions)
-  val submittedSubmission = Submission.submit(instant, "bob@example.com")(answeredSubmission)
-  val declinedSubmission  = Submission.decline(instant, gatekeeperUserName, reasons)(submittedSubmission)
-  val grantedSubmission   = Submission.grant(instant, gatekeeperUserName, None, None)(submittedSubmission)
+  val createdSubmission             = aSubmission
+  val answeringSubmission           = createdSubmission.answeringWith(answersToQuestions)
+  val answeredSubmission            = createdSubmission.hasCompletelyAnsweredWith(answersToQuestions)
+  val submittedSubmission           = Submission.submit(instant, "bob@example.com")(answeredSubmission)
+  val declinedSubmission            = Submission.decline(instant, gatekeeperUserName, reasons)(submittedSubmission)
+  val grantedSubmission             = Submission.grant(instant, gatekeeperUserName, None, None)(submittedSubmission)
+  val failedSubmission              = Submission.addStatusHistory(Submission.Status.Failed(instant, "bob@example.com"))(submittedSubmission)
+  val warningsSubmission            = Submission.addStatusHistory(Submission.Status.Warnings(instant, "bob@example.com"))(submittedSubmission)
+  val grantedWithWarningsSubmission = Submission.addStatusHistory(Submission.Status.GrantedWithWarnings(instant, "bob@example.com", "warning", None))(submittedSubmission)
 
   def buildSubmissionWithQuestions(appId: ApplicationId = ApplicationId.random): Submission = {
     val subId = SubmissionId.random
