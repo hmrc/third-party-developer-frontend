@@ -461,7 +461,7 @@ class ManageApplicationControllerSpec
       }
 
       "when V2 failed" should {
-        "returns ViewModel showing submission failed when V2 submission has failed" in new Setup {
+        "returns ViewModel showing submission in Submitted state when V2 submission has failed" in new Setup {
           val dueBy      = instant.plusSeconds(86400 * 30)
           val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
           val submission = failedSubmission
@@ -479,7 +479,7 @@ class ManageApplicationControllerSpec
 
           viewModel.required shouldBe true
           viewModel.agreement shouldBe None
-          viewModel.termsOfUseV2State should contain(InReview("bob@example.com", submission.status.timestamp))
+          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
 
           verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
@@ -487,7 +487,7 @@ class ManageApplicationControllerSpec
       }
 
       "when V2 failed with V1 agreement" should {
-        "returns ViewModel showing V1 agreement and V2 failed state" in new Setup {
+        "returns ViewModel showing V1 agreement and V2 Submitted state" in new Setup {
           val dueBy      = instant.plusSeconds(86400 * 30)
           val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
           val submission = failedSubmission
@@ -506,7 +506,7 @@ class ManageApplicationControllerSpec
           viewModel.required shouldBe true
           viewModel.appUsesOldVersion shouldBe true
           viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
-          viewModel.termsOfUseV2State.get shouldBe InReview("bob@example.com", submission.status.timestamp)
+          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
 
           verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
@@ -514,7 +514,7 @@ class ManageApplicationControllerSpec
       }
 
       "when V2 in warning state" should {
-        "returns ViewModel showing V2 submission in review state" in new Setup {
+        "returns ViewModel showing V2 submission in Submitted state" in new Setup {
           val dueBy      = instant.plusSeconds(86400 * 30)
           val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
           val submission = warningsSubmission
@@ -532,7 +532,7 @@ class ManageApplicationControllerSpec
 
           viewModel.required shouldBe true
           viewModel.agreement shouldBe None
-          viewModel.termsOfUseV2State should contain(InReview("bob@example.com", submission.status.timestamp))
+          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
 
           verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
@@ -540,7 +540,7 @@ class ManageApplicationControllerSpec
       }
 
       "when V2 in warning state with V1 agreement" should {
-        "returns ViewModel showing V1 agreement and V2 in review state" in new Setup {
+        "returns ViewModel showing V1 agreement and V2 in Submitted state" in new Setup {
           val dueBy      = instant.plusSeconds(86400 * 30)
           val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
           val submission = warningsSubmission
@@ -559,7 +559,60 @@ class ManageApplicationControllerSpec
           viewModel.required shouldBe true
           viewModel.appUsesOldVersion shouldBe true
           viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
-          viewModel.termsOfUseV2State.get shouldBe InReview("bob@example.com", submission.status.timestamp)
+          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 in GrantedWithWarning state" should {
+        "returns ViewModel showing V2 submission in Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = grantedWithWarningsSubmission
+
+          returnAgreementDetails()
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.agreement shouldBe None
+          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
+
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        }
+      }
+
+      "when V2 in GrantedWithWarning state with V1 agreement" should {
+        "returns ViewModel showing V1 agreement and V2 in Submitted state" in new Setup {
+          val dueBy      = instant.plusSeconds(86400 * 30)
+          val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
+          val submission = grantedWithWarningsSubmission
+
+          returnAgreementDetails(v1Agreement)
+          TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
+          SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+
+          givenApplicationAction(approvedApplication, adminSession)
+
+          val result = underTestWithMockView.applicationDetails(approvedApplication.id)(loggedInAdminRequest)
+          status(result) shouldBe OK
+
+          val viewModel = captureTermsOfUseViewModel()
+
+          viewModel.required shouldBe true
+          viewModel.appUsesOldVersion shouldBe true
+          viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
+          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
 
           verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)

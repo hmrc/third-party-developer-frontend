@@ -25,5 +25,4 @@ object TermsOfUseV2State {
   case class Started(startedBy: String, deadline: Instant)        extends TermsOfUseV2State
   case class Submitted(submittedBy: String, submittedOn: Instant) extends TermsOfUseV2State
   case class Approved(agreedBy: String, agreedOn: Instant)        extends TermsOfUseV2State
-  case class InReview(submittedBy: String, submittedOn: Instant)  extends TermsOfUseV2State
 }

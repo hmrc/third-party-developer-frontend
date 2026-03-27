@@ -395,7 +395,11 @@ class ApplicationDetailsViewSpec
               page.termsOfUseV2UpliftDetails.text should include("Our terms of use have changed.")
               page.termsOfUseV2UpliftDetails.text should include(s"Agree to version 2 of the terms of use by $expectedDeadline.")
               page.termsOfUseV2StartLink.text shouldBe "Start"
+              page.termsOfUseV2StartLink.attributes.get("href") shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(
+                application.id
+              ).url
               page.termsOfUseAgreementV1.text shouldBe s"$testUserName agreed to version 1 of the terms of use on $expectedDate."
+              page.termsOfUseLinkV1.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(application.id).url
               page.termsOfUseLinkV1.text shouldBe "View"
             }
 
@@ -413,6 +417,9 @@ class ApplicationDetailsViewSpec
               page.termsOfUseStartedDetails.text should include(s"Terms of use started by $testUserName.")
               page.termsOfUseStartedDetails.text should include(s"Complete the version 2 of the terms of use by $expectedDeadline.")
               page.termsOfUseContinueLink.text shouldBe "Continue"
+              page.termsOfUseContinueLink.attributes.get("href") shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(
+                prodApp.id
+              ).url
             }
 
             "show submitted details and 'View' link when V1 has no agreement and V2 is submitted" in new LoggedInUserIsAdmin {
@@ -429,6 +436,10 @@ class ApplicationDetailsViewSpec
               page.termsOfUseSubmittedDetails.text should include(s"Terms of use submitted by $testUserName on $expectedDate.")
               page.termsOfUseSubmittedDetails.text should include("Your submission is being checked.")
               page.termsOfUseSubmittedViewLink.text shouldBe "View"
+              page.termsOfUseSubmittedViewLink.attributes.get("href") shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(
+                prodApp.id
+              ).url
+
             }
 
             "show V2 agreement details with 'View' link and RI 'Change' link when V1 has no agreement and V2 is approved" in new LoggedInUserIsAdmin {
@@ -449,7 +460,11 @@ class ApplicationDetailsViewSpec
 
               page.termsOfUseAgreementV2.text shouldBe v2AgreementWording
               page.termsOfUseLinkV2.text shouldBe "View"
+              page.termsOfUseLinkV2.attributes.get(
+                "href"
+              ) shouldBe uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(prodApp.id).url
               page.responsibleIndividualLink.text shouldBe "Change"
+              page.responsibleIndividualLink.attributes.get("href") shouldBe routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(prodApp.id).url
             }
 
             "show V1 agreement with 'View' link and V2 started details with 'Continue' link when V1 is agreed and V2 is started" in new LoggedInUserIsAdmin {
@@ -471,8 +486,12 @@ class ApplicationDetailsViewSpec
               page.termsOfUseStartedDetails.text should include(s"Terms of use started by $testUserName.")
               page.termsOfUseStartedDetails.text should include(s"Complete the version 2 of the terms of use by $expectedDeadline.")
               page.termsOfUseContinueLink.text shouldBe "Continue"
+              page.termsOfUseContinueLink.attributes.get("href") shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(
+                prodApp.id
+              ).url
               page.termsOfUseAgreementV1.text shouldBe s"$testUserName agreed to version 1 of the terms of use on $expectedDate."
               page.termsOfUseLinkV1.text shouldBe "View"
+              page.termsOfUseLinkV1.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(prodApp.id).url
             }
 
             "show V1 agreement with 'View' link and V2 submitted details with 'View' link when V1 is agreed and V2 is submitted" in new LoggedInUserIsAdmin {
@@ -494,8 +513,12 @@ class ApplicationDetailsViewSpec
               page.termsOfUseSubmittedDetails.text should include(s"Terms of use submitted by $testUserName on $expectedDate.")
               page.termsOfUseSubmittedDetails.text should include("Your submission is being checked.")
               page.termsOfUseSubmittedViewLink.text shouldBe "View"
+              page.termsOfUseSubmittedViewLink.attributes.get("href") shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(
+                prodApp.id
+              ).url
               page.termsOfUseAgreementV1.text shouldBe s"$testUserName agreed to version 1 of the terms of use on $expectedDate."
               page.termsOfUseLinkV1.text shouldBe "View"
+              page.termsOfUseLinkV1.attributes.get("href") shouldBe routes.TermsOfUse.termsOfUse(prodApp.id).url
             }
 
             "show V2 agreement details with 'View' link, RI 'Change' link, and no V1 details when V1 was agreed and V2 is approved" in new LoggedInUserIsAdmin {
@@ -516,50 +539,16 @@ class ApplicationDetailsViewSpec
 
               page.termsOfUseAgreementV2.text shouldBe v2AgreementWording
               page.termsOfUseLinkV2.text shouldBe "View"
+              page.termsOfUseLinkV2.attributes.get(
+                "href"
+              ) shouldBe uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(
+                prodAppWithRespIndAndV2TermsOfUse.id
+              ).url
               page.termsOfUseAgreementV1 shouldBe null
               page.responsibleIndividualLink.text shouldBe "Change"
-            }
-
-            "show Submission is in review with 'View' link when V2 submission is in review" in new LoggedInUserIsAdmin {
-              val termsOfUseViewModelInReview = TermsOfUseViewModel(
-                required = true,
-                appUsesOldVersion = false,
-                agreement = None,
-                termsOfUseV2State = Some(TermsOfUseV2State.InReview(testUserName, instant))
-              )
-
-              val page =
-                Page(applicationDetailsView(
-                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
-                  List.empty,
-                  None,
-                  termsOfUseViewModelInReview
-                ))
-
-              page.termsOfUseInReviewDetails.text shouldBe s"Terms of use submitted by $testUserName on $expectedDate. Your submission is being checked."
-              page.termsOfUseInReviewViewLink.text shouldBe "View"
-            }
-
-            "show V1 agreement with 'View' link and Submission is in review with 'View' link when V1 is agreed and V2 submission is in review" in new LoggedInUserIsAdmin {
-              val termsOfUseModel = TermsOfUseViewModel(
-                required = true,
-                appUsesOldVersion = true,
-                agreement = Some(Agreement("bob@example.com", instant)),
-                termsOfUseV2State = Some(TermsOfUseV2State.InReview(testUserName, instant))
-              )
-
-              val page =
-                Page(applicationDetailsView(
-                  ApplicationViewModel(prodAppWithRespIndAndV2TermsOfUse, hasSubscriptionsFields = false, hasPpnsFields = false),
-                  List.empty,
-                  None,
-                  termsOfUseModel
-                ))
-
-              page.termsOfUseAgreementV1.text should include("bob@example.com agreed to version 1")
-              page.termsOfUseLinkV1.text shouldBe "View"
-              page.termsOfUseInReviewDetails.text shouldBe s"Terms of use submitted by $testUserName on $expectedDate. Your submission is being checked."
-              page.termsOfUseInReviewViewLink.text shouldBe "View"
+              page.responsibleIndividualLink.attributes.get("href") shouldBe routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(
+                prodAppWithRespIndAndV2TermsOfUse.id
+              ).url
             }
           }
         }
@@ -600,6 +589,9 @@ class ApplicationDetailsViewSpec
           page.responsibleIndividual.text() shouldBe "Responsible individual"
           page.responsibleIndividualName.text() shouldBe responsibleIndividualOne.fullName.toString()
           page.responsibleIndividualLink.text() shouldBe "View"
+          page.responsibleIndividualLink.attributes.get("href") shouldBe routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(
+            prodAppWithRespIndAndV2TermsOfUse.id
+          ).url
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {
@@ -614,6 +606,9 @@ class ApplicationDetailsViewSpec
           page.responsibleIndividual.text() shouldBe "Responsible individual"
           page.responsibleIndividualName.text() shouldBe responsibleIndividualOne.fullName.toString()
           page.responsibleIndividualLink.text() shouldBe "Change"
+          page.responsibleIndividualLink.attributes.get("href") shouldBe routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(
+            prodAppWithRespIndAndV2TermsOfUse.id
+          ).url
         }
       }
     }

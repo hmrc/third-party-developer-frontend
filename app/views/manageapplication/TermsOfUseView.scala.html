@@ -104,7 +104,7 @@
             ), attributes = Map("id" -> "termsOfUseSubmittedDetails")),
             TableRow(content = HtmlContent(
               if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.TermsOfUseResponsesController.termsOfUseResponsesPage(app.id)}' id='termsOfUseSubmittedViewLink'>View</a>"
+                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseSubmittedViewLink'>View</a>"
               } else ""
             ))
           )
@@ -125,20 +125,6 @@
             case _ => Seq.empty
           }
 
-        case Some(TermsOfUseV2State.InReview(submittedBy, submittedOn)) =>
-            val submittedDate = DateFormatter.formatTwoDigitDay(submittedOn)
-          Seq(
-            TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
-            TableRow(content = HtmlContent(
-                s"<p class='govuk-body'>Terms of use submitted by $submittedBy on $submittedDate.</p><p class='govuk-body'>Your submission is being checked.</p>"
-            ), attributes = Map("id" -> "termsOfUseInReviewDetails")),
-            TableRow(content = HtmlContent(
-              if(app.isPermittedToAgreeToTermsOfUse(loggedIn.developer)) {
-                s"<a class='govuk-link govuk-link--no-visited-state' href='${uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.agreeNewTermsOfUse(app.id)}' id='termsOfUseInReviewViewLink'>${messages("""application.details.view""")}</a>"
-              } else ""
-            ))
-          )
-        
         case _ => Seq.empty
       }
     } else {

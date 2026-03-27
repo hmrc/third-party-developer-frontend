@@ -218,17 +218,13 @@ class ManageApplicationController @Inject() (
           val deadline    = maybeInv.map(_.dueBy).getOrElse(instant())
           Some(Started(requestedBy, deadline))
 
-        case (_, Some(submission)) if submission.status.isSubmitted =>
-          val submitted = submission.status.asInstanceOf[Submission.Status.Submitted]
-          Some(Submitted(submitted.requestedBy, submitted.timestamp))
+        case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
+          extractSubmittedFromHistory(submission)
+            .map(submitted => Submitted(submitted.requestedBy, submitted.timestamp))
 
         case (_, Some(submission)) if submission.status.isGranted =>
           extractSubmittedFromHistory(submission)
             .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
-
-        case (_, Some(submission)) if submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
-          extractSubmittedFromHistory(submission)
-            .map(submitted => InReview(submitted.requestedBy, submitted.timestamp))
 
         case (_, Some(_)) =>
           None
