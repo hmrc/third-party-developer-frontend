@@ -51,7 +51,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
     <br>
 
     <p class="govuk-body">
-      <a class="govuk-link" href="@routes.Details.details(app.id)">View your application details</a>
+      <a class="govuk-link" href="@routes.ManageApplicationController.applicationDetails(app.id)">View your application details</a>
     </p>
   </div>
 }

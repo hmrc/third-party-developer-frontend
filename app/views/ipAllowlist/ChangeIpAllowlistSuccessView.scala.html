@@ -80,7 +80,7 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
     </p>
 
     <p class="govuk-body">
-      <a class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(app.id)">View your application details</a>
+      <a class="govuk-link govuk-link--no-visited-state" href="@routes.ManageApplicationController.applicationDetails(app.id)">View your application details</a>
     </p>
   </div>
 }

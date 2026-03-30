@@ -40,7 +40,6 @@ implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConf
     Crumb.viewAllApplications,
     Crumb.home
   ),
-  leftNav = Some(leftHandNav(Option(applicationView), Option(navSection), Map.empty, fraudPreventionNavLinkViewModel)(request, loggedIn, applicationConfig)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">Add a team member</h1>
