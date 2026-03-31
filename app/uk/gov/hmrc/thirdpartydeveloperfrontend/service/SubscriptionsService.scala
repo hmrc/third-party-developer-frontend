@@ -78,12 +78,12 @@ class SubscriptionsService @Inject() (
   }
 
   def subscribeToApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
-    val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant())
+    val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant)
     apmCmdModule.dispatch(application.id, cmd, Set.empty)
   }
 
   def unsubscribeFromApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
-    val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant())
+    val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant)
     apmCmdModule.dispatch(application.id, cmd, Set.empty)
   }
 }
