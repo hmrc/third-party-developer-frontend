@@ -182,9 +182,9 @@ class ApplicationDetailsViewSpec
             Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
           page.privacyPolicy.text shouldBe notSet
-          page.changePrivacyPolicyLocationLink shouldBe null
           page.termsAndConditions.text shouldBe notSet
-          page.changeTermsConditionsLocationLink shouldBe null
+          page.changePrivacyPolicyLocationLink.text should startWith("Change")
+          page.changeTermsConditionsLocationLink.text should startWith("Change")
         }
 
         "show nothing when an admin" in new LoggedInUserIsAdmin {
@@ -193,9 +193,9 @@ class ApplicationDetailsViewSpec
             Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
           page.privacyPolicy.text shouldBe notSet
-          page.changePrivacyPolicyLocationLink shouldBe null
           page.termsAndConditions.text shouldBe notSet
-          page.changeTermsConditionsLocationLink shouldBe null
+          page.changePrivacyPolicyLocationLink.text should startWith("Change")
+          page.changeTermsConditionsLocationLink.text should startWith("Change")
         }
       }
       "managing a production application" should {
