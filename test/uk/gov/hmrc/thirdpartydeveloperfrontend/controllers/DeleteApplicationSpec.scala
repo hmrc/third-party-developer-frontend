@@ -124,7 +124,7 @@ class DeleteApplicationSpec
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(s"/developer/applications/${standardApp.id}/details")
+      redirectLocation(result) shouldBe Some(s"/developer/applications/${standardApp.id}/manage")
     }
   }
 

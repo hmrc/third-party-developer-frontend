@@ -216,7 +216,7 @@ class SubscriptionsSpec
         val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
+        redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appId).url)
       }
     }
 
@@ -235,7 +235,7 @@ class SubscriptionsSpec
         val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
+        redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appId).url)
       }
     }
 
@@ -253,7 +253,7 @@ class SubscriptionsSpec
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(appId).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appId).url)
     }
 
     "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
@@ -289,7 +289,7 @@ class SubscriptionsSpec
       val result = underTest.changeApiSubscription(applicationIdTwo, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(applicationIdTwo).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(applicationIdTwo).url)
     }
 
     "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {

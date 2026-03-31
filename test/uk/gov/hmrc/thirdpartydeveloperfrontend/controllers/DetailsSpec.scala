@@ -503,7 +503,7 @@ class DetailsSpec
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyUrl.id).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithPrivPolicyUrl.id).url)
     }
   }
 
@@ -573,7 +573,7 @@ class DetailsSpec
       val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(appWithPrivPolicyInDesktop.id).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithPrivPolicyInDesktop.id).url)
     }
   }
 
@@ -615,7 +615,7 @@ class DetailsSpec
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsUrl.id).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithTermsAndConditionsUrl.id).url)
     }
   }
 
@@ -685,7 +685,7 @@ class DetailsSpec
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(appWithTermsAndConditionsInDesktop.id).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithTermsAndConditionsInDesktop.id).url)
     }
   }
 
@@ -833,7 +833,7 @@ class DetailsSpec
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
-      linkExistsWithHref(doc, routes.Details.details(application.id).url) shouldBe true
+      linkExistsWithHref(doc, routes.ManageApplicationController.applicationDetails(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
