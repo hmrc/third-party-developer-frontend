@@ -71,6 +71,7 @@ case class ManageApplicationsViewModel(
         TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
       )
 
+  lazy val userIsAllowListed = allowList.isDefined
 }
 
 case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: ApplicationName, dueBy: Instant)

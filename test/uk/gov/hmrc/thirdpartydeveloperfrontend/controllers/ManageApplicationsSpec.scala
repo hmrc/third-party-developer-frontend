@@ -24,6 +24,8 @@ import views.html._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.OrganisationName
+import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.OrganisationAllowList
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
@@ -82,6 +84,26 @@ class ManageApplicationsSpec
       contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Sign out")
       contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should not include ("You have been invited to register your organisation")
+      contentAsString(result) should not include "Sign in"
+    }
+
+    "return the manage Applications page with the user logged in and in organisation allow list" in new Setup {
+      val prodSummary = ApplicationSummary.from(standardApp, userSession.developer.userId)
+      aUsersUplfitableAndNotUpliftableAppsReturns(List.empty, List.empty, List.empty)
+      fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
+
+      TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+      SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+      OrganisationServiceMock.FetchOrganisationAllowList.thenReturn(OrganisationAllowList(adminSession.developer.userId, OrganisationName("My Org"), "reqquestedBy", instant))
+
+      private val result = manageApplicationsController.manageApps()(loggedInAdminRequest)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include(userSession.developer.displayedName)
+      contentAsString(result) should include("Sign out")
+      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should include("You have been invited to register your organisation")
       contentAsString(result) should not include "Sign in"
     }
 
