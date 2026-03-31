@@ -41,7 +41,8 @@ class ManageApplicationsSpec
       with AppsByTeamMemberServiceMock
       with ApplicationServiceMock
       with TermsOfUseInvitationServiceMockModule
-      with SubmissionServiceMockModule {
+      with SubmissionServiceMockModule
+      with OrganisationServiceMock {
 
     val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
@@ -56,7 +57,8 @@ class ManageApplicationsSpec
       manageApplicationsView,
       mcc,
       TermsOfUseInvitationServiceMock.aMock,
-      SubmissionServiceMock.aMock
+      SubmissionServiceMock.aMock,
+      OrganisationServiceMock.aMock
     )
 
     val sessionId   = adminSession.sessionId
@@ -71,8 +73,8 @@ class ManageApplicationsSpec
       fetchProductionSummariesByTeamMemberReturns(List(prodSummary))
 
       TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
-
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
+      OrganisationServiceMock.FetchOrganisationAllowList.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInAdminRequest)
 
@@ -88,6 +90,7 @@ class ManageApplicationsSpec
       fetchProductionSummariesByTeamMemberReturns(List.empty)
 
       TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
+      OrganisationServiceMock.FetchOrganisationAllowList.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInAdminRequest)
 

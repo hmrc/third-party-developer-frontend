@@ -43,7 +43,8 @@ class ManageApplications @Inject() (
     manageApplicationsView: ManageApplicationsView,
     mcc: MessagesControllerComponents,
     termsOfUseInvitationService: TermsOfUseInvitationService,
-    submissionService: SubmissionService
+    submissionService: SubmissionService,
+    organisationService: OrganisationService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
@@ -61,6 +62,7 @@ class ManageApplications @Inject() (
       productionAppSummaries           <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
       termsOfUseInvites                <- Future.sequence(productionAppSummaries.map(summary => termsOfUseInvitationService.fetchTermsOfUseInvitation(summary.id)).toList).map(_.flatten)
       productionApplicationSubmissions <- Future.sequence(termsOfUseInvites.map(invite => getSubmission(invite.applicationId)).toList).map(_.flatten)
+      allowList                        <- organisationService.fetchOrganisationAllowList(request.userId)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage())
       case _          => Ok(manageApplicationsView(
@@ -70,7 +72,8 @@ class ManageApplications @Inject() (
             upliftableApplicationIds,
             upliftData.hasAppsThatCannotBeUplifted,
             termsOfUseInvites,
-            productionApplicationSubmissions
+            productionApplicationSubmissions,
+            allowList
           )
         ))
     }
