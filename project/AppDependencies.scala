@@ -32,15 +32,16 @@ object AppDependencies {
   )
 
   lazy val test =  Seq(
-    "uk.gov.hmrc"                 %% "bootstrap-test-play-30"                   % bootstrapVersion,
-    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"                  % mongoVersion,
-    "org.mockito"                 %% "mockito-scala-scalatest"                  % mockitoScalaVersion,
-    "org.jsoup"                   %  "jsoup"                                    % "1.13.1",
-    "org.scalacheck"              %% "scalacheck"                               % "1.17.0",
-    "org.scalatestplus"           %% "scalacheck-1-17"                          % "3.2.17.0",
-    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"             % apiDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-application-domain-fixtures" % appDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"             % tpdDomainVersion
+    "uk.gov.hmrc"                 %% "bootstrap-test-play-30"                    % bootstrapVersion,
+    "uk.gov.hmrc.mongo"           %% "hmrc-mongo-test-play-30"                   % mongoVersion,
+    "org.mockito"                 %% "mockito-scala-scalatest"                   % mockitoScalaVersion,
+    "org.jsoup"                   %  "jsoup"                                     % "1.13.1",
+    "org.scalacheck"              %% "scalacheck"                                % "1.17.0",
+    "org.scalatestplus"           %% "scalacheck-1-17"                           % "3.2.17.0",
+    "uk.gov.hmrc"                 %% "api-platform-test-api-domain"              % apiDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-application-domain-fixtures"  % appDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"              % tpdDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-organisation-domain-fixtures" % orgDomainVersion
   ).map(_ % "test")
 
   lazy val componentTestDependencies = Seq(
