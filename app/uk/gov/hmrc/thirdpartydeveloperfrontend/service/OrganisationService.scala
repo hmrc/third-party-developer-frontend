@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.OrganisationAllowList
+import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.{OrganisationAllowList, Submission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 
 @Singleton
@@ -36,5 +36,9 @@ class OrganisationService @Inject() (
 
   def fetchOrganisationAllowList(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[OrganisationAllowList]] = {
     organisationConnector.fetchOrganisationAllowList(userId)
+  }
+
+  def fetchLatestSubmissionByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+    organisationConnector.fetchLatestSubmissionByUserId(userId)
   }
 }

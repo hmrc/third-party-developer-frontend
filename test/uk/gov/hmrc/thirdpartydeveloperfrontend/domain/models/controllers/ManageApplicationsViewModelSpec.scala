@@ -64,19 +64,19 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with Fix
     val liveProductionApp = notYetLiveProductionApp.copy(state = State.PRODUCTION)
 
     "return true if only sandbox apps" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty, Set.empty, false, List.empty, List.empty, None)
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq.empty, Set.empty, false, List.empty, List.empty, None, None)
 
       model.hasNoLiveProductionApplications shouldBe true
     }
 
     "return true if there are sandbox apps and a not yet live production app but no live prod apps" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(notYetLiveProductionApp), Set.empty, false, List.empty, List.empty, None)
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(notYetLiveProductionApp), Set.empty, false, List.empty, List.empty, None, None)
 
       model.hasNoLiveProductionApplications shouldBe true
     }
 
     "return false if there is a live production app" in {
-      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(notYetLiveProductionApp, liveProductionApp), Set.empty, false, List.empty, List.empty, None)
+      val model = ManageApplicationsViewModel(Seq(sandboxApp), Seq(notYetLiveProductionApp, liveProductionApp), Set.empty, false, List.empty, List.empty, None, None)
 
       model.hasNoLiveProductionApplications shouldBe false
     }

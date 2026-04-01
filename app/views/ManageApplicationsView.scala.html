@@ -54,10 +54,17 @@
 ) {
 
   @if(model.userIsAllowListed) {
-    @govukNotificationBanner(NotificationBanner(
-      title = Text("Important"),
-      content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have been invited to register your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Start your registration</a>.</p>")
-    ))
+    @if(model.userHasSubmission) {
+      @govukNotificationBanner(NotificationBanner(
+        title = Text("Important"),
+        content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have started registering your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Continue your registration</a>.</p>")
+      ))
+    } else {
+      @govukNotificationBanner(NotificationBanner(
+        title = Text("Important"),
+        content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have been invited to register your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Start your registration</a>.</p>")
+      ))
+    }
   }
 
   @if(model.applicationsThatHaveTermOfUseInvitatationsOutstanding.nonEmpty) {

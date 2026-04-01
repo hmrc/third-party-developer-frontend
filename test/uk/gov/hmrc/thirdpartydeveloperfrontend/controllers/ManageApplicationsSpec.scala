@@ -77,6 +77,7 @@ class ManageApplicationsSpec
       TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
       OrganisationServiceMock.FetchOrganisationAllowList.thenReturnNone()
+      OrganisationServiceMock.FetchLatestSubmissionByUserId.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInAdminRequest)
 
@@ -96,6 +97,7 @@ class ManageApplicationsSpec
       TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
       SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
       OrganisationServiceMock.FetchOrganisationAllowList.thenReturn(OrganisationAllowList(adminSession.developer.userId, OrganisationName("My Org"), "reqquestedBy", instant))
+      OrganisationServiceMock.FetchLatestSubmissionByUserId.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInAdminRequest)
 
@@ -113,6 +115,7 @@ class ManageApplicationsSpec
 
       TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
       OrganisationServiceMock.FetchOrganisationAllowList.thenReturnNone()
+      OrganisationServiceMock.FetchLatestSubmissionByUserId.thenReturnNone()
 
       private val result = manageApplicationsController.manageApps()(loggedInAdminRequest)
 

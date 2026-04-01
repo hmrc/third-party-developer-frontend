@@ -21,7 +21,7 @@ import scala.concurrent.Future
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.OrganisationAllowList
+import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.{OrganisationAllowList, Submission}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.OrganisationService
 
 trait OrganisationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
@@ -33,6 +33,12 @@ trait OrganisationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
       def thenReturn(allowList: OrganisationAllowList) = when(aMock.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(Future.successful(Some(allowList)))
 
       def thenReturnNone() = when(aMock.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(Future.successful(None))
+    }
+
+    object FetchLatestSubmissionByUserId {
+      def thenReturn(submission: Submission) = when(aMock.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(Future.successful(Some(submission)))
+
+      def thenReturnNone() = when(aMock.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(Future.successful(None))
     }
   }
 

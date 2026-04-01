@@ -62,7 +62,8 @@ class ManageApplications @Inject() (
       productionAppSummaries           <- appsByTeamMember.fetchProductionSummariesByTeamMember(request.userId)
       termsOfUseInvites                <- Future.sequence(productionAppSummaries.map(summary => termsOfUseInvitationService.fetchTermsOfUseInvitation(summary.id)).toList).map(_.flatten)
       productionApplicationSubmissions <- Future.sequence(termsOfUseInvites.map(invite => getSubmission(invite.applicationId)).toList).map(_.flatten)
-      allowList                        <- organisationService.fetchOrganisationAllowList(request.userId)
+      organisationAllowList            <- organisationService.fetchOrganisationAllowList(request.userId)
+      organisationSubmision            <- organisationService.fetchLatestSubmissionByUserId(request.userId)
     } yield (sandboxApplicationSummaries, productionAppSummaries) match {
       case (Nil, Nil) => Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.routes.NoApplications.noApplicationsPage())
       case _          => Ok(manageApplicationsView(
@@ -73,7 +74,8 @@ class ManageApplications @Inject() (
             upliftData.hasAppsThatCannotBeUplifted,
             termsOfUseInvites,
             productionApplicationSubmissions,
-            allowList
+            organisationAllowList,
+            organisationSubmision
           )
         ))
     }

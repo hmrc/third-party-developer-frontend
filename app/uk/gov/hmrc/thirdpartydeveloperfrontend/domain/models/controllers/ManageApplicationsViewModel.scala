@@ -32,7 +32,8 @@ case class ManageApplicationsViewModel(
     hasAppsThatCannotBeUplifted: Boolean,
     termsOfUseInvitations: List[TermsOfUseInvitation],
     productionApplicationSubmissions: List[Submission],
-    allowList: Option[OrganisationAllowList]
+    allowList: Option[OrganisationAllowList],
+    organisationSubmission: Option[uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.Submission]
   ) {
 
   lazy val hasPriviledgedApplications =
@@ -72,6 +73,7 @@ case class ManageApplicationsViewModel(
       )
 
   lazy val userIsAllowListed = allowList.isDefined
+  lazy val userHasSubmission = organisationSubmission.isDefined
 }
 
 case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: ApplicationName, dueBy: Instant)
