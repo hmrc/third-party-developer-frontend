@@ -187,7 +187,7 @@ class ApplicationDetailsViewSpec
           page.changePrivacyPolicyLocationLink should not be null
           page.changePrivacyPolicyLocationLink.text shouldBe "Change"
           page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
-          
+
           page.changeTermsConditionsLocationLink should not be null
           page.changeTermsConditionsLocationLink.text shouldBe "Change"
           page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
@@ -204,7 +204,7 @@ class ApplicationDetailsViewSpec
           page.changePrivacyPolicyLocationLink should not be null
           page.changePrivacyPolicyLocationLink.text shouldBe "Change"
           page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
-          
+
           page.changeTermsConditionsLocationLink should not be null
           page.changeTermsConditionsLocationLink.text shouldBe "Change"
           page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
@@ -227,7 +227,7 @@ class ApplicationDetailsViewSpec
           page.changePrivacyPolicyLocationLink should not be null
           page.changePrivacyPolicyLocationLink.text shouldBe "Change"
           page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.updatePrivacyPolicyLocation(prodApp.id).url)
-          
+
           page.changeTermsConditionsLocationLink should not be null
           page.changeTermsConditionsLocationLink.text shouldBe "Change"
           page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.updateTermsAndConditionsLocation(prodApp.id).url)

@@ -37,7 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -272,7 +272,7 @@ class DetailsSpec
 
       status(result) shouldBe SEE_OTHER
     }
-    
+
     "fail with invalid privacy policy URL" in new Setup {
       val application = sandboxApplication
       givenApplicationAction(application, devSession)
@@ -281,7 +281,7 @@ class DetailsSpec
 
       status(result) shouldBe BAD_REQUEST
     }
-    
+
     "fail with invalid terms and conditions URL" in new Setup {
       val application = sandboxApplication
       givenApplicationAction(application, devSession)
@@ -384,7 +384,7 @@ class DetailsSpec
       val cmds = captureAllApplicationCmds
       cmds.size shouldBe 2
     }
-    
+
     "dispatch no commands when values unchanged" in new Setup {
       val application = sandboxApplication
       givenApplicationAction(application, adminSession)
@@ -861,7 +861,7 @@ class DetailsSpec
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
       inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.value.describe()) shouldBe true
-      
+
       // Application name and description fields should NOT exist //todo remove after passing tests
       doc.select("#applicationName[type=text]").isEmpty shouldBe true
       doc.select("textarea#description").isEmpty shouldBe true

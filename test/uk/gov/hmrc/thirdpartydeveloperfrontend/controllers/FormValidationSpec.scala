@@ -236,7 +236,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       boundForm.errors.head.key shouldBe "privacyPolicyUrl"
       boundForm.globalErrors shouldBe List()
     }
-    
+
     "validate an invalid terms and conditions URL" in {
       val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("termsAndConditionsUrl" -> "not-a-url"))
       boundForm.errors.length shouldBe 1

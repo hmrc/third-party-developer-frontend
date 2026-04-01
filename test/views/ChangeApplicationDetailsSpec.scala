@@ -101,12 +101,12 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       elementIdentifiedByAttrContainsText(document, "div", "data-app-env", "Sandbox") shouldBe true
       elementExistsByText(document, "button", "Save changes") shouldBe true
       elementExistsByText(document, "a", "Cancel") shouldBe true
-      
+
       // Only privacy policy and T&C fields should exist
       document.getElementById("privacyPolicyUrl") should not be null
       document.getElementById("termsAndConditionsUrl") should not be null
       document.getElementById("applicationId") should not be null
-      
+
       // Name and description fields should NOT exist (not even hidden) //todo remove after all tests pass
       document.select("#applicationName[type=text]").isEmpty shouldBe true
       document.select("textarea#description").isEmpty shouldBe true
@@ -123,7 +123,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
       withClue("Privacy Policy URL")(formGroupWithLabelIsPrepopulated(document, "Privacy policy URL (optional)", aPrivacyPolicyURL.get) shouldBe true)
       withClue("T&C url")(formGroupWithLabelIsPrepopulated(document, "Terms and conditions URL (optional)", aTermsAndConditionsURL.get) shouldBe true)
-      
+
       // App name and description should NOT be in the form
       document.select("label:contains(Application name)").isEmpty shouldBe true
       document.select("label:contains(Application description)").isEmpty shouldBe true
@@ -135,13 +135,13 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
       document.getElementById("privacyPolicyUrl") should not be null
       document.getElementById("termsAndConditionsUrl") should not be null
-      
+
       // Application name field should NOT exist (even for sandbox) //todo remove after pass
       elementExistsByText(document, "label", "Application name") shouldBe false
-      
+
       // Description field should NOT exist  //todo remove after pass
       elementExistsByText(document, "label", "Application description") shouldBe false
-      
+
       // Grant length hidden field should NOT exist  //todo remove after pass
       document.getElementById("grantLength") shouldBe null
     }
