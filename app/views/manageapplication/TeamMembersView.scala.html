@@ -36,7 +36,7 @@
     rows = Seq(
         Seq(TableRow(content = Text(messages("application.details.team.members"))),
             TableRow(content = Text(formatTeamMembers(app)), attributes = Map("id" -> "teamMembers")),
-            TableRow(content = HtmlContent(s"<a href='${controllers.routes.ManageTeam.manageTeam(app.id, None)}' class='govuk-link govuk-link--no-visited-state'>Change</a>")))
+            TableRow(content = HtmlContent(s"<a href='${controllers.routes.ManageTeam.manageTeam(app.id, None)}' class='govuk-link govuk-link--no-visited-state'>Change</a>"), attributes = Map("id" -> "teamMembersChangeLink")))
     )
 ))
 
