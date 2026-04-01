@@ -874,7 +874,7 @@ class DetailsSpec
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(application.id).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(application.id).url)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {

@@ -207,7 +207,7 @@ class Details @Inject() (
         val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
 
         futs.map(_ =>
-          Redirect(routes.Details.details(applicationId))
+          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
         )
       }
 
