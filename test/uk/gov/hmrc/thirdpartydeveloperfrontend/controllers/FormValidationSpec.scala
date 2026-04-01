@@ -219,14 +219,9 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
 
   "EditApplicationForm " should {
     val validEditApplicationForm = Map(
-      "applicationId"           -> java.util.UUID.randomUUID.toString,
-      "applicationName"         -> "Application name",
-      "originalApplicationName" -> "Application name",
-      "description"             -> "Application description",
-      "redirectUris[0]"         -> "https://redirect-url.gov.uk",
-      "privacyPolicyUrl"        -> "http://redirectprivacy-policy.gov.uk",
-      "termsAndConditionsUrl"   -> "http://termsandconditions.gov.uk",
-      "grantLength"             -> "12 months"
+      "applicationId"         -> java.util.UUID.randomUUID.toString,
+      "privacyPolicyUrl"      -> "http://redirectprivacy-policy.gov.uk",
+      "termsAndConditionsUrl" -> "http://termsandconditions.gov.uk"
     )
 
     "validate a valid form" in {
@@ -235,16 +230,24 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
       boundForm.globalErrors shouldBe List()
     }
 
-    "validate name in wrong format and generate error when an name is not valid" in {
-      val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("applicationName" -> "a"))
-      boundForm.errors shouldBe List(FormError("applicationName", List("application.name.invalid.length.and.characters")))
+    "validate an invalid privacy policy URL" in {
+      val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("privacyPolicyUrl" -> "not-a-url"))
+      boundForm.errors.length shouldBe 1
+      boundForm.errors.head.key shouldBe "privacyPolicyUrl"
+      boundForm.globalErrors shouldBe List()
+    }
+    
+    "validate an invalid terms and conditions URL" in {
+      val boundForm = EditApplicationForm.form.bind(validEditApplicationForm + ("termsAndConditionsUrl" -> "not-a-url"))
+      boundForm.errors.length shouldBe 1
+      boundForm.errors.head.key shouldBe "termsAndConditionsUrl"
       boundForm.globalErrors shouldBe List()
     }
 
     "validate a valid form with empty optional fields" in {
       val boundForm = EditApplicationForm.form.bind(
         validEditApplicationForm ++
-          Map("description" -> "", "privacyPolicyUrl" -> "", "termsAndConditionsUrl" -> "")
+          Map("privacyPolicyUrl" -> "", "termsAndConditionsUrl" -> "")
       )
       boundForm.errors shouldBe List()
       boundForm.globalErrors shouldBe List()
