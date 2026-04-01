@@ -37,7 +37,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -255,38 +255,40 @@ class DetailsSpec
   }
 
   "changeDetailsAction validation" should {
-    "not pass when application is updated with empty name" in new Setup {
+    "pass with valid privacy policy URL" in new Setup {
       val application = sandboxApplication
       givenApplicationAction(application, devSession)
 
-      val result = application.withName(ApplicationName("")).callChangeDetailsAction
+      val result = application.withPrivacyPolicyUrl(Some("http://example.com/privacy")).callChangeDetailsAction
+
+      status(result) shouldBe SEE_OTHER
+    }
+
+    "pass with valid terms and conditions URL" in new Setup {
+      val application = sandboxApplication
+      givenApplicationAction(application, devSession)
+
+      val result = application.withTermsAndConditionsUrl(Some("http://example.com/terms")).callChangeDetailsAction
+
+      status(result) shouldBe SEE_OTHER
+    }
+
+    "fail with invalid privacy policy URL" in new Setup {
+      val application = sandboxApplication
+      givenApplicationAction(application, devSession)
+
+      val result = application.withPrivacyPolicyUrl(Some("not-a-url")).callChangeDetailsAction
 
       status(result) shouldBe BAD_REQUEST
     }
 
-    "not pass when application is updated with invalid name" in new Setup {
+    "fail with invalid terms and conditions URL" in new Setup {
       val application = sandboxApplication
       givenApplicationAction(application, devSession)
 
-      val result = application.withName(ApplicationName("a")).callChangeDetailsAction
+      val result = application.withTermsAndConditionsUrl(Some("not-a-url")).callChangeDetailsAction
 
       status(result) shouldBe BAD_REQUEST
-    }
-
-    "update name which contain HMRC should fail" in new Setup {
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
-        .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
-
-      val application = sandboxApplication
-      givenApplicationAction(application, adminSession)
-
-      val result = application.withName(ApplicationName("my invalid HMRC application name")).callChangeDetailsAction
-
-      status(result) shouldBe BAD_REQUEST
-
-      verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
-        *
-      )
     }
   }
 
@@ -353,21 +355,43 @@ class DetailsSpec
       changeDetailsShouldRedirectOnSuccess(devSession)(sandboxApplication)
     }
 
-    "update all fields for an admin" in new Setup {
-      changeDetailsShouldUpdateTheApplication(adminSession)(sandboxApplication)
-    }
-
-    "update all fields for a developer" in new Setup {
-      changeDetailsShouldUpdateTheApplication(adminSession)(sandboxApplication)
-    }
-
-    "update the app but not the check information" in new Setup {
+    "update privacy policy and terms & conditions for an admin" in new Setup {
       val application = sandboxApplication
       givenApplicationAction(application, adminSession)
 
-      await(application.withName(newName).callChangeDetailsAction)
+      await(
+        application
+          .withTermsAndConditionsUrl(newTermsUrl)
+          .withPrivacyPolicyUrl(newPrivacyUrl)
+          .callChangeDetailsAction
+      )
 
-      verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(*)
+      val cmds = captureAllApplicationCmds
+      cmds.size shouldBe 2
+    }
+
+    "update privacy policy and terms & conditions for a developer" in new Setup {
+      val application = sandboxApplication
+      givenApplicationAction(application, devSession)
+
+      await(
+        application
+          .withTermsAndConditionsUrl(newTermsUrl)
+          .withPrivacyPolicyUrl(newPrivacyUrl)
+          .callChangeDetailsAction
+      )
+
+      val cmds = captureAllApplicationCmds
+      cmds.size shouldBe 2
+    }
+
+    "dispatch no commands when values unchanged" in new Setup {
+      val application = sandboxApplication
+      givenApplicationAction(application, adminSession)
+
+      await(application.callChangeDetailsAction)
+
+      verify(underTest.applicationService, times(0)).dispatchCmd(*[ApplicationId], *)(*)
     }
   }
 
@@ -835,14 +859,13 @@ class DetailsSpec
       formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.ManageApplicationController.applicationDetails(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
-      if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
-        inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
-      } else {
-        inputExistsWithValue(doc, "applicationName", "hidden", application.details.name.value) shouldBe true
-      }
-      textareaExistsWithText(doc, "description", application.details.description.getOrElse("None")) shouldBe true
       inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
       inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.value.describe()) shouldBe true
+
+      // Application name and description fields should NOT exist //todo remove after passing tests
+      doc.select("#applicationName[type=text]").isEmpty shouldBe true
+      doc.select("textarea#description").isEmpty shouldBe true
+      doc.getElementById("grantLength") shouldBe null
     }
 
     def changeDetailsShouldRedirectOnSuccess(userSession: UserSession)(application: ApplicationWithCollaborators) = {
@@ -851,7 +874,7 @@ class DetailsSpec
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.Details.details(application.id).url)
+      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(application.id).url)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {
@@ -867,8 +890,6 @@ class DetailsSpec
 
       await(
         application
-          .withName(newName)
-          .withDescription(newDescription)
           .withTermsAndConditionsUrl(newTermsUrl)
           .withPrivacyPolicyUrl(newPrivacyUrl)
           .callChangeDetailsAction
@@ -883,7 +904,7 @@ class DetailsSpec
       private val appAccess = app.access.asInstanceOf[Access.Standard]
 
       final def toForm =
-        EditApplicationForm(app.id, app.details.name.value, app.details.description, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl, app.details.grantLength.show())
+        EditApplicationForm(app.id, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl)
 
       final def callDetails: Future[Result] = underTest.details(app.id)(loggedInDevRequest)
 

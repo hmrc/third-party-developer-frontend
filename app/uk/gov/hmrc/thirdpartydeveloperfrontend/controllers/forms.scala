@@ -24,7 +24,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, GrantLength}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
   PrivacyPolicyLocation,
   PrivacyPolicyLocations,
@@ -263,11 +263,8 @@ object AddApplicationNameForm {
 
 case class EditApplicationForm(
     applicationId: ApplicationId,
-    applicationName: String,
-    description: Option[String] = None,
     privacyPolicyUrl: Option[String] = None,
-    termsAndConditionsUrl: Option[String] = None,
-    grantLength: String
+    termsAndConditionsUrl: Option[String] = None
   )
 
 object EditApplicationForm {
@@ -275,11 +272,8 @@ object EditApplicationForm {
   val form: Form[EditApplicationForm] = Form(
     mapping(
       "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.toString()),
-      "applicationName"       -> nonEmptyText.verifying(applicationNameConstraint),
-      "description"           -> optional(text),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
-      "termsAndConditionsUrl" -> optional(tNcUrlValidator),
-      "grantLength"           -> text
+      "termsAndConditionsUrl" -> optional(tNcUrlValidator)
     )(EditApplicationForm.apply)(EditApplicationForm.unapply)
   )
 
@@ -295,11 +289,8 @@ object EditApplicationForm {
     form.fillAndValidate(
       EditApplicationForm(
         app.id,
-        app.name.value,
-        app.details.description,
         privacyPolicyUrl,
-        termsAndConditionsUrl,
-        GrantLength.show(app.details.grantLength)
+        termsAndConditionsUrl
       )
     )
   }
