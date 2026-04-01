@@ -68,7 +68,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       }
 
       val form = EditApplicationForm.form.fill(
-        EditApplicationForm(application.id, application.details.name.value, application.details.description, privacyPolicyUrl, termsAndConditionsUrl, "12 months")
+        EditApplicationForm(application.id, privacyPolicyUrl, termsAndConditionsUrl)
       )
 
       changeDetails.render(
@@ -95,12 +95,22 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val application = standardApp.inSandbox().withState(appStateTesting)
       val document    = Jsoup.parse(renderPage(application).body)
 
-      elementExistsByText(document, "h1", "Change application details") shouldBe true
+      elementExistsByText(document, "h1", "Change privacy policy and terms & conditions") shouldBe true
 
       elementIdentifiedByAttrContainsText(document, "div", "data-app-name", application.name.value) shouldBe true
       elementIdentifiedByAttrContainsText(document, "div", "data-app-env", "Sandbox") shouldBe true
       elementExistsByText(document, "button", "Save changes") shouldBe true
       elementExistsByText(document, "a", "Cancel") shouldBe true
+      
+      // Only privacy policy and T&C fields should exist
+      document.getElementById("privacyPolicyUrl") should not be null
+      document.getElementById("termsAndConditionsUrl") should not be null
+      document.getElementById("applicationId") should not be null
+      
+      // Name and description fields should NOT exist (not even hidden) //todo remove after all tests pass
+      document.select("#applicationName[type=text]").isEmpty shouldBe true
+      document.select("textarea#description").isEmpty shouldBe true
+      document.getElementById("grantLength") shouldBe null
     }
 
     "pre-populate existing data fields" in {
@@ -111,34 +121,29 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       val application            = standardApp.inSandbox().withState(appStateTesting).withAccess(anAccess).modify(_.copy(description = aDescription))
       val document               = Jsoup.parse(renderPage(application).body)
 
-      withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.value) shouldBe true)
-      withClue("Description")(textareaExistsWithText(document, "description", aDescription.get) shouldBe true)
       withClue("Privacy Policy URL")(formGroupWithLabelIsPrepopulated(document, "Privacy policy URL (optional)", aPrivacyPolicyURL.get) shouldBe true)
       withClue("T&C url")(formGroupWithLabelIsPrepopulated(document, "Terms and conditions URL (optional)", aTermsAndConditionsURL.get) shouldBe true)
+      
+      // App name and description should NOT be in the form
+      document.select("label:contains(Application name)").isEmpty shouldBe true
+      document.select("label:contains(Application description)").isEmpty shouldBe true
     }
 
-    "not display the option to change the app name if in prod pending GK approval" in {
-
-      val application = standardApp.withState(appStatePendingGatekeeperApproval)
+    "form should only contain privacy policy and terms & conditions fields" in {
+      val application = standardApp.inSandbox()
       val document    = Jsoup.parse(renderPage(application).body)
 
+      document.getElementById("privacyPolicyUrl") should not be null
+      document.getElementById("termsAndConditionsUrl") should not be null
+      
+      // Application name field should NOT exist (even for sandbox) //todo remove after pass
       elementExistsByText(document, "label", "Application name") shouldBe false
-    }
-
-    "not display the option to change the app name if in prod pending requestor verification" in {
-
-      val application = standardApp.withState(appStatePendingRequesterVerification)
-      val document    = Jsoup.parse(renderPage(application).body)
-
-      elementExistsByText(document, "label", "Application name") shouldBe false
-    }
-
-    "not display the option to change the app name if in prod with state production" in {
-
-      val application = standardApp
-      val document    = Jsoup.parse(renderPage(application).body)
-
-      elementExistsByText(document, "label", "Application name") shouldBe false
+      
+      // Description field should NOT exist  //todo remove after pass
+      elementExistsByText(document, "label", "Application description") shouldBe false
+      
+      // Grant length hidden field should NOT exist  //todo remove after pass
+      document.getElementById("grantLength") shouldBe null
     }
   }
 }

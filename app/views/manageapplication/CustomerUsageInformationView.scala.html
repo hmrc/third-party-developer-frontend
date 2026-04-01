@@ -50,14 +50,14 @@
     firstCellIsHeader = true,
     rows = Seq(
         Seq(
-            TableRow(content = Text(messages("application.details.privacy.policy.url"))), 
+            TableRow(content = Text(messages("application.details.privacy.policy.url"))),
             TableRow(content = Text(getPrivacyPolicyLocation(app.privacyPolicyLocation)), attributes = Map("id" -> "privacyPolicy")),
-            TableRow(content = HtmlContent(if (app.isSandbox || app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updatePrivacyPolicyLocation(app.id)}' id='changePrivacyPolicy'>${messages("""application.details.change""")}</a>"} else {""}))
+            TableRow(content = HtmlContent(if (app.isSandbox) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.changeDetails(app.id)}' id='changePrivacyPolicy'>${messages("""application.details.change""")}</a>"} else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updatePrivacyPolicyLocation(app.id)}' id='changePrivacyPolicy'>${messages("""application.details.change""")}</a>"} else {""}))
         ),
         Seq(
-            TableRow(content = Text(messages("application.details.terms.conditions.url"))), 
+            TableRow(content = Text(messages("application.details.terms.conditions.url"))),
             TableRow(content = Text(getTermsAndConditionsLocation(app.termsAndConditionsLocation)), attributes = Map("id" -> "termsAndConditions")),
-            TableRow(content = HtmlContent(if (app.isSandbox || app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updateTermsAndConditionsLocation(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else {""}))
+            TableRow(content = HtmlContent(if (app.isSandbox) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.changeDetails(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.Details.updateTermsAndConditionsLocation(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else {""}))
         ),
         Seq(
             TableRow(content = Text(messages("application.details.grant.length"))), 

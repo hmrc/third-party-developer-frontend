@@ -177,25 +177,37 @@ class ApplicationDetailsViewSpec
 
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
-        "show nothing when a developer" in new LoggedInUserIsDev {
+        "Show Change links when a developer" in new LoggedInUserIsDev {
           val page =
             Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
           page.privacyPolicy.text shouldBe notSet
           page.termsAndConditions.text shouldBe notSet
-          page.changePrivacyPolicyLocationLink.text should startWith("Change")
-          page.changeTermsConditionsLocationLink.text should startWith("Change")
+
+          page.changePrivacyPolicyLocationLink should not be null
+          page.changePrivacyPolicyLocationLink.text shouldBe "Change"
+          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+          
+          page.changeTermsConditionsLocationLink should not be null
+          page.changeTermsConditionsLocationLink.text shouldBe "Change"
+          page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
         }
 
-        "show nothing when an admin" in new LoggedInUserIsAdmin {
+        "Show Change links when an admin" in new LoggedInUserIsAdmin {
 
           val page =
             Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
 
           page.privacyPolicy.text shouldBe notSet
           page.termsAndConditions.text shouldBe notSet
-          page.changePrivacyPolicyLocationLink.text should startWith("Change")
-          page.changeTermsConditionsLocationLink.text should startWith("Change")
+
+          page.changePrivacyPolicyLocationLink should not be null
+          page.changePrivacyPolicyLocationLink.text shouldBe "Change"
+          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+          
+          page.changeTermsConditionsLocationLink should not be null
+          page.changeTermsConditionsLocationLink.text shouldBe "Change"
+          page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
         }
       }
       "managing a production application" should {
@@ -212,8 +224,13 @@ class ApplicationDetailsViewSpec
         "show Change links when an admin" in new LoggedInUserIsAdmin {
           val page = Page(applicationDetailsView(ApplicationViewModel(prodApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
-          page.changePrivacyPolicyLocationLink.text should startWith("Change")
-          page.changeTermsConditionsLocationLink.text should startWith("Change")
+          page.changePrivacyPolicyLocationLink should not be null
+          page.changePrivacyPolicyLocationLink.text shouldBe "Change"
+          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.updatePrivacyPolicyLocation(prodApp.id).url)
+          
+          page.changeTermsConditionsLocationLink should not be null
+          page.changeTermsConditionsLocationLink.text shouldBe "Change"
+          page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.updateTermsAndConditionsLocation(prodApp.id).url)
         }
       }
     }
