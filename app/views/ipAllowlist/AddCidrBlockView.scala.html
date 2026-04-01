@@ -102,7 +102,7 @@
       <div class="govuk-button-group">
         <button id="add" class="govuk-button" type="submit">Continue</button>
         @if(ipAllowlistFlow.allowlist.isEmpty) {
-          <a class="govuk-button govuk-button--secondary" href="@routes.Details.details(app.id)">Cancel</a>
+          <a class="govuk-button govuk-button--secondary" href="@routes.ManageApplicationController.applicationDetails(app.id)">Cancel</a>
         } else {
           <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowListController.editIpAllowlist(app.id)">Cancel</a>
         }

@@ -25,6 +25,7 @@ import scala.concurrent.Future._
 import _root_.uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ThirdPartyDeveloperConnectorMockModule, ThirdPartyDeveloperMfaConnectorMockModule}
 import views.html.{AccountLockedView, Add2SVView, SelectLoginMfaView, SignInView, UserDidNotAdd2SVView}
 
+import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
@@ -470,7 +471,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
 
-      private val result = underTest.selectLoginMfaAction()(request)
+      private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(authAppMfaId, MfaType.AUTHENTICATOR_APP).url)
@@ -483,7 +484,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", smsMfaId.value.toString))
 
-      private val result = underTest.selectLoginMfaAction()(request)
+      private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, MfaType.SMS).url)
@@ -495,7 +496,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
 
-      private val result = underTest.selectLoginMfaAction()(request)
+      private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe NOT_FOUND
       contentAsString(result) should include("User not found")
@@ -504,13 +505,13 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     "return error when mfaId is not valid" in new Setup {
       TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
-      private val request = testRequest
-        .withFormUrlEncodedBody(("mfaId", ""))
+      private val request: Request[AnyContent] = CSRFRequest(testRequest.withMethod("POST")
+        .withFormUrlEncodedBody(("mfaId", ""))).withCSRFToken
 
-      private val result = underTest.selectLoginMfaAction()(request)
+      private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe BAD_REQUEST
-      contentAsString(result) should include("Error while selecting mfaId")
+      contentAsString(result) should include("How do you want to get access codes?")
     }
 
     "return error when mfaDetail not found against the mfaId" in new Setup {
@@ -519,7 +520,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString))
 
-      private val result = underTest.selectLoginMfaAction()(request)
+      private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       contentAsString(result) should include("Access code required but mfa not set up")

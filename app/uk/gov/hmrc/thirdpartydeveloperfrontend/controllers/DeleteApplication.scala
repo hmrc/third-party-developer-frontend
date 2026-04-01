@@ -74,7 +74,7 @@ class DeleteApplication @Inject() (
           applicationService
             .requestApplicationDeletion(request.userSession, application)
             .map(_ => Ok(requestDeleteApplicationCompleteView(application)))
-        case _           => Future(Redirect(routes.Details.details(applicationId)))
+        case _           => Future(Redirect(routes.ManageApplicationController.applicationDetails(applicationId)))
       }
     }
 

@@ -147,7 +147,7 @@ class Redirects @Inject() (
             } else
               loginRedirectsService.changeLoginRedirect(actor, application, new LoginRedirectUri(form.originalRedirectUri), LoginRedirectUri.unsafeApply(form.newRedirectUri))
                 .map(_ => Redirect(routes.Redirects.loginRedirects(applicationId)))
-          case _                    => successful(Redirect(routes.Details.details(applicationId)))
+          case _                    => successful(Redirect(routes.ManageApplicationController.applicationDetails(applicationId)))
         }
       }
     }

@@ -314,6 +314,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/profile/security-preferences/select-mfa", _)               => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)              => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("GET", "/developer/login/select-mfa", _)                                      => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
+      case Endpoint("POST", "/developer/login/select-mfa", _)                                     => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
 
       case _ => Map.empty
     }
@@ -426,13 +427,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Redirect(s"/developer/applications/${applicationId}/team-members")
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 =>
         Redirect(s"/developer/applications/$applicationId/team-members")
-      case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)           => Redirect(s"/developer/applications/${applicationId}/details")
-      case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)           => Redirect(s"/developer/applications/${applicationId}/manage")
+      case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         => Redirect(s"/developer/applications/${applicationId}/manage")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/add", _)                                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/delete", _)                             => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
       case Endpoint("POST", "/developer/applications/:id/redirect-uris/change-confirmation", _)                => Redirect(s"/developer/applications/${applicationId}/redirect-uris")
-      case Endpoint("POST", "/developer/applications/:id/delete-request", _)                                   => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/delete-request", _)                                   => Redirect(s"/developer/applications/${applicationId}/manage")
       case Endpoint("POST", "/developer/applications/:id/delete-restricted", _)                                => Redirect(s"/developer/applications/${applicationId}/details")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/change", _)                              => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/activate")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/add", _)                                 => Redirect(s"/developer/applications/${applicationId}/ip-allowlist/change")
@@ -460,7 +461,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions", _)                         => Redirect(s"/developer/applications/${applicationId}/confirm-subscriptions")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)          =>
         Redirect(s"/developer/applications/$applicationId/confirm-subscriptions")
-      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                              => Redirect(s"/developer/applications/${applicationId}/details")
+      case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                              => Redirect(s"/developer/applications/${applicationId}/manage")
       case Endpoint("GET", path, _) if path.startsWith("/developer/applications/:id/check-your-answers")       => Success()
       case Endpoint("GET", path, _) if path.startsWith("/developer/applications/:id/request-check")            => Success()
       case Endpoint("POST", "/developer/applications/:id/check-your-answers", _)                               => Redirect(s"/developer/applications/${applicationId}/request-check/submitted")

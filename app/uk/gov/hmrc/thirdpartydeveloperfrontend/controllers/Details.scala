@@ -293,7 +293,9 @@ class Details @Inject() (
         Future.successful(BadRequest(updatePrivacyPolicyLocationView(unchangedUrlForm, applicationId)))
 
       } else {
-        applicationService.updatePrivacyPolicyLocation(application, request.userId, newLocation).map(_ => Redirect(routes.Details.details(applicationId)))
+        applicationService.updatePrivacyPolicyLocation(application, request.userId, newLocation).map(_ =>
+          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+        )
       }
     }
 
@@ -334,7 +336,9 @@ class Details @Inject() (
         Future.successful(BadRequest(updateTermsAndConditionsLocationView(unchangedUrlForm, applicationId)))
 
       } else {
-        applicationService.updateTermsConditionsLocation(application, request.userId, newLocation).map(_ => Redirect(routes.Details.details(applicationId)))
+        applicationService.updateTermsConditionsLocation(application, request.userId, newLocation).map(_ =>
+          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+        )
       }
     }
 

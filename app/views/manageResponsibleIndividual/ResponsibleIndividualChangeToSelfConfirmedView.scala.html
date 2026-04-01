@@ -40,7 +40,7 @@
 
     <ul class="govuk-list">
         <li>
-            <a id="appDetails" class="govuk-link govuk-link--no-visited-state" href="@routes.Details.details(app.id)">Check @app.name</a>
+            <a id="appDetails" class="govuk-link govuk-link--no-visited-state" href="@routes.ManageApplicationController.applicationDetails(app.id)">Check @app.name</a>
         </li>
         <li>
             <a id="riDetails" class="govuk-link govuk-link--no-visited-state" href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">Check the responsible individual for @app.name</a>
