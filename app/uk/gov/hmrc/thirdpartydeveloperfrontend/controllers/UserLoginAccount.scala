@@ -202,7 +202,7 @@ class UserLoginAccount @Inject() (
     successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId, smsMfaId)))
   }
 
-  def selectLoginMfaAction(): Action[AnyContent] = Action.async { implicit request =>
+  def selectLoginMfaAction(authAppMfaId: MfaId, smsMfaId: MfaId): Action[AnyContent] = Action.async { implicit request =>
     def handleSelectedMfa(userId: UserId, mfaDetail: MfaDetail) = {
       mfaDetail match {
         case x: AuthenticatorAppMfaDetail => handleAuthAppFlow(userId, x, request.session)
@@ -223,7 +223,7 @@ class UserLoginAccount @Inject() (
     }
 
     SelectLoginMfaForm.form.bindFromRequest().fold(
-      hasErrors => successful(BadRequest(s"Error while selecting mfaId: ${hasErrors.errors.toString()}")),
+      form => successful(BadRequest(selectLoginMfaView(form, authAppMfaId, smsMfaId))),
       form => handleMfaLogin(form)
     )
   }

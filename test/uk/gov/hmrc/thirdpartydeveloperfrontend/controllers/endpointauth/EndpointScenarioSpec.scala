@@ -312,6 +312,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("GET", "/developer/profile/security-preferences/select-mfa", _)               => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)              => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("GET", "/developer/login/select-mfa", _)                                      => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
+      case Endpoint("POST", "/developer/login/select-mfa", _)                                     => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
 
       case _ => Map.empty
     }
