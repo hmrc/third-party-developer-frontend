@@ -24,6 +24,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.captor.ArgCaptor
 import org.scalatest.Assertion
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import views.html.manageapplication._
 
 import play.api.libs.json.{Json, OFormat}
@@ -43,7 +44,6 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.Agreement
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
@@ -852,6 +852,7 @@ class ManageApplicationControllerSpec
     val mockDetailsView                              = mock[ApplicationDetailsView]
     val detailsView                                  = app.injector.instanceOf[ApplicationDetailsView]
     val changeAppNameAndDescView                     = app.injector.instanceOf[ChangeAppNameAndDescView]
+    val unauthorisedAppDetailsView                   = app.injector.instanceOf[UnauthorisedAppDetailsView]
     def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List(ServiceName("ppns-api")), "/")
     val newName                                      = ApplicationName("new name")
     val newDescription                               = Some("new description")
@@ -866,6 +867,7 @@ class ManageApplicationControllerSpec
       SubmissionServiceMock.aMock,
       TermsOfUseInvitationServiceMock.aMock,
       changeAppNameAndDescView,
+      unauthorisedAppDetailsView,
       mcc,
       cookieSigner,
       clock,
@@ -883,6 +885,7 @@ class ManageApplicationControllerSpec
       SubmissionServiceMock.aMock,
       TermsOfUseInvitationServiceMock.aMock,
       changeAppNameAndDescView,
+      unauthorisedAppDetailsView,
       mcc,
       cookieSigner,
       clock,

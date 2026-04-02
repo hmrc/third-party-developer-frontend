@@ -18,8 +18,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.Clock
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
+import cats.data.OptionT
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import views.html.manageapplication.{ApplicationDetailsView, ChangeAppNameAndDescView}
 
 import play.api.data.Form
@@ -27,7 +30,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{State, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
@@ -59,6 +62,7 @@ class ManageApplicationController @Inject() (
     submissionService: SubmissionService,
     termsOfUseInvitationService: TermsOfUseInvitationService,
     val changeAppNameAndDescView: ChangeAppNameAndDescView,
+    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val clock: Clock,
@@ -70,17 +74,58 @@ class ManageApplicationController @Inject() (
     with ClockNow {
 
   def applicationDetails(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    buildTermsOfUseViewModel().map { termsOfUseViewModel =>
-      Ok(applicationDetailsView(
-        applicationViewModelFromApplicationRequest(),
-        request.subscriptions,
-        createOptionalFraudPreventionNavLinkViewModel(
-          request.application,
+    def appDetailsPage =
+      buildTermsOfUseViewModel().map { termsOfUseViewModel =>
+        Ok(applicationDetailsView(
+          applicationViewModelFromApplicationRequest(),
           request.subscriptions,
-          fraudPreventionConfig
-        ),
-        termsOfUseViewModel
-      ))
+          createOptionalFraudPreventionNavLinkViewModel(
+            request.application,
+            request.subscriptions,
+            fraudPreventionConfig
+          ),
+          termsOfUseViewModel
+        ))
+      }
+
+    request.application.state.name match {
+      case State.TESTING =>
+        lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
+
+        lazy val newUpliftJourney = (s: Submission) =>
+          if (request.role.isAdministrator) {
+            if (s.status.isAnsweredCompletely) {
+              Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
+            } else {
+              Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
+            }
+          } else {
+            Ok(unauthorisedAppDetailsView(request.application.name, request.application.admins))
+          }
+
+        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
+
+      case State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION | State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
+        lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
+
+        lazy val newUpliftJourney = (s: Submission) =>
+          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
+
+        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
+      }
+
+      case State.PRE_PRODUCTION =>
+        request.queryString.contains("forceAppDetails") match {
+          case true  => appDetailsPage
+          case false =>
+            successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId)))
+        }
+
+      case State.PRODUCTION =>
+        appDetailsPage
+
+      case State.DELETED =>
+        successful(BadRequest)
     }
   }
 
