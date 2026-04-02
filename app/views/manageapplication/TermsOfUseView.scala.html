@@ -52,7 +52,6 @@
 @showTermsOfUse(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
     if(termsOfUseModel.required) {
       termsOfUseModel.termsOfUseV2State match {
-        // AC1: V2 NotStarted with no V1 agreement
         case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if !termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isEmpty =>
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
@@ -64,7 +63,6 @@
             ))
           )
         
-        // AC2: V2 NotStarted with V1 agreement (Uplift scenario)
         case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined =>
           val deadlineText = maybeDeadline.map(d => s"by ${DateFormatter.formatTwoDigitDay(d)}").getOrElse("")
           Seq(
@@ -79,7 +77,6 @@
             ))
           )
         
-        // AC3/AC6: V2 Started (with or without V1 agreement)
         case Some(TermsOfUseV2State.Started(startedBy, deadline)) =>
           val deadlineText = s"by ${DateFormatter.formatTwoDigitDay(deadline)}"
           Seq(
@@ -94,7 +91,6 @@
             ))
           )
         
-        // AC4/AC7: V2 Submitted (with or without V1 agreement)
         case Some(TermsOfUseV2State.Submitted(submittedBy, submittedOn)) =>
           val submittedDate = DateFormatter.formatTwoDigitDay(submittedOn)
           Seq(
@@ -109,7 +105,6 @@
             ))
           )
         
-        // AC5/AC8: V2 Approved (existing approved logic)
         case Some(TermsOfUseV2State.Approved(_, _)) | None if !termsOfUseModel.appUsesOldVersion =>
           termsOfUseModel.agreement match {
             case Some(agreement) =>
@@ -135,7 +130,6 @@
 @showV1Agreement(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
     if(termsOfUseModel.required && termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isDefined) {
       termsOfUseModel.termsOfUseV2State match {
-        // Don't show V1 agreement row if V2 is approved (V2 supersedes V1)
         case Some(TermsOfUseV2State.Approved(_, _)) => Seq.empty
         case _ =>
           termsOfUseModel.agreement match {

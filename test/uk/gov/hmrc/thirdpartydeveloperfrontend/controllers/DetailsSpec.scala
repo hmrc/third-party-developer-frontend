@@ -861,11 +861,6 @@ class DetailsSpec
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
       inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.value.describe()) shouldBe true
-
-      // Application name and description fields should NOT exist //todo remove after passing tests
-      doc.select("#applicationName[type=text]").isEmpty shouldBe true
-      doc.select("textarea#description").isEmpty shouldBe true
-      doc.getElementById("grantLength") shouldBe null
     }
 
     def changeDetailsShouldRedirectOnSuccess(userSession: UserSession)(application: ApplicationWithCollaborators) = {

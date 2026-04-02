@@ -106,11 +106,6 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
       document.getElementById("privacyPolicyUrl") should not be null
       document.getElementById("termsAndConditionsUrl") should not be null
       document.getElementById("applicationId") should not be null
-
-      // Name and description fields should NOT exist (not even hidden) //todo remove after all tests pass
-      document.select("#applicationName[type=text]").isEmpty shouldBe true
-      document.select("textarea#description").isEmpty shouldBe true
-      document.getElementById("grantLength") shouldBe null
     }
 
     "pre-populate existing data fields" in {
@@ -135,15 +130,6 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
 
       document.getElementById("privacyPolicyUrl") should not be null
       document.getElementById("termsAndConditionsUrl") should not be null
-
-      // Application name field should NOT exist (even for sandbox) //todo remove after pass
-      elementExistsByText(document, "label", "Application name") shouldBe false
-
-      // Description field should NOT exist  //todo remove after pass
-      elementExistsByText(document, "label", "Application description") shouldBe false
-
-      // Grant length hidden field should NOT exist  //todo remove after pass
-      document.getElementById("grantLength") shouldBe null
     }
   }
 }

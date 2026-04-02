@@ -31,6 +31,7 @@ class NewJourneyAdminUserTestingStatusProductionEndpointScenarioSpec extends End
       case Endpoint("GET", "/developer/applications/:id/client-id", _)                                     => BadRequest()
       case Endpoint("GET", "/developer/applications/:id/credentials", _)                                   => NotFound()
       case Endpoint("GET", "/developer/applications/:id/details", _)                                       => Redirect(s"/developer/submissions/application/${applicationId}/production-credentials-checklist")
+      case Endpoint("GET", "/developer/applications/:id/manage", _)                                        => Redirect(s"/developer/submissions/application/${applicationId}/production-credentials-checklist")
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                        =>
         Redirect(s"/developer/submissions/application/${applicationId}/view-answers")
       case Endpoint("GET", "/developer/applications/:id/we-will-check-your-answers", _)                    =>
