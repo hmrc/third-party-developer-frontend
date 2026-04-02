@@ -33,17 +33,17 @@
 
 @devMain(
   form,
-  title = "Change application details",
+  title = "Change privacy policy and terms & conditions",
   userFullName = loggedIn.loggedInName,
   breadcrumbs = Seq(
-    Crumb("Change application details"),
+    Crumb("Change privacy policy and terms & conditions"),
     Crumb.application(app),
     Crumb.viewAllApplications,
     Crumb.home
   ),
   developerSession = Some(loggedIn)
 ) {
-  <h1 class="govuk-heading-l">Change application details</h1>
+  <h1 class="govuk-heading-l">Change privacy policy and terms & conditions</h1>
 
   @appEnvironment(app)
 
@@ -52,44 +52,6 @@
   @helper.form(action = routes.Details.changeDetailsAction(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
-    @if(app.hasCapability(Capabilities.SupportChangingAppDetails)) {
-      <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
-        <label id="applicationName-label" class="govuk-label govuk-!-font-weight-bold" for="applicationName">
-          Application name
-        </label>
-        <span id="application-name-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "applicationName", form.error("submissionError").isEmpty)
-        </span>
-        <input
-          type="text"
-          id="applicationName"
-          name="applicationName"
-          value="@form.data("applicationName")"
-          class="govuk-input @if(form.errors("applicationName").nonEmpty) {govuk-input--error}"
-          aria-labelledby="application-name-error"
-        />
-      </div>
-    } else {
-      <input type="hidden" id="applicationName" name="applicationName" value="@form.data("applicationName")"/>
-    }
-
-    <div class="govuk-form-group @if(form.errors("description").nonEmpty) {govuk-form-group--error}">
-      <label id="description-label" class="govuk-label govuk-!-font-weight-bold" for="description">
-        Application description (optional)
-        <div id="description-label-hint" class="govuk-hint">We will not show this to users.</div>
-        <span id="description-label-error" class="govuk-error-message">
-          <span class="govuk-visually-hidden">Error:</span> @fieldError(form.errors, "description", form.error("submissionError").isEmpty)
-        </span>
-      </label>
-      <textarea
-        class="govuk-textarea @if(form.errors("description").nonEmpty) {govuk-textarea--error}"
-        id="description"
-        name="description"
-        cols="50"
-        rows="3"
-        maxlength="250"
-        aria-labelledby="description-label-hint description-label-error">@form.data.get("description")</textarea>
-    </div>
 
     <div class="govuk-form-group @if(form.errors("privacyPolicyUrl").nonEmpty) {govuk-form-group--error}">
       <label id="privacyPolicyUrl-label" class="govuk-label govuk-!-font-weight-bold" for="privacyPolicyUrl">
@@ -127,7 +89,6 @@
         class="govuk-input @if(form.errors("termsAndConditionsUrl").nonEmpty) {govuk-input--error}"
       />
     </div>
-    <input type="hidden" id="grantLength" name="grantLength" value="@form.data("grantLength")"/>
 
     <button id="submit" class="govuk-button" type="submit">Save changes</button>
     <a href="@routes.ManageApplicationController.applicationDetails(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>

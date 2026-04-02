@@ -32,7 +32,7 @@ import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, State, ValidatedApplicationName}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, State}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
@@ -177,31 +177,7 @@ class Details @Inject() (
     val actor                   = Actors.AppCollaborator(request.userRequest.developer.email)
     val access: Access.Standard = (application.access match { case s: Access.Standard => s }) // Only standard apps attempt this function
 
-    val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
-      form.applicationName.trim
-    } else {
-      application.name.value
-    }
-    val effectiveDescription = form.description.filterNot(_.isBlank())
-
     List(
-      if (effectiveNewName == application.name.value)
-        List.empty
-      else {
-        val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
-        if (validateAppName.isValid) // This has already been validated
-          List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant, validateAppName.toOption.get))
-        else
-          List.empty
-      },
-      if (effectiveDescription == application.details.description) {
-        List.empty
-      } else {
-        if (effectiveDescription.isDefined)
-          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant, effectiveDescription.get))
-        else
-          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant))
-      },
       if (form.privacyPolicyUrl == access.privacyPolicyUrl) {
         List.empty
       } else {
@@ -227,31 +203,12 @@ class Details @Inject() (
       val application = request.application
 
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
-        val requestForm = EditApplicationForm.form.bindFromRequest()
+        val cmds = deriveCommands(form)
+        val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
 
-        applicationService
-          .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
-          .flatMap({
-            case ApplicationNameValidationResult.Valid =>
-              val cmds = deriveCommands(form)
-              val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
-
-              futs.map(_ =>
-                Redirect(routes.Details.details(applicationId))
-              )
-
-            case ApplicationNameValidationResult.Invalid =>
-              Future.successful(BadRequest(changeDetailsView(
-                requestForm.withError(appNameField, applicationNameInvalidKey),
-                applicationViewModelFromApplicationRequest()
-              )))
-
-            case ApplicationNameValidationResult.Duplicate =>
-              Future.successful(BadRequest(changeDetailsView(
-                requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
-                applicationViewModelFromApplicationRequest()
-              )))
-          })
+        futs.map(_ =>
+          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+        )
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
