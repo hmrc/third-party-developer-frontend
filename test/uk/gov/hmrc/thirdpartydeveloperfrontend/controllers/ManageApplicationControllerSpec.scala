@@ -198,7 +198,7 @@ class ManageApplicationControllerSpec
 
   "buildTermsOfUseViewModel for production standard apps" when {
 
-    "V2 not started - AC1" should {
+    "V2 not started" should {
       "returns ViewModel showing V2 terms not yet started with deadline when invitation sent but no submission begun" in new Setup {
         val dueBy      = instant.plusSeconds(86400 * 30)
         val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
@@ -245,7 +245,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 not started with V1 agreement - AC2" should {
+    "V2 not started with V1 agreement" should {
       "returns ViewModel showing both V1 agreement and V2 uplift invitation when upgrading from V1 to V2" in new Setup {
         val dueBy      = instant.plusSeconds(86400 * 30)
         val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV1TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
@@ -272,7 +272,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 started - AC3" should {
+    "V2 started" should {
       "returns ViewModel showing who started V2 terms and deadline when submission is created but not yet in progress" in new Setup {
         val dueBy      = instant.plusSeconds(86400 * 30)
         val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
@@ -323,7 +323,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 started with V1 agreement - AC6" should {
+    "V2 started with V1 agreement" should {
       "returns ViewModel showing V1 historical agreement alongside who started the V2 process" in new Setup {
         val dueBy      = instant.plusSeconds(86400 * 30)
         val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV1TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
@@ -350,7 +350,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 submitted - AC4" should {
+    "V2 submitted" should {
       "returns ViewModel showing who submitted V2 terms and when, pending approval" in new Setup {
         val dueBy      = instant.plusSeconds(86400 * 30)
         val invitation = TermsOfUseInvitation(approvedApplication.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
@@ -376,7 +376,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 submitted with V1 agreement - AC7" should {
+    "V2 submitted with V1 agreement" should {
       "returns ViewModel showing V1 historical agreement alongside the pending V2 submission details" in new Setup {
         val dueBy      = instant.plusSeconds(86400 * 30)
         val invitation = TermsOfUseInvitation(prodAppWithRespIndAndV1TermsOfUse.id, instant, instant, dueBy, None, TermsOfUseInvitationState.EMAIL_SENT)
@@ -403,7 +403,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 approved - AC5" should {
+    "V2 approved" should {
       "returns ViewModel showing V2 terms agreed when submission approved" in new Setup {
         val submission = grantedSubmission
         val dueBy      = instant.plusSeconds(86400 * 30)
@@ -432,7 +432,7 @@ class ManageApplicationControllerSpec
       }
     }
 
-    "V2 approved replacing V1 - AC8" should {
+    "V2 approved replacing V1" should {
       "returns ViewModel showing only V2 agreement, V1 no longer displayed after V2 approval" in new Setup {
         val submission = grantedSubmission
         val dueBy      = instant.plusSeconds(86400 * 30)
