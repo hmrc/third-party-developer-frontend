@@ -51,7 +51,7 @@ class CollaboratorService @Inject() (
       adminsAsUsers <- developerConnector.fetchByEmails(setOfAdminEmails)
       adminsToEmail  = adminsAsUsers.filter(_.verified).map(_.email).toSet
       userId        <- developerConnector.getOrCreateUserId(newTeamMemberEmail) // TODO - if we adding an admin, check they are registered and verified.
-      addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), instant())
+      addCommand     = ApplicationCommands.AddCollaborator(Actors.AppCollaborator(requestingEmail), Collaborator.apply(newTeamMemberEmail, newTeamMemberRole, userId), instant)
       response      <- apmCmdModule.dispatch(app.id, addCommand, adminsToEmail)
     } yield response
   }
@@ -75,7 +75,7 @@ class CollaboratorService @Inject() (
     for {
       otherAdmins  <- developerConnector.fetchByEmails(otherAdminEmails)
       adminsToEmail = otherAdmins.filter(_.verified).map(_.email).toSet
-      removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, instant())
+      removeCommand = ApplicationCommands.RemoveCollaborator(Actors.AppCollaborator(requestingEmail), collaboratorToRemove, instant)
       response     <- apmCmdModule.dispatch(app.id, removeCommand, adminsToEmail)
     } yield response
   }

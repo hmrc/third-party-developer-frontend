@@ -87,7 +87,7 @@ class IpAllowlistService @Inject() (
       _         = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
       command   = ApplicationCommands.ChangeIpAllowlist(
                     Actors.AppCollaborator(requestingEmail),
-                    instant(),
+                    instant,
                     app.details.ipAllowlist.required,
                     app.details.ipAllowlist.allowlist.map(CidrBlock(_)).toList,
                     flow.allowlist.map(CidrBlock(_)).toList
@@ -104,7 +104,7 @@ class IpAllowlistService @Inject() (
     } else {
       val command = ApplicationCommands.ChangeIpAllowlist(
         Actors.AppCollaborator(requestingEmail),
-        instant(),
+        instant,
         app.details.ipAllowlist.required,
         app.details.ipAllowlist.allowlist.map(CidrBlock(_)).toList,
         List.empty

@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatLastAccessDate
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
@@ -26,7 +27,12 @@
 @import java.time.ZoneId
 @import java.time.format.DateTimeFormatter
 
-@this(devMain: DevMain, leftHandNav: LeftHandNav, clock: Clock)
+@this(
+  devMain: DevMain, 
+  leftHandNav: LeftHandNav, 
+  clock: Clock,
+  govukNotificationBanner: GovukNotificationBanner
+)
 
 
 @(model: ManageApplicationsViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-applications", environmentNameService: EnvironmentNameService)
@@ -46,6 +52,21 @@
   leftNav = Some(leftHandNav(None, Option(navSection), flags)),
   developerSession = Some(loggedIn)
 ) {
+
+  @if(model.userIsAllowListed) {
+    @if(model.userHasSubmission) {
+      @govukNotificationBanner(NotificationBanner(
+        title = Text("Important"),
+        content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have started registering your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Continue your registration</a>.</p>")
+      ))
+    } else {
+      @govukNotificationBanner(NotificationBanner(
+        title = Text("Important"),
+        content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have been invited to register your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Start your registration</a>.</p>")
+      ))
+    }
+  }
+
   @if(model.applicationsThatHaveTermOfUseInvitatationsOutstanding.nonEmpty) {
     <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title-important" data-module="govuk-notification-banner">
       <div class="govuk-notification-banner__header">

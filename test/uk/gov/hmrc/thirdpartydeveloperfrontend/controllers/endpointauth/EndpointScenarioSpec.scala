@@ -138,6 +138,8 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
   when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
   when(organisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
+  when(organisationConnector.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(successful(None))
+  when(organisationConnector.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(successful(None))
 
   import scala.reflect.runtime.universe._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._

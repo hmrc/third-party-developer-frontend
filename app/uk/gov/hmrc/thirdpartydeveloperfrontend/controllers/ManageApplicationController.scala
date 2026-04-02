@@ -144,7 +144,7 @@ class ManageApplicationController @Inject() (
       else {
         val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
         if (validateAppName.isValid) // This has already been validated
-          List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant(), validateAppName.toOption.get))
+          List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant, validateAppName.toOption.get))
         else
           List.empty
       },
@@ -152,9 +152,9 @@ class ManageApplicationController @Inject() (
         List.empty
       } else {
         if (effectiveDescription.isDefined)
-          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant(), effectiveDescription.get))
+          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant, effectiveDescription.get))
         else
-          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant()))
+          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant))
       }
     ).flatten
 
@@ -211,11 +211,11 @@ class ManageApplicationController @Inject() (
           Some(NotStarted(Some(invitation.dueBy)))
 
         case (None, None) =>
-          Some(NotStarted(Some(instant())))
+          Some(NotStarted(Some(instant)))
 
         case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
           val requestedBy = extractRequestedByFromHistory(submission)
-          val deadline    = maybeInv.map(_.dueBy).getOrElse(instant())
+          val deadline    = maybeInv.map(_.dueBy).getOrElse(instant)
           Some(Started(requestedBy, deadline))
 
         case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
