@@ -174,40 +174,108 @@ class ApplicationDetailsViewSpec
     "showing Change links for Privacy Policy and Terms & Conditions locations" when {
       val notSet = "Not set"
       "managing a sandbox application" should {
-
         val termsOfUseViewModelForSandboxApp = termsOfUseViewModel.copy(required = false)
 
-        "Show Change links when a developer" in new LoggedInUserIsDev {
-          val page =
-            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+        "the app is a standard app" should {
+          "Show Change links when a developer" in new LoggedInUserIsDev {
+            val page =
+              Page(applicationDetailsView(
+                ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false),
+                List.empty,
+                None,
+                termsOfUseViewModelForSandboxApp
+              ))
 
-          page.privacyPolicy.text shouldBe notSet
-          page.termsAndConditions.text shouldBe notSet
+            page.privacyPolicy.text shouldBe notSet
+            page.termsAndConditions.text shouldBe notSet
 
-          page.changePrivacyPolicyLocationLink should not be null
-          page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+            page.changePrivacyPolicyLocationLink should not be null
+            page.changePrivacyPolicyLocationLink.text shouldBe "Change"
+            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
 
-          page.changeTermsConditionsLocationLink should not be null
-          page.changeTermsConditionsLocationLink.text shouldBe "Change"
-          page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+            page.changeTermsConditionsLocationLink should not be null
+            page.changeTermsConditionsLocationLink.text shouldBe "Change"
+            page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+          }
+
+          "Show Change links when an admin" in new LoggedInUserIsAdmin {
+            val page =
+              Page(applicationDetailsView(
+                ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false),
+                List.empty,
+                None,
+                termsOfUseViewModelForSandboxApp
+              ))
+
+            page.privacyPolicy.text shouldBe notSet
+            page.termsAndConditions.text shouldBe notSet
+
+            page.changePrivacyPolicyLocationLink should not be null
+            page.changePrivacyPolicyLocationLink.text shouldBe "Change"
+            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+
+            page.changeTermsConditionsLocationLink should not be null
+            page.changeTermsConditionsLocationLink.text shouldBe "Change"
+            page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+          }
         }
 
-        "Show Change links when an admin" in new LoggedInUserIsAdmin {
+        "the app is a privileged app" should {
+          val termsOfUseViewModelForPrivApp = termsOfUseViewModel.copy(required = false)
+          val application                   = sandboxApp.withAccess(Access.Privileged())
 
-          val page =
-            Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForSandboxApp))
+          "show nothing when a developer" in new LoggedInUserIsDev {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
 
-          page.privacyPolicy.text shouldBe notSet
-          page.termsAndConditions.text shouldBe notSet
+            page.privacyPolicy.text shouldBe notSet
+            page.termsAndConditions.text shouldBe notSet
 
-          page.changePrivacyPolicyLocationLink should not be null
-          page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+            page.changePrivacyPolicyLocationLink shouldBe null
 
-          page.changeTermsConditionsLocationLink should not be null
-          page.changeTermsConditionsLocationLink.text shouldBe "Change"
-          page.changeTermsConditionsLocationLink.attr("href") should include(routes.Details.changeDetails(sandboxApp.id).url)
+            page.changeTermsConditionsLocationLink shouldBe null
+          }
+
+          "show nothing when an admin" in new LoggedInUserIsAdmin {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForPrivApp))
+
+            page.privacyPolicy.text shouldBe notSet
+            page.termsAndConditions.text shouldBe notSet
+
+            page.changePrivacyPolicyLocationLink shouldBe null
+
+            page.changeTermsConditionsLocationLink shouldBe null
+          }
+        }
+
+        "the app is an ROPC app" should {
+          val termsOfUseViewModelForRopcApp = termsOfUseViewModel.copy(required = false)
+          val application                   = sandboxApp.withAccess(Access.Ropc())
+
+          "show nothing when a developer" in new LoggedInUserIsDev {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
+
+            page.privacyPolicy.text shouldBe notSet
+            page.termsAndConditions.text shouldBe notSet
+
+            page.changePrivacyPolicyLocationLink shouldBe null
+
+            page.changeTermsConditionsLocationLink shouldBe null
+          }
+
+          "show nothing when an admin" in new LoggedInUserIsAdmin {
+            val page =
+              Page(applicationDetailsView(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModelForRopcApp))
+
+            page.privacyPolicy.text shouldBe notSet
+            page.termsAndConditions.text shouldBe notSet
+
+            page.changePrivacyPolicyLocationLink shouldBe null
+
+            page.changeTermsConditionsLocationLink shouldBe null
+          }
         }
       }
       "managing a production application" should {
