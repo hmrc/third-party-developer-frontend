@@ -182,16 +182,16 @@ class Details @Inject() (
         List.empty
       } else {
         form.privacyPolicyUrl match {
-          case Some(ppu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant(), ppu))
-          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant()))
+          case Some(ppu) => List(ApplicationCommands.ChangeSandboxApplicationPrivacyPolicyUrl(actor, instant, ppu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationPrivacyPolicyUrl(actor, instant))
         }
       },
       if (form.termsAndConditionsUrl == access.termsAndConditionsUrl) {
         List.empty
       } else {
         form.termsAndConditionsUrl match {
-          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationTermsAndConditionsUrl(actor, instant(), tcu))
-          case None      => List(ApplicationCommands.RemoveSandboxApplicationTermsAndConditionsUrl(actor, instant()))
+          case Some(tcu) => List(ApplicationCommands.ChangeSandboxApplicationTermsAndConditionsUrl(actor, instant, tcu))
+          case None      => List(ApplicationCommands.RemoveSandboxApplicationTermsAndConditionsUrl(actor, instant))
         }
       }
     ).flatten

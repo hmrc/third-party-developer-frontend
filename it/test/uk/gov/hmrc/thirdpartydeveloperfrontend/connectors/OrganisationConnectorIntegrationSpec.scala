@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -30,8 +30,10 @@ import uk.gov.hmrc.play.http.metrics.common.API
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{OrganisationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Collaborators, Organisation, OrganisationName}
+import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.OrganisationAllowList
+import uk.gov.hmrc.apiplatform.modules.organisations.submissions.utils.SubmissionsTestData
 
-class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
+class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with SubmissionsTestData {
   private val stubConfig = Configuration("microservice.services.api-platform-organisation.port" -> stubPort)
 
   override def fakeApplication(): Application =
@@ -48,6 +50,7 @@ class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec 
     val userId       = UserId.random
     val orgId        = OrganisationId.random
     val organisation = Organisation(orgId, OrganisationName("Org name"), Organisation.OrganisationType.UkLimitedCompany, instant, Set(Collaborators.Member(userId)))
+    val allowList    = OrganisationAllowList(userId, OrganisationName("My Org"), "requestedBy", instant)
   }
 
   "api" should {
@@ -101,6 +104,100 @@ class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec 
       val result = await(connector.fetchOrganisationsByUserId(userId))
 
       result shouldBe List.empty
+    }
+  }
+
+  "fetchOrganisationAllowList" should {
+    "successfully get one" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/allow-list/$userId"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(allowList).toString())
+          )
+      )
+
+      val result = await(connector.fetchOrganisationAllowList(userId))
+
+      result shouldBe Some(allowList)
+    }
+
+    "return None when not found" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/allow-list/$userId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      val result = await(connector.fetchOrganisationAllowList(userId))
+
+      result shouldBe None
+    }
+
+    "return None when the call returns an error" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/allow-list/$userId"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      val result = await(connector.fetchOrganisationAllowList(userId))
+
+      result shouldBe None
+    }
+  }
+
+  "fetchLatestSubmissionByUserId" should {
+    "successfully get one" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/submission/user/$userId"))
+          .willReturn(
+            aResponse()
+              .withStatus(OK)
+              .withHeader("Content-Type", "application/json")
+              .withBody(Json.toJson(aSubmission).toString())
+          )
+      )
+
+      val result = await(connector.fetchLatestSubmissionByUserId(userId))
+
+      result shouldBe Some(aSubmission)
+    }
+
+    "return None when not found" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/submission/user/$userId"))
+          .willReturn(
+            aResponse()
+              .withStatus(NOT_FOUND)
+              .withHeader("Content-Type", "application/json")
+          )
+      )
+
+      val result = await(connector.fetchLatestSubmissionByUserId(userId))
+
+      result shouldBe None
+    }
+
+    "return None when the call returns an error" in new Setup {
+      stubFor(
+        get(urlEqualTo(s"/submission/user/$userId"))
+          .willReturn(
+            aResponse()
+              .withStatus(INTERNAL_SERVER_ERROR)
+          )
+      )
+
+      val result = await(connector.fetchLatestSubmissionByUserId(userId))
+
+      result shouldBe None
     }
   }
 }

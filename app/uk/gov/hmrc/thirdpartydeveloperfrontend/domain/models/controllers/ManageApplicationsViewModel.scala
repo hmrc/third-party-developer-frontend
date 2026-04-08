@@ -21,6 +21,7 @@ import java.time.Instant
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.OrganisationAllowList
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
@@ -30,7 +31,9 @@ case class ManageApplicationsViewModel(
     upliftableApplicationIds: Set[ApplicationId],
     hasAppsThatCannotBeUplifted: Boolean,
     termsOfUseInvitations: List[TermsOfUseInvitation],
-    productionApplicationSubmissions: List[Submission]
+    productionApplicationSubmissions: List[Submission],
+    allowList: Option[OrganisationAllowList],
+    organisationSubmission: Option[uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.Submission]
   ) {
 
   lazy val hasPriviledgedApplications =
@@ -69,6 +72,8 @@ case class ManageApplicationsViewModel(
         TermsOfUseInvitationViewModel(applicationSummary.id, applicationSummary.name, termsOfUseInvitations.find(_.applicationId == applicationSummary.id).get.dueBy)
       )
 
+  lazy val userIsAllowListed = allowList.isDefined
+  lazy val userHasSubmission = organisationSubmission.isDefined
 }
 
 case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: ApplicationName, dueBy: Instant)

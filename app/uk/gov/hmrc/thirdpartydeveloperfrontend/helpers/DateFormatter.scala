@@ -53,7 +53,7 @@ object DateFormatter {
       if (ChronoUnit.DAYS.between(initialLastAccessDate.asLocalDate, lastAccessDate.asLocalDate) > 0) {
         standardFormatter.format(lastAccessDate)
       } else {
-        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.asLocalDate, clk.instant().asLocalDate)} months ago"
+        s"more than ${ChronoUnit.MONTHS.between(lastAccessDate.asLocalDate, clk.instant.asLocalDate)} months ago"
       }
     }
     maybeLastAccess

@@ -154,7 +154,16 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       val manageApplicationsView = app.injector.instanceOf[ManageApplicationsView]
 
       manageApplicationsView.render(
-        ManageApplicationsViewModel(sandboxAppSummaries, productionAppSummaries, upliftableApplicationIds, false, termsOfUseInvitations, productionApplicationSubmissions),
+        ManageApplicationsViewModel(
+          sandboxAppSummaries,
+          productionAppSummaries,
+          upliftableApplicationIds,
+          false,
+          termsOfUseInvitations,
+          productionApplicationSubmissions,
+          None,
+          None
+        ),
         request,
         loggedIn,
         messagesProvider,

@@ -145,7 +145,7 @@ class UpliftJourneyService @Inject() (
     if (Some(sellResellOrDistribute) != existingSellResellOrDistribute) {
       val cmd = ApplicationCommands.ChangeApplicationSellResellOrDistribute(
         Actors.AppCollaborator(userSession.developer.email),
-        instant(),
+        instant,
         sellResellOrDistribute
       )
       apmConnector.dispatch(application.id, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
