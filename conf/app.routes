@@ -61,7 +61,8 @@ POST        /applications/:id/team-members/add                                  
 GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.removeTeamMember(id: ApplicationId, teamMemberHash: String)
 POST        /applications/:id/team-members/remove                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.removeTeamMemberAction(id: ApplicationId)
 
-GET         /applications/:id/details                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.details(id: ApplicationId)
+GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
+GET         /applications/:id/details                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
 
 GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetails(id: ApplicationId)
 POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetailsAction(id: ApplicationId)
@@ -77,7 +78,6 @@ POST        /applications/:id/details/change-terms-conditions-location          
 
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 
-GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
 GET         /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.changeAppNameAndDesc(id: ApplicationId)
 POST        /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.changeAppNameAndDescAction(id: ApplicationId)
 
