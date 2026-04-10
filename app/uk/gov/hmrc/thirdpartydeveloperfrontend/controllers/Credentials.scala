@@ -149,5 +149,5 @@ class Credentials @Inject() (
 }
 
 object Credentials {
-  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).asInstant // scalastyle:ignore magic.number
+  val serverTokenCutoffDate = LocalDate.of(2020, 4, 1).asInstant
 }

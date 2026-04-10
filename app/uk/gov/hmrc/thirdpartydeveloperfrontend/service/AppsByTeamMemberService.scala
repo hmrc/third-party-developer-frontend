@@ -21,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithSubscriptions, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQueries
