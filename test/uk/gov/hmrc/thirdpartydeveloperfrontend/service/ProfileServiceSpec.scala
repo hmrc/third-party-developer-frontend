@@ -106,46 +106,33 @@ class ProfileServiceSpec extends AsyncHmrcSpec
   }
 
   "lookupDeveloperName" should {
-    //todo adminDeveloper.email is not equal to email. use adminDeveloper.email instead in tests
-    "return full name when developer found" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+    "return developer name when developer found with valid name" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(adminDeveloper.email)))(*))
         .thenReturn(successful(Seq(adminDeveloper)))
 
-      val result = await(profileService.lookupDeveloperName(email))
+      val result = await(profileService.lookupDeveloperName(adminDeveloper.email))
 
-      result shouldBe s"${adminDeveloper.firstName} ${adminDeveloper.lastName}"
-      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+      result shouldBe Some(s"${adminDeveloper.firstName} ${adminDeveloper.lastName}")
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(adminDeveloper.email)))(*)
     }
 
-    "return email when developer not found" in new Setup {
+    "return None when developer not found" in new Setup {
       when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
         .thenReturn(successful(Seq.empty))
 
       val result = await(profileService.lookupDeveloperName(email))
 
-      result shouldBe email.text
+      result shouldBe None
       verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
     }
 
-    "return email when name is empty" in new Setup {
-      val userWithEmptyName = adminDeveloper.copy(firstName = "", lastName = "")
-
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
-        .thenReturn(successful(Seq(userWithEmptyName)))
-
-      val result = await(profileService.lookupDeveloperName(email))
-
-      result shouldBe email.text
-      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
-    }
-
-    "return email on connector error" in new Setup {
+    "return None on connector error" in new Setup {
       when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
         .thenReturn(failed(new RuntimeException("Service unavailable")))
 
       val result = await(profileService.lookupDeveloperName(email))
 
-      result shouldBe email.text
+      result shouldBe None
       verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
     }
   }

@@ -281,7 +281,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
-        ProfileServiceMock.LookupDeveloperName.thenReturns("Bob Example")
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(approvedApplication, adminSession)
 
@@ -308,7 +308,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
-        ProfileServiceMock.LookupDeveloperName.thenReturns("Bob Example")
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(approvedApplication, adminSession)
 
@@ -336,7 +336,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails(v1Agreement)
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
-        ProfileServiceMock.LookupDeveloperName.thenReturns("Bob Example")
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
 
@@ -365,7 +365,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
-        ProfileServiceMock.LookupDeveloperName.thenReturns("Bob Example")
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(approvedApplication, adminSession)
 
@@ -393,7 +393,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails(v1Agreement)
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
-        ProfileServiceMock.LookupDeveloperName.thenReturns("Bob Example")
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
 
@@ -912,6 +912,8 @@ class ManageApplicationControllerSpec
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
+
+    ProfileServiceMock.LookupDeveloperName.thenReturns(Some("bob@example.com"))
 
     def captureTermsOfUseViewModel(): Details.TermsOfUseViewModel = {
       val captor = ArgCaptor[Details.TermsOfUseViewModel]

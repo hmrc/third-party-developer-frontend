@@ -43,18 +43,15 @@ class ProfileService @Inject() (
     } yield response
   }
 
-  def lookupDeveloperName(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[String] = {
+  def lookupDeveloperName(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     developerConnector.fetchByEmails(Set(email))
       .map { users =>
-        users.headOption match {
-          case Some(user) =>
-            val fullName = s"${user.firstName.trim} ${user.lastName.trim}".trim
-            if (fullName.isEmpty) email.text else fullName
-          case None => email.text
+        users.headOption.map { user =>
+          s"${user.firstName} ${user.lastName}"
         }
       }
       .recover {
-        case _ => email.text
+        case _ => None
       }
   }
 
