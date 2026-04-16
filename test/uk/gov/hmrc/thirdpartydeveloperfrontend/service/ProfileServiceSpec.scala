@@ -104,4 +104,60 @@ class ProfileServiceSpec extends AsyncHmrcSpec
       verify(mockDeskproConnector, times(1)).updatePersonName(eqTo(email), eqTo(name), eqTo(hc))
     }
   }
+
+  "lookupDeveloperName" should {
+    "return full name when developer found" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(successful(Seq(adminDeveloper)))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe s"${adminDeveloper.firstName} ${adminDeveloper.lastName}"
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+
+    "return email when developer not found" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(successful(Seq.empty))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe email.text
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+
+    "return email when name is empty" in new Setup {
+      val userWithEmptyName = adminDeveloper.copy(firstName = "", lastName = "")
+
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(successful(Seq(userWithEmptyName)))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe email.text
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+
+    "return email when name has only whitespace" in new Setup {
+      val userWithWhitespaceName = adminDeveloper.copy(firstName = "  ", lastName = "  ")
+
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(successful(Seq(userWithWhitespaceName)))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe email.text
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+
+    "return email on connector error" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(failed(new RuntimeException("Service unavailable")))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe email.text
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+  }
 }
