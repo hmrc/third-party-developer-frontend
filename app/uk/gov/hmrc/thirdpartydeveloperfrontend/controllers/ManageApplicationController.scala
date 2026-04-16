@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{State, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
@@ -61,6 +61,7 @@ class ManageApplicationController @Inject() (
     val termsOfUseService: TermsOfUseService,
     submissionService: SubmissionService,
     termsOfUseInvitationService: TermsOfUseInvitationService,
+    profileService: ProfileService,
     val changeAppNameAndDescView: ChangeAppNameAndDescView,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     mcc: MessagesControllerComponents,
@@ -250,31 +251,42 @@ class ManageApplicationController @Inject() (
     for {
       maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(applicationId)
       maybeSubmission <- submissionService.fetchLatestSubmission(applicationId)
-    } yield {
-      (maybeInvitation, maybeSubmission) match {
-        case (Some(invitation), None) =>
-          Some(NotStarted(Some(invitation.dueBy)))
+      maybeState      <- (maybeInvitation, maybeSubmission) match {
+                           case (Some(invitation), None) =>
+                             Future.successful(Some(NotStarted(Some(invitation.dueBy))))
 
-        case (None, None) =>
-          Some(NotStarted(Some(instant)))
+                           case (None, None) =>
+                             Future.successful(Some(NotStarted(Some(instant))))
 
-        case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
-          val requestedBy = extractRequestedByFromHistory(submission)
-          val deadline    = maybeInv.map(_.dueBy).getOrElse(instant)
-          Some(Started(requestedBy, deadline))
+                           case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
+                             val requestedByEmail = extractRequestedByFromHistory(submission)
+                             val deadline         = maybeInv.map(_.dueBy).getOrElse(instant)
+                             profileService.lookupDeveloperName(LaxEmailAddress(requestedByEmail)).map { name =>
+                               Some(Started(name, deadline))
+                             }
 
-        case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
-          extractSubmittedFromHistory(submission)
-            .map(submitted => Submitted(submitted.requestedBy, submitted.timestamp))
+                           case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
+                             extractSubmittedFromHistory(submission) match {
+                               case Some(submitted) =>
+                                 profileService.lookupDeveloperName(LaxEmailAddress(submitted.requestedBy)).map { name =>
+                                   Some(Submitted(name, submitted.timestamp))
+                                 }
+                               case None            =>
+                                 Future.successful(None)
+                             }
 
-        case (_, Some(submission)) if submission.status.isGranted =>
-          extractSubmittedFromHistory(submission)
-            .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
+                           case (_, Some(submission)) if submission.status.isGranted =>
+                             extractSubmittedFromHistory(submission) match {
+                               case Some(submitted) =>
+                                 Future.successful(Some(Approved(submitted.requestedBy, submitted.timestamp)))
+                               case None            =>
+                                 Future.successful(None)
+                             }
 
-        case (_, Some(_)) =>
-          None
-      }
-    }
+                           case (_, Some(_)) =>
+                             Future.successful(None)
+                         }
+    } yield maybeState
   }
 
   private def extractRequestedByFromHistory(submission: Submission): String = {
