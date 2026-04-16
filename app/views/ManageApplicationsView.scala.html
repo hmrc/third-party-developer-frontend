@@ -55,14 +55,35 @@
 
   @if(model.userIsAllowListed) {
     @if(model.userHasSubmission) {
-      @govukNotificationBanner(NotificationBanner(
-        title = Text("Important"),
-        content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have started registering your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Continue your registration</a>.</p>")
-      ))
+      @if(model.isApproved) {
+        @govukNotificationBanner(NotificationBanner(
+          title = Text("Important"),
+          content = HtmlContent(s"<p class='govuk-notification-banner__heading' id='organisation-registration-successful'>Your organisation registration has been successful.</p>")
+        ))
+      } else {
+        @if(model.isDeclinedAndOpenToAnswers) {
+          @govukNotificationBanner(NotificationBanner(
+            title = Text("Important"),
+            content = HtmlContent(s"<p class='govuk-notification-banner__heading' id='organisation-resubmit'>Your organisation registration has been unsuccessful. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link' id='organisation-resubmit-link'>Correct and re-submit your registration</a>.</p>")
+          ))
+        } else {
+          @if(model.isNotOpenToAnswers){
+            @govukNotificationBanner(NotificationBanner(
+              title = Text("Important"),
+              content = HtmlContent(s"<p class='govuk-notification-banner__heading' id='organisation-view-submission'>We are checking your organisation registration. </br><a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link' id='organisation-view-submission-link'>View your submission</a>.</p>")
+            ))
+          } else {
+            @govukNotificationBanner(NotificationBanner(
+              title = Text("Important"),
+              content = HtmlContent(s"<p class='govuk-notification-banner__heading' id='organisation-continue-registration'>You have started registering your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link' id='organisation-continue-registration-link'>Continue your registration</a>.</p>")
+            ))
+          }
+        }
+      }
     } else {
       @govukNotificationBanner(NotificationBanner(
         title = Text("Important"),
-        content = HtmlContent(s"<p class='govuk-notification-banner__heading'>You have been invited to register your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link'>Start your registration</a>.</p>")
+        content = HtmlContent(s"<p class='govuk-notification-banner__heading' id='organisation-start-registration'>You have been invited to register your organisation. <a href='${appConfig.organisationFrontendUrl}/api-platform-organisation/registration' class='govuk-notification-banner__link' id='organisation-start-registration-link'>Start your registration</a>.</p>")
       ))
     }
   }

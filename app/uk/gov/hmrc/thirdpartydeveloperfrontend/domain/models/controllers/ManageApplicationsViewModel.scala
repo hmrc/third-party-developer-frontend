@@ -74,6 +74,16 @@ case class ManageApplicationsViewModel(
 
   lazy val userIsAllowListed = allowList.isDefined
   lazy val userHasSubmission = organisationSubmission.isDefined
+
+  lazy val isApproved = userHasSubmission &&
+    organisationSubmission.get.latestInstance.isGranted
+
+  lazy val isDeclinedAndOpenToAnswers = userHasSubmission &&
+    organisationSubmission.get.instances.size > 1 &&
+    organisationSubmission.get.latestInstance.isOpenToAnswers
+
+  lazy val isNotOpenToAnswers = userHasSubmission &&
+    !organisationSubmission.get.latestInstance.isOpenToAnswers
 }
 
 case class TermsOfUseInvitationViewModel(applicationId: ApplicationId, name: ApplicationName, dueBy: Instant)
