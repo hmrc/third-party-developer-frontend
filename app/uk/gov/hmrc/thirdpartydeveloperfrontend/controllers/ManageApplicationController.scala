@@ -33,7 +33,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{State, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
@@ -45,6 +45,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.Fraud
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
@@ -61,6 +62,7 @@ class ManageApplicationController @Inject() (
     val termsOfUseService: TermsOfUseService,
     submissionService: SubmissionService,
     termsOfUseInvitationService: TermsOfUseInvitationService,
+    profileService: ProfileService,
     val changeAppNameAndDescView: ChangeAppNameAndDescView,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     mcc: MessagesControllerComponents,
@@ -221,7 +223,7 @@ class ManageApplicationController @Inject() (
       val (appUsesOldVersion, agreement)   = buildAgreementData(latestTermsOfUseAgreementDetails)
 
       for {
-        termsOfUseV2State <- buildV2TermsOfUseState(application.id, latestTermsOfUseAgreementDetails)
+        termsOfUseV2State <- buildV2TermsOfUseState(application.id)
       } yield {
         TermsOfUseViewModel(requiresTermsOfUse, appUsesOldVersion, agreement, termsOfUseV2State)
       }
@@ -243,37 +245,66 @@ class ManageApplicationController @Inject() (
   }
 
   private def buildV2TermsOfUseState(
-      applicationId: ApplicationId,
-      latestTermsOfUseAgreementDetails: Option[TermsOfUseAgreementDetails]
+      applicationId: ApplicationId
     )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
     ): Future[Option[TermsOfUseV2State]] = {
     for {
       maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(applicationId)
       maybeSubmission <- submissionService.fetchLatestSubmission(applicationId)
-    } yield {
-      (maybeInvitation, maybeSubmission) match {
-        case (Some(invitation), None) =>
-          Some(NotStarted(Some(invitation.dueBy)))
+      maybeState      <- buildState(maybeInvitation, maybeSubmission)
+    } yield maybeState
+  }
 
-        case (None, None) =>
-          Some(NotStarted(Some(instant)))
+  private def buildState(
+      maybeInvitation: Option[TermsOfUseInvitation],
+      maybeSubmission: Option[Submission]
+    )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
+    ): Future[Option[TermsOfUseV2State]] = {
+    (maybeInvitation, maybeSubmission) match {
+      case (Some(invitation), None) =>
+        Future.successful(Some(NotStarted(Some(invitation.dueBy))))
 
-        case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
-          val requestedBy = extractRequestedByFromHistory(submission)
-          val deadline    = maybeInv.map(_.dueBy).getOrElse(instant)
-          Some(Started(requestedBy, deadline))
+      case (None, None) =>
+        Future.successful(Some(NotStarted(Some(instant))))
 
-        case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
-          extractSubmittedFromHistory(submission)
-            .map(submitted => Submitted(submitted.requestedBy, submitted.timestamp))
+      case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
+        buildStartedState(submission, maybeInv.map(_.dueBy).getOrElse(instant))
 
-        case (_, Some(submission)) if submission.status.isGranted =>
-          extractSubmittedFromHistory(submission)
-            .map(submitted => Approved(submitted.requestedBy, submitted.timestamp))
+      case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
+        buildSubmittedState(submission)
 
-        case (_, Some(_)) =>
-          None
-      }
+      case (_, Some(submission)) if submission.status.isGranted =>
+        buildApprovedState(submission)
+
+      case (_, Some(_)) =>
+        Future.successful(None)
+    }
+  }
+
+  private def buildStartedState(submission: Submission, deadline: java.time.Instant)(implicit hc: uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
+    val requestedByEmail = extractRequestedByFromHistory(submission)
+    profileService.lookupDeveloperName(LaxEmailAddress(requestedByEmail)).map { maybeName =>
+      Some(Started(maybeName.getOrElse(requestedByEmail), deadline))
+    }
+  }
+
+  private def buildSubmittedState(submission: Submission)(implicit hc: uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
+    extractSubmittedFromHistory(submission) match {
+      case Some(submitted) =>
+        profileService.lookupDeveloperName(LaxEmailAddress(submitted.requestedBy)).map { maybeName =>
+          Some(Submitted(maybeName.getOrElse(submitted.requestedBy), submitted.timestamp))
+        }
+      case None            =>
+        Future.successful(None)
+    }
+  }
+
+  private def buildApprovedState(submission: Submission): Future[Option[TermsOfUseV2State]] = {
+    extractSubmittedFromHistory(submission) match {
+      case Some(submitted) =>
+        Future.successful(Some(Approved(submitted.requestedBy, submitted.timestamp)))
+      case None            =>
+        Future.successful(None)
     }
   }
 

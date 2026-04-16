@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.Clock
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -41,6 +41,18 @@ class ProfileService @Inject() (
       response <- developerConnector.updateProfile(userId, UpdateRequest(firstName, lastName))
       result   <- deskproConnector.updatePersonName(email, name, hc)
     } yield response
+  }
+
+  def lookupDeveloperName(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    developerConnector.fetchByEmails(Set(email))
+      .map { users =>
+        users.headOption.map { user =>
+          s"${user.firstName} ${user.lastName}"
+        }
+      }
+      .recover {
+        case _ => None
+      }
   }
 
 }

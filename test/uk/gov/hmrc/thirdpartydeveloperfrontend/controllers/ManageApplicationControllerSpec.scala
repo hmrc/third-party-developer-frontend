@@ -38,7 +38,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
@@ -281,6 +281,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(approvedApplication, adminSession)
 
@@ -292,10 +293,11 @@ class ManageApplicationControllerSpec
         viewModel.required shouldBe true
         viewModel.appUsesOldVersion shouldBe false
         viewModel.agreement shouldBe None
-        viewModel.termsOfUseV2State.get shouldBe Started("bob@example.com", dueBy)
+        viewModel.termsOfUseV2State.get shouldBe Started("Bob Example", dueBy)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
         verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
       }
 
       "returns ViewModel showing who started V2 terms and deadline when user is actively answering questions" in new Setup {
@@ -306,6 +308,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(approvedApplication, adminSession)
 
@@ -316,10 +319,11 @@ class ManageApplicationControllerSpec
 
         viewModel.required shouldBe true
         viewModel.agreement shouldBe None
-        viewModel.termsOfUseV2State.get shouldBe Started("bob@example.com", dueBy)
+        viewModel.termsOfUseV2State.get shouldBe Started("Bob Example", dueBy)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
         verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
       }
     }
 
@@ -332,6 +336,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails(v1Agreement)
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
 
@@ -343,10 +348,11 @@ class ManageApplicationControllerSpec
         viewModel.required shouldBe true
         viewModel.appUsesOldVersion shouldBe true
         viewModel.agreement should contain(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
-        viewModel.termsOfUseV2State.get shouldBe Started("bob@example.com", dueBy)
+        viewModel.termsOfUseV2State.get shouldBe Started("Bob Example", dueBy)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
         verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
       }
     }
 
@@ -359,6 +365,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails()
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(approvedApplication, adminSession)
 
@@ -369,10 +376,11 @@ class ManageApplicationControllerSpec
 
         viewModel.required shouldBe true
         viewModel.agreement shouldBe None
-        viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+        viewModel.termsOfUseV2State.get shouldBe Submitted("Bob Example", submission.status.timestamp)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
         verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
       }
     }
 
@@ -385,6 +393,7 @@ class ManageApplicationControllerSpec
         returnAgreementDetails(v1Agreement)
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnWith(invitation)
         SubmissionServiceMock.FetchLatestSubmission.thenReturns(submission)
+        ProfileServiceMock.LookupDeveloperName.thenReturns(Some("Bob Example"))
 
         givenApplicationAction(prodAppWithRespIndAndV1TermsOfUse, adminSession)
 
@@ -396,10 +405,11 @@ class ManageApplicationControllerSpec
         viewModel.required shouldBe true
         viewModel.appUsesOldVersion shouldBe true
         viewModel.agreement should contain(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
-        viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+        viewModel.termsOfUseV2State.get shouldBe Submitted("Bob Example", submission.status.timestamp)
 
         verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
         verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
       }
     }
 
@@ -847,7 +857,8 @@ class ManageApplicationControllerSpec
       with ApplicationActionServiceMock
       with SubmissionServiceMockModule
       with TermsOfUseInvitationServiceMockModule
-      with TermsOfUseServiceMock {
+      with TermsOfUseServiceMock
+      with ProfileServiceMock {
 
     val mockDetailsView                              = mock[ApplicationDetailsView]
     val detailsView                                  = app.injector.instanceOf[ApplicationDetailsView]
@@ -866,6 +877,7 @@ class ManageApplicationControllerSpec
       termsOfUseServiceMock,
       SubmissionServiceMock.aMock,
       TermsOfUseInvitationServiceMock.aMock,
+      ProfileServiceMock.aMock,
       changeAppNameAndDescView,
       unauthorisedAppDetailsView,
       mcc,
@@ -884,6 +896,7 @@ class ManageApplicationControllerSpec
       termsOfUseServiceMock,
       SubmissionServiceMock.aMock,
       TermsOfUseInvitationServiceMock.aMock,
+      ProfileServiceMock.aMock,
       changeAppNameAndDescView,
       unauthorisedAppDetailsView,
       mcc,
@@ -899,6 +912,8 @@ class ManageApplicationControllerSpec
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
+
+    ProfileServiceMock.LookupDeveloperName.thenReturns(Some("bob@example.com"))
 
     def captureTermsOfUseViewModel(): Details.TermsOfUseViewModel = {
       val captor = ArgCaptor[Details.TermsOfUseViewModel]
