@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
@@ -28,7 +28,7 @@ trait SubscriptionsBuilder {
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
-    val version     = ApiVersion(ApiVersionNbr("version"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
+    val version     = ApiVersion(ApiVersionNbr("version"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
 
     val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId.random, ClientId("fake-clientId"), contextName, version.versionNbr, List.empty))
 
