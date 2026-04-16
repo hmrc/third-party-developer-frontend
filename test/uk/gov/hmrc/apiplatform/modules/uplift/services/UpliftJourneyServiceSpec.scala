@@ -91,7 +91,7 @@ class UpliftJourneyServiceSpec
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
-      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -101,7 +101,7 @@ class UpliftJourneyServiceSpec
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
-      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -111,7 +111,7 @@ class UpliftJourneyServiceSpec
       "test-api-3",
       ServiceName("api-example-microservice"),
       ApiContext("test-api-context-3"),
-      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -125,7 +125,7 @@ class UpliftJourneyServiceSpec
         description = "Description",
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
         isTestSupport = false,
         categories = List(ApiCategory.EXAMPLE)
       )
@@ -139,7 +139,7 @@ class UpliftJourneyServiceSpec
         description = "Description",
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
         isTestSupport = false,
         categories = List(ApiCategory.EXAMPLE)
       ),
@@ -150,7 +150,7 @@ class UpliftJourneyServiceSpec
         description = "Description",
         context = ApiContext("test-api-context-2"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
         isTestSupport = false,
         categories = List(ApiCategory.EXAMPLE)
       )

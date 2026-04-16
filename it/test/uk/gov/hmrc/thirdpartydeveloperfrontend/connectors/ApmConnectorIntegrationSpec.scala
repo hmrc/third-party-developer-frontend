@@ -132,7 +132,7 @@ class ApmConnectorIntegrationSpec
         description = "Description",
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
         isTestSupport = false,
         categories = List(ApiCategory.EXAMPLE)
       )

@@ -146,7 +146,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
     apiPpnsFieldName -> FieldDefinition(apiPpnsFieldName, "field desc", "hint", FieldDefinitionType.PPNS_FIELD, "field short desc", None, AccessRequirements.Default)
   )
 
-  lazy val defaultApiVersion: ApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
+  lazy val defaultApiVersion: ApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
 
   lazy val defaultApiDefinition: ApiDefinition = ApiDefinition(
     serviceName = ServiceName("service name"),

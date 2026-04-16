@@ -65,7 +65,7 @@ class SubscriptionsGroupSpec
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
   val subscriptionStatus: APISubscriptionStatus =
-    APISubscriptionStatus(apiName, ServiceName(apiName), apiContext, ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty), false, false, fields = emptyFields)
+    APISubscriptionStatus(apiName, ServiceName(apiName), apiContext, ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty), false, false, fields = emptyFields)
 
   val apiSubscriptions: Seq[APISubscriptions] = Seq(APISubscriptions(apiName, ServiceName(apiName), apiContext, Seq(subscriptionStatus)))
 
