@@ -104,4 +104,36 @@ class ProfileServiceSpec extends AsyncHmrcSpec
       verify(mockDeskproConnector, times(1)).updatePersonName(eqTo(email), eqTo(name), eqTo(hc))
     }
   }
+
+  "lookupDeveloperName" should {
+    "return developer name when developer found with valid name" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(adminDeveloper.email)))(*))
+        .thenReturn(successful(Seq(adminDeveloper)))
+
+      val result = await(profileService.lookupDeveloperName(adminDeveloper.email))
+
+      result shouldBe Some(s"${adminDeveloper.firstName} ${adminDeveloper.lastName}")
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(adminDeveloper.email)))(*)
+    }
+
+    "return None when developer not found" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(successful(Seq.empty))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe None
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+
+    "return None on connector error" in new Setup {
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+        .thenReturn(failed(new RuntimeException("Service unavailable")))
+
+      val result = await(profileService.lookupDeveloperName(email))
+
+      result shouldBe None
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+    }
+  }
 }
