@@ -20,7 +20,7 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.EmailPreferencesService
 
 trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSugar {

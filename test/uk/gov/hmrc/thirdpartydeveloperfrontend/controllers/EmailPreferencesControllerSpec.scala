@@ -29,7 +29,7 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, MessagesCont
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
@@ -38,8 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.routes.{AddApplication => AddApplicationRoutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.EmailPreferencesController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.{EmailPreferencesController => EmailPreferencesControllerRoutes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ErrorHandlerMock
@@ -125,8 +123,8 @@ class EmailPreferencesControllerSpec
       ApiDefinition(ServiceName("api2"), "http://serviceBaseUrl", "API 2", "desc2", ApiContext("CATEGORY_1"), Map.empty, false, None, List(ApiCategory.VAT))
     val apis: Set[ServiceName]                              = Set(api1.serviceName, api2.serviceName)
 
-    val extendedApiOne: CombinedApi    = CombinedApi(ServiceName("api1"), "API 1", List(ApiCategory.INCOME_TAX_MTD), REST_API)
-    val extendedApiTwo: CombinedApi    = CombinedApi(ServiceName("api2"), "API 2", List(ApiCategory.VAT), REST_API)
+    val extendedApiOne: CombinedApi    = CombinedApi("API 1", ServiceName("api1"), Set(ApiCategory.INCOME_TAX_MTD), ApiType.REST_API, ApiAccessType.PUBLIC)
+    val extendedApiTwo: CombinedApi    = CombinedApi("API 2", ServiceName("api2"), Set(ApiCategory.VAT), ApiType.REST_API, ApiAccessType.PUBLIC)
     val fetchedAPis: List[CombinedApi] = List(extendedApiOne, extendedApiTwo)
 
     "return emailPreferencesSummaryView page for logged in user" in new Setup {
@@ -361,7 +359,7 @@ class EmailPreferencesControllerSpec
 
   "flowSelectApisPage" should {
     val apiCategory = APICategoryDisplayDetails("OTHER", "Other")
-    val visibleApis = List(CombinedApi(ServiceName("nameApi1"), "serviceNameApi1", List(ApiCategory.EXAMPLE, ApiCategory.OTHER), REST_API))
+    val visibleApis = List(CombinedApi("serviceNameApi1", ServiceName("nameApi1"), Set(ApiCategory.EXAMPLE, ApiCategory.OTHER), ApiType.REST_API, ApiAccessType.PUBLIC))
 
     // category passed to route
     // category is missing from route
@@ -406,7 +404,7 @@ class EmailPreferencesControllerSpec
 
   "flowSelectApiAction" should {
 
-    val visibleApis  = List(CombinedApi(ServiceName("nameApi1"), "serviceNameApi1", List(category2, category1), REST_API))
+    val visibleApis  = List(CombinedApi("serviceNameApi1", ServiceName("nameApi1"), Set(category2, category1), ApiType.REST_API, ApiAccessType.PUBLIC))
     val apiCategory1 = APICategoryDisplayDetails(category1.toString(), category1.displayText)
     val apiCategory2 = APICategoryDisplayDetails(category2.toString(), category2.displayText)
 

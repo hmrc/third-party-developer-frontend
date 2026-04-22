@@ -40,7 +40,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailT
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 

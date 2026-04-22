@@ -21,13 +21,12 @@ import scala.reflect.runtime.universe._
 import cats.Semigroup
 import cats.implicits._
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 
 sealed trait FlowType
 
