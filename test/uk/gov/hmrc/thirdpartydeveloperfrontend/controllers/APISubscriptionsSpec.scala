@@ -32,8 +32,8 @@ class APISubscriptionsSpec
   val clientId = clientIdOne
 
   "groupSubscriptions" should {
-    val publicAccess  = ApiAccess.PUBLIC
-    val privateAccess = ApiAccess.Private(false)
+    val publicAccess  = ApiAccessType.PUBLIC
+    val privateAccess = ApiAccessType.INTERNAL
 
     "split Private Beta APIs from public APIs " in {
       val groupedSubscriptions = APISubscriptions
@@ -56,7 +56,7 @@ class APISubscriptionsSpec
         "Individual Employment",
         "individual-employment",
         List(
-          ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty),
+          ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
           ApiVersion(versionTwo, ApiStatus.BETA, publicAccess, List.empty),
           ApiVersion(versionThree, ApiStatus.BETA, privateAccess, List.empty),
           ApiVersion(ApiVersionNbr("4.0"), ApiStatus.BETA, privateAccess, List.empty)
@@ -66,7 +66,7 @@ class APISubscriptionsSpec
         groupedSubscriptions.testApis.head,
         "Individual Tax",
         "individual-tax",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty))
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty))
       )
     }
 
@@ -88,9 +88,9 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccess.PUBLIC, List.empty))
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccessType.PUBLIC, List.empty))
       )
-      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)))
+      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)))
     }
 
     "take first app name if it is different" in {
@@ -110,7 +110,7 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccess.PUBLIC, List.empty))
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccessType.PUBLIC, List.empty))
       )
     }
 
@@ -145,7 +145,7 @@ class APISubscriptionsSpec
         groupedSubscriptions.exampleApi.get,
         "Hello World",
         "api-example-microservice",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty))
+        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty))
       )
     }
   }
@@ -209,8 +209,8 @@ class APISubscriptionsSpec
     "return with api context name and subscriptions count for the specific api for a PUBLIC API" in {
       val subscriptions = List(
         subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionOne, ApiStatus.STABLE, subscribed = true),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccess.PUBLIC),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccess.Private(false)),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccessType.PUBLIC),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccessType.INTERNAL),
         subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionOne, ApiStatus.STABLE, subscribed = true),
         subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionTwo, ApiStatus.BETA, subscribed = false),
         subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionThree, ApiStatus.STABLE, subscribed = true)
@@ -224,8 +224,8 @@ class APISubscriptionsSpec
     "return with api context name and subscriptions count for the specific api for a PRIVATE API" in {
       val subscriptions = List(
         subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionOne, ApiStatus.STABLE, subscribed = true),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccess.PUBLIC),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccess.Private(false)),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccessType.PUBLIC),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccessType.INTERNAL),
         subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionOne, ApiStatus.STABLE, subscribed = true),
         subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionTwo, ApiStatus.BETA, subscribed = false),
         subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionThree, ApiStatus.STABLE, subscribed = true)

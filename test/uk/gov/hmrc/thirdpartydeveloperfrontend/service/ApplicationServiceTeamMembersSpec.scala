@@ -22,7 +22,7 @@ import scala.concurrent.Future.successful
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccess, ApiStatus, ApiVersion, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
@@ -87,7 +87,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name = name,
       serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -108,7 +108,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name = name,
       serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)

@@ -105,7 +105,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name = name,
       serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -126,7 +126,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name = name,
       serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersion(version, status, ApiAccess.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)

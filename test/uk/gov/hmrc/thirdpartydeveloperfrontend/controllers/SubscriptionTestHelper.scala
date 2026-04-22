@@ -35,7 +35,7 @@ trait ExtendedSubscriptionTestHelper extends SubscriptionTestHelper {
       status: ApiStatus = ApiStatus.STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
-      access: ApiAccess = ApiAccess.PUBLIC,
+      access: ApiAccessType = ApiAccessType.PUBLIC,
       isTestSupport: Boolean = false,
       fields: Option[SubscriptionFieldsWrapper] = None
     ) = super.subscriptionStatus(
@@ -81,7 +81,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
       status: ApiStatus = ApiStatus.STABLE,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
-      access: ApiAccess = ApiAccess.PUBLIC,
+      access: ApiAccessType = ApiAccessType.PUBLIC,
       isTestSupport: Boolean = false,
       fields: Option[SubscriptionFieldsWrapper] = None
     ) = {
@@ -174,7 +174,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
 
   def onlyApiExampleMicroserviceSubscribedTo(appId: ApplicationId, clientId: ClientId): APISubscriptionStatus = {
     val context     = ApiContext("example-api")
-    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
+    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.versionNbr)
 
     APISubscriptionStatus(
@@ -191,12 +191,12 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithoutFields(appId: ApplicationId, clientId: ClientId)(prefix: String): APISubscriptionStatus = {
     val context     = ApiContext(s"/$prefix-api")
-    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccess.PUBLIC, List.empty)
+    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.versionNbr)
 
-    val subscriptinFieldInxed = 1
+    val subscriptionFieldIndex = 1
     APISubscriptionStatus(
-      name = generateName(prefix, subscriptinFieldInxed),
+      name = generateName(prefix, subscriptionFieldIndex),
       serviceName = ServiceName(s"$prefix-api"),
       context = context,
       apiVersion = version,

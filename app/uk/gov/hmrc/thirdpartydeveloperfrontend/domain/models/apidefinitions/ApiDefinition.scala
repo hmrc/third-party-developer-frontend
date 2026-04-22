@@ -33,8 +33,7 @@ case class APISubscriptionStatus(
   ) {
 
   def isPrivate: Boolean = {
-    apiVersion.access.accessType match {
-      case ApiAccessType.PRIVATE    => true
+    apiVersion.access match {
       case ApiAccessType.PUBLIC     => false
       case ApiAccessType.CONTROLLED => true
       case ApiAccessType.INTERNAL   => true
