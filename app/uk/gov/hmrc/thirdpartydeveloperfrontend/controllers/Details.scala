@@ -18,40 +18,36 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.time.{Clock, Instant}
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.data.OptionT
-import cats.instances.future.catsStdInstancesForFuture
 import views.html._
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import views.html.manageapplication.ChangeAppNameAndDescView
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access, AccessType}
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, State}
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ValidatedApplicationName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.{Agreement, ApplicationNameModel, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
 object Details {
@@ -79,7 +75,7 @@ class Details @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
-    detailsView: DetailsView,
+    val changeAppNameAndDescView: ChangeAppNameAndDescView,
     changeDetailsView: ChangeDetailsView,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
     changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView,
@@ -95,76 +91,92 @@ class Details @Inject() (
     with WithUnsafeDefaultFormBinding
     with ClockNow {
 
+  def changeAppNameAndDesc(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
+    Future.successful(Ok(changeAppNameAndDescView(ChangeAppNameAndDescForm.withData(request.application), applicationViewModelFromApplicationRequest())))
+  }
+
+  def changeAppNameAndDescAction(applicationId: ApplicationId): Action[AnyContent] =
+    canChangeDetailsAndIsApprovedAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
+      val application = request.application
+
+      def handleValidForm(form: ChangeAppNameAndDescForm): Future[Result] = {
+        val requestForm: Form[ChangeAppNameAndDescForm] = ChangeAppNameAndDescForm.form.bindFromRequest()
+
+        applicationService
+          .isApplicationNameValid(form.applicationName, application.deployedTo, Some(applicationId))
+          .flatMap({
+            case ApplicationNameValidationResult.Valid =>
+              val cmds = deriveCommands(form)
+              val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
+
+              futs.map(_ =>
+                Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+              )
+
+            case ApplicationNameValidationResult.Invalid =>
+              Future.successful(BadRequest(changeAppNameAndDescView(
+                requestForm.withError(appNameField, applicationNameInvalidKey),
+                applicationViewModelFromApplicationRequest()
+              )))
+
+            case ApplicationNameValidationResult.Duplicate =>
+              Future.successful(BadRequest(changeAppNameAndDescView(
+                requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
+                applicationViewModelFromApplicationRequest()
+              )))
+          })
+      }
+
+      def handleInvalidForm(formWithErrors: Form[ChangeAppNameAndDescForm]): Future[Result] =
+        changeAppNameAndDescErrorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest())
+
+      ChangeAppNameAndDescForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    }
+
+  private def deriveCommands(form: ChangeAppNameAndDescForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
+    val application             = request.application
+    val actor                   = Actors.AppCollaborator(request.userRequest.developer.email)
+    val access: Access.Standard = (application.access match { case s: Access.Standard => s }) // Only standard apps attempt this function
+
+    val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
+      form.applicationName.trim
+    } else {
+      application.name.value
+    }
+    val effectiveDescription = form.description.filterNot(_.isBlank()).map(desc => desc.trim)
+
+    List(
+      if (effectiveNewName == application.name.value)
+        List.empty
+      else {
+        val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
+        if (validateAppName.isValid) // This has already been validated
+          List(ApplicationCommands.ChangeSandboxApplicationName(actor, instant, validateAppName.toOption.get))
+        else
+          List.empty
+      },
+      if (effectiveDescription == application.details.description) {
+        List.empty
+      } else {
+        if (effectiveDescription.isDefined)
+          List(ApplicationCommands.ChangeSandboxApplicationDescription(actor, instant, effectiveDescription.get))
+        else
+          List(ApplicationCommands.ClearSandboxApplicationDescription(actor, instant))
+      }
+    ).flatten
+
+  }
+
+  private def changeAppNameAndDescErrorView(
+      id: ApplicationId,
+      form: Form[ChangeAppNameAndDescForm],
+      applicationViewModel: ApplicationViewModel
+    )(implicit request: ApplicationRequest[_]
+    ): Future[Result] =
+    Future.successful(BadRequest(changeAppNameAndDescView(form, applicationViewModel)))
+
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
-
-  def details(applicationId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(applicationId) { implicit request =>
-    def appDetailsPage = Ok(
-      detailsView(
-        applicationViewModelFromApplicationRequest(),
-        buildTermsOfUseViewModel(),
-        createOptionalFraudPreventionNavLinkViewModel(
-          request.application,
-          request.subscriptions,
-          fraudPreventionConfig
-        )
-      )
-    )
-
-    request.application.state.name match {
-      case State.TESTING =>
-        lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
-
-        lazy val newUpliftJourney = (s: Submission) =>
-          if (request.role.isAdministrator) {
-            if (s.status.isAnsweredCompletely) {
-              Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersPage(applicationId))
-            } else {
-              Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.ProdCredsChecklistController.productionCredentialsChecklistPage(applicationId))
-            }
-          } else {
-            Ok(unauthorisedAppDetailsView(request.application.name, request.application.admins))
-          }
-
-        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
-
-      case State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION | State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
-        lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
-
-        lazy val newUpliftJourney = (s: Submission) =>
-          Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
-
-        OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
-      }
-
-      case State.PRE_PRODUCTION =>
-        successful(request.queryString.contains("forceAppDetails") match {
-          case true  => appDetailsPage
-          case false => Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId))
-        })
-
-      case State.PRODUCTION =>
-        successful(appDetailsPage)
-
-      case State.DELETED =>
-        successful(BadRequest)
-    }
-  }
-
-  private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): TermsOfUseViewModel = {
-    val application = request.application
-
-    val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
-
-    val hasTermsOfUse = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
-    latestTermsOfUseAgreementDetails match {
-      case Some(TermsOfUseAgreementDetails(emailAddress, maybeName, date, maybeVersionString)) => {
-        val maybeVersion = maybeVersionString.flatMap(TermsOfUseVersion.fromVersionString(_))
-        TermsOfUseViewModel(hasTermsOfUse, maybeVersion.contains(TermsOfUseVersion.OLD_JOURNEY), Some(Agreement(maybeName.getOrElse(emailAddress.text), date)))
-      }
-      case _                                                                                   => TermsOfUseViewModel(hasTermsOfUse, false, None)
-    }
-  }
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
     Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
