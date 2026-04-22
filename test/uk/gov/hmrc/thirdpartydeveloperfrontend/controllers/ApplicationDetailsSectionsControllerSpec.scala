@@ -47,7 +47,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class DetailsSpec
+class ApplicationDetailsSectionsControllerSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubmissionsTestData
@@ -577,7 +577,7 @@ class DetailsSpec
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithPrivPolicyUrl.id).url)
+      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithPrivPolicyUrl.id).url)
     }
   }
 
@@ -647,7 +647,7 @@ class DetailsSpec
       val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithPrivPolicyInDesktop.id).url)
+      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithPrivPolicyInDesktop.id).url)
     }
   }
 
@@ -689,7 +689,7 @@ class DetailsSpec
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithTermsAndConditionsUrl.id).url)
+      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithTermsAndConditionsUrl.id).url)
     }
   }
 
@@ -759,7 +759,7 @@ class DetailsSpec
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(appWithTermsAndConditionsInDesktop.id).url)
+      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithTermsAndConditionsInDesktop.id).url)
     }
   }
 
@@ -777,7 +777,7 @@ class DetailsSpec
     val updatePrivacyPolicyLocationView         = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
     val updateTermsAndConditionsLocationView    = app.injector.instanceOf[UpdateTermsAndConditionsLocationView]
 
-    val underTest = new Details(
+    val underTest = new ApplicationDetailsSectionsController(
       mockErrorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
@@ -785,16 +785,13 @@ class DetailsSpec
       mcc,
       cookieSigner,
       clock,
-      unauthorisedAppDetailsView,
       changeAppNameAndDescView,
       changeDetailsView,
       requestChangeOfApplicationNameView,
       changeOfApplicationNameConfirmationView,
       updatePrivacyPolicyLocationView,
       updateTermsAndConditionsLocationView,
-      fraudPreventionConfig,
-      SubmissionServiceMock.aMock,
-      termsOfUseServiceMock
+      fraudPreventionConfig
     )
 
     val newName        = ApplicationName("new name")
@@ -818,7 +815,7 @@ class DetailsSpec
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      formExistsWithAction(doc, routes.Details.changeAppNameAndDescAction(application.id).url) shouldBe true
+      formExistsWithAction(doc, routes.ApplicationDetailsSectionsController.changeAppNameAndDescAction(application.id).url) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
       } else {
@@ -833,7 +830,7 @@ class DetailsSpec
       val result = application.withDescription(newDescription).callChangeAppNameAndDescAction
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(application.id).url)
+      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(application.id).url)
     }
 
     def changeAppNameAndDescShouldUpdateTheApplication(userSession: UserSession)(application: ApplicationWithCollaborators) = {
@@ -921,8 +918,8 @@ class DetailsSpec
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      formExistsWithAction(doc, routes.Details.changeDetailsAction(application.id).url) shouldBe true
-      linkExistsWithHref(doc, routes.ManageApplicationController.applicationDetails(application.id).url) shouldBe true
+      formExistsWithAction(doc, routes.ApplicationDetailsSectionsController.changeDetailsAction(application.id).url) shouldBe true
+      linkExistsWithHref(doc, routes.MainApplicationDetailsController.applicationDetails(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
       inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.value.describe()) shouldBe true
@@ -934,7 +931,7 @@ class DetailsSpec
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.ManageApplicationController.applicationDetails(application.id).url)
+      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(application.id).url)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {

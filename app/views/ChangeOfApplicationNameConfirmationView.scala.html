@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.ApplicationNameModel
 
 
 @this(devMain: DevMain)
@@ -45,5 +45,5 @@
 
   <p class="govuk-body">Expect a response in 2 working days.</p>
 
-  <p class="govuk-body"><a href="@routes.ManageApplicationController.applicationDetails(model.application.id)" class="govuk-link govuk-link--no-visited-state">Review or manage your production application</a></p>
+  <p class="govuk-body"><a href="@routes.MainApplicationDetailsController.applicationDetails(model.application.id)" class="govuk-link govuk-link--no-visited-state">Review or manage your production application</a></p>
 }

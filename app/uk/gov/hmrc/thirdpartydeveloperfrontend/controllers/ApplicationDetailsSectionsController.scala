@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.html._
-import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import views.html.manageapplication.ChangeAppNameAndDescView
 
 import play.api.data.Form
@@ -36,21 +35,19 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.ApplicationNameModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.ApplicationNameModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 
-object Details {
+object ApplicationDetailsSectionsController {
   case class Agreement(who: String, when: Instant)
 
   case class TermsOfUseViewModel(
@@ -66,7 +63,7 @@ object Details {
 }
 
 @Singleton
-class Details @Inject() (
+class ApplicationDetailsSectionsController @Inject() (
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService,
@@ -74,16 +71,13 @@ class Details @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val clock: Clock,
-    unauthorisedAppDetailsView: UnauthorisedAppDetailsView,
     val changeAppNameAndDescView: ChangeAppNameAndDescView,
     changeDetailsView: ChangeDetailsView,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
     changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView,
     updatePrivacyPolicyLocationView: UpdatePrivacyPolicyLocationView,
     updateTermsAndConditionsLocationView: UpdateTermsAndConditionsLocationView,
-    val fraudPreventionConfig: FraudPreventionConfig,
-    submissionService: SubmissionService,
-    termsOfUseService: TermsOfUseService
+    val fraudPreventionConfig: FraudPreventionConfig
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
@@ -110,7 +104,7 @@ class Details @Inject() (
               val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
 
               futs.map(_ =>
-                Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+                Redirect(routes.MainApplicationDetailsController.applicationDetails(applicationId))
               )
 
             case ApplicationNameValidationResult.Invalid =>
@@ -217,7 +211,7 @@ class Details @Inject() (
         val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
 
         futs.map(_ =>
-          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+          Redirect(routes.MainApplicationDetailsController.applicationDetails(applicationId))
         )
       }
 
@@ -261,7 +255,7 @@ class Details @Inject() (
 
       } else {
         applicationService.updatePrivacyPolicyLocation(application, request.userId, newLocation).map(_ =>
-          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+          Redirect(routes.MainApplicationDetailsController.applicationDetails(applicationId))
         )
       }
     }
@@ -304,7 +298,7 @@ class Details @Inject() (
 
       } else {
         applicationService.updateTermsConditionsLocation(application, request.userId, newLocation).map(_ =>
-          Redirect(routes.ManageApplicationController.applicationDetails(applicationId))
+          Redirect(routes.MainApplicationDetailsController.applicationDetails(applicationId))
         )
       }
     }

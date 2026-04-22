@@ -32,7 +32,7 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with Fix
 
   val grantLength = GrantLength.EIGHTEEN_MONTHS
 
-  val sandboxApp  =
+  val sandboxApp =
     ApplicationSummary(
       ApplicationId.random,
       appNameOne,

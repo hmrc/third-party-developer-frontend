@@ -41,7 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.Agreement
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.Agreement
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -53,7 +53,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class ManageApplicationControllerSpec
+class MainApplicationDetailsControllerSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
     with SubmissionsTestData
@@ -677,7 +677,7 @@ class ManageApplicationControllerSpec
     val unauthorisedAppDetailsView                   = app.injector.instanceOf[UnauthorisedAppDetailsView]
     def fraudPreventionConfig: FraudPreventionConfig = FraudPreventionConfig(enabled = true, List(ServiceName("ppns-api")), "/")
 
-    val underTest = new ManageApplicationController(
+    val underTest = new MainApplicationDetailsController(
       mockErrorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
@@ -695,7 +695,7 @@ class ManageApplicationControllerSpec
     )
 
     // Controller with mocked view for capturing ViewModel
-    val underTestWithMockView = new ManageApplicationController(
+    val underTestWithMockView = new MainApplicationDetailsController(
       mockErrorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
@@ -722,8 +722,8 @@ class ManageApplicationControllerSpec
 
     ProfileServiceMock.LookupDeveloperName.thenReturns(Some("bob@example.com"))
 
-    def captureTermsOfUseViewModel(): Details.TermsOfUseViewModel = {
-      val captor = ArgCaptor[Details.TermsOfUseViewModel]
+    def captureTermsOfUseViewModel(): ApplicationDetailsSectionsController.TermsOfUseViewModel = {
+      val captor = ArgCaptor[ApplicationDetailsSectionsController.TermsOfUseViewModel]
       verify(mockDetailsView).apply(*, *, *, captor)(*, *, *, *, *)
       captor.value
     }

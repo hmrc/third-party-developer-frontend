@@ -43,7 +43,7 @@
 
   <br>
 
-  @helper.form(action = routes.Details.changeAppNameAndDescAction(app.id), Symbol("class") -> "form") {
+  @helper.form(action = routes.ApplicationDetailsSectionsController.changeAppNameAndDescAction(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     @if(app.hasCapability(Capabilities.SupportChangingAppDetails)) {
       <div class="govuk-form-group @if(form.errors("applicationName").nonEmpty) {govuk-form-group--error}">
