@@ -49,7 +49,7 @@
 
   <br>
 
-  @helper.form(action = routes.Details.changeDetailsAction(app.id), Symbol("class") -> "form") {
+  @helper.form(action = routes.ApplicationDetailsSectionsController.changeDetailsAction(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
     <input type="hidden" id="applicationId" name="applicationId" value="@form.data("applicationId")"/>
 
@@ -91,7 +91,7 @@
     </div>
 
     <button id="submit" class="govuk-button" type="submit">Save changes</button>
-    <a href="@routes.ManageApplicationController.applicationDetails(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
+    <a href="@routes.MainApplicationDetailsController.applicationDetails(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
   }
 }
 

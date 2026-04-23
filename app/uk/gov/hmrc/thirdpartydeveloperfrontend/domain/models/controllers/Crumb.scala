@@ -41,7 +41,7 @@ object Crumb {
     Crumb("Sign in", s"${routes.UserLoginAccount.login()}", Some("data-breadcrumb-sign-in"))
 
   def application(application: ApplicationWithCollaborators) =
-    Crumb(s"${application.name}", s"${routes.ManageApplicationController.applicationDetails(application.id)}", Some("data-breadcrumb-app-name"))
+    Crumb(s"${application.name}", s"${routes.MainApplicationDetailsController.applicationDetails(application.id)}", Some("data-breadcrumb-app-name"))
 
   def applicationMetadata(application: ApplicationWithCollaborators) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))

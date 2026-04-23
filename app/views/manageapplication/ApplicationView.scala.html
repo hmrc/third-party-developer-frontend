@@ -33,7 +33,7 @@
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
 @envName = @{ if(app.deployedTo.isProduction) principalEnvName else subordinateEnvName}
 
-@changeDetailsRoute = @{routes.ManageApplicationController.changeAppNameAndDesc(app.id)}
+@changeDetailsRoute = @{routes.ApplicationDetailsSectionsController.changeAppNameAndDesc(app.id)}
 
 @formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
     maybeDate match {
@@ -44,9 +44,9 @@
 
 @changeAppNameLink = @{
     if (app.isSandbox && app.isPermittedToEditAppDetails(loggedIn.developer)) {
-        HtmlContent(s"<a href='${routes.ManageApplicationController.changeAppNameAndDesc(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+        HtmlContent(s"<a href='${routes.ApplicationDetailsSectionsController.changeAppNameAndDesc(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {
-        HtmlContent(s"<a href='${routes.Details.requestChangeOfAppName(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
+        HtmlContent(s"<a href='${routes.ApplicationDetailsSectionsController.requestChangeOfAppName(app.id)}' id='changeAppNameLink' class='govuk-link govuk-link--no-visited-state'>Change</a>")
     } else {
         Empty
     }
