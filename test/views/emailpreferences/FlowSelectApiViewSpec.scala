@@ -28,14 +28,12 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, SelectedApisEmailPreferencesForm}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{ApiType, CombinedApi}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.EmailPreferencesFlowV2
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -112,9 +110,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec
 
   "Email Preferences Select Api view page" should {
     val apiList  = List(
-      CombinedApi(ServiceName("api1"), "Api One", List(category1, category1), REST_API),
-      CombinedApi(ServiceName("api2"), "Api Two", List(category2, category4), REST_API),
-      CombinedApi(ServiceName("api3"), "Api Three", List(category3, category2), REST_API)
+      CombinedApi("Api One", ServiceName("api1"), Set(category1, category1), ApiType.REST_API, ApiAccessType.PUBLIC),
+      CombinedApi("Api Two", ServiceName("api2"), Set(category2, category4), ApiType.REST_API, ApiAccessType.PUBLIC),
+      CombinedApi("Api Three", ServiceName("api3"), Set(category3, category2), ApiType.REST_API, ApiAccessType.PUBLIC)
     )
     val userApis = Set("api1", "api2")
 

@@ -31,7 +31,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinitionData, ExtendedApiDefinitionData, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{Endpoint => _, _}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationTokenData
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationResult, UpliftRequest}
@@ -52,7 +52,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConn
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
@@ -106,7 +105,13 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(apmConnector.getAllFieldDefinitions(*[Environment])(*)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
   when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(List.empty))
   when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
-  when(apmConnector.fetchCombinedApi(*[ServiceName])(*)).thenReturn(Future.successful(Right(CombinedApi(ServiceName("my service"), "my service display name", List.empty, REST_API))))
+  when(apmConnector.fetchCombinedApi(*[ServiceName])(*)).thenReturn(Future.successful(Right(CombinedApi(
+    "my service display name",
+    ServiceName("my service"),
+    Set.empty,
+    ApiType.REST_API,
+    ApiAccessType.PUBLIC
+  ))))
   when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
   when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
@@ -202,10 +207,11 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
   when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
   when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi(
-    ServiceName("my service"),
     "display name",
-    List.empty,
-    REST_API
+    ServiceName("my service"),
+    Set.empty,
+    ApiType.REST_API,
+    ApiAccessType.PUBLIC
   )))))
   when(tpdConnector.changePassword(*[PasswordChangeRequest])(*)).thenReturn(Future.successful(1))
   when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))

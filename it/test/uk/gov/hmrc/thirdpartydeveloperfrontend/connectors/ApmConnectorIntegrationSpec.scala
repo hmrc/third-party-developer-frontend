@@ -31,8 +31,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ApmConnectorIntegrationSpec
@@ -86,7 +84,7 @@ class ApmConnectorIntegrationSpec
     "retrieve an CombinedApi based on a serviceName" in new Setup {
       val serviceName                            = ServiceName("api1")
       val displayName                            = "API 1"
-      val expectedApi                            = CombinedApi(serviceName, displayName, List(ApiCategory.VAT), REST_API)
+      val expectedApi                            = CombinedApi(displayName, serviceName, Set(ApiCategory.VAT), ApiType.REST_API, ApiAccessType.PUBLIC)
       ApiPlatformMicroserviceStub
         .stubCombinedApiByServiceName(serviceName.value, Json.toJson(expectedApi).toString())
       val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi(ServiceName("api1")))
