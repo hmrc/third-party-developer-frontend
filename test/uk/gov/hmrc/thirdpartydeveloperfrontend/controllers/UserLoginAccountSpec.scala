@@ -564,6 +564,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   }
 
   "authenticateAccessCode" should {
+    val accessUri = "http://redirect.to/here"
 
     "return the Sms Setup Reminder page when the credentials are correct and mfa method is AUTHENTICATOR_APP" in new Setup {
       mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, authAppMfaId, successful(sessionWithAuthAppMfa))
@@ -582,6 +583,24 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       )(*)
     }
 
+    "return the access_uri not the mfa nag page when the credentials are correct, mfa method is AUTHENTICATOR_APP and access_uri is set" in new Setup {
+      mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, authAppMfaId, successful(sessionWithAuthAppMfa))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = testRequest
+        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withSession("access_uri" -> accessUri)
+
+      private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(accessUri)
+      verify(underTest.auditService, times(1)).audit(
+        eqTo(LoginSucceeded),
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+      )(*)
+    }
+
     "return the AuthApp Setup Reminder page when the credentials are correct and mfa method is SMS" in new Setup {
       mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, smsMfaId, successful(sessionWithSmsMfa))
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
@@ -593,6 +612,24 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
+      verify(underTest.auditService, times(1)).audit(
+        eqTo(LoginSucceeded),
+        eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
+      )(*)
+    }
+
+    "return the access_uri not the mfa nag page when the credentials are correct, mfa method is SMS and access_uri is set" in new Setup {
+      mockAuthenticateAccessCode(sessionWithAuthAppMfa.developer.email, accessCode, nonce, smsMfaId, successful(sessionWithSmsMfa))
+      mockAudit(LoginSucceeded, successful(AuditResult.Success))
+
+      private val request = testRequest
+        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withSession("access_uri" -> accessUri)
+
+      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
+
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(accessUri)
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))

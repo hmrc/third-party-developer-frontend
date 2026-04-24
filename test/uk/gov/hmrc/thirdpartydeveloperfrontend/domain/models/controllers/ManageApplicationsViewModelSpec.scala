@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationNameFixtures, Collaborator, GrantLength, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, UserId}
@@ -30,6 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with FixedClock with ApplicationNameFixtures with SubmissionsTestData {
 
   val grantLength = GrantLength.EIGHTEEN_MONTHS
+
   val sandboxApp =
     ApplicationSummary(
       ApplicationId.random,
@@ -72,7 +74,6 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with Fix
   val submitted  = Submission.submit(instant, "bob@example.com")(answered)
   val declined   = Submission.decline(instant, "bob@example.com", "comments")(submitted)
   val granted    = Submission.grant(instant, "bob@example.com", Some("comments"), Some(""))(submitted)
-
 
   "noProductionApplications" should {
 
