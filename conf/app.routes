@@ -61,25 +61,25 @@ POST        /applications/:id/team-members/add                                  
 GET         /applications/:id/team-members/:teamMemberHash/remove-confirmation                           uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.removeTeamMember(id: ApplicationId, teamMemberHash: String)
 POST        /applications/:id/team-members/remove                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageTeam.removeTeamMemberAction(id: ApplicationId)
 
-GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
-GET         /applications/:id/details                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.applicationDetails(id: ApplicationId)
+GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MainApplicationDetailsController.applicationDetails(id: ApplicationId)
+GET         /applications/:id/details                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MainApplicationDetailsController.applicationDetails(id: ApplicationId)
 
-GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetails(id: ApplicationId)
-POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.changeDetailsAction(id: ApplicationId)
+GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeDetails(id: ApplicationId)
+POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeDetailsAction(id: ApplicationId)
 
-GET         /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.requestChangeOfAppName(id: ApplicationId)
-POST        /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.requestChangeOfAppNameAction(id: ApplicationId)
+GET         /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.requestChangeOfAppName(id: ApplicationId)
+POST        /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.requestChangeOfAppNameAction(id: ApplicationId)
 
-GET         /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updatePrivacyPolicyLocation(id: ApplicationId)
-POST        /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updatePrivacyPolicyLocationAction(id: ApplicationId)
+GET         /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.updatePrivacyPolicyLocation(id: ApplicationId)
+POST        /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.updatePrivacyPolicyLocationAction(id: ApplicationId)
 
-GET         /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updateTermsAndConditionsLocation(id: ApplicationId)
-POST        /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Details.updateTermsAndConditionsLocationAction(id: ApplicationId)
+GET         /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.updateTermsAndConditionsLocation(id: ApplicationId)
+POST        /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.updateTermsAndConditionsLocationAction(id: ApplicationId)
 
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 
-GET         /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.changeAppNameAndDesc(id: ApplicationId)
-POST        /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageApplicationController.changeAppNameAndDescAction(id: ApplicationId)
+GET         /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeAppNameAndDesc(id: ApplicationId)
+POST        /applications/:id/change-app-name-and-desc                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeAppNameAndDescAction(id: ApplicationId)
 
 
 # Used by DOCS Fe
