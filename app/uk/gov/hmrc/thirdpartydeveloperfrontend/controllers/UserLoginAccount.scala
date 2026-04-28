@@ -309,12 +309,18 @@ class UserLoginAccount @Inject() (
     val email: LaxEmailAddress = request.session.get("emailAddress").get.toLaxEmail
 
     def handleMfaSetupReminder(session: UserSession) = {
-      val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
+      val uri = request.session.get("access_uri")
 
-      (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
-        case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
-        case (true, SMS)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
-        case _                         => loginSucceeded(request)
+      if (uri.isEmpty) {
+        val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
+
+        (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
+          case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
+          case (true, SMS)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
+          case _                         => loginSucceeded(request)
+        }
+      } else {
+        loginSucceeded(request)
       }
     }
 
