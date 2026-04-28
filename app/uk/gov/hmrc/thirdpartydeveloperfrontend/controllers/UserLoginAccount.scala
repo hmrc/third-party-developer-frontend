@@ -210,9 +210,7 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    def handleMfaLogin(form: SelectLoginMfaForm) = {
-      val userId = UserId(UUID.fromString(request.session.get("userId").get))
-
+    def handleMfaLogin(userId: UserId, form: SelectLoginMfaForm) = {
       thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
         case Some(developer: User) =>
           getMfaDetailById(MfaId(UUID.fromString(form.mfaId)), developer.mfaDetails)
@@ -222,9 +220,13 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    SelectLoginMfaForm.form.bindFromRequest().fold(
-      form => successful(BadRequest(selectLoginMfaView(form, authAppMfaId, smsMfaId))),
-      form => handleMfaLogin(form)
+    request.session.get("userId").fold(
+      internalServerErrorTemplate("Unable to obtain user information")
+    )(userId =>
+      SelectLoginMfaForm.form.bindFromRequest().fold(
+        form => successful(BadRequest(selectLoginMfaView(form, authAppMfaId, smsMfaId))),
+        form => handleMfaLogin(UserId(UUID.fromString(userId)), form)
+      )
     )
   }
 
@@ -288,8 +290,6 @@ class UserLoginAccount @Inject() (
   }
 
   def loginAccessCodePage(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
-    val userId = UserId(UUID.fromString(request.session.get("userId").get))
-
     def handleMfaType(userHasMultipleMfa: Boolean) = {
       mfaType match {
         case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
@@ -297,10 +297,11 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    thirdPartyDeveloperConnector.fetchDeveloper(userId).map {
+    request.session.get("userId").fold(internalServerErrorTemplate("Unable to obtain user information"))(
+      userId => thirdPartyDeveloperConnector.fetchDeveloper(UserId(UUID.fromString(userId))).map {
       case Some(developer: User) => handleMfaType(hasMultipleMfaMethods(developer))
-      case None                  => handleMfaType(false)
-    }
+      case None                  => handleMfaType(false) // does this make sense?
+    })
   }
 
   private def hasMultipleMfaMethods(developer: User): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
@@ -413,5 +414,9 @@ class UserLoginAccount @Inject() (
       case Some(emailAddress) => request2SVRemoval(emailAddress.toLaxEmail)
       case _                  => successful(Redirect(routes.UserLoginAccount.login()))
     }
+  }
+
+  private def internalServerErrorTemplate(errorMessage: String)(implicit request: Request[_]): Future[Result] = {
+    errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage).map(InternalServerError(_))
   }
 }
