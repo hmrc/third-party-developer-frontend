@@ -16,20 +16,22 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
+
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -37,13 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html._
-import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import views.html.manageapplication.ChangeAppNameAndDescView
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
 
 class ChangeAppNameAndDescControllerSpec
     extends BaseControllerSpec

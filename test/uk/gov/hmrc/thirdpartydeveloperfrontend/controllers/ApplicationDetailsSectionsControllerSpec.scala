@@ -815,7 +815,7 @@ class ApplicationDetailsSectionsControllerSpec
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      formExistsWithAction(doc, routes.ApplicationDetailsSectionsController.changeAppNameAndDescAction(application.id).url) shouldBe true
+      formExistsWithAction(doc, routes.ChangeAppNameAndDescController.changeAppNameAndDescAction(application.id).url) shouldBe true
       if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
         inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
       } else {
