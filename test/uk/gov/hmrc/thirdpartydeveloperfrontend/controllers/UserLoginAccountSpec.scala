@@ -127,12 +127,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
     )
 
-    val sessionParamsWithMissingUserId: Seq[(String, String)] = Seq(
-      "csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken
-    )
-
     val testRequest = FakeRequest()
-      .withSession(sessionParamsWithMissingUserId
+      .withSession(sessionParams
         :+ "userId"       -> sessionWithAuthAppMfa.developer.userId.value.toString
         :+ "emailAddress" -> sessionWithAuthAppMfa.developer.email.text :+ "nonce" -> nonce: _*)
 
