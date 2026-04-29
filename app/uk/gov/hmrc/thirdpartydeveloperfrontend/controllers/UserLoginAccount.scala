@@ -221,7 +221,7 @@ class UserLoginAccount @Inject() (
     }
 
     request.session.get("userId").fold(
-      internalServerErrorTemplate("Unable to obtain user information")
+      successful(BadRequest("Unable to obtain user information"))
     )(userId =>
       SelectLoginMfaForm.form.bindFromRequest().fold(
         form => successful(BadRequest(selectLoginMfaView(form, authAppMfaId, smsMfaId))),
@@ -297,11 +297,14 @@ class UserLoginAccount @Inject() (
       }
     }
 
-    request.session.get("userId").fold(internalServerErrorTemplate("Unable to obtain user information"))(
-      userId => thirdPartyDeveloperConnector.fetchDeveloper(UserId(UUID.fromString(userId))).map {
-      case Some(developer: User) => handleMfaType(hasMultipleMfaMethods(developer))
-      case None                  => handleMfaType(false) // does this make sense?
-    })
+    request.session.get("userId").fold(
+      successful(BadRequest("Unable to obtain user information"))
+    )(userId =>
+      thirdPartyDeveloperConnector.fetchDeveloper(UserId(UUID.fromString(userId))).map {
+        case Some(developer: User) => handleMfaType(hasMultipleMfaMethods(developer))
+        case None                  => handleMfaType(false) // does this make sense?
+      }
+    )
   }
 
   private def hasMultipleMfaMethods(developer: User): Boolean = hasVerifiedSmsAndAuthApp(developer.mfaDetails)
@@ -414,9 +417,5 @@ class UserLoginAccount @Inject() (
       case Some(emailAddress) => request2SVRemoval(emailAddress.toLaxEmail)
       case _                  => successful(Redirect(routes.UserLoginAccount.login()))
     }
-  }
-
-  private def internalServerErrorTemplate(errorMessage: String)(implicit request: Request[_]): Future[Result] = {
-    errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage).map(InternalServerError(_))
   }
 }
