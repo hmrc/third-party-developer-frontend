@@ -298,12 +298,6 @@ class ChangeAppNameAndDescControllerSpec
       captureAllApplicationCmds
     }
 
-    def captureApplicationCmd: ApplicationCommand = {
-      val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService).dispatchCmd(*[ApplicationId], captor)(*)
-      captor.value
-    }
-
     def captureAllApplicationCmds: List[ApplicationCommand] = {
       val captor = ArgCaptor[ApplicationCommand]
       verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
