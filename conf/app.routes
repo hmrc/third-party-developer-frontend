@@ -67,8 +67,8 @@ GET         /applications/:id/details                                           
 GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeDetails(id: ApplicationId)
 POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeDetailsAction(id: ApplicationId)
 
-GET         /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.requestChangeOfAppName(id: ApplicationId)
-POST        /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.requestChangeOfAppNameAction(id: ApplicationId)
+GET         /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RequestChangeOfApplicationNameController.requestChangeOfAppName(id: ApplicationId)
+POST        /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RequestChangeOfApplicationNameController.requestChangeOfAppNameAction(id: ApplicationId)
 
 GET         /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.updatePrivacyPolicyLocation(id: ApplicationId)
 POST        /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.updatePrivacyPolicyLocationAction(id: ApplicationId)
