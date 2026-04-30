@@ -19,17 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import play.api.test.Helpers._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.html._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future._
 
 class RequestChangeOfApplicationNameControllerSpec
     extends BaseControllerSpec
@@ -38,11 +35,6 @@ class RequestChangeOfApplicationNameControllerSpec
     with ApplicationWithCollaboratorsFixtures {
 
   val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description")))
-  val sandboxApplication  = approvedApplication.inSandbox()
-  val inTestingApp        = approvedApplication.withState(appStateTesting)
-
-  val principalApplication   = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description")))
-  val subordinateApplication = principalApplication.inSandbox()
 
   "changeOfApplicationName" should {
     "show page successfully" in new Setup {
@@ -139,9 +131,7 @@ class RequestChangeOfApplicationNameControllerSpec
 
   trait Setup
       extends ApplicationServiceMock
-      with ApplicationActionServiceMock
-      with SubmissionServiceMockModule
-      with TermsOfUseServiceMock {
+      with ApplicationActionServiceMock {
 
     val requestChangeOfApplicationNameView      = app.injector.instanceOf[RequestChangeOfApplicationNameView]
     val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
@@ -160,8 +150,5 @@ class RequestChangeOfApplicationNameControllerSpec
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
-
-    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
-      .thenReturn(successful(ApplicationUpdateSuccessful))
   }
 }
