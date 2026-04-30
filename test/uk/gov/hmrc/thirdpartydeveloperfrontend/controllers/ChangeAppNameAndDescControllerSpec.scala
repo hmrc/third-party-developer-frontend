@@ -22,6 +22,7 @@ import scala.concurrent.Future._
 
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
+import views.html.manageapplication.ChangeAppNameAndDescView
 
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
@@ -39,7 +40,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html.manageapplication.ChangeAppNameAndDescView
 
 class ChangeAppNameAndDescControllerSpec
     extends BaseControllerSpec
@@ -245,7 +245,7 @@ class ChangeAppNameAndDescControllerSpec
       with SubmissionServiceMockModule
       with TermsOfUseServiceMock {
 
-    val changeAppNameAndDescView                = app.injector.instanceOf[ChangeAppNameAndDescView]
+    val changeAppNameAndDescView = app.injector.instanceOf[ChangeAppNameAndDescView]
 
     val underTest = new ChangeAppNameAndDescController(
       mockErrorHandler,
