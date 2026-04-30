@@ -165,7 +165,7 @@ class RequestChangeOfApplicationNameControllerSpec
     val updatePrivacyPolicyLocationView         = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
     val updateTermsAndConditionsLocationView    = app.injector.instanceOf[UpdateTermsAndConditionsLocationView]
 
-    val underTest = new ApplicationDetailsSectionsController(
+    val underTest = new RequestChangeOfApplicationNameController(
       mockErrorHandler,
       applicationServiceMock,
       applicationActionServiceMock,
@@ -173,13 +173,8 @@ class RequestChangeOfApplicationNameControllerSpec
       mcc,
       cookieSigner,
       clock,
-      changeAppNameAndDescView,
-      changeDetailsView,
       requestChangeOfApplicationNameView,
-      changeOfApplicationNameConfirmationView,
-      updatePrivacyPolicyLocationView,
-      updateTermsAndConditionsLocationView,
-      fraudPreventionConfig
+      changeOfApplicationNameConfirmationView
     )
 
     val newName        = ApplicationName("new name")
