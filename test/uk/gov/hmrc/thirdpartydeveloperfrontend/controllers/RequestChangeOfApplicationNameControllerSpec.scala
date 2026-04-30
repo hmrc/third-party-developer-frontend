@@ -20,7 +20,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 import views.html._
@@ -31,7 +30,6 @@ import scala.concurrent.Future
 class RequestChangeOfApplicationNameControllerSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with SubmissionsTestData
     with ApplicationWithCollaboratorsFixtures {
 
   val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description")))
@@ -128,7 +126,6 @@ class RequestChangeOfApplicationNameControllerSpec
     }
   }
 
-
   trait Setup
       extends ApplicationServiceMock
       with ApplicationActionServiceMock {
@@ -143,7 +140,6 @@ class RequestChangeOfApplicationNameControllerSpec
       sessionServiceMock,
       mcc,
       cookieSigner,
-      clock,
       requestChangeOfApplicationNameView,
       changeOfApplicationNameConfirmationView
     )

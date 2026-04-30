@@ -47,19 +47,14 @@ class RequestChangeOfApplicationNameController @Inject() (
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    val clock: Clock,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
     changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc)
-    with FraudPreventionNavLinkHelper
-    with WithUnsafeDefaultFormBinding
-    with ClockNow {
+  ) extends ApplicationController(mcc) {
 
-  def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
+  private def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
-
 
   def requestChangeOfAppName(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
     Future.successful(Ok(requestChangeOfApplicationNameView(ChangeOfApplicationNameForm.withData(request.application.name), ApplicationNameModel(request.application))))
