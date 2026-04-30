@@ -789,7 +789,7 @@ class ApplicationDetailsViewSpec
           page.applicationNameChangeLink.text shouldBe "Change"
           page.applicationNameChangeLink.attr(
             "href"
-          ) shouldBe uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ApplicationDetailsSectionsController.requestChangeOfAppName(
+          ) shouldBe uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.RequestChangeOfApplicationNameController.requestChangeOfAppName(
             prodApp.id
           ).url
           page.body.getElementById("applicationName").text shouldBe prodApp.details.name.toString
