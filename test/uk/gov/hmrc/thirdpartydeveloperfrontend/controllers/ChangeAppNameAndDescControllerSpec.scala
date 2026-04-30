@@ -16,35 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
-
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
-import views.html.manageapplication.ChangeAppNameAndDescView
-
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
-import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import views.html.manageapplication.ChangeAppNameAndDescView
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
 
 class ChangeAppNameAndDescControllerSpec
     extends BaseControllerSpec
     with WithCSRFAddToken
-    with SubmissionsTestData
     with ApplicationWithCollaboratorsFixtures {
 
   val approvedApplication = standardApp.withAccess(standardAccessOne).modify(_.copy(description = Some("Some App Description")))
@@ -241,9 +236,7 @@ class ChangeAppNameAndDescControllerSpec
 
   trait Setup
       extends ApplicationServiceMock
-      with ApplicationActionServiceMock
-      with SubmissionServiceMockModule
-      with TermsOfUseServiceMock {
+      with ApplicationActionServiceMock {
 
     val changeAppNameAndDescView = app.injector.instanceOf[ChangeAppNameAndDescView]
 
