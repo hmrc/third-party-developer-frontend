@@ -24,14 +24,12 @@ import cats.data.NonEmptyList
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, ThirdPartyDeveloperConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, EmailPreferencesProducer, FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
@@ -47,7 +45,7 @@ class EmailPreferencesService @Inject() (
   def fetchCategoriesVisibleToUser(userSession: UserSession, existingFlow: EmailPreferencesFlowV2)(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
     for {
       apis                <- getOrUpdateFlowWithVisibleApis(existingFlow, userSession)
-      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).distinct.map(_.toString())
+      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).map(_.toString())
       categories          <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategoryNames.contains(x.category)))
     } yield categories.distinct.sortBy(_.category)
 
@@ -57,7 +55,7 @@ class EmailPreferencesService @Inject() (
         .flatMap {
           case Right(x) => successful(x)
           case Left(_)  => apmConnector.fetchApiDefinitionsVisibleToUser(Some(userSession.developer.userId)).map(_.map(y =>
-              CombinedApi(y.serviceName, y.name, y.categories, REST_API)
+              CombinedApi(y.name, y.serviceName, y.categories.toSet, ApiType.REST_API, ApiAccessType.PUBLIC)
             ))
         }
       updateVisibleApis(userSession, visibleApis)
@@ -77,7 +75,7 @@ class EmailPreferencesService @Inject() (
     apmConnector.fetchCombinedApi(serviceName).flatMap {
       case Right(x) => successful(Some(x))
       case Left(_)  => apmConnector.fetchExtendedApiDefinition(serviceName).flatMap {
-          case Right(y) => successful(Some(CombinedApi(y.serviceName, y.name, y.categories, REST_API)))
+          case Right(y) => successful(Some(CombinedApi(y.name, y.serviceName, y.categories.toSet, ApiType.REST_API, ApiAccessType.PUBLIC)))
           case Left(_)  => successful(None)
         }
     }

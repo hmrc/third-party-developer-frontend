@@ -33,14 +33,12 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mongo.play.json.Codecs
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ServiceName}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.REST_API
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 
@@ -71,7 +69,7 @@ class FlowRepositoryISpec extends AnyWordSpec
       selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
       selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi(ServiceName("api1ServiceName"), "api1Name", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
+      visibleApis = List(CombinedApi("api1Name", ServiceName("api1ServiceName"), Set(ApiCategory.VAT, ApiCategory.AGENTS), ApiType.REST_API, ApiAccessType.PUBLIC))
     )
 
     await(flowRepository.saveFlow(currentFlow))
@@ -118,7 +116,7 @@ class FlowRepositoryISpec extends AnyWordSpec
           selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
           selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY", "EVENT_INVITES"),
-          visibleApis = List(CombinedApi(ServiceName("api1ServiceName"), "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
+          visibleApis = List(CombinedApi("api1DisplayName", ServiceName("api1ServiceName"), Set(ApiCategory.VAT, ApiCategory.AGENTS), ApiType.REST_API, ApiAccessType.PUBLIC))
         )
 
         await(flowRepository.saveFlow(flow))
@@ -128,7 +126,13 @@ class FlowRepositoryISpec extends AnyWordSpec
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
         castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
-        castResult.visibleApis should contain only (CombinedApi(ServiceName("api1ServiceName"), "api1DisplayName", List(ApiCategory.VAT, ApiCategory.AGENTS), REST_API))
+        castResult.visibleApis should contain only (CombinedApi(
+          "api1DisplayName",
+          ServiceName("api1ServiceName"),
+          Set(ApiCategory.VAT, ApiCategory.AGENTS),
+          ApiType.REST_API,
+          ApiAccessType.PUBLIC
+        ))
       }
 
       "save prod creds preferences" in {

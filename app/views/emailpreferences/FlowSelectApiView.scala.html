@@ -17,10 +17,10 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CombinedApi
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.ApiType.XML_API
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.CombinedApi
+@import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiType
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedApisEmailPreferencesForm
@@ -28,8 +28,8 @@
 
 @this(devMain: DevMainWithFormErrors)
 
-@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
+@(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 @pageHeading = @{
   s"Which ${currentCategory.name} APIs are you interested in?"
 }
@@ -85,7 +85,7 @@
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
                 @if(selectedApis.contains(api.serviceName.value)) {checked}/>
-                <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName @if(api.apiType == XML_API){-XML API}</label>
+                <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName @if(api.apiType == ApiType.XML_API){-XML API}</label>
               </div>
             }
           </div>
