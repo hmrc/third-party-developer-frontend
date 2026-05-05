@@ -294,7 +294,7 @@ class ApplicationDetailsViewSpec
 
           page.changePrivacyPolicyLocationLink should not be null
           page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.updatePrivacyPolicyLocation(prodApp.id).url)
+          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.UpdatePrivacyPolicyLocationController.updatePrivacyPolicyLocation(prodApp.id).url)
 
           page.changeTermsConditionsLocationLink should not be null
           page.changeTermsConditionsLocationLink.text shouldBe "Change"
