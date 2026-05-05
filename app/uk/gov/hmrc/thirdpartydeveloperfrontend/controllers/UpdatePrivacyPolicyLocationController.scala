@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import java.time.{Clock, Instant}
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-
-import views.html._
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -28,33 +26,16 @@ import play.api.mvc._
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.ProductionAndAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-
-object UpdatePrivacyPolicyLocationController {
-  case class Agreement(who: String, when: Instant)
-
-  case class TermsOfUseViewModel(
-      required: Boolean,
-      appUsesOldVersion: Boolean,
-      agreement: Option[Agreement],
-      termsOfUseV2State: Option[TermsOfUseV2State] = None
-    ) {
-    lazy val agreementNeeded = required && !agreement.isDefined
-  }
-  case class ApplicationNameModel(application: ApplicationWithCollaborators)
-  case class PrivacyPolicyLocationModel(applicationId: ApplicationId, privacyPolicyUrl: String, isInDesktop: Boolean)
-}
+import views.html.UpdatePrivacyPolicyLocationView
 
 @Singleton
 class UpdatePrivacyPolicyLocationController @Inject() (
@@ -69,7 +50,6 @@ class UpdatePrivacyPolicyLocationController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with FraudPreventionNavLinkHelper
     with WithUnsafeDefaultFormBinding
     with ClockNow {
 
