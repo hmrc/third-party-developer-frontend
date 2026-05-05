@@ -16,9 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.time.Clock
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html.manageapplication.ChangeAppNameAndDescView
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
@@ -31,11 +38,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabi
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.manageapplication.ChangeAppNameAndDescView
-
-import java.time.Clock
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ChangeAppNameAndDescController @Inject() (
