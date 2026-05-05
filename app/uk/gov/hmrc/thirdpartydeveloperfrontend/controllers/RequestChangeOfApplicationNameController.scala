@@ -16,28 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+import views.html._
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.ApplicationNameModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.ProductionAndAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html._
-
-import java.time.Clock
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-
 
 @Singleton
 class RequestChangeOfApplicationNameController @Inject() (
