@@ -257,7 +257,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       with SubmissionServiceMockModule
       with TermsOfUseServiceMock {
 
-    val changeDetailsView = app.injector.instanceOf[ChangeDetailsView]
+    val updateTCAndPrivPolicyURLView = app.injector.instanceOf[UpdateTCAndPrivPolicyURLView]
 
     val underTest = new UpdateTCAndPrivPolicyURLController(
       mockErrorHandler,
@@ -267,7 +267,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       mcc,
       cookieSigner,
       clock,
-      changeDetailsView,
+      updateTCAndPrivPolicyURLView,
       fraudPreventionConfig
     )
 

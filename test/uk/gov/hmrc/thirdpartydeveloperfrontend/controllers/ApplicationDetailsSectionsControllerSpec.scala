@@ -771,7 +771,7 @@ class ApplicationDetailsSectionsControllerSpec
 
     val unauthorisedAppDetailsView              = app.injector.instanceOf[UnauthorisedAppDetailsView]
     val changeAppNameAndDescView                = app.injector.instanceOf[ChangeAppNameAndDescView]
-    val changeDetailsView                       = app.injector.instanceOf[ChangeDetailsView]
+    val updateTCAndPrivPolicyURLView            = app.injector.instanceOf[UpdateTCAndPrivPolicyURLView]
     val requestChangeOfApplicationNameView      = app.injector.instanceOf[RequestChangeOfApplicationNameView]
     val changeOfApplicationNameConfirmationView = app.injector.instanceOf[ChangeOfApplicationNameConfirmationView]
     val updatePrivacyPolicyLocationView         = app.injector.instanceOf[UpdatePrivacyPolicyLocationView]
@@ -786,7 +786,7 @@ class ApplicationDetailsSectionsControllerSpec
       cookieSigner,
       clock,
       changeAppNameAndDescView,
-      changeDetailsView,
+      updateTCAndPrivPolicyURLView,
       requestChangeOfApplicationNameView,
       changeOfApplicationNameConfirmationView,
       updatePrivacyPolicyLocationView,
