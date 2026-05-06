@@ -39,7 +39,7 @@ class NewJourneyAdminUserPendingStatusProductionEndpointScenarioSpec extends End
         Redirect(s"/developer/applications/${applicationId}/sell-resell-or-distribute-your-software")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)    =>
         Redirect(s"/developer/submissions/application/${applicationId}/production-credentials-checklist")
-      case Endpoint(_, "/developer/applications/:id/details/change", _)                                  => Forbidden()
+      case Endpoint(_, "/developer/applications/:id/details/change-tc-and-priv-pol-url", _)              => Forbidden()
       case Endpoint(_, "/developer/applications/:id/change-app-name-and-desc", _)                        => Forbidden()
       case Endpoint("GET", "/developer/applications/:id/details/terms-of-use", _)                        => NotFound()
       case Endpoint("GET", "/developer/applications/:id/request-check/submitted", _)                     => Success()

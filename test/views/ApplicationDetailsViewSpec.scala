@@ -191,11 +191,11 @@ class ApplicationDetailsViewSpec
 
             page.changePrivacyPolicyLocationLink should not be null
             page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
 
             page.changeTermsConditionsLocationLink should not be null
             page.changeTermsConditionsLocationLink.text shouldBe "Change"
-            page.changeTermsConditionsLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changeTermsConditionsLocationLink.attr("href") should include(routes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
           }
 
           "Show Change links when an admin" in new LoggedInUserIsAdmin {
@@ -212,11 +212,11 @@ class ApplicationDetailsViewSpec
 
             page.changePrivacyPolicyLocationLink should not be null
             page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
 
             page.changeTermsConditionsLocationLink should not be null
             page.changeTermsConditionsLocationLink.text shouldBe "Change"
-            page.changeTermsConditionsLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changeTermsConditionsLocationLink.attr("href") should include(routes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
           }
         }
 

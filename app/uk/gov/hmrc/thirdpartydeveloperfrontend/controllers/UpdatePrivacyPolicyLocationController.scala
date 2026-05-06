@@ -20,6 +20,8 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import views.html.UpdatePrivacyPolicyLocationView
+
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
@@ -35,7 +37,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.ProductionAndAdmin
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
-import views.html.UpdatePrivacyPolicyLocationView
 
 @Singleton
 class UpdatePrivacyPolicyLocationController @Inject() (
