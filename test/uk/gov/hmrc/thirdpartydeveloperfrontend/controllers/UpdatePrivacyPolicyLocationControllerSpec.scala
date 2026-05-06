@@ -167,7 +167,6 @@ class UpdatePrivacyPolicyLocationControllerSpec
       sessionServiceMock,
       mcc,
       cookieSigner,
-      clock,
       updatePrivacyPolicyLocationView
     )
 
