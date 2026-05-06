@@ -298,7 +298,7 @@ class ApplicationDetailsViewSpec
 
           page.changeTermsConditionsLocationLink should not be null
           page.changeTermsConditionsLocationLink.text shouldBe "Change"
-          page.changeTermsConditionsLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.updateTermsAndConditionsLocation(prodApp.id).url)
+          page.changeTermsConditionsLocationLink.attr("href") should include(routes.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocation(prodApp.id).url)
         }
       }
     }

@@ -57,7 +57,7 @@
         Seq(
             TableRow(content = Text(messages("application.details.terms.conditions.url"))),
             TableRow(content = Text(getTermsAndConditionsLocation(app.termsAndConditionsLocation)), attributes = Map("id" -> "termsAndConditions")),
-            TableRow(content = HtmlContent(if (app.isPermittedToEditAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.UpdateTCAndPrivPolicyURLController.changeDetails(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.ApplicationDetailsSectionsController.updateTermsAndConditionsLocation(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else {""}))
+            TableRow(content = HtmlContent(if (app.isPermittedToEditAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.UpdateTCAndPrivPolicyURLController.changeDetails(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else if (app.isPermittedToEditProductionAppDetails(loggedIn.developer)) {s"<a class='govuk-link govuk-link--no-visited-state' href='${controllers.routes.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocation(app.id)}' id='changeTermsAndConditions'>${messages("""application.details.change""")}</a>"} else {""}))
         ),
         Seq(
             TableRow(content = Text(messages("application.details.grant.length"))), 
