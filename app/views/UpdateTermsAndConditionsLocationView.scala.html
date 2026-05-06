@@ -39,7 +39,7 @@
   developerSession = Some(loggedIn)
 ) {
 
-@helper.form(action = controllers.routes.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocationAction(appId), Symbol("class") -> "form") {
+@helper.form(action = controllers.manageapplication.routes.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocationAction(appId), Symbol("class") -> "form") {
 @helper.CSRF.formField
   <fieldset class="govuk-fieldset">
     <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">

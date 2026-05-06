@@ -73,8 +73,8 @@ POST        /applications/:id/details/change-app-name                           
 GET         /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UpdatePrivacyPolicyLocationController.updatePrivacyPolicyLocation(id: ApplicationId)
 POST        /applications/:id/details/change-privacy-policy-location                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UpdatePrivacyPolicyLocationController.updatePrivacyPolicyLocationAction(id: ApplicationId)
 
-GET         /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocation(id: ApplicationId)
-POST        /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocationAction(id: ApplicationId)
+GET         /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocation(id: ApplicationId)
+POST        /applications/:id/details/change-terms-conditions-location                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocationAction(id: ApplicationId)
 
 GET         /applications/:id/details/terms-of-use                                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TermsOfUse.termsOfUse(id: ApplicationId)
 
