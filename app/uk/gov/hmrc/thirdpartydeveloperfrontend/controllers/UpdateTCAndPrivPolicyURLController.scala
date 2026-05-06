@@ -31,8 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
@@ -49,12 +48,10 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val clock: Clock,
-    updateTCAndPrivPolicyURLView: UpdateTCAndPrivPolicyURLView,
-    val fraudPreventionConfig: FraudPreventionConfig
+    updateTCAndPrivPolicyURLView: UpdateTCAndPrivPolicyURLView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with FraudPreventionNavLinkHelper
     with WithUnsafeDefaultFormBinding
     with ClockNow {
 

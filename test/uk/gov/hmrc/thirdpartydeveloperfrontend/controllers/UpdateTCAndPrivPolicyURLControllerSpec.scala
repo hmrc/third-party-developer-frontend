@@ -35,7 +35,6 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
@@ -253,9 +252,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
 
   trait Setup
       extends ApplicationServiceMock
-      with ApplicationActionServiceMock
-      with SubmissionServiceMockModule
-      with TermsOfUseServiceMock {
+      with ApplicationActionServiceMock {
 
     val updateTCAndPrivPolicyURLView = app.injector.instanceOf[UpdateTCAndPrivPolicyURLView]
 
@@ -267,8 +264,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       mcc,
       cookieSigner,
       clock,
-      updateTCAndPrivPolicyURLView,
-      fraudPreventionConfig
+      updateTCAndPrivPolicyURLView
     )
 
     val newDescription = Some("new description")
@@ -280,12 +276,6 @@ class UpdateTCAndPrivPolicyURLControllerSpec
 
     when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
       .thenReturn(successful(ApplicationUpdateSuccessful))
-
-    def captureApplicationCmd: ApplicationCommand = {
-      val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService).dispatchCmd(*[ApplicationId], captor)(*)
-      captor.value
-    }
 
     def captureAllApplicationCmds: List[ApplicationCommand] = {
       val captor = ArgCaptor[ApplicationCommand]
@@ -338,8 +328,6 @@ class UpdateTCAndPrivPolicyURLControllerSpec
         EditApplicationForm(app.id, appAccess.privacyPolicyUrl, appAccess.termsAndConditionsUrl)
 
       final def callChangeDetails: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedInDevRequest)
-
-      final def callChangeDetailsNotLoggedIn: Future[Result] = addToken(underTest.changeDetails(app.id))(loggedOutRequest)
 
       final def callChangeDetailsAction: Future[Result] = callChangeDetailsAction(loggedInDevRequest)
 
