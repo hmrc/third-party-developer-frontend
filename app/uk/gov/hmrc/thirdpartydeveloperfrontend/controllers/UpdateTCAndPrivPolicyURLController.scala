@@ -49,7 +49,7 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     val clock: Clock,
-    changeDetailsView: ChangeDetailsView,
+    updateTCAndPrivPolicyURLView: UpdateTCAndPrivPolicyURLView,
     val fraudPreventionConfig: FraudPreventionConfig
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
@@ -62,7 +62,7 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
-    Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
+    Future.successful(Ok(updateTCAndPrivPolicyURLView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
   }
 
   private def deriveCommands(form: EditApplicationForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
@@ -114,5 +114,5 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
 
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
-    Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
+    Future.successful(BadRequest(updateTCAndPrivPolicyURLView(form, applicationViewModel)))
 }

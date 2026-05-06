@@ -72,7 +72,7 @@ class ApplicationDetailsSectionsController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     val changeAppNameAndDescView: ChangeAppNameAndDescView,
-    changeDetailsView: ChangeDetailsView,
+    updateTCAndPrivPolicyURLView: UpdateTCAndPrivPolicyURLView,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
     changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView,
     updatePrivacyPolicyLocationView: UpdatePrivacyPolicyLocationView,
@@ -173,7 +173,7 @@ class ApplicationDetailsSectionsController @Inject() (
     checkActionForApprovedApps(SupportsDetails, SandboxOnly)(applicationId)(fun)
 
   def changeDetails(applicationId: ApplicationId): Action[AnyContent] = canChangeDetailsAndIsApprovedAction(applicationId) { implicit request =>
-    Future.successful(Ok(changeDetailsView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
+    Future.successful(Ok(updateTCAndPrivPolicyURLView(EditApplicationForm.withData(request.application), applicationViewModelFromApplicationRequest())))
   }
 
   private def deriveCommands(form: EditApplicationForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
@@ -311,7 +311,7 @@ class ApplicationDetailsSectionsController @Inject() (
   }
 
   private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
-    Future.successful(BadRequest(changeDetailsView(form, applicationViewModel)))
+    Future.successful(BadRequest(updateTCAndPrivPolicyURLView(form, applicationViewModel)))
 
   def requestChangeOfAppName(applicationId: ApplicationId): Action[AnyContent] = canChangeProductionDetailsAndIsApprovedAction(applicationId) { implicit request =>
     Future.successful(Ok(requestChangeOfApplicationNameView(ChangeOfApplicationNameForm.withData(request.application.name), ApplicationNameModel(request.application))))

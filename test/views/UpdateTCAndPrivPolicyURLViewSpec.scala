@@ -16,31 +16,26 @@
 
 package views
 
-import java.time.Period
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import views.helper.CommonViewSpec
-import views.html.ChangeDetailsView
+import views.html.UpdateTCAndPrivPolicyURLView
 
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.EditApplicationForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText, textareaExistsWithText}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
-class ChangeApplicationDetailsSpec extends CommonViewSpec
+class UpdateTCAndPrivPolicyURLViewSpec extends CommonViewSpec
     with WithCSRFAddToken
     with LocalUserIdTracker
     with DeveloperSessionBuilder
@@ -48,9 +43,9 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
     with FixedClock
     with ApplicationWithCollaboratorsFixtures {
 
-  val changeDetails = app.injector.instanceOf[ChangeDetailsView]
-  val applicationId = standardApp.id
-  val clientId      = standardApp.clientId
+  val updateTCAndPrivPolicyURLView = app.injector.instanceOf[UpdateTCAndPrivPolicyURLView]
+  val applicationId                = standardApp.id
+  val clientId                     = standardApp.clientId
 
   "change application details page" should {
 
@@ -71,7 +66,7 @@ class ChangeApplicationDetailsSpec extends CommonViewSpec
         EditApplicationForm(application.id, privacyPolicyUrl, termsAndConditionsUrl)
       )
 
-      changeDetails.render(
+      updateTCAndPrivPolicyURLView.render(
         form,
         ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false),
         request,
