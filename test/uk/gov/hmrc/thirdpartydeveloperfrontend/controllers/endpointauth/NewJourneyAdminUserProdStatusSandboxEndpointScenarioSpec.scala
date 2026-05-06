@@ -28,7 +28,7 @@ class NewJourneyAdminUserProdStatusSandboxEndpointScenarioSpec extends EndpointS
       case Endpoint("GET", "/developer/applications/:id/add/subscription-configuration-step/:pageNumber", _) =>
         Redirect(s"/developer/applications/$applicationId/add/success")
       case Endpoint(_, "/developer/applications/:id/change-locked-subscription", _)                          => BadRequest()
-      case Endpoint(_, "/developer/applications/:id/details/change", _)                                      => getEndpointSuccessResponse(endpoint)
+      case Endpoint(_, "/developer/applications/:id/details/change-tc-and-priv-pol-url", _)                  => getEndpointSuccessResponse(endpoint)
       case Endpoint("GET", "/developer/applications/:id/details/terms-of-use", _)                            => BadRequest()
       case Endpoint("GET", "/developer/applications/:id/agree-new-terms-of-use", _)                          =>
         Redirect(s"/developer/submissions/application/$applicationId/view-answers")

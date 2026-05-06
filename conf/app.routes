@@ -64,8 +64,8 @@ POST        /applications/:id/team-members/remove                               
 GET         /applications/:id/manage                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MainApplicationDetailsController.applicationDetails(id: ApplicationId)
 GET         /applications/:id/details                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.MainApplicationDetailsController.applicationDetails(id: ApplicationId)
 
-GET         /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeDetails(id: ApplicationId)
-POST        /applications/:id/details/change                                                             uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.changeDetailsAction(id: ApplicationId)
+GET         /applications/:id/details/change-tc-and-priv-pol-url                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UpdateTCAndPrivPolicyURLController.changeDetails(id: ApplicationId)
+POST        /applications/:id/details/change-tc-and-priv-pol-url                                         uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.UpdateTCAndPrivPolicyURLController.changeDetailsAction(id: ApplicationId)
 
 GET         /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RequestChangeOfApplicationNameController.requestChangeOfAppName(id: ApplicationId)
 POST        /applications/:id/details/change-app-name                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RequestChangeOfApplicationNameController.requestChangeOfAppNameAction(id: ApplicationId)

@@ -918,7 +918,7 @@ class ApplicationDetailsSectionsControllerSpec
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      formExistsWithAction(doc, routes.ApplicationDetailsSectionsController.changeDetailsAction(application.id).url) shouldBe true
+      formExistsWithAction(doc, routes.UpdateTCAndPrivPolicyURLController.changeDetailsAction(application.id).url) shouldBe true
       linkExistsWithHref(doc, routes.MainApplicationDetailsController.applicationDetails(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
