@@ -16,12 +16,19 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
+import views.html._
+
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
@@ -29,16 +36,12 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.Appli
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, EditApplicationForm, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
 
 class UpdateTCAndPrivPolicyURLControllerSpec
     extends BaseControllerSpec
@@ -294,8 +297,8 @@ class UpdateTCAndPrivPolicyURLControllerSpec
 
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
-      formExistsWithAction(doc, routes.UpdateTCAndPrivPolicyURLController.changeDetailsAction(application.id).url) shouldBe true
-      linkExistsWithHref(doc, routes.MainApplicationDetailsController.applicationDetails(application.id).url) shouldBe true
+      formExistsWithAction(doc, manageapplicationroutes.UpdateTCAndPrivPolicyURLController.changeDetailsAction(application.id).url) shouldBe true
+      linkExistsWithHref(doc, manageapplicationroutes.MainApplicationDetailsController.applicationDetails(application.id).url) shouldBe true
       inputExistsWithValue(doc, "applicationId", "hidden", application.id.toString()) shouldBe true
       inputExistsWithValue(doc, "privacyPolicyUrl", "text", application.privacyPolicyLocation.value.describe()) shouldBe true
       inputExistsWithValue(doc, "termsAndConditionsUrl", "text", application.termsAndConditionsLocation.value.describe()) shouldBe true
@@ -307,7 +310,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       val result = application.withDescription(newDescription).callChangeDetailsAction
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(application.id).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(application.id).url)
     }
 
     implicit class AppAugment(val app: ApplicationWithCollaborators) {

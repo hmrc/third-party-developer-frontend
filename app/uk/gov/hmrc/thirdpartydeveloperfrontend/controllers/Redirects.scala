@@ -32,6 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedi
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsRedirects
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
@@ -147,7 +148,7 @@ class Redirects @Inject() (
             } else
               loginRedirectsService.changeLoginRedirect(actor, application, new LoginRedirectUri(form.originalRedirectUri), LoginRedirectUri.unsafeApply(form.newRedirectUri))
                 .map(_ => Redirect(routes.Redirects.loginRedirects(applicationId)))
-          case _                    => successful(Redirect(routes.MainApplicationDetailsController.applicationDetails(applicationId)))
+          case _                    => successful(Redirect(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(applicationId)))
         }
       }
     }

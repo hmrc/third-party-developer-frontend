@@ -16,23 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import org.jsoup.Jsoup
+import views.html._
+
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class UpdatePrivacyPolicyLocationControllerSpec
     extends BaseControllerSpec
@@ -79,7 +82,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithPrivPolicyUrl.id).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appWithPrivPolicyUrl.id).url)
     }
   }
 
@@ -149,7 +152,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
       val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithPrivPolicyInDesktop.id).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appWithPrivPolicyInDesktop.id).url)
     }
   }
 

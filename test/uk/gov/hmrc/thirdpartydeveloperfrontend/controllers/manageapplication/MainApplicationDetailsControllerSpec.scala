@@ -16,12 +16,20 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.captor.ArgCaptor
 import org.scalatest.Assertion
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import views.html.manageapplication._
+
 import play.api.mvc.Result
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ServiceName
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -45,12 +53,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
-import views.html.manageapplication._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
 
 class MainApplicationDetailsControllerSpec
     extends BaseControllerSpec

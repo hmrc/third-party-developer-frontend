@@ -16,23 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import org.jsoup.Jsoup
+import views.html.UpdateTermsAndConditionsLocationView
+
 import play.api.test.Helpers._
+
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, routes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import views.html.UpdateTermsAndConditionsLocationView
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class UpdateTermsAndConditionsLocationControllerSpec
     extends BaseControllerSpec
@@ -77,7 +80,7 @@ class UpdateTermsAndConditionsLocationControllerSpec
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithTermsAndConditionsUrl.id).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appWithTermsAndConditionsUrl.id).url)
     }
   }
 
@@ -147,7 +150,7 @@ class UpdateTermsAndConditionsLocationControllerSpec
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appWithTermsAndConditionsInDesktop.id).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appWithTermsAndConditionsInDesktop.id).url)
     }
   }
 
