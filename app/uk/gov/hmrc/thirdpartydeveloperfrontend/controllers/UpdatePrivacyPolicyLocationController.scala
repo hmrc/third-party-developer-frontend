@@ -46,13 +46,11 @@ class UpdatePrivacyPolicyLocationController @Inject() (
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    val clock: Clock,
     updatePrivacyPolicyLocationView: UpdatePrivacyPolicyLocationView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding
-    with ClockNow {
+    with WithUnsafeDefaultFormBinding {
 
   private def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
