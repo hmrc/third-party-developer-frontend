@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
-
-import java.time.Clock
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future.successful
-import scala.concurrent.{ExecutionContext, Future}
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
 import cats.data.OptionT
-import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
-import views.html.manageapplication.ApplicationDetailsView
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.State
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
@@ -35,14 +26,22 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.ApplicationDetailsSectionsController.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
+import views.html.manageapplication.ApplicationDetailsView
+
+import java.time.Clock
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future.successful
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class MainApplicationDetailsController @Inject() (

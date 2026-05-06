@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-import views.html._
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import views.html._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class RequestChangeOfApplicationNameControllerSpec
     extends BaseControllerSpec

@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.Future._
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
-import views.html.manageapplication.ChangeAppNameAndDescView
-
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, ChangeAppNameAndDescForm, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
+import views.html.manageapplication.ChangeAppNameAndDescView
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.Future._
 
 class ChangeAppNameAndDescControllerSpec
     extends BaseControllerSpec

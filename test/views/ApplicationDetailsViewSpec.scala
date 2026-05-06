@@ -41,7 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.ApplicationDetailsSectionsController.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
