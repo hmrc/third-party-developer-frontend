@@ -165,7 +165,6 @@ class UpdateTermsAndConditionsLocationControllerSpec
       sessionServiceMock,
       mcc,
       cookieSigner,
-      clock,
       updateTermsAndConditionsLocationView
     )
 

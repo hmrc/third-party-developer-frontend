@@ -46,13 +46,11 @@ class UpdateTermsAndConditionsLocationController @Inject() (
     val sessionService: SessionService,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
-    val clock: Clock,
     updateTermsAndConditionsLocationView: UpdateTermsAndConditionsLocationView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding
-    with ClockNow {
+    with WithUnsafeDefaultFormBinding {
 
   def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
