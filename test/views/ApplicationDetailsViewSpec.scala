@@ -41,7 +41,8 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
@@ -191,11 +192,11 @@ class ApplicationDetailsViewSpec
 
             page.changePrivacyPolicyLocationLink should not be null
             page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changePrivacyPolicyLocationLink.attr("href") should include(manageapplicationroutes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
 
             page.changeTermsConditionsLocationLink should not be null
             page.changeTermsConditionsLocationLink.text shouldBe "Change"
-            page.changeTermsConditionsLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changeTermsConditionsLocationLink.attr("href") should include(manageapplicationroutes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
           }
 
           "Show Change links when an admin" in new LoggedInUserIsAdmin {
@@ -212,11 +213,11 @@ class ApplicationDetailsViewSpec
 
             page.changePrivacyPolicyLocationLink should not be null
             page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-            page.changePrivacyPolicyLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changePrivacyPolicyLocationLink.attr("href") should include(manageapplicationroutes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
 
             page.changeTermsConditionsLocationLink should not be null
             page.changeTermsConditionsLocationLink.text shouldBe "Change"
-            page.changeTermsConditionsLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.changeDetails(sandboxApp.id).url)
+            page.changeTermsConditionsLocationLink.attr("href") should include(manageapplicationroutes.UpdateTCAndPrivPolicyURLController.changeDetails(sandboxApp.id).url)
           }
         }
 
@@ -294,11 +295,13 @@ class ApplicationDetailsViewSpec
 
           page.changePrivacyPolicyLocationLink should not be null
           page.changePrivacyPolicyLocationLink.text shouldBe "Change"
-          page.changePrivacyPolicyLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.updatePrivacyPolicyLocation(prodApp.id).url)
+          page.changePrivacyPolicyLocationLink.attr("href") should include(manageapplicationroutes.UpdatePrivacyPolicyLocationController.updatePrivacyPolicyLocation(prodApp.id).url)
 
           page.changeTermsConditionsLocationLink should not be null
           page.changeTermsConditionsLocationLink.text shouldBe "Change"
-          page.changeTermsConditionsLocationLink.attr("href") should include(routes.ApplicationDetailsSectionsController.updateTermsAndConditionsLocation(prodApp.id).url)
+          page.changeTermsConditionsLocationLink.attr("href") should include(
+            manageapplicationroutes.UpdateTermsAndConditionsLocationController.updateTermsAndConditionsLocation(prodApp.id).url
+          )
         }
       }
     }
@@ -723,7 +726,7 @@ class ApplicationDetailsViewSpec
 
           page.descriptionCell.text shouldBe "Test description"
           page.changeAppDescriptionLink.text shouldBe "Change"
-          page.changeAppDescriptionLink.attr("href") shouldBe routes.ApplicationDetailsSectionsController.changeAppNameAndDesc(appWithDesc.id).url
+          page.changeAppDescriptionLink.attr("href") shouldBe manageapplicationroutes.ChangeAppNameAndDescController.changeAppNameAndDesc(appWithDesc.id).url
         }
 
         "show description with Change link for description when logged in as an admin and there is a description" in new LoggedInUserIsAdmin {
@@ -731,14 +734,14 @@ class ApplicationDetailsViewSpec
 
           page.descriptionCell.text shouldBe "Test description"
           page.changeAppDescriptionLink.text shouldBe "Change"
-          page.changeAppDescriptionLink.attr("href") shouldBe routes.ApplicationDetailsSectionsController.changeAppNameAndDesc(appWithDesc.id).url
+          page.changeAppDescriptionLink.attr("href") shouldBe manageapplicationroutes.ChangeAppNameAndDescController.changeAppNameAndDesc(appWithDesc.id).url
         }
 
         "show Change link for application name when logged in as a developer" in new LoggedInUserIsDev {
           val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
           page.applicationNameChangeLink.text shouldBe "Change"
-          page.applicationNameChangeLink.attr("href") shouldBe routes.ApplicationDetailsSectionsController.changeAppNameAndDesc(sandboxApp.id).url
+          page.applicationNameChangeLink.attr("href") shouldBe manageapplicationroutes.ChangeAppNameAndDescController.changeAppNameAndDesc(sandboxApp.id).url
           page.body.getElementById("applicationName").text shouldBe sandboxApp.details.name.toString
         }
 
@@ -746,7 +749,7 @@ class ApplicationDetailsViewSpec
           val page = Page(applicationDetailsView(ApplicationViewModel(sandboxApp, hasSubscriptionsFields = false, hasPpnsFields = false), List.empty, None, termsOfUseViewModel))
 
           page.applicationNameChangeLink.text shouldBe "Change"
-          page.applicationNameChangeLink.attr("href") shouldBe routes.ApplicationDetailsSectionsController.changeAppNameAndDesc(sandboxApp.id).url
+          page.applicationNameChangeLink.attr("href") shouldBe manageapplicationroutes.ChangeAppNameAndDescController.changeAppNameAndDesc(sandboxApp.id).url
           page.body.getElementById("applicationName").text shouldBe sandboxApp.details.name.toString
         }
       }
@@ -789,7 +792,7 @@ class ApplicationDetailsViewSpec
           page.applicationNameChangeLink.text shouldBe "Change"
           page.applicationNameChangeLink.attr(
             "href"
-          ) shouldBe uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ApplicationDetailsSectionsController.requestChangeOfAppName(
+          ) shouldBe uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes.RequestChangeOfApplicationNameController.requestChangeOfAppName(
             prodApp.id
           ).url
           page.body.getElementById("applicationName").text shouldBe prodApp.details.name.toString

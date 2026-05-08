@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,7 +41,8 @@ import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServ
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.Agreement
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.Agreement
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, SubscriptionTestHelper, routes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -722,8 +723,8 @@ class MainApplicationDetailsControllerSpec
 
     ProfileServiceMock.LookupDeveloperName.thenReturns(Some("bob@example.com"))
 
-    def captureTermsOfUseViewModel(): ApplicationDetailsSectionsController.TermsOfUseViewModel = {
-      val captor = ArgCaptor[ApplicationDetailsSectionsController.TermsOfUseViewModel]
+    def captureTermsOfUseViewModel(): MainApplicationDetailsController.TermsOfUseViewModel = {
+      val captor = ArgCaptor[MainApplicationDetailsController.TermsOfUseViewModel]
       verify(mockDetailsView).apply(*, *, *, captor)(*, *, *, *, *)
       captor.value
     }

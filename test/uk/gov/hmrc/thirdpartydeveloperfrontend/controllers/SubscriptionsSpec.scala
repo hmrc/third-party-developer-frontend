@@ -34,6 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApiContext,
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.FraudPreventionConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SubscriptionsServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -216,7 +217,7 @@ class SubscriptionsSpec
         val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appId).url)
+        redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appId).url)
       }
     }
 
@@ -235,7 +236,7 @@ class SubscriptionsSpec
         val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appId).url)
+        redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appId).url)
       }
     }
 
@@ -253,7 +254,7 @@ class SubscriptionsSpec
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(appId).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(appId).url)
     }
 
     "return a Bad Request without changing the subscription when requesting a change to the subscription when the form is invalid" in new Setup {
@@ -289,7 +290,7 @@ class SubscriptionsSpec
       val result = underTest.changeApiSubscription(applicationIdTwo, apiContext, apiVersion, redirectTo)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.MainApplicationDetailsController.applicationDetails(applicationIdTwo).url)
+      redirectLocation(result) shouldBe Some(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(applicationIdTwo).url)
     }
 
     "return a Bad Request without changing the subscription or check information when requesting a change to the subscription when the form is invalid" in new Setup {

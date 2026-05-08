@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
+package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
-import java.time.Clock
+import java.time.{Clock, Instant}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,20 +29,33 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.State
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationDetailsSectionsController.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.{Agreement, TermsOfUseViewModel}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+
+object MainApplicationDetailsController {
+  case class Agreement(who: String, when: Instant)
+
+  case class TermsOfUseViewModel(
+      required: Boolean,
+      appUsesOldVersion: Boolean,
+      agreement: Option[Agreement],
+      termsOfUseV2State: Option[TermsOfUseV2State] = None
+    )
+  case class ApplicationNameModel(application: ApplicationWithCollaborators)
+}
 
 @Singleton
 class MainApplicationDetailsController @Inject() (
