@@ -72,6 +72,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
       withClue("name")(elementIdentifiedByIdContainsText(doc, "name", CommonSessionData.dev.developer.displayedName) shouldBe true)
+      withClue("name")(elementIdentifiedByIdContainsText(doc, "nameChangeLink", CommonSessionData.dev.developer.displayedName) shouldBe true)
       withClue("email")(elementIdentifiedByIdContainsText(doc, "email", CommonSessionData.dev.developer.email.text) shouldBe true)
     }
   }
