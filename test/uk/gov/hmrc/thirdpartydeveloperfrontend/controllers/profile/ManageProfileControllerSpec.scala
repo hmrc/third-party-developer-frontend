@@ -106,7 +106,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
       val expectedDate       = expectedDateFormat.format(instant.atZone(ZoneOffset.UTC))
 
       withClue("MFA type")(elementIdentifiedByIdContainsText(doc, s"mfa-type-${mfaDetail.id.value}", mfaDetail.mfaType.displayText) shouldBe true)
-      withClue("MFA name and creation date")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", mfaDetail.name) shouldBe true)
+      withClue("MFA name")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", mfaDetail.name) shouldBe true)
       withClue("MFA creation date")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", s"Added $expectedDate at") shouldBe true)
       withClue("Remove link")(linkExistsWithHref(doc, mfaRoutes.MfaController.removeMfa(mfaDetail.id, mfaDetail.mfaType).url) shouldBe true)
     }
