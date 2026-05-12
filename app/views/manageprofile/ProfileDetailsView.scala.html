@@ -73,8 +73,8 @@
     @govukTable(Table(
       firstCellIsHeader = true,
       rows = user.mfaDetails.map(mfaDetail => Seq(
-        TableRow(content = Text(mfaDetail.mfaType.displayText)),
-        TableRow(content = HtmlContent(s"${mfaDetail.name}<p class='govuk-body govuk-hint govuk-!-margin-bottom-1'>Added ${dateFormatter.format(mfaDetail.createdOn)}</p>")),
+        TableRow(content = Text(mfaDetail.mfaType.displayText), attributes = Map("id" -> s"mfa-type-${mfaDetail.id.value}")),
+        TableRow(content = HtmlContent(s"${mfaDetail.name}<p class='govuk-body govuk-hint govuk-!-margin-bottom-1'>Added ${dateFormatter.format(mfaDetail.createdOn)}</p>"), attributes = Map("id" -> s"mfa-details-${mfaDetail.id.value}")),
         TableRow(content = HtmlContent(s"<a href='${routes.MfaController.removeMfa(mfaDetail.id, mfaDetail.mfaType)}' class='govuk-link govuk-link--no-visited-state'>Remove</a>"))
       ))
     ))
