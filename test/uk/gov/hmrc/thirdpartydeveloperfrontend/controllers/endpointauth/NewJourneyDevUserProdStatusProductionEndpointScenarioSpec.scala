@@ -58,7 +58,8 @@ class NewJourneyDevUserProdStatusProductionEndpointScenarioSpec extends Endpoint
       case Endpoint("GET", "/developer/submissions/application/:aid/check-answers", _)                     => BadRequest() // must be in testing state
       case Endpoint("GET", "/developer/submissions/application/:aid/request-received", _)                  => BadRequest()
       case Endpoint("GET", "/developer/submissions/application/:aid/submit-request", _)                    => BadRequest() // must be in testing state
-      case Endpoint(_, "/developer/submissions/application/:aid/start-using-your-application", _)          => Forbidden()
+      case Endpoint("GET", "/developer/submissions/application/:aid/start-using-your-application", _)      => NotFound()   // must be in pre-production state
+      case Endpoint("POST", "/developer/submissions/application/:aid/start-using-your-application", _)     => Forbidden()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/details/change")           => Forbidden()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/change-app-name-and-desc") => Forbidden()
       case Endpoint(_, path, _) if path.startsWith("/developer/applications/:id/delete")                   => Forbidden()

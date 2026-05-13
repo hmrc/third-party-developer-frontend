@@ -20,10 +20,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK, SEE_OTHER}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, status}
+import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -81,13 +82,28 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
   }
 
   "startUsingYourApplicationPage" should {
-    "return success for app in PRE_PRODUCTION state" in new Setup {
+    "return success for app in PRE_PRODUCTION state and user is Admin" in new Setup {
       val app = sampleApp.withState(InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
       givenApplicationAction(app, userSession)
 
       val result = underTest.startUsingYourApplicationPage(app.id)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
+      contentAsString(result) should include("Before your software will work in")
+      contentAsString(result) should include("Managing your application")
+    }
+
+    "return success for app in PRE_PRODUCTION state and user is Developer" in new Setup {
+      val app = standardApp
+        .withCollaborators(userSession.developer.email.asDeveloperCollaborator)
+        .withName(ApplicationName("App name 1"))
+        .withState(InState.preProduction(userSession.developer.email.text, userSession.developer.displayedName))
+      givenApplicationAction(app, userSession)
+
+      val result = underTest.startUsingYourApplicationPage(app.id)(loggedInRequest.withCSRFToken)
+
+      status(result) shouldBe OK
+      contentAsString(result) should include("Ask your organisation’s application admin to")
     }
 
     "return failure for app in non-PRE_PRODUCTION state" in new Setup {
