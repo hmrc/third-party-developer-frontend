@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -27,8 +30,10 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{OrganisationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.{routes => mfaRoutes}
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
@@ -74,6 +79,37 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
       withClue("name")(elementIdentifiedByIdContainsText(doc, "name", CommonSessionData.dev.developer.displayedName) shouldBe true)
       withClue("nameChangeLink")(elementExistsById(doc, "nameChangeLink") shouldBe true)
       withClue("email")(elementIdentifiedByIdContainsText(doc, "email", CommonSessionData.dev.developer.email.text) shouldBe true)
+    }
+
+    "display security preferences with MFA details" in new Setup {
+      val mfaDetail = AuthenticatorAppMfaDetail(
+        id = MfaId.random,
+        name = "My Authenticator App",
+        createdOn = instant,
+        verified = true
+      )
+
+      val userWithMfa = loggedInDeveloper.copy(mfaDetails = List(mfaDetail))
+      val sessionWithMfa = devSession.copy(developer = userWithMfa)
+
+      fetchSessionByIdReturns(sessionId, sessionWithMfa)
+
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(*))
+        .thenReturn(Future.successful(organisations))
+
+      val result = addToken(underTest.profileDetails())(loggedInDevRequest.withSession("sessionId" -> sessionId.toString))
+
+      status(result) shouldBe OK
+      val content = contentAsString(result)
+      val doc     = Jsoup.parse(content)
+
+      val expectedDateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH)
+      val expectedDate       = expectedDateFormat.format(instant.atZone(ZoneOffset.UTC))
+
+      withClue("MFA type")(elementIdentifiedByIdContainsText(doc, s"mfa-type-${mfaDetail.id.value}", mfaDetail.mfaType.displayText) shouldBe true)
+      withClue("MFA name")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", mfaDetail.name) shouldBe true)
+      withClue("MFA creation date")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", s"Added $expectedDate at") shouldBe true)
+      withClue("Remove link")(linkExistsWithHref(doc, mfaRoutes.MfaController.removeMfa(mfaDetail.id, mfaDetail.mfaType).url) shouldBe true)
     }
   }
 }

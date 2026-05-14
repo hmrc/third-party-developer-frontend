@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 @import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 @import views.html.include.DevMain
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import java.util.Locale
 @import java.time.Instant
 @import java.time.ZoneId
@@ -79,8 +79,9 @@
     @govukTable(Table(
       firstCellIsHeader = true,
       rows = user.mfaDetails.map(mfaDetail => Seq(
-        TableRow(content = Text(mfaDetail.mfaType.displayText)),
-        TableRow(content = HtmlContent(s"${mfaDetail.name}<p class='govuk-body govuk-hint govuk-!-margin-bottom-1'>Added ${dateFormatter.format(mfaDetail.createdOn)}</p>"))
+        TableRow(content = Text(mfaDetail.mfaType.displayText), attributes = Map("id" -> s"mfa-type-${mfaDetail.id.value}")),
+        TableRow(content = HtmlContent(s"${mfaDetail.name}<p class='govuk-body govuk-hint govuk-!-margin-bottom-1'>Added ${dateFormatter.format(mfaDetail.createdOn)}</p>"), attributes = Map("id" -> s"mfa-details-${mfaDetail.id.value}")),
+        TableRow(content = HtmlContent(s"<a href='${routes.MfaController.removeMfa(mfaDetail.id, mfaDetail.mfaType)}' class='govuk-link govuk-link--no-visited-state'>Remove</a>"))
       ))
     ))
   }
