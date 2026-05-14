@@ -59,9 +59,15 @@
   @govukTable(Table(
     firstCellIsHeader = true,
     rows = Seq(
-      Seq(TableRow(content = Text(messages("profile.details.name"))), TableRow(content = Text(user.displayedName), attributes = Map("id" -> "name"))),
-      Seq(TableRow(content = Text(messages("profile.details.email"))), TableRow(content = Text(user.email.text), attributes = Map("id" -> "email"))),
-      Seq(TableRow(content = Text(messages("profile.details.organisation"))), TableRow(content = HtmlContent(formatListOfOrganisations(organisations, "None")), attributes = Map("id" -> "organisation")))
+      Seq(TableRow(content = Text(messages("profile.details.name"))),
+          TableRow(content = Text(user.displayedName), attributes = Map("id" -> "name")),
+          TableRow(content = HtmlContent(s"<a href='${controllers.profile.routes.Profile.changeProfile()}' class='govuk-link govuk-link--no-visited-state'>Change</a>"), attributes = Map("id" -> "nameChangeLink"))),
+      Seq(TableRow(content = Text(messages("profile.details.email"))),
+          TableRow(content = Text(user.email.text), attributes = Map("id" -> "email")),
+          TableRow(content = Empty)),
+      Seq(TableRow(content = Text(messages("profile.details.organisation"))),
+          TableRow(content = HtmlContent(formatListOfOrganisations(organisations, "None")), attributes = Map("id" -> "organisation")),
+          TableRow(content = Empty))
     )
   ))
 
