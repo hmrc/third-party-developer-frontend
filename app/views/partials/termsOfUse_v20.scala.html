@@ -16,7 +16,7 @@
 
 @import views.html.helper.CSPNonce
 
-@()(implicit request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
+@()(implicit request: play.api.mvc.Request[Any], appConfig: ApplicationConfig, messages: Messages)
 
 <div class="govuk-grid-column-one-half">
   <ul class="govuk-list">
@@ -71,22 +71,22 @@
 
   <p class="govuk-body">
         The terms of use explain what we expect from you when creating and operating software services that use HMRC APIs hosted on the HMRC Developer Hub.
-<p>
+  </p>
   <p class="govuk-body">
         You will be asked these questions when you apply for production access. You must make sure that your software conforms to our terms of use.
-<p>
+  </p>
   <p class="govuk-body">
         HMRC staff will review your responses and information is kept private.
-<p>
+  </p>
   <p class="govuk-body">
         The terms of use is not a legal relationship between HMRC and any software developer.
-<p>
+  </p>
   <p class="govuk-body">
-        We reserve the right to remove your access to the Developer Hub and its APIs temporarily or permanently.
-<p>
+        @messages("terms.of.use.warning")
+  </p>
   <p class="govuk-body">
         You have 6 months to complete your request for production credentials. After that, your progress is deleted and you will need to start again.
-<p>
+  </p>
 
   <ul class="govuk-list">
     <li>

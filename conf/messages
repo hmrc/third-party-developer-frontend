@@ -261,3 +261,5 @@ profile.details.your.history=Your sign in history
 profile.details.last.signin=Last signed in
 profile.details.delete.account=Delete account
 profile.details.delete.hint=You can ask us to delete your account and we’ll respond within 2 working days.
+
+terms.of.use.warning=We reserve the right to remove or revoke your access to the Developer Hub and its APIs temporarily or permanently. Persistent non‑compliance with the Developer Hub terms of use may also result in the rejection of further production credential requests.
