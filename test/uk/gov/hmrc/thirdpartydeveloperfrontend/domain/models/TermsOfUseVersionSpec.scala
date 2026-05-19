@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
+import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
@@ -46,16 +47,22 @@ class TermsOfUseVersionSpec extends HmrcSpec {
   }
 
   "getTermsOfUseAsHtml" should {
+    val termsOfUseWarning =
+      "We reserve the right to remove or revoke your access to the Developer Hub and its APIs temporarily or permanently. Persistent non‑compliance with the Developer Hub terms of use may also result in the rejection of further production credential requests"
     "return old content for OLD_JOURNEY" in {
-      TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], mock[Request[Any]]).toString() should include(
-        "These terms of use explain what you can expect from us and what we expect from you"
-      )
+      val messagesMock = mock[Messages]
+      when(messagesMock("terms.of.use.warning")).thenReturn(termsOfUseWarning)
+      val termsOfUse   = TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], mock[Request[Any]], messagesMock).toString()
+      termsOfUse should include("These terms of use explain what you can expect from us and what we expect from you")
+      termsOfUse should include(termsOfUseWarning)
     }
+
     "return new content for NEW_JOURNEY" in {
-      TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(
-        mock[ApplicationConfig],
-        FakeRequest(GET, "/")
-      ).toString() should not include "These terms of use explain what you can expect from us and what we expect from you"
+      val messagesMock = mock[Messages]
+      when(messagesMock("terms.of.use.warning")).thenReturn(termsOfUseWarning)
+      val termsOfUse   = TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], FakeRequest(GET, "/"), messagesMock).toString()
+      termsOfUse should not include "These terms of use explain what you can expect from us and what we expect from you"
+      termsOfUse should include(termsOfUseWarning)
     }
   }
 
