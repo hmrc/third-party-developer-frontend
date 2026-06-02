@@ -89,7 +89,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
         verified = true
       )
 
-      val userWithMfa = loggedInDeveloper.copy(mfaDetails = List(mfaDetail))
+      val userWithMfa    = loggedInDeveloper.copy(mfaDetails = List(mfaDetail))
       val sessionWithMfa = devSession.copy(developer = userWithMfa)
 
       fetchSessionByIdReturns(sessionId, sessionWithMfa)
