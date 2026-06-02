@@ -19,8 +19,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeSubscriptionConfirmationForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import include._
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav, govukButton: GovukButton)
 
 @(applicationView: ApplicationViewModel, form: Form[ChangeSubscriptionConfirmationForm], name: String, context: ApiContext, version: ApiVersionNbr, subscribed: Boolean, redirectTo: String, formAction: Call)(
   implicit request: play.api.mvc.Request[Any],
@@ -87,7 +90,7 @@
         </div>
       </fieldset>
       <div class="govuk-button-group">
-        <button id="submit" class="govuk-button" type="submit">Submit</button>
+        @govukButton(Button(id = Some("submit"), preventDoubleClick = Some(true), content = Text("Submit")))
         <a href="@routes.SubscriptionsController.manageSubscriptions(app.id)" class="govuk-button govuk-button--secondary">Cancel</a>
       </div>
     </div>
