@@ -21,8 +21,11 @@
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaNameChangeForm
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors,govukButton: GovukButton)
 
 @(form: Form[MfaNameChangeForm], mfaId: MfaId)(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig)
 
@@ -57,7 +60,7 @@
     </div>
 
 
-    <button id="submit" class="govuk-button" type="submit">Continue</button>
+      @govukButton(Button(id = Some("submit"), preventDoubleClick = Some(true), content = Text("Continue")))
   }
 
 }

@@ -20,8 +20,11 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
 @import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[MobileNumberForm])(implicit messages: Messages, request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig)
 
@@ -58,7 +61,7 @@
     </div>
 
 
-    <button id="submit" class="govuk-button" type="submit">Continue</button>
+      @govukButton(Button(id = Some("submit"), preventDoubleClick = Some(true), content = Text("Continue")))
   }
 
 }
