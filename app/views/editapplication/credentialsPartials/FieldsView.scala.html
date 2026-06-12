@@ -16,11 +16,17 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatDateWithShortPattern
 
+
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 @import _root_.controllers.routes.Assets
 @import views.html.helper.CSPNonce
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+
+@this(govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, developer: User, clientSecrets: Seq[ClientSecret])(
   implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
@@ -37,7 +43,7 @@
 @if(clientSecrets.isEmpty) {
   @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), Symbol("class") -> "form") {
     @helper.CSRF.formField
-    <button id="submit" class="govuk-button" type="submit">Generate a client secret</button>
+      @govukButton(Button(id = Some("submit"), preventDoubleClick = Some(true), content = Text("Generate a client secret")))
   }
 } else {
   <table class="govuk-table">
@@ -112,9 +118,7 @@
         <div>
           @helper.form(action = controllers.routes.Credentials.addClientSecret(app.id), Symbol("class") -> "form") {
             @helper.CSRF.formField
-            <button id="generate-another-client-secret" class="govuk-button" type="submit">
-              Generate another client secret
-            </button>
+              @govukButton(Button(id = Some("generate-another-client-secret"), preventDoubleClick = Some(true), content = Text("Generate another client secret")))
           }
         </div>
       } else {
