@@ -40,8 +40,6 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
 
   lazy val contactPath: String = getConfigDefaulted("contactPath", "")
 
-  lazy val reportAProblemPartialUrl               = s"$contactPath/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  lazy val reportAProblemNonJSUrl                 = s"$contactPath/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   lazy val apiDocumentationFrontendUrl: String    = buildUrl("platform.internal.frontend").getOrElse(baseUrl("api-documentation-frontend"))
   lazy val thirdPartyDeveloperFrontendUrl: String = buildUrl("platform.internal.frontend").getOrElse(baseUrl("third-party-developer-frontend"))
   lazy val devhubSupportFrontendUrl: String       = buildUrl("platform.internal.frontend").getOrElse(baseUrl("devhub-support-frontend"))
@@ -68,9 +66,6 @@ class ApplicationConfig @Inject() (config: Configuration) extends ServicesConfig
   lazy val platformFrontendHost: String = getConfigDefaulted("platform.frontend.host", "http://localhost:9685")
   lazy val feedbackFrontendHost: String = getConfigDefaulted("platform.frontend.host", "http://localhost:9514")
   lazy val feedbackFrontendUrl: String  = s"$feedbackFrontendHost/feedback/devhub"
-
-  lazy val reportProblemHost: String =
-    config.underlying.getString("report-a-problem.base.url") + config.underlying.getString("urls.report-a-problem.problem")
 
   // API Subscription Fields
   val apiSubscriptionFieldsProductionUrl: String    = apiSubscriptionFieldsUrl("api-subscription-fields-production")
