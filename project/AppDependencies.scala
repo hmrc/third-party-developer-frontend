@@ -10,7 +10,7 @@ object AppDependencies {
   lazy val apiDomainVersion = "1.4.0"
   lazy val appDomainVersion = "1.1.0"
   lazy val tpdDomainVersion = "0.15.0"
-  private val orgDomainVersion = "0.19.0"
+  private val orgDomainVersion = "0.21.0-SNAPSHOT"
   private val mockitoScalaVersion = "2.0.0"
 
 
@@ -28,7 +28,18 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-organisation-domain"       % orgDomainVersion
+    ("uk.gov.hmrc"                 %% "api-platform-organisation-domain"       % orgDomainVersion ).cross(CrossVersion.for2_13Use3)
+      .excludeAll(
+        ExclusionRule(organization="uk.gov.hmrc", name="play-json-union-formatter"),
+        ExclusionRule(organization="uk.gov.hmrc", name="api-platform-common-domain-fixtures"),
+        ExclusionRule(organization="uk.gov.hmrc", name="api-platform-common-domain"),
+        ExclusionRule(organization="org.scalatest"),
+        ExclusionRule(organization="org.mockito"),
+        ExclusionRule(organization="org.typelevel"),
+        ExclusionRule(organization="dev.optics"),
+        ExclusionRule(organization="org.playframework"),
+        ExclusionRule(organization="org.scalactic")
+      )
   )
 
   lazy val test =  Seq(
@@ -41,7 +52,18 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "api-platform-api-domain-fixtures"          % apiDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-application-domain-fixtures"  % appDomainVersion,
     "uk.gov.hmrc"                 %% "api-platform-test-tpd-domain"              % tpdDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-organisation-domain-fixtures" % orgDomainVersion
+    ("uk.gov.hmrc"                 %% "api-platform-organisation-domain-fixtures" % orgDomainVersion).cross(CrossVersion.for2_13Use3)
+      .excludeAll(
+        ExclusionRule(organization="uk.gov.hmrc", name="play-json-union-formatter"),
+        ExclusionRule(organization="uk.gov.hmrc", name="api-platform-common-domain-fixtures"),
+        ExclusionRule(organization="uk.gov.hmrc", name="api-platform-common-domain"),
+          ExclusionRule(organization="org.scalatest"),
+          ExclusionRule(organization="org.mockito"),
+          ExclusionRule(organization="org.typelevel"),
+          ExclusionRule(organization="dev.optics"),
+          ExclusionRule(organization="org.playframework"),
+          ExclusionRule(organization="org.scalactic")
+      )
   ).map(_ % "test")
 
   lazy val componentTestDependencies = Seq(
