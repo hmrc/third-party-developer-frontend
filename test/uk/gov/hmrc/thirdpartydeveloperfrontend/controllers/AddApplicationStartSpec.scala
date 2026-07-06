@@ -102,7 +102,7 @@ class AddApplicationStartSpec
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("Production")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Sandbox")
 
-      private val result = underTest.addApplicationSubordinate()(loggedInDevRequest)
+      private val result = underTest.addApplicationSubordinate(None)(loggedInDevRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to the sandbox")
@@ -114,7 +114,7 @@ class AddApplicationStartSpec
     "return the add applications page with the user logged in when the environmennt is QA/Dev" in new Setup {
       when(appConfig.nameOfPrincipalEnvironment).thenReturn("QA")
       when(appConfig.nameOfSubordinateEnvironment).thenReturn("Development")
-      private val result = underTest.addApplicationSubordinate()(loggedInDevRequest)
+      private val result = underTest.addApplicationSubordinate(None)(loggedInDevRequest)
 
       status(result) shouldBe OK
       contentAsString(result) should include("Add an application to development")
@@ -125,14 +125,14 @@ class AddApplicationStartSpec
     "return to the login page when the user is not logged in" in new Setup {
       val request = FakeRequest()
 
-      private val result = underTest.addApplicationSubordinate()(request)
+      private val result = underTest.addApplicationSubordinate(None)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when partly logged" in new Setup {
-      private val result = underTest.addApplicationSubordinate()(partLoggedInRequest)
+      private val result = underTest.addApplicationSubordinate(None)(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")

@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, OrganisationId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
@@ -78,17 +78,17 @@ class AddApplication @Inject() (
     successful(Ok(usingPrivilegedApplicationCredentialsView()))
   }
 
-  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(addApplicationStartSubordinateView()))
+  def addApplicationSubordinate(organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(addApplicationStartSubordinateView(organisationId)))
   }
 
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
     addApplicationProductionSwitch()(request)
   }
 
-  def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
+  def addApplicationName(environment: Environment, organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
     val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
-    successful(Ok(addApplicationNameView(form, environment)))
+    successful(Ok(addApplicationNameView(form, environment, organisationId)))
   }
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
@@ -153,11 +153,11 @@ class AddApplication @Inject() (
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
+  def editApplicationNameAction(environment: Environment, organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest()
 
     def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
-      successful(Ok(addApplicationNameView(errors, environment)))
+      successful(Ok(addApplicationNameView(errors, environment, organisationId)))
 
     def fromAddApplicationJourney(loggedInDeveloper: User, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequestV1(
       name = ApplicationName(form.applicationName.trim),
@@ -165,7 +165,8 @@ class AddApplication @Inject() (
       environment = environment,
       description = None,
       collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
-      subscriptions = None
+      subscriptions = None,
+      organisationId = organisationId
     )
 
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
@@ -184,13 +185,15 @@ class AddApplication @Inject() (
           case ApplicationNameValidationResult.Invalid =>
             successful(BadRequest(addApplicationNameView(
               requestForm.withError(appNameField, applicationNameInvalidKey),
-              environment
+              environment,
+              organisationId
             )))
 
           case ApplicationNameValidationResult.Duplicate =>
             successful(BadRequest(addApplicationNameView(
               requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
-              environment
+              environment,
+              organisationId
             )))
         }
 

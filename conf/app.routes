@@ -43,15 +43,15 @@ GET         /applications                                                       
 GET         /applications/using-privileged-application-credentials                                       uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.usingPrivilegedApplicationCredentialsPage()
 GET         /applications/access-token                                                                   uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.accessTokenSwitchPage()
 
-GET         /applications/add/sandbox                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSubordinate()
+GET         /applications/add/sandbox                                                                    uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSubordinate(organisationId: Option[OrganisationId])
 GET         /applications/add/production                                                                 uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationPrincipal()
 GET         /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationProductionSwitch()
 GET         /applications/add/:id                                                                        uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.soleApplicationToUpliftAction(id: ApplicationId)
 POST        /applications/add/switch                                                                     uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.chooseApplicationToUpliftAction()
 
 
-GET         /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationName(environment: Environment)
-POST        /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.editApplicationNameAction(environment: Environment)
+GET         /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationName(environment: Environment, organisationId: Option[OrganisationId])
+POST        /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.editApplicationNameAction(environment: Environment, organisationId: Option[OrganisationId])
 
 GET         /applications/:id/add/success                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSuccess(id: ApplicationId)
 

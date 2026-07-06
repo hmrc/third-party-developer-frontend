@@ -148,14 +148,14 @@ class AddApplicationSuccessSpec
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = underTest.addApplicationSubordinate()(request)
+      private val result = underTest.addApplicationSubordinate(None)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when partly logged" in new Setup {
-      private val result = underTest.addApplicationSubordinate()(partLoggedInRequest)
+      private val result = underTest.addApplicationSubordinate(None)(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
