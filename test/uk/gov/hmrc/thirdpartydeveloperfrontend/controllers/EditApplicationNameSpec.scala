@@ -129,7 +129,7 @@ class EditApplicationNameSpec
         private val request = loggedInDevRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", ""))
 
-        private val result = underTest.editApplicationNameAction(Environment.SANDBOX, None)(request)
+        private val result = underTest.editApplicationNameAction(Environment.SANDBOX)(request)
 
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
@@ -185,7 +185,7 @@ class EditApplicationNameSpec
         private val request = loggedInAdminRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", ""))
 
-        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION, None)(request)
+        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
 
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
@@ -205,7 +205,7 @@ class EditApplicationNameSpec
         private val request = loggedInAdminRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", ""))
 
-        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION, None)(request)
+        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
 
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include("That application name already exists. Enter a unique name for your application")

@@ -21,7 +21,7 @@
 
 @this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
-@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm], environment: Environment, organisationId: Option[OrganisationId]
+@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm], environment: Environment
 )(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @pageHeading = @{ "What's the name of your application?" }
@@ -33,7 +33,7 @@
     back = BackButtonWithJavaScript,
     developerSession = Some(loggedIn)
 ) {
-  @helper.form(action = controllers.addapplication.routes.AddApplication.editApplicationNameAction(environment, organisationId)) {
+  @helper.form(action = controllers.addapplication.routes.AddApplication.editApplicationNameAction(environment)) {
     @helper.CSRF.formField
 
     <h1 class="govuk-heading-l">@pageHeading</h1>
@@ -58,6 +58,7 @@
         maxLength="50"
       />
     </div>
+    <input id="organisationId" name="organisationId" type="hidden" value="@form.data.get("organisationId")"/>
 
     <br />
 

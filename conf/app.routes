@@ -51,7 +51,7 @@ POST        /applications/add/switch                                            
 
 
 GET         /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationName(environment: Environment, organisationId: Option[OrganisationId])
-POST        /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.editApplicationNameAction(environment: Environment, organisationId: Option[OrganisationId])
+POST        /applications/add/:environment/name                                                          uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.editApplicationNameAction(environment: Environment)
 
 GET         /applications/:id/add/success                                                                uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication.addApplicationSuccess(id: ApplicationId)
 

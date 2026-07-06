@@ -87,8 +87,8 @@ class AddApplication @Inject() (
   }
 
   def addApplicationName(environment: Environment, organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
-    successful(Ok(addApplicationNameView(form, environment, organisationId)))
+    val form = AddApplicationNameForm.form.fill(AddApplicationNameForm("", organisationId))
+    successful(Ok(addApplicationNameView(form, environment)))
   }
 
   def progressOnUpliftJourney(sandboxAppId: ApplicationId): Action[AnyContent] = loggedInAction { _ =>
@@ -153,11 +153,11 @@ class AddApplication @Inject() (
     ChooseApplicationToUpliftForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
   }
 
-  def editApplicationNameAction(environment: Environment, organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
+  def editApplicationNameAction(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
     val requestForm: Form[AddApplicationNameForm] = AddApplicationNameForm.form.bindFromRequest()
 
     def nameApplicationWithErrors(errors: Form[AddApplicationNameForm], environment: Environment) =
-      successful(Ok(addApplicationNameView(errors, environment, organisationId)))
+      successful(Ok(addApplicationNameView(errors, environment)))
 
     def fromAddApplicationJourney(loggedInDeveloper: User, form: AddApplicationNameForm, environment: Environment) = CreateApplicationRequestV1(
       name = ApplicationName(form.applicationName.trim),
@@ -166,7 +166,7 @@ class AddApplication @Inject() (
       description = None,
       collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
       subscriptions = None,
-      organisationId = organisationId
+      organisationId = form.organisationId
     )
 
     def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
@@ -185,15 +185,13 @@ class AddApplication @Inject() (
           case ApplicationNameValidationResult.Invalid =>
             successful(BadRequest(addApplicationNameView(
               requestForm.withError(appNameField, applicationNameInvalidKey),
-              environment,
-              organisationId
+              environment
             )))
 
           case ApplicationNameValidationResult.Duplicate =>
             successful(BadRequest(addApplicationNameView(
               requestForm.withError(appNameField, applicationNameAlreadyExistsKey),
-              environment,
-              organisationId
+              environment
             )))
         }
 
