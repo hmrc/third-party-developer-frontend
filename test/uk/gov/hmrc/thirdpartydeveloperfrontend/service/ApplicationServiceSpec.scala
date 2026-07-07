@@ -26,13 +26,14 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
@@ -92,6 +93,27 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   val sandboxApplicationId = ApplicationId.random
 
   val sandboxApplication: ApplicationWithCollaborators = standardApp.withId(sandboxApplicationId).inSandbox()
+
+  val userId           = UserId.random
+  val organisationId   = OrganisationId.random
+
+  val organisation     = Organisation(
+    organisationId,
+    OrganisationName("Org name"),
+    Organisation.OrganisationType.UkLimitedCompany,
+    instant,
+    Set(uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Collaborators.Administrator(userId))
+  )
+
+  val createAppRequest = CreateApplicationRequestV1(
+    name = ApplicationName("app name"),
+    access = CreationAccess.Standard,
+    environment = Environment.SANDBOX,
+    description = None,
+    collaborators = Set(Collaborator(LaxEmailAddress("bob@example.com"), Collaborator.Roles.ADMINISTRATOR, userId)),
+    subscriptions = None,
+    organisationId = Some(organisationId)
+  )
 
   def subStatusWithoutFieldValues(
       appId: ApplicationId,
@@ -348,4 +370,40 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
   }
 
+  "createForUser" should {
+    "call the TPO connector correctly" in new Setup {
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(Some(organisation)))
+      ThirdPartyOrchestratorConnectorMock.Create.succeedsWith(ApplicationCreatedResponse(sandboxApplicationId))
+
+      val result = await(applicationService.createForUser(createAppRequest, userId))
+
+      result shouldBe Right(ApplicationCreatedResponse(sandboxApplicationId))
+      ThirdPartyOrchestratorConnectorMock.Create.verifyCalledWith(createAppRequest)
+    }
+
+    "not call the TPO connector if no organisation found" in new Setup {
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(None))
+
+      val result = await(applicationService.createForUser(createAppRequest, userId))
+
+      result shouldBe Left("Error - organisation not found")
+      ThirdPartyOrchestratorConnectorMock.Create.verifyNotCalled()
+    }
+
+    "not call the TPO connector if user not an admin on organisation" in new Setup {
+      val organisationNotAdmin = Organisation(
+        organisationId,
+        OrganisationName("Org name"),
+        Organisation.OrganisationType.UkLimitedCompany,
+        instant,
+        Set(uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Collaborators.Member(userId))
+      )
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(Some(organisationNotAdmin)))
+
+      val result = await(applicationService.createForUser(createAppRequest, userId))
+
+      result shouldBe Left("Error - user is not an administrator")
+      ThirdPartyOrchestratorConnectorMock.Create.verifyNotCalled()
+    }
+  }
 }
