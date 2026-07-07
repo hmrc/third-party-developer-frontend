@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.CreateApplicationRequest
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
 import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
@@ -135,7 +135,7 @@ class EditApplicationNameSpec
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, times(0))
-          .createForUser(any[CreateApplicationRequest])(*)
+          .createForUser(any[CreateApplicationRequest], any[UserId])(*)
 
         verify(applicationServiceMock)
           .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.SANDBOX), eqTo(None))(*)
@@ -191,7 +191,7 @@ class EditApplicationNameSpec
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest])(*)
+          .createForUser(any[CreateApplicationRequest], any[UserId])(*)
 
         verify(applicationServiceMock)
           .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.PRODUCTION), *)(*)
@@ -211,7 +211,7 @@ class EditApplicationNameSpec
         contentAsString(result) should include("That application name already exists. Enter a unique name for your application")
 
         verify(applicationServiceMock, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest])(*)
+          .createForUser(any[CreateApplicationRequest], any[UserId])(*)
 
         verify(applicationServiceMock)
           .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), *)(*)

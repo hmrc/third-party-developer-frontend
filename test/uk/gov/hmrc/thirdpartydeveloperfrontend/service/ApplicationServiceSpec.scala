@@ -71,6 +71,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
     val mockApmConnector: ApmConnector                               = mock[ApmConnector]
+    val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
@@ -80,6 +81,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       mockApiPlatformDeskproConnector,
       mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
+      mockOrganisationConnector,
       mockAuditService,
       clock
     )

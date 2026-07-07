@@ -169,8 +169,8 @@ class AddApplication @Inject() (
       organisationId = form.organisationId
     )
 
-    def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService.createForUser(fromAddApplicationJourney(request.userSession.developer, form, environment))
+    def addApplication(form: AddApplicationNameForm): Future[Either[String, ApplicationCreatedResponse]] = {
+      applicationService.createForUser(fromAddApplicationJourney(request.userSession.developer, form, environment), request.userId)
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
@@ -178,9 +178,11 @@ class AddApplication @Inject() (
         .isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment, None)
         .flatMap {
           case ApplicationNameValidationResult.Valid =>
-            addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
-              Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
-            )
+            addApplication(formThatPassesSimpleValidation).map(_ match {
+              case Right(applicationCreatedResponse) =>
+                Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
+              case Left(message)                     => BadRequest(message)
+            })
 
           case ApplicationNameValidationResult.Invalid =>
             successful(BadRequest(addApplicationNameView(

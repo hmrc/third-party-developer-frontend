@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{OrganisationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.{OrganisationAllowList, Submission}
@@ -64,6 +64,13 @@ class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationCo
         .execute[Option[Submission]] recover {
         case _: Throwable => None
       }
+    }
+  }
+
+  def fetchOrganisation(id: OrganisationId)(implicit hc: HeaderCarrier): Future[Option[Organisation]] = {
+    metrics.record(api) {
+      http.get(requestUrl(s"/organisation/${id.value}"))
+        .execute[Option[Organisation]]
     }
   }
 
