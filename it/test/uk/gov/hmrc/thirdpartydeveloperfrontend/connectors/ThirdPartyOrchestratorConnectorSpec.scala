@@ -43,6 +43,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
     with FixedClock {
 
   private val applicationId = ApplicationId.random
+  private val orgId         = OrganisationId.random
 
   private val stubConfig = Configuration(
     "microservice.services.third-party-orchestrator.port" -> stubPort
@@ -64,7 +65,8 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
       Some("Description"),
       Environment.SANDBOX,
       Set("admin@example.com".toLaxEmail.asAdministratorCollaborator),
-      None
+      None,
+      Some(orgId)
     )
 
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =

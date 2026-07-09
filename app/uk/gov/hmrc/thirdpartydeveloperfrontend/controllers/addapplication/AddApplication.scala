@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, OrganisationId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
@@ -78,16 +78,16 @@ class AddApplication @Inject() (
     successful(Ok(usingPrivilegedApplicationCredentialsView()))
   }
 
-  def addApplicationSubordinate(): Action[AnyContent] = loggedInAction { implicit request =>
-    successful(Ok(addApplicationStartSubordinateView()))
+  def addApplicationSubordinate(organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
+    successful(Ok(addApplicationStartSubordinateView(organisationId)))
   }
 
   def addApplicationPrincipal(): Action[AnyContent] = loggedInAction { implicit request =>
     addApplicationProductionSwitch()(request)
   }
 
-  def addApplicationName(environment: Environment): Action[AnyContent] = loggedInAction { implicit request =>
-    val form = AddApplicationNameForm.form.fill(AddApplicationNameForm(""))
+  def addApplicationName(environment: Environment, organisationId: Option[OrganisationId]): Action[AnyContent] = loggedInAction { implicit request =>
+    val form = AddApplicationNameForm.form.fill(AddApplicationNameForm("", organisationId))
     successful(Ok(addApplicationNameView(form, environment)))
   }
 
@@ -165,11 +165,12 @@ class AddApplication @Inject() (
       environment = environment,
       description = None,
       collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
-      subscriptions = None
+      subscriptions = None,
+      organisationId = form.organisationId
     )
 
-    def addApplication(form: AddApplicationNameForm): Future[ApplicationCreatedResponse] = {
-      applicationService.createForUser(fromAddApplicationJourney(request.userSession.developer, form, environment))
+    def addApplication(form: AddApplicationNameForm): Future[Either[String, ApplicationCreatedResponse]] = {
+      applicationService.createForUser(fromAddApplicationJourney(request.userSession.developer, form, environment), request.userId)
     }
 
     def nameApplicationWithValidForm(formThatPassesSimpleValidation: AddApplicationNameForm) =
@@ -177,9 +178,11 @@ class AddApplication @Inject() (
         .isApplicationNameValid(formThatPassesSimpleValidation.applicationName, environment, None)
         .flatMap {
           case ApplicationNameValidationResult.Valid =>
-            addApplication(formThatPassesSimpleValidation).map(applicationCreatedResponse =>
-              Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
-            )
+            addApplication(formThatPassesSimpleValidation).map(_ match {
+              case Right(applicationCreatedResponse) =>
+                Redirect(uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.SubscriptionsController.addAppSubscriptions(applicationCreatedResponse.id))
+              case Left(message)                     => BadRequest(message)
+            })
 
           case ApplicationNameValidationResult.Invalid =>
             successful(BadRequest(addApplicationNameView(

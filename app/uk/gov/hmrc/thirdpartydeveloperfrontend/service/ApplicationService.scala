@@ -29,7 +29,8 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
+import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
+import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -46,13 +47,37 @@ class ApplicationService @Inject() (
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
+    organisationConnector: OrganisationConnector,
     auditService: AuditService,
     val clock: Clock
   )(implicit val ec: ExecutionContext
-  ) extends ClockNow {
+  ) extends ClockNow
+    with EitherTHelper[String] {
 
-  def createForUser(createApplicationRequest: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
-    thirdPartyOrchestratorConnector.create(createApplicationRequest)
+  def createForUser(createApplicationRequest: CreateApplicationRequest, userId: UserId)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationCreatedResponse]] = {
+    (
+      for {
+        maybeOrg <- fromEitherF(checkMaybeOrganisationId(createApplicationRequest.organisationId, userId))
+        response <- liftF(thirdPartyOrchestratorConnector.create(createApplicationRequest))
+      } yield response
+    ).value
+  }
+
+  private def checkMaybeOrganisationId(maybeOrganisationId: Option[OrganisationId], userId: UserId)(implicit hc: HeaderCarrier): Future[Either[String, Option[Organisation]]] = {
+    maybeOrganisationId match {
+      case Some(orgId) => checkOrganisation(orgId, userId)
+      case _           => Future.successful(Right(None))
+    }
+  }
+
+  private def checkOrganisation(organisationId: OrganisationId, userId: UserId)(implicit hc: HeaderCarrier): Future[Either[String, Option[Organisation]]] = {
+    (
+      for {
+        organisation <- fromOptionF(organisationConnector.fetchOrganisation(organisationId), "Error - organisation not found")
+        collaborator <- fromOption(organisation.collaborators.find(c => c.userId == userId && c.isAdministrator), "Error - user is not an administrator")
+      } yield Some(organisation)
+    ).value
+  }
 
   def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     apmCmdModule.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)

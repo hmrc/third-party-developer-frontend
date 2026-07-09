@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
   TermsAndConditionsLocation,
   TermsAndConditionsLocations
 }
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, OrganisationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 
 trait ConfirmPassword {
@@ -248,13 +248,14 @@ object ChooseApplicationToUpliftForm {
   )
 }
 
-case class AddApplicationNameForm(applicationName: String)
+case class AddApplicationNameForm(applicationName: String, organisationId: Option[OrganisationId])
 
 object AddApplicationNameForm {
 
   val form: Form[AddApplicationNameForm] = Form(
     mapping(
-      "applicationName" -> applicationNameValidator
+      "applicationName" -> applicationNameValidator,
+      "organisationId"  -> optional(text.transform[OrganisationId](text => OrganisationId(java.util.UUID.fromString(text)), id => id.toString()))
     )(AddApplicationNameForm.apply)(AddApplicationNameForm.unapply)
   )
 }

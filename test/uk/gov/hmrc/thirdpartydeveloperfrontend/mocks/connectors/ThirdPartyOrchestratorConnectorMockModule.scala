@@ -18,6 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors
 
 import scala.concurrent.Future.{failed, successful}
 
+import org.mockito.verification.VerificationMode
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
@@ -30,11 +31,21 @@ trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with Argume
 
   trait AbstractThirdPartyOrchestratorConnectorMock {
     def aMock: ThirdPartyOrchestratorConnector
+    def verify                         = MockitoSugar.verify(aMock)
+    def verify(mode: VerificationMode) = MockitoSugar.verify(aMock, mode)
 
     object Create {
 
       def succeedsWith(response: ApplicationCreatedResponse) = {
         when(aMock.create(*)(*)).thenReturn(successful(response))
+      }
+
+      def verifyCalledWith(request: CreateApplicationRequest) = {
+        verify.create(eqTo(request))(*)
+      }
+
+      def verifyNotCalled() = {
+        verify(never).create(*)(*)
       }
     }
 
