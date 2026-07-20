@@ -70,22 +70,22 @@
   <h2 class="govuk-heading-m" id="introduction">Review the questions we ask when you request production access</h2>
 
   <p class="govuk-body">
-        The terms of use explain what we expect from you when creating and operating software services that use HMRC APIs hosted on the HMRC Developer Hub.
+        To access the live (production) environment, you must ensure your software conforms to our terms of use.  The terms of use explain what we expect from you when creating and operating software services that use HMRC APIs hosted on the HMRC Developer Hub.
   </p>
   <p class="govuk-body">
-        You will be asked these questions when you apply for production access. You must make sure that your software conforms to our terms of use.
-  </p>
-  <p class="govuk-body">
-        HMRC staff will review your responses and information is kept private.
+        The terms of use apply to all users of the Developer Hub and cover all publicly accessible content, including your software, websites and social media. HMRC may carry out spot checks and retrospective assurance activity, to confirm ongoing compliance.
   </p>
   <p class="govuk-body">
         The terms of use is not a legal relationship between HMRC and any software developer.
+  </p>
+  <p class="govuk-body">
+        HMRC staff will review your responses and information is kept private.
   </p>
   <div class="govuk-inset-text">
         @messages("terms.of.use.warning")
   </div>
   <p class="govuk-body">
-        You have 6 months to complete your request for production credentials. After that, your progress is deleted and you will need to start again.
+        You have six months to complete your request for production credentials. After that, your progress is deleted and you will need to start again.
   </p>
 
   <ul class="govuk-list">
@@ -140,7 +140,7 @@
             </li>
             <li>PAYE reference
             </li>
-            <li>Corporation Tax Unique Taxpayer Reference (UTR)
+            <li>Corporation Tax UTR
             </li>
           </ul>
           <p class="govuk-body">Or you can use your company registration number given to you by Companies House.
@@ -167,6 +167,15 @@
         <td class="govuk-table__cell">We will check if you are using HMRC logos in your software, marketing or website.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            You <strong>must not</strong> use HMRC logos or other crown copyright material and branding in any content, 
+            including your software application, website and marketing material.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do adverts in your software comply with UK standards?</td>
         <td class="govuk-table__cell">
           <p class="govuk-body govuk-!-margin-bottom-2">Advertising that appears in your software (including third party advertising) must follow:</p>
@@ -181,8 +190,35 @@
         </td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            You are responsible for all marketing and promotional content produced by, or on behalf of your organisation, including websites, 
+            software, blogs, adverts and social media. Your advertising and marketing content <strong>must not</strong>: 
+            <ul>
+              <li>mislead customers about what your software can do</li>
+              <li>claim to be ready, compatible or integrated, before access to the live environment is granted</li>
+              <li>present planned features as if they are available now</li>
+              <li>include content that contradicts HMRC’s official guidance and policy</li>
+              <li>use search engine optimisation (SEO) techniques or bulk generated content to promote inaccurate content.</li>
+            </ul>
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you advertise your software as ‘HMRC recognised’?</td>
         <td class="govuk-table__cell">Only use ‘HMRC recognised’ when advertising your software. Do not use terms like ‘accredited’ or ‘approved’.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <ul>
+              <li>You may describe your software as “HMRC recognised” if it has successfully completed HMRC’s formal recognition process. You <strong>must not</strong> claim or imply your software is ‘HMRC recognised’ unless you have successfully completed the formal recognition process.</li>
+              <li>You <strong>must not</strong> claim or imply that your software is HMRC approved, accredited, certified, Kitemarked or similar.</li>
+            </ul>
+          </p>
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you get your customers’ consent before sharing their personal data for marketing?</td>
@@ -210,12 +246,40 @@
         <td class="govuk-table__cell">You must develop your software following our <a href="/api-documentation/docs/development-practices" class="govuk-link" target="_blank" rel="noreferrer noopener">development practices (opens in a new tab)</a>.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            Your software <strong>must</strong> be built and tested to meet HMRC’s technical specifications before you request live access. 
+            Make sure you understand the specific requirements of the APIs you want to integrate with, as each HMRC service 
+            has its own rules and documentation.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Does your error handling meet our specification?</td>
         <td class="govuk-table__cell">We will check for evidence that you comply with our <a href="/api-documentation/docs/reference-guide#errors" class="govuk-link" target="_blank" rel="noreferrer noopener">error handling specification (opens in a new tab)</a>.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            Your software <strong>must</strong> be built to meet our error handling specification.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Does your software meet accessibility standards?</td>
         <td class="govuk-table__cell">Web-based software must meet level AA of the <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" class="govuk-link" target="_blank" rel="noreferrer noopener">Web Content Accessibility Guidelines (WCAG) (opens in a new tab)</a>. Desktop software should follow equivalent offline standards.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            Web-based software <strong>must</strong> meet Level AA of the Web Content Accessibility Guidelines (WCAG). 
+            Desktop software should follow equivalent offline standards. To be listed as accessible on HMRC’s Gov.UK 
+            software recognition pages, you will need to provide evidence of compliance to this standard.
+          </p>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -235,8 +299,27 @@
         <td class="govuk-table__cell">We expect you to provide an easy contact method in the case of a security breach.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <strong>You must</strong> provide a way for customers or third parties to report security risks or incidents to you. 
+            This should be easy to find and use, enabling issues to be raised and acted on quickly.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you have a process for notifying HMRC in the case of a security breach?</td>
         <td class="govuk-table__cell">Any issues concerning the security of personal or customer data must be reported immediately to HMRC by <a href="/devhub-support" class="govuk-link" target="_blank" rel="noreferrer noopener">logging a ticket (opens in new tab)</a> within 72 hours, providing a breach contact name and telephone number. You must also <a href="https://ico.org.uk/for-organisations/report-a-breach/personal-data-breach/personal-data-breaches-a-guide/" class="govuk-link" target="_blank" rel="noreferrer noopener">notify the ICO about personal data breaches (opens in a new tab)</a> within 72 hours of becoming aware of it.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <strong>You must</strong> have a clear process in place to report security incidents to HMRC. 
+            Any issues affecting customer data must be reported immediately, and full details must be provided to HMRC within 72 hours. 
+            Where personal data is involved, you must also notify the ICO within 72 hours of becoming aware of the breach.
+          </p>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -265,24 +348,79 @@
           </ul></td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means (UK GDPR compliance):</strong><br>
+            <strong>You must</strong> handle customer data in line with UK GDPR. This means being clear with customers about 
+            what data you collect, why you collect it, your legal basis for doing so, and your responsibility to keep it secure.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you encrypt all customer data that you handle?</td>
         <td class="govuk-table__cell">You must encrypt access tokens and personally identifiable data when it is stored and in transit. Read the <a href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/security/a-guide-to-data-security/encryption/" class="govuk-link" target="_blank" rel="noreferrer noopener">UK GDPR guidelines on encryption (opens in a new tab)</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            When storing and transferring customer data, <strong>you must</strong> encrypt it. This includes access tokens 
+            and any information that could identify an individual.
+          </p>
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you ensure that each customer’s data cannot be accessed by unauthorised users?</td>
         <td class="govuk-table__cell">Read the National Cyber Security Centre’s guidance on <a href="https://www.ncsc.gov.uk/collection/cloud-security/implementing-the-cloud-security-principles/separation-between-users" class="govuk-link">keeping user data separate</a> and best practice for <a href="https://www.ncsc.gov.uk/collection/passwords/updating-your-approach" class="govuk-link" target="_blank" rel="noreferrer noopener">username and password security (opens in a new tab)</a>.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <strong>You must</strong> ensure that customer data is kept separate and secure. 
+            Your system should be designed so that one customer cannot access another customer’s data.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you have access control for employees using customer data?</td>
         <td class="govuk-table__cell">Using a personnel security policy and Role Based Access Control (RBAC) will ensure that employees can only access data essential to their job role. Read the <a href="https://www.ncsc.gov.uk/collection/cloud-security/implementing-the-cloud-security-principles/personnel-security" class="govuk-link" target="_blank" rel="noreferrer noopener">National Cyber Security Centre’s guidance (opens in a new tab)</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            Where appropriate, <strong>you must</strong> implement clear roles and access controls, to ensure employees can 
+            only access information relevant to their job.
+          </p>
+        </td>
       </tr>
       <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Can customers get their data from your software if they switch providers?</td>
         <td class="govuk-table__cell">You must allow customers to change, export or delete their data if they want to. Read the <a href="https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/individual-rights/" class="govuk-link" target="_blank" rel="noreferrer noopener">UK GDPR guidelines on individuals rights (opens in a new tab)</a>.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <strong>You must</strong> allow customers to access, change, export or delete their data if they 
+            choose to move to another provider or no longer use your service.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you store your customers’ HMRC sign in details?</td>
         <td class="govuk-table__cell">Implementing OAuth 2.0 means there is no need to store HMRC sign in details.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            You <strong>should not</strong> store customers’ HMRC sign-in details. Using OAuth 2.0 means customers 
+            authenticate directly with HMRC, so your software does not need to collect, handle or store these credentials. 
+            Storing HMRC sign-in details creates an unnecessary security risk.
+          </p>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -306,8 +444,27 @@
         <td class="govuk-table__cell">Use either penetration test tools or an independent third party supplier. For penetration testing methodologies read the <a href="https://www.ncsc.gov.uk/guidance/penetration-testing" class="govuk-link" target="_blank" rel="noreferrer noopener">National Cyber Security Centre Penetration Guide (opens in a new tab)</a>.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <strong>You must</strong> test your software for security vulnerabilities before going live. 
+            This should include regular penetration testing using appropriate tools to identify and fix 
+            vulnerabilities that could put the customer or HMRC at risk.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you audit security controls to ensure you comply with data protection law?</td>
         <td class="govuk-table__cell">Assess your compliance using the <a href="https://ico.org.uk/for-organisations/advice-for-small-organisations/checklists/data-protection-self-assessment/information-security-checklist/" class="govuk-link" target="_blank" rel="noreferrer noopener">ICO information security checklist (opens in a new tab)</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            <strong>You must</strong> regularly check that your security controls are working and comply with data protection 
+            regulations. This includes reviewing how you protect customer data and taking action where gaps or weaknesses are identified.
+          </p>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -331,8 +488,26 @@
         <td class="govuk-table__cell">You must submit header data in line with the <a href="https://developer.service.hmrc.gov.uk/guides/fraud-prevention/" class="govuk-link" target="_blank" rel="noreferrer noopener">fraud prevention specification (opens in a new tab)</a>.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            You must include HMRC‑specified fraud‑prevention header data in all API requests, 
+            as this helps protect customer accounts and identify suspicious activity.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Have you checked that your software submits fraud prevention data correctly?</td>
         <td class="govuk-table__cell">Before you submit any header data, you need to use the <a href="https://developer.service.hmrc.gov.uk/api-documentation/docs/api/service/txm-fph-validator-api/1.0" class="govuk-link" target="_blank" rel="noreferrer noopener">Test Fraud Prevention Headers API (opens in a new tab)</a>.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            You must test your fraud prevention headers before going live to make sure your software 
+            sends the required security data correctly and to avoid your production access request being rejected or delayed.
+          </p>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -352,12 +527,40 @@
         <td class="govuk-table__cell">For cloud software, check the server location with your cloud provider.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means (server location):</strong><br>
+            You must know where customer data is processed and stored. If you use a cloud provider, 
+            you should confirm the server location and make sure it meets your data protection responsibilities.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you have a privacy policy URL for your software?</td>
         <td class="govuk-table__cell">You need a privacy policy covering the software you request production credentials for.</td>
       </tr>
       <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            Commercial software <strong>must</strong> have a clear and accessible privacy policy that explains how you collect, use and 
+            protect customer data. It must accurately reflect how your product works and be specific to the service you 
+            are providing, rather than generic or template wording.
+          </p>
+        </td>
+      </tr>
+      <tr class="govuk-table__row">
         <td scope="row" class="govuk-table__cell">Do you have a terms and conditions URL for your software?</td>
         <td class="govuk-table__cell">You need terms and conditions covering the software you request production credentials for.</td>
+      </tr>
+      <tr class="govuk-table__row">
+        <td colspan="2" class="govuk-table__cell">
+          <p class="govuk-body govuk-!-margin-top-1 govuk-!-margin-bottom-3">  
+            <strong>What this means:</strong><br>
+            You must have clear and accessible terms and conditions for your software that sets out how your service works 
+            and the responsibilities of both you and your customers.
+          </p>
+        </td>
       </tr>
     </tbody>
   </table>
