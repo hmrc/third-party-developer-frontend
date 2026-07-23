@@ -94,10 +94,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   val sandboxApplication: ApplicationWithCollaborators = standardApp.withId(sandboxApplicationId).inSandbox()
 
-  val userId           = UserId.random
-  val organisationId   = OrganisationId.random
+  val userId         = UserId.random
+  val organisationId = OrganisationId.random
 
-  val organisation     = Organisation(
+  val organisation = Organisation(
     organisationId,
     OrganisationName("Org name"),
     Organisation.OrganisationType.UkLimitedCompany,
