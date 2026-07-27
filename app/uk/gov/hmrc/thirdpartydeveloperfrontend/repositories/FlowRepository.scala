@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
-import scala.reflect.runtime.universe._
 
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.model.Indexes.ascending
@@ -52,7 +51,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
           ascending("lastUpdated"),
           IndexOptions().name("last_updated_ttl_idx")
             .background(true)
-            .expireAfter(appConfig.sessionTimeoutInSeconds, TimeUnit.SECONDS)
+            .expireAfter(appConfig.sessionTimeoutInSeconds.toLong, TimeUnit.SECONDS)
         )
       ),
       extraCodecs = Codecs.playFormatCodecsBuilder(formatFlow)
@@ -91,7 +90,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: A#Type)(implicit tt: TypeTag[A], ct: ClassTag[A]): Future[Option[A]] = {
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: A#Type)(implicit ct: ClassTag[A]): Future[Option[A]] = {
     val flowType = FlowType.from[A]
     collection.find[A](and(equal("sessionId", sessionId.toString), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }

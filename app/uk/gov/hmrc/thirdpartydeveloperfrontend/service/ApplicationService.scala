@@ -175,7 +175,7 @@ class ApplicationService @Inject() (
     val instigator       = requester.developer.userId
     val deleteRestricted = !(application.details.deleteRestriction == DeleteRestriction.NoRestriction)
 
-    if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD && !deleteRestricted) {
+    if (environment == Environment.Sandbox && requesterRole == Collaborator.Role.Administrator && application.access.accessType == AccessType.Standard && !deleteRestricted) {
 
       val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant)
       dispatchCmd(application.id, deleteRequest)
@@ -255,7 +255,7 @@ object ApplicationService {
       apiIdentifier =>
         apiDefinitions.find(_.context == apiIdentifier.context) match {
           case None      => false
-          case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
+          case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.Example)
         }
 
   val filterSubscriptionsToRemoveTestAndExampleApis: List[ApiDefinition] => Map[ApplicationId, Set[ApiIdentifier]] => Map[ApplicationId, Set[ApiIdentifier]] =

@@ -55,7 +55,7 @@ class EmailPreferencesService @Inject() (
         .flatMap {
           case Right(x) => successful(x)
           case Left(_)  => apmConnector.fetchApiDefinitionsVisibleToUser(Some(userSession.developer.userId)).map(_.map(y =>
-              CombinedApi(y.name, y.serviceName, y.categories.toSet, ApiType.REST_API, ApiAccessType.PUBLIC)
+              CombinedApi(y.name, y.serviceName, y.categories.toSet, ApiType.RestApi, ApiAccessType.Public)
             ))
         }
       updateVisibleApis(userSession, visibleApis)
@@ -75,7 +75,7 @@ class EmailPreferencesService @Inject() (
     apmConnector.fetchCombinedApi(serviceName).flatMap {
       case Right(x) => successful(Some(x))
       case Left(_)  => apmConnector.fetchExtendedApiDefinition(serviceName).flatMap {
-          case Right(y) => successful(Some(CombinedApi(y.name, y.serviceName, y.categories.toSet, ApiType.REST_API, ApiAccessType.PUBLIC)))
+          case Right(y) => successful(Some(CombinedApi(y.name, y.serviceName, y.categories.toSet, ApiType.RestApi, ApiAccessType.Public)))
           case Left(_)  => successful(None)
         }
     }

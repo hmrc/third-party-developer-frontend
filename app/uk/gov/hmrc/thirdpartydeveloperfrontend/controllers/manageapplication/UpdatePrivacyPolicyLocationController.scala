@@ -74,8 +74,8 @@ class UpdatePrivacyPolicyLocationController @Inject() (
 
       val oldLocation = application.access match {
         case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, _, privacyPolicyLocation, _))) => privacyPolicyLocation
-        case Access.Standard(_, _, _, Some(privacyPolicyUrl), _, _, None)                                           => PrivacyPolicyLocations.Url(privacyPolicyUrl)
-        case _                                                                                                      => PrivacyPolicyLocations.NoneProvided
+        case Access.Standard(_, _, _, Some(privacyPolicyUrl), _, _, None)                                           => PrivacyPolicyLocation.Url(privacyPolicyUrl)
+        case _                                                                                                      => PrivacyPolicyLocation.NoneProvided
       }
       val newLocation = form.toLocation
 

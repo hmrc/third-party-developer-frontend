@@ -41,7 +41,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
     type Type = UserSession => Boolean
 
     val alwaysTrueFilter: DeveloperSessionFilter.Type         = _ => true
-    val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LOGGED_IN
+    val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LoggedIn
   }
 
   def loggedInActionRefiner(filter: DeveloperSessionFilter.Type = DeveloperSessionFilter.onlyTrueIfLoggedInFilter): ActionRefiner[MessagesRequest, UserRequest] =

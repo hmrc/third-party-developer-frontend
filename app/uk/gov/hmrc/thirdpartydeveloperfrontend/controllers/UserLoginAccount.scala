@@ -28,7 +28,7 @@ import play.api.mvc.{Session => PlaySession, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
@@ -39,7 +39,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccess
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AuthenticatorApp, Sms}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
@@ -166,14 +166,14 @@ class UserLoginAccount @Inject() (
 
   private def handleAuthAppFlow(userId: UserId, authAppDetail: AuthenticatorAppMfaDetail, session: PlaySession) = {
     successful(
-      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AUTHENTICATOR_APP), SEE_OTHER).withSession(session + ("userId" -> userId.value.toString))
+      Redirect(routes.UserLoginAccount.loginAccessCodePage(authAppDetail.id, AuthenticatorApp), SEE_OTHER).withSession(session + ("userId" -> userId.value.toString))
     )
   }
 
   private def handleSmsFlow(userId: UserId, smsMfaDetail: SmsMfaDetail, session: PlaySession)(implicit hc: HeaderCarrier) = {
     thirdPartyDeveloperMfaConnector.sendSms(userId, smsMfaDetail.id).map {
       case true =>
-        Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, SMS), SEE_OTHER)
+        Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, Sms), SEE_OTHER)
           .withSession(session + ("userId" -> userId.value.toString))
           .flashing("mobileNumber" -> obfuscateNumber(smsMfaDetail.mobileNumber))
 
@@ -277,8 +277,8 @@ class UserLoginAccount @Inject() (
         case Some(developer: User) =>
           {}
           if (hasVerifiedSmsAndAuthApp(developer.mfaDetails)) {
-            val authAppMfaId = getMfaDetailByType(MfaType.AUTHENTICATOR_APP, developer.mfaDetails)
-            val smsMfaId     = getMfaDetailByType(MfaType.SMS, developer.mfaDetails)
+            val authAppMfaId = getMfaDetailByType(MfaType.AuthenticatorApp, developer.mfaDetails)
+            val smsMfaId     = getMfaDetailByType(MfaType.Sms, developer.mfaDetails)
             successful(Ok(selectLoginMfaView(SelectLoginMfaForm.form, authAppMfaId.id, smsMfaId.id)))
           } else {
             logger.warn("Inconsistent state of user mfa")
@@ -292,8 +292,8 @@ class UserLoginAccount @Inject() (
   def loginAccessCodePage(mfaId: MfaId, mfaType: MfaType): Action[AnyContent] = Action.async { implicit request =>
     def handleMfaType(userHasMultipleMfa: Boolean) = {
       mfaType match {
-        case AUTHENTICATOR_APP => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
-        case SMS               => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
+        case AuthenticatorApp => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
+        case Sms               => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
       }
     }
 
@@ -319,8 +319,8 @@ class UserLoginAccount @Inject() (
         val verifiedMfaDetailsOfOtherTypes = session.developer.mfaDetails.filter(_.verified).filterNot(_.mfaType == mfaType)
 
         (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
-          case (true, AUTHENTICATOR_APP) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
-          case (true, SMS)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
+          case (true, AuthenticatorApp) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
+          case (true, Sms)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
           case _                         => loginSucceeded(request)
         }
       } else {
@@ -353,19 +353,19 @@ class UserLoginAccount @Inject() (
     }
 
     def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean) = mfaType match {
-      case AUTHENTICATOR_APP => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
-      case SMS               => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
+      case AuthenticatorApp => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
+      case Sms               => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
     }
 
     def handleAccessCodeError(form: MfaAccessCodeForm, mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
       mfaType match {
-        case AUTHENTICATOR_APP => Unauthorized(authAppLoginAccessCodeView(
+        case AuthenticatorApp => Unauthorized(authAppLoginAccessCodeView(
             MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
             mfaId,
             mfaType,
             userHasMultipleMfa
           ))
-        case SMS               => Unauthorized(smsLoginAccessCodeView(
+        case Sms               => Unauthorized(smsLoginAccessCodeView(
             MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
             mfaId,
             mfaType,

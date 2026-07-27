@@ -213,13 +213,13 @@ class EmailPreferencesController @Inject() (
     ): EmailPreferencesSummaryViewData = {
 
     def decorateXmlApiDisplayName(api: CombinedApi): String = {
-      if (api.apiType == ApiType.XML_API) { api.displayName + " - XML API" }
+      if (api.apiType == ApiType.XmlApi) { api.displayName + " - XML API" }
       else api.displayName
     }
 
     EmailPreferencesSummaryViewData(
       createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
-      filteredAPIs.map(a => (a.serviceName.value, decorateXmlApiDisplayName(a))).toMap,
+      filteredAPIs.map(a => (a.serviceName, decorateXmlApiDisplayName(a))).toMap,
       unsubscribed
     )
   }
@@ -261,7 +261,7 @@ class EmailPreferencesController @Inject() (
       flow: NewApplicationEmailPreferencesFlowV2
     )(implicit request: UserRequest[AnyContent]
     ): Html =
-    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName.value))
+    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectApisFromSubscriptionsForm.form.bindFromRequest()

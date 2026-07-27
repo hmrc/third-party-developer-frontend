@@ -105,12 +105,12 @@ class ChangeAppNameAndDescController @Inject() (
     val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
-      application.name.value
+      application.name
     }
     val effectiveDescription = form.description.filterNot(_.isBlank()).map(desc => desc.trim)
 
     List(
-      if (effectiveNewName == application.name.value)
+      if (effectiveNewName == application.name)
         List.empty
       else {
         val validateAppName = ValidatedApplicationName.validate(effectiveNewName)

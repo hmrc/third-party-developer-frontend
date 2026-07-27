@@ -82,7 +82,7 @@ object EditManageSubscription {
         apiSubscription.name,
         apiSubscription.apiVersion.versionNbr,
         apiSubscription.context,
-        apiSubscription.apiVersion.status.displayText,
+        apiSubscription.apiVersion.status.toString,
         fieldsViewModel,
         formErrors
       )
@@ -127,7 +127,7 @@ object EditManageSubscription {
         apiSubscription.name,
         apiSubscription.apiVersion.versionNbr,
         apiSubscription.context,
-        apiSubscription.apiVersion.status.displayText,
+        apiSubscription.apiVersion.status.toString,
         subscriptionFieldViewModel,
         formErrors
       )

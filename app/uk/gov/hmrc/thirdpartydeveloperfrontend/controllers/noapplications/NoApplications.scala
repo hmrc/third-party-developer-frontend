@@ -39,7 +39,7 @@ object NoApplications {
   object NoApplicationsChoiceForm {
 
     def form: Form[NoApplicationsChoiceForm] = Form(mapping("choice" -> optional(text)
-      .verifying(FormKeys.noApplicationsChoiceRequiredKey.value, s => s.isDefined))(NoApplicationsChoiceForm.apply)(NoApplicationsChoiceForm.unapply))
+      .verifying(FormKeys.noApplicationsChoiceRequiredKey.value, s => s.isDefined))(NoApplicationsChoiceForm.apply)(n => Some(n.choice)))
 
   }
 }

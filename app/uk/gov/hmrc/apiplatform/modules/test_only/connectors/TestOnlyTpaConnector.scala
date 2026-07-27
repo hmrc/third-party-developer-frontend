@@ -61,7 +61,7 @@ class TestOnlyTpaSandboxConnector @Inject() (
   )(implicit ec: ExecutionContext
   ) extends TestOnlyTpaConnector(http, appConfig)(ec) {
 
-  val environment: Environment = Environment.SANDBOX
+  val environment: Environment = Environment.Sandbox
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationSandboxUrl
   val useProxy: Boolean        = appConfig.thirdPartyApplicationSandboxUseProxy
   val apiKey: String           = appConfig.thirdPartyApplicationSandboxApiKey
@@ -78,7 +78,7 @@ class TestOnlyTpaProductionConnector @Inject() (
     val appConfig: ApplicationConfig
   )(implicit ec: ExecutionContext
   ) extends TestOnlyTpaConnector(http, appConfig)(ec) {
-  val environment: Environment = Environment.PRODUCTION
+  val environment: Environment = Environment.Production
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationProductionUrl
 
   val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity

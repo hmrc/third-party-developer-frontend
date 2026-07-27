@@ -44,14 +44,14 @@ class UpliftLogic @Inject() (
   def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[UpliftLogic.Data] = {
     // Concurrent requests
     val fApisAvailableInProd  = apmConnector.fetchUpliftableApiIdentifiers
-    val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.SANDBOX)
+    val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.Sandbox)
     val fAllSummaries         = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
 
     for {
       apisAvailableInProd    <- fApisAvailableInProd
       sandboxApis            <- fAllSandboxApiDetails
       allSummaries           <- fAllSummaries
-      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType == AccessType.STANDARD)
+      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType == AccessType.Standard)
 
       subscriptionsForApps = getSubscriptionsByApp(possibleUpliftSummaries)
 
@@ -73,13 +73,13 @@ object UpliftLogic {
   }
 
   def contextsOfTestSupportAndExampleApis(apis: List[ApiDefinition]): Set[ApiContext] = {
-    filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
+    filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.Example))(apis)
       .map(_.context)
       .toSet
   }
 
   def apiIdentifiersOfRetiredApis(apis: List[ApiDefinition]): Set[ApiIdentifier] = {
-    (filterApis(_ => true, v => v.status == ApiStatus.RETIRED) _ andThen toApiIdentifiers)(apis)
+    (filterApis(_ => true, v => v.status == ApiStatus.Retired) _ andThen toApiIdentifiers)(apis)
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(

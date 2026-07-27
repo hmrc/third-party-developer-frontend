@@ -74,8 +74,8 @@ class UpdateTermsAndConditionsLocationController @Inject() (
 
       val oldLocation = application.access match {
         case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-        case Access.Standard(_, _, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
-        case _                                                                                                           => PrivacyPolicyLocations.NoneProvided
+        case Access.Standard(_, _, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
+        case _                                                                                                           => TermsAndConditionsLocation.NoneProvided
       }
       val newLocation = form.toLocation
 

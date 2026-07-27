@@ -202,4 +202,19 @@ package object binders {
       textBinder.unbind(key, applicationId.value.toString())
     }
   }
+
+  private def organisationIdFromString(text: String): Either[String, OrganisationId] = {
+    OrganisationId.apply(text).toRight(s"Cannot accept $text as OrganisationId")
+  }
+
+  implicit def organisationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[OrganisationId] = new QueryStringBindable[OrganisationId] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, OrganisationId]] = {
+      textBinder.bind(key, params).map(_.flatMap(organisationIdFromString))
+    }
+
+    override def unbind(key: String, organisationId: OrganisationId): String = {
+      textBinder.unbind(key, organisationId.value.toString())
+    }
+  }
 }

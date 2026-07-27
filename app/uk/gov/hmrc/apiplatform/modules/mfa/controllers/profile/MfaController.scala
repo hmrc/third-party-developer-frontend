@@ -34,7 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AuthenticatorApp, Sms}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.UpdateLoggedInStateRequest
@@ -103,8 +103,8 @@ class MfaController @Inject() (
 
   private def setupSelectedMfa(mfaType: String): Future[Result] = {
     MfaType.unsafeApply(mfaType) match {
-      case SMS               => successful(Redirect(routes.MfaController.setupSms()))
-      case AUTHENTICATOR_APP => successful(Redirect(routes.MfaController.authAppStart()))
+      case Sms               => successful(Redirect(routes.MfaController.setupSms()))
+      case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppStart()))
     }
   }
 
@@ -112,12 +112,12 @@ class MfaController @Inject() (
 
     def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId): Future[Result] = {
       mfaType match {
-        case SMS               =>
+        case Sms               =>
           thirdPartyDeveloperMfaConnector.sendSms(userId, mfaIdForAuthentication) flatMap {
             case true  => successful(Redirect(routes.MfaController.smsAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
             case false => internalServerErrorTemplate("Failed to send SMS")
           }
-        case AUTHENTICATOR_APP => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
+        case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
       }
     }
 
@@ -152,7 +152,7 @@ class MfaController @Inject() (
   def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LoggedIn))
         Redirect(routes.MfaController.nameChangePage(mfaId))
       }
 
@@ -247,7 +247,7 @@ class MfaController @Inject() (
   def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LoggedIn))
         Redirect(routes.MfaController.smsSetupCompletedPage())
       }
 
@@ -294,8 +294,8 @@ class MfaController @Inject() (
 
   private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     mfaType match {
-      case AUTHENTICATOR_APP => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
-      case SMS               =>
+      case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
+      case Sms               =>
         thirdPartyDeveloperMfaConnector.sendSms(userId, mfaId).flatMap {
           case true  => successful(Redirect(routes.MfaController.smsAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
           case false => internalServerErrorTemplate("Failed to send SMS")

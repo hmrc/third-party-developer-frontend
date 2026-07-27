@@ -54,13 +54,13 @@ class AppsByTeamMemberService @Inject() (
     }
 
   def fetchProductionSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
-    fetchAppsByTeamMember(Environment.PRODUCTION)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
+    fetchAppsByTeamMember(Environment.Production)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
 
   def fetchProductionSummariesByAdmin(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
-    fetchByTeamMemberWithRole(Environment.PRODUCTION)(Collaborator.Roles.ADMINISTRATOR)(userId: UserId)
+    fetchByTeamMemberWithRole(Environment.Production)(Collaborator.Role.Administrator)(userId: UserId)
 
   def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
-    fetchAppsByTeamMember(Environment.SANDBOX)(userId) recover { case NonFatal(_) => Seq.empty }
+    fetchAppsByTeamMember(Environment.Sandbox)(userId) recover { case NonFatal(_) => Seq.empty }
 
   def fetchSandboxSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
     fetchSandboxAppsByTeamMember(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))

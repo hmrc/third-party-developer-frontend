@@ -46,8 +46,8 @@ class DashboardService @Inject() (
     }
 
     for {
-      productionApps <- appSvc.fetchAppsByTeamMember(Environment.PRODUCTION)(userId)
-      sandboxApps    <- appSvc.fetchAppsByTeamMember(Environment.SANDBOX)(userId)
+      productionApps <- appSvc.fetchAppsByTeamMember(Environment.Production)(userId)
+      sandboxApps    <- appSvc.fetchAppsByTeamMember(Environment.Sandbox)(userId)
       combinedAppList = createDashboardAppList(productionApps, sandboxApps)
     } yield combinedAppList
   }

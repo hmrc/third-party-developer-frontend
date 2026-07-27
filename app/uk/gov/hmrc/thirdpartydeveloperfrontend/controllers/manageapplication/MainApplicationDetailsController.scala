@@ -95,7 +95,7 @@ class MainApplicationDetailsController @Inject() (
       }
 
     request.application.state.name match {
-      case State.TESTING =>
+      case State.Testing =>
         lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
         lazy val newUpliftJourney = (s: Submission) =>
@@ -111,7 +111,7 @@ class MainApplicationDetailsController @Inject() (
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 
-      case State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION | State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
+      case State.PendingResponsibleIndividualVerification | State.PendingGatekeeperApproval | State.PendingRequesterVerification => {
         lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
         lazy val newUpliftJourney = (s: Submission) =>
@@ -120,17 +120,17 @@ class MainApplicationDetailsController @Inject() (
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
       }
 
-      case State.PRE_PRODUCTION =>
+      case State.PreProduction =>
         request.queryString.contains("forceAppDetails") match {
           case true  => appDetailsPage
           case false =>
             successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId)))
         }
 
-      case State.PRODUCTION =>
+      case State.Production =>
         appDetailsPage
 
-      case State.DELETED =>
+      case State.Deleted =>
         successful(BadRequest)
     }
   }
@@ -138,7 +138,7 @@ class MainApplicationDetailsController @Inject() (
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): Future[TermsOfUseViewModel] = {
     implicit val hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(request)
     val application                                 = request.application
-    val requiresTermsOfUse                          = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
+    val requiresTermsOfUse                          = !application.deployedTo.isSandbox && application.access.accessType == AccessType.Standard
 
     if (requiresTermsOfUse) {
       val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption

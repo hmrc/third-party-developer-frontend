@@ -41,7 +41,7 @@ trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
     )
     http.get(url"${baseUrl}?$queryParams")
       .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
+      .map(_.values.toList)
   }
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
@@ -51,7 +51,7 @@ trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
 
     http.get(url"${baseUrl}/open?$queryParams")
       .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
+      .map(_.values.toList)
   }
 
   def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
@@ -66,7 +66,7 @@ trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
     )
     http.get(url"${baseUrl}/all?$queryParams")
       .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
+      .map(_.values.toList)
   }
 
   def fetchExtendedApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =

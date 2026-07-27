@@ -164,7 +164,7 @@ class AddApplication @Inject() (
       access = CreationAccess.Standard,
       environment = environment,
       description = None,
-      collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
+      collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Role.Administrator, loggedInDeveloper.userId)),
       subscriptions = None,
       organisationId = form.organisationId
     )
@@ -210,7 +210,7 @@ class AddApplication @Inject() (
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime).toSet
         val filteredApis    = apiDetails.filter(api => api.categories.map(_.toString).intersect(allInCategories).isEmpty) // TODO - types
-        filteredApis.map(_.serviceName.value).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
+        filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
       }
     }
 
@@ -218,7 +218,7 @@ class AddApplication @Inject() (
       import appRequest._
 
       deployedTo match {
-        case Environment.SANDBOX    => {
+        case Environment.Sandbox    => {
           val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
           subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), userSession.developer.emailPreferences) map { missingSubscriptions =>
             if (alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
@@ -229,7 +229,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case Environment.PRODUCTION => errorHandler.notFoundTemplate(appRequest).map(NotFound(_))
+        case Environment.Production => errorHandler.notFoundTemplate(appRequest).map(NotFound(_))
       }
     }
   }

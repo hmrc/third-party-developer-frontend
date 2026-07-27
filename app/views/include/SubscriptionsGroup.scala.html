@@ -55,13 +55,13 @@
       </div>
       <div id="@displayableAccordionId()-content-@displayableSectionId(apiSubscription)" class="govuk-accordion__section-content" role="region" aria-labelledby="@displayableAccordionId()-heading-@displayableSectionId(apiSubscription)">
         @apiSubscription.subscriptions.map { case api =>
-          @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.versionNbr} (${api.apiVersion.status.displayText})") { apiVersionFullName =>
+          @defining(s"${apiSubscription.apiHumanReadableAppName} ${api.apiVersion.versionNbr} (${api.apiVersion.status.toString})") { apiVersionFullName =>
             <div class="govuk-grid-row">
               <div class="govuk-grid-column-one-half">
                 <div class="govuk-form-group govuk-!-margin-bottom-0">
                   <p class='govuk-body govuk-!-padding-top-2'>
                     <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.versionNbr" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
-                      @{api.apiVersion.versionNbr} (@{api.apiVersion.status.displayText})
+                      @{api.apiVersion.versionNbr} (@{api.apiVersion.status.toString})
                     </a>
                   </p>
                 </div>
@@ -94,7 +94,7 @@
                   @helper.form(action = controllers.routes.SubscriptionsController.changeApiSubscription(app.id, api.context, api.apiVersion.versionNbr, afterSubscriptionRedirectTo.toString), Symbol("class") -> "slider") {
                     @helper.CSRF.formField
                     <fieldset id="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-toggle" @if(app.areSubscriptionsLocked || api.isPrivate) { disabled } aria-live="assertive">
-                      <legend class="govuk-visually-hidden">subscribe to @{api.name} @{api.apiVersion.versionNbr} (@{api.apiVersion.status.displayText})</legend>
+                      <legend class="govuk-visually-hidden">subscribe to @{api.name} @{api.apiVersion.versionNbr} (@{api.apiVersion.status.toString})</legend>
                       <div class="slider__radios slider__radios--font-fix">
                         <input class="slider__on slider__on-submit" id="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-on" name="subscribed" type="radio" value="true" @if(api.subscribed) {checked} else {}>
                         <label class="govuk-label govuk-radios__label slider__on--label" for="@IdFormatter.identifier(api.context, api.apiVersion.versionNbr)-on">Yes</label>

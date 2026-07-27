@@ -46,11 +46,11 @@ object ManageSubscriptions {
   case class ApiDetails(name: String, context: ApiContext, version: ApiVersionNbr, displayedStatus: String, subsValues: Seq[Field])
 
   def toFieldValue(accessLevel: DevhubAccessLevel)(sfv: SubscriptionFieldValue): Field = {
-    def default(in: String, default: String) = if (in.isEmpty) default else in
+    def default(in: FieldValue, default: String): String = if (in.isEmpty) default else in.toString
 
     val canWrite = sfv.definition.access.devhub.satisfiesWrite(accessLevel)
 
-    Field(sfv.definition.name.value, sfv.definition.shortDescription, default(sfv.value.value, "None"), canWrite)
+    Field(sfv.definition.name, sfv.definition.shortDescription, default(sfv.value, "None"), canWrite)
   }
 
   def toDetails(accessLevel: DevhubAccessLevel)(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
@@ -58,7 +58,7 @@ object ManageSubscriptions {
       name = in.name,
       context = in.context,
       version = in.apiVersion.versionNbr,
-      displayedStatus = in.apiVersion.status.displayText,
+      displayedStatus = in.apiVersion.status.toString,
       subsValues = in.fields.fields.map(toFieldValue(accessLevel))
     )
   }

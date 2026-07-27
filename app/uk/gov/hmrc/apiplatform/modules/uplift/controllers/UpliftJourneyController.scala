@@ -57,7 +57,7 @@ object UpliftJourneyController {
     val form: Form[ChooseApplicationToUpliftForm] = Form(
       mapping(
         "applicationId" -> nonEmptyText.transform[ApplicationId](text => ApplicationId(UUID.fromString(text)), id => id.toString())
-      )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+      )(ChooseApplicationToUpliftForm.apply)(c => Some(c.applicationId))
     )
   }
 
@@ -68,7 +68,7 @@ object UpliftJourneyController {
     def form: Form[SellResellOrDistributeForm] = Form(
       mapping(
         "answer" -> optional(text).verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey.value, s => s.isDefined)
-      )(SellResellOrDistributeForm.apply)(SellResellOrDistributeForm.unapply)
+      )(SellResellOrDistributeForm.apply)(s => Some(s.answer))
     )
   }
 }
@@ -170,7 +170,7 @@ class UpliftJourneyController @Inject() (
     for {
       sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.userSession)
       form                    =
-        sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
+        sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.value))))
     } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
   }
 
@@ -194,8 +194,8 @@ class UpliftJourneyController @Inject() (
       validForm.answer match {
         case Some(answer) =>
           request.application.deployedTo match {
-            case Environment.SANDBOX    => storeResultAndGotoApiSubscriptionsPage(answer)
-            case Environment.PRODUCTION => createSubmissionAndGotoQuestionnairePage(answer)
+            case Environment.Sandbox    => storeResultAndGotoApiSubscriptionsPage(answer)
+            case Environment.Production => createSubmissionAndGotoQuestionnairePage(answer)
           }
 
         case None => throw new IllegalStateException("Should never get here")
@@ -245,8 +245,8 @@ class UpliftJourneyController @Inject() (
 
   def weWillCheckYourAnswers(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     request.application.deployedTo match {
-      case Environment.SANDBOX    => successful(Ok(weWillCheckYourAnswersView(appId)))
-      case Environment.PRODUCTION =>
+      case Environment.Sandbox    => successful(Ok(weWillCheckYourAnswersView(appId)))
+      case Environment.Production =>
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
     }
   }
@@ -259,14 +259,14 @@ object DummySubscriptionsForm {
   def form: Form[DummySubscriptionsForm] = Form(
     mapping(
       "hasNonExampleSubscription" -> boolean
-    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+    )(DummySubscriptionsForm.apply)(d => Some(d.hasNonExampleSubscription))
       .verifying("error.must.subscribe", x => x.hasNonExampleSubscription)
   )
 
   def form2: Form[DummySubscriptionsForm] = Form(
     mapping(
       "hasNonExampleSubscription" -> boolean
-    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+    )(DummySubscriptionsForm.apply)(d => Some(d.hasNonExampleSubscription))
       .verifying("error.turnoffapis.requires.at.least.one", x => x.hasNonExampleSubscription)
   )
 }

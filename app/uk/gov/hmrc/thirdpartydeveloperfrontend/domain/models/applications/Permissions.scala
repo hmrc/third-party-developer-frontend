@@ -49,7 +49,7 @@ object Permissions {
 
     override def hasPermissions(app: ApplicationWithCollaborators, developer: User): Boolean =
       app.deployedTo match {
-        case Environment.SANDBOX => true
+        case Environment.Sandbox => true
         case _                   => false
       }
   }

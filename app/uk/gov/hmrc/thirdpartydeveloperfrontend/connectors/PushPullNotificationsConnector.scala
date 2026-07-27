@@ -79,7 +79,7 @@ class SandboxPushPullNotificationsConnector @Inject() (
   )(implicit val ec: ExecutionContext
   ) extends AbstractPushPullNotificationsConnector {
 
-  val environment: Environment = Environment.SANDBOX
+  val environment: Environment = Environment.Sandbox
   val serviceBaseUrl: String   = appConfig.ppnsSandboxUrl
   val useProxy: Boolean        = appConfig.ppnsSandboxUseProxy
   val apiKey: String           = appConfig.ppnsSandboxApiKey
@@ -100,7 +100,7 @@ class ProductionPushPullNotificationsConnector @Inject() (
 
   val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity
 
-  val environment: Environment = Environment.PRODUCTION
+  val environment: Environment = Environment.Production
   val serviceBaseUrl: String   = appConfig.ppnsProductionUrl
   val authorizationKey: String = appConfig.ppnsProductionAuthorizationKey
 }

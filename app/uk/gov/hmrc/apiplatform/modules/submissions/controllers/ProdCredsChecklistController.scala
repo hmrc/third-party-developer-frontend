@@ -48,7 +48,7 @@ object ProdCredsChecklistController {
       Form(
         mapping(
           "dummy" -> ignored("dummy")
-        )(DummyForm.apply)(DummyForm.unapply)
+        )(DummyForm.apply)(d => Some(d.dummy))
       )
     }
   }

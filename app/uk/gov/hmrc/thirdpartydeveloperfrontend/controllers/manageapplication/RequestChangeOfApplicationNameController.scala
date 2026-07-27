@@ -65,7 +65,7 @@ class RequestChangeOfApplicationNameController @Inject() (
       val requestForm        = ChangeOfApplicationNameForm.form.bindFromRequest()
       val newApplicationName = form.applicationName.trim()
 
-      if (newApplicationName.equalsIgnoreCase(application.name.value)) {
+      if (newApplicationName.equalsIgnoreCase(application.name)) {
 
         def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
           requestForm.withError(appNameField, "application.name.unchanged.error")

@@ -35,6 +35,8 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
       routesImport ++= Seq(
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.RouteModels._",
+        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.RouteModels.given",
         "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",
         "uk.gov.hmrc.apiplatform.modules.uplift.controllers._",
         "uk.gov.hmrc.apiplatform.modules.submissions.controllers.binders._",

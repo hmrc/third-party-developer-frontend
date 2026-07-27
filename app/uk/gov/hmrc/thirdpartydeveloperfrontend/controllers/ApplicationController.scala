@@ -35,7 +35,7 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
   def applicationService: ApplicationService
 
   def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
-    request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == FieldDefinitionType.PPNS_FIELD))
+    request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == FieldDefinitionType.PPNSField))
   }
 
   def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =

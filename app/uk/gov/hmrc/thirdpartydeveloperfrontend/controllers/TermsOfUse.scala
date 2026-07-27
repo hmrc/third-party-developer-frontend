@@ -55,7 +55,7 @@ class TermsOfUse @Inject() (
   def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTermsOfUse, SandboxOrAdmin)(applicationId)(fun)
 
-  def termsOfUsePartial() = Action { implicit request =>
+  def termsOfUsePartial(): Action[AnyContent] = Action { implicit request =>
     Ok(termsOfUseVersionService.getLatest().getTermsOfUseAsHtml())
   }
 

@@ -29,6 +29,6 @@ abstract class TpdfeBaseController(mcc: MessagesControllerComponents) extends Fr
 
   implicit def appConfig: ApplicationConfig
 
-  protected lazy val ETR = EitherTHelper.make[Result](ec)
+  protected lazy val ETR = EitherTHelper.make[Result]
 
 }

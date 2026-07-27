@@ -35,7 +35,7 @@ class ConnectorsWrapper @Inject() (
 
   def forEnvironment(environment: Environment): PushPullNotificationsConnector = {
     environment match {
-      case Environment.PRODUCTION => productionPushPullNotificationsConnector
+      case Environment.Production => productionPushPullNotificationsConnector
       case _                      => sandboxPushPullNotificationsConnector
     }
   }

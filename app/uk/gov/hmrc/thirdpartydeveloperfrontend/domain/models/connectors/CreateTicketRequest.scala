@@ -70,7 +70,7 @@ object CreateTicketRequest {
     ): CreateTicketRequest = {
 
     val actor           = role match {
-      case Collaborator.Roles.ADMINISTRATOR => "an administrator"
+      case Collaborator.Role.Administrator => "an administrator"
       case _                                => "a developer"
     }
     def reasonKey()     = if (environment.isProduction) {

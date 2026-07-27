@@ -26,7 +26,7 @@ case class BridgedConnector[T] @Inject() (@Named("SANDBOX") sandbox: T, @Named("
 
   def forEnvironment(environment: Environment): T = {
     environment match {
-      case Environment.PRODUCTION => production
+      case Environment.Production => production
       case _                      => sandbox
     }
   }

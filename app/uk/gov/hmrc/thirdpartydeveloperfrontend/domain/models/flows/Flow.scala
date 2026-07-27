@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 
-import scala.reflect.runtime.universe._
+import scala.reflect.{ClassTag, classTag}
 
 import cats.Semigroup
 import cats.implicits._
@@ -47,20 +47,20 @@ object FlowType {
     GET_PRODUCTION_CREDENTIALS
   )
 
-  def from[A <: Flow: TypeTag]: FlowType = {
-    typeOf[A] match {
-      case t if t =:= typeOf[EmailPreferencesFlowV2]               => FlowType.EMAIL_PREFERENCES_V2
-      case t if t =:= typeOf[IpAllowlistFlow]                      => FlowType.IP_ALLOW_LIST
-      case t if t =:= typeOf[NewApplicationEmailPreferencesFlowV2] => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
-      case t if t =:= typeOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
+  def from[A <: Flow: ClassTag]: FlowType = {
+    classTag[A].runtimeClass match {
+      case c if c == classOf[EmailPreferencesFlowV2]               => FlowType.EMAIL_PREFERENCES_V2
+      case c if c == classOf[IpAllowlistFlow]                      => FlowType.IP_ALLOW_LIST
+      case c if c == classOf[NewApplicationEmailPreferencesFlowV2] => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
+      case c if c == classOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
     }
   }
 
   def apply(text: String): Option[FlowType] = FlowType.values.find(_.toString() == text.toUpperCase)
 
   import play.api.libs.json.Format
-  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
-  implicit val format: Format[FlowType] = SealedTraitJsonFormatting.createFormatFor[FlowType]("Flow Type", FlowType.apply)
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
+  implicit val format: Format[FlowType] = SimpleEnumJsonFormatting.createStringFormatFor[FlowType]("Flow Type", FlowType.apply)
 }
 
 trait Flow {
@@ -159,7 +159,7 @@ case class NewApplicationEmailPreferencesFlowV2(
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName.value -> api.categories.map(_.toString()).toSet)).toMap
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.toString()).toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
     val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap

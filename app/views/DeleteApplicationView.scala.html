@@ -38,10 +38,10 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProv
   @appEnvironment(app)
   <br>
 
-  @if(roleOfLoggedIn == Collaborator.Roles.ADMINISTRATOR) {
+  @if(roleOfLoggedIn == Collaborator.Role.Administrator) {
     @app.details.deleteRestriction match {
       case DeleteRestriction.NoRestriction => {
-        @if(app.deployedTo == Environment.SANDBOX) {
+        @if(app.deployedTo == Environment.Sandbox) {
 
           <p class="govuk-body">
             Before deleting this application, check with all your 

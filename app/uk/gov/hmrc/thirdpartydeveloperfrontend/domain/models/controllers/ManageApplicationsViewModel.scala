@@ -37,7 +37,7 @@ case class ManageApplicationsViewModel(
   ) {
 
   lazy val hasPriviledgedApplications =
-    sandboxApplicationSummaries.exists(_.accessType == AccessType.PRIVILEGED) || productionApplicationSummaries.exists(_.accessType == AccessType.PRIVILEGED)
+    sandboxApplicationSummaries.exists(_.accessType == AccessType.Privileged) || productionApplicationSummaries.exists(_.accessType == AccessType.Privileged)
   lazy val hasAppsThatCanBeUplifted   = upliftableApplicationIds.nonEmpty
 
   lazy val notYetLiveProductionApplications = productionApplicationSummaries.filterNot(_.state.isApproved)
@@ -49,7 +49,7 @@ case class ManageApplicationsViewModel(
 
   lazy val applicationsThatHaveTermOfUseInvitatationsOutstanding =
     liveProductionApplications
-      .filter(app => app.role == Collaborator.Roles.ADMINISTRATOR)
+      .filter(app => app.role == Collaborator.Role.Administrator)
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
       .filter(app =>
         !productionApplicationSubmissions.exists(sub => app.id == sub.applicationId) ||
@@ -61,7 +61,7 @@ case class ManageApplicationsViewModel(
 
   lazy val applicationsThatHaveTermOfUseInvitatationsSubmitted =
     liveProductionApplications
-      .filter(app => app.role == Collaborator.Roles.ADMINISTRATOR)
+      .filter(app => app.role == Collaborator.Role.Administrator)
       .filter(app => termsOfUseInvitations.exists(app.id == _.applicationId))
       .filter(app =>
         productionApplicationSubmissions.exists(sub =>

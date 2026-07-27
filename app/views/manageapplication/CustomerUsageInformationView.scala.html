@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 @import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -32,7 +32,7 @@
 
 @getPrivacyPolicyLocation(privacyPolicyLocation: Option[PrivacyPolicyLocation]): String = @{
     privacyPolicyLocation match {
-        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.PrivacyPolicyLocations.NoneProvided) => "Not set"
+        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.PrivacyPolicyLocation.NoneProvided) => "Not set"
         case Some(ppl) => ppl.describe()
         case _ => "Not set"
     }
@@ -40,7 +40,7 @@
 
 @getTermsAndConditionsLocation(termsAndConditionsLocation: Option[TermsAndConditionsLocation]): String = @{
     termsAndConditionsLocation match {
-        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsAndConditionsLocations.NoneProvided) => "Not set"
+        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsAndConditionsLocation.NoneProvided) => "Not set"
         case Some(tacl) => tacl.describe()
         case _ => "Not set"
     }
