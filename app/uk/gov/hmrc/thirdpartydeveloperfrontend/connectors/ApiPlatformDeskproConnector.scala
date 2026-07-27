@@ -23,7 +23,6 @@ import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, _}
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger

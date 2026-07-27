@@ -26,7 +26,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application => PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.mongo.play.PlayMongoModule
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._

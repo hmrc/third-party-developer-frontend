@@ -24,7 +24,7 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
-import uk.gov.hmrc.play.http.metrics.common.API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId

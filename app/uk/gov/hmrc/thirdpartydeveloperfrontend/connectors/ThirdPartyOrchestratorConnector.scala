@@ -24,7 +24,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._

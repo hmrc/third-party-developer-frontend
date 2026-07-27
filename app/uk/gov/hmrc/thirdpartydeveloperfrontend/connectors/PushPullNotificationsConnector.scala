@@ -28,7 +28,6 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator

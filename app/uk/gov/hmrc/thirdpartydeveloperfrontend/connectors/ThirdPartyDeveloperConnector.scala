@@ -25,7 +25,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{SessionId => _, _}
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.{SessionId, User}

@@ -21,7 +21,6 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "play-frontend-hmrc-play-30"             % "12.32.0",
     "uk.gov.hmrc.mongo"           %% "hmrc-mongo-play-30"                     % mongoVersion,
     "uk.gov.hmrc"                 %% "crypto-json-play-30"                    % "8.4.0",
-    "uk.gov.hmrc"                 %% "http-metrics"                           % "2.9.0",
     "uk.gov.hmrc"                 %% "play-conditional-form-mapping-play-30"  % "3.5.0",
     "commons-net"                 %  "commons-net"                            % "3.6",
     "com.google.zxing"            %  "core"                                   % "3.2.1",

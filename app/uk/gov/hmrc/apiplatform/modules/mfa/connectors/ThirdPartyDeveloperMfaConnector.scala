@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.http.metrics.common.API
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, MfaId}
