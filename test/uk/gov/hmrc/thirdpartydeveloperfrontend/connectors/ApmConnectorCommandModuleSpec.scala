@@ -23,9 +23,13 @@ import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Administrator
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
@@ -35,6 +39,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
 
 class ApmConnectorCommandModuleSpec
@@ -43,6 +48,12 @@ class ApmConnectorCommandModuleSpec
     with GuiceOneAppPerSuite
     with FixedClock
     with ApplicationWithCollaboratorsFixtures {
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+      .build()
 
   def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationWithCollaborators = standardApp
 

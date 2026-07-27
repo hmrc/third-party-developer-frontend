@@ -26,13 +26,24 @@ import org.apache.pekko.actor.{ActorSystem, Scheduler}
 import org.apache.pekko.pattern.FutureTimeoutSupport
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
+import play.api.Application
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
+
+  override def fakeApplication(): Application =
+    new GuiceApplicationBuilder()
+      .configure("metrics.jvm" -> false)
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+      .build()
 
   trait Setup {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -47,7 +58,12 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
       }
     }
 
-    private val app                       = new GuiceApplicationBuilder().configure("metrics.jvm" -> false).build()
+    private val app                       =
+      new GuiceApplicationBuilder()
+        .configure("metrics.jvm" -> false)
+        .disable[PlayMongoModule]
+        .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+        .build()
     implicit val actorSystem: ActorSystem = app.actorSystem
     implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
 

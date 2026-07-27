@@ -30,6 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{Endpoint => _, _}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
@@ -89,6 +90,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
       .overrides(bind[ApiPlatformDeskproConnector].toInstance(apiPlatformDeskproConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))
+      .disable[PlayMongoModule]
       .overrides(bind[ApmConnector].toInstance(apmConnector))
       .overrides(bind[ApmConnectorApiDefinitionModule].toInstance(apmConnector))
       .overrides(bind[ApmConnectorSubscriptionFieldsModule].toInstance(apmConnector))
