@@ -23,9 +23,9 @@ class InvalidEnumException(className: String, input: String)
 
 object EnumJson {
 
-  def enumReads[E <: Enumeration](enumValue: E): Reads[E#Value] = new Reads[E#Value] {
+  def enumReads[E <: Enumeration](enumValue: E): Reads[enumValue.Value] = new Reads[enumValue.Value] {
 
-    def reads(json: JsValue): JsResult[E#Value] = json match {
+    def reads(json: JsValue): JsResult[enumValue.Value] = json match {
       case JsString(s) =>
         try {
           JsSuccess(enumValue.withName(s))
@@ -37,14 +37,14 @@ object EnumJson {
     }
   }
 
-  implicit def enumWrites[E <: Enumeration]: Writes[E#Value] = new Writes[E#Value] {
-    def writes(v: E#Value): JsValue = JsString(v.toString)
+  def enumWrites[E <: Enumeration](enumValue: E): Writes[enumValue.Value] = new Writes[enumValue.Value] {
+    def writes(v: enumValue.Value): JsValue = JsString(v.toString)
   }
 
   import scala.language.implicitConversions
 
-  implicit def enumFormat[E <: Enumeration](enumValue: E): Format[E#Value] = {
-    Format(enumReads(enumValue), enumWrites)
+  implicit def enumFormat[E <: Enumeration](enumValue: E): Format[enumValue.Value] = {
+    Format(enumReads(enumValue), enumWrites(enumValue))
   }
 
 }

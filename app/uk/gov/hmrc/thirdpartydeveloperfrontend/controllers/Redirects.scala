@@ -146,7 +146,7 @@ class Redirects @Inject() (
                   .withError("newRedirectUri", "redirect.uri.duplicate")
               )
             } else
-              loginRedirectsService.changeLoginRedirect(actor, application, new LoginRedirectUri(form.originalRedirectUri), LoginRedirectUri.unsafeApply(form.newRedirectUri))
+              loginRedirectsService.changeLoginRedirect(actor, application, LoginRedirectUri.unsafeApply(form.originalRedirectUri), LoginRedirectUri.unsafeApply(form.newRedirectUri))
                 .map(_ => Redirect(routes.Redirects.loginRedirects(applicationId)))
           case _                    => successful(Redirect(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(applicationId)))
         }

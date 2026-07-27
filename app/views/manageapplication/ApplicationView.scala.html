@@ -75,7 +75,7 @@
     firstCellIsHeader = true,
     rows = Seq(
         Seq(TableRow(content = Text(messages("application.details.name"))),
-            TableRow(content = Text(app.details.name.value), attributes = Map("id" -> "applicationName")),
+            TableRow(content = Text(app.details.name), attributes = Map("id" -> "applicationName")),
             TableRow(content = changeAppNameLink)),
         Seq(TableRow(content = Text(messages("application.details.applicationid"))),
             TableRow(content = Text(app.id.toString()), attributes = Map("id" -> "applicationId"), colspan = Some(2))),

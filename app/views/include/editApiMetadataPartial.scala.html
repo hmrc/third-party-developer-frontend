@@ -37,7 +37,7 @@
   @for((field, idx) <- viewModel.fields.zipWithIndex) {
     @if(field.canWrite) {
       @defining(field.name.value) { fieldName =>
-        @defining(field.value.value) { fieldValue =>
+        @defining(field.value.toString) { fieldValue =>
           <div class="govuk-form-group @if(field.errors.nonEmpty){govuk-form-group--error}">
             <label class="govuk-label" for="@fieldName">
               @{field.description}

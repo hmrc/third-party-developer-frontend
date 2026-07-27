@@ -75,7 +75,7 @@
       <input
         type="text"
         name="@{viewModel.field.name.value}"
-        value="@{viewModel.field.value.value}"
+        value="@{viewModel.field.value.toString}"
         class="govuk-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
         id="value"
         aria-describedby="hint"

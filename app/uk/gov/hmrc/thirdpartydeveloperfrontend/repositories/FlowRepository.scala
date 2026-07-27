@@ -90,7 +90,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: A#Type)(implicit ct: ClassTag[A]): Future[Option[A]] = {
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]): Future[Option[A]] = {
     val flowType = FlowType.from[A]
     collection.find[A](and(equal("sessionId", sessionId.toString), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }

@@ -79,7 +79,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
 
   def query[T](environment: Environment)(qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val qryStringMap = QueryParamsToQueryStringMap.toQuery(qry).map {
-      case (k, vs) => k -> vs.mkString
+      case (k, vs) => k.text -> vs.mkString
     }
 
     http

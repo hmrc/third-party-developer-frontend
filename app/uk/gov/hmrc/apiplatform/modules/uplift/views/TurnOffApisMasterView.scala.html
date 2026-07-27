@@ -89,7 +89,7 @@
                                   <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@api.serviceName/@api.apiVersion.versionNbr" aria-label="@apiVersionFullName. You are @if(!api.subscribed) {not} subscribed" data-api-link>
                                   @if(api.apiVersion.access != ApiAccessType.Public) {
                                     <span>
-                                        <span>@api.apiVersion.versionNbr</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.access.displayText @api.apiVersion.status.toString)</span>
+                                        <span>@api.apiVersion.versionNbr</span><span style="width: 60%;display: inline-block;">(@api.apiVersion.access.toString @api.apiVersion.status.toString)</span>
                                     </span>
                                   } else {
                                     <span>
