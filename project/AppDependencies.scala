@@ -9,9 +9,9 @@ object AppDependencies {
   lazy val mongoVersion = "2.12.0"
   lazy val apiDomainVersion = "1.4.0"
   lazy val appDomainVersion = "1.3.0"
-  lazy val tpdDomainVersion = "0.15.0"
+  lazy val tpdDomainVersion = "1.1.0"
   private val orgDomainVersion = "1.3.0"
-  private val mockitoScalaVersion = "2.0.0"
+  private val mockitoScalaVersion = "2.2.1"
 
 
   lazy val compile = Seq(
