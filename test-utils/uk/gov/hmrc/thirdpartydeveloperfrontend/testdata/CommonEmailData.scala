@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.testdata
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CollaboratorData
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 
 object CommonEmailData {
   val admin = CollaboratorData.Administrator.one.emailAddress

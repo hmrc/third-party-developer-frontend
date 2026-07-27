@@ -52,7 +52,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     val emailPreferences =
       EmailPreferences(
         List(TaxRegimeInterests("VAT", Set.empty), TaxRegimeInterests("INCOME_TAX_MTD", Set(api1, api2))),
-        Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
+        Set(EmailTopic.Technical, EmailTopic.BusinessAndPolicy)
       )
 
     val developerSession                                      = standardDeveloper.copy(emailPreferences = emailPreferences).loggedIn

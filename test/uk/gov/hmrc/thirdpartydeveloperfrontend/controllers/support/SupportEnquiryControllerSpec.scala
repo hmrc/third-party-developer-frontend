@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -55,7 +55,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
-    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, developer))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LoggedIn, developer))
   }
 
   trait NotLoggedIn {
@@ -74,7 +74,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
       .withLoggedIn(underTest, implicitly)(sessionId)
       .withSession(sessionParams: _*)
 
-    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PartLoggedInEnablingMFA, developer))
   }
 
   "SupportEnquiryController" when {

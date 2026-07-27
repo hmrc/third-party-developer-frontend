@@ -36,7 +36,7 @@ import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.FindUserIdRequest
@@ -208,7 +208,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(mfaId, MfaType.AUTHENTICATOR_APP).url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(mfaId, MfaType.AuthenticatorApp).url)
       }
     }
   }

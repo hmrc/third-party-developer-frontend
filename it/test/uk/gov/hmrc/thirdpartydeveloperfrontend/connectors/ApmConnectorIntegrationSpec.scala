@@ -89,9 +89,9 @@ class ApmConnectorIntegrationSpec
     "retrieve an CombinedApi based on a serviceName" in new Setup {
       val serviceName                            = ServiceName("api1")
       val displayName                            = "API 1"
-      val expectedApi                            = CombinedApi(displayName, serviceName, Set(ApiCategory.VAT), ApiType.REST_API, ApiAccessType.PUBLIC)
+      val expectedApi                            = CombinedApi(displayName, serviceName, Set(ApiCategory.Vat), ApiType.RestApi, ApiAccessType.Public)
       ApiPlatformMicroserviceStub
-        .stubCombinedApiByServiceName(serviceName.value, Json.toJson(expectedApi).toString())
+        .stubCombinedApiByServiceName(serviceName.toString, Json.toJson(expectedApi).toString())
       val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi(ServiceName("api1")))
       result match {
         case Right(x) =>
@@ -130,14 +130,15 @@ class ApmConnectorIntegrationSpec
     "return api data when successful" in new Setup {
       val apiDefinition               = ApiDefinition(
         serviceName = ServiceName("serviceName"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "name",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("name"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
       val response                    = List(apiDefinition)
       ApiPlatformMicroserviceStub.stubFetchAllPossibleSubscriptions(applicationId, Json.toJson(response).toString())

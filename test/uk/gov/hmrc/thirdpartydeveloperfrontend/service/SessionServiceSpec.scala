@@ -23,7 +23,7 @@ import scala.concurrent.Future.{failed, successful}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId}
@@ -55,7 +55,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     val developer                  = buildTrackedUser(emailAddress = email)
     val sessionId                  = UserSessionId.random
     val deviceSessionId            = DeviceSessionId.random
-    val session                    = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session                    = UserSession(sessionId, LoggedInState.LoggedIn, developer)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
     val applicationId       = ApplicationId.random

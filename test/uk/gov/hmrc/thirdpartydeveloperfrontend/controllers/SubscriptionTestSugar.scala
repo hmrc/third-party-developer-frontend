@@ -29,7 +29,7 @@ trait SubscriptionTestSugar {
       expectedVersions: List[ApiVersion]
     ): Unit = {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
-    applicationSubscription.apiServiceName.value shouldBe expectedApiServiceName
+    applicationSubscription.apiServiceName.toString shouldBe expectedApiServiceName
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
   }
 

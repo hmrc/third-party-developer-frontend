@@ -61,7 +61,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
   "AuthAppLoginAccessCodeView view" should {
 
     "render correctly when form is valid" in new Setup {
-      val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.AUTHENTICATOR_APP, userHasMultipleMfa = false)(
+      val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.AuthenticatorApp, userHasMultipleMfa = false)(
         stubMessages(),
         FakeRequest().withCSRFToken,
         appConfig
@@ -78,7 +78,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
         MfaAccessCodeForm.form
           .withError("accessCode", "You have entered an incorrect access code"),
         MfaId(UUID.randomUUID()),
-        MfaType.AUTHENTICATOR_APP,
+        MfaType.AuthenticatorApp,
         userHasMultipleMfa = false
       )(stubMessages(), FakeRequest().withCSRFToken, appConfig)
 

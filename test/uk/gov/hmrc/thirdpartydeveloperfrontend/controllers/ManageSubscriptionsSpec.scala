@@ -30,7 +30,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator.Roles
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator.Role
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement._
@@ -56,7 +56,7 @@ class ManageSubscriptionsSpec
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val role: Roles.ADMINISTRATOR.type = Collaborator.Roles.ADMINISTRATOR
+  val role: Role.Administrator.type = Collaborator.Role.Administrator
 
   val application: ApplicationWithCollaborators =
     standardApp
@@ -67,7 +67,7 @@ class ManageSubscriptionsSpec
         termsAndConditionsUrl = Some("http://tnc-url.com")
       ))
 
-  val productionApplication: ApplicationWithCollaborators = application.withEnvironment(Environment.PRODUCTION)
+  val productionApplication: ApplicationWithCollaborators = application.withEnvironment(Environment.Production)
 
   val privilegedApplication: ApplicationWithCollaborators = application.withAccess(Access.Privileged())
 
@@ -111,10 +111,10 @@ class ManageSubscriptionsSpec
     val appId           = standardApp.id
     val clientId        = standardApp.clientId
 
-    fetchAppsByTeamMemberReturns(Environment.PRODUCTION)(Seq(application.withSubscriptions(Set.empty)))
+    fetchAppsByTeamMemberReturns(Environment.Production)(Seq(application.withSubscriptions(Set.empty)))
 
     def editFormPostRequest(fieldName: FieldName, fieldValue: FieldValue): FakeRequest[AnyContentAsFormUrlEncoded] = {
-      loggedInAdminRequest.withFormUrlEncodedBody(fieldName.value -> fieldValue.value)
+      loggedInAdminRequest.withFormUrlEncodedBody(fieldName.value -> fieldValue.toString)
     }
 
     def assertCommonEditFormFields(result: Future[Result], apiSubscriptionStatus: APISubscriptionStatus): Unit = {
@@ -140,13 +140,13 @@ class ManageSubscriptionsSpec
     def assertIsApiConfigureEditPage(result: Future[Result]): Unit = {
       contentAsString(result) should include("Subscription configuration")
       contentAsString(result) should include("Environment")
-      contentAsString(result) should include(application.name.value)
+      contentAsString(result) should include(application.name.toString)
     }
 
     def assertIsSandboxJourneyApiConfigureEditPage(result: Future[Result]): Unit = {
       contentAsString(result) should not include "Subscription configuration"
       contentAsString(result) should not include "Environment"
-      contentAsString(result) should not include application.name.value
+      contentAsString(result) should not include application.name.toString
     }
   }
 
@@ -290,7 +290,7 @@ class ManageSubscriptionsSpec
 
           assertCommonEditFormFields(result, apiSubscriptionStatus)
 
-          contentAsString(result) should include(application.name.value)
+          contentAsString(result) should include(application.name.toString)
           contentAsString(result) should include("Sandbox")
         }
       }
@@ -326,7 +326,7 @@ class ManageSubscriptionsSpec
 
           contentAsString(result) should include(field.definition.description)
           contentAsString(result) should include(field.definition.hint)
-          contentAsString(result) should include(field.value.value)
+          contentAsString(result) should include(field.value.toString)
         }
 
         "use the description if no hint text is available" in new ManageSubscriptionsSetup {

@@ -34,7 +34,7 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding w
 
   val developer = buildTrackedUser()
   val sessionId = UserSessionId.random
-  val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+  val session   = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
   fetchSessionByIdReturns(sessionId, session)
   updateUserFlowSessionsReturnsSuccessfully(sessionId)

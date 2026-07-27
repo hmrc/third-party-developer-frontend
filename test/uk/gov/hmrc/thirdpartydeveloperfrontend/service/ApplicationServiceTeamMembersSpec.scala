@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -81,7 +81,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name: String,
       context: ApiContext,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
     ): APISubscriptionStatus =
@@ -89,7 +89,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name = name,
       serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -101,7 +101,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name: String,
       context: String,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
@@ -110,7 +110,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name = name,
       serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)

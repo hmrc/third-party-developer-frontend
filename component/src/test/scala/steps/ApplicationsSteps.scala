@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 object ApplicationsSteps extends NavigationSugar with ComponentTestDeveloperBuilder with ApplicationWithCollaboratorsFixtures {
@@ -32,7 +32,7 @@ object ApplicationsSteps extends NavigationSugar with ComponentTestDeveloperBuil
   val collaboratorEmail: LaxEmailAddress = "john.smith@example.com".toLaxEmail
 
   private def defaultApp(name: String, environment: Environment) = standardApp
-    .withCollaborators(Set(Collaborator(collaboratorEmail, Collaborator.Roles.ADMINISTRATOR, staticUserId)))
+    .withCollaborators(Set(Collaborator(collaboratorEmail, Collaborator.Role.Administrator, staticUserId)))
     .withEnvironment(environment)
     .modify(_.copy(name = ApplicationName(name)))
 
@@ -40,7 +40,7 @@ object ApplicationsSteps extends NavigationSugar with ComponentTestDeveloperBuil
   def givenApplicationWithNameCanBeCreated(name: String): Unit = {
     ApplicationStub.setupApplicationNameValidation()
 
-    val app = defaultApp(name, Environment.PRODUCTION)
+    val app = defaultApp(name, Environment.Production)
 
     Stubs.setupPostRequest("/application", CREATED, Json.toJson(app).toString())
 

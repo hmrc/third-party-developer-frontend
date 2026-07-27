@@ -32,10 +32,10 @@ trait ExtendedSubscriptionTestHelper extends SubscriptionTestHelper {
       serviceName: String,
       context: ApiContext,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
-      access: ApiAccessType = ApiAccessType.PUBLIC,
+      access: ApiAccessType = ApiAccessType.Public,
       isTestSupport: Boolean = false,
       fields: Option[SubscriptionFieldsWrapper] = None
     ) = super.subscriptionStatus(
@@ -78,10 +78,10 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
       serviceName: String,
       context: ApiContext,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
-      access: ApiAccessType = ApiAccessType.PUBLIC,
+      access: ApiAccessType = ApiAccessType.Public,
       isTestSupport: Boolean = false,
       fields: Option[SubscriptionFieldsWrapper] = None
     ) = {
@@ -92,7 +92,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
       apiName,
       ServiceName(serviceName),
       context,
-      ApiVersion(version, status, access, List.empty),
+      ApiVersion(version, status, access, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed,
       requiresTrust,
       isTestSupport = isTestSupport,
@@ -102,10 +102,10 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
 
   def sampleSubscriptions(appId: ApplicationId, clientId: ClientId): List[APISubscriptionStatus] = {
     List(
-      subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-      subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA),
-      subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.STABLE),
-      subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionTwo, ApiStatus.BETA)
+      subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+      subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta),
+      subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.Stable),
+      subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionTwo, ApiStatus.Beta)
     )
   }
 
@@ -122,7 +122,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
         "individual-employment-2",
         employmentContext,
         versionOne,
-        ApiStatus.STABLE,
+        ApiStatus.Stable,
         subscribed = true,
         fields = Some(subscriptionFieldsWrapper)
       )
@@ -174,7 +174,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
 
   def onlyApiExampleMicroserviceSubscribedTo(appId: ApplicationId, clientId: ClientId): APISubscriptionStatus = {
     val context     = ApiContext("example-api")
-    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
+    val version     = ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.versionNbr)
 
     APISubscriptionStatus(
@@ -191,7 +191,7 @@ trait SubscriptionTestHelper extends SubscriptionsBuilder {
 
   def exampleSubscriptionWithoutFields(appId: ApplicationId, clientId: ClientId)(prefix: String): APISubscriptionStatus = {
     val context     = ApiContext(s"/$prefix-api")
-    val version     = ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
+    val version     = ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
     val emptyFields = emptySubscriptionFieldsWrapper(appId, clientId, context, version.versionNbr)
 
     val subscriptionFieldIndex = 1

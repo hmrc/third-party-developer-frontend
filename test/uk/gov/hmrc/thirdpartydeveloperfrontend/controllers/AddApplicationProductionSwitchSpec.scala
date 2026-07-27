@@ -109,13 +109,13 @@ class AddApplicationProductionSwitchSpec
 
     def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        withClue(s"shouldShowAppNamesFor[${summary.name.value}]")(contentAsString(results) should include(summary.name.value))
+        withClue(s"shouldShowAppNamesFor[${summary.name.toString}]")(contentAsString(results) should include(summary.name.toString))
       }
     }
 
     def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        withClue(s"shouldNotShowAppNamesFor: ${summary.name.value}")(contentAsString(results) should not include (summary.name.value))
+        withClue(s"shouldNotShowAppNamesFor: ${summary.name.toString}")(contentAsString(results) should not include (summary.name.toString))
       }
     }
 

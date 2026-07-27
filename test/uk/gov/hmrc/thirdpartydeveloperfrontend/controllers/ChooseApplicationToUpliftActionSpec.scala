@@ -103,13 +103,13 @@ class ChooseApplicationToUpliftActionSpec
 
     def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should include(summary.name.value)
+        contentAsString(results) should include(summary.name.toString)
       }
     }
 
     def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should not include (summary.name.value)
+        contentAsString(results) should not include (summary.name.toString)
       }
     }
 

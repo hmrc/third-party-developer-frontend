@@ -24,30 +24,30 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 trait SampleApplications extends SampleApplication {
   self: SampleUserSession with CollaboratorTracker =>
 
-  val newSandboxApplication: ApplicationWithCollaborators = sampleApp.modify(_.copy(deployedTo = Environment.SANDBOX, state = InState.testing))
+  val newSandboxApplication: ApplicationWithCollaborators = sampleApp.modify(_.copy(deployedTo = Environment.Sandbox, state = InState.testing))
 
   val adminApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asAdministratorCollaborator))
 
   val developerApplication: ApplicationWithCollaborators = sampleApp.copy(collaborators = Set(userSession.developer.email.asDeveloperCollaborator))
 
   val adminSubmittedProductionApplication: ApplicationWithCollaborators =
-    adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+    adminApplication.withEnvironment(Environment.Production).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val adminCreatedProductionApplication: ApplicationWithCollaborators = adminApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
+  val adminCreatedProductionApplication: ApplicationWithCollaborators = adminApplication.withEnvironment(Environment.Production).withState(InState.testing)
 
   val adminSubmittedSandboxApplication: ApplicationWithCollaborators =
-    adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+    adminApplication.withEnvironment(Environment.Sandbox).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val adminCreatedSandboxApplication: ApplicationWithCollaborators = adminApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
+  val adminCreatedSandboxApplication: ApplicationWithCollaborators = adminApplication.withEnvironment(Environment.Sandbox).withState(InState.testing)
 
   val developerSubmittedProductionApplication: ApplicationWithCollaborators =
-    developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+    developerApplication.withEnvironment(Environment.Sandbox).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val developerCreatedProductionApplication: ApplicationWithCollaborators = developerApplication.withEnvironment(Environment.PRODUCTION).withState(InState.testing)
+  val developerCreatedProductionApplication: ApplicationWithCollaborators = developerApplication.withEnvironment(Environment.Production).withState(InState.testing)
 
   val developerSubmittedSandboxApplication: ApplicationWithCollaborators =
-    developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
+    developerApplication.withEnvironment(Environment.Sandbox).withState(InState.production(userSession.developer.email.text, userSession.developer.displayedName, ""))
 
-  val devloperCreatedSandboxApplication: ApplicationWithCollaborators = developerApplication.withEnvironment(Environment.SANDBOX).withState(InState.testing)
+  val devloperCreatedSandboxApplication: ApplicationWithCollaborators = developerApplication.withEnvironment(Environment.Sandbox).withState(InState.testing)
 
 }

@@ -79,7 +79,7 @@ class DashboardControllerSpec
       contentAsString(result) should include("Your organisations")
       contentAsString(result) should include(organisation.organisationName.value)
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should include(standardApp.name.toString)
       contentAsString(result) should not include "Sign in"
     }
 
@@ -97,7 +97,7 @@ class DashboardControllerSpec
       contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) shouldNot include("Your organisations")
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should include(standardApp.name.toString)
       contentAsString(result) should not include "Sign in"
     }
 

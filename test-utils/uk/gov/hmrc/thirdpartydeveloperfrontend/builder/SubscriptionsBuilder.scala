@@ -28,7 +28,7 @@ trait SubscriptionsBuilder {
   def buildAPISubscriptionStatus(name: String, context: Option[ApiContext] = None, fields: Option[SubscriptionFieldsWrapper] = None): APISubscriptionStatus = {
 
     val contextName = context.getOrElse(ApiContext(s"context-$name"))
-    val version     = ApiVersion(ApiVersionNbr("version"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
+    val version     = ApiVersion(ApiVersionNbr("version"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
 
     val f = fields.getOrElse(SubscriptionFieldsWrapper(ApplicationId.random, ClientId("fake-clientId"), contextName, version.versionNbr, List.empty))
 
@@ -59,7 +59,7 @@ trait SubscriptionsBuilder {
       hintOverride: Option[String] = None
     ): SubscriptionFieldValue = {
     val hint       = hintOverride.getOrElse(s"hint-$name")
-    val definition = FieldDefinition(FieldName(name), s"description-$name", hint, FieldDefinitionType.STRING, s"shortDescription-$name", None, accessRequirements)
+    val definition = FieldDefinition(FieldName(name), s"description-$name", hint, FieldDefinitionType.PlainText, s"shortDescription-$name", None, accessRequirements)
 
     SubscriptionFieldValue(definition, FieldValue(value.getOrElse(s"value-$name")))
   }

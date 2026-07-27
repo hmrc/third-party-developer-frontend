@@ -41,11 +41,11 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
   trait SetUp extends UserBuilder with LocalUserIdTracker with FixedClock with CombinedApiTestDataHelper with FlowRepositoryMockModule {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val emailPreferences                      = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.TECHNICAL))
+    val emailPreferences                      = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.Technical))
     val developerWithNoEmailPreferences: User = buildTrackedUser()
     val developerWithEmailPrefences: User     = developerWithNoEmailPreferences.copy(emailPreferences = emailPreferences)
     val sessionId                             = UserSessionId.random
-    val userSession: UserSession              = UserSession(sessionId, LoggedInState.LOGGED_IN, developerWithEmailPrefences)
+    val userSession: UserSession              = UserSession(sessionId, LoggedInState.LoggedIn, developerWithEmailPrefences)
     val applicationId                         = ApplicationId.random
 
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
@@ -138,7 +138,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
     }
 
     "fetchAllAPICategoryDetails" should {
-      val categoryDisplayDetails = APICategoryDisplayDetails("SELF_ASSESSMENT", ApiCategory.SELF_ASSESSMENT.displayText)
+      val categoryDisplayDetails = APICategoryDisplayDetails("SELF_ASSESSMENT", ApiCategory.SelfAssessment.displayText)
 
       "return all APICategoryDetails objects from the library type ApiCategory" in new SetUp {
         val result = await(underTest.fetchAllAPICategoryDetails())

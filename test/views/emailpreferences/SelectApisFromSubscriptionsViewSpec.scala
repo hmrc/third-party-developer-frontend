@@ -44,10 +44,10 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with UserTestData {
 
-  val category1 = ApiCategory.AGENTS
-  val category2 = ApiCategory.BUSINESS_RATES
-  val category3 = ApiCategory.EXAMPLE
-  val category4 = ApiCategory.NATIONAL_INSURANCE
+  val category1 = ApiCategory.Agents
+  val category2 = ApiCategory.BusinessRates
+  val category3 = ApiCategory.Example
+  val category4 = ApiCategory.NationalInsurance
 
   trait Setup {
 
@@ -71,9 +71,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
   private def validateCheckboxItemsAgainstApis(document: Document, apis: List[CombinedApi]) = {
     apis.foreach(api => {
-      val checkbox = document.getElementById(api.serviceName.value)
+      val checkbox = document.getElementById(api.serviceName.toString)
       checkbox.attr("name") shouldBe "selectedApi[]"
-      checkbox.`val`() shouldBe api.serviceName.value
+      checkbox.`val`() shouldBe api.serviceName.toString
 
       document.select(s"label[for=${api.serviceName}]").text shouldBe api.displayName
 
@@ -103,9 +103,9 @@ class SelectApisFromSubscriptionsViewSpec extends CommonViewSpec
 
   "New Application Email Preferences Select Api view page" should {
     val missingAPIs = List(
-      CombinedApi("Api One", ServiceName("api1"), Set(category1), ApiType.REST_API, ApiAccessType.PUBLIC),
-      CombinedApi("Api Two", ServiceName("api2"), Set(category2, category4), ApiType.REST_API, ApiAccessType.PUBLIC),
-      CombinedApi("Api Three", ServiceName("api3"), Set(category3, category2), ApiType.REST_API, ApiAccessType.PUBLIC)
+      CombinedApi("Api One", ServiceName("api1"), Set(category1), ApiType.RestApi, ApiAccessType.Public),
+      CombinedApi("Api Two", ServiceName("api2"), Set(category2, category4), ApiType.RestApi, ApiAccessType.Public),
+      CombinedApi("Api Three", ServiceName("api3"), Set(category3, category2), ApiType.RestApi, ApiAccessType.Public)
     )
 
     "render the api selection page with APIs that are missing from user's email preferences" in new Setup {

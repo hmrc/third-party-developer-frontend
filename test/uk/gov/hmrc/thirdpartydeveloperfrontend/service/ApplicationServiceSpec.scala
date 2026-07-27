@@ -28,9 +28,9 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
@@ -108,9 +108,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   val createAppRequest = CreateApplicationRequestV1(
     name = ApplicationName("app name"),
     access = CreationAccess.Standard,
-    environment = Environment.SANDBOX,
+    environment = Environment.Sandbox,
     description = None,
-    collaborators = Set(Collaborator(LaxEmailAddress("bob@example.com"), Collaborator.Roles.ADMINISTRATOR, userId)),
+    collaborators = Set(Collaborator(LaxEmailAddress("bob@example.com"), Collaborator.Role.Administrator, userId)),
     subscriptions = None,
     organisationId = Some(organisationId)
   )
@@ -121,7 +121,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name: String,
       context: ApiContext,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
     ): APISubscriptionStatus =
@@ -129,7 +129,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name = name,
       serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -141,7 +141,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name: String,
       context: String,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
@@ -150,7 +150,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name = name,
       serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
@@ -160,7 +160,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Privacy Policy Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
-      val newLocation = PrivacyPolicyLocations.Url("http://example.com")
+      val newLocation = PrivacyPolicyLocation.Url("http://example.com")
       val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant, newLocation)
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
@@ -173,7 +173,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Terms and Conditions Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
-      val newLocation = TermsAndConditionsLocations.Url("http://example.com")
+      val newLocation = TermsAndConditionsLocation.Url("http://example.com")
       val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant, newLocation)
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
@@ -312,10 +312,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.SANDBOX)(ApplicationNameValidationResult.Valid)
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.Sandbox)(ApplicationNameValidationResult.Valid)
 
       private val result =
-        await(applicationService.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
+        await(applicationService.isApplicationNameValid(applicationName, Environment.Sandbox, Some(applicationId)))
 
       result shouldBe ApplicationNameValidationResult.Valid
 
@@ -325,10 +325,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.PRODUCTION)(ApplicationNameValidationResult.Valid)
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.Production)(ApplicationNameValidationResult.Valid)
 
       private val result =
-        await(applicationService.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
+        await(applicationService.isApplicationNameValid(applicationName, Environment.Production, Some(applicationId)))
 
       result shouldBe ApplicationNameValidationResult.Valid
 

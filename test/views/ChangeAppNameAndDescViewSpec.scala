@@ -53,7 +53,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
       val request  = FakeRequest().withCSRFToken
 
       val form = ChangeAppNameAndDescForm.form.fill(
-        ChangeAppNameAndDescForm(application.details.name.value, application.details.description)
+        ChangeAppNameAndDescForm(application.details.name.toString, application.details.description)
       )
 
       changeDetails.render(
@@ -92,7 +92,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
       val application  = standardApp.inSandbox().withState(appStateTesting).modify(_.copy(description = aDescription))
       val document     = Jsoup.parse(renderPage(application).body)
 
-      withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.value) shouldBe true)
+      withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.toString) shouldBe true)
       withClue("Description")(textareaExistsWithText(document, "description", aDescription.get) shouldBe true)
     }
 

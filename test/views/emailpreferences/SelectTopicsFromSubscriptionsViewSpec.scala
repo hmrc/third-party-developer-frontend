@@ -102,7 +102,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
     }
 
     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
-      val usersTopics = Set(BUSINESS_AND_POLICY.toString, EVENT_INVITES.toString)
+      val usersTopics = Set(BusinessAndPolicy.toString, EventInvites.toString)
       val page        =
         viewUnderTest.render(
           SelectTopicsFromSubscriptionsForm.form,

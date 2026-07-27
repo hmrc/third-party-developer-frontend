@@ -203,10 +203,10 @@ class MfaControllerBaseSpec extends BaseControllerSpec
   }
 
   trait PartLogged extends Setup {
-    override def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+    override def loggedInState: LoggedInState = LoggedInState.PartLoggedInEnablingMFA
   }
 
   trait LoggedIn extends Setup {
-    override def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
+    override def loggedInState: LoggedInState = LoggedInState.LoggedIn
   }
 }

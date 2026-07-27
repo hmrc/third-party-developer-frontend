@@ -93,7 +93,7 @@ object CommonStepsSteps extends NavigationSugar with OptionValues with CustomMat
   def thenTheCurrentPageContainsLinkTo(linkText: String, pageName: String): Unit = {
     val href = CurrentPage.linkTextHref(linkText)
     val page = withClue(s"page not found: $pageName")(pages(pageName))
-    href.value shouldBe page.url()
+    href.value shouldBe page.url
   }
 
   // Overload for ScalaTest (no DataTable, accepts varargs)

@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.{BsonValue, Document}
 import org.mongodb.scala.model.Aggregates.{filter, project}
 import org.mongodb.scala.model.Projections.fields
@@ -66,10 +67,10 @@ class FlowRepositoryISpec extends AnyWordSpec
 
     val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(
       currentSession,
-      selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
-      selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
+      selectedCategories = Set(ApiCategory.Vat.toString(), ApiCategory.Agents.toString()),
+      selectedAPIs = Map(ApiCategory.Vat.toString() -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi("api1Name", ServiceName("api1ServiceName"), Set(ApiCategory.VAT, ApiCategory.AGENTS), ApiType.REST_API, ApiAccessType.PUBLIC))
+      visibleApis = List(CombinedApi("api1Name", ServiceName("api1ServiceName"), Set(ApiCategory.Vat, ApiCategory.Agents), ApiType.RestApi, ApiAccessType.Public))
     )
 
     await(flowRepository.saveFlow(currentFlow))
@@ -113,10 +114,10 @@ class FlowRepositoryISpec extends AnyWordSpec
       "save email preferences" in {
         val flow = EmailPreferencesFlowV2(
           currentSession,
-          selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
-          selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
+          selectedCategories = Set(ApiCategory.Vat.toString(), ApiCategory.Agents.toString()),
+          selectedAPIs = Map(ApiCategory.Vat.toString() -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY", "EVENT_INVITES"),
-          visibleApis = List(CombinedApi("api1DisplayName", ServiceName("api1ServiceName"), Set(ApiCategory.VAT, ApiCategory.AGENTS), ApiType.REST_API, ApiAccessType.PUBLIC))
+          visibleApis = List(CombinedApi("api1DisplayName", ServiceName("api1ServiceName"), Set(ApiCategory.Vat, ApiCategory.Agents), ApiType.RestApi, ApiAccessType.Public))
         )
 
         await(flowRepository.saveFlow(flow))
@@ -125,13 +126,13 @@ class FlowRepositoryISpec extends AnyWordSpec
         val castResult   = result.asInstanceOf[EmailPreferencesFlowV2]
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
-        castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
+        castResult.selectedTopics shouldBe Set(EmailTopic.BusinessAndPolicy.toString, EmailTopic.EventInvites.toString)
         castResult.visibleApis should contain only (CombinedApi(
           "api1DisplayName",
           ServiceName("api1ServiceName"),
-          Set(ApiCategory.VAT, ApiCategory.AGENTS),
-          ApiType.REST_API,
-          ApiAccessType.PUBLIC
+          Set(ApiCategory.Vat, ApiCategory.Agents),
+          ApiType.RestApi,
+          ApiAccessType.Public
         ))
       }
 

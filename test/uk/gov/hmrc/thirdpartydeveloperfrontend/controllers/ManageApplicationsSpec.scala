@@ -86,7 +86,7 @@ class ManageApplicationsSpec
       status(result) shouldBe OK
       contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should include(standardApp.name.toString)
       contentAsString(result) should not include ("You have been invited to register your organisation")
       contentAsString(result) should not include "Sign in"
     }
@@ -106,7 +106,7 @@ class ManageApplicationsSpec
       status(result) shouldBe OK
       contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should include(standardApp.name.toString)
       contentAsString(result) should include("You have been invited to register your organisation")
       contentAsString(result) should not include "Sign in"
     }
@@ -126,7 +126,7 @@ class ManageApplicationsSpec
       status(result) shouldBe OK
       contentAsString(result) should include(userSession.developer.displayedName)
       contentAsString(result) should include("Sign out")
-      contentAsString(result) should include(standardApp.name.value)
+      contentAsString(result) should include(standardApp.name.toString)
       contentAsString(result) should include("You have started registering your organisation")
       contentAsString(result) should not include "Sign in"
     }

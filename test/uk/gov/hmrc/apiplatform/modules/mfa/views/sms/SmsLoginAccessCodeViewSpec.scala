@@ -52,7 +52,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
 
   "SmsLoginAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
-      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.SMS, userHasMultipleMfa = true)(
+      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.Sms, userHasMultipleMfa = true)(
         flash,
         stubMessages(),
         FakeRequest().withCSRFToken,
@@ -70,7 +70,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
         MfaAccessCodeForm.form
           .withError("accessCode", "You have entered an incorrect access code"),
         MfaId(UUID.randomUUID()),
-        MfaType.SMS,
+        MfaType.Sms,
         userHasMultipleMfa = true
       )(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
 

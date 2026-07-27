@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils._
@@ -63,7 +63,7 @@ class CollaboratorServiceSpec
 
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(mockResponse)
 
-      val result = await(collaboratorService.addTeamMember(standardApp, devEmail, Collaborator.Roles.DEVELOPER, adminEmail))
+      val result = await(collaboratorService.addTeamMember(standardApp, devEmail, Collaborator.Role.Developer, adminEmail))
       result.isRight shouldBe true
 
       inside(result) {

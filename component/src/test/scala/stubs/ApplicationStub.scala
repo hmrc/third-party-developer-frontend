@@ -86,10 +86,10 @@ object ApplicationStub {
       )
     }
 
-    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.PRODUCTION)
+    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.Production)
 
-    stubResponse(Environment.PRODUCTION, prodApps)
-    stubResponse(Environment.SANDBOX, sandboxApps)
+    stubResponse(Environment.Production, prodApps)
+    stubResponse(Environment.Sandbox, sandboxApps)
 
     stubFor(
       get(urlPathEqualTo("/api-definitions/all"))

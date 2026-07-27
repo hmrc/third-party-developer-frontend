@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellRes
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -80,7 +80,7 @@ class UpliftJourneyServiceSpec
 
     val developer = buildTrackedUser()
     val sessionId = UserSessionId.random
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session   = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
     val apiIdentifier1 = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
     val apiIdentifier2 = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
@@ -91,7 +91,7 @@ class UpliftJourneyServiceSpec
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
-      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -101,7 +101,7 @@ class UpliftJourneyServiceSpec
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
-      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -111,7 +111,7 @@ class UpliftJourneyServiceSpec
       "test-api-3",
       ServiceName("api-example-microservice"),
       ApiContext("test-api-context-3"),
-      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -120,39 +120,42 @@ class UpliftJourneyServiceSpec
     val singleApi: List[ApiDefinition] = List(
       ApiDefinition(
         serviceName = ServiceName("test-api-context-1"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-1",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-1"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
     )
 
     val multipleApis: List[ApiDefinition] = List(
       ApiDefinition(
         serviceName = ServiceName("test-api-context-1"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-1",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-1"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       ),
       ApiDefinition(
         serviceName = ServiceName("test-api-context-2"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-2",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-2"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-2"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
     )
 
@@ -201,7 +204,7 @@ class UpliftJourneyServiceSpec
 
     "fail when no upliftable apis found" in new Setup {
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
-      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set())
+      ApmConnectorMock.FetchUpliftableSubscriptions.willReturn(Set.empty[ApiIdentifier])
 
       private val result = await(underTest.confirmAndUplift(sandboxAppId, session))
 

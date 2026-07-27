@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.builder
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
@@ -36,7 +36,7 @@ trait ApplicationBuilder extends FixedClock with ApplicationStateHelper with App
 
     standardApp
       .withId(appId)
-      .withEnvironment(Environment.SANDBOX)
+      .withEnvironment(Environment.Sandbox)
       .withState(InState.production(appOwnerEmail.text, appOwnerName, ""))
       .withAccess(access)
       .modify(_.copy(name = ApplicationName(s"${appId.toString()}-name")))

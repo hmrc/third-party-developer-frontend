@@ -171,10 +171,10 @@ object ApplicationStub {
       )
     }
 
-    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.PRODUCTION)
+    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.Production)
 
-    stubResponse(Environment.PRODUCTION, prodApps)
-    stubResponse(Environment.SANDBOX, sandboxApps)
+    stubResponse(Environment.Production, prodApps)
+    stubResponse(Environment.Sandbox, sandboxApps)
   }
 
   def configureApplicationCredentials(tokens: Map[String, ApplicationToken], status: Int = OK): Unit = {
@@ -308,7 +308,7 @@ object ApiPlatformMicroserviceStub {
   def stubFetchExtendedApiDefinition(serviceName: ServiceName, apiDefintion: ExtendedApiDefinition): StubMapping = {
     stubFor(
       get(
-        urlEqualTo(s"/combined-api-definitions/${serviceName.value.replaceAll(" ", "%20")}")
+        urlEqualTo(s"/combined-api-definitions/${serviceName.toString.replaceAll(" ", "%20")}")
       )
         .willReturn(
           aResponse()

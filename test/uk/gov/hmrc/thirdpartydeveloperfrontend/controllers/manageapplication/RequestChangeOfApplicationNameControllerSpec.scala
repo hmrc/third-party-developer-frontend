@@ -110,7 +110,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show error if new application name is the same as the old one" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name.value)
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name.toString)
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 

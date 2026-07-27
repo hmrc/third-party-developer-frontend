@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -24,7 +26,7 @@ import play.api.test.Helpers.GET
 import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
-class TermsOfUseVersionSpec extends HmrcSpec {
+class TermsOfUseVersionSpec extends HmrcSpec with MockitoSugar with ArgumentMatchersSugar {
   "fromVersionString" should {
     "return OLD_VERSION for 1.0 version" in {
       TermsOfUseVersion.fromVersionString("1.0") shouldBe Some(TermsOfUseVersion.OLD_JOURNEY)

@@ -81,31 +81,31 @@ class NavigationSpec extends BaseControllerSpec {
     }
 
     "user is logged in" should {
-      "be successful" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
+      "be successful" in new Setup(loggedInState = Some(LoggedInState.LoggedIn)) {
         status(result) shouldBe OK
         links.size shouldBe 2
       }
 
-      "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
+      "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LoggedIn)) {
         links.head shouldBe NavLink(devUser.displayedName, Profile.showProfile().url, isSensitive = true)
       }
 
-      "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LOGGED_IN)) {
+      "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LoggedIn)) {
         links(1) shouldBe NavLink("Sign out", routes.UserLogoutAccount.logout().url)
       }
     }
 
     "user is part logged in enabling MFA in" should {
-      "be successful" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
+      "be successful" in new Setup(loggedInState = Some(LoggedInState.PartLoggedInEnablingMFA)) {
         status(result) shouldBe OK
         links.size shouldBe 2
       }
 
-      "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
+      "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.PartLoggedInEnablingMFA)) {
         links.head shouldBe NavLink("Register", routes.Registration.register().url)
       }
 
-      "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.PART_LOGGED_IN_ENABLING_MFA)) {
+      "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.PartLoggedInEnablingMFA)) {
         links(1) shouldBe NavLink("Sign in", routes.UserLoginAccount.login().url)
       }
     }

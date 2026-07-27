@@ -17,7 +17,7 @@
 package uk.gov.hmrc.apiplatform.modules.uplift.services.mocks
 
 import scala.concurrent.Future.successful
-import scala.reflect.runtime.universe._
+import scala.reflect.ClassTag
 
 import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
@@ -36,17 +36,17 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
 
     object FetchBySessionIdAndFlowType {
-      def thenReturn[A <: Flow](flow: A)(implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt), *)).thenReturn(successful(Some(flow)))
+      def thenReturn[A <: Flow](flow: A)(implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(ct))).thenReturn(successful(Some(flow)))
 
-      def thenReturn[A <: Flow](sessionId: A#Type)(flow: A)(implicit tt: TypeTag[A]) =
-        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)).thenReturn(successful(Some(flow)))
+      def thenReturn[A <: Flow](sessionId: SessionId)(flow: A)(implicit ct: ClassTag[A]) =
+        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(ct))).thenReturn(successful(Some(flow)))
 
-      def thenReturnNothing[A <: Flow](implicit tt: TypeTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(tt), *)).thenReturn(successful(None))
+      def thenReturnNothing[A <: Flow](implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(ct))).thenReturn(successful(None))
 
-      def thenReturnNothing[A <: Flow](sessionId: A#Type)(implicit tt: TypeTag[A]) =
-        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)).thenReturn(successful(None))
+      def thenReturnNothing[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) =
+        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(ct))).thenReturn(successful(None))
 
-      def verifyCalledWith[A <: Flow](sessionId: A#Type)(implicit tt: TypeTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(tt), *)
+      def verifyCalledWith[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(ct))
     }
 
     object SaveFlow {

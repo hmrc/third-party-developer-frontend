@@ -66,8 +66,8 @@ class CredentialsSpec
 
     final def createApplication() = modifiers(anApplication)
   }
-  val productionState: ApplicationState = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant)
-  val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
+  val productionState: ApplicationState = ApplicationState(State.Production, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant)
+  val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PendingGatekeeperApproval)
 
   trait ApplicationProviderWithAdmin extends ApplicationProvider {
     def anApplication: ApplicationWithCollaborators = standardApp.withCollaborators(userSession.developer.email.asAdministratorCollaborator)

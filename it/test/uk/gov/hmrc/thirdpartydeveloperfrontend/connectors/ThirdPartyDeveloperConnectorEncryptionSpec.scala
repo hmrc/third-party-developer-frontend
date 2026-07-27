@@ -28,7 +28,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.EmailAlreadyInUse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, LockedAccount, UnverifiedAccount}

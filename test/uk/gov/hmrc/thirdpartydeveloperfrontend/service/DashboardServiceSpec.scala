@@ -68,8 +68,8 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
   "get the list of applications for the given user" should {
     "successfully return the list of applications" in new Setup {
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(Seq(productionApplication))
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(Seq(sandboxApplication))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Production)(Seq(productionApplication))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Sandbox)(Seq(sandboxApplication))
 
       val result = await(dashboardService.fetchApplicationList(userId))
 

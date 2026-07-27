@@ -27,8 +27,8 @@ trait CollaboratorTracker extends UserIdTracker {
   }
 
   implicit class CollaboratorSyntax(email: LaxEmailAddress) {
-    def asAdministratorCollaborator             = collaboratorOf(email, Collaborator.Roles.ADMINISTRATOR)
-    def asDeveloperCollaborator                 = collaboratorOf(email, Collaborator.Roles.DEVELOPER)
+    def asAdministratorCollaborator             = collaboratorOf(email, Collaborator.Role.Administrator)
+    def asDeveloperCollaborator                 = collaboratorOf(email, Collaborator.Role.Developer)
     def asCollaborator(role: Collaborator.Role) = collaboratorOf(email, role)
   }
 }

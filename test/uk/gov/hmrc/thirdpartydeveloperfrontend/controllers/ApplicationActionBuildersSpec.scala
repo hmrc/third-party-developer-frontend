@@ -74,7 +74,7 @@ class ApplicationActionBuildersSpec
       val testResultBody = "was called"
 
       val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionFields.id, context, version) {
-        definitionsRequest: ApplicationWithSubscriptionFieldsRequest[AnyContent] => Future.successful(underTest.Ok(testResultBody))
+        (definitionsRequest: ApplicationWithSubscriptionFieldsRequest[AnyContent]) => Future.successful(underTest.Ok(testResultBody))
       }(loggedInDevRequest)
       status(result) shouldBe expectedStatus
       if (expectedStatus == OK) {

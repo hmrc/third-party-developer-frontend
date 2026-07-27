@@ -22,8 +22,8 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 trait DeveloperSessionBuilder {
 
   implicit class DeveloperSyntax(developer: User) {
-    def loggedIn: UserSession                = buildDeveloperSession(LoggedInState.LOGGED_IN, developer)
-    def partLoggedInEnablingMFA: UserSession = buildDeveloperSession(LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer)
+    def loggedIn: UserSession                = buildDeveloperSession(LoggedInState.LoggedIn, developer)
+    def partLoggedInEnablingMFA: UserSession = buildDeveloperSession(LoggedInState.PartLoggedInEnablingMFA, developer)
   }
 
   private def buildDeveloperSession(loggedInState: LoggedInState, developer: User): UserSession = {

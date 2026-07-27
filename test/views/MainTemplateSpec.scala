@@ -34,7 +34,7 @@ class MainTemplateSpec extends CommonViewSpec with UserBuilder with LocalUserIdT
   "MainTemplateSpec" should {
     val mainView             = app.injector.instanceOf[Main]
     val developer            = buildTrackedUser()
-    val session              = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
+    val session              = UserSession(UserSessionId.random, LoggedInState.LoggedIn, developer)
     implicit val userSession = session
     implicit val request     = FakeRequest()
 

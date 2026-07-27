@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -54,12 +54,12 @@ class UpdateTCAndPrivPolicyURLViewSpec extends CommonViewSpec
       val loggedIn              = adminDeveloper.loggedIn
       val request               = FakeRequest().withCSRFToken
       val privacyPolicyUrl      = application.privacyPolicyLocation match {
-        case Some(PrivacyPolicyLocations.Url(url)) => Some(url)
-        case _                                     => None
+        case Some(PrivacyPolicyLocation.Url(url)) => Some(url)
+        case _                                    => None
       }
       val termsAndConditionsUrl = application.termsAndConditionsLocation match {
-        case Some(TermsAndConditionsLocations.Url(url)) => Some(url)
-        case _                                          => None
+        case Some(TermsAndConditionsLocation.Url(url)) => Some(url)
+        case _                                         => None
       }
 
       val form = EditApplicationForm.form.fill(
@@ -92,7 +92,7 @@ class UpdateTCAndPrivPolicyURLViewSpec extends CommonViewSpec
 
       elementExistsByText(document, "h1", "Change privacy policy and terms & conditions") shouldBe true
 
-      elementIdentifiedByAttrContainsText(document, "div", "data-app-name", application.name.value) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "div", "data-app-name", application.name.toString) shouldBe true
       elementIdentifiedByAttrContainsText(document, "div", "data-app-env", "Sandbox") shouldBe true
       elementExistsByText(document, "button", "Save changes") shouldBe true
       elementExistsByText(document, "a", "Cancel") shouldBe true

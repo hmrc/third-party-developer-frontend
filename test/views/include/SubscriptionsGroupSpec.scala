@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{Collaborator, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
@@ -65,7 +65,15 @@ class SubscriptionsGroupSpec
   val emptyFields: ApiSubscriptionFields.SubscriptionFieldsWrapper = emptySubscriptionFieldsWrapper(applicationId, clientId, apiContext, apiVersion)
 
   val subscriptionStatus: APISubscriptionStatus =
-    APISubscriptionStatus(apiName, ServiceName(apiName), apiContext, ApiVersion(apiVersion, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty), false, false, fields = emptyFields)
+    APISubscriptionStatus(
+      apiName,
+      ServiceName(apiName),
+      apiContext,
+      ApiVersion(apiVersion, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
+      false,
+      false,
+      fields = emptyFields
+    )
 
   val apiSubscriptions: Seq[APISubscriptions] = Seq(APISubscriptions(apiName, ServiceName(apiName), apiContext, Seq(subscriptionStatus)))
 
@@ -101,45 +109,45 @@ class SubscriptionsGroupSpec
   }
 
   "subscriptionsGroup" when {
-    val productionState                   = ApplicationState(State.PRODUCTION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
+    val productionState                   = ApplicationState(State.Production, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
     val pendingGatekeeperApprovalState    =
-      ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
+      ApplicationState(State.PendingGatekeeperApproval, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
     val pendingRequesterVerificationState =
-      ApplicationState(State.PENDING_REQUESTER_VERIFICATION, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
+      ApplicationState(State.PendingRequesterVerification, Some(loggedInDeveloper.developer.email.text), Some(loggedInDeveloper.developer.displayedName), Some(""), instant)
 
     "logged in as a developer" should {
-      val role = Collaborator.Roles.DEVELOPER
+      val role = Collaborator.Role.Developer
 
       "render enabled toggles for a sandbox app" in {
-        val page = Page(role, Environment.SANDBOX, productionState)
+        val page = Page(role, Environment.Sandbox, productionState)
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
       }
 
       "render enabled toggles for a created production app" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState(updatedOn = instant))
+        val page = Page(role, Environment.Production, ApplicationState(updatedOn = instant))
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a pending-gatekeeper-approval production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, pendingGatekeeperApprovalState)
+        val page = Page(role, Environment.Production, pendingGatekeeperApprovalState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a pending-requester-verification production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, pendingRequesterVerificationState)
+        val page = Page(role, Environment.Production, pendingRequesterVerificationState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a checked production app with no link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, productionState)
+        val page = Page(role, Environment.Production, productionState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink shouldBe None
@@ -147,38 +155,38 @@ class SubscriptionsGroupSpec
     }
 
     "logged in as an administrator" should {
-      val role = Collaborator.Roles.ADMINISTRATOR
+      val role = Collaborator.Role.Administrator
 
       "render enabled toggles for a sandbox app" in {
-        val page = Page(role, Environment.SANDBOX, productionState)
+        val page = Page(role, Environment.Sandbox, productionState)
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
       }
 
       "render enabled toggles for a created production app" in {
-        val page = Page(role, Environment.PRODUCTION, ApplicationState(updatedOn = instant))
+        val page = Page(role, Environment.Production, ApplicationState(updatedOn = instant))
 
         page.toggle.hasAttr("disabled") shouldBe false
         page.requestChangeLink shouldBe None
       }
 
       "render disabled toggles for a pending-gatekeeper-approval production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, pendingGatekeeperApprovalState)
+        val page = Page(role, Environment.Production, pendingGatekeeperApprovalState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink.isDefined shouldBe true
       }
 
       "render disabled toggles for a pending-requester-verification production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, pendingRequesterVerificationState)
+        val page = Page(role, Environment.Production, pendingRequesterVerificationState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink.isDefined shouldBe true
       }
 
       "render disabled toggles for a checked production app with a link to request change" in {
-        val page = Page(role, Environment.PRODUCTION, productionState)
+        val page = Page(role, Environment.Production, productionState)
 
         page.toggle.hasAttr("disabled") shouldBe true
         page.requestChangeLink.isDefined shouldBe true

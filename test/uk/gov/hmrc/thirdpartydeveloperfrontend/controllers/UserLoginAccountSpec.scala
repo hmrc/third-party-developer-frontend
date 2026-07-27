@@ -31,12 +31,11 @@ import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionsData
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSessionId, MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.UserAuthenticationResponse
@@ -62,8 +61,8 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     val developerWithAuthAppAndSmsMfa                = buildTrackedUser(mfaDetails = List(verifiedAuthenticatorAppMfaDetail, verifiedSmsMfaDetail))
     val authAppMfaId                                 = verifiedAuthenticatorAppMfaDetail.id
     val smsMfaId                                     = verifiedSmsMfaDetail.id
-    val sessionWithAuthAppMfa                        = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developerWithAuthAppMfa)
-    val sessionWithSmsMfa                            = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developerWithSmsMfa)
+    val sessionWithAuthAppMfa                        = UserSession(UserSessionId.random, LoggedInState.LoggedIn, developerWithAuthAppMfa)
+    val sessionWithSmsMfa                            = UserSession(UserSessionId.random, LoggedInState.LoggedIn, developerWithSmsMfa)
     val sessionContainsDeveloperWithAuthAppAndSmsMfa = sessionWithAuthAppMfa.copy(developer = developerWithAuthAppAndSmsMfa)
     val emailFieldName: String                       = "emailaddress"
     val passwordFieldName: String                    = "password"
@@ -183,7 +182,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   }
 
   trait SetupWithUserAuthResRequiringMfaEnablement extends Setup {
-    val sessionPartLoggedInEnablingMfa = UserSession(UserSessionId.random, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developerWithAuthAppMfa)
+    val sessionPartLoggedInEnablingMfa = UserSession(UserSessionId.random, LoggedInState.PartLoggedInEnablingMFA, developerWithAuthAppMfa)
 
     val userAuthRespRequiringMfaEnablement = UserAuthenticationResponse(
       accessCodeRequired = false,
@@ -212,12 +211,12 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
   }
 
   trait PartLogged extends Setup {
-    def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+    def loggedInState: LoggedInState = LoggedInState.PartLoggedInEnablingMFA
     FetchSessionById.succeedsWith(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
   }
 
   trait LoggedIn extends Setup {
-    def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
+    def loggedInState: LoggedInState = LoggedInState.LoggedIn
     FetchSessionById.succeedsWith(sessionId, UserSession(sessionId, loggedInState, loggedInDeveloper))
   }
 
@@ -282,7 +281,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(authAppMfaId, AUTHENTICATOR_APP).url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(authAppMfaId, MfaType.AuthenticatorApp).url)
     }
 
     "display the enter access code page after successfully logging in with MFA configured as SMS" in new SetupWithUserAuthRespRequiringMfaAccessCode {
@@ -300,7 +299,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
 
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, SMS).url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, MfaType.Sms).url)
     }
 
     "return error when MFA configured as SMS and it fails to send the sms" in new SetupWithUserAuthRespRequiringMfaAccessCode {
@@ -474,7 +473,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(authAppMfaId, MfaType.AUTHENTICATOR_APP).url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(authAppMfaId, MfaType.AuthenticatorApp).url)
     }
 
     "return Sms access code page when mfa method is SMS" in new Setup {
@@ -487,7 +486,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, MfaType.SMS).url)
+      redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(smsMfaId, MfaType.Sms).url)
     }
 
     "return error when user is not found" in new Setup {
@@ -537,7 +536,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
 
-      private val result = addToken(underTest.loginAccessCodePage(authAppMfaId, AUTHENTICATOR_APP))(request)
+      private val result = addToken(underTest.loginAccessCodePage(authAppMfaId, MfaType.AuthenticatorApp))(request)
       status(result) shouldBe OK
 
       contentAsString(result) should include("Enter your access code")
@@ -551,7 +550,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withSession(sessionParams: _*)
 
-      private val result = addToken(underTest.loginAccessCodePage(smsMfaId, SMS))(request)
+      private val result = addToken(underTest.loginAccessCodePage(smsMfaId, MfaType.Sms))(request)
 
       status(result) shouldBe OK
 
@@ -572,7 +571,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false)(request)
+      private val result = underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage().url)
@@ -590,7 +589,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withFormUrlEncodedBody(("accessCode", accessCode))
         .withSession("access_uri" -> accessUri)
 
-      private val result = underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false)(request)
+      private val result = underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(accessUri)
@@ -607,7 +606,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage().url)
@@ -625,7 +624,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         .withFormUrlEncodedBody(("accessCode", accessCode))
         .withSession("access_uri" -> accessUri)
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(accessUri)
@@ -639,7 +638,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
@@ -653,7 +652,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", "123xx"))
 
-      private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, AUTHENTICATOR_APP, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
@@ -666,7 +665,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)
@@ -680,7 +679,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", "654321"))
 
-      private val result = addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) should include("You have entered an incorrect access code")
@@ -694,7 +693,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", "123xxx"))
 
-      private val result = addToken(underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = false))(request)
+      private val result = addToken(underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false))(request)
 
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) should include("You have entered an invalid access code")
@@ -707,7 +706,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = testRequest
         .withFormUrlEncodedBody(("accessCode", accessCode))
 
-      private val result = underTest.authenticateAccessCode(smsMfaId, SMS, userHasMultipleMfa = true)(request)
+      private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = true)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.ManageApplications.manageApps().url)

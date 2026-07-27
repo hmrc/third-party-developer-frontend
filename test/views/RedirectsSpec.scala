@@ -76,11 +76,11 @@ class RedirectsSpec
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {
-      renderPageWithRedirectUris(Collaborator.Roles.ADMINISTRATOR, numberOfRedirectUris)
+      renderPageWithRedirectUris(Collaborator.Role.Administrator, numberOfRedirectUris)
     }
 
     def renderPageForStandardApplicationAsDeveloperWithRedirectUris(numberOfRedirectUris: Int) = {
-      renderPageWithRedirectUris(Collaborator.Roles.DEVELOPER, numberOfRedirectUris)
+      renderPageWithRedirectUris(Collaborator.Role.Developer, numberOfRedirectUris)
     }
 
     "show a button for adding a redirect uri" in {

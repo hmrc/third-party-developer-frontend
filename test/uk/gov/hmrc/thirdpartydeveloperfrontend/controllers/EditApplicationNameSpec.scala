@@ -92,7 +92,7 @@ class EditApplicationNameSpec
     "return the Edit Applications Name Page with user logged in" in new Setup {
       givenApplicationAction(standardApp, devSession)
 
-      private val result = underTest.addApplicationName(Environment.SANDBOX, None)(loggedInDevRequest.withCSRFToken)
+      private val result = underTest.addApplicationName(Environment.Sandbox, None)(loggedInDevRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
@@ -105,14 +105,14 @@ class EditApplicationNameSpec
     "return to the login page when the user is not logged in" in new Setup {
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = underTest.addApplicationName(Environment.SANDBOX, None)(request)
+      private val result = underTest.addApplicationName(Environment.Sandbox, None)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when part logged in" in new Setup {
-      val result = underTest.addApplicationName(Environment.SANDBOX, None)(partLoggedInRequest)
+      val result = underTest.addApplicationName(Environment.Sandbox, None)(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -129,7 +129,7 @@ class EditApplicationNameSpec
         private val request = loggedInDevRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", ""))
 
-        private val result = underTest.editApplicationNameAction(Environment.SANDBOX)(request)
+        private val result = underTest.editApplicationNameAction(Environment.Sandbox)(request)
 
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
@@ -138,7 +138,7 @@ class EditApplicationNameSpec
           .createForUser(any[CreateApplicationRequest], any[UserId])(*)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.SANDBOX), eqTo(None))(*)
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.Sandbox), eqTo(None))(*)
       }
     }
   }
@@ -147,7 +147,7 @@ class EditApplicationNameSpec
 
     "return the Edit Applications Name Page with user logged in" in new Setup {
 
-      private val result = underTest.addApplicationName(Environment.PRODUCTION, None)(loggedInAdminRequest.withCSRFToken)
+      private val result = underTest.addApplicationName(Environment.Production, None)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
       contentAsString(result) should include("What&#x27;s the name of your application?")
@@ -161,14 +161,14 @@ class EditApplicationNameSpec
 
       val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-      private val result = underTest.addApplicationName(Environment.PRODUCTION, None)(request)
+      private val result = underTest.addApplicationName(Environment.Production, None)(request)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
     }
 
     "redirect to the login screen when part logged in" in new Setup {
-      val result = underTest.addApplicationName(Environment.PRODUCTION, None)(partLoggedInRequest)
+      val result = underTest.addApplicationName(Environment.Production, None)(partLoggedInRequest)
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
@@ -185,7 +185,7 @@ class EditApplicationNameSpec
         private val request = loggedInAdminRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", ""))
 
-        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
+        private val result = underTest.editApplicationNameAction(Environment.Production)(request)
 
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
@@ -194,7 +194,7 @@ class EditApplicationNameSpec
           .createForUser(any[CreateApplicationRequest], any[UserId])(*)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.PRODUCTION), *)(*)
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.Production), *)(*)
       }
 
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
@@ -205,7 +205,7 @@ class EditApplicationNameSpec
         private val request = loggedInAdminRequest.withCSRFToken
           .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", ""))
 
-        private val result = underTest.editApplicationNameAction(Environment.PRODUCTION)(request)
+        private val result = underTest.editApplicationNameAction(Environment.Production)(request)
 
         status(result) shouldBe BAD_REQUEST
         contentAsString(result) should include("That application name already exists. Enter a unique name for your application")
@@ -214,7 +214,7 @@ class EditApplicationNameSpec
           .createForUser(any[CreateApplicationRequest], any[UserId])(*)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.PRODUCTION), *)(*)
+          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.Production), *)(*)
       }
 
     }

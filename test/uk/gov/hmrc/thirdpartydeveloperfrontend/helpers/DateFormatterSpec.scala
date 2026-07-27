@@ -21,6 +21,7 @@ import java.time.{Instant, LocalDate, LocalDateTime}
 
 import org.scalatest.BeforeAndAfterAll
 
+import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.initialLastAccessDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec

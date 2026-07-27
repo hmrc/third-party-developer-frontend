@@ -40,9 +40,9 @@ class AddApplicationNameSpec extends CommonViewSpec
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
   val loggedInDeveloper      = adminDeveloper.loggedIn
-  val subordinateEnvironment = Environment.SANDBOX
+  val subordinateEnvironment = Environment.Sandbox
   val appId                  = ApplicationId.random
-  val principalEnvironment   = Environment.PRODUCTION
+  val principalEnvironment   = Environment.Production
 
   "Add application page in subordinate" should {
 

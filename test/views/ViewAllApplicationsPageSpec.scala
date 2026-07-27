@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationNameFixtures, Collaborator, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -92,7 +92,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       elementExistsByText(document, "h1", "View all applications") shouldBe true
 
     def showsAppName(appName: ApplicationName)(implicit document: Document): Assertion =
-      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName.value) shouldBe true
+      elementIdentifiedByAttrContainsText(document, "a", "data-app-name", appName.toString) shouldBe true
 
     def showsSubordinateAppsHeading()(implicit document: Document): Assertion =
       elementExistsByText(document, "th", s"$subordinateCapitalized applications") shouldBe true
@@ -174,7 +174,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     }
 
     // val appName       = "App name 1"
-    val appUserRole   = Collaborator.Roles.ADMINISTRATOR
+    val appUserRole   = Collaborator.Role.Administrator
     val appCreatedOn  = instant.minus(1, DAYS)
     val appLastAccess = Some(appCreatedOn)
 
@@ -184,13 +184,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         appNameOne,
         appUserRole,
         TermsOfUseStatus.NOT_APPLICABLE,
-        State.TESTING,
+        State.Testing,
         appLastAccess,
         grantLength,
         false,
         appCreatedOn,
-        AccessType.STANDARD,
-        Environment.SANDBOX,
+        AccessType.Standard,
+        Environment.Sandbox,
         Set.empty
       )
     )
@@ -201,13 +201,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
         appNameOne,
         appUserRole,
         TermsOfUseStatus.NOT_APPLICABLE,
-        State.PRODUCTION,
+        State.Production,
         appLastAccess,
         grantLength,
         false,
         appCreatedOn,
-        AccessType.STANDARD,
-        Environment.PRODUCTION,
+        AccessType.Standard,
+        Environment.Production,
         Set.empty
       )
     )
@@ -373,7 +373,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
     "handling of privileged applications" should {
       "show using privileged application credentials text if user is a collaborator on at least one privileged application" in new ProdAndET with Setup {
-        val priviledgedAppSummaries: Seq[ApplicationSummary] = productionAppSummaries.map(_.copy(accessType = AccessType.PRIVILEGED))
+        val priviledgedAppSummaries: Seq[ApplicationSummary] = productionAppSummaries.map(_.copy(accessType = AccessType.Privileged))
 
         implicit val document: Document = Jsoup.parse(renderPage(Seq.empty, priviledgedAppSummaries, Set(applicationId)).body)
 

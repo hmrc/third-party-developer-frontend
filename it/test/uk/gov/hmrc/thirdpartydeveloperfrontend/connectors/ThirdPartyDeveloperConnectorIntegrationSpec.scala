@@ -28,7 +28,7 @@ import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
@@ -124,7 +124,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LOGGED_IN, buildTrackedUser(userEmail))
+      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LoggedIn, buildTrackedUser(userEmail))
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -182,8 +182,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "update session logged in state" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
-      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser())
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LoggedIn)
+      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LoggedIn, buildTrackedUser())
 
       stubFor(
         put(urlEqualTo(url))
@@ -199,7 +199,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "error with SessionInvalid if we get a 404 response" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
-      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LoggedIn)
       stubFor(
         put(urlEqualTo(url))
           .willReturn(
@@ -464,7 +464,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
         mfaEnabled = false,
-        session = Some(UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(userEmail)))
+        session = Some(UserSession(sessionId, LoggedInState.LoggedIn, buildTrackedUser(userEmail)))
       )
     }
 
@@ -586,7 +586,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserSession = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(emailAddress = userEmail))
+      result shouldBe UserSession(sessionId, LoggedInState.LoggedIn, buildTrackedUser(emailAddress = userEmail))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

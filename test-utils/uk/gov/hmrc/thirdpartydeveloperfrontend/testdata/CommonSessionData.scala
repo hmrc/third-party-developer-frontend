@@ -24,7 +24,7 @@ object CommonSessionData extends DeveloperSessionBuilder {
   val dev    = CommonUserData.dev.loggedIn
   val altDev = CommonUserData.altDev.loggedIn
 
-  val partLoggedIn = altDev.copy(loggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA, sessionId = UserSessionId.random)
+  val partLoggedIn = altDev.copy(loggedInState = LoggedInState.PartLoggedInEnablingMFA, sessionId = UserSessionId.random)
 }
 
 trait CommonSessionFixtures extends CommonUserFixtures {

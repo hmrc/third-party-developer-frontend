@@ -30,21 +30,21 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.Comb
 
 class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matchers with CombinedApiTestDataHelper with UserBuilder with LocalUserIdTracker {
 
-  val category1     = ApiCategory.AGENTS
-  val category2     = ApiCategory.BUSINESS_RATES
-  val category3     = ApiCategory.CHARITIES
+  val category1     = ApiCategory.Agents
+  val category2     = ApiCategory.BusinessRates
+  val category3     = ApiCategory.Charities
   val category1Apis = Set("api1", "api2")
   val category2Apis = Set("api3", "api2", "api4")
 
   val emailPreferences =
-    EmailPreferences(List(TaxRegimeInterests(category1.toString, category1Apis), TaxRegimeInterests(category2.toString, category2Apis)), Set(EmailTopic.TECHNICAL))
+    EmailPreferences(List(TaxRegimeInterests(category1.toString, category1Apis), TaxRegimeInterests(category2.toString, category2Apis)), Set(EmailTopic.Technical))
 
   val applicationId = ApplicationId.random
   val sessionId     = UserSessionId.random
 
   def developerSession(emailPreferences: EmailPreferences): UserSession = {
     val developer: User = buildTrackedUser(emailPreferences = emailPreferences)
-    UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    UserSession(sessionId, LoggedInState.LoggedIn, developer)
   }
 
   def newApplicationEmailPreferencesFlow(selectedApis: Set[CombinedApi], selectedTopics: Set[String]): NewApplicationEmailPreferencesFlowV2 = {
@@ -57,7 +57,7 @@ class NewApplicationEmailPreferencesFlowV2V2Spec extends AnyWordSpec with Matche
         val newApiInExistingCategory = combinedApi("new-api", List(category1))
         val newApiInNewCategory      = combinedApi("new-api-2", List(category3))
 
-        val selectedTopics = Set(EmailTopic.TECHNICAL, EmailTopic.BUSINESS_AND_POLICY)
+        val selectedTopics = Set(EmailTopic.Technical, EmailTopic.BusinessAndPolicy)
 
         val flow                                = newApplicationEmailPreferencesFlow(Set(newApiInExistingCategory, newApiInNewCategory), selectedTopics.map(_.toString))
         val mappedPreferences: EmailPreferences = flow.toEmailPreferences

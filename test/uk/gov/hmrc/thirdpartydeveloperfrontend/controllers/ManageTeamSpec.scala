@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
@@ -81,7 +81,7 @@ class ManageTeamSpec
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val developer: User      = buildTrackedUser()
-    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session: UserSession = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
     fetchSessionByIdReturns(sessionId, session)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
@@ -127,14 +127,14 @@ class ManageTeamSpec
 
   "manageTeam" should {
     "show the add team member page when logged in as an admin" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
       val result: Future[Result] = underTest.manageTeam(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
     }
 
     "show the add team member page when logged in as a developer" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer)
 
       val result: Future[Result] = underTest.manageTeam(appId)(loggedInRequest.withCSRFToken)
 
@@ -151,14 +151,14 @@ class ManageTeamSpec
 
   "addTeamMember" should {
     "show the add team member page when logged in as an admin" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
       val result: Future[Result] = underTest.addTeamMember(appId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
     }
 
     "show the add team member page when logged in as a developer" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer)
 
       val result: Future[Result] = underTest.addTeamMember(appId)(loggedInRequest.withCSRFToken)
 
@@ -176,10 +176,10 @@ class ManageTeamSpec
 
   "addTeamMemberAction" should {
     val email = "user@example.com".toLaxEmail
-    val role  = Collaborator.Roles.ADMINISTRATOR
+    val role  = Collaborator.Role.Administrator
 
     "add a team member when logged in as an admin" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
 
       val result: Future[Result] =
         underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
@@ -191,7 +191,7 @@ class ManageTeamSpec
     }
 
     "check if team member already exists on the application" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
       CollaboratorServiceMock.AddTeamMember.teamMemberAlreadyExists()
 
       val result: Future[Result] =
@@ -203,7 +203,7 @@ class ManageTeamSpec
     }
 
     "check if application exists" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
       CollaboratorServiceMock.AddTeamMember.applicationNotFound()
 
       val result: Future[Result] =
@@ -215,7 +215,7 @@ class ManageTeamSpec
     }
 
     "reject invalid email address" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
       CollaboratorServiceMock.AddTeamMember.applicationNotFound()
 
       val result: Future[Result] =
@@ -227,7 +227,7 @@ class ManageTeamSpec
     }
 
     "return 403 Forbidden when logged in as a developer" in new Setup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer)
 
       val result: Future[Result] =
         underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> email.text, "role" -> role.toString))
@@ -249,7 +249,7 @@ class ManageTeamSpec
   "removeTeamMember" should {
 
     "show the remove team member page when logged in as an admin" in new ExtendedSetup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator, additionalTeamMembers = additionalTeamMembers)
 
       val result: Future[Result] =
         underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest.withCSRFToken)
@@ -259,7 +259,7 @@ class ManageTeamSpec
     }
 
     "show the remove team member page when logged in as a developer" in new ExtendedSetup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER, additionalTeamMembers = additionalTeamMembers)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer, additionalTeamMembers = additionalTeamMembers)
 
       val result: Future[Result] =
         underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedInRequest.withCSRFToken)
@@ -269,7 +269,7 @@ class ManageTeamSpec
     }
 
     "redirect to login page when logged out" in new ExtendedSetup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER, additionalTeamMembers = additionalTeamMembers)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer, additionalTeamMembers = additionalTeamMembers)
 
       val result: Future[Result] = underTest.removeTeamMember(appId, teamMemberEmailHash)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail))
 
@@ -278,7 +278,7 @@ class ManageTeamSpec
     }
 
     "reject invalid email address" in new ExtendedSetup {
-      givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR, additionalTeamMembers = additionalTeamMembers)
+      givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator, additionalTeamMembers = additionalTeamMembers)
       val result: Future[Result] = underTest.addTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> "notAnEmailAddress"))
 
       status(result) shouldBe BAD_REQUEST
@@ -291,7 +291,7 @@ class ManageTeamSpec
 
     "logged in as an admin" should {
       "remove a team member when given the correct email and confirmation is 'Yes'" in new Setup {
-        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
 
         val result: Future[Result] =
           underTest.removeTeamMemberAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
@@ -303,7 +303,7 @@ class ManageTeamSpec
       }
 
       "redirect to the team members page without removing a team member when the confirmation in 'No'" in new Setup {
-        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
 
         val result: Future[Result] =
           underTest.removeTeamMemberAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "No"))
@@ -315,7 +315,7 @@ class ManageTeamSpec
       }
 
       "return 400 Bad Request when no confirmation is given" in new Setup {
-        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
 
         val result: Future[Result] = underTest.removeTeamMemberAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text))
 
@@ -325,7 +325,7 @@ class ManageTeamSpec
       }
 
       "show 400 Bad Request when no email is given" in new Setup {
-        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.ADMINISTRATOR)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Administrator)
 
         val result: Future[Result] = underTest.removeTeamMemberAction(application.id)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "Yes"))
 
@@ -336,7 +336,7 @@ class ManageTeamSpec
 
     "logged in as a developer" should {
       "return 403 Forbidden" in new Setup {
-        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
+        val application: ApplicationWithCollaborators = givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer)
 
         val result: Future[Result] = underTest.removeTeamMemberAction(application.id)(loggedInRequest.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))
 
@@ -347,7 +347,7 @@ class ManageTeamSpec
 
     "not logged in" should {
       "redirect to the login page" in new Setup {
-        givenTheApplicationExistWithUserRole(appId, Collaborator.Roles.DEVELOPER)
+        givenTheApplicationExistWithUserRole(appId, Collaborator.Role.Developer)
 
         val result: Future[Result] =
           underTest.removeTeamMemberAction(appId)(loggedOutRequest.withCSRFToken.withFormUrlEncodedBody("email" -> teamMemberEmail.text, "confirm" -> "Yes"))

@@ -44,7 +44,7 @@ trait NavigationSugar extends Assertions with Matchers with Eventually with Mock
   def on(page: WebPage): Assertion = {
     eventually {
       withClue(s"Currently in page: ${Driver.instance.getCurrentUrl()}, with title '${page.heading()}' - ") {
-        assert(page.isCurrentPage(), s"Page was not loaded: ${page.url()}")
+        assert(page.isCurrentPage(), s"Page was not loaded: ${page.url}")
       }
     }
   }

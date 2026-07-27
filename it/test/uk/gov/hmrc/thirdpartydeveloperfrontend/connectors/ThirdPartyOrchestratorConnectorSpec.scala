@@ -29,7 +29,7 @@ import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, _}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -67,7 +67,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
       ApplicationName("My Application"),
       CreationAccess.Standard,
       Some("Description"),
-      Environment.SANDBOX,
+      Environment.Sandbox,
       Set("admin@example.com".toLaxEmail.asAdministratorCollaborator),
       None,
       Some(orgId)
@@ -154,7 +154,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
               .withJsonBody(expectedResponse)
           )
       )
-      val result = await(connector.validateName(applicationName, Some(appId), Environment.PRODUCTION))
+      val result = await(connector.validateName(applicationName, Some(appId), Environment.Production))
       result shouldBe ApplicationNameValidationResult.Valid
     }
 
@@ -173,7 +173,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
               .withJsonBody(expectedResponse)
           )
       )
-      val result = await(connector.validateName(applicationName, None, Environment.PRODUCTION))
+      val result = await(connector.validateName(applicationName, None, Environment.Production))
       result shouldBe ApplicationNameValidationResult.Invalid
     }
 

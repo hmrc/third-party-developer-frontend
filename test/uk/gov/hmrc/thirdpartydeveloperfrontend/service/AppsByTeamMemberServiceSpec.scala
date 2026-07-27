@@ -64,24 +64,24 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
     }
 
     "sort the returned applications by name" in new Setup {
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(productionApps)
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(sandboxApps)
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Production)(productionApps)
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Sandbox)(sandboxApps)
 
       private val result = await(appsByTeamMemberService.fetchAllSummariesByTeamMember(userId))
       result shouldBe ((List(sandboxApp1.asSandboxSummary), List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
     "tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(productionApps)
-      ThirdPartyOrchestratorConnectorMock.Query.failsFor(Environment.SANDBOX)(UpstreamErrorResponse("Expected exception", 504, 504))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Production)(productionApps)
+      ThirdPartyOrchestratorConnectorMock.Query.failsFor(Environment.Sandbox)(UpstreamErrorResponse("Expected exception", 504, 504))
 
       private val result = await(appsByTeamMemberService.fetchAllSummariesByTeamMember(userId))
       result shouldBe ((Nil, List(productionApp2.asProdSummary, productionApp1.asProdSummary)))
     }
 
     "not tolerate the sandbox connector failing with a 5xx error" in new Setup {
-      ThirdPartyOrchestratorConnectorMock.Query.failsFor(Environment.PRODUCTION)(UpstreamErrorResponse("Expected exception", 504, 504))
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(sandboxApps)
+      ThirdPartyOrchestratorConnectorMock.Query.failsFor(Environment.Production)(UpstreamErrorResponse("Expected exception", 504, 504))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Sandbox)(sandboxApps)
 
       intercept[UpstreamErrorResponse] {
         await(appsByTeamMemberService.fetchAllSummariesByTeamMember(userId))

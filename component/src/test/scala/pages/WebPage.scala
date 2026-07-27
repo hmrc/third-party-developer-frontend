@@ -26,9 +26,9 @@ import uk.gov.hmrc.selenium.webdriver.Driver
 case class Link(href: String, text: String)
 
 trait WebLink extends PageObject {
-  def url(): String
+  def url: String
 
-  def go(): Unit = get(this.url())
+  def go(): Unit = get(this.url)
 
   protected def waitForElementToBePresent(locator: By): WebElement = {
     fluentWait.until(ExpectedConditions.presenceOfElementLocated(locator))

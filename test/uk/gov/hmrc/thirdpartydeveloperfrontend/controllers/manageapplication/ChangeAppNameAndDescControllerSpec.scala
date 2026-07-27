@@ -272,10 +272,10 @@ class ChangeAppNameAndDescControllerSpec
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, manageapplicationroutes.ChangeAppNameAndDescController.changeAppNameAndDescAction(application.id).url) shouldBe true
-      if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
-        inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
+      if (application.deployedTo == Environment.Sandbox || application.state.name == State.Testing) {
+        inputExistsWithValue(doc, "applicationName", "text", application.details.name.toString) shouldBe true
       } else {
-        inputExistsWithValue(doc, "applicationName", "hidden", application.details.name.value) shouldBe true
+        inputExistsWithValue(doc, "applicationName", "hidden", application.details.name.toString) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.details.description.getOrElse("None")) shouldBe true
     }
@@ -322,7 +322,7 @@ class ChangeAppNameAndDescControllerSpec
     implicit class ChangeAppNameAndDescAppAugment(val app: ApplicationWithCollaborators) {
 
       final def toChangeAppNameAndDescForm =
-        ChangeAppNameAndDescForm(app.details.name.value, app.details.description)
+        ChangeAppNameAndDescForm(app.details.name.toString, app.details.description)
 
       final def callChangeAppNameAndDesc: Future[Result] = underTest.changeAppNameAndDesc(app.id)(loggedInDevRequest)
 

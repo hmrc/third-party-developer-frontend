@@ -85,7 +85,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
         ("lastname", "  last  ")    // with whitespaces before and after
       )
 
-      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
+      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       when(underTest.profileService.updateProfileName(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo("first"), eqTo("last"))(*))
@@ -102,7 +102,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
         ("lastname", "last")
       )
 
-      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))
+      fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val result = addToken(underTest.updateProfile())(request)
@@ -120,7 +120,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
       when(underTest.sessionService.fetch(eqTo(sessionId))(*))
-        .thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))))
+        .thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))))
       when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
         .thenReturn(failed(new InvalidCredentials()))
 
@@ -140,7 +140,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LOGGED_IN, loggedInDeveloper))))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))))
       when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
         .thenReturn(Future.successful(OK))
 

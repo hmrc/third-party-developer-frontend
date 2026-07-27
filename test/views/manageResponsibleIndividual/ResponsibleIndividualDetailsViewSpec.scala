@@ -60,7 +60,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       )
       val document    = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
 
-      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name.value)
+      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name.toString)
       elementBySelector(document, "#environment").map(_.text()) shouldBe Some(environment)
 
       val oldRiNames = document.select(".riHistoryName")

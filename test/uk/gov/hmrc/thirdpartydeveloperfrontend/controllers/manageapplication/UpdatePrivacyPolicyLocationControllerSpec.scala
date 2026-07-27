@@ -28,7 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
@@ -74,7 +74,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
       val newPrivacyPolicyUrl  = "http://example.com/new-priv-policy"
       val appWithPrivPolicyUrl = legacyAppWithPrivacyPolicyLocation(Some(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, adminSession)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocations.Url(newPrivacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocation.Url(newPrivacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> newPrivacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "false")
@@ -89,7 +89,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
   "changing privacy policy location for new journey applications" should {
 
     "display update page with 'in desktop' radio selected" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, adminSession)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
@@ -101,7 +101,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
     }
 
     "display update page with 'url' radio selected" in new Setup {
-      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.Url(privacyPolicyUrl))
+      val appWithPrivPolicyUrl = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.Url(privacyPolicyUrl))
       givenApplicationAction(appWithPrivPolicyUrl, adminSession)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyUrl.id))(loggedInAdminRequest)
@@ -114,7 +114,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
     }
 
     "return See Other if application cannot be retrieved" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationActionReturnsNotFound(appWithPrivPolicyInDesktop.id)
 
       val result = addToken(underTest.updatePrivacyPolicyLocation(appWithPrivPolicyInDesktop.id))(loggedInAdminRequest)
@@ -123,7 +123,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
     }
 
     "return bad request if privacy policy location has not changed" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, adminSession)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
@@ -133,7 +133,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
     }
 
     "return bad request if form data is invalid" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, adminSession)
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
@@ -143,9 +143,9 @@ class UpdatePrivacyPolicyLocationControllerSpec
     }
 
     "update location if form data is valid and return to app details page" in new Setup {
-      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocations.InDesktopSoftware)
+      val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, adminSession)
-      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocations.Url(privacyPolicyUrl)))(*))
+      when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> privacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
@@ -190,7 +190,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
             None,
             ResponsibleIndividual(FullName("bob example"), "bob@example.com".toLaxEmail),
             Set.empty,
-            TermsAndConditionsLocations.InDesktopSoftware,
+            TermsAndConditionsLocation.InDesktopSoftware,
             privacyPolicyLocation,
             List.empty
           )

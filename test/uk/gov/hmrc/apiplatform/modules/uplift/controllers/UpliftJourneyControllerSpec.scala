@@ -116,7 +116,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     val developer: User      = buildTrackedUser()
     val sessionId            = UserSessionId.random
-    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session: UserSession = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
     val testingApp: ApplicationWithCollaborators = sampleApp.withState(ApplicationState(updatedOn = instant)).inSandbox()
 
@@ -136,7 +136,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
-      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -146,7 +146,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
-      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -155,39 +155,42 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val singleApi: List[ApiDefinition] = List(
       ApiDefinition(
         serviceName = ServiceName("test-api-context-1"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-1",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-1"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("context/name"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
     )
 
     val multipleApis: List[ApiDefinition] = List(
       ApiDefinition(
         serviceName = ServiceName("test-api-context-1"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-1",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-1"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       ),
       ApiDefinition(
         serviceName = ServiceName("test-api-context-2"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-2",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-2"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-2"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
     )
 
@@ -371,7 +374,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "answer" -> testSellResellOrDistribute.answer
+        "answer" -> testSellResellOrDistribute.value
       ))
 
       status(result) shouldBe SEE_OTHER
@@ -389,7 +392,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "answer" -> testSellResellOrDistribute.answer
+        "answer" -> testSellResellOrDistribute.value
       ))
 
       status(result) shouldBe SEE_OTHER
@@ -415,7 +418,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(prodAppId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "answer" -> testSellResellOrDistribute.answer
+        "answer" -> testSellResellOrDistribute.value
       ))
 
       status(result) shouldBe SEE_OTHER

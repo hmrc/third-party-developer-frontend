@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationNameFixtures, Collaborator, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ApplicationIdFixtures, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.OrganisationName
@@ -121,7 +121,7 @@ class ViewAllApplicationsPageOrganisationRegistrationSpec extends CommonViewSpec
       )
     }
 
-    val appUserRole   = Collaborator.Roles.ADMINISTRATOR
+    val appUserRole   = Collaborator.Role.Administrator
     val appCreatedOn  = instant.minus(1, DAYS)
     val appLastAccess = Some(appCreatedOn)
     val applicationId = applicationIdOne
@@ -132,13 +132,13 @@ class ViewAllApplicationsPageOrganisationRegistrationSpec extends CommonViewSpec
         appNameOne,
         appUserRole,
         TermsOfUseStatus.NOT_APPLICABLE,
-        State.TESTING,
+        State.Testing,
         appLastAccess,
         grantLength,
         false,
         appCreatedOn,
-        AccessType.STANDARD,
-        Environment.SANDBOX,
+        AccessType.Standard,
+        Environment.Sandbox,
         Set.empty
       )
     )
@@ -149,13 +149,13 @@ class ViewAllApplicationsPageOrganisationRegistrationSpec extends CommonViewSpec
         appNameOne,
         appUserRole,
         TermsOfUseStatus.NOT_APPLICABLE,
-        State.PRODUCTION,
+        State.Production,
         appLastAccess,
         grantLength,
         false,
         appCreatedOn,
-        AccessType.STANDARD,
-        Environment.PRODUCTION,
+        AccessType.Standard,
+        Environment.Production,
         Set.empty
       )
     )

@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullNam
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{SubmissionId, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
@@ -106,7 +106,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "Production Application Credential Request"
       deskproTicket.fullName shouldBe application.state.requestedByName.get
       deskproTicket.email shouldBe application.state.requestedByEmailAddress.get
-      deskproTicket.message should include(riVerification.applicationName.value)
+      deskproTicket.message should include(riVerification.applicationName.toString)
       deskproTicket.message should include("for production use on the Developer Hub")
       deskproTicket.applicationId shouldBe Some(applicationId.toString())
       deskproTicket.supportReason shouldBe Some("Production Application Credential Request")
@@ -143,7 +143,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
       deskproTicket.subject shouldBe "Terms of Use - Uplift Request"
       deskproTicket.fullName shouldBe requesterName
       deskproTicket.email shouldBe requesterEmail.text
-      deskproTicket.message should include(riVerificationUplift.applicationName.value)
+      deskproTicket.message should include(riVerificationUplift.applicationName.toString)
       deskproTicket.message should include("for Terms of Use review")
       deskproTicket.applicationId shouldBe Some(applicationId.toString())
       deskproTicket.supportReason shouldBe Some("Terms of Use Uplift Request")

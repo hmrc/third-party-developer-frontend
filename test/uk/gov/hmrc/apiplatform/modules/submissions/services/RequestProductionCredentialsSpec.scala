@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -90,7 +90,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.subject shouldBe "Production Application Credential Request"
       ticketCapture.value.fullName shouldBe name
       ticketCapture.value.email shouldBe email.text
-      ticketCapture.value.message should include(appAfterCommand.name.value)
+      ticketCapture.value.message should include(appAfterCommand.name.toString)
       ticketCapture.value.message should include("for production use on the Developer Hub")
       ticketCapture.value.applicationId shouldBe Some(app.id.toString())
       ticketCapture.value.supportReason shouldBe Some("Production Application Credential Request")
@@ -111,7 +111,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.subject shouldBe "Terms of Use - Uplift Request"
       ticketCapture.value.fullName shouldBe name
       ticketCapture.value.email shouldBe email.text
-      ticketCapture.value.message should include(app.name.value)
+      ticketCapture.value.message should include(app.name.toString)
       ticketCapture.value.message should include("for Terms of Use review")
       ticketCapture.value.applicationId shouldBe Some(app.id.toString())
       ticketCapture.value.supportReason shouldBe Some("Terms of Use Uplift Request")
