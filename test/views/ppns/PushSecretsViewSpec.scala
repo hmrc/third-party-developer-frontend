@@ -27,13 +27,9 @@ import views.html.ppns.PushSecretsView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationState
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.{SampleUserSession, UserTestData}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class PushSecretsViewSpec extends CommonViewSpec

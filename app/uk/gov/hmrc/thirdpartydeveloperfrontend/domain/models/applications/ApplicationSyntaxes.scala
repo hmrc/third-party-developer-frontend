@@ -74,11 +74,11 @@ trait ApplicationSyntaxes {
       import Collaborator.Role._
 
       (app.deployedTo, app.access.accessType, app.state.name, app.roleFor(developer.userId)) match {
-        case (Environment.Sandbox, _, _, _)                                                                           => false
-        case (Environment.Production, AccessType.Standard, State.Testing, Some(Administrator))                        => true
+        case (Environment.Sandbox, _, _, _)                                                                         => false
+        case (Environment.Production, AccessType.Standard, State.Testing, Some(Administrator))                      => true
         case (Environment.Production, AccessType.Standard, State.PendingGatekeeperApproval, Some(Administrator))    => true
         case (Environment.Production, AccessType.Standard, State.PendingRequesterVerification, Some(Administrator)) => true
-        case _                                                                                                        => false
+        case _                                                                                                      => false
       }
     }
 

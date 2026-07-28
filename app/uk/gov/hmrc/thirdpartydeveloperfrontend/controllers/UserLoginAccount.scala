@@ -293,7 +293,7 @@ class UserLoginAccount @Inject() (
     def handleMfaType(userHasMultipleMfa: Boolean) = {
       mfaType match {
         case AuthenticatorApp => Ok(authAppLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
-        case Sms               => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
+        case Sms              => Ok(smsLoginAccessCodeView(MfaAccessCodeForm.form, mfaId, mfaType, userHasMultipleMfa))
       }
     }
 
@@ -320,8 +320,8 @@ class UserLoginAccount @Inject() (
 
         (verifiedMfaDetailsOfOtherTypes.isEmpty, mfaType) match {
           case (true, AuthenticatorApp) => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.smsSetupReminderPage()))
-          case (true, Sms)               => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
-          case _                         => loginSucceeded(request)
+          case (true, Sms)              => successful(Redirect(uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes.MfaController.authAppSetupReminderPage()))
+          case _                        => loginSucceeded(request)
         }
       } else {
         loginSucceeded(request)
@@ -354,7 +354,7 @@ class UserLoginAccount @Inject() (
 
     def handleFormWithErrors(formWithErrors: Form[MfaAccessCodeForm], mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean) = mfaType match {
       case AuthenticatorApp => BadRequest(authAppLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
-      case Sms               => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
+      case Sms              => BadRequest(smsLoginAccessCodeView(formWithErrors, mfaId, mfaType, userHasMultipleMfa))
     }
 
     def handleAccessCodeError(form: MfaAccessCodeForm, mfaId: MfaId, mfaType: MfaType, userHasMultipleMfa: Boolean) = {
@@ -365,7 +365,7 @@ class UserLoginAccount @Inject() (
             mfaType,
             userHasMultipleMfa
           ))
-        case Sms               => Unauthorized(smsLoginAccessCodeView(
+        case Sms              => Unauthorized(smsLoginAccessCodeView(
             MfaAccessCodeForm.form.fill(form).withError("accessCode", "You have entered an incorrect access code"),
             mfaId,
             mfaType,

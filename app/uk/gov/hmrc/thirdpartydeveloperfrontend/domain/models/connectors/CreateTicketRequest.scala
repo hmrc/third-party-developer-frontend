@@ -71,7 +71,7 @@ object CreateTicketRequest {
 
     val actor           = role match {
       case Collaborator.Role.Administrator => "an administrator"
-      case _                                => "a developer"
+      case _                               => "a developer"
     }
     def reasonKey()     = if (environment.isProduction) {
       "prod-app-delete"

@@ -25,14 +25,13 @@ import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.given
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{API, ConnectorMetrics}
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
@@ -63,7 +62,6 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   import ThirdPartyApplicationSubmissionsConnector._
   import config._
-  import Submission._
 
   val api = API("third-party-application-submissions")
 

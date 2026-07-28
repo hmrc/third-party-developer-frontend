@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder

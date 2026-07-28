@@ -81,7 +81,6 @@ case class ResponsibleIndividualUpdateVerification(
 object ResponsibleIndividualVerification {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
-  import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
   implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification]                = Json.format[ResponsibleIndividualToUVerification]
   implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]

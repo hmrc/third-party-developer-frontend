@@ -1,12 +1,13 @@
 import scoverage.ScoverageKeys._
 
 object ScoverageSettings {
+
   def apply() = Seq(
-    coverageMinimumStmtTotal := 84.00,
+    coverageMinimumStmtTotal   := 84.00,
     coverageMinimumBranchTotal := 75.0,
-    coverageFailOnMinimum := true,
-    coverageHighlighting := true,
-    coverageExcludedPackages :=  Seq(
+    coverageFailOnMinimum      := true,
+    coverageHighlighting       := true,
+    coverageExcludedPackages   := Seq(
       "<empty>",
       "prod.*",
       "testOnlyDoNotUseInAppConf.*",

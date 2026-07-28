@@ -104,7 +104,7 @@ class MfaController @Inject() (
 
   private def setupSelectedMfa(mfaType: String): Future[Result] = {
     MfaType.unsafeApply(fromScreamingSnakeCase(mfaType)) match {
-      case Sms               => successful(Redirect(routes.MfaController.setupSms()))
+      case Sms              => successful(Redirect(routes.MfaController.setupSms()))
       case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppStart()))
     }
   }
@@ -113,7 +113,7 @@ class MfaController @Inject() (
 
     def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId): Future[Result] = {
       mfaType match {
-        case Sms               =>
+        case Sms              =>
           thirdPartyDeveloperMfaConnector.sendSms(userId, mfaIdForAuthentication) flatMap {
             case true  => successful(Redirect(routes.MfaController.smsAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
             case false => internalServerErrorTemplate("Failed to send SMS")
@@ -296,7 +296,7 @@ class MfaController @Inject() (
   private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     mfaType match {
       case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
-      case Sms               =>
+      case Sms              =>
         thirdPartyDeveloperMfaConnector.sendSms(userId, mfaId).flatMap {
           case true  => successful(Redirect(routes.MfaController.smsAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
           case false => internalServerErrorTemplate("Failed to send SMS")

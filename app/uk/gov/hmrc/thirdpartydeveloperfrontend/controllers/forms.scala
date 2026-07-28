@@ -210,9 +210,7 @@ object RemoveTeamMemberCheckPageConfirmationForm {
   val form: Form[RemoveTeamMemberCheckPageConfirmationForm] = Form(
     mapping(
       "email" -> emailValidator(FormKeys.teamMemberEmailRequired)
-    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(
-      r => Some(r.email)
-    )
+    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(r => Some(r.email))
   )
 }
 
@@ -602,11 +600,11 @@ object ChangeOfPrivacyPolicyLocationForm {
   def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
       case PrivacyPolicyLocation.Url(value) => value
-      case _                                 => ""
+      case _                                => ""
     }
     val isInDesktop      = privacyPolicyLocation match {
       case PrivacyPolicyLocation.InDesktopSoftware => true
-      case _                                        => false
+      case _                                       => false
     }
     form.fillAndValidate(
       ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, isInDesktop, true)
@@ -651,11 +649,11 @@ object ChangeOfTermsAndConditionsLocationForm {
   def withNewJourneyData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
     val termsAndConditionsUrl = termsAndConditionsLocation match {
       case TermsAndConditionsLocation.Url(value) => value
-      case _                                      => ""
+      case _                                     => ""
     }
     val isInDesktop           = termsAndConditionsLocation match {
       case TermsAndConditionsLocation.InDesktopSoftware => true
-      case _                                             => false
+      case _                                            => false
     }
     form.fillAndValidate(
       ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, isInDesktop, true)

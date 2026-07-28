@@ -22,7 +22,6 @@ trait ApplicationsJsonFormatters {
   import play.api.libs.json._
 
   object TOUAHelper {
-    import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
     val formatTOUA: OFormat[TermsOfUseAgreement] = Json.format[TermsOfUseAgreement]
   }

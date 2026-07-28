@@ -26,13 +26,12 @@ import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, MfaId}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{API, CommonResponseHandlers, ConnectorMetrics}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
 
 @Singleton

@@ -16,7 +16,6 @@
 
 package views.helper
 
-import java.time.Period
 import java.util.Locale
 
 import org.scalatest.matchers.should.Matchers

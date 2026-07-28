@@ -16,8 +16,6 @@
 
 package views.include
 
-import java.time.Period
-
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
@@ -29,7 +27,6 @@ import play.twirl.api.Html
 import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb

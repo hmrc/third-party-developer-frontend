@@ -88,9 +88,17 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None), ApiVersion(versionTwo, ApiStatus.Beta, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None))
+        List(
+          ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(versionTwo, ApiStatus.Beta, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
+        )
       )
-      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)))
+      verifyApplicationSubscription(
+        groupedSubscriptions.apis(1),
+        "Individual Tax",
+        "individual-tax",
+        List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None))
+      )
     }
 
     "take first app name if it is different" in {
@@ -110,7 +118,10 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None), ApiVersion(versionTwo, ApiStatus.Beta, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None))
+        List(
+          ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(versionTwo, ApiStatus.Beta, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
+        )
       )
     }
 

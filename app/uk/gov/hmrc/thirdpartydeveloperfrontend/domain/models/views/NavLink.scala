@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 
 import play.api.libs.json._
 import uk.gov.hmrc.govukfrontend.views.html.components.Text
-import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.{ServiceNavigation, ServiceNavigationItem}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.ServiceNavigationItem
 
 case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, isSensitive: Boolean = false)
 
