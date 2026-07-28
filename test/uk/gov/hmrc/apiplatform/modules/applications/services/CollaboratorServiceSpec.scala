@@ -44,7 +44,10 @@ class CollaboratorServiceSpec
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
+      classOf[ApmConnector],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
 
     val collaboratorService = new CollaboratorService(
       ApmConnectorCommandModuleMock.aMock,

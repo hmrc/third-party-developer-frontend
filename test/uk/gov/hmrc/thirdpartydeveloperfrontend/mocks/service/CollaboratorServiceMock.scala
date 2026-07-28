@@ -81,6 +81,10 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
   }
 
   object CollaboratorServiceMock extends AbstractCollaboratorServiceMock {
-    val aMock = mock[CollaboratorService]
+
+    val aMock = org.mockito.Mockito.mock(
+      classOf[CollaboratorService],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
   }
 }

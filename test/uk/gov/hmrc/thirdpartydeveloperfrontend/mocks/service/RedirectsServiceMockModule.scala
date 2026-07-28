@@ -54,6 +54,10 @@ trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
   }
 
   object RedirectsServiceMock extends AbstractRedirectsServiceMock {
-    val aMock = mock[LoginRedirectsService]
+
+    val aMock = org.mockito.Mockito.mock(
+      classOf[LoginRedirectsService],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
   }
 }

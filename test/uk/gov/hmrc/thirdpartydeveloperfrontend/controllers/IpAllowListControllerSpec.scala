@@ -45,7 +45,10 @@ class IpAllowListControllerSpec
       with ApplicationActionServiceMock {
 
     implicit val hc: HeaderCarrier                 = HeaderCarrier()
-    val mockIpAllowlistService: IpAllowlistService = mock[IpAllowlistService]
+    val mockIpAllowlistService: IpAllowlistService = org.mockito.Mockito.mock(
+      classOf[IpAllowlistService],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
 
     val underTest = new IpAllowListController(
       mockErrorHandler,

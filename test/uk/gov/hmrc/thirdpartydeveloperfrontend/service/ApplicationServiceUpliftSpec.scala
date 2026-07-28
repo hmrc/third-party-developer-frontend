@@ -40,7 +40,10 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
 
     private val mockAppConfig = mock[ApplicationConfig]
 
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
+      classOf[ApmConnector],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
 

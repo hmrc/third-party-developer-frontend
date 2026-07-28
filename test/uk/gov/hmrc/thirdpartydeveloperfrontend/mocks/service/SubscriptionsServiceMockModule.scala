@@ -81,7 +81,11 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
   }
 
   object SubscriptionsServiceMock extends AbstractSubscriptionsServiceMock {
-    val aMock = mock[SubscriptionsService]
+
+    val aMock = org.mockito.Mockito.mock(
+      classOf[SubscriptionsService],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
   }
 
 }

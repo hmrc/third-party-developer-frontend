@@ -27,7 +27,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
 
   object ApmConnectorMock {
-    val aMock = mock[ApmConnector]
+    val aMock = org.mockito.Mockito.mock(
+      classOf[ApmConnector],
+      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+    )
 
     object UpliftApplicationV2 {
 

@@ -29,7 +29,10 @@ trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
   val tpaProductionConnector: ThirdPartyApplicationProductionConnector                     = mock[ThirdPartyApplicationProductionConnector]
   val apiPlatformDeskproConnector: ApiPlatformDeskproConnector                             = mock[ApiPlatformDeskproConnector]
   val flowRepository: FlowRepository                                                       = mock[FlowRepository]
-  val apmConnector: ApmConnector                                                           = mock[ApmConnector]
+  val apmConnector: ApmConnector                                                           = org.mockito.Mockito.mock(
+    classOf[TestApmConnector],
+    org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
+  )
   val sandboxPushPullNotificationsConnector: SandboxPushPullNotificationsConnector         = mock[SandboxPushPullNotificationsConnector]
   val productionPushPullNotificationsConnector: ProductionPushPullNotificationsConnector   = mock[ProductionPushPullNotificationsConnector]
   val thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
