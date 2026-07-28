@@ -23,6 +23,7 @@ import cats.implicits._
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromScreamingSnakeCase}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
@@ -91,7 +92,7 @@ case class EmailPreferencesFlowV2(
 
   def categoriesInOrder: List[String]                            = selectedCategories.toList.sorted
 // testng for a string against list of apicatrgories/// amazed it doesn't complain about type - how String <: ApiCategory is beyond me...
-  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.toString()).contains(category)).sortBy(_.displayName)
+  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.asScreamingSnakeCase).contains(category)).sortBy(_.displayName)
 
   def selectedApisByCategory(category: String): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
 
@@ -103,7 +104,7 @@ case class EmailPreferencesFlowV2(
     val interests: List[TaxRegimeInterests] =
       selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
 
-    EmailPreferences(interests, selectedTopics.map(EmailTopic.unsafeApply(_)))
+    EmailPreferences(interests, selectedTopics.map(t => EmailTopic.unsafeApply(fromScreamingSnakeCase(t))))
   }
 }
 
@@ -119,7 +120,7 @@ object EmailPreferencesFlowV2 {
           userSession.sessionId,
           emailPreferences.interests.map(_.regime).toSet,
           taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
-          emailPreferences.topics.map(_.toString),
+          emailPreferences.topics.map(_.asScreamingSnakeCase),
           List.empty
         )
     }
@@ -159,7 +160,7 @@ case class NewApplicationEmailPreferencesFlowV2(
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.toString()).toSet)).toMap
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.asScreamingSnakeCase).toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
     val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
@@ -175,7 +176,7 @@ case class NewApplicationEmailPreferencesFlowV2(
 
     val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
 
-    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.unsafeApply(_)))
+    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(t => EmailTopic.unsafeApply(fromScreamingSnakeCase(t))))
   }
 }
 

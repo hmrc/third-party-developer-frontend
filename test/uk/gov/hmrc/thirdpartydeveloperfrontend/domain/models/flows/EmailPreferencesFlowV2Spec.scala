@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
@@ -52,7 +53,7 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuil
         flow.selectedAPIs.keySet should contain allElementsOf (emailPreferences.interests.map(_.regime))
         flow.selectedAPIs.get(category1).head should contain allElementsOf category1Apis
         flow.selectedAPIs.get(category2).head should contain allElementsOf category2Apis
-        flow.selectedTopics should contain allElementsOf Set(EmailTopic.Technical.toString())
+        flow.selectedTopics should contain allElementsOf Set(EmailTopic.Technical.asScreamingSnakeCase)
       }
 
       "map to EmailPreferencesFlow object when ALL APIS in selected Apis" in {
@@ -60,7 +61,7 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuil
         flow.selectedCategories should contain allElementsOf (emailPreferencesWithAllApis.interests.map(_.regime))
         flow.selectedAPIs.keySet should contain allElementsOf (emailPreferencesWithAllApis.interests.map(_.regime))
         flow.selectedAPIs.get(category1).head should contain only ("ALL_APIS")
-        flow.selectedTopics should contain allElementsOf Set(EmailTopic.Technical.toString())
+        flow.selectedTopics should contain allElementsOf Set(EmailTopic.Technical.asScreamingSnakeCase)
       }
     }
 

@@ -32,6 +32,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess, _}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, OrganisationId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
@@ -209,7 +210,7 @@ class AddApplication @Inject() (
       ): Future[Set[String]] = {
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime).toSet
-        val filteredApis    = apiDetails.filter(api => api.categories.map(_.toString).intersect(allInCategories).isEmpty) // TODO - types
+        val filteredApis    = apiDetails.filter(api => api.categories.map(_.asScreamingSnakeCase).intersect(allInCategories).isEmpty) // TODO - types
         filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
       }
     }

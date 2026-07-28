@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{SessionId => _, _}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.{SessionId, User}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
@@ -169,7 +170,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   }
 
   def updateSessionLoggedInState(sessionId: SessionId, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[UserSession] = metrics.record(api) {
-    http.put(url"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState}")
+    http.put(url"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState.asScreamingSnakeCase}")
       .execute[Option[UserSession]]
       .map {
         case Some(session) => session

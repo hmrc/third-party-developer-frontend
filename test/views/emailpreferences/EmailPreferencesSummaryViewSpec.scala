@@ -25,6 +25,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
@@ -113,7 +114,7 @@ class EmailPreferencesSummaryViewSpec extends CommonViewSpec
     val topicsHeading = document.getElementById("topics-heading")
     topicsHeading.text shouldBe "Topics"
     for (topic <- emailPreferences.topics) {
-      val selectedTopicsCell = document.getElementById(s"topic-${topic.toString}")
+      val selectedTopicsCell = document.getElementById(s"topic-${topic.asScreamingSnakeCase}")
       selectedTopicsCell.text shouldBe topic.displayName
     }
 

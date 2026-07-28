@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
@@ -68,7 +69,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
 
     val body = selfApplicationId.fold[ApplicationNameValidationRequest](NewApplicationNameValidationRequest(name))(appId => ChangeApplicationNameValidationRequest(name, appId))
 
-    http.post(url"$serviceBaseUrl/environment/$environment/application/name/validate")
+    http.post(url"$serviceBaseUrl/environment/${environment.asScreamingSnakeCase}/application/name/validate")
       .withBody(Json.toJson[ApplicationNameValidationRequest](body))
       .execute[Option[ApplicationNameValidationResult]]
       .map {
@@ -83,7 +84,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
     }
 
     http
-      .get(url"${serviceBaseUrl}/environment/$environment/query?$qryStringMap")
+      .get(url"${serviceBaseUrl}/environment/${environment.asScreamingSnakeCase}/query?$qryStringMap")
       .execute[T]
   }
 }

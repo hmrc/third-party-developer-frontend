@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse, _}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{ConnectorSaveSubscriptionFieldsResponse, _}
@@ -31,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
 object ApmConnectorSubscriptionFieldsModule {
 
   def urlSubscriptionFieldValues(baseUrl: String)(environment: Environment, clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
-    url"$baseUrl/field/application/${clientId}/context/${apiContext}/version/${apiVersion}?environment=${environment}"
+    url"$baseUrl/field/application/${clientId}/context/${apiContext}/version/${apiVersion}?environment=${environment.asScreamingSnakeCase}"
 }
 
 trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
@@ -40,7 +41,7 @@ trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
   private[this] val baseUrl = s"${config.serviceBaseUrl}/subscription-fields"
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
-    http.get(url"${baseUrl}?environment=$environment")
+    http.get(url"${baseUrl}?environment=${environment.asScreamingSnakeCase}")
       .execute[ApiFieldMap[FieldDefinition]]
   }
 

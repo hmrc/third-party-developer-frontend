@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, _}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, MappedApiDefinitions, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 
 object ApmConnectorApiDefinitionModule {
   val ApplicationIdQueryParam = "applicationId"
@@ -46,7 +47,7 @@ trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
 
   def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams = Seq(
-      EnvironmentQueryParam -> environment
+      EnvironmentQueryParam -> environment.asScreamingSnakeCase
     )
 
     http.get(url"${baseUrl}/open?$queryParams")
@@ -62,7 +63,7 @@ trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
 
   def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams = Seq(
-      EnvironmentQueryParam -> environment
+      EnvironmentQueryParam -> environment.asScreamingSnakeCase
     )
     http.get(url"${baseUrl}/all?$queryParams")
       .execute[MappedApiDefinitions]

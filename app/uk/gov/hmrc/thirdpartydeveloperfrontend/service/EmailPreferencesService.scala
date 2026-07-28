@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -45,7 +46,7 @@ class EmailPreferencesService @Inject() (
   def fetchCategoriesVisibleToUser(userSession: UserSession, existingFlow: EmailPreferencesFlowV2)(implicit hc: HeaderCarrier): Future[List[APICategoryDisplayDetails]] =
     for {
       apis                <- getOrUpdateFlowWithVisibleApis(existingFlow, userSession)
-      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).map(_.toString())
+      visibleCategoryNames = apis.map(_.categories).reduce(_ ++ _).map(_.asScreamingSnakeCase)
       categories          <- fetchAllAPICategoryDetails().map(_.filter(x => visibleCategoryNames.contains(x.category)))
     } yield categories.distinct.sortBy(_.category)
 
@@ -65,7 +66,7 @@ class EmailPreferencesService @Inject() (
 
   def fetchAllAPICategoryDetails(): Future[List[APICategoryDisplayDetails]] = {
     val categories = ApiCategory.values
-    successful(categories.map(c => APICategoryDisplayDetails(c.toString(), c.displayText)).toList)
+    successful(categories.map(c => APICategoryDisplayDetails(c.asScreamingSnakeCase, c.displayText)).toList)
   }
 
   def apiCategoryDetails(category: String): Future[Option[APICategoryDisplayDetails]] =
@@ -109,7 +110,7 @@ class EmailPreferencesService @Inject() (
           applicationId,
           Set.empty,
           Set.empty,
-          userSession.developer.emailPreferences.topics.map(_.toString)
+          userSession.developer.emailPreferences.topics.map(_.asScreamingSnakeCase)
         )
         flowRepository.saveFlow[NewApplicationEmailPreferencesFlowV2](newFlowObject)
         newFlowObject

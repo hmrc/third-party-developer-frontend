@@ -21,6 +21,7 @@ import java.util.regex.Pattern
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, text}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
@@ -88,7 +89,7 @@ object SelectMfaForm {
   )
 
   def verifyMfaType(mfaType: String) = {
-    MfaType.values.exists(v => v.toString().equalsIgnoreCase(mfaType))
+    MfaType.values.exists(v => v.asScreamingSnakeCase.equalsIgnoreCase(mfaType))
   }
 }
 

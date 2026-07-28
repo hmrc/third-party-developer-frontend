@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 @import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import include._
@@ -54,8 +55,8 @@
         <div class="govuk-checkboxes " data-module="govuk-checkboxes">
           @for(topic <- List(BusinessAndPolicy, Technical, ReleaseSchedules).sortBy(_.displayOrder)) {
             <div class="govuk-checkboxes__item">
-              <input id="@topic.toString" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@topic.toString" @if(selectedTopics.contains(topic.toString)) {checked} >
-              <label class="govuk-label govuk-checkboxes__label" for="@topic.toString">
+              <input id="@topic.asScreamingSnakeCase" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@topic.asScreamingSnakeCase" @if(selectedTopics.contains(topic.asScreamingSnakeCase)) {checked} >
+              <label class="govuk-label govuk-checkboxes__label" for="@topic.asScreamingSnakeCase">
                 @topic.displayName
                 <div class="govuk-hint">
                   @topic.description
@@ -71,8 +72,8 @@
           <h2 class="govuk-heading-m">Get involved in user research and events</h2>
 
           <div class="govuk-checkboxes__item">
-            <input id="@EventInvites.toString" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@EventInvites.toString" @if(selectedTopics.contains(EventInvites.toString)) {checked} >
-            <label class="govuk-label govuk-checkboxes__label" for="@EventInvites.toString">
+            <input id="@EventInvites.asScreamingSnakeCase" class="govuk-checkboxes__input" type="checkbox" name="topic[]" value="@EventInvites.asScreamingSnakeCase" @if(selectedTopics.contains(EventInvites.asScreamingSnakeCase)) {checked} >
+            <label class="govuk-label govuk-checkboxes__label" for="@EventInvites.asScreamingSnakeCase">
               @EventInvites.displayName
               <div class="govuk-hint">
                 @EventInvites.description

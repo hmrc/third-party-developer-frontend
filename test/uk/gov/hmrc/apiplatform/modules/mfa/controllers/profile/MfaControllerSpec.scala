@@ -26,6 +26,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
@@ -96,7 +97,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
       "redirect to Auth App access code page when mfa to be deleted is Auth App and mfa authentication method is Auth App" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
 
-          val result = addToken(underTest.selectMfaAction(Some(authAppMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AuthenticatorApp.toString))
+          val result = addToken(underTest.selectMfaAction(Some(authAppMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AuthenticatorApp.asScreamingSnakeCase))
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
@@ -130,7 +131,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
       "redirect to Auth App access code page when mfa to be deleted is Sms and mfa authentication method is Auth App" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AuthenticatorApp.toString))
+          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AuthenticatorApp.asScreamingSnakeCase))
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe

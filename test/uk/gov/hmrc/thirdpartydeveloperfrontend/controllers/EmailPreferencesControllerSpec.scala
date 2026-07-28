@@ -31,6 +31,7 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApplicationId, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
@@ -101,7 +102,7 @@ class EmailPreferencesControllerSpec
         mockSelectTopicsFromSubscriptionsView
       )
 
-    val emailPreferences: EmailPreferences = EmailPreferences(List(TaxRegimeInterests(category1.toString, Set("api1", "api2"))), Set.empty)
+    val emailPreferences: EmailPreferences = EmailPreferences(List(TaxRegimeInterests(category1.asScreamingSnakeCase, Set("api1", "api2"))), Set.empty)
     val developer: User                    = devUser
     val developerWithEmailPrefences: User  = developer.copy(emailPreferences = emailPreferences)
 
@@ -148,7 +149,7 @@ class EmailPreferencesControllerSpec
     val fetchedAPis: List[CombinedApi] = List(extendedApiOne, extendedApiTwo)
 
     "return emailPreferencesSummaryView page for logged in user" in new Setup {
-      val expectedCategoryMap: Map[String, String] = Map(category1.toString() -> category1.displayText)
+      val expectedCategoryMap: Map[String, String] = Map(category1.asScreamingSnakeCase -> category1.displayText)
       fetchSessionByIdReturns(sessionId, session)
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
@@ -465,7 +466,7 @@ class EmailPreferencesControllerSpec
     }
 
     "return 400 when form has missing elements" in new Setup {
-      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> category2.toString())
+      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> category2.asScreamingSnakeCase)
       val emailFlow: EmailPreferencesFlowV2                        = EmailPreferencesFlowV2.fromDeveloperSession(session)
         .copy(selectedCategories = Set(apiCategory1.category, apiCategory2.category), visibleApis = visibleApis)
 
