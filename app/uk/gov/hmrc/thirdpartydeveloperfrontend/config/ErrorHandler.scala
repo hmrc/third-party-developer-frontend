@@ -45,7 +45,7 @@ class ErrorHandler @Inject() (
     successful(errorTemplateView(pageTitle, heading, message))
   }
 
-  def forbiddenTemplate(implicit request: Request[_]): Future[Html] = {
+  def forbiddenTemplate(implicit request: Request[?]): Future[Html] = {
     successful(forbiddenTemplateView())
   }
 

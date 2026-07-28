@@ -34,11 +34,11 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
 
   def applicationService: ApplicationService
 
-  def hasPpnsFields(request: ApplicationRequest[_]): Boolean = {
+  def hasPpnsFields(request: ApplicationRequest[?]): Boolean = {
     request.subscriptions.exists(in => in.subscribed && in.fields.fields.exists(field => field.definition.`type` == FieldDefinitionType.PPNSField))
   }
 
-  def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[_]): ApplicationViewModel =
+  def applicationViewModelFromApplicationRequest()(implicit request: ApplicationRequest[?]): ApplicationViewModel =
     ApplicationViewModel(request.application, request.hasSubscriptionFields, hasPpnsFields(request))
 
   def whenTeamMemberOnApp(applicationId: ApplicationId)(block: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -70,15 +70,15 @@ abstract class ApplicationController(mcc: MessagesControllerComponents)
     }
   }
 
-  def checkActionForAllStates = checkActionWithStateCheck(stateCheck = _ => true) _
+  def checkActionForAllStates = checkActionWithStateCheck(stateCheck = _ => true)
 
-  def checkActionForProduction = checkActionWithStateCheck(_.isProduction) _
+  def checkActionForProduction = checkActionWithStateCheck(_.isProduction)
 
-  def checkActionForPreProduction = checkActionWithStateCheck(_.isPreProduction) _
+  def checkActionForPreProduction = checkActionWithStateCheck(_.isPreProduction)
 
-  def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved) _
+  def checkActionForApprovedApps = checkActionWithStateCheck(_.isApproved)
 
-  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isTesting) _
+  def checkActionForApprovedOrTestingApps = checkActionWithStateCheck(state => state.isApproved || state.isTesting)
 
-  def checkActionForTesting = checkActionWithStateCheck(_.isTesting) _
+  def checkActionForTesting = checkActionWithStateCheck(_.isTesting)
 }

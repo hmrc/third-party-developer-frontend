@@ -97,7 +97,7 @@ class TermsOfUseResponsesControllerSpec
       termsOfUseResponsesView
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "termsOfUseResponsesPage" should {

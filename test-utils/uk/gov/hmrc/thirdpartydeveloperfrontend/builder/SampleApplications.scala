@@ -22,7 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
 trait SampleApplications extends SampleApplication {
-  self: SampleUserSession with CollaboratorTracker =>
+  self: SampleUserSession & CollaboratorTracker =>
 
   val newSandboxApplication: ApplicationWithCollaborators = sampleApp.modify(_.copy(deployedTo = Environment.Sandbox, state = InState.testing))
 

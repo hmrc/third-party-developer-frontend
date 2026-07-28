@@ -342,7 +342,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
   }
 
   "ProfileForm" should {
-    def validateNoErrors = buildValidateNoErrors(ProfileForm.form.bind) _
+    def validateNoErrors = buildValidateNoErrors(ProfileForm.form.bind)
 
     val validFormData = Map("firstname" -> "Terry", "lastname" -> "Jones", "organisation" -> "HMRC")
 
@@ -388,7 +388,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
   }
 
   "SelectApisFromSubscriptionsForm" should {
-    def validateNoErrors = buildValidateNoErrors(SelectApisFromSubscriptionsForm.form.bind) _
+    def validateNoErrors = buildValidateNoErrors(SelectApisFromSubscriptionsForm.form.bind)
 
     val validFormData = Map("selectedApi[0]" -> "", "applicationId" -> ApplicationId.random.toString())
 
@@ -402,7 +402,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
   }
 
   "SelectTopicsFromSubscriptionsForm" should {
-    def validateNoErrors = buildValidateNoErrors(SelectTopicsFromSubscriptionsForm.form.bind) _
+    def validateNoErrors = buildValidateNoErrors(SelectTopicsFromSubscriptionsForm.form.bind)
 
     val validFormData = Map("topic[0]" -> "TopicOne", "applicationId" -> ApplicationId.random.toString())
 
@@ -420,7 +420,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
   }
 
   "ChangeOfPrivacyPolicyLocationForm" should {
-    def validateNoErrors = buildValidateNoErrors(ChangeOfPrivacyPolicyLocationForm.form.bind) _
+    def validateNoErrors = buildValidateNoErrors(ChangeOfPrivacyPolicyLocationForm.form.bind)
 
     "accept valid form with valid url" in {
       val validFormDataWithUrl = Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false")
@@ -441,7 +441,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
   }
 
   "ChangeOfTermsAndConditionsLocationForm" should {
-    def validateNoErrors = buildValidateNoErrors(ChangeOfTermsAndConditionsLocationForm.form.bind) _
+    def validateNoErrors = buildValidateNoErrors(ChangeOfTermsAndConditionsLocationForm.form.bind)
 
     "accept valid form with valid url" in {
       val validFormDataWithUrl = Map("termsAndConditionsUrl" -> "http://example.com", "isInDesktop" -> "false")
@@ -462,7 +462,7 @@ class FormValidationSpec extends AsyncHmrcSpec with BuildValidateNoErrors {
   }
 
   "ResponsibleIndividualChangeToSelfOrOtherForm" should {
-    def validateNoErrors = buildValidateNoErrors(ResponsibleIndividualChangeToSelfOrOtherForm.form().bind) _
+    def validateNoErrors = buildValidateNoErrors(ResponsibleIndividualChangeToSelfOrOtherForm.form().bind)
 
     "accept valid form with 'who' value of 'self'" in {
       validateNoErrors(Map("who" -> "self"))

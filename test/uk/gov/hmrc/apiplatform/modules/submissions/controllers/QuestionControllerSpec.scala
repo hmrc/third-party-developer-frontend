@@ -65,7 +65,7 @@ class QuestionControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: HasSubscriptions & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -103,7 +103,7 @@ class QuestionControllerSpec
       mcc
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "showQuestion" should {
@@ -114,7 +114,7 @@ class QuestionControllerSpec
       val result             = controller.showQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      contentAsString(result) contains (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) `contains` (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
     }
 
     "succeed and check for label, hintText and afterStatement" in new Setup {
@@ -124,14 +124,14 @@ class QuestionControllerSpec
       val result             = controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      contentAsString(result) contains (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
-      contentAsString(result) contains ("Email address") shouldBe true withClue ("HTML content did not contain label")
-      contentAsString(result) contains ("Cannot be a shared mailbox") shouldBe true withClue ("HTML content did not contain hintText")
+      contentAsString(result) `contains` (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) `contains` ("Email address") shouldBe true withClue ("HTML content did not contain label")
+      contentAsString(result) `contains` ("Cannot be a shared mailbox") shouldBe true withClue ("HTML content did not contain hintText")
       contentAsString(
         result
-      ) contains (s"""aria-describedby="hint-${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"""") shouldBe true withClue ("HTML content did not contain describeBy")
-      contentAsString(result) contains ("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue ("HTML content did not contain afterStatement")
-      contentAsString(result) contains ("<title>")
+      ) `contains` (s"""aria-describedby="hint-${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"""") shouldBe true withClue ("HTML content did not contain describeBy")
+      contentAsString(result) `contains` ("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue ("HTML content did not contain afterStatement")
+      contentAsString(result) `contains` ("<title>")
     }
 
     "display fail and show error in title when applicable" in new Setup {
@@ -141,7 +141,7 @@ class QuestionControllerSpec
         controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
-      contentAsString(result) contains ("<title>Error:") shouldBe true withClue ("Page title should contain `Error: ` prefix")
+      contentAsString(result) `contains` ("<title>Error:") shouldBe true withClue ("Page title should contain `Error: ` prefix")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
@@ -162,7 +162,7 @@ class QuestionControllerSpec
       val result             = controller.updateQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      contentAsString(result) contains (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) `contains` (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {

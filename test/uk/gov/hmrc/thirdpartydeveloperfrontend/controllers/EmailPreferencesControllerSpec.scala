@@ -111,7 +111,7 @@ class EmailPreferencesControllerSpec
     val session: UserSession                 = UserSession(sessionId, LoggedInState.LoggedIn, developerWithEmailPrefences)
     val sessionNoEMailPrefences: UserSession = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
-    lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withLoggedIn(controllerUnderTest, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "emailPreferencesSummaryPage" should {

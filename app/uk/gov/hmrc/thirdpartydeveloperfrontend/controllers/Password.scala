@@ -142,7 +142,7 @@ trait PasswordChange {
       email: LaxEmailAddress,
       success: Result,
       error: Form[ChangePasswordForm] => HtmlFormat.Appendable
-    )(implicit request: Request[_],
+    )(implicit request: Request[?],
       hc: HeaderCarrier,
       ec: ExecutionContext
     ) = {

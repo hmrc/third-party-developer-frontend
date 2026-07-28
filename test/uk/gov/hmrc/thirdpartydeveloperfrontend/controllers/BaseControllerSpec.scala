@@ -61,19 +61,19 @@ abstract class BaseControllerSpec
 
   val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-  val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
+  val loggedOutRequest = FakeRequest().withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(devSession.sessionId, devSession)
   UpdateUserFlowSessions.succeedsWith(devSession.sessionId)
-  val loggedInDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(devSession.sessionId).withSession(sessionParams: _*)
+  val loggedInDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(devSession.sessionId).withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(adminSession.sessionId, adminSession)
   UpdateUserFlowSessions.succeedsWith(adminSession.sessionId)
-  val loggedInAdminRequest = FakeRequest().withLoggedIn(this, cookieSigner)(adminSession.sessionId).withSession(sessionParams: _*)
+  val loggedInAdminRequest = FakeRequest().withLoggedIn(this, cookieSigner)(adminSession.sessionId).withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(altDevSession.sessionId, altDevSession)
   UpdateUserFlowSessions.succeedsWith(altDevSession.sessionId)
-  val loggedInAltDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(altDevSession.sessionId).withSession(sessionParams: _*)
+  val loggedInAltDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(altDevSession.sessionId).withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(partLoggedInSession.sessionId, partLoggedInSession)
   val partLoggedInRequest = FakeRequest().withLoggedIn(this, cookieSigner)(partLoggedInSession.sessionId)

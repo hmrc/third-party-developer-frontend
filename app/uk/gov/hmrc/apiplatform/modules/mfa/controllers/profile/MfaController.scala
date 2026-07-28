@@ -109,7 +109,7 @@ class MfaController @Inject() (
     }
   }
 
-  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])(implicit request: Request[?], hc: HeaderCarrier): Future[Result] = {
 
     def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId): Future[Result] = {
       mfaType match {
@@ -293,7 +293,7 @@ class MfaController @Inject() (
     successful(Ok(removeMfaCompletedView()))
   }
 
-  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[?]): Future[Result] = {
     mfaType match {
       case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
       case Sms              =>
@@ -309,7 +309,7 @@ class MfaController @Inject() (
       accessCode: String,
       mfaIdToVerify: MfaId,
       mfaIdForRemoval: Option[MfaId]
-    )(implicit request: Request[_]
+    )(implicit request: Request[?]
     ): Future[Result] = {
     mfaIdForRemoval match {
       case Some(mfaId) =>
@@ -321,7 +321,7 @@ class MfaController @Inject() (
     }
   }
 
-  private def internalServerErrorTemplate(errorMessage: String)(implicit request: Request[_]): Future[Result] = {
+  private def internalServerErrorTemplate(errorMessage: String)(implicit request: Request[?]): Future[Result] = {
     errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage).map(InternalServerError(_))
   }
 }

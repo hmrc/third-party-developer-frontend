@@ -24,9 +24,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.security.ExtendedDevHubAuthorizat
 
 abstract class LoggedOutController(mcc: MessagesControllerComponents) extends TpdfeBaseController(mcc) with ExtendedDevHubAuthorization {
 
-  implicit def developerSessionFromRequest(implicit request: UserRequest[_]): UserSession = request.userSession
+  implicit def developerSessionFromRequest(implicit request: UserRequest[?]): UserSession = request.userSession
 
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = {
+  implicit def hc(implicit request: Request[?]): HeaderCarrier = {
     val carrier = super.hc
     request match {
       case x: MaybeUserRequest[_] => enrichHeaders(carrier, x.userSession)

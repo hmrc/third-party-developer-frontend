@@ -56,7 +56,7 @@ class QRCodeSpec extends AsyncHmrcSpec {
     "generate a base64 encoded image of a QR code" in {
       val httpImgData = QRCode().generateDataImageBase64("Test")
 
-      val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList
+      val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList: @unchecked
       prefix shouldBe "data:image/png;base64"
       testQrCodeImages(imageInBase64, "/qrCodeImages/Small_QR_Code.png")
     }
@@ -64,7 +64,7 @@ class QRCodeSpec extends AsyncHmrcSpec {
     "generate a base64 encoded image of a barcode from the supplied text with the specified scale" in {
       val httpImgData = QRCode(5).generateDataImageBase64("QRCode test text")
 
-      val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList
+      val prefix :: imageInBase64 :: Nil = httpImgData.split(",", 2).toList: @unchecked
       prefix shouldBe "data:image/png;base64"
       testQrCodeImages(imageInBase64, "/qrCodeImages/Large_QR_Code.png")
     }

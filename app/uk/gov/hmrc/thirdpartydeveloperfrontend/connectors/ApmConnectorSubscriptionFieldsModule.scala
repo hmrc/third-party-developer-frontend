@@ -38,7 +38,7 @@ object ApmConnectorSubscriptionFieldsModule {
 trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
   import play.api.libs.json._
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/subscription-fields"
+  private val baseUrl = s"${config.serviceBaseUrl}/subscription-fields"
 
   def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
     http.get(url"${baseUrl}?environment=${environment.asScreamingSnakeCase}")

@@ -18,7 +18,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 
 object TestContext {
-  var developer: User = _
+  var developer: User = scala.compiletime.uninitialized
 
   var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
   var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random

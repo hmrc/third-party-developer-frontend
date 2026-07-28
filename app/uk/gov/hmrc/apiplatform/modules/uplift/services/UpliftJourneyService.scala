@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    apmConnector: ApmConnectorApplicationModule with ApmConnectorCommandModule,
+    apmConnector: ApmConnectorApplicationModule & ApmConnectorCommandModule,
     thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
     val clock: Clock
   )(implicit val ec: ExecutionContext

@@ -37,7 +37,7 @@ class AuditService @Inject() (auditConnector: AuditConnector, appConfig: Applica
       auditSource = "third-party-developer-frontend",
       auditType = action.auditType,
       tags = hc.toAuditTags(action.name, "-") ++ userContext(hc) ++ action.tags.toSeq ++ data,
-      detail = hc.toAuditDetails(action.details.toSeq: _*)
+      detail = hc.toAuditDetails(action.details.toSeq*)
     ))
 
   def userContext(hc: HeaderCarrier): Seq[(String, String)] = {

@@ -133,7 +133,7 @@ class SubscriptionsController @Inject() (
 
       def updateSubscription(form: ChangeSubscriptionForm) = form.subscribed match {
         case Some(subscribe) =>
-          def service = if (subscribe) subscriptionsService.subscribeToApi _ else subscriptionsService.unsubscribeFromApi _
+          def service = if (subscribe) subscriptionsService.subscribeToApi else subscriptionsService.unsubscribeFromApi
 
           service(request.application, apiIdentifier, requestingEmail)
         case _               =>

@@ -88,13 +88,13 @@ class CancelRequestControllerSpec
       clock
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams*)
 
     val extendedSubmission = aSubmission.withIncompleteProgress()
   }
 
   trait HasAppInProductionState {
-    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: Setup & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -106,7 +106,7 @@ class CancelRequestControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: Setup & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),

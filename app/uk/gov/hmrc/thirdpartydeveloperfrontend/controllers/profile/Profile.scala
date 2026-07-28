@@ -57,7 +57,7 @@ class Profile @Inject() (
   val passwordForm: Form[ChangePasswordForm]     = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def changeProfileView()(implicit req: UserRequest[_]) = {
+  private def changeProfileView()(implicit req: UserRequest[?]) = {
     changeProfileViewTemplate(profileForm.fill(ProfileForm(
       req.userSession.developer.firstName,
       req.userSession.developer.lastName

@@ -90,7 +90,7 @@ class RedirectsSpec
       givenApplicationAction(application, adminSession)
     }
 
-    def redirectsShouldRenderThePage(request: FakeRequest[_])(application: ApplicationWithCollaborators, shouldShowDeleteButton: Boolean) = {
+    def redirectsShouldRenderThePage(request: FakeRequest[?])(application: ApplicationWithCollaborators, shouldShowDeleteButton: Boolean) = {
       givenApplicationExists(application)
 
       val result = underTest.loginRedirects(application.id)(request.withCSRFToken)
@@ -103,7 +103,7 @@ class RedirectsSpec
       elementExistsByText(document, "button", "Delete") shouldBe shouldShowDeleteButton
     }
 
-    def addRedirectShouldRenderThePage(request: FakeRequest[_])(application: ApplicationWithCollaborators, resultStatus: Int, shouldShowAmendControls: Boolean) = {
+    def addRedirectShouldRenderThePage(request: FakeRequest[?])(application: ApplicationWithCollaborators, resultStatus: Int, shouldShowAmendControls: Boolean) = {
       givenApplicationExists(application)
 
       val result = underTest.addLoginRedirect(application.id)(request.withCSRFToken)
@@ -154,7 +154,7 @@ class RedirectsSpec
     }
 
     def deleteRedirectsShouldRenderThePage(
-        request: FakeRequest[_]
+        request: FakeRequest[?]
       )(
         application: ApplicationWithCollaborators,
         resultStatus: Int,

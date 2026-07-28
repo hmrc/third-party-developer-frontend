@@ -249,7 +249,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       val request = updateRequestForScenario(FakeRequest(requestValues.endpoint.verb, path))
 
       val result = (requestValues.postBody.isEmpty match {
-        case false => route(app, CSRFTokenHelper.addCSRFToken(request.withFormUrlEncodedBody(requestValues.postBody.toSeq: _*)))
+        case false => route(app, CSRFTokenHelper.addCSRFToken(request.withFormUrlEncodedBody(requestValues.postBody.toSeq*)))
         case true  => route(app, CSRFTokenHelper.addCSRFToken(request))
       }).get
 

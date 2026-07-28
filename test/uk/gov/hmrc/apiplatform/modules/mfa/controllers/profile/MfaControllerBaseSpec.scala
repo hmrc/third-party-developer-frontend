@@ -132,7 +132,7 @@ class MfaControllerBaseSpec extends BaseControllerSpec
         .withLoggedIn(underTest, implicitly)(notPresentSessionId)
         .withCSRFToken
 
-      if (formFieldMap.isEmpty) request else request.withFormUrlEncodedBody(formFieldMap.toSeq: _*)
+      if (formFieldMap.isEmpty) request else request.withFormUrlEncodedBody(formFieldMap.toSeq*)
     }
 
     def createRequest() = {

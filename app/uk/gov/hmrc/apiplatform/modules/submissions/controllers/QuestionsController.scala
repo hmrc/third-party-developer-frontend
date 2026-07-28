@@ -130,13 +130,13 @@ class QuestionsController @Inject() (
       val question = request.submission.findQuestion(questionId).get
 
       val errorInfo = (question match {
-        case q: Question with ErrorMessaging => q.errorInfo
-        case _                               => None
+        case q: (Question & ErrorMessaging) => q.errorInfo
+        case _                              => None
       })
         .getOrElse(ErrorInfo(defaultMessage, defaultMessage))
 
       val onFormAnswer = question match {
-        case q: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer)
+        case q: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer.apply)
         case _                        => None
       }
 

@@ -73,7 +73,7 @@ object SubmissionActionBuilders {
 }
 
 trait SubmissionActionBuilders {
-  self: ApplicationActionBuilders with TpdfeBaseController =>
+  self: ApplicationActionBuilders & TpdfeBaseController =>
 
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter, SubmissionStatusFilter}
 
@@ -141,7 +141,7 @@ trait SubmissionActionBuilders {
       }
     }
 
-  private def submissionFilter[SR[_] <: SubmissionRequest[_]](submissionStatusFilter: SubmissionStatusFilter.Type)(redirectOnIncomplete: => Result): ActionFilter[SR] =
+  private def submissionFilter[SR[_] <: SubmissionRequest[?]](submissionStatusFilter: SubmissionStatusFilter.Type)(redirectOnIncomplete: => Result): ActionFilter[SR] =
     new ActionFilter[SR] {
 
       override protected def executionContext: ExecutionContext = ec
@@ -154,7 +154,7 @@ trait SubmissionActionBuilders {
         }
     }
 
-  private def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] =
+  private def applicationStateFilter[AR[_] <: MessagesRequest[?] & HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] =
     new ActionFilter[AR] {
 
       override protected def executionContext: ExecutionContext = ec

@@ -64,7 +64,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     )
   val collaboratorUsers: Seq[User]                        = List(adminDeveloper, standardDeveloper)
   val collaboratorUsersWithUnverifiedAdmin: Seq[User]     = List(adminDeveloper, unverifiedUser(collaborator.developer.email))
-  val application                                         = standardApp.withCollaborators(collaborators.toList: _*)
+  val application                                         = standardApp.withCollaborators(collaborators.toList*)
 
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]

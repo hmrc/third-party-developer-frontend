@@ -53,7 +53,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
 
     val request = FakeRequest()
       .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
 
     fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LoggedIn, developer))
   }
@@ -62,7 +62,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
     self: Setup =>
 
     val request = FakeRequest()
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
 
     fetchSessionByIdReturnsNone(sessionId)
   }
@@ -72,7 +72,7 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
 
     val request = FakeRequest()
       .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
 
     fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PartLoggedInEnablingMFA, developer))
   }

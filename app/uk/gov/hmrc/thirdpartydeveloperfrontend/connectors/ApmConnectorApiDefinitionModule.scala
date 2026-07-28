@@ -34,7 +34,7 @@ object ApmConnectorApiDefinitionModule {
 trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
   import ApmConnectorApiDefinitionModule._
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/api-definitions"
+  private val baseUrl = s"${config.serviceBaseUrl}/api-definitions"
 
   def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams = Seq(

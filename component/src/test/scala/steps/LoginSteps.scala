@@ -28,7 +28,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{SessionCreateWithDeviceR
 
 object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilder {
 
-  var developer: User                              = _
+  var developer: User                              = scala.compiletime.uninitialized
   var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
   var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
 

@@ -31,8 +31,8 @@ trait ApmConnectorCommandModule
     with CommandHandlerTypes[DispatchSuccessResult]
     with ApplicationLogger {
 
-  private[this] val baseUrl                                          = s"${config.serviceBaseUrl}/applications"
-  private[this] def baseApplicationUrl(applicationId: ApplicationId) = s"$baseUrl/${applicationId}"
+  private val baseUrl                                          = s"${config.serviceBaseUrl}/applications"
+  private def baseApplicationUrl(applicationId: ApplicationId) = s"$baseUrl/${applicationId}"
 
   // TODO - rework code so this is not required
   def dispatchWithThrow(

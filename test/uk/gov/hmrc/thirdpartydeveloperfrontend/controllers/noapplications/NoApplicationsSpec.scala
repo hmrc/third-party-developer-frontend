@@ -65,11 +65,11 @@ class NoApplicationsSpec
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(noApplicationsController, implicitly)(sessionId)
-      .withSession(sessionParams: _*).withCSRFToken
+      .withSession(sessionParams*).withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       .withLoggedIn(noApplicationsController, implicitly)(partLoggedInSession.sessionId)
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
   }
 
   "noApplications" when {

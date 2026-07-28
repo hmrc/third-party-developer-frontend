@@ -21,9 +21,9 @@ import scala.collection.immutable.ListSet
 sealed trait TermsOfUseStatus
 
 object TermsOfUseStatus {
-  final case object NOT_APPLICABLE     extends TermsOfUseStatus
-  final case object AGREEMENT_REQUIRED extends TermsOfUseStatus
-  final case object AGREED             extends TermsOfUseStatus
+  case object NOT_APPLICABLE     extends TermsOfUseStatus
+  case object AGREEMENT_REQUIRED extends TermsOfUseStatus
+  case object AGREED             extends TermsOfUseStatus
 
   val values: ListSet[TermsOfUseStatus] = ListSet(NOT_APPLICABLE, AGREEMENT_REQUIRED, AGREED)
 }

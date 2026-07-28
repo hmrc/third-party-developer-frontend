@@ -31,7 +31,7 @@ class FraudPreventionConfigProviderSpec extends BaseControllerSpec {
 
       intercept[RuntimeException] {
         new FraudPreventionConfigProvider(testConfig).get().enabled
-      }.getMessage contains "No configuration setting found for key 'applicationCheck"
+      }.getMessage `contains` "No configuration setting found for key 'applicationCheck"
 
     }
 

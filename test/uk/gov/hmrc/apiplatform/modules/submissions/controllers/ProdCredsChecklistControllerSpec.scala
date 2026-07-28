@@ -57,7 +57,7 @@ class ProdCredsChecklistControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: HasSubscriptions & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -89,11 +89,11 @@ class ProdCredsChecklistControllerSpec
       productionCredentialsChecklistView
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   trait HasAppInProductionState {
-    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: Setup & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),

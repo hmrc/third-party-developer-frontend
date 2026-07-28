@@ -79,7 +79,7 @@ object UpliftLogic {
   }
 
   def apiIdentifiersOfRetiredApis(apis: List[ApiDefinition]): Set[ApiIdentifier] = {
-    (filterApis(_ => true, v => v.status == ApiStatus.Retired) _ andThen toApiIdentifiers)(apis)
+    (filterApis(_ => true, v => v.status == ApiStatus.Retired) andThen toApiIdentifiers)(apis)
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(

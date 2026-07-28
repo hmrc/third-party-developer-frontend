@@ -41,7 +41,7 @@ class UserLogoutAccountSpec
     DestroySession.succeedsWith(devSession.sessionId)
 
     val notLoggedInRequestWithCsrfToken = FakeRequest()
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
   }
 
   "logging out" should {

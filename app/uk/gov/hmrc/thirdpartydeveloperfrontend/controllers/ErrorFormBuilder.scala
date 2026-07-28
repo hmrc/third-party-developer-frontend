@@ -28,9 +28,9 @@ object FormExtensions {
   }
 
   implicit class FieldErrorSyntax[T](form: Form[T]) {
-    def withError(fieldName: FieldNameKey, fieldMessageKey: FieldMessageKey, args: Any*) = form.withError(fieldName.value, fieldMessageKey.value, args: _*)
+    def withError(fieldName: FieldNameKey, fieldMessageKey: FieldMessageKey, args: Any*) = form.withError(fieldName.value, fieldMessageKey.value, args*)
 
-    def withGlobalError(fieldMessageKey: GlobalMessageKey, args: Any*) = form.withGlobalError(fieldMessageKey.value, args: _*)
+    def withGlobalError(fieldMessageKey: GlobalMessageKey, args: Any*) = form.withGlobalError(fieldMessageKey.value, args*)
 
     def verifying(error: => FieldMessageKey, constraint: (T => Boolean)): Mapping[T] = {
       form.mapping.verifying(error.value, constraint)

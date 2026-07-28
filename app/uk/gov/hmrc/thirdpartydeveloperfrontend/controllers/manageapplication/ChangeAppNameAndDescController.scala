@@ -135,7 +135,7 @@ class ChangeAppNameAndDescController @Inject() (
       id: ApplicationId,
       form: Form[ChangeAppNameAndDescForm],
       applicationViewModel: ApplicationViewModel
-    )(implicit request: ApplicationRequest[_]
+    )(implicit request: ApplicationRequest[?]
     ): Future[Result] =
     Future.successful(BadRequest(changeAppNameAndDescView(form, applicationViewModel)))
 

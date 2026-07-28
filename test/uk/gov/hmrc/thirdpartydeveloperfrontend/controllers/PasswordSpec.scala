@@ -100,7 +100,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     val developerPassword        = "$Pr4srs1234W0irddd1$"
     val developerCode            = "developerCode"
     val sessionParams            = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val request                  = FakeRequest().withSession(sessionParams: _*)
+    val request                  = FakeRequest().withSession(sessionParams*)
     val requestWithSession       = request.withSession((emailSessionName, devEmail.text))
 
     val mockHeaderCarrier = mock[HeaderCarrier]

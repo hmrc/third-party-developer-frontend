@@ -23,11 +23,11 @@ sealed trait ErrorCode
 object ErrorCode {
   val values: ListSet[ErrorCode] = ListSet(LOCKED_ACCOUNT, BAD_REQUEST, INVALID_PASSWORD, PASSWORD_REQUIRED, USER_ALREADY_EXISTS)
 
-  final case object LOCKED_ACCOUNT      extends ErrorCode
-  final case object BAD_REQUEST         extends ErrorCode
-  final case object INVALID_PASSWORD    extends ErrorCode
-  final case object PASSWORD_REQUIRED   extends ErrorCode
-  final case object USER_ALREADY_EXISTS extends ErrorCode
+  case object LOCKED_ACCOUNT      extends ErrorCode
+  case object BAD_REQUEST         extends ErrorCode
+  case object INVALID_PASSWORD    extends ErrorCode
+  case object PASSWORD_REQUIRED   extends ErrorCode
+  case object USER_ALREADY_EXISTS extends ErrorCode
 
   def apply(text: String): Option[ErrorCode] = ErrorCode.values.find(_.toString() == text.toUpperCase)
 

@@ -33,7 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with UserTestData with DeveloperSessionBuilder
     with LocalUserIdTracker with StubMessagesFactory {
 
-  implicit val request: FakeRequest[_] = FakeRequest()
+  implicit val request: FakeRequest[?] = FakeRequest()
 
   implicit val loggedIn: UserSession = JoeBloggs.loggedIn
   val mobileNumberView               = app.injector.instanceOf[MobileNumberView]

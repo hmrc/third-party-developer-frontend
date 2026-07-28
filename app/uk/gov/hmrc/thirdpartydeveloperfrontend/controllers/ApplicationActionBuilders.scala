@@ -60,7 +60,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  def forbiddenWhenNotFilter(cond: ApplicationRequest[_] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def forbiddenWhenNotFilter(cond: ApplicationRequest[?] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
@@ -70,7 +70,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  def badRequestWhenNotFilter(cond: ApplicationRequest[_] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def badRequestWhenNotFilter(cond: ApplicationRequest[?] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
@@ -81,7 +81,7 @@ trait ApplicationActionBuilders {
   }
 
   def capabilityFilter(capability: Capability)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = {
-    val capabilityCheck: ApplicationRequest[_] => Boolean = req => capability.hasCapability(req.application)
+    val capabilityCheck: ApplicationRequest[?] => Boolean = req => capability.hasCapability(req.application)
     badRequestWhenNotFilter(capabilityCheck)
   }
 
@@ -100,7 +100,7 @@ trait ApplicationActionBuilders {
   }
 
   def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) = {
-    val test: ApplicationRequest[_] => Boolean = (req) => permission.hasPermissions(req.application, req.userSession.developer)
+    val test: ApplicationRequest[?] => Boolean = (req) => permission.hasPermissions(req.application, req.userSession.developer)
     forbiddenWhenNotFilter(req => test(req))
   }
 }

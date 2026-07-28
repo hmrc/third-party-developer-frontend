@@ -25,7 +25,7 @@ trait CommonResponseHandlers {
 
   type ErrorOrUnit = Either[UpstreamErrorResponse, Unit]
 
-  val throwOrUnit = throwOr(()) _
+  val throwOrUnit = throwOr(())
 
   def throwOr[A](successValue: A)(either: ErrorOrUnit): A =
     either match {

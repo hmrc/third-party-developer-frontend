@@ -32,7 +32,7 @@ object ApmConnectorCombinedApisModule {
 
 trait ApmConnectorCombinedApisModule extends ApmConnectorModule {
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/combined-rest-xml-apis"
+  private val baseUrl = s"${config.serviceBaseUrl}/combined-rest-xml-apis"
 
   def fetchCombinedApi(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
     http.get(url"${baseUrl}/$serviceName")

@@ -23,7 +23,7 @@ sealed trait APIGroup
 object APIGroup {
   val values: ListSet[APIGroup] = ListSet(API, TEST_API, EXAMPLE)
 
-  final case object API      extends APIGroup
-  final case object TEST_API extends APIGroup
-  final case object EXAMPLE  extends APIGroup
+  case object API      extends APIGroup
+  case object TEST_API extends APIGroup
+  case object EXAMPLE  extends APIGroup
 }

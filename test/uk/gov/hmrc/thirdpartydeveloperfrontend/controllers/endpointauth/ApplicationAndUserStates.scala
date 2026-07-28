@@ -77,7 +77,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
         checkInformation = checkInformation,
         ipAllowlist = IpAllowlist()
       ))
-      .withCollaborators(collabs.toList: _*)
+      .withCollaborators(collabs.toList*)
 
   lazy val loginRedirectUri: LoginRedirectUri           = LoginRedirectUri.unsafeApply("https://example.com/redirect-here")
   lazy val apiContext: ApiContext                       = ApiContext("ctx")

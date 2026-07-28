@@ -65,12 +65,12 @@ class RegistrationSpec extends BaseControllerSpec {
     self: Setup =>
     val email            = "john.smith@example.com".toLaxEmail
     val newSessionParams = Seq(("email", email.text), sessionParams.head)
-    val request          = FakeRequest().withSession(newSessionParams: _*)
+    val request          = FakeRequest().withSession(newSessionParams*)
   }
 
   "registration" should {
     "register with normalized firstname, lastname, email" in new Setup {
-      val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(sessionParams*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
         ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),
@@ -92,7 +92,7 @@ class RegistrationSpec extends BaseControllerSpec {
       requestCaptor.getValue.password shouldBe "VALID@1q2w3e"
     }
     "register with no organisation" in new Setup {
-      val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(sessionParams*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
         ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),

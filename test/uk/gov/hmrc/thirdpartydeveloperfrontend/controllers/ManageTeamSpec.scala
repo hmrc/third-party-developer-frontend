@@ -90,8 +90,8 @@ class ManageTeamSpec
     CollaboratorServiceMock.RemoveTeamMember.succeeds(mock[ApplicationWithCollaborators])
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
 
     def givenTheApplicationExistWithUserRole(
         appId: ApplicationId,
@@ -105,7 +105,7 @@ class ManageTeamSpec
         createdOn = Instant.parse("2018-04-06T09:00:00Z"),
         lastAccess = Some(Instant.parse("2018-04-06T09:00:00Z"))
       ))
-        .withCollaborators(collaborators.toList: _*)
+        .withCollaborators(collaborators.toList*)
 
       givenApplicationAction(application, session)
 

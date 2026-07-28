@@ -81,7 +81,7 @@ class ManageResponsibleIndividualControllerSpec
       responsibleIndividualChangeToOtherView,
       responsibleIndividualChangeToOtherRequestedView
     )
-    val loggedOutRequest      = FakeRequest().withSession(sessionParams: _*)
+    val loggedOutRequest      = FakeRequest().withSession(sessionParams*)
     val responsibleIndividual = ResponsibleIndividual(FullName("Bob Responsible"), "bob@example.com".toLaxEmail)
 
     implicit val hc: HeaderCarrier = HeaderCarrier()

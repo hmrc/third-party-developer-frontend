@@ -41,7 +41,7 @@ object ApmConnectorApplicationModule {
 trait ApmConnectorApplicationModule extends ApmConnectorModule {
   import ApmConnectorApplicationModule._
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/applications"
+  private val baseUrl = s"${config.serviceBaseUrl}/applications"
 
   def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
     http.get(url"${baseUrl}/${applicationId}")
