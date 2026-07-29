@@ -22,6 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationToken, ApplicationWithSubscriptions}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 
 object ApplicationStub {
 
@@ -74,7 +75,7 @@ object ApplicationStub {
 
     def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptions]) = {
       stubFor(
-        get(urlPathEqualTo(s"/environment/${environment}/query"))
+        get(urlPathEqualTo(s"/environment/${environment.asScreamingSnakeCase}/query"))
           .withQueryParam("userId", equalTo(userId.toString()))
           // .withQueryParam("wantSubscriptions", matching("*"))
           .withQueryParam("status", equalTo("EXCLUDING_DELETED"))
