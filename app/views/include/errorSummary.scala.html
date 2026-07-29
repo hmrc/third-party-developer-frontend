@@ -16,7 +16,7 @@
 
 @import views.helper.GlobalSection._
 
-@(form: Form[_])(implicit messages: Messages)
+@(form: Form[?])(implicit messages: Messages)
 
 @if(form.hasGlobalErrors) {
   <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">

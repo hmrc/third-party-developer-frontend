@@ -17,8 +17,6 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 @import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMainWithFormErrors)
@@ -26,8 +24,6 @@
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @pageHeading = @{ "Which application do you want production credentials for?" }
-
-@principalWording = @{appConfig.nameOfPrincipalEnvironment.toLowerCase}
 
 @needToChoose = @{upliftableApps.size > 1}
 

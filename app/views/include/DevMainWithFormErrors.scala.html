@@ -14,22 +14,19 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{BackButton, FeedbackBanner, NoBackButton, UserNavLinks}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.GenericFeedbackBanner
-@import views.html.helper.CSPNonce
 
 @import templates._
 
 @this(
-  govUkWrapper: govUkWrapper,
-  hmrcTrackingConsentSnippet: HmrcTrackingConsentSnippet
+  govUkWrapper: govUkWrapper
 )
 
 @(
-  form: Form[_],
+  form: Form[?],
   title: String,
   userFullName: Option[String] = None,
   isRegistering: Boolean = false,
@@ -41,18 +38,10 @@
   developerSession: Option[UserSession],
   feedbackBanner: Option[FeedbackBanner] = Some(GenericFeedbackBanner)
 )(mainContent: Html)(
-  implicit request: Request[_],
+  implicit request: Request[?],
   messages: Messages,
   applicationConfig: ApplicationConfig
 )
-
-@scripts = {
-  <script @CSPNonce.attr type="module">
-    import { initAll } from '@routes.Assets.versioned("lib/govuk-frontend/dist/govuk/govuk-frontend.min.js")'
-    initAll({accordion: {rememberExpanded: false}})
-  </script>
-  @hmrcTrackingConsentSnippet()
-}
 
 @userBanner = {
   <div class="subnav-auth">

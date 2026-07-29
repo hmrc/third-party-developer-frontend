@@ -56,7 +56,7 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
-  @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
+  @for((teamMember, _) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
         <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
         @if(displayUnverified(teamMember, collaboratorUsers)){

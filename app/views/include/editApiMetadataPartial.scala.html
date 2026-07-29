@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription.EditApiConfigurationViewModel
-@import views.helper.IdFormatter
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 
 @(
@@ -34,7 +33,7 @@
 
   @helper.CSRF.formField
 
-  @for((field, idx) <- viewModel.fields.zipWithIndex) {
+  @for((field, _) <- viewModel.fields.zipWithIndex) {
     @if(field.canWrite) {
       @defining(field.name.value) { fieldName =>
         @defining(field.value.toString) { fieldValue =>

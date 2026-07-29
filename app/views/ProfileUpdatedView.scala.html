@@ -18,7 +18,6 @@
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.html.include.DevMain
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
@@ -32,7 +31,7 @@
       Crumb.viewAllApplications,
       Crumb.home
   ),
-  leftNav = Some(leftHandNav(None, Option(navSection))(request, loggedIn, appConfig)),
+  leftNav = Some(leftHandNav(None, Option(navSection))(using request, loggedIn, appConfig)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">@heading</h1>

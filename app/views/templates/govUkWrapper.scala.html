@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.StaticNavItems
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.{ServiceNavigation, ServiceNavigationItem}
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.ServiceNavigation
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.components._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
@@ -114,14 +114,10 @@
 @beforeContentBlock = {
   @feedbackBannerBlock
   <div class="before-content-banner">
-    @include.breadcrumbs(breadcrumbs: _*)
+    @include.breadcrumbs(breadcrumbs*)
     @backLink
     @serviceInfoContent
   </div>
-}
-
-@content = {
-  @contentBlock
 }
 
 @mainContentDefault = {

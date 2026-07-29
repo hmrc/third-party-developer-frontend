@@ -22,8 +22,6 @@
 @import views.html.manageapplication.TermsOfUseView
 @import views.html.manageapplication._
 
-@import java.time.Instant
-@import java.time.format.DateTimeFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.TermsOfUseViewModel
 
@@ -45,13 +43,6 @@ applicationView: ApplicationView)
         appConfig: ApplicationConfig,
         navSection: String = "details"
 )
-
-@formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
-    maybeDate match {
-        case Some(date) => dateFormatter.format(date)
-        case _ => defaultString
-    }
-}
 
 @app = @{
     applicationViewModel.application
