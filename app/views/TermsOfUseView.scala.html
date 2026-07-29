@@ -27,7 +27,7 @@
 
 
 @(applicationView: ApplicationViewModel, termsOfUseVersion: TermsOfUseVersion)(
-  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details"
+  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig
 )
 
 @app = @{applicationView.application}

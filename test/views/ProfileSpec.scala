@@ -62,7 +62,7 @@ class ProfileSpec extends CommonViewSpec
         .withError("firstname", "First name error message")
         .withError("lastname", "Last name error message")
 
-      val page = changeProfileView.render(formWithErrors, request, developer, appConfig, messagesProvider, "details")
+      val page = changeProfileView.render(formWithErrors, request, developer, appConfig, messagesProvider)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

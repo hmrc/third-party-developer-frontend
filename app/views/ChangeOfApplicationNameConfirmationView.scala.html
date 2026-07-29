@@ -22,7 +22,7 @@
 
 @this(devMain: DevMain)
 
-@(model: ApplicationNameModel, newAppName: String)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
+@(model: ApplicationNameModel, newAppName: String)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider)
 
 @devMain(
   title = "Change of application name request received",

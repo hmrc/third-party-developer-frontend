@@ -72,8 +72,7 @@ class UpdateTCAndPrivPolicyURLViewSpec extends CommonViewSpec
         request,
         loggedIn,
         messagesProvider,
-        appConfig,
-        "nav-section"
+        appConfig
       )
     }
 

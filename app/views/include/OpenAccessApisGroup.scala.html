@@ -25,9 +25,7 @@
   app: ApplicationWithCollaborators,
   openAccessApis: List[ApiDefinition]
 )(
-  implicit messagesProvider: MessagesProvider,
-  applicationConfig: ApplicationConfig,
-  request: play.api.mvc.Request[Any]
+  implicit applicationConfig: ApplicationConfig
 )
 
 @displayableContextName(apiContext: ApiContext) = @{apiContext.value.substring(apiContext.value.lastIndexOf('/')+1)}

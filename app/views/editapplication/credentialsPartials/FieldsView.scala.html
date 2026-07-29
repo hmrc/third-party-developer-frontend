@@ -29,7 +29,7 @@
 @this(govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, developer: User, clientSecrets: Seq[ClientSecret])(
-  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
+  implicit request: play.api.mvc.Request[Any]
 )
 
 @allowDeletion = @{clientSecrets.size > 1}

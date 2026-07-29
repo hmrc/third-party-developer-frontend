@@ -25,7 +25,7 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+@(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel)(implicit loggedIn: UserSession, messages: Messages)
 
 @getResponsibleIndividualName(access: Access): Option[String] = @{
     access match {

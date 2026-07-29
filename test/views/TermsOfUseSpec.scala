@@ -60,7 +60,6 @@ class TermsOfUseSpec extends CommonViewSpec
   "Terms of use view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
     implicit val loggedIn: UserSession                        = buildUser("developer@example.com".toLaxEmail, "Joe", "Bloggs").loggedIn
-    implicit val navSection: String                           = "details"
 
     "viewing an agreed application" should {
       trait Setup {

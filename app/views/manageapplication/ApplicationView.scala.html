@@ -26,7 +26,7 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
+@(app: ApplicationWithCollaborators)(implicit loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig)
 
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}

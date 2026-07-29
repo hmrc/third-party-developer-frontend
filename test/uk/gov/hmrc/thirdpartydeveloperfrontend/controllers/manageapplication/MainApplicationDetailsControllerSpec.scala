@@ -713,7 +713,7 @@ class MainApplicationDetailsControllerSpec
       mockDetailsView
     )
 
-    when(mockDetailsView.apply(*, *, *, *)(using *, *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockDetailsView.apply(*, *, *, *)(using *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
@@ -725,7 +725,7 @@ class MainApplicationDetailsControllerSpec
 
     def captureTermsOfUseViewModel(): MainApplicationDetailsController.TermsOfUseViewModel = {
       val captor = ArgCaptor[MainApplicationDetailsController.TermsOfUseViewModel]
-      verify(mockDetailsView).apply(*, *, *, captor)(using *, *, *, *, *)
+      verify(mockDetailsView).apply(*, *, *, captor)(using *, *, *, *)
       captor.value
     }
 

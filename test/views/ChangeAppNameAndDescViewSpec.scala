@@ -62,8 +62,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
         request,
         loggedIn,
         messagesProvider,
-        appConfig,
-        "nav-section"
+        appConfig
       )
     }
 

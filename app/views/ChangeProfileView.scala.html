@@ -18,9 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors)
 
-@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
+@(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider)
 
 @devMain(
   form,

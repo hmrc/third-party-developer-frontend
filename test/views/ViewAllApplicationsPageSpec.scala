@@ -399,7 +399,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
       val loggedIn                               = buildUser("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
 
-      addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig, "nav-section", environmentNameService)
+      addApplicationSubordinateEmptyNestView.render(request, loggedIn, messagesProvider, appConfig)
     }
 
     "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new ProdAndET with Setup {

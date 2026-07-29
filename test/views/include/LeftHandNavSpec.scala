@@ -66,7 +66,7 @@ class LeftHandNavSpec extends CommonViewSpec
         flags: Map[String, Boolean] = Map.empty,
         fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel] = None
       ): Html = {
-      leftHandNavView.render(viewModel, navSection, flags, fraudPreventionNavLinkViewModel, request, loggedInDeveloper, appConfig)
+      leftHandNavView.render(viewModel, navSection, flags, fraudPreventionNavLinkViewModel, loggedInDeveloper, appConfig)
     }
   }
 

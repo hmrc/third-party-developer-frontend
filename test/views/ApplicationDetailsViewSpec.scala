@@ -129,7 +129,6 @@ class ApplicationDetailsViewSpec
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val navSection: String                           = "details"
 
     "rendering Environment " when {
       "managing a principal application" should {

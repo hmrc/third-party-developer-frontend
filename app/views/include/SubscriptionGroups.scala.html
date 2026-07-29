@@ -31,7 +31,7 @@
   showSubscriptionFields: Boolean,
   showSectionHeadings: Boolean = true
 )(
-  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
+  implicit request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig
 )
 
 @if(subscriptions.exampleApi.nonEmpty) {

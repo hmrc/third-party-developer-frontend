@@ -94,7 +94,6 @@ class SubscriptionsGroupSpec
             group = "Example",
             afterSubscriptionRedirectTo = SubscriptionRedirect.MANAGE_PAGE,
             showSubscriptionFields = true,
-            messagesProvider,
             appConfig,
             request
           )

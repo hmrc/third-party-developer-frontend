@@ -86,7 +86,6 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
         request,
         messagesProvider,
         appConfig,
-        "nav-section",
         loggedInDeveloper
       )
     }

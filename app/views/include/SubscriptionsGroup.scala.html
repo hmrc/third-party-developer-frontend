@@ -31,8 +31,7 @@
   afterSubscriptionRedirectTo: SubscriptionRedirect,
   showSubscriptionFields: Boolean
 )(
-  implicit messagesProvider: MessagesProvider,
-  applicationConfig: ApplicationConfig,
+  implicit applicationConfig: ApplicationConfig,
   request: play.api.mvc.Request[Any]
 )
 

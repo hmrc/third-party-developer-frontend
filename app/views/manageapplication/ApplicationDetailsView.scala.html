@@ -27,7 +27,6 @@
 
 @this(
 devMain: DevMain,
-govukTable: GovukTable,
 customerUsageInformation: CustomerUsageInformationView,
 teamMembersView: TeamMembersView,
 authorisationDetailsView: AuthorisationDetailsView,
@@ -40,8 +39,7 @@ applicationView: ApplicationView)
         implicit request: play.api.mvc.Request[Any],
         loggedIn: UserSession,
         messages: Messages,
-        appConfig: ApplicationConfig,
-        navSection: String = "details"
+        appConfig: ApplicationConfig
 )
 
 @app = @{

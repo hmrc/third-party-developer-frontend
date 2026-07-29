@@ -62,8 +62,7 @@ class RedirectsSpec
         request,
         userSession,
         messagesProvider,
-        appConfig,
-        "redirects"
+        appConfig
       )
     }
 

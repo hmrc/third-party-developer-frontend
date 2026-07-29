@@ -80,8 +80,7 @@ class SubscriptionsSpec extends CommonViewSpec
         request,
         developer,
         messagesProvider,
-        appConfig,
-        "subscriptions"
+        appConfig
       )
     }
 

@@ -31,7 +31,7 @@
       Crumb.viewAllApplications,
       Crumb.home
   ),
-  leftNav = Some(leftHandNav(None, Option(navSection))(using request, loggedIn, appConfig)),
+  leftNav = Some(leftHandNav(None, Option(navSection))(using loggedIn, appConfig)),
   developerSession = Some(loggedIn)
 ) {
   <h1 class="govuk-heading-l">@heading</h1>

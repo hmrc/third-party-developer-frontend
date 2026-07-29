@@ -22,7 +22,7 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+@(app: ApplicationWithCollaborators)(implicit loggedIn: UserSession, messages: Messages)
 
 @formatCreateClientSecretsLink(clientSecrets: List[ClientSecret]): TableRow = @{
     clientSecrets.isEmpty match {
