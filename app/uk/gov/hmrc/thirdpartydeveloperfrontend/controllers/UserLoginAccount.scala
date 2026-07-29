@@ -259,7 +259,7 @@ class UserLoginAccount @Inject() (
             successful(Locked(accountLockedView()))
           case _: UnverifiedAccount  =>
             logger.warn("Login failed unverified account")
-            successful(Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm, loginForm.emailaddress)))
+            successful(Forbidden(signInView("Sign in", LoginForm.accountUnverified(requestForm)))
               .withSession("email" -> loginForm.emailaddress))
           case _: UserNotFound       =>
             logger.warn("Login failed due to user not found")
@@ -383,8 +383,8 @@ class UserLoginAccount @Inject() (
 
   def get2SVHelpConfirmationPage(): Action[AnyContent] = loggedOutAction { implicit request =>
     request.session.get("emailAddress") match {
-      case Some(userEmail) => successful(Ok(requestMfaRemovalView()))
-      case _               => successful(Redirect(routes.UserLoginAccount.login()))
+      case Some(_) => successful(Ok(requestMfaRemovalView()))
+      case _       => successful(Redirect(routes.UserLoginAccount.login()))
     }
 
   }
@@ -397,7 +397,7 @@ class UserLoginAccount @Inject() (
     import cats.data.OptionT
     import cats.implicits._
 
-    lazy val showRequestMfaRemovalCompleteView = (resp: Option[String]) => Ok(requestMfaRemovalCompleteView())
+    lazy val showRequestMfaRemovalCompleteView = (_: Option[String]) => Ok(requestMfaRemovalCompleteView())
 
     def findDeveloper(email: LaxEmailAddress) = {
       (for {
@@ -412,9 +412,8 @@ class UserLoginAccount @Inject() (
       (
         for {
           developer <- ETR.fromOptionF(findDeveloper(email), BadRequest("Developer not found"))
-          userId     = developer.userId
           fullName   = getFullName(developer)
-          response  <- ETR.liftF(applicationService.request2SVRemoval(userId, fullName, email))
+          response  <- ETR.liftF(applicationService.request2SVRemoval(fullName, email))
         } yield response
       )
         .fold[Result](identity(_), showRequestMfaRemovalCompleteView)

@@ -161,12 +161,12 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
     "securityPreferences" should {
       "return 200 and show the Security Preferences page when user is Logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
-        private val request = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest)(sessionId)
         shouldReturnOK(underTest.securityPreferences()(request), validateSecurityPreferences)
       }
 
       "return 200 and show the Security Preferences page when user is Part Logged in" in new SetupAuthAppSecurityPreferences with PartLogged {
-        private val request = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest)(sessionId)
         shouldReturnOK(underTest.securityPreferences()(request), validateSecurityPreferences)
       }
 
@@ -179,7 +179,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
         when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
           .thenReturn(successful(None))
 
-        private val request = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest)(sessionId)
         val result          = underTest.securityPreferences()(request)
 
         validateErrorTemplateView(result, "Unable to obtain User information")

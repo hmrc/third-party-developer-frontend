@@ -22,7 +22,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -88,7 +87,7 @@ class CancelRequestControllerSpec
       clock
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
 
     val extendedSubmission = aSubmission.withIncompleteProgress()
   }
@@ -146,7 +145,7 @@ class CancelRequestControllerSpec
 
       private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request").withMethod("POST")
 
-      ApmConnectorCommandModuleMock.DispatchWithThrow.thenReturnsSuccess(mock[ApplicationWithCollaborators])
+      ApmConnectorCommandModuleMock.DispatchWithThrow.thenReturnsSuccess()
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 

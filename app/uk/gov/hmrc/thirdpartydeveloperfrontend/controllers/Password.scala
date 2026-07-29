@@ -73,7 +73,7 @@ class Password @Inject() (
         connector.requestReset(passwordForm.emailaddress.toLaxEmail) map {
           _ => Ok(checkEmailView(passwordForm.emailaddress.toLaxEmail))
         } recover {
-          case _: UnverifiedAccount                      => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm, passwordForm.emailaddress)))
+          case _: UnverifiedAccount                      => Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(requestForm)))
           case UpstreamErrorResponse(_, NOT_FOUND, _, _) => Ok(checkEmailView(passwordForm.emailaddress.toLaxEmail))
         }
     )
@@ -105,7 +105,7 @@ class Password @Inject() (
     request.flash.get("error").getOrElse("error") match {
       case "UnverifiedAccount" =>
         val email = request.flash.get("email").getOrElse("").toString
-        Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(ForgotPasswordForm.form, email))).withSession("email" -> email)
+        Forbidden(forgotPasswordView(ForgotPasswordForm.accountUnverified(ForgotPasswordForm.form))).withSession("email" -> email)
       case "InvalidResetCode"  =>
         BadRequest(resetInvalidView())
       case _                   =>
@@ -122,7 +122,7 @@ class Password @Inject() (
         connector.reset(PasswordResetRequest(email.toLaxEmail, data.password)) map {
           _ => Ok(signInView("You have reset your password", LoginForm.form, endOfJourney = true))
         } recover {
-          case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form, email)))
+          case _: UnverifiedAccount => Forbidden(resetView(PasswordResetForm.accountUnverified(PasswordResetForm.form)))
               .withSession("email" -> email)
         }
       }
@@ -153,7 +153,7 @@ trait PasswordChange {
         connector.changePassword(payload) map {
           _ => success
         } recover {
-          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form, email.text)))
+          case _: UnverifiedAccount  => Forbidden(error(ChangePasswordForm.accountUnverified(ChangePasswordForm.form)))
               .withSession("email" -> email.text)
           case _: InvalidCredentials =>
             auditService.audit(PasswordChangeFailedDueToInvalidCredentials(email))

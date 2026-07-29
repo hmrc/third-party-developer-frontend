@@ -39,7 +39,7 @@ trait ApmConnectorCommandModuleMockModule extends MockitoSugar with ArgumentMatc
 
     object DispatchWithThrow {
 
-      def thenReturnsSuccess(app: ApplicationWithCollaborators) = {
+      def thenReturnsSuccess() = {
         when(aMock.dispatchWithThrow(*[ApplicationId], *, *)(using *)).thenReturn(successful(ApplicationUpdateSuccessful))
       }
     }

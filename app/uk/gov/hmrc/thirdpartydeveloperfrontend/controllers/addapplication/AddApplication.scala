@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication
 
 import javax.inject.{Inject, Singleton}
+import scala.annotation.unused
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -96,7 +97,7 @@ class AddApplication @Inject() (
     successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId)))
   }
 
-  def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+  def soleApplicationToUpliftAction(@unused appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
       upliftData <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
     } yield upliftData.upliftableSummaries match {

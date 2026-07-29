@@ -169,7 +169,7 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
       val res: ValidationResult = passwordsMatch.apply(RegisterForm("name", "last name", "john@example.com", "A1@wwwwwwwww", "A1@wwwwwwwww"))
 
       res match {
-        case v: Invalid => fail("passwords matching validation should have succeeded")
+        case _: Invalid => fail("passwords matching validation should have succeeded")
         case _          =>
       }
     }

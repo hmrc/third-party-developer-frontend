@@ -50,6 +50,6 @@ class TestOnlyApplicationController @Inject() (
       case Production => productionConnector
       case _          => sandboxConnector
     }
-    connector.clone(environment)(appId).map(app => Ok(Json.toJson(app)))
+    connector.clone(appId).map(app => Ok(Json.toJson(app)))
   }
 }

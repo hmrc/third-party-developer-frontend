@@ -394,7 +394,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
 
   "welcome to your account page" should {
 
-    def renderPage(appSummaries: Seq[ApplicationSummary]) = {
+    def renderPage() = {
       val request                                = FakeRequest().withCSRFToken
       val loggedIn                               = buildUser("developer@example.com".toLaxEmail, "firstName", "lastname").loggedIn
       val addApplicationSubordinateEmptyNestView = app.injector.instanceOf[StartUsingRestApisView]
@@ -403,17 +403,13 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     }
 
     "show the empty nest page when there are no applications when environment is Prod/Sandbox" in new ProdAndET with Setup {
-      val appSummaries: Seq[Nothing] = Seq()
-
-      val document: Document = Jsoup.parse(renderPage(appSummaries).body)
+      val document: Document = Jsoup.parse(renderPage().body)
 
       elementExistsByText(document, "h1", "Start using our REST APIs") shouldBe true
     }
 
     "show the empty nest page when there are no applications when environment is QA/Dev" in new QaAndDev with Setup {
-      val appSummaries: Seq[Nothing] = Seq()
-
-      val document: Document = Jsoup.parse(renderPage(appSummaries).body)
+      val document: Document = Jsoup.parse(renderPage().body)
 
       elementExistsByText(document, "h1", "Start using our REST APIs") shouldBe true
     }

@@ -93,7 +93,7 @@ class ChangeAppNameAndDescController @Inject() (
       }
 
       def handleInvalidForm(formWithErrors: Form[ChangeAppNameAndDescForm]): Future[Result] =
-        changeAppNameAndDescErrorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest())
+        changeAppNameAndDescErrorView(formWithErrors, applicationViewModelFromApplicationRequest())
 
       ChangeAppNameAndDescForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
@@ -132,7 +132,6 @@ class ChangeAppNameAndDescController @Inject() (
   }
 
   private def changeAppNameAndDescErrorView(
-      id: ApplicationId,
       form: Form[ChangeAppNameAndDescForm],
       applicationViewModel: ApplicationViewModel
     )(implicit request: ApplicationRequest[?]

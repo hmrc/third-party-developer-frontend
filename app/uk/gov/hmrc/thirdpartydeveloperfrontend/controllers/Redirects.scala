@@ -97,11 +97,11 @@ class Redirects @Inject() (
       successful(Ok(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest(), DeleteRedirectConfirmationForm.form, form.redirectUri)))
     }
 
-    def handleInvalidForm(formWithErrors: Form[DeleteRedirectForm]) = {
+    def handleInvalidForm() = {
       successful(Redirect(routes.Redirects.loginRedirects(applicationId)))
     }
 
-    DeleteRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    DeleteRedirectForm.form.bindFromRequest().fold(_ => handleInvalidForm(), handleValidForm)
   }
 
   def deleteLoginRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>

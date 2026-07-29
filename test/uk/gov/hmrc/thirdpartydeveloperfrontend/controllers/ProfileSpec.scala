@@ -75,7 +75,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
     val sessionId               = devSession.sessionId
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withCSRFToken.withMethod("POST")
+      FakeRequest().withLoggedIn(using underTest)(sessionId).withCSRFToken.withMethod("POST")
   }
 
   "updateProfile" should {

@@ -78,7 +78,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       view
     )
     val applicationId   = ApplicationId.random
-    val loggedInRequest = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest)(sessionId).withSession(sessionParams*)
   }
 
   "startUsingYourApplicationPage" should {

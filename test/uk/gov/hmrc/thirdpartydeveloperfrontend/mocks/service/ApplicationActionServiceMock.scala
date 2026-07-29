@@ -72,7 +72,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
     }
     reset(applicationActionServiceMock)
     when(applicationActionServiceMock.process[A](eqTo(appData.id), *)(using *))
-      .thenAnswer((a: ApplicationId, request: UserRequest[A], c: HeaderCarrier) => createReturn(request))
+      .thenAnswer((_: ApplicationId, request: UserRequest[A], _: HeaderCarrier) => createReturn(request))
   }
 
 }

@@ -104,7 +104,7 @@ class CancelRequestController @Inject() (
                               .filter(isValidSubmit),
                             failed("Bad form data")
                           )
-          cancelAction <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
+          _            <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
           _            <- ET.liftF(appCmdModule.dispatchWithThrow(appId, deleteRequest, Set.empty))
         } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
       )

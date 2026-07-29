@@ -69,7 +69,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(using HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
-    val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
+    val failed = (_: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
 
     metrics.record(api) {
       http
@@ -147,7 +147,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     import cats.implicits._
 
     val url    = url"$serviceBaseUrl/application/${applicationId}/confirm-setup-complete"
-    val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId}"
+    val failed = (_: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId}"
 
     http.post(url)
       .withBody(Json.toJson(ConfirmSetupCompleteRequest(userEmailAddress)))

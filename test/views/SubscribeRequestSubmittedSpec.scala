@@ -23,7 +23,7 @@ import views.html.SubscribeRequestSubmittedView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, ClientId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiVersionNbr
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -48,10 +48,8 @@ class SubscribeRequestSubmittedSpec
       val appConfig = mock[ApplicationConfig]
       val request   = FakeRequest().withCSRFToken
 
-      val appId       = ApplicationId.random
       val apiName     = "Test API"
       val apiVersion  = ApiVersionNbr("1.0")
-      val clientId    = ClientId("clientId123")
       val developer   = buildUser("email@example.com".toLaxEmail, "First Name", "Last Name").loggedIn
       val application = sampleApp
 

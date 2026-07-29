@@ -31,7 +31,7 @@ trait ApplicationActionBuilders {
 
   protected def applicationActionService: ApplicationActionService
 
-  def applicationRequestRefiner(applicationId: ApplicationId)(using ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] = {
+  def applicationRequestRefiner(applicationId: ApplicationId): ActionRefiner[UserRequest, ApplicationRequest] = {
     new ActionRefiner[UserRequest, ApplicationRequest] {
       override protected def executionContext: ExecutionContext = ec
 

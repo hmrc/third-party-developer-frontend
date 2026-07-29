@@ -129,14 +129,14 @@ class MfaControllerBaseSpec extends BaseControllerSpec
         .thenReturn(Future.successful(None))
 
       val request = FakeRequest()
-        .withLoggedIn(using underTest, implicitly)(notPresentSessionId)
+        .withLoggedIn(using underTest)(notPresentSessionId)
         .withCSRFToken
 
       if (formFieldMap.isEmpty) request else request.withFormUrlEncodedBody(formFieldMap.toSeq*)
     }
 
     def createRequest() = {
-      FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withCSRFToken
+      FakeRequest().withLoggedIn(using underTest)(sessionId).withCSRFToken
     }
 
     def authAppAccessCodeRequest(code: String): FakeRequest[AnyContentAsFormUrlEncoded] = {

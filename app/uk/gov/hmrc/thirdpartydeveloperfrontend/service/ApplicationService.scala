@@ -57,7 +57,7 @@ class ApplicationService @Inject() (
   def createForUser(createApplicationRequest: CreateApplicationRequest, userId: UserId)(using HeaderCarrier): Future[Either[String, ApplicationCreatedResponse]] = {
     (
       for {
-        maybeOrg <- fromEitherF(checkMaybeOrganisationId(createApplicationRequest.organisationId, userId))
+        _        <- fromEitherF(checkMaybeOrganisationId(createApplicationRequest.organisationId, userId))
         response <- liftF(thirdPartyOrchestratorConnector.create(createApplicationRequest))
       } yield response
     ).value
@@ -74,7 +74,7 @@ class ApplicationService @Inject() (
     (
       for {
         organisation <- fromOptionF(organisationConnector.fetchOrganisation(organisationId), "Error - organisation not found")
-        collaborator <- fromOption(organisation.collaborators.find(c => c.userId == userId && c.isAdministrator), "Error - user is not an administrator")
+        _            <- fromOption(organisation.collaborators.find(c => c.userId == userId && c.isAdministrator), "Error - user is not an administrator")
       } yield Some(organisation)
     ).value
   }
@@ -192,7 +192,7 @@ class ApplicationService @Inject() (
     thirdPartyOrchestratorConnector.verify(verificationCode)
   }
 
-  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(using hc: HeaderCarrier): Future[Option[String]] = {
+  def requestDeveloperAccountDeletion(name: String, email: LaxEmailAddress)(using hc: HeaderCarrier): Future[Option[String]] = {
     val deleteDeveloperTicket = CreateTicketRequest.deleteDeveloperAccount(name, email)
 
     for {
@@ -201,7 +201,7 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def request2SVRemoval(userId: UserId, name: String, email: LaxEmailAddress)(using hc: HeaderCarrier): Future[Option[String]] = {
+  def request2SVRemoval(name: String, email: LaxEmailAddress)(using hc: HeaderCarrier): Future[Option[String]] = {
     val remove2SVTicket = CreateTicketRequest.removeDeveloper2SV(name, email)
 
     for {
@@ -218,7 +218,6 @@ class ApplicationService @Inject() (
   }
 
   def requestProductonApplicationNameChange(
-      userId: UserId,
       application: ApplicationWithCollaborators,
       newApplicationName: ApplicationName,
       requesterName: String,

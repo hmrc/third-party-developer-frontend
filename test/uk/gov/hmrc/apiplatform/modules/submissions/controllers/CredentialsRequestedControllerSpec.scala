@@ -90,7 +90,7 @@ class CredentialsRequestedControllerSpec
       credentialsRequestedView
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
   }
 
   "credentialsRequestedPage" should {

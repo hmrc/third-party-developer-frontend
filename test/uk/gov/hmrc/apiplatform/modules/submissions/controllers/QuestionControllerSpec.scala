@@ -103,7 +103,7 @@ class QuestionControllerSpec
       mcc
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
   }
 
   "showQuestion" should {

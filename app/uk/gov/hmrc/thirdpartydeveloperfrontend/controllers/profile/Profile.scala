@@ -118,7 +118,7 @@ class Profile @Inject() (
       validForm => {
         validForm.confirmation match {
           case Some("true") => applicationService
-              .requestDeveloperAccountDeletion(request.userSession.developer.userId, request.userSession.developer.displayedName, request.userSession.developer.email)
+              .requestDeveloperAccountDeletion(request.userSession.developer.displayedName, request.userSession.developer.email)
               .map(_ => Ok(profileDeleteSubmittedView()))
 
           case _ => Future.successful(Ok(changeProfileView()))

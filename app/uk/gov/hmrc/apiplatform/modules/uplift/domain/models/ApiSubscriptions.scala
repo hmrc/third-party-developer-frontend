@@ -28,8 +28,8 @@ object ApiSubscriptions {
 
   implicit val keyReadsApiIdentifier: KeyReads[ApiIdentifier] = key =>
     key.split("###").toList match {
-      case c :: v :: tail => JsSuccess(ApiIdentifier(ApiContext(c), ApiVersionNbr(v.replace("_", "."))))
-      case _              => JsError(s"Cannot raise $key to an ApiIdentifier")
+      case c :: v :: _ => JsSuccess(ApiIdentifier(ApiContext(c), ApiVersionNbr(v.replace("_", "."))))
+      case _           => JsError(s"Cannot raise $key to an ApiIdentifier")
     }
 
   implicit val keyWritesApiIdentifier: KeyWrites[ApiIdentifier] = { id => s"${id.context.value}###${id.versionNbr.value.replace(".", "_")}" }

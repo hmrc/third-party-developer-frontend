@@ -114,7 +114,7 @@ class MainApplicationDetailsController @Inject() (
       case State.PendingResponsibleIndividualVerification | State.PendingGatekeeperApproval | State.PendingRequesterVerification => {
         lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
-        lazy val newUpliftJourney = (s: Submission) =>
+        lazy val newUpliftJourney = (_: Submission) =>
           Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)

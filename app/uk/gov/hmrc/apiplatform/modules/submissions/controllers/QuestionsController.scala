@@ -76,7 +76,6 @@ class QuestionsController @Inject() (
   import QuestionsController._
 
   private def processQuestion(
-      submissionId: SubmissionId,
       questionId: Question.Id,
       onFormAnswer: Option[ActualAnswer],
       errorInfo: Option[ErrorInfo]
@@ -91,8 +90,8 @@ class QuestionsController @Inject() (
 
     (
       for {
-        flowItem <- fromOption(oQuestion, "Question not found in questionnaire")
-        question  = oQuestion.get
+        _       <- fromOption(oQuestion, "Question not found in questionnaire")
+        question = oQuestion.get
       } yield {
         errorInfo.fold[Result](
           Ok(questionView(question, applicationId, submitAction, persistedAnswer, None))
@@ -105,13 +104,13 @@ class QuestionsController @Inject() (
   def showQuestion(submissionId: SubmissionId, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-      processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
+      processQuestion(questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
   def updateQuestion(submissionId: SubmissionId, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
-      processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
+      processQuestion(questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
   private def processAnswer(
@@ -136,7 +135,7 @@ class QuestionsController @Inject() (
         .getOrElse(ErrorInfo(defaultMessage, defaultMessage))
 
       val onFormAnswer = question match {
-        case q: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer.apply)
+        case _: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer.apply)
         case _                        => None
       }
 

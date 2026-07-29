@@ -94,9 +94,9 @@ object ResponsibleIndividualVerification {
 
   def getVerificationType(riVerification: ResponsibleIndividualVerification): String = {
     riVerification match {
-      case ritouv: ResponsibleIndividualToUVerification        => "termsOfUse"
-      case ritouuv: ResponsibleIndividualTouUpliftVerification => "termsOfUseUplift"
-      case riuv: ResponsibleIndividualUpdateVerification       => "adminUpdate"
+      case _: ResponsibleIndividualToUVerification       => "termsOfUse"
+      case _: ResponsibleIndividualTouUpliftVerification => "termsOfUseUplift"
+      case _: ResponsibleIndividualUpdateVerification    => "adminUpdate"
     }
   }
 }

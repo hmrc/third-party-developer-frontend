@@ -96,8 +96,6 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
 
   def changeDetailsAction(applicationId: ApplicationId): Action[AnyContent] =
     canChangeDetailsAndIsApprovedAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
-      val application = request.application
-
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
         val cmds = deriveCommands(form)
         val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
@@ -108,7 +106,7 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest())
+        errorView(formWithErrors, applicationViewModelFromApplicationRequest())
 
       EditApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
@@ -116,6 +114,6 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
   def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
 
-  private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[?]): Future[Result] =
+  private def errorView(form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[?]): Future[Result] =
     Future.successful(BadRequest(updateTCAndPrivPolicyURLView(form, applicationViewModel)))
 }

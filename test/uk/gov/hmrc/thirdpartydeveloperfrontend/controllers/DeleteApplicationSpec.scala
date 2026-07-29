@@ -69,7 +69,7 @@ class DeleteApplicationSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams   = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest)(sessionId).withSession(sessionParams*)
   }
 
   "delete application page" should {

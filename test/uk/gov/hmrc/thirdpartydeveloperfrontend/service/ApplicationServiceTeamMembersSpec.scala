@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
@@ -121,9 +121,8 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   "request delete developer" should {
-    val developerName   = "Testy McTester"
-    val devEmail        = "testy@example.com".toLaxEmail
-    val developerUserId = UserId.random
+    val developerName = "Testy McTester"
+    val devEmail      = "testy@example.com".toLaxEmail
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
@@ -131,7 +130,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, devEmail))
+      await(applicationService.requestDeveloperAccountDeletion(developerName, devEmail))
 
       verify(mockApiPlatformDeskproConnector, times(1)).createTicket(any[CreateTicketRequest], eqTo(hc))
       verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc))

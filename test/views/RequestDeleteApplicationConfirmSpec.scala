@@ -23,7 +23,6 @@ import views.html.RequestDeleteApplicationConfirmView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -42,8 +41,6 @@ class RequestDeleteApplicationConfirmSpec extends CommonViewSpec with WithCSRFAd
   "delete application confirm page" should {
 
     val request           = FakeRequest().withCSRFToken
-    val appId             = ApplicationId.random
-    val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
     val application       = standardApp
 

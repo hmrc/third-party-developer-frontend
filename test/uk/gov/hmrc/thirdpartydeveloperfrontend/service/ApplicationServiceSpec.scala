@@ -290,9 +290,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request 2SV removal" should {
 
-    val email  = "testy@example.com".toLaxEmail
-    val name   = "Bob"
-    val userId = UserId.random
+    val email = "testy@example.com".toLaxEmail
+    val name  = "Bob"
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       val ticketCaptor = ArgCaptor[CreateTicketRequest]
@@ -301,7 +300,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.request2SVRemoval(userId, name, email))
+      await(applicationService.request2SVRemoval(name, email))
 
       verify(mockApiPlatformDeskproConnector, times(1)).createTicket(ticketCaptor, eqTo(hc))
       ticketCaptor.value.email shouldBe email.text
@@ -348,7 +347,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       private val result =
         await(applicationService.requestProductonApplicationNameChange(
-          adminSession.developer.userId,
           productionApplication,
           applicationName,
           adminSession.developer.displayedName,

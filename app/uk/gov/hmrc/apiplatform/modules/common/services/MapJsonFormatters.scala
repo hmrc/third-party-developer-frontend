@@ -52,7 +52,7 @@ trait MapJsonFormatters {
               case (Left(e1), JsError(e2))      => Left(e1 ++ locate(e2, fs.keySet.head))
             }
 
-          case (acc, _) => Left(Seq(JsPath() -> Seq(JsonValidationError("error.expected.jsobject"))))
+          case (_, _) => Left(Seq(JsPath() -> Seq(JsonValidationError("error.expected.jsobject"))))
         }
           .fold(JsError.apply, res => JsSuccess(res))
 

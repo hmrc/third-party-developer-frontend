@@ -81,7 +81,6 @@ class RequestChangeOfApplicationNameController @Inject() (
               for {
                 _ <-
                   applicationService.requestProductonApplicationNameChange(
-                    request.userSession.developer.userId,
                     application,
                     ApplicationName(newApplicationName),
                     request.userSession.developer.displayedName,

@@ -55,7 +55,7 @@ class NavigationSpec extends BaseControllerSpec {
 
     private val request =
       if (loggedInState.isDefined) {
-        FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId)
+        FakeRequest().withLoggedIn(using underTest)(sessionId)
       } else {
         FakeRequest()
       }

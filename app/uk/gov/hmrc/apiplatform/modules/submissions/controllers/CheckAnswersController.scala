@@ -89,7 +89,7 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials
       .requestProductionCredentials(request.application, request.userSession, requesterIsResponsibleIndividual, isNewTouUplift)
       .map(_ match {
-        case Right(app)                 => {
+        case Right(_)                   => {
           Redirect(routes.CheckAnswersController.requestReceivedPage(productionAppId))
         }
         case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)

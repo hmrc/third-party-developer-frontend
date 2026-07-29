@@ -39,7 +39,7 @@ class ProfileService @Inject() (
     val name = s"$firstName $lastName"
     for {
       response <- developerConnector.updateProfile(userId, UpdateRequest(firstName, lastName))
-      result   <- deskproConnector.updatePersonName(email, name, hc)
+      _        <- deskproConnector.updatePersonName(email, name, hc)
     } yield response
   }
 

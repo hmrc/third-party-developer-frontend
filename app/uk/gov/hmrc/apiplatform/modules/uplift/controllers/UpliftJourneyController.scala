@@ -101,8 +101,7 @@ class UpliftJourneyController @Inject() (
 
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
-  private val exec = ec
-  private val ET   = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val ET = new EitherTHelper[Result] {}
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {

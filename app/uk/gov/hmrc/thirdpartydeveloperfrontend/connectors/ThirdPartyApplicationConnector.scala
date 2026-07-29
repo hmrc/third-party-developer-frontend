@@ -30,7 +30,7 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics)
+abstract class ThirdPartyApplicationConnector(metrics: ConnectorMetrics)
     extends CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   protected val http: HttpClientV2
@@ -54,6 +54,6 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
   )(using val ec: ExecutionContext
-  ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
+  ) extends ThirdPartyApplicationConnector(metrics) {
   val serviceBaseUrl: String = appConfig.thirdPartyApplicationProductionUrl
 }

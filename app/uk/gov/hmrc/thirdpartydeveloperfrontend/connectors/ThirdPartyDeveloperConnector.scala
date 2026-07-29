@@ -106,7 +106,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     )
       .map {
         case Right(response) if (response.status == CREATED) => RegistrationSuccessful
-        case Right(response)                                 => throw new InternalServerException("Unexpected 2xx code")
+        case Right(_)                                        => throw new InternalServerException("Unexpected 2xx code")
         case Left(UpstreamErrorResponse(_, CONFLICT, _, _))  => EmailAlreadyInUse
         case Left(err)                                       => throw err
       }

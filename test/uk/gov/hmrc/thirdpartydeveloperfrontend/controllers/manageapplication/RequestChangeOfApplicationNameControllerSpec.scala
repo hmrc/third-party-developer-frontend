@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -60,7 +60,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show success page if name changed successfully" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(using *))
+      when(underTest.applicationService.requestProductonApplicationNameChange(*, *[ApplicationName], *, *[LaxEmailAddress])(using *))
         .thenReturn(Future.successful(Some("ref")))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name").withMethod("POST")
@@ -68,7 +68,7 @@ class RequestChangeOfApplicationNameControllerSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(using *)
+      verify(underTest.applicationService).requestProductonApplicationNameChange(*, *[ApplicationName], *, *[LaxEmailAddress])(using *)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 

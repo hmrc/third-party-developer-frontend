@@ -23,7 +23,6 @@ import views.html.include.Main
 import play.api.test.FakeRequest
 import play.twirl.api.{Html, HtmlFormat}
 
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.{GenericFeedbackBanner, NoBackButton}
@@ -32,11 +31,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsBy
 class MainTemplateSpec extends CommonViewSpec with UserBuilder with LocalUserIdTracker {
 
   "MainTemplateSpec" should {
-    val mainView             = app.injector.instanceOf[Main]
-    val developer            = buildTrackedUser()
-    val session              = UserSession(UserSessionId.random, LoggedInState.LoggedIn, developer)
-    implicit val userSession = session
-    implicit val request     = FakeRequest()
+    val mainView         = app.injector.instanceOf[Main]
+    implicit val request = FakeRequest()
 
     "Application title meta data set by configuration" in {
       when(appConfig.title).thenReturn("Application Title")

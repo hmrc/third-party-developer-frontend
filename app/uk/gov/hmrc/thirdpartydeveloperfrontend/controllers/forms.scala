@@ -50,7 +50,7 @@ object LoginForm {
       .withGlobalError(FormKeys.invalidCredentialsGlobalKey)
   }
 
-  def accountUnverified(form: Form[LoginForm], email: String) = {
+  def accountUnverified(form: Form[LoginForm]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -74,7 +74,7 @@ case class PasswordResetForm(password: String, confirmPassword: String) extends 
 
 object PasswordResetForm {
 
-  def accountUnverified[T](form: Form[T], email: String) = {
+  def accountUnverified[T](form: Form[T]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -139,7 +139,7 @@ case class ForgotPasswordForm(emailaddress: String)
 
 object ForgotPasswordForm {
 
-  def accountUnverified(form: Form[ForgotPasswordForm], email: String) = {
+  def accountUnverified(form: Form[ForgotPasswordForm]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -162,7 +162,7 @@ case class ChangePasswordForm(currentPassword: String, password: String, confirm
 
 object ChangePasswordForm {
 
-  def accountUnverified[T](form: Form[T], email: String) = {
+  def accountUnverified[T](form: Form[T]) = {
     form
       .withError("submissionError", "true")
       .withError(

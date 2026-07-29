@@ -27,7 +27,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator, State}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
@@ -59,7 +59,6 @@ class SubscriptionsSpec extends CommonViewSpec
 
   "Subscriptions page" should {
     val developer = buildUser("Test".toLaxEmail, "Test", "Test").loggedIn
-    val baseState = ApplicationState(State.Production, Some("somebody@example.com"), Some("somebody"), Some(""), instant)
 
     val productionApplicationPendingGatekeeperApproval    = standardApp.withState(appStatePendingGatekeeperApproval)
     val productionApplicationPendingRequesterVerification = standardApp.withState(appStatePendingRequesterVerification)

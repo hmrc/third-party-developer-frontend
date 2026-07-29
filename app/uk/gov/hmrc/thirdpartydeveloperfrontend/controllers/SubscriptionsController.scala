@@ -32,7 +32,6 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
@@ -78,37 +77,27 @@ class SubscriptionsController @Inject() (
     checkActionForAllStates(SupportsSubscriptions, TeamMembersOnly)(applicationId)(fun)
 
   def manageSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
-    renderSubscriptions(
-      request.application,
-      request.userSession,
-      (role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
-        manageSubscriptionsView(
-          role,
-          data,
-          form,
-          applicationViewModelFromApplicationRequest(),
-          data.subscriptions,
-          data.openAccessApis,
-          data.app.id,
-          createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
-        )
-      }
-    )
+    renderSubscriptions((role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
+      manageSubscriptionsView(
+        role,
+        data,
+        form,
+        applicationViewModelFromApplicationRequest(),
+        data.subscriptions,
+        data.openAccessApis,
+        data.app.id,
+        createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
+      )
+    })
   }
 
   def addAppSubscriptions(applicationId: ApplicationId): Action[AnyContent] = canViewSubscriptionsInDevHubAction(applicationId) { implicit request =>
-    renderSubscriptions(
-      request.application,
-      request.userSession,
-      (role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
-        addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
-      }
-    )
+    renderSubscriptions((role: Collaborator.Role, data: PageData, form: Form[EditApplicationForm]) => {
+      addAppSubscriptionsView(role, data, form, request.application, request.application.deployedTo, data.subscriptions, data.openAccessApis)
+    })
   }
 
   def renderSubscriptions(
-      application: ApplicationWithCollaborators,
-      userSession: UserSession,
       renderHtml: (Collaborator.Role, PageData, Form[EditApplicationForm]) => Html
     )(implicit request: ApplicationRequest[AnyContent]
     ): Future[Result] = {
@@ -149,15 +138,14 @@ class SubscriptionsController @Inject() (
         }
       }
 
-      def handleInvalidForm(formWithErrors: Form[ChangeSubscriptionForm]) = {
+      def handleInvalidForm() = {
         errorHandler.badRequestTemplate.map(BadRequest(_))
       }
 
-      ChangeSubscriptionForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+      ChangeSubscriptionForm.form.bindFromRequest().fold(_ => handleInvalidForm(), handleValidForm)
     }
 
   def requestChangeApiSubscription(
-      applicationId: ApplicationId,
       apiName: String,
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
@@ -189,13 +177,13 @@ class SubscriptionsController @Inject() (
   def changeLockedApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     canManageLockedApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changeLockedApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo.toString)
-      requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
+      requestChangeApiSubscription(apiName, apiContext, apiVersion, redirectTo, call)
     }
 
   def changePrivateApiSubscription(applicationId: ApplicationId, apiName: String, apiContext: ApiContext, apiVersion: ApiVersionNbr, redirectTo: String): Action[AnyContent] =
     canManagePrivateApiSubscriptionsAction(applicationId) {
       val call: Call = routes.SubscriptionsController.changePrivateApiSubscriptionAction(applicationId, apiName, apiContext, apiVersion, redirectTo)
-      requestChangeApiSubscription(applicationId, apiName, apiContext, apiVersion, redirectTo, call)
+      requestChangeApiSubscription(apiName, apiContext, apiVersion, redirectTo, call)
     }
 
   def requestChangeApiSubscriptionAction(

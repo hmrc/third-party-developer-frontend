@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
@@ -55,7 +54,7 @@ class ApmConnectorCommandModuleSpec
       .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
       .build()
 
-  def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationWithCollaborators = standardApp
+  def anApplicationResponse(): ApplicationWithCollaborators = standardApp
 
   val apiVersion1   = ApiVersionNbr.random
   val applicationId = ApplicationId.random
@@ -73,7 +72,7 @@ class ApmConnectorCommandModuleSpec
   val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
   val url           = s"/applications/${applicationId}/dispatch"
 
-  class Setup(proxyEnabled: Boolean = false) {
+  class Setup {
 
     val httpClient = app.injector.instanceOf[HttpClientV2]
 

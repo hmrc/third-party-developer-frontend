@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import java.time.Instant
+import scala.annotation.unused
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import scala.io.Source
@@ -522,9 +523,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   // Override these methods within scenarios classes
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = request
-  def getPathParameterValueOverrides(endpoint: Endpoint)                            = Map.empty[String, String]
-  def getQueryParameterValueOverrides(endpoint: Endpoint)                           = Map.empty[String, String]
-  def getBodyParameterValueOverrides(endpoint: Endpoint)                            = Map.empty[String, String]
+  def getPathParameterValueOverrides(@unused endpoint: Endpoint)                    = Map.empty[String, String]
+  def getQueryParameterValueOverrides(@unused endpoint: Endpoint)                   = Map.empty[String, String]
+  def getBodyParameterValueOverrides(@unused endpoint: Endpoint)                    = Map.empty[String, String]
 
   def populateRequestValues(endpoint: Endpoint): Seq[RequestValues] = {
     val pathParameterValues  = getPathParameterValues() ++ getPathParameterValueOverrides(endpoint)

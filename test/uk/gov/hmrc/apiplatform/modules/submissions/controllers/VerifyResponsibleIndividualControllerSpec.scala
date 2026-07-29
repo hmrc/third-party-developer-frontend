@@ -117,7 +117,7 @@ class VerifyResponsibleIndividualControllerSpec
       ResponsibleIndividualVerificationState.INITIAL
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
   }
 
   "verifyPage" should {
