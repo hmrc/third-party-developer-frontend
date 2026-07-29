@@ -67,7 +67,11 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
   private def deriveCommands(form: EditApplicationForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
     val application             = request.application
     val actor                   = Actors.AppCollaborator(request.userRequest.developer.email)
-    val access: Access.Standard = (application.access match { case s: Access.Standard => s }) // Only standard apps attempt this function
+    // Only standard apps attempt this function
+    val access: Access.Standard = (application.access match {
+      case s: Access.Standard                    => s
+      case _: Access.Privileged | _: Access.Ropc => throw new MatchError(application.access)
+    })
 
     List(
       if (form.privacyPolicyUrl == access.privacyPolicyUrl) {

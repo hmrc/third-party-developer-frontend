@@ -249,7 +249,6 @@ trait AnsweringQuestionsHelper {
       case Question.ChooseOneOfQuestion(id, _, _, _, _, _, marking, absence, _) => {
         marking.map {
           case (pa, mark) => Some(ActualAnswer.SingleChoiceAnswer(pa.value))
-          case _          => None
         }
           .toList ++
           List(absence.flatMap(a => if (a._2 == desiredMark) Some(ActualAnswer.NoAnswer) else None))

@@ -165,6 +165,7 @@ class ManageResponsibleIndividualController @Inject() (
               )
           }
         }
+        case _                                                                                                      => successful(BadRequest("Only Standard apps have Responsible Individual details"))
       }
     }
 

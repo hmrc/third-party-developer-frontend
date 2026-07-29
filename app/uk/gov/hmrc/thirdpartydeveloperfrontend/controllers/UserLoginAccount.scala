@@ -161,6 +161,8 @@ class UserLoginAccount @Inject() (
           case None                  => throw new UserNotFound
         }
 
+      case (Some(_), true) | (None, false) | (Some(_), false) =>
+        throw new MatchError((userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired))
     }
   }
 
@@ -275,7 +277,6 @@ class UserLoginAccount @Inject() (
     thirdPartyDeveloperConnector.fetchDeveloper(userId)
       .flatMap {
         case Some(developer: User) =>
-          {}
           if (hasVerifiedSmsAndAuthApp(developer.mfaDetails)) {
             val authAppMfaId = getMfaDetailByType(MfaType.AuthenticatorApp, developer.mfaDetails)
             val smsMfaId     = getMfaDetailByType(MfaType.Sms, developer.mfaDetails)

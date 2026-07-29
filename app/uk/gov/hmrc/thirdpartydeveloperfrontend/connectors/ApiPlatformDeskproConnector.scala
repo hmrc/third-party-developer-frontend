@@ -58,13 +58,13 @@ class ApiPlatformDeskproConnector @Inject() (
       .recover(handleUpstreamErrors[UpdateProfileResult](UpdateProfileFailed))
   }
 
-  private def handleUpstreamErrors[A](returnIfError: A): PartialFunction[Throwable, A] = (err: Throwable) => {
-    logger.warn("Exception occurred when calling Deskpro", err)
-    err match {
-      case e: HttpException         => returnIfError
-      case e: UpstreamErrorResponse => returnIfError
-      case e: Throwable             => throw e
-    }
+  private def handleUpstreamErrors[A](returnIfError: A): PartialFunction[Throwable, A] = {
+    case err: Throwable =>
+      logger.warn("Exception occurred when calling Deskpro", err)
+      err match {
+        case _: HttpException | _: UpstreamErrorResponse => returnIfError
+        case _                                           => throw err
+      }
   }
 }
 

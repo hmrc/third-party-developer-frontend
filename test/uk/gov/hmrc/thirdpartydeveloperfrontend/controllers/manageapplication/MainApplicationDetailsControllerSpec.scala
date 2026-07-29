@@ -777,7 +777,8 @@ class MainApplicationDetailsControllerSpec
             withClue("termsOfUse")(elementIdentifiedByIdContainsText(doc, "termsOfUse", "Terms of use") shouldBe true)
             withClue("termsOfUseAgreementV2")(elementIdentifiedByIdContainsText(doc, "termsOfUseAgreementV2", wording) shouldBe true)
             withClue("termsOfUseLinkV2")(elementIdentifiedByIdContainsText(doc, "termsOfUseLinkV2", "View") shouldBe true)
-          case _             => succeed
+            ()
+          case _             => ()
         }
       }
 

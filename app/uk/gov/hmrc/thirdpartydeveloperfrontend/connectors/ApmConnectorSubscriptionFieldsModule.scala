@@ -65,8 +65,8 @@ trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
 
         case HttpResponse(BAD_REQUEST, body, _) =>
           Json.parse(body).validate[Map[String, String]] match {
-            case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
-            case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
+            case s: JsSuccess[Map[String, String]] @unchecked => SaveSubscriptionFieldsFailureResponse(s.get)
+            case _                                            => SaveSubscriptionFieldsFailureResponse(Map.empty)
           }
 
         case HttpResponse(status, body, _) => throw UpstreamErrorResponse(body, status)
