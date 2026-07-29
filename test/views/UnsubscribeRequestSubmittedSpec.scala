@@ -22,8 +22,8 @@ import views.html.UnsubscribeRequestSubmittedView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApiVersionNbr
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker

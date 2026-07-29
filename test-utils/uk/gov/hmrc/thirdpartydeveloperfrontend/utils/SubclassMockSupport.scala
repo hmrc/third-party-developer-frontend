@@ -16,10 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.utils
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import scala.reflect.ClassTag
 
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import org.mockito.{MockMakers, Mockito}
 
-import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
+// Builds mocks by generating a real subclass, rather than Mockito's default of rewriting the class in place.
+// The default can't stub methods a class inherits from a trait - it ignores the stub and runs the real code.
+trait SubclassMockSupport {
 
-abstract class AsyncHmrcSpec extends HmrcSpec with DefaultAwaitTimeout with FutureAwaits with MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {}
+  def subclassMock[T](using ct: ClassTag[T]): T =
+    Mockito.mock(
+      ct.runtimeClass.asInstanceOf[Class[T]],
+      Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(MockMakers.SUBCLASS)
+    )
+}

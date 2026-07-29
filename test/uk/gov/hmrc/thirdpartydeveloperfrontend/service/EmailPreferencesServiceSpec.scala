@@ -50,10 +50,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
-    val mockApmConnector = org.mockito.Mockito.mock(
-      classOf[ApmConnector],
-      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-    )
+    val mockApmConnector = subclassMock[ApmConnector]
     val underTest        = new EmailPreferencesService(mockApmConnector, mockThirdPartyDeveloperConnector, FlowRepositoryMock.aMock)
 
   }

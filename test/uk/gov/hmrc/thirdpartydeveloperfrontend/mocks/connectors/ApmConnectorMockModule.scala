@@ -23,15 +23,13 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   object ApmConnectorMock {
 
-    val aMock = org.mockito.Mockito.mock(
-      classOf[ApmConnector],
-      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-    )
+    val aMock = subclassMock[ApmConnector]
 
     object UpliftApplicationV2 {
 

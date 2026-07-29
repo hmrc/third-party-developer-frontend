@@ -26,8 +26,9 @@ import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   trait AbstractCollaboratorServiceMock {
     val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
@@ -82,9 +83,6 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
 
   object CollaboratorServiceMock extends AbstractCollaboratorServiceMock {
 
-    val aMock = org.mockito.Mockito.mock(
-      classOf[CollaboratorService],
-      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-    )
+    val aMock = subclassMock[CollaboratorService]
   }
 }

@@ -23,8 +23,9 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.LoginRedirectsService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   trait AbstractRedirectsServiceMock {
     def aMock: LoginRedirectsService
@@ -55,9 +56,6 @@ trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
 
   object RedirectsServiceMock extends AbstractRedirectsServiceMock {
 
-    val aMock = org.mockito.Mockito.mock(
-      classOf[LoginRedirectsService],
-      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-    )
+    val aMock = subclassMock[LoginRedirectsService]
   }
 }

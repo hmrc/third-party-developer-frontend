@@ -22,18 +22,16 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
+trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
   val tpoConnector: ThirdPartyOrchestratorConnector                    = mock[ThirdPartyOrchestratorConnector]
   val tpdConnector: ThirdPartyDeveloperConnector                       = mock[ThirdPartyDeveloperConnector]
   val tpaProductionConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
   val apiPlatformDeskproConnector: ApiPlatformDeskproConnector         = mock[ApiPlatformDeskproConnector]
   val flowRepository: FlowRepository                                   = mock[FlowRepository]
 
-  val apmConnector: ApmConnector                                                           = org.mockito.Mockito.mock(
-    classOf[TestApmConnector],
-    org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-  )
+  val apmConnector: ApmConnector                                                           = subclassMock[TestApmConnector]
   val sandboxPushPullNotificationsConnector: SandboxPushPullNotificationsConnector         = mock[SandboxPushPullNotificationsConnector]
   val productionPushPullNotificationsConnector: ProductionPushPullNotificationsConnector   = mock[ProductionPushPullNotificationsConnector]
   val thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]

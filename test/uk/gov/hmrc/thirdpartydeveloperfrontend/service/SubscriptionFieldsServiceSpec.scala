@@ -52,10 +52,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     given hc: HeaderCarrier = HeaderCarrier()
 
-    val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
-      classOf[ApmConnector],
-      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-    )
+    val mockApmConnector: ApmConnector = subclassMock[ApmConnector]
 
     val underTest = new SubscriptionFieldsService(mockApmConnector)
   }

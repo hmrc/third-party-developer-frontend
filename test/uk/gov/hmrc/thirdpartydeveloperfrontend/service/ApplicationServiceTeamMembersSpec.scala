@@ -47,10 +47,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
     val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
 
     val applicationService = new ApplicationService(
-      org.mockito.Mockito.mock(
-        classOf[ApmConnector],
-        org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-      ),
+      subclassMock[ApmConnector],
       ApmConnectorCommandModuleMock.aMock,
       mockApiPlatformDeskproConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,

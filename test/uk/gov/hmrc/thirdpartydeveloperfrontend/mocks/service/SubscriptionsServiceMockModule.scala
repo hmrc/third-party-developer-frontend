@@ -26,8 +26,9 @@ import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   trait AbstractSubscriptionsServiceMock {
     val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
@@ -82,10 +83,7 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
 
   object SubscriptionsServiceMock extends AbstractSubscriptionsServiceMock {
 
-    val aMock = org.mockito.Mockito.mock(
-      classOf[SubscriptionsService],
-      org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
-    )
+    val aMock = subclassMock[SubscriptionsService]
   }
 
 }
