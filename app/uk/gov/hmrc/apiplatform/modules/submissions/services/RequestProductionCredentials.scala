@@ -41,7 +41,7 @@ class RequestProductionCredentials @Inject() (
     apmCmdModule: ApmConnectorCommandModule,
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow with ApplicationLogger {
 
   def requestProductionCredentials(
@@ -49,7 +49,7 @@ class RequestProductionCredentials @Inject() (
       requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[Either[ErrorDetails, ApplicationWithCollaborators]] = {
 
     def getCommand() = {
@@ -103,7 +103,7 @@ class RequestProductionCredentials @Inject() (
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean,
       isSubmissionPassed: Boolean
-    )(implicit hc: HeaderCarrier
+    )(using hc: HeaderCarrier
     ): Future[Option[String]] = {
     if (requesterIsResponsibleIndividual) {
       if (isNewTouUplift) {

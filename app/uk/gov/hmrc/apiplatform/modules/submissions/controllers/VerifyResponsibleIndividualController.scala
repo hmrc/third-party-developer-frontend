@@ -69,7 +69,7 @@ class VerifyResponsibleIndividualController @Inject() (
     responsibleIndividualAcceptedView: ResponsibleIndividualAcceptedView,
     responsibleIndividualDeclinedView: ResponsibleIndividualDeclinedView,
     responsibleIndividualErrorView: ResponsibleIndividualErrorView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]

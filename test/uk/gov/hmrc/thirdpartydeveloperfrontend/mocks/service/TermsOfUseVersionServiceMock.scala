@@ -25,8 +25,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.TermsOfUseVersionService
 trait TermsOfUseVersionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val termsOfUseVersionServiceMock = mock[TermsOfUseVersionService]
 
-  def returnLatestTermsOfUseVersion = when(termsOfUseVersionServiceMock.getLatest()(*)).thenReturn(TermsOfUseVersion.latest)
+  def returnLatestTermsOfUseVersion = when(termsOfUseVersionServiceMock.getLatest()(using *)).thenReturn(TermsOfUseVersion.latest)
 
-  def returnTermsOfUseVersionForApplication = when(termsOfUseVersionServiceMock.getForApplication(*[ApplicationWithCollaborators])(*)).thenReturn(TermsOfUseVersion.NEW_JOURNEY)
+  def returnTermsOfUseVersionForApplication =
+    when(termsOfUseVersionServiceMock.getForApplication(*[ApplicationWithCollaborators])(using *)).thenReturn(TermsOfUseVersion.NEW_JOURNEY)
 
 }

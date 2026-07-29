@@ -49,7 +49,7 @@ class TermsOfUseResponsesController @Inject() (
     val cookieSigner: CookieSigner,
     val submissionService: SubmissionService,
     termsOfUseResponsesView: TermsOfUseResponsesView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]

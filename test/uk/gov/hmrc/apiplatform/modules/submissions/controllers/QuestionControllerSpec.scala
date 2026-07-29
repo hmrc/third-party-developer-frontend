@@ -86,7 +86,7 @@ class QuestionControllerSpec
       with AppendedClues
       with FixedClock {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val questionView     = app.injector.instanceOf[QuestionView]
     val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
@@ -103,7 +103,7 @@ class QuestionControllerSpec
       mcc
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "showQuestion" should {

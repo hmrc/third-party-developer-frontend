@@ -68,7 +68,7 @@ class ManageResponsibleIndividualController @Inject() (
     responsibleIndividualChangeToSelfConfirmedView: ResponsibleIndividualChangeToSelfConfirmedView,
     responsibleIndividualChangeToOtherView: ResponsibleIndividualChangeToOtherView,
     responsibleIndividualChangeToOtherRequestedView: ResponsibleIndividualChangeToOtherRequestedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper {

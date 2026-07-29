@@ -54,7 +54,7 @@ class ThirdPartyDeveloperConnectorEncryptionSpec extends BaseConnectorIntegratio
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
     val underTest                  = app.injector.instanceOf[ThirdPartyDeveloperConnector]
   }
 

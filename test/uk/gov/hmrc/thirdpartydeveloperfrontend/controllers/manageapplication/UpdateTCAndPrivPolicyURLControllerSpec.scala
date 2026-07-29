@@ -247,7 +247,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
 
       await(application.callChangeDetailsAction)
 
-      verify(underTest.applicationService, times(0)).dispatchCmd(*[ApplicationId], *)(*)
+      verify(underTest.applicationService, times(0)).dispatchCmd(*[ApplicationId], *)(using *)
     }
   }
 
@@ -272,15 +272,15 @@ class UpdateTCAndPrivPolicyURLControllerSpec
     val newTermsUrl    = Some("http://example.com/new-terms")
     val newPrivacyUrl  = Some("http://example.com/new-privacy")
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
+    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(using *))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     def captureAllApplicationCmds: List[ApplicationCommand] = {
       val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
+      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(using *)
       captor.values
     }
 

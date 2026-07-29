@@ -35,7 +35,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.MongoFormatters.formatFlow
 
 @Singleton
-class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext)
+class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationConfig)(using val ec: ExecutionContext)
     extends PlayMongoRepository[Flow](
       collectionName = "flows",
       mongoComponent = mongo,

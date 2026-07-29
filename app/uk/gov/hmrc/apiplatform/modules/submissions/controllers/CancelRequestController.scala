@@ -64,7 +64,7 @@ class CancelRequestController @Inject() (
     confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
     cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
     val clock: Clock
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]

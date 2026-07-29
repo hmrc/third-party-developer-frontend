@@ -44,7 +44,7 @@ class IpAllowListControllerSpec
       extends ApplicationServiceMock
       with ApplicationActionServiceMock {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockIpAllowlistService: IpAllowlistService = org.mockito.Mockito.mock(
       classOf[IpAllowlistService],
@@ -469,7 +469,7 @@ class IpAllowListControllerSpec
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId))
         .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set("2.2.2.0/24"))))
-      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
+      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(using *))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
@@ -477,14 +477,14 @@ class IpAllowListControllerSpec
       status(result) shouldBe OK
       val body = contentAsString(result)
       body should include("Your IP allow list is active")
-      verify(mockIpAllowlistService).activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), eqTo(adminEmail))(*)
+      verify(mockIpAllowlistService).activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), eqTo(adminEmail))(using *)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return 403 when the service throws a forbidden exception" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
-      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
+      when(mockIpAllowlistService.activateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(using *))
         .thenReturn(failed(new ForbiddenException("forbidden")))
 
       val result: Future[Result] = underTest.activateIpAllowlist(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
@@ -525,7 +525,7 @@ class IpAllowListControllerSpec
   "removeIpAllowlistAction" should {
     "deactivate the IP allowlist and return the success page" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
-      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
+      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(using *))
         .thenReturn(successful(ApplicationUpdateSuccessful))
 
       val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)
@@ -533,13 +533,13 @@ class IpAllowListControllerSpec
       status(result) shouldBe OK
       val body: String = contentAsString(result)
       body should include("IP allow list removed")
-      verify(mockIpAllowlistService).deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), eqTo(adminEmail))(*)
+      verify(mockIpAllowlistService).deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), eqTo(adminEmail))(using *)
       verifyIpAllowlistSurveyIsPresent(body)
     }
 
     "return 403 when the service throws a forbidden exception" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
-      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(*))
+      when(mockIpAllowlistService.deactivateIpAllowlist(eqTo(anApplicationWithoutIpAllowlist), eqTo(adminSession.sessionId), *[LaxEmailAddress])(using *))
         .thenReturn(failed(new ForbiddenException("forbidden")))
 
       val result: Future[Result] = underTest.removeIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest)

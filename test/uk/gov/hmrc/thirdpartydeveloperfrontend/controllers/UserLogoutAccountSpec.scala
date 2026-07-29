@@ -66,7 +66,7 @@ class UserLogoutAccountSpec
       implicit val request: FakeRequest[AnyContent] = loggedInDevRequest.withSession("access_uri" -> "https://www.example.com")
       val result                                    = await(underTest.logout()(request))
 
-      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(devSession.sessionId))(*)
+      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(devSession.sessionId))(using *)
       result.session.data shouldBe Map.empty
     }
   }

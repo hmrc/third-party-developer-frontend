@@ -54,7 +54,7 @@ class ManageSubscriptionsSpec
   val apiContext: ApiContext    = ApiContext("test")
   val apiVersion: ApiVersionNbr = ApiVersionNbr("1.0")
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given hc: HeaderCarrier = HeaderCarrier()
 
   val role: Role.Administrator.type = Collaborator.Role.Administrator
 
@@ -373,7 +373,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
 
             private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
@@ -396,7 +396,7 @@ class ManageSubscriptionsSpec
                 eqTo(apiSubscriptionStatus.apiVersion.versionNbr),
                 eqTo(apiSubscriptionStatus.fields.fields),
                 eqTo(expectedFields)
-              )(*)
+              )(using *)
           }
 
           s"save action saves valid subscription field values and with a read only field" in new ManageSubscriptionsSetup {
@@ -407,7 +407,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
             val newSubscriptionValue = "new value"
@@ -434,7 +434,7 @@ class ManageSubscriptionsSpec
                 eqTo(apiSubscriptionStatus.apiVersion.versionNbr),
                 eqTo(apiSubscriptionStatus.fields.fields),
                 eqTo(expectedFields)
-              )(*)
+              )(using *)
           }
 
           s"save action saves valid subscription field values fails and with a read only field is passed in by a bad actor" in new ManageSubscriptionsSetup {
@@ -450,7 +450,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
             val newSubscriptionValue = "illegal new value"
@@ -475,7 +475,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -501,7 +501,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -554,7 +554,7 @@ class ManageSubscriptionsSpec
           val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
           givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
             .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -578,7 +578,7 @@ class ManageSubscriptionsSpec
           val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
           givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
             .thenReturn(successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head

@@ -64,8 +64,8 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       with SubmissionServiceMockModule
       with HasSessionDeveloperFlow
       with FixedClock {
-    val view                       = app.injector.instanceOf[StartUsingYourApplicationView]
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    val view                = app.injector.instanceOf[StartUsingYourApplicationView]
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val underTest       = new StartUsingYourApplicationController(
       mockErrorHandler,
@@ -78,7 +78,7 @@ class StartUsingYourApplicationControllerSpec extends BaseControllerSpec
       view
     )
     val applicationId   = ApplicationId.random
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "startUsingYourApplicationPage" should {

@@ -48,7 +48,7 @@ class StartUsingYourApplicationController @Inject() (
     val cookieSigner: CookieSigner,
     val submissionService: SubmissionService,
     startUsingYourApplicationView: StartUsingYourApplicationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with SubmissionActionBuilders {

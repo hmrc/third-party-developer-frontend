@@ -29,6 +29,10 @@ class UpliftLogicMock extends MockitoSugar with ArgumentMatchersSugar {
   val upliftLogicMock = mock[UpliftLogic]
 
   def aUsersUplfitableAndNotUpliftableAppsReturns(summaries: List[ApplicationSummary], upliftableAppIds: List[ApplicationId], nonUpliftableAppIds: List[ApplicationId]) = {
-    when(upliftLogicMock.aUsersSandboxAdminSummariesAndUpliftIds(*[UserId])(*)).thenReturn(successful(UpliftLogic.Data(summaries, upliftableAppIds.toSet, nonUpliftableAppIds.toSet)))
+    when(upliftLogicMock.aUsersSandboxAdminSummariesAndUpliftIds(*[UserId])(using *)).thenReturn(successful(UpliftLogic.Data(
+      summaries,
+      upliftableAppIds.toSet,
+      nonUpliftableAppIds.toSet
+    )))
   }
 }

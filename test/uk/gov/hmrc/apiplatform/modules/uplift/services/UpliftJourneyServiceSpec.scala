@@ -64,7 +64,7 @@ class UpliftJourneyServiceSpec
 
     val sandboxAppId = ApplicationId.random
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
@@ -263,7 +263,7 @@ class UpliftJourneyServiceSpec
     "return the new submission when everything is good" in new Setup {
       val productionAppId = ApplicationId.random
       GPCFlowServiceMock.FetchFlow.thenReturns(GetProductionCredentialsFlow(UserSessionId.random, Some(sellResellOrDistribute), Some(aListOfSubscriptions)))
-      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(using *)).thenReturn(successful(Some(aSubmission)))
       val cmd             = ApplicationCommands.ChangeApplicationSellResellOrDistribute(Actors.AppCollaborator(session.developer.email), instant, sellResellOrDistribute)
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(sampleApp)
 

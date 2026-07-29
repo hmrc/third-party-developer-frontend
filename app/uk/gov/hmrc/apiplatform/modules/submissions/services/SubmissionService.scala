@@ -28,16 +28,16 @@ import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 @Singleton
 class SubmissionService @Inject() (productionApplicationConnector: ThirdPartyApplicationSubmissionsConnector) {
-  def fetchLatestSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = productionApplicationConnector.fetchLatestSubmission(appId)
+  def fetchLatestSubmission(appId: ApplicationId)(using HeaderCarrier): Future[Option[Submission]] = productionApplicationConnector.fetchLatestSubmission(appId)
 
-  def fetchLatestExtendedSubmission(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] =
+  def fetchLatestExtendedSubmission(appId: ApplicationId)(using HeaderCarrier): Future[Option[ExtendedSubmission]] =
     productionApplicationConnector.fetchLatestExtendedSubmission(appId)
 
-  def fetch(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
+  def fetch(id: SubmissionId)(using HeaderCarrier): Future[Option[ExtendedSubmission]] = productionApplicationConnector.fetchSubmission(id)
 
-  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] =
+  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(using HeaderCarrier): Future[Either[String, ExtendedSubmission]] =
     productionApplicationConnector.recordAnswer(submissionId, questionId, rawAnswers)
 
-  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] =
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(using HeaderCarrier): Future[Either[String, Unit]] =
     productionApplicationConnector.confirmSetupComplete(applicationId, userEmailAddress)
 }

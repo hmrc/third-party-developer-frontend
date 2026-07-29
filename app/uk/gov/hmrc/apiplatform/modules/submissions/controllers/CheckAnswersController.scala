@@ -52,7 +52,7 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials: RequestProductionCredentials,
     checkAnswersView: CheckAnswersView,
     prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]

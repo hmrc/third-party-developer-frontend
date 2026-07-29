@@ -52,7 +52,7 @@ class Redirects @Inject() (
     changeRedirectView: ChangeRedirectView,
     val fraudPreventionConfig: FraudPreventionConfig,
     loginRedirectsService: LoginRedirectsService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUrlEncodedOnlyFormBinding with ApplicationSyntaxes {
 

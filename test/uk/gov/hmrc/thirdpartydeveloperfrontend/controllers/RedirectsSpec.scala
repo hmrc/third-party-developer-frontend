@@ -78,7 +78,7 @@ class RedirectsSpec
       RedirectsServiceMock.aMock
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     fetchSessionByIdReturns(adminSession.sessionId, adminSession)
     updateUserFlowSessionsReturnsSuccessfully(adminSession.sessionId)

@@ -103,23 +103,23 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .build()
   }
 
-  when(apmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(Future.successful(Some(appWithSubsData)))
-  when(apmConnector.getAllFieldDefinitions(*[Environment])(*)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
-  when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(List.empty))
-  when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
-  when(apmConnector.fetchCombinedApi(*[ServiceName])(*)).thenReturn(Future.successful(Right(CombinedApi(
+  when(apmConnector.fetchApplicationById(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(appWithSubsData)))
+  when(apmConnector.getAllFieldDefinitions(*[Environment])(using *)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
+  when(apmConnector.fetchAllOpenAccessApis(*[Environment])(using *)).thenReturn(Future.successful(List.empty))
+  when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(using *)).thenReturn(Future.successful(allPossibleSubscriptions))
+  when(apmConnector.fetchCombinedApi(*[ServiceName])(using *)).thenReturn(Future.successful(Right(CombinedApi(
     "my service display name",
     ServiceName("my service"),
     Set.empty,
     ApiType.RestApi,
     ApiAccessType.Public
   ))))
-  when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
-  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.Production))(*)).thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
+  when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(using *)).thenReturn(Future.successful(List("secret1")))
+  when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(using *)).thenReturn(Future.successful(List("secret1")))
+  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(using *)).thenReturn(Future.successful(List(mock[User])))
+  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.Production))(using *)).thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-  when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenReturn(Future.successful(Some(TermsOfUseInvitation(
+  when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(TermsOfUseInvitation(
     ApplicationId.random,
     Instant.now,
     Instant.now,
@@ -128,31 +128,33 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EMAIL_SENT
   ))))
 
-  when(apmConnector.dispatchWithThrow(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-  when(apmConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(application))))
-  when(apmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
-  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.Sandbox))(*)).thenReturn(Future.successful(
+  when(apmConnector.dispatchWithThrow(*[ApplicationId], *, *)(using *)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(apmConnector.dispatch(*[ApplicationId], *, *)(using *)).thenReturn(Future.successful(Right(DispatchSuccessResult(application))))
+  when(apmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(using *)).thenReturn(
+    Future.successful(SaveSubscriptionFieldsSuccessResponse)
+  )
+  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.Sandbox))(using *)).thenReturn(Future.successful(
     ApplicationNameValidationResult.Valid
   ))
-  when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftRequest])(*)).thenAnswer((appId: ApplicationId, _: UpliftRequest) => Future.successful(appId))
-  when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
-  when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
-  when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
+  when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftRequest])(using *)).thenAnswer((appId: ApplicationId, _: UpliftRequest) => Future.successful(appId))
+  when(apmConnector.fetchUpliftableApiIdentifiers(using *)).thenReturn(Future.successful(Set(apiIdentifier)))
+  when(apmConnector.fetchAllApis(*)(using *)).thenReturn(Future.successful(List.empty))
+  when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(using *)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
   when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful(Some("ref")))
   when(apiPlatformDeskproConnector.updatePersonName(*[LaxEmailAddress], *, *)).thenReturn(Future.successful(UpdateProfileSuccess))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
-  when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
-  when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
-  when(organisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
-  when(organisationConnector.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(successful(None))
-  when(organisationConnector.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(successful(None))
+  when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(using *)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
+  when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(using *)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
+  when(organisationConnector.fetchOrganisationsByUserId(*[UserId])(using *)).thenReturn(successful(List(organisation)))
+  when(organisationConnector.fetchOrganisationAllowList(*[UserId])(using *)).thenReturn(successful(None))
+  when(organisationConnector.fetchLatestSubmissionByUserId(*[UserId])(using *)).thenReturn(successful(None))
 
   import scala.reflect.ClassTag
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 
   def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit ct: ClassTag[A]) = {
-    when(flowRepository.fetchBySessionIdAndFlowType[A](*[SessionId])(eqTo(ct))).thenReturn(
+    when(flowRepository.fetchBySessionIdAndFlowType[A](*[SessionId])(using eqTo(ct))).thenReturn(
       Future.successful(Some(a))
     )
   }
@@ -187,41 +189,41 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     Set.empty,
     List.empty
   )))
-  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
-  when(tpdConnector.requestReset(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.getOrCreateUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(UserId.random))
-  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
-  when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
-  when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.authenticateMfaAccessCode(*)(*)).thenReturn(Future.successful(session))
-  when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
-  when(tpoConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
-  when(tpdConnector.resendVerificationEmail(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
-  when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[SubmissionId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
-  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(submission)))
-  when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
-  when(tpdConnector.updateProfile(*[UserId], *[UpdateRequest])(*)).thenReturn(Future.successful(1))
-  when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
-  when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
-  when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi(
+  when(tpdConnector.fetchEmailForResetCode(*)(using *)).thenReturn(Future.successful(userEmail))
+  when(tpdConnector.requestReset(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(OK))
+  when(tpdConnector.getOrCreateUserId(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(UserId.random))
+  when(tpdConnector.reset(*)(using *)).thenReturn(Future.successful(OK))
+  when(tpdConnector.authenticate(*)(using *)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
+  when(tpdConnector.fetchSession(eqTo(sessionId))(using *)).thenReturn(Future.successful(session))
+  when(tpdConnector.deleteSession(eqTo(sessionId))(using *)).thenReturn(Future.successful(OK))
+  when(tpdConnector.authenticateMfaAccessCode(*)(using *)).thenReturn(Future.successful(session))
+  when(tpdConnector.verify(*)(using *)).thenReturn(Future.successful(OK))
+  when(tpoConnector.verify(*)(using *)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
+  when(tpdConnector.resendVerificationEmail(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(OK))
+  when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(using *)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[SubmissionId])(using *)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(submission)))
+  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *[List[String]])(using *)).thenReturn(Future.successful(Right(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(using *)).thenReturn(Future.successful(Some(submission)))
+  when(tpdConnector.fetchDeveloper(*[UserId])(using *)).thenReturn(Future.successful(Some(developer)))
+  when(tpdConnector.updateProfile(*[UserId], *[UpdateRequest])(using *)).thenReturn(Future.successful(1))
+  when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(using *)).thenReturn(Future.successful(true))
+  when(tpdConnector.removeEmailPreferences(*[UserId])(using *)).thenReturn(Future.successful(true))
+  when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(using *)).thenReturn(Future.successful(Right(List(CombinedApi(
     "display name",
     ServiceName("my service"),
     Set.empty,
     ApiType.RestApi,
     ApiAccessType.Public
   )))))
-  when(tpdConnector.changePassword(*[PasswordChangeRequest])(*)).thenReturn(Future.successful(1))
-  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(()))
-  when(thirdPartyDeveloperMfaConnector.createMfaAuthApp(*[UserId])(*)).thenReturn(Future.successful(registerAuthAppResponse))
-  when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(Some(registerSmsResponse)))
-  when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+  when(tpdConnector.changePassword(*[PasswordChangeRequest])(using *)).thenReturn(Future.successful(1))
+  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(using *)).thenReturn(Future.successful(true))
+  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(()))
+  when(thirdPartyDeveloperMfaConnector.createMfaAuthApp(*[UserId])(using *)).thenReturn(Future.successful(registerAuthAppResponse))
+  when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(using *)).thenReturn(Future.successful(true))
+  when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(using *)).thenReturn(Future.successful(Some(registerSmsResponse)))
+  when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(true))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String, String]): String = {
     // TODO fail test if path contains parameters that aren't supplied by the values map

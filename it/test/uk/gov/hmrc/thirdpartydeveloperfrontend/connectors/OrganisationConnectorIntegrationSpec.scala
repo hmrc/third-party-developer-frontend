@@ -48,7 +48,7 @@ class OrganisationConnectorIntegrationSpec extends BaseConnectorIntegrationSpec 
       .build()
 
   trait Setup extends FixedClock {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
     val connector                  = app.injector.instanceOf[OrganisationConnector]
 
     val userId       = UserId.random

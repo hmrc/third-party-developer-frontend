@@ -84,7 +84,7 @@ class SubscriptionsSpec
       FraudPreventionConfig(true, List.empty, "some/uri")
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val developerApplication: ApplicationWithCollaborators = standardApp.inSandbox()
 
@@ -191,7 +191,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
@@ -208,7 +208,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
@@ -227,7 +227,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("subscribed" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
         givenApplicationAction(app.withSubscriptions(Set.empty).withFieldValues(Map.empty), userSession, List.empty)
@@ -245,7 +245,7 @@ class SubscriptionsSpec
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
         "POST",
         s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+      ).withCSRFToken.withLoggedIn(using underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
       fetchByApplicationIdReturns(appId, appl)
       givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
@@ -262,7 +262,7 @@ class SubscriptionsSpec
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
         "POST",
         s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody()
+      ).withCSRFToken.withLoggedIn(using underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody()
 
       fetchByApplicationIdReturns(appId, appl)
       givenApplicationAction(appl.withSubscriptions(Set.empty).withFieldValues(Map.empty), devSession, List.empty)
@@ -280,7 +280,7 @@ class SubscriptionsSpec
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
         "POST",
         s"developer/applications/${applicationIdTwo}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest, implicitly)(adminSession.sessionId).withFormUrlEncodedBody("subscribed" -> "false")
+      ).withCSRFToken.withLoggedIn(using underTest, implicitly)(adminSession.sessionId).withFormUrlEncodedBody("subscribed" -> "false")
 
       fetchByApplicationIdReturns(applicationIdTwo, productionApp)
 
@@ -298,7 +298,7 @@ class SubscriptionsSpec
       val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
         "POST",
         s"developer/applications/${appId}/change-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-      ).withCSRFToken.withLoggedIn(underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody()
+      ).withCSRFToken.withLoggedIn(using underTest, implicitly)(devSession.sessionId).withFormUrlEncodedBody()
 
       fetchByApplicationIdReturns(appId, appl)
 
@@ -339,7 +339,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId)
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId)
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -368,7 +368,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId)
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId)
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -386,7 +386,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(
           "GET",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId)
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId)
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -428,7 +428,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -446,7 +446,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(appId, app)
 
@@ -457,7 +457,7 @@ class SubscriptionsSpec
 
         status(result) shouldBe BAD_REQUEST
 
-        verify(underTest.subscriptionsService, never).isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)
+        verify(underTest.subscriptionsService, never).isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(using *)
       }
     }
 
@@ -467,7 +467,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -487,7 +487,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody("confirm" -> "true")
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -507,7 +507,7 @@ class SubscriptionsSpec
         val request: FakeRequest[AnyContentAsFormUrlEncoded] = FakeRequest(
           "POST",
           s"developer/applications/${app.id}/change-locked-subscription?name=$apiName&context=${apiContext}&version=${apiVersion}&redirectTo=$redirectTo"
-        ).withCSRFToken.withLoggedIn(underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody()
+        ).withCSRFToken.withLoggedIn(using underTest, implicitly)(userSession.sessionId).withFormUrlEncodedBody()
 
         fetchByApplicationIdReturns(app.id, app)
 
@@ -553,7 +553,7 @@ class SubscriptionsSpec
 
       val request: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest("GET", s"developer/applications/$appId/subscribe?context=${apiContext}&version=${apiVersion}&accessType=$apiAccessType&tab=subscriptions")
-          .withLoggedIn(underTest, implicitly)(altDevSession.sessionId)
+          .withLoggedIn(using underTest, implicitly)(altDevSession.sessionId)
 
       val result = underTest.changeApiSubscription(appId, apiContext, apiVersion, apiAccessType)(request)
       status(result) shouldBe SEE_OTHER

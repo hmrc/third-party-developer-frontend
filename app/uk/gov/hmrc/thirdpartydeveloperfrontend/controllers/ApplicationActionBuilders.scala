@@ -31,7 +31,7 @@ trait ApplicationActionBuilders {
 
   protected def applicationActionService: ApplicationActionService
 
-  def applicationRequestRefiner(applicationId: ApplicationId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] = {
+  def applicationRequestRefiner(applicationId: ApplicationId)(using ExecutionContext): ActionRefiner[UserRequest, ApplicationRequest] = {
     new ActionRefiner[UserRequest, ApplicationRequest] {
       override protected def executionContext: ExecutionContext = ec
 
@@ -44,7 +44,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  private def forbiddenWhenNot[A](cond: Boolean)(implicit ec: ExecutionContext, applicationRequest: ApplicationRequest[A]): Future[Option[Result]] = {
+  private def forbiddenWhenNot[A](cond: Boolean)(using ec: ExecutionContext, applicationRequest: ApplicationRequest[A]): Future[Option[Result]] = {
     if (cond) {
       successful(None)
     } else {
@@ -52,7 +52,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  private def badRequestWhenNot[A](cond: Boolean)(implicit ec: ExecutionContext, applicationRequest: ApplicationRequest[A]): Future[Option[Result]] = {
+  private def badRequestWhenNot[A](cond: Boolean)(using ec: ExecutionContext, applicationRequest: ApplicationRequest[A]): Future[Option[Result]] = {
     if (cond) {
       successful(None)
     } else {
@@ -60,7 +60,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  def forbiddenWhenNotFilter(cond: ApplicationRequest[?] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def forbiddenWhenNotFilter(cond: ApplicationRequest[?] => Boolean)(using ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
@@ -70,7 +70,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  def badRequestWhenNotFilter(cond: ApplicationRequest[?] => Boolean)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
+  def badRequestWhenNotFilter(cond: ApplicationRequest[?] => Boolean)(using ExecutionContext): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
@@ -80,12 +80,12 @@ trait ApplicationActionBuilders {
     }
   }
 
-  def capabilityFilter(capability: Capability)(implicit ec: ExecutionContext): ActionFilter[ApplicationRequest] = {
+  def capabilityFilter(capability: Capability)(using ExecutionContext): ActionFilter[ApplicationRequest] = {
     val capabilityCheck: ApplicationRequest[?] => Boolean = req => capability.hasCapability(req.application)
     badRequestWhenNotFilter(capabilityCheck)
   }
 
-  def approvalFilter(approvalPredicate: State => Boolean)(implicit ec: ExecutionContext) = new ActionFilter[ApplicationRequest] {
+  def approvalFilter(approvalPredicate: State => Boolean)(using ExecutionContext) = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 
     override protected def filter[A](request: ApplicationRequest[A]): Future[Option[Result]] = {
@@ -99,7 +99,7 @@ trait ApplicationActionBuilders {
     }
   }
 
-  def permissionFilter(permission: Permission)(implicit ec: ExecutionContext) = {
+  def permissionFilter(permission: Permission)(using ExecutionContext) = {
     val test: ApplicationRequest[?] => Boolean = (req) => permission.hasPermissions(req.application, req.userSession.developer)
     forbiddenWhenNotFilter(req => test(req))
   }

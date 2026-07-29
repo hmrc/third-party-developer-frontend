@@ -30,7 +30,7 @@ class TermsOfUseInvitationService @Inject() (
     tpaConnector: ThirdPartyApplicationProductionConnector
   ) {
 
-  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
+  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     tpaConnector.fetchTermsOfUseInvitation(applicationId)
   }
 }

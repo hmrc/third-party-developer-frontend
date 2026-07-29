@@ -51,7 +51,7 @@ class ChangeAppNameAndDescController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     val changeAppNameAndDescView: ChangeAppNameAndDescView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ClockNow {

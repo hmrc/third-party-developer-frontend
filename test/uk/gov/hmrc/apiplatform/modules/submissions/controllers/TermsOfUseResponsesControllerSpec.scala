@@ -71,7 +71,7 @@ class TermsOfUseResponsesControllerSpec
       with HasSessionDeveloperFlow
       with FixedClock {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val termsOfUseResponsesView = app.injector.instanceOf[TermsOfUseResponsesView]
 
@@ -97,7 +97,7 @@ class TermsOfUseResponsesControllerSpec
       termsOfUseResponsesView
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "termsOfUseResponsesPage" should {

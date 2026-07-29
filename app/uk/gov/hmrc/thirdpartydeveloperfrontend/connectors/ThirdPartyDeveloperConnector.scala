@@ -49,12 +49,12 @@ class ThirdPartyDeveloperConnector @Inject() (
     encryptedJson: EncryptedJson,
     config: ApplicationConfig,
     metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends CommonResponseHandlers with Logging {
 
   import ThirdPartyDeveloperConnector._
 
-  def authenticate(loginRequest: SessionCreateWithDeviceRequest)(implicit hc: HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
+  def authenticate(loginRequest: SessionCreateWithDeviceRequest)(using HeaderCarrier): Future[UserAuthenticationResponse] = metrics.record(api) {
     encryptedJson.secretRequest(
       loginRequest,
       encrypted =>
@@ -74,7 +74,7 @@ class ThirdPartyDeveloperConnector @Inject() (
 
   def authenticateMfaAccessCode(
       accessCodeAuthenticationRequest: AccessCodeAuthenticationRequest
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[UserSession] = metrics.record(api) {
 
     encryptedJson.secretRequest(
@@ -96,7 +96,7 @@ class ThirdPartyDeveloperConnector @Inject() (
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api: API                    = API("third-party-developer")
 
-  def register(registration: RegistrationRequest)(implicit hc: HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
+  def register(registration: RegistrationRequest)(using HeaderCarrier): Future[RegistrationDownstreamResponse] = metrics.record(api) {
     encryptedJson.secretRequest(
       registration,
       encrypted =>
@@ -112,7 +112,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def createUnregisteredUser(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def createUnregisteredUser(email: LaxEmailAddress)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     encryptedJson.secretRequest(
       UnregisteredUserCreationRequest(email),
       encrypted =>
@@ -126,7 +126,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def reset(reset: PasswordResetRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def reset(reset: PasswordResetRequest)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     encryptedJson.secretRequest(
       reset,
       encrypted =>
@@ -141,7 +141,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def changePassword(change: PasswordChangeRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def changePassword(change: PasswordChangeRequest)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     encryptedJson.secretRequest(
       change,
       encrypted =>
@@ -158,7 +158,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def requestReset(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def requestReset(email: LaxEmailAddress)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     http.post(url"$serviceBaseUrl/password-reset-request")
       .withBody(Json.toJson(EmailIdentifier(email)))
       .execute[Either[UpstreamErrorResponse, HttpResponse]]
@@ -169,7 +169,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def updateSessionLoggedInState(sessionId: SessionId, request: UpdateLoggedInStateRequest)(implicit hc: HeaderCarrier): Future[UserSession] = metrics.record(api) {
+  def updateSessionLoggedInState(sessionId: SessionId, request: UpdateLoggedInStateRequest)(using HeaderCarrier): Future[UserSession] = metrics.record(api) {
     http.put(url"$serviceBaseUrl/session/$sessionId/loggedInState/${request.loggedInState.asScreamingSnakeCase}")
       .execute[Option[UserSession]]
       .map {
@@ -178,7 +178,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def fetchEmailForResetCode(code: String)(implicit hc: HeaderCarrier): Future[LaxEmailAddress] = {
+  def fetchEmailForResetCode(code: String)(using HeaderCarrier): Future[LaxEmailAddress] = {
     metrics.record(api) {
       http
         .get(url"$serviceBaseUrl/reset-password?code=$code")
@@ -192,7 +192,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     }
   }
 
-  def updateProfile(userId: UserId, profile: UpdateRequest)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def updateProfile(userId: UserId, profile: UpdateRequest)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     http.post(url"$serviceBaseUrl/developer/$userId")
       .withBody(Json.toJson(profile))
       .execute[ErrorOr[HttpResponse]]
@@ -202,7 +202,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def findUserId(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[CoreUserDetails]] = {
+  def findUserId(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[CoreUserDetails]] = {
     http.post(url"$serviceBaseUrl/developers/find-user-id")
       .withBody(Json.toJson(FindUserIdRequest(email)))
       .execute[Option[FindUserIdResponse]]
@@ -212,7 +212,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def fetchUserId(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[CoreUserDetails] = {
+  def fetchUserId(email: LaxEmailAddress)(using HeaderCarrier): Future[CoreUserDetails] = {
     http
       .post(url"$serviceBaseUrl/developers/find-user-id")
       .withBody(Json.toJson(FindUserIdRequest(email)))
@@ -220,7 +220,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       .map(response => CoreUserDetails(email, response.userId))
   }
 
-  def resendVerificationEmail(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def resendVerificationEmail(email: LaxEmailAddress)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     for {
       coreUserDetails <- fetchUserId(email)
       userId           = coreUserDetails.id.value
@@ -234,7 +234,7 @@ class ThirdPartyDeveloperConnector @Inject() (
     } yield response
   }
 
-  def verify(code: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def verify(code: String)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     http.get(url"$serviceBaseUrl/verification?code=$code")
       .execute[ErrorOr[HttpResponse]]
       .map {
@@ -243,7 +243,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def fetchSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[UserSession] = metrics.record(api) {
+  def fetchSession(sessionId: SessionId)(using HeaderCarrier): Future[UserSession] = metrics.record(api) {
     http.get(url"$serviceBaseUrl/session/$sessionId")
       .execute[Option[UserSession]]
       .map {
@@ -252,7 +252,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def deleteSession(sessionId: SessionId)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def deleteSession(sessionId: SessionId)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     http.delete(url"$serviceBaseUrl/session/$sessionId")
       .execute[ErrorOr[HttpResponse]]
       .map {
@@ -263,14 +263,14 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def updateRoles(userId: UserId, roles: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[User] =
+  def updateRoles(userId: UserId, roles: AccountSetupRequest)(using HeaderCarrier): Future[User] =
     metrics.record(api) {
       http.put(url"$serviceBaseUrl/developer/account-setup/$userId/roles")
         .withBody(Json.toJson(roles))
         .execute[User]
     }
 
-  def updateServices(userId: UserId, services: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[User] =
+  def updateServices(userId: UserId, services: AccountSetupRequest)(using HeaderCarrier): Future[User] =
     metrics.record(api) {
       http
         .put(url"$serviceBaseUrl/developer/account-setup/$userId/services")
@@ -278,7 +278,7 @@ class ThirdPartyDeveloperConnector @Inject() (
         .execute[User]
     }
 
-  def updateTargets(userId: UserId, targets: AccountSetupRequest)(implicit hc: HeaderCarrier): Future[User] =
+  def updateTargets(userId: UserId, targets: AccountSetupRequest)(using HeaderCarrier): Future[User] =
     metrics.record(api) {
       http
         .put(url"$serviceBaseUrl/developer/account-setup/$userId/targets")
@@ -286,14 +286,14 @@ class ThirdPartyDeveloperConnector @Inject() (
         .execute[User]
     }
 
-  def completeAccountSetup(userId: UserId)(implicit hc: HeaderCarrier): Future[User] =
+  def completeAccountSetup(userId: UserId)(using HeaderCarrier): Future[User] =
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developer/account-setup/$userId/complete")
         .execute[User]
     }
 
-  def fetchDeveloper(id: UserId)(implicit hc: HeaderCarrier): Future[Option[User]] = {
+  def fetchDeveloper(id: UserId)(using HeaderCarrier): Future[Option[User]] = {
     metrics.record(api) {
       http
         .get(url"$serviceBaseUrl/developer?${Seq("developerId" -> id.toString())}")
@@ -301,14 +301,14 @@ class ThirdPartyDeveloperConnector @Inject() (
     }
   }
 
-  def fetchByEmails(emails: Set[LaxEmailAddress])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
+  def fetchByEmails(emails: Set[LaxEmailAddress])(using HeaderCarrier): Future[Seq[User]] = {
     http
       .post(url"$serviceBaseUrl/developers/get-by-emails")
       .withBody(Json.toJson(emails))
       .execute[Seq[User]]
   }
 
-  def removeEmailPreferences(userId: UserId)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+  def removeEmailPreferences(userId: UserId)(using HeaderCarrier): Future[Boolean] = metrics.record(api) {
     http
       .delete(url"$serviceBaseUrl/developer/$userId/email-preferences")
       .execute[ErrorOrUnit]
@@ -319,7 +319,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def updateEmailPreferences(userId: UserId, emailPreferences: EmailPreferences)(implicit hc: HeaderCarrier): Future[Boolean] = metrics.record(api) {
+  def updateEmailPreferences(userId: UserId, emailPreferences: EmailPreferences)(using HeaderCarrier): Future[Boolean] = metrics.record(api) {
     val url = s"$serviceBaseUrl/developer/$userId/email-preferences"
 
     http
@@ -333,7 +333,7 @@ class ThirdPartyDeveloperConnector @Inject() (
       }
   }
 
-  def getOrCreateUserId(emailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[UserId] = {
+  def getOrCreateUserId(emailAddress: LaxEmailAddress)(using HeaderCarrier): Future[UserId] = {
     http
       .post(url"$serviceBaseUrl/developers/user-id")
       .withBody(Json.toJson(FindOrCreateUserIdRequest(emailAddress)))

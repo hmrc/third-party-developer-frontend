@@ -50,7 +50,7 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
     "render correctly when form is valid" in {
 
       val mainView =
-        authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"
@@ -64,7 +64,7 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
         MfaId(UUID.randomUUID()),
         MfaAction.CREATE,
         None
-      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      )(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"

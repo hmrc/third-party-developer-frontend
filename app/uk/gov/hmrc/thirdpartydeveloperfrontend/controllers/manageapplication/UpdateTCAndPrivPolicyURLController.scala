@@ -51,7 +51,7 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     updateTCAndPrivPolicyURLView: UpdateTCAndPrivPolicyURLView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with WithUrlEncodedOnlyFormBinding

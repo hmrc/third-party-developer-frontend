@@ -82,7 +82,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       title.get
     }
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val confirmApisView: ConfirmApisView                                       = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView: TurnOffApisMasterView                           = app.injector.instanceOf[TurnOffApisMasterView]
@@ -125,7 +125,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
 
     val apiIdentifier1: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
     val apiIdentifier2: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))

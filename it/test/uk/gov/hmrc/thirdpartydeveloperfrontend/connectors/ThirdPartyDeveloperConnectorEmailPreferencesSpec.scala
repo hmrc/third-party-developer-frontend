@@ -58,7 +58,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail: LaxEmailAddress                                 = "thirdpartydeveloper@example.com".toLaxEmail
     val userPassword                                               = "password1!"

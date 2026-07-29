@@ -62,7 +62,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
 
     "render correctly when form is valid" in new Setup {
       val mainView: Html = authAppLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.AuthenticatorApp, userHasMultipleMfa = false)(
-        stubMessages(),
+        using stubMessages(),
         FakeRequest().withCSRFToken,
         appConfig
       )
@@ -80,7 +80,7 @@ class AuthAppLoginAccessCodeViewSpec extends CommonViewSpec
         MfaId(UUID.randomUUID()),
         MfaType.AuthenticatorApp,
         userHasMultipleMfa = false
-      )(stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      )(using stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document: Document = Jsoup.parse(mainView.body)
 

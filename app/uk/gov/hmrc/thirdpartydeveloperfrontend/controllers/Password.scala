@@ -53,7 +53,7 @@ class Password @Inject() (
     resetInvalidView: ResetInvalidView,
     resetErrorView: ResetErrorView,
     signInView: SignInView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUrlEncodedOnlyFormBinding {
 
@@ -142,7 +142,7 @@ trait PasswordChange {
       email: LaxEmailAddress,
       success: Result,
       error: Form[ChangePasswordForm] => HtmlFormat.Appendable
-    )(implicit request: Request[?],
+    )(using request: Request[?],
       hc: HeaderCarrier,
       ec: ExecutionContext
     ) = {

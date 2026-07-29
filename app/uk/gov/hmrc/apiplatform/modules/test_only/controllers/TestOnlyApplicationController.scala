@@ -40,7 +40,7 @@ class TestOnlyApplicationController @Inject() (
     val sessionService: SessionService,
     val cookieSigner: CookieSigner,
     mcc: MessagesControllerComponents
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {

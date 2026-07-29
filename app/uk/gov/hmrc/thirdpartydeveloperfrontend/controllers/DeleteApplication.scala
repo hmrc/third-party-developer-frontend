@@ -46,7 +46,7 @@ class DeleteApplication @Inject() (
     requestDeleteApplicationCompleteView: RequestDeleteApplicationCompleteView,
     deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
     deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with WithUrlEncodedOnlyFormBinding {

@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 @Singleton
 class GetProductionCredentialsFlowService @Inject() (
     val flowRepository: FlowRepository
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   def fetchFlow(session: UserSession): Future[GetProductionCredentialsFlow] =

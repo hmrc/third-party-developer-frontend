@@ -37,7 +37,7 @@ class ErrorHandler @Inject() (
     val configuration: Configuration,
     errorTemplateView: ErrorTemplate,
     forbiddenTemplateView: ForbiddenTemplate
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends FrontendErrorHandler {
 

@@ -42,7 +42,7 @@ class AuthAppStartViewSpec
 
   "AuthAppStartView view" should {
     "render correctly when form is valid" in {
-      val mainView = authAppStartView.apply()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = authAppStartView.apply()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "You need an authenticator app on your device"
       document.getElementById("submit").text shouldBe "Continue"

@@ -51,7 +51,7 @@ class PushPullNotificationsConnectorIntegrationSpec extends BaseConnectorIntegra
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val connector: ProductionPushPullNotificationsConnector = app.injector.instanceOf[ProductionPushPullNotificationsConnector]
   }

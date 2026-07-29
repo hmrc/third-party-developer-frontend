@@ -29,7 +29,7 @@ trait PpnsActions {
   self: ApplicationController =>
 
   private def subscribedToApiWithPpnsFieldFilter(
-      implicit ec: ExecutionContext
+      using ec: ExecutionContext
     ): ActionFilter[ApplicationRequest] = new ActionFilter[ApplicationRequest] {
     override protected def executionContext: ExecutionContext = ec
 

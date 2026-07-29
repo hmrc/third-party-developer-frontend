@@ -58,8 +58,8 @@ class IpAllowlistServiceSpec
       with ApmConnectorMockModule
       with ApmConnectorCommandModuleMockModule {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    val sessionId                  = UserSessionId.random
+    given hc: HeaderCarrier = HeaderCarrier()
+    val sessionId           = UserSessionId.random
 
     val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
     when(mockConnectorsWrapper.forEnvironment(*)).thenReturn(mock[PushPullNotificationsConnector])

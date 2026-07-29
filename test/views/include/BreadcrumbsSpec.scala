@@ -47,7 +47,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Fix
     "render in the right order" in {
 
       val applicationName = ApplicationName("An Application Name")
-      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp.withName(applicationName)), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp.withName(applicationName)), Crumb.viewAllApplications, Crumb.home(using appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)
 

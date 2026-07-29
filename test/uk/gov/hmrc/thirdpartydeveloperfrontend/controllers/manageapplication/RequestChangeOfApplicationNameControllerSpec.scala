@@ -60,7 +60,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show success page if name changed successfully" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*))
+      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(using *))
         .thenReturn(Future.successful(Some("ref")))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name").withMethod("POST")
@@ -68,13 +68,13 @@ class RequestChangeOfApplicationNameControllerSpec
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*)
+      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(using *)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 
     "show error if application name is not valid" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
         .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
 
       private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name").withMethod("POST")
@@ -147,7 +147,7 @@ class RequestChangeOfApplicationNameControllerSpec
       changeOfApplicationNameConfirmationView
     )
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
   }
 }

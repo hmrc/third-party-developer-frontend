@@ -40,7 +40,7 @@ class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with UserTestD
   "QrCodeView view" should {
     "render correctly when form is valid" in {
 
-      val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Set up your authenticator app"
       document.getElementById("submit").text shouldBe "Continue"

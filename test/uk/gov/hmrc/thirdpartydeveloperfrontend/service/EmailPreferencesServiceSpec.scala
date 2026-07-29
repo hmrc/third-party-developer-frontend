@@ -39,7 +39,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
   trait SetUp extends UserBuilder with LocalUserIdTracker with FixedClock with CombinedApiTestDataHelper with FlowRepositoryMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val emailPreferences                      = EmailPreferences(List(TaxRegimeInterests("CATEGORY_1", Set("api1", "api2"))), Set(EmailTopic.Technical))
     val developerWithNoEmailPreferences: User = buildTrackedUser()
@@ -50,11 +50,11 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     val mockThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
 
-    val mockApmConnector                 = org.mockito.Mockito.mock(
+    val mockApmConnector = org.mockito.Mockito.mock(
       classOf[ApmConnector],
       org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
     )
-    val underTest                        = new EmailPreferencesService(mockApmConnector, mockThirdPartyDeveloperConnector, FlowRepositoryMock.aMock)
+    val underTest        = new EmailPreferencesService(mockApmConnector, mockThirdPartyDeveloperConnector, FlowRepositoryMock.aMock)
 
   }
 
@@ -63,7 +63,7 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       "return true when connector is called correctly and true" in new SetUp {
         val userId = UserId.random
 
-        when(mockThirdPartyDeveloperConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
+        when(mockThirdPartyDeveloperConnector.removeEmailPreferences(*[UserId])(using *)).thenReturn(Future.successful(true))
         val result = await(underTest.removeEmailPreferences(userId))
         result shouldBe true
       }
@@ -71,14 +71,14 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
 
     "updateEmailPreferences" should {
       "return true when connector is called correctly and true" in new SetUp {
-        when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))
+        when(mockThirdPartyDeveloperConnector.updateEmailPreferences(*[UserId], *)(using *)).thenReturn(Future.successful(true))
         val userId             = UserId.random
         val expectedFlowObject = EmailPreferencesFlowV2(sessionId, Set("CATEGORY_1"), Map("CATEGORY_1" -> Set("api1", "api2")), Set("TECHNICAL"), List.empty)
 
         val result = await(underTest.updateEmailPreferences(userId, expectedFlowObject))
 
         result shouldBe true
-        verify(mockThirdPartyDeveloperConnector).updateEmailPreferences(eqTo(userId), eqTo(expectedFlowObject.toEmailPreferences))(*)
+        verify(mockThirdPartyDeveloperConnector).updateEmailPreferences(eqTo(userId), eqTo(expectedFlowObject.toEmailPreferences))(using *)
       }
     }
 
@@ -160,16 +160,16 @@ class EmailPreferencesServiceSpec extends AsyncHmrcSpec {
       val apiDetails2 = mock[CombinedApi]
 
       "return details of APIs by serviceName" in new SetUp {
-        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName1))(*)).thenReturn(Future.successful(Right(apiDetails1)))
-        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName2))(*)).thenReturn(Future.successful(Right(apiDetails2)))
+        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName1))(using *)).thenReturn(Future.successful(Right(apiDetails1)))
+        when(mockApmConnector.fetchCombinedApi(eqTo(apiServiceName2))(using *)).thenReturn(Future.successful(Right(apiDetails2)))
 
         val result = await(underTest.fetchAPIDetails(Set(apiServiceName1, apiServiceName2)))
 
         result.size should be(2)
         result should contain theSameElementsAs List(apiDetails1, apiDetails2)
 
-        verify(mockApmConnector).fetchCombinedApi(eqTo(apiServiceName1))(*)
-        verify(mockApmConnector).fetchCombinedApi(eqTo(apiServiceName2))(*)
+        verify(mockApmConnector).fetchCombinedApi(eqTo(apiServiceName1))(using *)
+        verify(mockApmConnector).fetchCombinedApi(eqTo(apiServiceName2))(using *)
       }
     }
 

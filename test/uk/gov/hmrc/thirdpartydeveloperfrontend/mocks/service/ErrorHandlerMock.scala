@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 
 trait ErrorHandlerMock extends MockitoSugar with ArgumentMatchersSugar {
   val mockErrorHandler = mock[ErrorHandler]
-  when(mockErrorHandler.notFoundTemplate(*)).thenReturn(successful(Html("")))
-  when(mockErrorHandler.badRequestTemplate(*)).thenReturn(successful(Html("")))
-  when(mockErrorHandler.forbiddenTemplate(*)).thenReturn(successful(Html("")))
+  when(mockErrorHandler.notFoundTemplate(using *)).thenReturn(successful(Html("")))
+  when(mockErrorHandler.badRequestTemplate(using *)).thenReturn(successful(Html("")))
+  when(mockErrorHandler.forbiddenTemplate(using *)).thenReturn(successful(Html("")))
 }

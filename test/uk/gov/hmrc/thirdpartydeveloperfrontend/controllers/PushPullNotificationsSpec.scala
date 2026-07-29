@@ -128,7 +128,7 @@ class PushPullNotificationsSpec
       pushPullNotificationsServiceMock
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     FetchSessionById.succeedsWith(devSession.sessionId, devSession)
     UpdateUserFlowSessions.succeedsWith(devSession.sessionId)
@@ -149,7 +149,7 @@ class PushPullNotificationsSpec
       givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), session, subsData)
 
       val expectedSecrets = Seq("some secret")
-      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))
+      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(using *)).thenReturn(successful(expectedSecrets))
 
       val result = underTest.showPushSecrets(application.id)(request)
 

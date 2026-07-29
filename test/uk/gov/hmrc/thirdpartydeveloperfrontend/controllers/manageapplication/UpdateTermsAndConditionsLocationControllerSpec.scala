@@ -73,7 +73,7 @@ class UpdateTermsAndConditionsLocationControllerSpec
       val newTermsAndConditionsUrl     = "http://example.com/new-terms-conds"
       val appWithTermsAndConditionsUrl = legacyAppWithTermsAndConditionsLocation(Some(termsAndConditionsUrl))
       givenApplicationAction(appWithTermsAndConditionsUrl, adminSession)
-      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocation.Url(newTermsAndConditionsUrl)))(*))
+      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocation.Url(newTermsAndConditionsUrl)))(using *))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request =
@@ -144,7 +144,9 @@ class UpdateTermsAndConditionsLocationControllerSpec
     "update location if form data is valid and return to app details page" in new Setup {
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, adminSession)
-      when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocation.Url(termsAndConditionsUrl)))(*))
+      when(
+        applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocation.Url(termsAndConditionsUrl)))(using *)
+      )
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
       private val request =

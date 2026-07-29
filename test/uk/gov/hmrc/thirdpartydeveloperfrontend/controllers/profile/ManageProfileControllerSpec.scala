@@ -69,7 +69,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
 
   "profileDetails" should {
     "display users profile details" in new Setup {
-      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(*))
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(using *))
         .thenReturn(Future.successful(organisations))
 
       val result = addToken(underTest.profileDetails())(loggedInDevRequest)
@@ -94,7 +94,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
 
       fetchSessionByIdReturns(sessionId, sessionWithMfa)
 
-      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(*))
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(using *))
         .thenReturn(Future.successful(organisations))
 
       val result = addToken(underTest.profileDetails())(loggedInDevRequest.withSession("sessionId" -> sessionId.toString))

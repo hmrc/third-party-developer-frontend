@@ -85,7 +85,7 @@ class AddApplicationSuccessSpec
       flowServiceMock
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
   }
 
   "Add applications subordinate success page" should {

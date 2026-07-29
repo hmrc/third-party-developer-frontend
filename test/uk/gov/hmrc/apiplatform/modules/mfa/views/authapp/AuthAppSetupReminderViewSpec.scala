@@ -42,7 +42,7 @@ class AuthAppSetupReminderViewSpec extends CommonViewSpec
 
   "AuthAppSetupReminderView" should {
     "render as expected" in {
-      val mainView = authAppSetupReminderView()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = authAppSetupReminderView()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "Get access codes by an authenticator app"

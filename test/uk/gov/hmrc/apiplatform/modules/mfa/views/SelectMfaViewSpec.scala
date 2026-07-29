@@ -46,7 +46,7 @@ class SelectMfaViewSpec extends CommonViewSpec
 
   "SelectMfaView" should {
     "render correctly with Text Message selected as default" in {
-      val mainView = selectMfaViewView.apply(SelectMfaForm.form, MfaAction.CREATE, None)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = selectMfaViewView.apply(SelectMfaForm.form, MfaAction.CREATE, None)(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "How do you want to get access codes?"

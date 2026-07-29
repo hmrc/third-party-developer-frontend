@@ -90,7 +90,7 @@ class CheckAnswersControllerSpec
       with HasAppInTestingState
       with FixedClock {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockRequestProdCreds = mock[RequestProductionCredentials]
 
@@ -103,10 +103,10 @@ class CheckAnswersControllerSpec
     val incompleteExtendedSubmission = ExtendedSubmission(aSubmission, incompleteProgress)
 
     val checkAnswersView                         = mock[CheckAnswersView]
-    when(checkAnswersView.apply(*, *, *, *)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(checkAnswersView.apply(*, *, *, *)(using *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
     val productionCredentialsRequestReceivedView = mock[ProductionCredentialsRequestReceivedView]
     val viewModelCaptor                          = ArgCaptor[ProdCredsRequestReceivedViewModel]
-    when(productionCredentialsRequestReceivedView.apply(*)(*, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(productionCredentialsRequestReceivedView.apply(*)(using *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
     val underTest = new CheckAnswersController(
       mockErrorHandler,
@@ -121,7 +121,7 @@ class CheckAnswersControllerSpec
       productionCredentialsRequestReceivedView
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "checkAnswersPage" should {
@@ -155,20 +155,20 @@ class CheckAnswersControllerSpec
 
       await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
 
-      verify(checkAnswersView).apply(*, eqTo(true), *, *)(*, *, *, *)
+      verify(checkAnswersView).apply(*, eqTo(true), *, *)(using *, *, *, *)
     }
     "don't show submission declined text when previous submission was not declined" in new Setup {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       await(underTest.checkAnswersPage(applicationId)(loggedInRequest.withCSRFToken))
 
-      verify(checkAnswersView).apply(*, eqTo(false), *, *)(*, *, *, *)
+      verify(checkAnswersView).apply(*, eqTo(false), *, *)(using *, *, *, *)
     }
   }
 
   "checkAnswersAction" should {
     "succeed when production credentials are requested successfully" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(using *)).thenReturn(successful(Right(sampleApp)))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeredSubmission.withCompletedProgress())
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
@@ -178,7 +178,7 @@ class CheckAnswersControllerSpec
     }
 
     "fail when production credentials are not requested successfully" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(failed(new ApplicationNotFound))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(using *)).thenReturn(failed(new ApplicationNotFound))
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(answeringSubmission.withIncompleteProgress())
 
       val result = underTest.checkAnswersAction(applicationId)(loggedInRequest.withCSRFToken)
@@ -187,7 +187,7 @@ class CheckAnswersControllerSpec
     }
 
     "don't display verification email text if requester is the Responsible Individual" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(using *)).thenReturn(successful(Right(sampleApp)))
       val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.SingleChoiceAnswer("Yes"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
@@ -199,7 +199,7 @@ class CheckAnswersControllerSpec
     }
 
     "do display verification email text if requester is not the Responsible Individual" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(using *)).thenReturn(successful(Right(sampleApp)))
       val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.SingleChoiceAnswer("No"))
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)
@@ -211,7 +211,7 @@ class CheckAnswersControllerSpec
     }
 
     "don't display verification email text if requester is Responsible Individual question not answered" in new Setup {
-      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(*)).thenReturn(successful(Right(sampleApp)))
+      when(mockRequestProdCreds.requestProductionCredentials(*, *[UserSession], *, *)(using *)).thenReturn(successful(Right(sampleApp)))
       val answers       = answersToQuestions.updated(testQuestionIdsOfInterest.responsibleIndividualIsRequesterId, ActualAnswer.NoAnswer)
       val extSubmission = ExtendedSubmission(answeredSubmission.hasCompletelyAnsweredWith(answers), completedProgress)
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extSubmission)

@@ -34,7 +34,7 @@ trait ApmConnectorCombinedApisModule extends ApmConnectorModule {
 
   private val baseUrl = s"${config.serviceBaseUrl}/combined-rest-xml-apis"
 
-  def fetchCombinedApi(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
+  def fetchCombinedApi(serviceName: ServiceName)(using HeaderCarrier): Future[Either[Throwable, CombinedApi]] =
     http.get(url"${baseUrl}/$serviceName")
       .execute[CombinedApi]
       .map(Right(_))
@@ -42,7 +42,7 @@ trait ApmConnectorCombinedApisModule extends ApmConnectorModule {
         case NonFatal(e) => Left(e)
       }
 
-  def fetchCombinedApisVisibleToUser(userId: UserId)(implicit hc: HeaderCarrier): Future[Either[Throwable, List[CombinedApi]]] =
+  def fetchCombinedApisVisibleToUser(userId: UserId)(using HeaderCarrier): Future[Either[Throwable, List[CombinedApi]]] =
     http.get(url"${baseUrl}/developer?developerId=$userId")
       .execute[List[CombinedApi]]
       .map(Right(_))

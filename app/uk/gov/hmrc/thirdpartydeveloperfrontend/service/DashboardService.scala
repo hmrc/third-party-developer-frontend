@@ -34,10 +34,10 @@ class DashboardService @Inject() (
     organisationConnector: OrganisationConnector,
     appSvc: AppsByTeamMemberService,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow {
 
-  def fetchApplicationList(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] = {
+  def fetchApplicationList(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationSummary]] = {
 
     def createDashboardAppList(prodAppList: Seq[ApplicationWithSubscriptions], sandboxAppList: Seq[ApplicationWithSubscriptions]): Seq[ApplicationSummary] = {
       val combinedApps = prodAppList ++ sandboxAppList;
@@ -52,7 +52,7 @@ class DashboardService @Inject() (
     } yield combinedAppList
   }
 
-  def fetchOrganisationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Organisation]] = {
+  def fetchOrganisationsByUserId(userId: UserId)(using HeaderCarrier): Future[Seq[Organisation]] = {
     organisationConnector.fetchOrganisationsByUserId(userId)
   }
 }

@@ -92,7 +92,7 @@ class UpliftJourneyController @Inject() (
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
     beforeYouStartView: BeforeYouStartView,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with WithUrlEncodedOnlyFormBinding {

@@ -56,7 +56,7 @@ class ManageTeam @Inject() (
     addTeamMemberView: AddTeamMemberView,
     removeTeamMemberView: RemoveTeamMemberView,
     val fraudPreventionConfig: FraudPreventionConfig
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with CommandHandlerTypes[DispatchSuccessResult]

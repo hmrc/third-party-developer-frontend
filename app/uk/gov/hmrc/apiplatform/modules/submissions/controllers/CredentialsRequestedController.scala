@@ -59,7 +59,7 @@ class CredentialsRequestedController @Inject() (
     val cookieSigner: CookieSigner,
     val submissionService: SubmissionService,
     credentialsRequestedView: CredentialsRequestedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]

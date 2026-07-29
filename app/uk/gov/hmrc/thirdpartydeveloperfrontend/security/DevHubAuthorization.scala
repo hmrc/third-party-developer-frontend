@@ -76,7 +76,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
       loggedInActionRefiner(DeveloperSessionFilter.onlyTrueIfLoggedInFilter).invokeBlock(request, block)
     }
 
-  def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
+  def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])(using ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] => loadSession.flatMap(maybeDeveloperSession => body(new MaybeUserRequest(maybeDeveloperSession, request)))
   }
 
@@ -91,7 +91,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
       .getOrElse(Future.successful(None))
   }
 
-  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] = {
+  private def fetchDeveloperSession[A](sessionId: UserSessionId)(using HeaderCarrier): Future[Option[UserSession]] = {
     sessionService.fetch(sessionId)
   }
 }
@@ -99,7 +99,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
   self: TpdfeBaseController =>
 
-  def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
+  def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])(using ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap {
         case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
@@ -121,7 +121,7 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
     result.withCookies(createUserCookie(sessionId), createDeviceCookie(deviceSessionId))
   }
 
-  def destroyUserSession(request: RequestHeader)(implicit hc: HeaderCarrier): Option[Future[Int]] = {
+  def destroyUserSession(request: RequestHeader)(using HeaderCarrier): Option[Future[Int]] = {
     extractUserSessionIdFromCookie(request)
       .map(sessionId => sessionService.destroy(sessionId))
   }

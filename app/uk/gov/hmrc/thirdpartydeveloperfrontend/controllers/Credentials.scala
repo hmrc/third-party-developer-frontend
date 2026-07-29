@@ -60,7 +60,7 @@ class Credentials @Inject() (
     deleteClientSecretView: DeleteClientSecretView,
     clientSecretsGeneratedView: ClientSecretsGeneratedView,
     val clock: Clock
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ClockNow

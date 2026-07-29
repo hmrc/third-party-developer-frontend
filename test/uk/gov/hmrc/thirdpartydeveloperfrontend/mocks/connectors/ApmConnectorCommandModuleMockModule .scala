@@ -40,38 +40,38 @@ trait ApmConnectorCommandModuleMockModule extends MockitoSugar with ArgumentMatc
     object DispatchWithThrow {
 
       def thenReturnsSuccess(app: ApplicationWithCollaborators) = {
-        when(aMock.dispatchWithThrow(*[ApplicationId], *, *)(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+        when(aMock.dispatchWithThrow(*[ApplicationId], *, *)(using *)).thenReturn(successful(ApplicationUpdateSuccessful))
       }
     }
 
     object Dispatch {
 
       def thenReturnsSuccess(app: ApplicationWithCollaborators) = {
-        when(aMock.dispatch(*[ApplicationId], *, *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.dispatch(*[ApplicationId], *, *)(using *)).thenReturn(DispatchSuccessResult(app).asSuccess)
       }
 
       def thenReturnsSuccessFor(command: ApplicationCommand)(app: ApplicationWithCollaborators) = {
-        when(aMock.dispatch(*[ApplicationId], eqTo(command), *)(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.dispatch(*[ApplicationId], eqTo(command), *)(using *)).thenReturn(DispatchSuccessResult(app).asSuccess)
       }
 
       def thenFailsWith(fail: CommandFailure) = {
-        when(aMock.dispatch(*[ApplicationId], *, *)(*)).thenReturn(fail.asFailure)
+        when(aMock.dispatch(*[ApplicationId], *, *)(using *)).thenReturn(fail.asFailure)
       }
 
       def verifyAdminsToEmail() = {
         val captor = ArgCaptor[Set[LaxEmailAddress]]
-        verify(aMock).dispatch(*[ApplicationId], *, captor)(*)
+        verify(aMock).dispatch(*[ApplicationId], *, captor)(using *)
         captor.value
       }
 
       def verifyCommand() = {
         val captor = ArgCaptor[ApplicationCommand]
-        verify(aMock).dispatch(*[ApplicationId], captor, *)(*)
+        verify(aMock).dispatch(*[ApplicationId], captor, *)(using *)
         captor.value
       }
 
       def verifyNeverCalled() = {
-        verify(aMock, never).dispatch(*[ApplicationId], *, *)(*)
+        verify(aMock, never).dispatch(*[ApplicationId], *, *)(using *)
       }
     }
   }

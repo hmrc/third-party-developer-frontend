@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 abstract class TestOnlyTpaConnector @Inject() (
     http: HttpClientV2,
     config: ApplicationConfig
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   val environment: Environment
@@ -40,7 +40,7 @@ abstract class TestOnlyTpaConnector @Inject() (
 
   def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
-  def clone(environment: Environment)(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = {
+  def clone(environment: Environment)(appId: ApplicationId)(using HeaderCarrier): Future[ApplicationWithCollaborators] = {
     if (isEnabled) {
       val url = s"$serviceBaseUrl/test-only/application"
 
@@ -58,8 +58,8 @@ abstract class TestOnlyTpaConnector @Inject() (
 class TestOnlyTpaSandboxConnector @Inject() (
     val http: HttpClientV2,
     val appConfig: ApplicationConfig
-  )(implicit ec: ExecutionContext
-  ) extends TestOnlyTpaConnector(http, appConfig)(ec) {
+  )(using ec: ExecutionContext
+  ) extends TestOnlyTpaConnector(http, appConfig)(using ec) {
 
   val environment: Environment = Environment.Sandbox
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationSandboxUrl
@@ -76,8 +76,8 @@ class TestOnlyTpaSandboxConnector @Inject() (
 class TestOnlyTpaProductionConnector @Inject() (
     val http: HttpClientV2,
     val appConfig: ApplicationConfig
-  )(implicit ec: ExecutionContext
-  ) extends TestOnlyTpaConnector(http, appConfig)(ec) {
+  )(using ec: ExecutionContext
+  ) extends TestOnlyTpaConnector(http, appConfig)(using ec) {
   val environment: Environment = Environment.Production
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationProductionUrl
 

@@ -39,7 +39,7 @@ trait ApmConnectorCommandModule
       applicationId: ApplicationId,
       command: ApplicationCommand,
       adminsToEmail: Set[LaxEmailAddress]
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     dispatch(applicationId, command, adminsToEmail).map(_ match {
       case Left(errs) => throw new RuntimeException(CommandFailures.describe(errs.head))
@@ -51,7 +51,7 @@ trait ApmConnectorCommandModule
       applicationId: ApplicationId,
       command: ApplicationCommand,
       adminsToEmail: Set[LaxEmailAddress]
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): AppCmdResult = {
 
     import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given

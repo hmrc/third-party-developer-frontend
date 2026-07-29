@@ -48,7 +48,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
   "setupSmsAction" should {
     "redirect to access code page when user is Logged in and form is valid and call to connector is successful" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
-        when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
+        when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(using *))
           .thenReturn(Future.successful(Some(registerSmsResponse)))
 
         private val result = underTest.setupSmsAction()(mobileNumberRequest().withMethod("POST"))
@@ -56,12 +56,12 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(using *)
       }
 
     "redirect to access code page when user is Part Logged in and form is valid and call to connector is successful" in
       new SetupAuthAppSecurityPreferences with PartLogged {
-        when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
+        when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(using *))
           .thenReturn(Future.successful(Some(registerSmsResponse)))
 
         private val result = underTest.setupSmsAction()(mobileNumberRequest().withMethod("POST"))
@@ -69,7 +69,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(mobileNumber))(using *)
       }
 
     "redirect to login page when user is not logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
@@ -95,7 +95,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
       val badMobileNumber = "05555555555"
       val request         = createRequest().withFormUrlEncodedBody("mobileNumber" -> badMobileNumber).withMethod("POST")
 
-      when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *)(*))
+      when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *)(using *))
         .thenReturn(Future.successful(None))
 
       val result = addToken(underTest.setupSmsAction())(request)
@@ -105,13 +105,13 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
       validateMobileNumberView(doc)
       doc.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It cannot be used for access codes"
 
-      verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(badMobileNumber))(*)
+      verify(underTest.thirdPartyDeveloperMfaConnector).createMfaSms(*[UserId], eqTo(badMobileNumber))(using *)
     }
   }
 
   "smsSetupReminderPage" should {
     "return sms setup reminder view when user is logged in with only Authenticator App MFA setup" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupReminderPage())(createRequest())
@@ -119,7 +119,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return sms setup reminder view when user is part logged in with only Authenticator App MFA setup" in new SetupSuccessfulStart2SV with PartLogged {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupReminderPage())(createRequest())
@@ -134,7 +134,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
   "smsSetupSkippedPage" should {
     "return sms setup skipped view when user is logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
@@ -142,7 +142,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return sms setup skipped view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
@@ -177,7 +177,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
   "smsAccessCodeAction for CREATE" should {
     "redirect to sms setup completed page when user is Logged in and form is valid and call to connector returns true" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
-        when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
+        when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *))
           .thenReturn(Future.successful(true))
 
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
@@ -185,12 +185,12 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup/complete")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *)
       }
 
     "redirect to sms setup completed page when user is Part Logged in and form is valid and call to connector returns true" in
       new SetupAuthAppSecurityPreferences with PartLogged {
-        when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
+        when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *))
           .thenReturn(Future.successful(true))
 
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
@@ -198,7 +198,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup/complete")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *)
       }
 
     "redirect to login page when user is not logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
@@ -224,7 +224,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
     "return Bad Request when user is Logged in and form is valid and call to connector returns false" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
-        when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
+        when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *))
           .thenReturn(Future.successful(false))
 
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
@@ -233,7 +233,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         validateSmsAccessCodeView(doc)
         doc.getElementById("data-field-error-accessCode").text() shouldBe "Error: Unable to verify SMS access code"
 
-        verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *)
       }
   }
 
@@ -241,7 +241,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     "redirect to remove mfa completed page when user is Logged in and call to connector returns true" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
 
-        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*))
+        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(using *))
           .thenReturn(Future.successful(MfaResponse(true)))
 
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId))(smsAccessCodeRequest(correctCode).withMethod("POST"))
@@ -249,8 +249,8 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/remove-mfa/complete")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
-        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *)
+        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(using *)
       }
 
     "redirect to login page when user is not logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
@@ -275,14 +275,14 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
     "return error page when user is Logged in and form is valid and call to connector returns false" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
-        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*))
+        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(using *))
           .thenReturn(Future.successful(MfaResponse(false)))
 
         private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId))(smsAccessCodeRequest(correctCode).withMethod("POST"))
 
         validateErrorTemplateView(result, "Unable to verify access code")
-        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
-        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *)
+        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(using *)
       }
 
     "return error page when user is Logged in and form is valid and mfaIdForRemoval is None" in
@@ -291,14 +291,14 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
         validateErrorTemplateView(result, "Unable to find Mfa to remove")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
-        verify(underTest.mfaService, times(0)).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(using *)
+        verify(underTest.mfaService, times(0)).removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(using *)
       }
   }
 
   "smsSetupCompletedPage" should {
     "return sms setup complete view when user is logged in and fetchDeveloper returns a developer" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
@@ -306,7 +306,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return error template view when user is logged in and fetchDeveloper returns None" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(None))
 
       val result = addToken(underTest.smsSetupCompletedPage())(createRequest())
@@ -314,7 +314,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return sms setup complete view when user is part logged in and fetchDeveloper returns a developer" in new SetupSuccessfulStart2SV with PartLogged {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.smsSetupCompletedPage())(createRequest())

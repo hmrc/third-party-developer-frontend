@@ -41,38 +41,38 @@ object TestOnlyTpdConnector {
 class TestOnlyTpdConnector @Inject() (
     http: HttpClientV2,
     config: ApplicationConfig
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   import TestOnlyTpdConnector._
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
 
-  def clone(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[CloneUserResponse] = {
+  def clone(email: LaxEmailAddress)(using HeaderCarrier): Future[CloneUserResponse] = {
     http.post(url"$serviceBaseUrl/test-only/user/clone")
       .withBody(Json.toJson(email))
       .execute[CloneUserResponse]
   }
 
-  def findUserByEmail(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[User]] = {
+  def findUserByEmail(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[User]] = {
     http.post(url"$serviceBaseUrl/test-only/user/find")
       .withBody(Json.toJson(email))
       .execute[Option[User]]
   }
 
-  def peekAtPasswordResetCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def peekAtPasswordResetCode(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtPasswordResetCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]
   }
 
-  def peekAtRegistrationVerificationCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def peekAtRegistrationVerificationCode(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtRegistrationVerificationCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]
   }
 
-  def peekAtSmsAccessCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def peekAtSmsAccessCode(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtSmsAccessCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]

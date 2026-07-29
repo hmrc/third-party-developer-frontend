@@ -54,7 +54,7 @@ class TermsOfUseVersionSpec extends HmrcSpec with MockitoSugar with ArgumentMatc
     "return old content for OLD_JOURNEY" in {
       val messagesMock = mock[Messages]
       when(messagesMock("terms.of.use.warning")).thenReturn(termsOfUseWarning)
-      val termsOfUse   = TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], mock[Request[Any]], messagesMock).toString()
+      val termsOfUse   = TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(using mock[ApplicationConfig], mock[Request[Any]], messagesMock).toString()
       termsOfUse should include("These terms of use explain what you can expect from us and what we expect from you")
       termsOfUse should include(termsOfUseWarning)
     }
@@ -62,7 +62,7 @@ class TermsOfUseVersionSpec extends HmrcSpec with MockitoSugar with ArgumentMatc
     "return new content for NEW_JOURNEY" in {
       val messagesMock = mock[Messages]
       when(messagesMock("terms.of.use.warning")).thenReturn(termsOfUseWarning)
-      val termsOfUse   = TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], FakeRequest(GET, "/"), messagesMock).toString()
+      val termsOfUse   = TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(using mock[ApplicationConfig], FakeRequest(GET, "/"), messagesMock).toString()
       termsOfUse should not include "These terms of use explain what you can expect from us and what we expect from you"
       termsOfUse should include(termsOfUseWarning)
     }

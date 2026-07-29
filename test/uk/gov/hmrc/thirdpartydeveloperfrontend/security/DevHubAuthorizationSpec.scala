@@ -41,7 +41,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
     with UserTestData
     with DeveloperSessionBuilder {
 
-  class TestDevHubAuthorization(mcc: MessagesControllerComponents)(implicit val appConfig: ApplicationConfig, val ec: ExecutionContext)
+  class TestDevHubAuthorization(mcc: MessagesControllerComponents)(using val appConfig: ApplicationConfig, val ec: ExecutionContext)
       extends TpdfeBaseController(mcc)
       with ExtendedDevHubAuthorization {
     override val sessionService: SessionService = mock[SessionService]
@@ -64,7 +64,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
     val requestWithInvalidCookie = FakeRequest().withCookies(Cookie("PLAY2AUTH_SESS_ID", "InvalidCookieValue"))
     val requestWithNoRealSession = FakeRequest().withCookies(underTest.createUserCookie(sessionId))
 
-    when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(successful(userSession))
+    when(underTest.sessionService.fetch(eqTo(sessionId))(using *)).thenReturn(successful(userSession))
     when(underTest.sessionService.updateUserFlowSessions(*)).thenReturn(successful(()))
   }
 
@@ -131,7 +131,7 @@ class DevHubAuthorizationSpec extends BaseControllerSpec with Matchers with Loca
       }
 
       "they have a valid cookie but it does not exist in the session service" in new Setup(None) {
-        when(underTest.sessionService.fetch(eqTo(sessionId))(*))
+        when(underTest.sessionService.fetch(eqTo(sessionId))(using *))
           .thenReturn(successful(None))
 
         val result = atLeastPartLoggedInAction()(requestWithNoRealSession)

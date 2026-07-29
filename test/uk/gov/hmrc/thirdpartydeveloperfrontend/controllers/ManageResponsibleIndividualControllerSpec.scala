@@ -49,22 +49,22 @@ class ManageResponsibleIndividualControllerSpec
       extends ApplicationServiceMock
       with ApplicationActionServiceMock {
     val responsibleIndividualDetailsView = mock[ResponsibleIndividualDetailsView]
-    when(responsibleIndividualDetailsView.apply(*, *)(*, *, *, *)).thenReturn(HtmlFormat.empty)
+    when(responsibleIndividualDetailsView.apply(*, *)(using *, *, *, *)).thenReturn(HtmlFormat.empty)
 
     val responsibleIndividualChangeToSelfOrOtherView = mock[ResponsibleIndividualChangeToSelfOrOtherView]
-    when(responsibleIndividualChangeToSelfOrOtherView.apply(*, *)(*, *, *, *)).thenReturn(HtmlFormat.empty)
+    when(responsibleIndividualChangeToSelfOrOtherView.apply(*, *)(using *, *, *, *)).thenReturn(HtmlFormat.empty)
 
     val responsibleIndividualChangeToSelfView = mock[ResponsibleIndividualChangeToSelfView]
-    when(responsibleIndividualChangeToSelfView.apply(*)(*, *, *, *)).thenReturn(HtmlFormat.empty)
+    when(responsibleIndividualChangeToSelfView.apply(*)(using *, *, *, *)).thenReturn(HtmlFormat.empty)
 
     val responsibleIndividualChangeToSelfConfirmedView = mock[ResponsibleIndividualChangeToSelfConfirmedView]
-    when(responsibleIndividualChangeToSelfConfirmedView.apply(*)(*, *, *, *)).thenReturn(HtmlFormat.empty)
+    when(responsibleIndividualChangeToSelfConfirmedView.apply(*)(using *, *, *, *)).thenReturn(HtmlFormat.empty)
 
     val responsibleIndividualChangeToOtherView = mock[ResponsibleIndividualChangeToOtherView]
-    when(responsibleIndividualChangeToOtherView.apply(*, *)(*, *, *, *)).thenReturn(HtmlFormat.empty)
+    when(responsibleIndividualChangeToOtherView.apply(*, *)(using *, *, *, *)).thenReturn(HtmlFormat.empty)
 
     val responsibleIndividualChangeToOtherRequestedView = mock[ResponsibleIndividualChangeToOtherRequestedView]
-    when(responsibleIndividualChangeToOtherRequestedView.apply(*, *)(*, *, *, *)).thenReturn(HtmlFormat.empty)
+    when(responsibleIndividualChangeToOtherRequestedView.apply(*, *)(using *, *, *, *)).thenReturn(HtmlFormat.empty)
 
     val underTest             = new ManageResponsibleIndividualController(
       sessionServiceMock,
@@ -84,7 +84,7 @@ class ManageResponsibleIndividualControllerSpec
     val loggedOutRequest      = FakeRequest().withSession(sessionParams*)
     val responsibleIndividual = ResponsibleIndividual(FullName("Bob Responsible"), "bob@example.com".toLaxEmail)
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val appId = standardApp.id
 
@@ -124,7 +124,7 @@ class ManageResponsibleIndividualControllerSpec
       val result = underTest.showResponsibleIndividualDetails(appId)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      verify(responsibleIndividualDetailsView).apply(*, captor.capture())(*, *, *, *)
+      verify(responsibleIndividualDetailsView).apply(*, captor.capture())(using *, *, *, *)
       val viewModel = captor.getValue
       viewModel.environment shouldBe "Production"
       viewModel.responsibleIndividualName shouldBe responsibleIndividual.fullName.value
@@ -143,7 +143,7 @@ class ManageResponsibleIndividualControllerSpec
       val result = underTest.showResponsibleIndividualDetails(appId)(loggedInAdminRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      verify(responsibleIndividualDetailsView).apply(*, captor.capture())(*, *, *, *)
+      verify(responsibleIndividualDetailsView).apply(*, captor.capture())(using *, *, *, *)
       val viewModel = captor.getValue
       viewModel.allowChanges shouldBe true
     }
@@ -156,7 +156,7 @@ class ManageResponsibleIndividualControllerSpec
       val result = underTest.showResponsibleIndividualDetails(appId)(loggedInDevRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      verify(responsibleIndividualDetailsView).apply(*, captor.capture())(*, *, *, *)
+      verify(responsibleIndividualDetailsView).apply(*, captor.capture())(using *, *, *, *)
       val viewModel = captor.getValue
       viewModel.allowChanges shouldBe false
     }
@@ -247,7 +247,7 @@ class ManageResponsibleIndividualControllerSpec
 
   "responsibleIndividualChangeToSelfAction" should {
     "save current users details as the RI" in new Setup {
-      when(applicationServiceMock.updateResponsibleIndividual(*, *[UserId], *, *[LaxEmailAddress])(*)).thenReturn(successful(
+      when(applicationServiceMock.updateResponsibleIndividual(*, *[UserId], *, *[LaxEmailAddress])(using *)).thenReturn(successful(
         ApplicationUpdateSuccessful
       ))
       givenTheApplicationExistWithUserRole(adminSession, List.empty)
@@ -309,7 +309,7 @@ class ManageResponsibleIndividualControllerSpec
       val name          = "bob"
       val email         = "bob@example.com".toLaxEmail
       val requesterName = adminSession.developer.displayedName
-      when(applicationServiceMock.verifyResponsibleIndividual(*, *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(*)).thenReturn(successful(
+      when(applicationServiceMock.verifyResponsibleIndividual(*, *[UserId], eqTo(requesterName), eqTo(name), eqTo(email))(using *)).thenReturn(successful(
         ApplicationUpdateSuccessful
       ))
       givenTheApplicationExistWithUserRole(adminSession, List.empty)

@@ -36,46 +36,46 @@ trait ApmConnectorMockModule extends MockitoSugar with ArgumentMatchersSugar {
     object UpliftApplicationV2 {
 
       def willReturn(newAppId: ApplicationId) =
-        when(aMock.upliftApplicationV2(*[ApplicationId], *)(*)).thenReturn(successful(newAppId))
+        when(aMock.upliftApplicationV2(*[ApplicationId], *)(using *)).thenReturn(successful(newAppId))
 
       def willFailWith(exception: Exception) =
-        when(aMock.upliftApplicationV2(*[ApplicationId], *)(*)).thenReturn(failed(exception))
+        when(aMock.upliftApplicationV2(*[ApplicationId], *)(using *)).thenReturn(failed(exception))
     }
 
     object FetchAllApis {
 
       def willReturn(apis: List[ApiDefinition]) =
-        when(aMock.fetchAllApis(*)(*)).thenReturn(successful(apis))
+        when(aMock.fetchAllApis(*)(using *)).thenReturn(successful(apis))
 
       def willFailWith(exception: Exception) =
-        when(aMock.fetchAllApis(*)(*)).thenReturn(failed(exception))
+        when(aMock.fetchAllApis(*)(using *)).thenReturn(failed(exception))
     }
 
     object FetchApiDefinitionsVisibleToUser {
 
       def willReturn(apis: List[ApiDefinition]) =
-        when(aMock.fetchApiDefinitionsVisibleToUser(*)(*)).thenReturn(successful(apis))
+        when(aMock.fetchApiDefinitionsVisibleToUser(*)(using *)).thenReturn(successful(apis))
 
       def willFailWith(exception: Exception) =
-        when(aMock.fetchApiDefinitionsVisibleToUser(*)(*)).thenReturn(failed(exception))
+        when(aMock.fetchApiDefinitionsVisibleToUser(*)(using *)).thenReturn(failed(exception))
     }
 
     object FetchExtendedApiDefinition {
 
       def willReturn(definition: ExtendedApiDefinition) =
-        when(aMock.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(successful(Right(definition)))
+        when(aMock.fetchExtendedApiDefinition(*[ServiceName])(using *)).thenReturn(successful(Right(definition)))
 
       def willFailWith(exception: Exception) =
-        when(aMock.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(successful(Left(exception)))
+        when(aMock.fetchExtendedApiDefinition(*[ServiceName])(using *)).thenReturn(successful(Left(exception)))
     }
 
     object FetchUpliftableSubscriptions {
 
       def willReturn(apiIds: Set[ApiIdentifier]) =
-        when(aMock.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(successful(apiIds))
+        when(aMock.fetchUpliftableSubscriptions(*[ApplicationId])(using *)).thenReturn(successful(apiIds))
 
       def willFailWith(exception: Exception) =
-        when(aMock.fetchUpliftableSubscriptions(*)(*)).thenReturn(failed(exception))
+        when(aMock.fetchUpliftableSubscriptions(*)(using *)).thenReturn(failed(exception))
     }
   }
 }

@@ -217,8 +217,8 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement shouldBe None
         viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(dueBy)))
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
       }
 
       "returns ViewModel showing V2 terms not started when no invitation exists" in new Setup {
@@ -238,8 +238,8 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement shouldBe None
         viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(instant)))
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
       }
     }
 
@@ -265,8 +265,8 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement.get.who shouldBe v1Agreement.name.getOrElse(v1Agreement.emailAddress.text)
         viewModel.termsOfUseV2State shouldBe Some(NotStarted(Some(dueBy)))
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(using *)
       }
     }
 
@@ -293,9 +293,9 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement shouldBe None
         viewModel.termsOfUseV2State.get shouldBe Started("Bob Example", dueBy)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
-        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(using *)
       }
 
       "returns ViewModel showing who started V2 terms and deadline when user is actively answering questions" in new Setup {
@@ -319,9 +319,9 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement shouldBe None
         viewModel.termsOfUseV2State.get shouldBe Started("Bob Example", dueBy)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
-        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(using *)
       }
     }
 
@@ -348,9 +348,9 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement should contain(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
         viewModel.termsOfUseV2State.get shouldBe Started("Bob Example", dueBy)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
-        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(using *)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(using *)
       }
     }
 
@@ -376,9 +376,9 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement shouldBe None
         viewModel.termsOfUseV2State.get shouldBe Submitted("Bob Example", submission.status.timestamp)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
-        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(using *)
       }
     }
 
@@ -405,9 +405,9 @@ class MainApplicationDetailsControllerSpec
         viewModel.agreement should contain(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
         viewModel.termsOfUseV2State.get shouldBe Submitted("Bob Example", submission.status.timestamp)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(*)
-        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV1TermsOfUse.id))(using *)
+        verify(ProfileServiceMock.aMock).lookupDeveloperName(eqTo(LaxEmailAddress("bob@example.com")))(using *)
       }
     }
 
@@ -435,8 +435,8 @@ class MainApplicationDetailsControllerSpec
           submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
         viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submittedStatus.timestamp)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndAndV2TermsOfUse.id))(using *)
       }
     }
 
@@ -464,8 +464,8 @@ class MainApplicationDetailsControllerSpec
           submission.latestInstance.statusHistory.toList.find(_.isSubmitted).get.asInstanceOf[uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Submitted]
         viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submittedStatus.timestamp)
 
-        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(*)
-        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(*)
+        verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(using *)
+        verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(prodAppWithRespIndWithV1AndV2TermsOfUse.id))(using *)
       }
 
       "when V2 failed" should {
@@ -489,8 +489,8 @@ class MainApplicationDetailsControllerSpec
           viewModel.agreement shouldBe None
           viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
 
-          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
         }
       }
 
@@ -516,8 +516,8 @@ class MainApplicationDetailsControllerSpec
           viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
           viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
 
-          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
         }
       }
 
@@ -542,8 +542,8 @@ class MainApplicationDetailsControllerSpec
           viewModel.agreement shouldBe None
           viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
 
-          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
         }
       }
 
@@ -569,8 +569,8 @@ class MainApplicationDetailsControllerSpec
           viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
           viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
 
-          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
         }
       }
 
@@ -595,8 +595,8 @@ class MainApplicationDetailsControllerSpec
           viewModel.agreement shouldBe None
           viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
 
-          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
         }
       }
 
@@ -622,8 +622,8 @@ class MainApplicationDetailsControllerSpec
           viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
           viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
 
-          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(*)
-          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(*)
+          verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
+          verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
         }
       }
     }
@@ -713,19 +713,19 @@ class MainApplicationDetailsControllerSpec
       mockDetailsView
     )
 
-    when(mockDetailsView.apply(*, *, *, *)(*, *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
+    when(mockDetailsView.apply(*, *, *, *)(using *, *, *, *, *)).thenReturn(play.twirl.api.HtmlFormat.empty)
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
+    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(using *))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     ProfileServiceMock.LookupDeveloperName.thenReturns(Some("bob@example.com"))
 
     def captureTermsOfUseViewModel(): MainApplicationDetailsController.TermsOfUseViewModel = {
       val captor = ArgCaptor[MainApplicationDetailsController.TermsOfUseViewModel]
-      verify(mockDetailsView).apply(*, *, *, captor)(*, *, *, *, *)
+      verify(mockDetailsView).apply(*, *, *, captor)(using *, *, *, *, *)
       captor.value
     }
 

@@ -38,7 +38,7 @@ class AppsByTeamMemberServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilde
   val versionTwo = ApiVersionNbr("2.0")
 
   trait Setup extends ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val appsByTeamMemberService = new AppsByTeamMemberService(ThirdPartyOrchestratorConnectorMock.aMock)
   }

@@ -45,7 +45,7 @@ class ManageApplications @Inject() (
     termsOfUseInvitationService: TermsOfUseInvitationService,
     submissionService: SubmissionService,
     organisationService: OrganisationService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {

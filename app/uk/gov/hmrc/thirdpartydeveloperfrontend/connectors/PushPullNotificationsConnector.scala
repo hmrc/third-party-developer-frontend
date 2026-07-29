@@ -36,7 +36,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.PushPullNotificationsC
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.Retries
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 
-abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionContext) extends PushPullNotificationsConnector with Retries {
+abstract class AbstractPushPullNotificationsConnector(using ExecutionContext) extends PushPullNotificationsConnector with Retries {
   val http: HttpClientV2
   val environment: Environment
   val serviceBaseUrl: String
@@ -46,14 +46,14 @@ abstract class AbstractPushPullNotificationsConnector(implicit ec: ExecutionCont
 
   def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
-  def fetchPushSecrets(clientId: ClientId)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
+  def fetchPushSecrets(clientId: ClientId)(using HeaderCarrier): Future[Seq[String]] = {
     import cats.implicits._
     OptionT(getWithAuthorization[Option[Seq[PushSecret]]](s"$serviceBaseUrl/client/${clientId.value}/secrets"))
       .map(ps => ps.map(_.value))
       .getOrElse(Seq.empty)
   }
 
-  private def getWithAuthorization[A](aUrl: String)(implicit rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
+  private def getWithAuthorization[A](aUrl: String)(using rd: HttpReads[A], hc: HeaderCarrier): Future[A] = {
     retry {
       configureEbridgeIfRequired(
         http.get(url"$aUrl")
@@ -76,7 +76,7 @@ class SandboxPushPullNotificationsConnector @Inject() (
     val http: HttpClientV2,
     val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends AbstractPushPullNotificationsConnector {
 
   val environment: Environment = Environment.Sandbox
@@ -95,7 +95,7 @@ class ProductionPushPullNotificationsConnector @Inject() (
     val http: HttpClientV2,
     val actorSystem: ActorSystem,
     val futureTimeout: FutureTimeoutSupport
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends AbstractPushPullNotificationsConnector {
 
   val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity

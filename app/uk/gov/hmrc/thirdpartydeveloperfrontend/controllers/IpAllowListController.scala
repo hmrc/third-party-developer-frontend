@@ -54,7 +54,7 @@ class IpAllowListController @Inject() (
     removeIpAllowlistView: RemoveIpAllowlistView,
     removeIpAllowlistSuccessView: RemoveIpAllowlistSuccessView,
     removeCidrBlockView: RemoveCidrBlockView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with WithUrlEncodedOnlyFormBinding {
 

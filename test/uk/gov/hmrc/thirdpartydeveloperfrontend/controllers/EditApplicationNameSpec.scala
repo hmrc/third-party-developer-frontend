@@ -82,7 +82,7 @@ class EditApplicationNameSpec
       flowServiceMock
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     givenApplicationNameIsValid()
   }
@@ -135,10 +135,10 @@ class EditApplicationNameSpec
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, times(0))
-          .createForUser(any[CreateApplicationRequest], any[UserId])(*)
+          .createForUser(any[CreateApplicationRequest], any[UserId])(using *)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.Sandbox), eqTo(None))(*)
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.Sandbox), eqTo(None))(using *)
       }
     }
   }
@@ -191,10 +191,10 @@ class EditApplicationNameSpec
         contentAsString(result) should include("Application name must not include HMRC or HM Revenue and Customs")
 
         verify(applicationServiceMock, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest], any[UserId])(*)
+          .createForUser(any[CreateApplicationRequest], any[UserId])(using *)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.Production), *)(*)
+          .isApplicationNameValid(eqTo(invalidApplicationName), eqTo(Environment.Production), *)(using *)
       }
 
       "and it is duplicate it shows an error page and lets you re-submit the name" in new Setup {
@@ -211,10 +211,10 @@ class EditApplicationNameSpec
         contentAsString(result) should include("That application name already exists. Enter a unique name for your application")
 
         verify(applicationServiceMock, Mockito.times(0))
-          .createForUser(any[CreateApplicationRequest], any[UserId])(*)
+          .createForUser(any[CreateApplicationRequest], any[UserId])(using *)
 
         verify(applicationServiceMock)
-          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.Production), *)(*)
+          .isApplicationNameValid(eqTo(applicationName), eqTo(Environment.Production), *)(using *)
       }
 
     }

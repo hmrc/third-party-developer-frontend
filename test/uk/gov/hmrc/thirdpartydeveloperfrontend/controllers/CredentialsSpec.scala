@@ -118,7 +118,7 @@ class CredentialsSpec
     val application                                                = createApplication()
     val applicationWithSubscriptions: ApplicationWithSubscriptions = application.withSubscriptions(Set.empty)
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptions, userSession)
     fetchSessionByIdReturns(sessionId, userSession)
@@ -126,7 +126,7 @@ class CredentialsSpec
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
     val actor: Actors.AppCollaborator                         = Actors.AppCollaborator(userSession.developer.email)
   }
 

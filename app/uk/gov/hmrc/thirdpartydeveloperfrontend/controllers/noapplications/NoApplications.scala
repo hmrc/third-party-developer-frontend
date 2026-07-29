@@ -52,7 +52,7 @@ class NoApplications @Inject() (
     startUsingRestApisView: StartUsingRestApisView,
     noApplicationsChoiceView: NoApplicationsChoiceView,
     mcc: MessagesControllerComponents
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {

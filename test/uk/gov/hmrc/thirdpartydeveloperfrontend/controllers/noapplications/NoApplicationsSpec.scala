@@ -64,11 +64,11 @@ class NoApplicationsSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(noApplicationsController, implicitly)(sessionId)
+      .withLoggedIn(using noApplicationsController, implicitly)(sessionId)
       .withSession(sessionParams*).withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(noApplicationsController, implicitly)(partLoggedInSession.sessionId)
+      .withLoggedIn(using noApplicationsController, implicitly)(partLoggedInSession.sessionId)
       .withSession(sessionParams*)
   }
 

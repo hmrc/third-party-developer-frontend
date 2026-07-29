@@ -57,7 +57,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     val http: HttpClientV2,
     val config: ThirdPartyApplicationSubmissionsConnector.Config,
     val metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   import ThirdPartyApplicationSubmissionsConnector._
@@ -67,7 +67,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
 
   val environment = Environment.Production
 
-  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(using HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
     val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
 
@@ -80,7 +80,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchLatestSubmission(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
       http
         .get(url"$serviceBaseUrl/submissions/application/${applicationId}")
@@ -88,7 +88,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def createSubmission(applicationId: ApplicationId, requestedBy: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def createSubmission(applicationId: ApplicationId, requestedBy: LaxEmailAddress)(using HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
       http.post(url"$serviceBaseUrl/submissions/application/${applicationId}")
         .withBody(Json.toJson(CreateSubmissionRequest(requestedBy)))
@@ -96,21 +96,21 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchLatestExtendedSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchLatestExtendedSubmission(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/submissions/application/${applicationId}/extended")
         .execute[Option[ExtendedSubmission]]
     }
   }
 
-  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchSubmission(id: SubmissionId)(using HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/submissions/${id.value}")
         .execute[Option[ExtendedSubmission]]
     }
   }
 
-  def fetchResponsibleIndividualVerification(code: String)(implicit hc: HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] =
+  def fetchResponsibleIndividualVerification(code: String)(using HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] =
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/approvals/responsible-individual-verification/${code}")
         .execute[Option[ResponsibleIndividualVerification]]
@@ -120,7 +120,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       applicationId: ApplicationId,
       requestedByName: String,
       requestedByEmailAddress: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[Either[ErrorDetails, ApplicationWithCollaborators]] =
     metrics.record(api) {
       import play.api.http.Status._
@@ -143,7 +143,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
         }
     }
 
-  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(using HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
     import cats.implicits._
 
     val url    = url"$serviceBaseUrl/application/${applicationId}/confirm-setup-complete"

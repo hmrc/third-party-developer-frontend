@@ -42,7 +42,7 @@ class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with UserT
   "NameChangeView view" should {
     "render correctly when form is valid" in {
 
-      val mainView = nameChangeView.apply(MfaNameChangeForm.form, MfaId(UUID.randomUUID()))(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = nameChangeView.apply(MfaNameChangeForm.form, MfaId(UUID.randomUUID()))(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Create a name for your authenticator app"
       document.getElementById("paragraph").text shouldBe "Use a name that will help you remember the app when you sign in."
@@ -53,7 +53,7 @@ class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with UserT
     "render correctly when form is invalid" in {
 
       val mainView = nameChangeView.apply(MfaNameChangeForm.form.withError("name", "The name must be more than 3 characters in length"), MfaId(UUID.randomUUID()))(
-        stubMessages(),
+        using stubMessages(),
         FakeRequest().withCSRFToken,
         loggedIn,
         appConfig

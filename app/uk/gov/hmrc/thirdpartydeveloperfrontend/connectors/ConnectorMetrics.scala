@@ -27,13 +27,13 @@ sealed trait Timer {
 }
 
 trait ConnectorMetrics {
-  def record[A](api: API)(f: => Future[A])(implicit ec: ExecutionContext): Future[A]
+  def record[A](api: API)(f: => Future[A])(using ExecutionContext): Future[A]
 }
 
 @Singleton
 class ConnectorMetricsImpl @Inject() (metrics: Metrics) extends ConnectorMetrics {
 
-  def record[A](api: API)(f: => Future[A])(implicit ec: ExecutionContext): Future[A] = {
+  def record[A](api: API)(f: => Future[A])(using ExecutionContext): Future[A] = {
     val timer = startTimer(api)
 
     f.andThen {
@@ -61,5 +61,5 @@ class ConnectorMetricsImpl @Inject() (metrics: Metrics) extends ConnectorMetrics
 
 @Singleton
 class NoopConnectorMetrics extends ConnectorMetrics {
-  def record[A](api: API)(f: => Future[A])(implicit ec: ExecutionContext): Future[A] = f
+  def record[A](api: API)(f: => Future[A])(using ExecutionContext): Future[A] = f
 }

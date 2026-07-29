@@ -45,7 +45,7 @@ class TermsOfUse @Inject() (
     termsOfUseView: TermsOfUseView,
     termsOfUseVersionService: TermsOfUseVersionService,
     val clock: Clock
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper

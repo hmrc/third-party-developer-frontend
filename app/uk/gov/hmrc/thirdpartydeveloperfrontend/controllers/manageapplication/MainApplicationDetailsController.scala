@@ -73,7 +73,7 @@ class MainApplicationDetailsController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     applicationDetailsView: ApplicationDetailsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with FraudPreventionNavLinkHelper
@@ -136,9 +136,9 @@ class MainApplicationDetailsController @Inject() (
   }
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): Future[TermsOfUseViewModel] = {
-    implicit val hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(request)
-    val application                                 = request.application
-    val requiresTermsOfUse                          = !application.deployedTo.isSandbox && application.access.accessType == AccessType.Standard
+    given hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(using request)
+    val application                          = request.application
+    val requiresTermsOfUse                   = !application.deployedTo.isSandbox && application.access.accessType == AccessType.Standard
 
     if (requiresTermsOfUse) {
       val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
@@ -168,7 +168,7 @@ class MainApplicationDetailsController @Inject() (
 
   private def buildV2TermsOfUseState(
       applicationId: ApplicationId
-    )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
+    )(using uk.gov.hmrc.http.HeaderCarrier
     ): Future[Option[TermsOfUseV2State]] = {
     for {
       maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(applicationId)
@@ -180,7 +180,7 @@ class MainApplicationDetailsController @Inject() (
   private def buildState(
       maybeInvitation: Option[TermsOfUseInvitation],
       maybeSubmission: Option[Submission]
-    )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
+    )(using uk.gov.hmrc.http.HeaderCarrier
     ): Future[Option[TermsOfUseV2State]] = {
     (maybeInvitation, maybeSubmission) match {
       case (Some(invitation), None) =>
@@ -203,14 +203,14 @@ class MainApplicationDetailsController @Inject() (
     }
   }
 
-  private def buildStartedState(submission: Submission, deadline: java.time.Instant)(implicit hc: uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
+  private def buildStartedState(submission: Submission, deadline: java.time.Instant)(using uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
     val requestedByEmail = extractRequestedByFromHistory(submission)
     profileService.lookupDeveloperName(LaxEmailAddress(requestedByEmail)).map { maybeName =>
       Some(Started(maybeName.getOrElse(requestedByEmail), deadline))
     }
   }
 
-  private def buildSubmittedState(submission: Submission)(implicit hc: uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
+  private def buildSubmittedState(submission: Submission)(using uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
     extractSubmittedFromHistory(submission) match {
       case Some(submitted) =>
         profileService.lookupDeveloperName(LaxEmailAddress(submitted.requestedBy)).map { maybeName =>

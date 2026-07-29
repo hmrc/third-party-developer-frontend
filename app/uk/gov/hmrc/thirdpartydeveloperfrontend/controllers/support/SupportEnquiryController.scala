@@ -33,7 +33,7 @@ class SupportEnquiryController @Inject() (
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends TpdfeBaseController(mcc) {
 

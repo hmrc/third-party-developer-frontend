@@ -41,7 +41,7 @@ class ManageProfileController @Inject() (
     val cookieSigner: CookieSigner,
     dashboardService: DashboardService,
     profileDetailsView: ProfileDetailsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) with PasswordChange {
 

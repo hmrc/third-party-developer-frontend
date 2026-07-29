@@ -53,7 +53,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     with FixedClock {
 
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
 
@@ -72,11 +72,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
 
-    val mockApmConnector: ApmConnector                               = org.mockito.Mockito.mock(
+    val mockApmConnector: ApmConnector                   = org.mockito.Mockito.mock(
       classOf[ApmConnector],
       org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
     )
-    val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
+    val mockOrganisationConnector: OrganisationConnector = mock[OrganisationConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
@@ -210,12 +210,12 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       when(mockApiPlatformDeskproConnector.createTicket(*, *))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe Some("ref")
 
-      verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc))
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
 
@@ -232,11 +232,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       when(mockApiPlatformDeskproConnector.createTicket(*, *))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe Some("ref")
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc))
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
 
@@ -298,7 +298,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       val ticketCaptor = ArgCaptor[CreateTicketRequest]
       when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.request2SVRemoval(userId, name, email))
@@ -307,7 +307,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       ticketCaptor.value.email shouldBe email.text
       ticketCaptor.value.fullName shouldBe name
 
-      verify(mockAuditService, times(1)).audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService, times(1)).audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(using eqTo(hc))
     }
   }
 
@@ -376,7 +376,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "createForUser" should {
     "call the TPO connector correctly" in new Setup {
-      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(Some(organisation)))
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(using *)).thenReturn(successful(Some(organisation)))
       ThirdPartyOrchestratorConnectorMock.Create.succeedsWith(ApplicationCreatedResponse(sandboxApplicationId))
 
       val result = await(applicationService.createForUser(createAppRequest, userId))
@@ -386,7 +386,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
 
     "not call the TPO connector if no organisation found" in new Setup {
-      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(None))
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(using *)).thenReturn(successful(None))
 
       val result = await(applicationService.createForUser(createAppRequest, userId))
 
@@ -402,7 +402,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
         instant,
         Set(uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Collaborators.Member(userId))
       )
-      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(Some(organisationNotAdmin)))
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(using *)).thenReturn(successful(Some(organisationNotAdmin)))
 
       val result = await(applicationService.createForUser(createAppRequest, userId))
 

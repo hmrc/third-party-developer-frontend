@@ -37,40 +37,40 @@ trait ThirdPartyOrchestratorConnectorMockModule extends MockitoSugar with Argume
     object Create {
 
       def succeedsWith(response: ApplicationCreatedResponse) = {
-        when(aMock.create(*)(*)).thenReturn(successful(response))
+        when(aMock.create(*)(using *)).thenReturn(successful(response))
       }
 
       def verifyCalledWith(request: CreateApplicationRequest) = {
-        verify.create(eqTo(request))(*)
+        verify.create(eqTo(request))(using *)
       }
 
       def verifyNotCalled() = {
-        verify(never).create(*)(*)
+        verify(never).create(*)(using *)
       }
     }
 
     object Verify {
 
       def returns(result: ApplicationVerificationResponse) = {
-        when(aMock.verify(*)(*)).thenReturn(successful(result))
+        when(aMock.verify(*)(using *)).thenReturn(successful(result))
       }
     }
 
     object ValidateName {
 
       def succeedsWith(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(response: ApplicationNameValidationResult) = {
-        when(aMock.validateName(eqTo(name), eqTo(selfApplicationId), eqTo(environment))(*)).thenReturn(successful(response))
+        when(aMock.validateName(eqTo(name), eqTo(selfApplicationId), eqTo(environment))(using *)).thenReturn(successful(response))
       }
     }
 
     object Query {
 
       def returnsFor[T](environment: Environment)(results: T) = {
-        when(aMock.query[T](eqTo(environment))(*)(*, *)).thenReturn(successful(results))
+        when(aMock.query[T](eqTo(environment))(*)(using *, *)).thenReturn(successful(results))
       }
 
       def failsFor(environment: Environment)(err: Throwable) = {
-        when(aMock.query(eqTo(environment))(*)(*, *)).thenReturn(failed(err))
+        when(aMock.query(eqTo(environment))(*)(using *, *)).thenReturn(failed(err))
       }
     }
   }

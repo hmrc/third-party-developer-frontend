@@ -42,7 +42,7 @@ class SmsSetupCompletedViewSpec extends CommonViewSpec
 
   "SmsSetupCompletedView" should {
     "render correctly when form is valid and showAuthAppText flag is false" in {
-      val mainView = smsSetupCompletedView.apply(false)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupCompletedView.apply(false)(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "You can now get access codes by text"
@@ -54,7 +54,7 @@ class SmsSetupCompletedViewSpec extends CommonViewSpec
     }
 
     "render correctly when form is valid and showAuthAppText flag is true" in {
-      val mainView = smsSetupCompletedView.apply(true)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupCompletedView.apply(true)(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "You can now get access codes by text"
       document.getElementById("paragraph").text shouldBe "Every time you sign in we will request an access code."

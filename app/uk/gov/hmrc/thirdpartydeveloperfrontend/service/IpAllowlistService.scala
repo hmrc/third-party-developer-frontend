@@ -39,7 +39,7 @@ class IpAllowlistService @Inject() (
     connectorWrapper: ConnectorsWrapper,
     apmCmdModule: ApmConnectorCommandModule,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
@@ -80,8 +80,7 @@ class IpAllowlistService @Inject() (
     } yield savedFlow
   }
 
-  def activateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier)
-      : Future[ApplicationUpdateSuccessful] = {
+  def activateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(using HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     for {
       flow     <- fetchIpAllowListFlow(sessionId, None, createIfNotFound = false)
       _         = if (flow.allowlist.isEmpty) throw new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be activated because it is empty")
@@ -97,8 +96,7 @@ class IpAllowlistService @Inject() (
     } yield response
   }
 
-  def deactivateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier)
-      : Future[ApplicationUpdateSuccessful] = {
+  def deactivateIpAllowlist(app: ApplicationWithCollaborators, sessionId: UserSessionId, requestingEmail: LaxEmailAddress)(using HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     if (app.details.ipAllowlist.required) {
       Future.failed(new ForbiddenException(s"IP allowlist for session ID $sessionId cannot be deactivated because it is required"))
     } else {

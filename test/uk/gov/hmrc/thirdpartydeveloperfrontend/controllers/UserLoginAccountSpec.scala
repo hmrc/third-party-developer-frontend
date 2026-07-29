@@ -133,23 +133,23 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     def mockAuthenticate(email: LaxEmailAddress, password: String, result: Future[UserAuthenticationResponse], resultShowAdminMfaMandateMessage: Future[Boolean]): Unit = {
 
-      when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(*))
+      when(underTest.sessionService.authenticate(eqTo(email), eqTo(password), eqTo(Some(deviceSessionId)))(using *))
         .thenReturn(result.map(x => (x, sessionWithAuthAppMfa.developer.userId)))
     }
 
     def mockAuthenticateAccessCode(email: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId, result: Future[UserSession]): Unit =
-      when(underTest.sessionService.authenticateAccessCode(eqTo(email), eqTo(accessCode), eqTo(nonce), eqTo(mfaId))(*))
+      when(underTest.sessionService.authenticateAccessCode(eqTo(email), eqTo(accessCode), eqTo(nonce), eqTo(mfaId))(using *))
         .thenReturn(result)
 
     def mockLogout(): Unit =
-      when(underTest.sessionService.destroy(eqTo(sessionWithAuthAppMfa.sessionId))(*))
+      when(underTest.sessionService.destroy(eqTo(sessionWithAuthAppMfa.sessionId))(using *))
         .thenReturn(Future.successful(NO_CONTENT))
 
-    when(underTest.sessionService.authenticate(*[LaxEmailAddress], *, *)(*)).thenReturn(failed(new InvalidCredentials))
-    when(underTest.sessionService.authenticateAccessCode(*[LaxEmailAddress], *, *, *[MfaId])(*)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticate(*[LaxEmailAddress], *, *)(using *)).thenReturn(failed(new InvalidCredentials))
+    when(underTest.sessionService.authenticateAccessCode(*[LaxEmailAddress], *, *, *[MfaId])(using *)).thenReturn(failed(new InvalidCredentials))
 
     def mockAudit(auditAction: AuditAction, result: Future[AuditResult]): Unit =
-      when(underTest.auditService.audit(eqTo(auditAction), *)(*)).thenReturn(result)
+      when(underTest.auditService.audit(eqTo(auditAction), *)(using *)).thenReturn(result)
   }
 
   trait SetupWithUserAuthRespRequiringMfaAndMfaEnabled extends Setup {
@@ -177,7 +177,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
   }
 
@@ -240,7 +240,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
 
     "display the MFA recommendation page after successfully logging in with MFA not enabled but mandated" in new SetupWithUserAuthRespNotRequiringMfa {
@@ -376,7 +376,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidPassword),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
-      )(*)
+      )(using *)
     }
 
     "return the login page when the password is invalid" in new Setup {
@@ -404,7 +404,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidEmail),
         eqTo(Map("devEmail" -> unregisteredEmail.text))
-      )(*)
+      )(using *)
     }
 
     "return to the login page when the account is unverified" in new Setup {
@@ -418,7 +418,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe FORBIDDEN
       contentAsString(result) should include("Verify your account using the email we sent. Or get us to resend the verification email")
-      await(result).session(request).get("email").mkString shouldBe sessionWithAuthAppMfa.developer.email.text
+      await(result).session(using request).get("email").mkString shouldBe sessionWithAuthAppMfa.developer.email.text
     }
 
     "display the Account locked page when the account is locked" in new Setup {
@@ -436,7 +436,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToLockedAccount),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
-      )(*)
+      )(using *)
     }
   }
 
@@ -578,7 +578,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
 
     "return the access_uri not the mfa nag page when the credentials are correct, mfa method is AUTHENTICATOR_APP and access_uri is set" in new Setup {
@@ -596,7 +596,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
 
     "return the AuthApp Setup Reminder page when the credentials are correct and mfa method is SMS" in new Setup {
@@ -613,7 +613,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
 
     "return the access_uri not the mfa nag page when the credentials are correct, mfa method is SMS and access_uri is set" in new Setup {
@@ -631,7 +631,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
 
     "return the error page when mfa method is AUTHENTICATOR_APP and access code is incorrect" in new Setup {
@@ -645,7 +645,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
-      )(*)
+      )(using *)
     }
 
     "return the error page when mfa method is AUTHENTICATOR_APP and access code is invalid" in new Setup {
@@ -672,7 +672,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
 
     "return the error page when mfa method is SMS and access code is incorrect" in new Setup {
@@ -686,7 +686,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginFailedDueToInvalidAccessCode),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text))
-      )(*)
+      )(using *)
     }
 
     "return the error page when mfa method is SMS and access code is invalid" in new Setup {
@@ -713,7 +713,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       verify(underTest.auditService, times(1)).audit(
         eqTo(LoginSucceeded),
         eqTo(Map("devEmail" -> sessionWithAuthAppMfa.developer.email.text, "developerFullName" -> sessionWithAuthAppMfa.developer.displayedName))
-      )(*)
+      )(using *)
     }
   }
 
@@ -762,7 +762,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       val userId = UserId.random
       TPDMock.FindUserId.thenReturn(sessionWithAuthAppMfa.developer.email)(userId)
       TPDMock.FetchDeveloper.thenReturn(userId)(Some(developerWithAuthAppMfa))
-      when(underTest.applicationService.request2SVRemoval(*[UserId], *, eqTo(sessionWithAuthAppMfa.developer.email))(*))
+      when(underTest.applicationService.request2SVRemoval(*[UserId], *, eqTo(sessionWithAuthAppMfa.developer.email))(using *))
         .thenReturn(Future.successful(Some("ref")))
 
       private val result = addToken(underTest.confirm2SVHelp())(request)
@@ -772,7 +772,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       body should include("We have received your request to remove 2-step verification from your account")
       body should include("Request submitted")
-      verify(underTest.applicationService).request2SVRemoval(*[UserId], *, eqTo(sessionWithAuthAppMfa.developer.email))(*)
+      verify(underTest.applicationService).request2SVRemoval(*[UserId], *, eqTo(sessionWithAuthAppMfa.developer.email))(using *)
     }
 
     "redirect to login page if no email in the session on submission" in new Setup {
@@ -783,7 +783,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some("/developer/login")
-      verify(underTest.applicationService, never).request2SVRemoval(*[UserId], *, *[LaxEmailAddress])(*)
+      verify(underTest.applicationService, never).request2SVRemoval(*[UserId], *, *[LaxEmailAddress])(using *)
     }
 
     "return bad request if user not found on submission" in new Setup {
@@ -795,16 +795,16 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val result = addToken(underTest.confirm2SVHelp())(request)
 
       status(result) shouldBe BAD_REQUEST
-      verify(underTest.applicationService, never).request2SVRemoval(*[UserId], *, *[LaxEmailAddress])(*)
+      verify(underTest.applicationService, never).request2SVRemoval(*[UserId], *, *[LaxEmailAddress])(using *)
     }
   }
 
   "accountLocked" should {
     "destroy session when locked" in new Setup {
       mockLogout()
-      private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionWithAuthAppMfa.sessionId)
+      private val request = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionWithAuthAppMfa.sessionId)
       await(underTest.accountLocked()(request))
-      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(sessionWithAuthAppMfa.sessionId))(*)
+      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(sessionWithAuthAppMfa.sessionId))(using *)
     }
   }
 
@@ -825,7 +825,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         FetchSessionById.succeedsWith(sessionPartLoggedInEnablingMfa.sessionId, sessionPartLoggedInEnablingMfa)
 
         private val partLoggedInRequest = FakeRequest()
-          .withLoggedIn(underTest, implicitly)(sessionPartLoggedInEnablingMfa.sessionId)
+          .withLoggedIn(using underTest, implicitly)(sessionPartLoggedInEnablingMfa.sessionId)
           .withSession(sessionParams*)
 
         private val result = addToken(underTest.login())(partLoggedInRequest)
@@ -840,7 +840,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
         FetchSessionById.succeedsWith(sessionWithAuthAppMfa.sessionId, sessionWithAuthAppMfa)
 
         private val loggedInRequest = FakeRequest()
-          .withLoggedIn(underTest, implicitly)(sessionWithAuthAppMfa.sessionId)
+          .withLoggedIn(using underTest, implicitly)(sessionWithAuthAppMfa.sessionId)
           .withSession(sessionParams*)
 
         private val result = addToken(underTest.login())(loggedInRequest)
@@ -856,7 +856,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       "show the MFA recommendation" in new LoggedIn {
         fetchProductionSummariesByAdmin(sessionWithAuthAppMfa.developer.userId, applicationsWhereUserIsAdminInProduction)
 
-        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId)
 
         private val result = underTest.get2svRecommendationPage()(request)
 
@@ -870,7 +870,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       "not show MFA recommendation" in new LoggedIn {
         fetchProductionSummariesByAdmin(sessionWithAuthAppMfa.developer.userId, applicationsWhereUserIsAdminInProduction)
 
-        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId)
 
         private val result = underTest.get2svRecommendationPage()(request)
 

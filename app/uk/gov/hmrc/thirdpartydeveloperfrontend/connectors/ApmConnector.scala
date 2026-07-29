@@ -36,7 +36,7 @@ trait ApmConnectorModule {
 }
 
 @Singleton
-class ApmConnector @Inject() (val http: HttpClientV2, val config: ApmConnector.Config, val metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+class ApmConnector @Inject() (val http: HttpClientV2, val config: ApmConnector.Config, val metrics: ConnectorMetrics)(using val ec: ExecutionContext)
     extends OpenAccessApisConnector
     with CommonResponseHandlers
     with ApmConnectorSubscriptionFieldsModule

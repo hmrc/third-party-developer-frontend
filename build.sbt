@@ -7,6 +7,14 @@ lazy val appName = "third-party-developer-frontend"
 Global / bloopAggregateSourceDependencies := true
 Global / bloopExportJarClassifiers        := Some(Set("sources"))
 
+lazy val commonScalacOptions = Seq(
+  // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+  // suppress warnings in generated routes files
+  "-Wconf:src=routes/.*:s",
+  "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s", // TODO - remove once Play is really Scala 3
+  "-Wconf:msg=unused import&src=html/.*:s"
+)
+
 ThisBuild / scalaVersion                                         := "3.7.4"
 ThisBuild / majorVersion                                         := 0
 ThisBuild / semanticdbEnabled                                    := true
@@ -65,13 +73,7 @@ lazy val microservice = Project(appName, file("."))
     )
   )
   .settings(
-    scalacOptions ++= Seq(
-      // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
-      // suppress warnings in generated routes files
-      "-Wconf:src=routes/.*:s",
-      "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s", // TODO - remove once Play is really Scala 3
-      "-Wconf:msg=unused import&src=html/.*:s"
-    )
+    scalacOptions ++= commonScalacOptions
   )
 
 lazy val it = (project in file("it"))
@@ -79,7 +81,8 @@ lazy val it = (project in file("it"))
   .dependsOn(microservice % "test->test")
   .settings(
     name := "integration-tests",
-    DefaultBuildSettings.itSettings()
+    DefaultBuildSettings.itSettings(),
+    scalacOptions ++= commonScalacOptions
   )
 
 lazy val component = (project in file("component"))
@@ -90,7 +93,8 @@ lazy val component = (project in file("component"))
     Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
     DefaultBuildSettings.itSettings(),
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a")),
+    scalacOptions ++= commonScalacOptions
   )
 
 commands ++= Seq(

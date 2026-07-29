@@ -53,11 +53,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
 trait Auditing {
   val auditService: AuditService
 
-  def audit(auditAction: AuditAction, data: Map[String, String])(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def audit(auditAction: AuditAction, data: Map[String, String])(using HeaderCarrier): Future[AuditResult] = {
     auditService.audit(auditAction, data)
   }
 
-  def audit(auditAction: AuditAction, userSession: UserSession)(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def audit(auditAction: AuditAction, userSession: UserSession)(using HeaderCarrier): Future[AuditResult] = {
     auditService.audit(auditAction, Map("devEmail" -> userSession.developer.email.text, "developerFullName" -> userSession.developer.displayedName))
   }
 }
@@ -83,7 +83,7 @@ class UserLoginAccount @Inject() (
     requestMfaRemovalCompleteView: RequestMfaRemovalCompleteView,
     userDidNotAdd2SVView: UserDidNotAdd2SVView,
     add2SVView: Add2SVView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedOutController(mcc) with Auditing with ApplicationLogger {
 
@@ -172,7 +172,7 @@ class UserLoginAccount @Inject() (
     )
   }
 
-  private def handleSmsFlow(userId: UserId, smsMfaDetail: SmsMfaDetail, session: PlaySession)(implicit hc: HeaderCarrier) = {
+  private def handleSmsFlow(userId: UserId, smsMfaDetail: SmsMfaDetail, session: PlaySession)(using HeaderCarrier) = {
     thirdPartyDeveloperMfaConnector.sendSms(userId, smsMfaDetail.id).map {
       case true =>
         Redirect(routes.UserLoginAccount.loginAccessCodePage(smsMfaDetail.id, Sms), SEE_OTHER)
@@ -188,7 +188,7 @@ class UserLoginAccount @Inject() (
       .withSession(session + ("userId" -> userId.value.toString)))
   }
 
-  private def handleMfaChoices(developer: User, playSession: PlaySession, emailAddress: LaxEmailAddress, nonce: String)(implicit hc: HeaderCarrier) = {
+  private def handleMfaChoices(developer: User, playSession: PlaySession, emailAddress: LaxEmailAddress, nonce: String)(using HeaderCarrier) = {
     val session: PlaySession = playSession + ("emailAddress" -> emailAddress.text) + ("nonce" -> nonce)
 
     (MfaDetailHelper.getAuthAppMfaVerified(developer.mfaDetails), MfaDetailHelper.getSmsMfaVerified(developer.mfaDetails)) match {

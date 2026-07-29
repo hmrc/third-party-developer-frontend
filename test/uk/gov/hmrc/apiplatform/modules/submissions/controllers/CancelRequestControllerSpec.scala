@@ -88,7 +88,7 @@ class CancelRequestControllerSpec
       clock
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller, implicitly)(sessionId).withSession(sessionParams*)
 
     val extendedSubmission = aSubmission.withIncompleteProgress()
   }

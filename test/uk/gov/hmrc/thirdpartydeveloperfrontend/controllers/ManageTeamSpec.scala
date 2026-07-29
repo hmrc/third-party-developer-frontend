@@ -78,7 +78,7 @@ class ManageTeamSpec
       fraudPreventionConfig
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val developer: User      = buildTrackedUser()
     val session: UserSession = UserSession(sessionId, LoggedInState.LoggedIn, developer)
@@ -91,7 +91,7 @@ class ManageTeamSpec
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
     val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
 
     def givenTheApplicationExistWithUserRole(
         appId: ApplicationId,

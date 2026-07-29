@@ -32,7 +32,7 @@ trait ProfileServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     object LookupDeveloperName {
 
       def thenReturns(name: Option[String]) =
-        when(aMock.lookupDeveloperName(*[LaxEmailAddress])(*)).thenReturn(successful(name))
+        when(aMock.lookupDeveloperName(*[LaxEmailAddress])(using *)).thenReturn(successful(name))
     }
   }
 

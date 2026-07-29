@@ -47,7 +47,7 @@ class RequestChangeOfApplicationNameController @Inject() (
     val cookieSigner: CookieSigner,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
     changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) {
 

@@ -39,7 +39,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   val api: API = API("third-party-application")
 
-  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
+  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/terms-of-use/application/${applicationId}")
         .execute[Option[TermsOfUseInvitation]]
@@ -53,7 +53,7 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
   val serviceBaseUrl: String = appConfig.thirdPartyApplicationProductionUrl
 }

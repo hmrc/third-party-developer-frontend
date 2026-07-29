@@ -36,7 +36,7 @@ class ApplicationVerification @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     applicationVerificationView: ApplicationVerificationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedOutController(mcc) {
 

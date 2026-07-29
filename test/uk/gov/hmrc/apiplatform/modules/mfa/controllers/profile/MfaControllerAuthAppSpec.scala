@@ -82,7 +82,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
   "authAppAccessCodeAction For CREATE" should {
     "return change name view when user is logged in and enable mfa successful" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(true)))
+      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(MfaResponse(true)))
 
       val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE, None))(authAppAccessCodeRequest(correctCode).withMethod("POST"))
 
@@ -91,7 +91,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return change name view when user is part logged in and enable mfa successful" in new SetupSuccessfulStart2SV with PartLogged {
-      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(true)))
+      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(MfaResponse(true)))
 
       val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE, None))(authAppAccessCodeRequest(correctCode).withMethod("POST"))
 
@@ -100,7 +100,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return access code view with errors when user is logged in and enable mfa fails" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(false)))
+      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(MfaResponse(false)))
 
       val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE, None))(authAppAccessCodeRequest(correctCode).withMethod("POST"))
 
@@ -111,7 +111,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return access code view with errors when user is logged in and submitted form is invalid" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(MfaResponse(false)))
+      when(underTest.mfaService.enableMfa(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(MfaResponse(false)))
 
       val result = addToken(underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.CREATE, None))(authAppAccessCodeRequest("INVALID_CODE").withMethod("POST"))
 
@@ -133,7 +133,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     "redirect to remove mfa completed page when user is Logged in and call to connector returns true" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
 
-        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*))
+        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(using *))
           .thenReturn(Future.successful(MfaResponse(true)))
 
         private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE, Some(authAppMfaId))(authAppAccessCodeRequest(correctCode).withMethod("POST"))
@@ -141,8 +141,8 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/remove-mfa/complete")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
-        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(using *)
+        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(using *)
       }
 
     "redirect to login page when user is not logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
@@ -167,14 +167,14 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
     "return error page when user is Logged in and form is valid and call to connector returns false" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
-        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*))
+        when(underTest.mfaService.removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(using *))
           .thenReturn(Future.successful(MfaResponse(false)))
 
         private val result = underTest.authAppAccessCodeAction(authAppMfaId, MfaAction.REMOVE, Some(authAppMfaId))(authAppAccessCodeRequest(correctCode).withMethod("POST"))
 
         validateErrorTemplateView(result, "Unable to verify access code")
-        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
-        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(using *)
+        verify(underTest.mfaService).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(using *)
       }
 
     "return error page when user is Logged in and form is valid and call to connector returns true and mfaIdForRemoval is None" in
@@ -183,8 +183,8 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
         validateErrorTemplateView(result, "Unable to find Mfa to remove")
 
-        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(*)
-        verify(underTest.mfaService, times(0)).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(*)
+        verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(authAppMfaId), eqTo(correctCode))(using *)
+        verify(underTest.mfaService, times(0)).removeMfaById(*[UserId], eqTo(authAppMfaId), eqTo(correctCode), eqTo(authAppMfaId))(using *)
       }
   }
 
@@ -208,7 +208,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
   "nameChangeAction" should {
     val updatedName = "updated name"
     "return auth app completed view when user is logged in and call to backend is successful" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(true))
+      when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(true))
 
       val result = addToken(underTest.nameChangeAction(authAppMfaId))(nameChangeRequest(updatedName).withMethod("POST"))
 
@@ -217,7 +217,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return auth app completed view when user is part logged in and call to backend is successful" in new SetupSuccessfulStart2SV with PartLogged {
-      when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(true))
+      when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(true))
 
       val result = addToken(underTest.nameChangeAction(authAppMfaId))(nameChangeRequest(updatedName).withMethod("POST"))
 
@@ -226,7 +226,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return error page when user is logged in and connector returns false" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(*)).thenReturn(Future.successful(false))
+      when(underTest.thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *)(using *)).thenReturn(Future.successful(false))
 
       val result = addToken(underTest.nameChangeAction(authAppMfaId))(nameChangeRequest(updatedName).withMethod("POST"))
 
@@ -254,7 +254,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
 
   "authAppSetupCompletedPage" should {
     "return auth app setup complete view when user is logged in and fetchDeveloper returns a developer" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.authAppSetupCompletedPage())(createRequest())
@@ -262,7 +262,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return InternalServerError when user is logged in and fetchDeveloper returns None" in new SetupSuccessfulStart2SV with LoggedIn {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(None))
 
       val result = addToken(underTest.authAppSetupCompletedPage())(createRequest())
@@ -270,7 +270,7 @@ class MfaControllerAuthAppSpec extends MfaControllerBaseSpec {
     }
 
     "return auth app setup complete view when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
-      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+      when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
         .thenReturn(successful(Some(loggedInDeveloper)))
 
       val result = addToken(underTest.authAppSetupCompletedPage())(createRequest())

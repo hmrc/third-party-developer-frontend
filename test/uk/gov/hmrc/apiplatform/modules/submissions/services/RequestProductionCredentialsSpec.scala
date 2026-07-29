@@ -47,7 +47,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     with UserTestData {
 
   trait Setup extends ApmConnectorMockModule with ApmConnectorCommandModuleMockModule {
-    implicit val hc: HeaderCarrier                                          = HeaderCarrier()
+    given hc: HeaderCarrier                                                 = HeaderCarrier()
     val mockSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
     val userId: UserId    = UserId.random
@@ -78,7 +78,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "successfully create a ticket if requester is responsible individual" in new Setup {
       val appAfterCommand = app.withName(ApplicationName("New app name"))
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(appAfterCommand)
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result          = await(underTest.requestProductionCredentials(app, userSession, true, false))
 
@@ -99,7 +99,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true))
 
@@ -120,7 +120,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(grantedSubmission)))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true))
 
       result.isRight shouldBe true
@@ -131,7 +131,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "not create a ticket if requester is not responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
       val result = await(underTest.requestProductionCredentials(app, userSession, false, false))
 
       result.isRight shouldBe true
@@ -152,7 +152,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
     "fails to create a ticket if the submission is not found" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(None))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(None))
 
       val result = await(underTest.requestProductionCredentials(app, userSession, true, false))
 

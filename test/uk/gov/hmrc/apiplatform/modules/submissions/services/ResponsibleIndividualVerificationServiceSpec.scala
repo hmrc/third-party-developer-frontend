@@ -45,12 +45,12 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     with SubmissionsTestData {
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    val applicationId              = ApplicationId.random
-    val application                = standardApp.withState(appStatePendingRIVerification)
-    val code                       = "12345678"
-    val requesterName              = "Mr Submitter"
-    val requesterEmail             = "submitter@example.com".toLaxEmail
+    given hc: HeaderCarrier = HeaderCarrier()
+    val applicationId       = ApplicationId.random
+    val application         = standardApp.withState(appStatePendingRIVerification)
+    val code                = "12345678"
+    val requesterName       = "Mr Submitter"
+    val requesterEmail      = "submitter@example.com".toLaxEmail
 
     val riVerification        = ResponsibleIndividualToUVerification(
       ResponsibleIndividualVerificationId(code),
@@ -70,7 +70,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
   "fetchResponsibleIndividualVerification" should {
     "successfully return a riVerification record" in new Setup {
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(Some(riVerification)))
 
       val result = await(underTest.fetchResponsibleIndividualVerification(code))
 
@@ -79,7 +79,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
     }
 
     "return 'None' where no riVerification record found" in new Setup {
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(None))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(None))
 
       val result = await(underTest.fetchResponsibleIndividualVerification(code))
 
@@ -89,8 +89,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
   "accept" should {
     "successfully return a riVerification record for accept and create a deskpro ticket with correct details" in new Setup {
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(Some(riVerification)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
@@ -126,8 +126,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         ResponsibleIndividualVerificationState.INITIAL
       )
 
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerificationUplift)))
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(Some(riVerificationUplift)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
@@ -163,8 +163,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         ResponsibleIndividualVerificationState.INITIAL
       )
 
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerificationUplift)))
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(Some(grantedSubmission)))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(Some(riVerificationUplift)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(grantedSubmission)))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
 
@@ -189,8 +189,8 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
         ResponsibleIndividualVerificationState.INITIAL
       )
 
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riUpdateVerification)))
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(*)).thenReturn(successful(None))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(Some(riUpdateVerification)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(None))
       ApplicationServiceMock.fetchByApplicationIdReturns(applicationId, application)
       ApplicationServiceMock.acceptResponsibleIndividualVerification(applicationId, code)
 
@@ -204,7 +204,7 @@ class ResponsibleIndividualVerificationServiceSpec extends AsyncHmrcSpec
 
   "decline" should {
     "successfully return a riVerification record for decline" in new Setup {
-      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(*)).thenReturn(successful(Some(riVerification)))
+      when(mockSubmissionsConnector.fetchResponsibleIndividualVerification(eqTo(code))(using *)).thenReturn(successful(Some(riVerification)))
       ApplicationServiceMock.declineResponsibleIndividualVerification(applicationId, code)
 
       val result = await(underTest.decline(code))

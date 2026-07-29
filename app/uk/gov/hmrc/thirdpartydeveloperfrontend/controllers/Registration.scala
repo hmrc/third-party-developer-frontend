@@ -48,7 +48,7 @@ class Registration @Inject() (
     expiredVerificationLinkView: ExpiredVerificationLinkView,
     confirmationView: ConfirmationView,
     resendConfirmationView: ResendConfirmationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedOutController(mcc) with ApplicationLogger with WithUrlEncodedOnlyFormBinding {
 
@@ -95,7 +95,7 @@ class Registration @Inject() (
       }
   }
 
-  def ensureLoggedOut(implicit request: Request[?], hc: HeaderCarrier) = {
+  def ensureLoggedOut(using request: Request[?], hc: HeaderCarrier) = {
     extractUserSessionIdFromCookie(request)
       .map(sessionService.destroy)
       .getOrElse(Future.successful(()))

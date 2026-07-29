@@ -101,7 +101,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     val headers              = Headers(AUTHORIZATION -> "AUTH_TOKEN")
     val loginRequest         = FakeRequest(POST, "/developer/login").withHeaders(headers)
     val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
-    val csrftoken            = CSRF.getToken(loginRequestWithCSRF)
+    val csrftoken            = CSRF.getToken(using loginRequestWithCSRF)
     val developer            = buildTrackedUser(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
     val mfaId                = verifiedAuthenticatorAppMfaDetail.id
   }

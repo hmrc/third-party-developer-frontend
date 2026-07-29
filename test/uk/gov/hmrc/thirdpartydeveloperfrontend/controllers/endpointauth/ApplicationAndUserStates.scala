@@ -273,8 +273,8 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder with FixedClo
 }
 
 trait UserIsTeamMember extends HasUserWithRole with HasApplication {
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Production))(*)(*, *)).thenReturn(Future.successful(List(appWithSubsIds)))
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Sandbox))(*)(*, *)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Production))(*)(using *, *)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Sandbox))(*)(using *, *)).thenReturn(Future.successful(List(appWithSubsIds)))
 }
 
 trait UserIsAdmin extends UserIsTeamMember {
@@ -290,8 +290,8 @@ trait UserIsDeveloper extends UserIsTeamMember {
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
   val otherApp: ApplicationWithCollaborators            = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Role.Developer, userId))
   val otherAppWithSubsIds: ApplicationWithSubscriptions = otherApp.withSubscriptions(Set(apiIdentifier))
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Production))(*)(*, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Sandbox))(*)(*, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Production))(*)(using *, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Sandbox))(*)(using *, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   def describeUserRole                                  = "The user is not a member of the application team"
   def maybeCollaborator: Option[Collaborator]           = None
 }
@@ -307,8 +307,8 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def describeAuthenticationState  = "and is authenticated"
   def loggedInState: LoggedInState = LoggedInState.LoggedIn
 
-  when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
-  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+  when(tpdConnector.register(*)(using *)).thenReturn(Future.successful(EmailAlreadyInUse))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
 
@@ -328,8 +328,8 @@ trait UserIsNotAuthenticated extends HasUserSession {
   def describeAuthenticationState  = "and is not authenticated"
   def loggedInState: LoggedInState = LoggedInState.PartLoggedInEnablingMFA
 
-  when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
-  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(None))
+  when(tpdConnector.register(*)(using *)).thenReturn(Future.successful(RegistrationSuccessful))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(None))
 }
 
 trait HasAppDeploymentEnvironment {

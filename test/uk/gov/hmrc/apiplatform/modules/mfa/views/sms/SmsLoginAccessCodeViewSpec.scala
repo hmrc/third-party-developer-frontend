@@ -50,7 +50,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
   "SmsLoginAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
       val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.Sms, userHasMultipleMfa = true)(
-        flash,
+        using flash,
         stubMessages(),
         FakeRequest().withCSRFToken,
         appConfig
@@ -69,7 +69,7 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
         MfaId(UUID.randomUUID()),
         MfaType.Sms,
         userHasMultipleMfa = true
-      )(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      )(using flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document = Jsoup.parse(mainView.body)
 

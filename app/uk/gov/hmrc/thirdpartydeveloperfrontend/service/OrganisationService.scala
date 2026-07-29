@@ -31,14 +31,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 class OrganisationService @Inject() (
     organisationConnector: OrganisationConnector,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow {
 
-  def fetchOrganisationAllowList(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[OrganisationAllowList]] = {
+  def fetchOrganisationAllowList(userId: UserId)(using HeaderCarrier): Future[Option[OrganisationAllowList]] = {
     organisationConnector.fetchOrganisationAllowList(userId)
   }
 
-  def fetchLatestSubmissionByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchLatestSubmissionByUserId(userId: UserId)(using HeaderCarrier): Future[Option[Submission]] = {
     organisationConnector.fetchLatestSubmissionByUserId(userId)
   }
 }

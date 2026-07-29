@@ -28,9 +28,9 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnector, Connect
 // Test-only subclass that overrides `fetchAllOpenAccessApis` to make it stubbable. On `ApmConnector` that
 // method is declared in one trait and implemented in another, a form Mockito cannot replace, so stubs on it
 // are silently ignored.
-class TestApmConnector(http: HttpClientV2, config: ApmConnector.Config, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
+class TestApmConnector(http: HttpClientV2, config: ApmConnector.Config, metrics: ConnectorMetrics)(using ExecutionContext)
     extends ApmConnector(http, config, metrics) {
 
-  override def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] =
+  override def fetchAllOpenAccessApis(environment: Environment)(using HeaderCarrier): Future[List[ApiDefinition]] =
     super.fetchAllOpenAccessApis(environment)
 }

@@ -30,7 +30,7 @@ trait NavigationSugar extends Assertions with Matchers with Eventually with Mock
   when(mockAppConfig.jsonEncryptionKey).thenReturn("czV2OHkvQj9FKEgrTWJQZVNoVm1ZcTN0Nnc5eiRDJkY=")
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(5, Seconds)), interval = scaled(Span(100, Millis)))
-  implicit val encryptedJson: EncryptedJson            = new EncryptedJson(new PayloadEncryption()(new LocalCrypto(mockAppConfig)))
+  implicit val encryptedJson: EncryptedJson            = new EncryptedJson(new PayloadEncryption()(using new LocalCrypto(mockAppConfig)))
 
   def goOn(page: WebPage): Assertion = {
     go(page)

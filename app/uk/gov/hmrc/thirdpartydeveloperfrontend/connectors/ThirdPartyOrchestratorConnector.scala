@@ -38,14 +38,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 
 @Singleton
-class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
+class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(using ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   val serviceBaseUrl: String = config.thirdPartyOrchestratorUrl
 
   val api: API = API("third-party-orchestrator")
 
-  def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
+  def create(request: CreateApplicationRequest)(using HeaderCarrier): Future[ApplicationCreatedResponse] =
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/application")
@@ -54,7 +54,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
         .map(a => ApplicationCreatedResponse(a.id))
     }
 
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
+  def verify(verificationCode: String)(using HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
     http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
       .execute[ErrorOrUnit]
       .map {
@@ -65,7 +65,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       }
   }
 
-  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidationResult] = {
+  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(using HeaderCarrier): Future[ApplicationNameValidationResult] = {
 
     val body = selfApplicationId.fold[ApplicationNameValidationRequest](NewApplicationNameValidationRequest(name))(appId => ChangeApplicationNameValidationRequest(name, appId))
 
@@ -78,7 +78,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       }
   }
 
-  def query[T](environment: Environment)(qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+  def query[T](environment: Environment)(qry: ApplicationQuery)(using hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val qryStringMap = QueryParamsToQueryStringMap.toQuery(qry).map {
       case (k, vs) => k.text -> vs.mkString
     }

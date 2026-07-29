@@ -43,7 +43,7 @@ class PushPullNotifications @Inject() (
     mcc: MessagesControllerComponents,
     pushSecretsView: PushSecretsView,
     pushPullNotificationsService: PushPullNotificationsService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     override val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with PpnsActions {
 

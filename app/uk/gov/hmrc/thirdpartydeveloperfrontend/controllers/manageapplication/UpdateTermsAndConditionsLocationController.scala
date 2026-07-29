@@ -47,7 +47,7 @@ class UpdateTermsAndConditionsLocationController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     updateTermsAndConditionsLocationView: UpdateTermsAndConditionsLocationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with WithUrlEncodedOnlyFormBinding {

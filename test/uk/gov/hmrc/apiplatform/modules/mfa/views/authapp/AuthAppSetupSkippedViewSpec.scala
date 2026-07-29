@@ -43,7 +43,7 @@ class AuthAppSetupSkippedViewSpec extends CommonViewSpec
 
   "AuthAppSetupSkippedView" should {
     "render as expected" in {
-      val mainView = smsSetupSkippedView()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupSkippedView()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "Get access codes by authenticator app later"

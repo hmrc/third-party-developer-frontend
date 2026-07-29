@@ -36,7 +36,7 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
 
   trait Setup extends LocalUserIdTracker with DeveloperSessionBuilder with UserTestData with FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule
       with ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     private val mockAppConfig = mock[ApplicationConfig]
 

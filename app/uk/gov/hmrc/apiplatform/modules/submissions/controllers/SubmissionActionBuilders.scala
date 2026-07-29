@@ -79,7 +79,7 @@ trait SubmissionActionBuilders {
 
   def submissionService: SubmissionService
 
-  private def submissionRefiner(submissionId: SubmissionId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
+  private def submissionRefiner(submissionId: SubmissionId)(using ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
     new ActionRefiner[UserRequest, SubmissionRequest] {
       def executionContext = ec
 
@@ -87,27 +87,27 @@ trait SubmissionActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = input
         (
           for {
-            submission <- ETR.fromOptionM(submissionService.fetch(submissionId), errorHandler.notFoundTemplate(input).map(NotFound(_)))
+            submission <- ETR.fromOptionM(submissionService.fetch(submissionId), errorHandler.notFoundTemplate(using input).map(NotFound(_)))
           } yield new SubmissionRequest(submission, input)
         )
           .value
       }
     }
 
-  private def submissionApplicationRefiner(implicit ec: ExecutionContext): ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] =
+  private def submissionApplicationRefiner(using ExecutionContext): ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] =
     new ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] {
       override def executionContext = ec
 
       override def refine[A](request: SubmissionRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
 
-        ETR.fromOptionM(applicationActionService.process(request.submission.applicationId, request.userRequest), errorHandler.notFoundTemplate(request).map(NotFound(_)))
+        ETR.fromOptionM(applicationActionService.process(request.submission.applicationId, request.userRequest), errorHandler.notFoundTemplate(using request).map(NotFound(_)))
           .map(r => new SubmissionApplicationRequest(r.application, request, r.subscriptions))
           .value
       }
     }
 
-  private def applicationSubmissionRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] =
+  private def applicationSubmissionRefiner(using ExecutionContext): ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] =
     new ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] {
       override def executionContext = ec
 
@@ -116,7 +116,7 @@ trait SubmissionActionBuilders {
 
         (
           for {
-            submission <- ETR.fromOptionM(submissionService.fetchLatestExtendedSubmission(request.application.id), errorHandler.notFoundTemplate(request).map(NotFound(_)))
+            submission <- ETR.fromOptionM(submissionService.fetchLatestExtendedSubmission(request.application.id), errorHandler.notFoundTemplate(using request).map(NotFound(_)))
           } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest), request.subscriptions)
         )
           .value
@@ -167,7 +167,7 @@ trait SubmissionActionBuilders {
         }
     }
 
-  def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(using ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
@@ -184,7 +184,7 @@ trait SubmissionActionBuilders {
       applicationId: ApplicationId
     )(
       block: SubmissionApplicationRequest[AnyContent] => Future[Result]
-    )(implicit ec: ExecutionContext
+    )(using ExecutionContext
     ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
@@ -207,7 +207,7 @@ trait SubmissionActionBuilders {
       applicationId: ApplicationId
     )(
       block: SubmissionApplicationRequest[AnyContent] => Future[Result]
-    )(implicit ec: ExecutionContext
+    )(using ExecutionContext
     ): Action[AnyContent] = {
     Action.async { implicit request =>
       (

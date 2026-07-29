@@ -80,7 +80,7 @@ class ManageSubscriptions @Inject() (
     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
     subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper
@@ -169,7 +169,7 @@ class ManageSubscriptions @Inject() (
       apiSubscription: APISubscriptionStatusWithSubscriptionFields,
       successRedirect: Call,
       validationFailureView: EditApiConfigurationViewModel => Html
-    )(implicit hc: HeaderCarrier,
+    )(using hc: HeaderCarrier,
       applicationRequest: ApplicationRequest[AnyContent]
     ): Future[Result] = {
 
@@ -198,7 +198,7 @@ class ManageSubscriptions @Inject() (
       apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
       successRedirect: Call,
       validationFailureView: EditApiConfigurationFieldViewModel => Html
-    )(implicit hc: HeaderCarrier,
+    )(using hc: HeaderCarrier,
       applicationRequest: ApplicationRequest[AnyContent]
     ): Future[Result] = {
 

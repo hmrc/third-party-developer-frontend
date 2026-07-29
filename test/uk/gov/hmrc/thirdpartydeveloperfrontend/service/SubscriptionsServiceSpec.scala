@@ -34,7 +34,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscriptionsFixtures {
 
   trait Setup extends ApmConnectorMockModule with ApmConnectorCommandModuleMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
@@ -42,7 +42,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
 
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
 
-    val mockApmConnector: ApmConnector                               = org.mockito.Mockito.mock(
+    val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
       classOf[ApmConnector],
       org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
     )
@@ -60,7 +60,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
     val appWithSubs = standardApp.withSubscriptions(Set(apiIdentifierOne, apiIdentifierTwo)).withFieldValues(Map.empty)
 
     "return false when the application has no subscriptions to the requested api version" in new Setup {
-      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithSubs)))
+      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(using *)).thenReturn(successful(Some(appWithSubs)))
 
       private val result =
         await(subscriptionsService.isSubscribedToApi(appWithSubs.id, apiIdentifierFour))
@@ -69,7 +69,7 @@ class SubscriptionsServiceSpec extends AsyncHmrcSpec with ApplicationWithSubscri
     }
 
     "return true when the application is subscribed to the requested api version" in new Setup {
-      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(successful(Some(appWithSubs)))
+      when(mockApmConnector.fetchApplicationById(*[ApplicationId])(using *)).thenReturn(successful(Some(appWithSubs)))
 
       private val result =
         await(subscriptionsService.isSubscribedToApi(appWithSubs.id, apiIdentifierOne))

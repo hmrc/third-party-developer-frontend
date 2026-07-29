@@ -66,7 +66,7 @@ class AddApplication @Inject() (
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
     beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends ApplicationController(mcc) {
@@ -206,7 +206,7 @@ class AddApplication @Inject() (
     def subscriptionsNotInUserEmailPreferences(
         applicationSubscriptions: Seq[APISubscriptionStatus],
         userEmailPreferences: EmailPreferences
-      )(implicit hc: HeaderCarrier
+      )(using HeaderCarrier
       ): Future[Set[String]] = {
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime).toSet
@@ -230,7 +230,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case Environment.Production => errorHandler.notFoundTemplate(appRequest).map(NotFound(_))
+        case Environment.Production => errorHandler.notFoundTemplate(using appRequest).map(NotFound(_))
       }
     }
   }

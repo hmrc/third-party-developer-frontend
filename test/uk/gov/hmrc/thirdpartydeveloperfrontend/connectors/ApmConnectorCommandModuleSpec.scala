@@ -62,8 +62,8 @@ class ApmConnectorCommandModuleSpec
   val administrator = Administrator(UserId.random, "sample@example.com".toLaxEmail)
   val developer     = Collaborators.Developer(UserId.random, "someone@example.com".toLaxEmail)
 
-  val authToken                  = "Bearer Token"
-  implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
+  val authToken           = "Bearer Token"
+  given hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
 
   val emailAddressToRemove = "toRemove@example.com".toLaxEmail
   val gatekeeperUserName   = "maxpower"

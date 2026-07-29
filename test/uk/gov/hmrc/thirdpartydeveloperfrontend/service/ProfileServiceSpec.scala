@@ -39,7 +39,7 @@ class ProfileServiceSpec extends AsyncHmrcSpec
     with UserTestData {
 
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
     val mockDeskproConnector: ApiPlatformDeskproConnector    = mock[ApiPlatformDeskproConnector]
@@ -60,7 +60,7 @@ class ProfileServiceSpec extends AsyncHmrcSpec
     "call the TPD and Deskpro connectors correctly" in new Setup {
       val userId = UserId.random
 
-      when(mockDeveloperConnector.updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(*))
+      when(mockDeveloperConnector.updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(using *))
         .thenReturn(successful(OK))
       when(mockDeskproConnector.updatePersonName(eqTo(email), eqTo(name), eqTo(hc)))
         .thenReturn(successful(UpdateProfileSuccess))
@@ -69,14 +69,14 @@ class ProfileServiceSpec extends AsyncHmrcSpec
 
       result shouldBe OK
 
-      verify(mockDeveloperConnector, times(1)).updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(eqTo(hc))
+      verify(mockDeveloperConnector, times(1)).updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(using eqTo(hc))
       verify(mockDeskproConnector, times(1)).updatePersonName(eqTo(email), eqTo(name), eqTo(hc))
     }
 
     "handle error in call to TPD connector correctly" in new Setup {
       val userId = UserId.random
 
-      when(mockDeveloperConnector.updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(*))
+      when(mockDeveloperConnector.updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(using *))
         .thenReturn(failed(UpstreamErrorResponse("auth fail", 401)))
       when(mockDeskproConnector.updatePersonName(eqTo(email), eqTo(name), eqTo(hc)))
         .thenReturn(successful(UpdateProfileSuccess))
@@ -85,13 +85,13 @@ class ProfileServiceSpec extends AsyncHmrcSpec
         await(profileService.updateProfileName(userId, email, firstName, lastName))
       }
 
-      verify(mockDeveloperConnector, times(1)).updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(eqTo(hc))
+      verify(mockDeveloperConnector, times(1)).updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(using eqTo(hc))
     }
 
     "handle error in call to Deskpro connector correctly" in new Setup {
       val userId = UserId.random
 
-      when(mockDeveloperConnector.updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(*))
+      when(mockDeveloperConnector.updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(using *))
         .thenReturn(successful(OK))
       when(mockDeskproConnector.updatePersonName(eqTo(email), eqTo(name), eqTo(hc)))
         .thenReturn(successful(UpdateProfileFailed))
@@ -100,40 +100,40 @@ class ProfileServiceSpec extends AsyncHmrcSpec
 
       result shouldBe OK
 
-      verify(mockDeveloperConnector, times(1)).updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(eqTo(hc))
+      verify(mockDeveloperConnector, times(1)).updateProfile(eqTo(userId), eqTo(UpdateRequest(firstName, lastName)))(using eqTo(hc))
       verify(mockDeskproConnector, times(1)).updatePersonName(eqTo(email), eqTo(name), eqTo(hc))
     }
   }
 
   "lookupDeveloperName" should {
     "return developer name when developer found with valid name" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(adminDeveloper.email)))(*))
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(adminDeveloper.email)))(using *))
         .thenReturn(successful(Seq(adminDeveloper)))
 
       val result = await(profileService.lookupDeveloperName(adminDeveloper.email))
 
       result shouldBe Some(s"${adminDeveloper.firstName} ${adminDeveloper.lastName}")
-      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(adminDeveloper.email)))(*)
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(adminDeveloper.email)))(using *)
     }
 
     "return None when developer not found" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(using *))
         .thenReturn(successful(Seq.empty))
 
       val result = await(profileService.lookupDeveloperName(email))
 
       result shouldBe None
-      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(using *)
     }
 
     "return None on connector error" in new Setup {
-      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(*))
+      when(mockDeveloperConnector.fetchByEmails(eqTo(Set(email)))(using *))
         .thenReturn(failed(new RuntimeException("Service unavailable")))
 
       val result = await(profileService.lookupDeveloperName(email))
 
       result shouldBe None
-      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(*)
+      verify(mockDeveloperConnector, times(1)).fetchByEmails(eqTo(Set(email)))(using *)
     }
   }
 }

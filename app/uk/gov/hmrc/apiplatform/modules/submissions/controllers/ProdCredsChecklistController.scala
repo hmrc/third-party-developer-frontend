@@ -108,7 +108,7 @@ class ProdCredsChecklistController @Inject() (
     val cookieSigner: CookieSigner,
     val submissionService: SubmissionService,
     productionCredentialsChecklistView: ProductionCredentialsChecklistView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]

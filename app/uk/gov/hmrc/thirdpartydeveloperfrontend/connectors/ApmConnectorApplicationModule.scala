@@ -43,17 +43,17 @@ trait ApmConnectorApplicationModule extends ApmConnectorModule {
 
   private val baseUrl = s"${config.serviceBaseUrl}/applications"
 
-  def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
+  def fetchApplicationById(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
     http.get(url"${baseUrl}/${applicationId}")
       .execute[Option[ApplicationWithSubscriptionFields]]
 
-  def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
+  def fetchUpliftableSubscriptions(applicationId: ApplicationId)(using HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
       http.get(url"${baseUrl}/$applicationId/upliftableSubscriptions")
         .execute[Set[ApiIdentifier]]
     }
 
-  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(using HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
     http.post(url"${baseUrl}/${applicationId}/uplift")
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
       .execute[ApplicationId]

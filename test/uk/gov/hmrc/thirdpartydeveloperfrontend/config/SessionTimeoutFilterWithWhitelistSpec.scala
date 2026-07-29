@@ -76,7 +76,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("ts" -> nowInMillis, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 3
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri
@@ -91,7 +91,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("ts" -> nowInMillis, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 3
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri
@@ -106,7 +106,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("ts" -> nowInMillis, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 3
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri
@@ -124,7 +124,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("ts" -> twentySecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 3
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri
@@ -138,7 +138,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
       val request = FakeRequest(method = "GET", path = otherUrl)
         .withSession("ts" -> twentySecondsAgo, "access_uri" -> accessUri)
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.keys shouldNot contain("access_uri")
         sessionData.keys should contain("ts")
       }
@@ -150,7 +150,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("ts" -> twentySecondsAgo, "access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.keys shouldNot contain("access_uri")
         sessionData.keys should contain("ts")
       }
@@ -165,7 +165,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 2
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri
@@ -179,7 +179,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 3
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri
@@ -194,7 +194,7 @@ class SessionTimeoutFilterWithWhitelistSpec extends AsyncHmrcSpec with GuiceOneA
         .withSession("access_uri" -> accessUri)
 
       whenReady(filter.apply(nextOperationFunction)(request)) { result =>
-        val sessionData = result.session(request).data
+        val sessionData = result.session(using request).data
         sessionData.size shouldBe 3
         sessionData("authToken") shouldBe bearerToken
         sessionData("access_uri") shouldBe accessUri

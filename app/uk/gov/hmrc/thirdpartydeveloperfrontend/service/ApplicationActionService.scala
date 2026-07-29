@@ -38,10 +38,10 @@ class ApplicationActionService @Inject() (
     subscriptionFieldsService: SubscriptionFieldsService,
     openAccessApisService: OpenAccessApiService,
     collaboratorService: CollaboratorService
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
-  def process[A](applicationId: ApplicationId, userRequest: UserRequest[A])(implicit hc: HeaderCarrier): Future[Option[ApplicationRequest[A]]] = {
+  def process[A](applicationId: ApplicationId, userRequest: UserRequest[A])(using HeaderCarrier): Future[Option[ApplicationRequest[A]]] = {
     import cats.implicits._
 
     (

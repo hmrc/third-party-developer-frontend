@@ -30,9 +30,9 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
-class AuditService @Inject() (auditConnector: AuditConnector, appConfig: ApplicationConfig)(implicit val ec: ExecutionContext) {
+class AuditService @Inject() (auditConnector: AuditConnector, appConfig: ApplicationConfig)(using val ec: ExecutionContext) {
 
-  def audit(action: AuditAction, data: Map[String, String] = Map.empty)(implicit hc: HeaderCarrier): Future[AuditResult] =
+  def audit(action: AuditAction, data: Map[String, String] = Map.empty)(using hc: HeaderCarrier): Future[AuditResult] =
     auditConnector.sendEvent(DataEvent(
       auditSource = "third-party-developer-frontend",
       auditType = action.auditType,

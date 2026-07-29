@@ -37,7 +37,7 @@ class SubscriptionsService @Inject() (
     apmApplicationModule: ApmConnectorApplicationModule,
     apmCmdModule: ApmConnectorCommandModule,
     val clock: Clock
-  )(implicit ec: ExecutionContext
+  )(using ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
@@ -57,12 +57,12 @@ class SubscriptionsService @Inject() (
       application: ApplicationWithCollaborators,
       apiName: String,
       apiVersion: ApiVersionNbr
-    )(implicit hc: HeaderCarrier
+    )(using hc: HeaderCarrier
     ): Future[Option[String]] = {
     apiPlatformDeskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(CreateTicketRequest.createForApiSubscribe), hc)
   }
 
-  def requestApiUnsubscribe(requester: UserSession, application: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr)(implicit hc: HeaderCarrier)
+  def requestApiUnsubscribe(requester: UserSession, application: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr)(using hc: HeaderCarrier)
       : Future[Option[String]] = {
     apiPlatformDeskproConnector.createTicket(doRequest(requester, application, apiName, apiVersion)(CreateTicketRequest.createForApiUnsubscribe), hc)
   }
@@ -70,19 +70,19 @@ class SubscriptionsService @Inject() (
   type ApiMap[V]   = Map[ApiContext, Map[ApiVersionNbr, V]]
   type FieldMap[V] = ApiMap[Map[FieldName, V]]
 
-  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def isSubscribedToApi(applicationId: ApplicationId, apiIdentifier: ApiIdentifier)(using HeaderCarrier): Future[Boolean] = {
     for {
       app <- apmApplicationModule.fetchApplicationById(applicationId)
       subs = app.map(_.subscriptions).getOrElse(Set.empty)
     } yield subs.contains(apiIdentifier)
   }
 
-  def subscribeToApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+  def subscribeToApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(using HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.SubscribeToApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant)
     apmCmdModule.dispatch(application.id, cmd, Set.empty)
   }
 
-  def unsubscribeFromApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(implicit hc: HeaderCarrier): AppCmdResult = {
+  def unsubscribeFromApi(application: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier, requestingEmail: LaxEmailAddress)(using HeaderCarrier): AppCmdResult = {
     val cmd = ApplicationCommands.UnsubscribeFromApi(Actors.AppCollaborator(requestingEmail), apiIdentifier, instant)
     apmCmdModule.dispatch(application.id, cmd, Set.empty)
   }

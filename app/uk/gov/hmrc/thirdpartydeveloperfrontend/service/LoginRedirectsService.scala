@@ -34,11 +34,11 @@ class LoginRedirectsService @Inject() (
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
-  private def issueCommand(id: ApplicationId, cmd: RedirectCommand)(implicit hc: HeaderCarrier): AppCmdResult = {
+  private def issueCommand(id: ApplicationId, cmd: RedirectCommand)(using HeaderCarrier): AppCmdResult = {
     apmCmdModule.dispatch(id, cmd, Set.empty)
   }
 
-  def addLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, newRedirectUri: LoginRedirectUri)(implicit hc: HeaderCarrier) = {
+  def addLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, newRedirectUri: LoginRedirectUri)(using HeaderCarrier) = {
     issueCommand(application.id, ApplicationCommands.AddLoginRedirectUri(actor, newRedirectUri, instant))
   }
 
@@ -47,12 +47,12 @@ class LoginRedirectsService @Inject() (
       application: ApplicationWithCollaborators,
       originalRedirectUri: LoginRedirectUri,
       newRedirectUri: LoginRedirectUri
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ) = {
     issueCommand(application.id, ApplicationCommands.ChangeLoginRedirectUri(actor, originalRedirectUri, newRedirectUri, instant))
   }
 
-  def deleteLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, redirectUriToDelete: LoginRedirectUri)(implicit hc: HeaderCarrier) = {
+  def deleteLoginRedirect(actor: Actor, application: ApplicationWithCollaborators, redirectUriToDelete: LoginRedirectUri)(using HeaderCarrier) = {
     issueCommand(application.id, ApplicationCommands.DeleteLoginRedirectUri(actor, redirectUriToDelete, instant))
   }
 }

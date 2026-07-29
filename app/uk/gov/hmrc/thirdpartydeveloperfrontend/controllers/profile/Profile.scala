@@ -46,7 +46,7 @@ class Profile @Inject() (
     passwordUpdatedView: PasswordUpdatedView,
     profileDeleteConfirmationView: ProfileDeleteConfirmationView,
     profileDeleteSubmittedView: ProfileDeleteSubmittedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) with PasswordChange {
 

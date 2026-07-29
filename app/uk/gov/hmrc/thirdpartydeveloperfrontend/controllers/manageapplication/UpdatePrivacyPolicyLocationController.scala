@@ -47,7 +47,7 @@ class UpdatePrivacyPolicyLocationController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     updatePrivacyPolicyLocationView: UpdatePrivacyPolicyLocationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with WithUrlEncodedOnlyFormBinding {

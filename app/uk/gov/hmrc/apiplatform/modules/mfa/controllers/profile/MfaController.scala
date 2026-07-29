@@ -73,7 +73,7 @@ class MfaController @Inject() (
     authAppSetupReminderView: AuthAppSetupReminderView,
     selectMfaView: SelectMfaView,
     removeMfaCompletedView: RemoveMfaCompletedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc)
     with WithUrlEncodedOnlyFormBinding {
@@ -109,7 +109,7 @@ class MfaController @Inject() (
     }
   }
 
-  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])(implicit request: Request[?], hc: HeaderCarrier): Future[Result] = {
+  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])(using request: Request[?], hc: HeaderCarrier): Future[Result] = {
 
     def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId): Future[Result] = {
       mfaType match {
@@ -293,7 +293,7 @@ class MfaController @Inject() (
     successful(Ok(removeMfaCompletedView()))
   }
 
-  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[?]): Future[Result] = {
+  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(using hc: HeaderCarrier, request: Request[?]): Future[Result] = {
     mfaType match {
       case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
       case Sms              =>

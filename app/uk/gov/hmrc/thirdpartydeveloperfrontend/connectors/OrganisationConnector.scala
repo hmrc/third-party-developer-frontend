@@ -31,13 +31,13 @@ import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.{
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
-class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit val ec: ExecutionContext)
+class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(using val ec: ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger {
 
   lazy val serviceBaseUrl: String = config.organisationUrl
   val api                         = API("organisation")
 
-  def fetchOrganisationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[List[Organisation]] = {
+  def fetchOrganisationsByUserId(userId: UserId)(using HeaderCarrier): Future[List[Organisation]] = {
     metrics.record(api) {
       // TODO: remove the swallowing of errors once api-platform-organisation is in Production
       http.get(requestUrl(s"/organisation/user/$userId"))
@@ -47,7 +47,7 @@ class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationCo
     }
   }
 
-  def fetchOrganisationAllowList(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[OrganisationAllowList]] = {
+  def fetchOrganisationAllowList(userId: UserId)(using HeaderCarrier): Future[Option[OrganisationAllowList]] = {
     metrics.record(api) {
       http.get(requestUrl(s"/allow-list/$userId"))
         .execute[Option[OrganisationAllowList]] recover {
@@ -56,7 +56,7 @@ class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationCo
     }
   }
 
-  def fetchLatestSubmissionByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchLatestSubmissionByUserId(userId: UserId)(using HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
       http
         .get(requestUrl(s"/submission/user/$userId"))
@@ -66,7 +66,7 @@ class OrganisationConnector @Inject() (http: HttpClientV2, config: ApplicationCo
     }
   }
 
-  def fetchOrganisation(id: OrganisationId)(implicit hc: HeaderCarrier): Future[Option[Organisation]] = {
+  def fetchOrganisation(id: OrganisationId)(using HeaderCarrier): Future[Option[Organisation]] = {
     metrics.record(api) {
       http.get(requestUrl(s"/organisation/${id.value}"))
         .execute[Option[Organisation]]

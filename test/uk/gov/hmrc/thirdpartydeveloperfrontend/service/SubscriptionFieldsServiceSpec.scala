@@ -51,12 +51,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     lazy val locked = false
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
     val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
 
-    val mockApmConnector: ApmConnector                                     = org.mockito.Mockito.mock(
+    val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
       classOf[ApmConnector],
       org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
     )
@@ -85,7 +85,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val newValue1    = FieldValue("newValue")
       val newValuesMap = Map(definition1.name -> newValue1)
 
-      when(mockApmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))
+      when(mockApmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(using *))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValuesMap))
@@ -98,7 +98,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       )
 
       verify(mockApmConnector)
-        .saveFieldValues(eqTo(Environment.Production), eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(*)
+        .saveFieldValues(eqTo(Environment.Production), eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(using *)
     }
 
     "save the fields fails with write access denied" in new Setup {
@@ -118,7 +118,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       result shouldBe SaveSubscriptionFieldsAccessDeniedResponse
 
       verify(mockApmConnector, never)
-        .saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*)
+        .saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(using *)
     }
   }
 }

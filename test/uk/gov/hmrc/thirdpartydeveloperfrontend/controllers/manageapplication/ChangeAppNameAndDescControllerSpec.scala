@@ -140,7 +140,7 @@ class ChangeAppNameAndDescControllerSpec
     }
 
     "update name which contains HMRC should fail" in new Setup {
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
         .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
 
       val application = subordinateApplication
@@ -151,7 +151,7 @@ class ChangeAppNameAndDescControllerSpec
       status(result) shouldBe BAD_REQUEST
 
       verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
-        *
+        using *
       )
     }
   }
@@ -233,7 +233,7 @@ class ChangeAppNameAndDescControllerSpec
 
       await(application.withName(newName).callChangeAppNameAndDescAction)
 
-      verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(*)
+      verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(using *)
     }
   }
 
@@ -257,10 +257,10 @@ class ChangeAppNameAndDescControllerSpec
     val newName        = ApplicationName("new name")
     val newDescription = Some("new description")
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
+    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(using *))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     def changeAppNameAndDescShouldRenderThePage(userSession: UserSession)(application: ApplicationWithCollaborators) = {
@@ -303,7 +303,7 @@ class ChangeAppNameAndDescControllerSpec
 
     def captureAllApplicationCmds: List[ApplicationCommand] = {
       val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
+      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(using *)
       captor.values
     }
 

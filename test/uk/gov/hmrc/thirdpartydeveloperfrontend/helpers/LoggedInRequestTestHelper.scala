@@ -40,6 +40,6 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding w
   updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
   lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    .withLoggedIn(this, implicitly)(sessionId)
+    .withLoggedIn(using this, implicitly)(sessionId)
     .withSession(sessionParams*)
 }

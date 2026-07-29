@@ -36,17 +36,17 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     def verifyZeroInteractions() = MockitoSugar.verifyZeroInteractions(aMock)
 
     object FetchBySessionIdAndFlowType {
-      def thenReturn[A <: Flow](flow: A)(implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(ct))).thenReturn(successful(Some(flow)))
+      def thenReturn[A <: Flow](flow: A)(implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(using eqTo(ct))).thenReturn(successful(Some(flow)))
 
       def thenReturn[A <: Flow](sessionId: SessionId)(flow: A)(implicit ct: ClassTag[A]) =
-        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(ct))).thenReturn(successful(Some(flow)))
+        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))).thenReturn(successful(Some(flow)))
 
-      def thenReturnNothing[A <: Flow](implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(eqTo(ct))).thenReturn(successful(None))
+      def thenReturnNothing[A <: Flow](implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(using eqTo(ct))).thenReturn(successful(None))
 
       def thenReturnNothing[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) =
-        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(ct))).thenReturn(successful(None))
+        when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))).thenReturn(successful(None))
 
-      def verifyCalledWith[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(eqTo(ct))
+      def verifyCalledWith[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))
     }
 
     object SaveFlow {

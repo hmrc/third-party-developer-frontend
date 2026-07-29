@@ -24,11 +24,11 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
-  val tpoConnector: ThirdPartyOrchestratorConnector                                        = mock[ThirdPartyOrchestratorConnector]
-  val tpdConnector: ThirdPartyDeveloperConnector                                           = mock[ThirdPartyDeveloperConnector]
-  val tpaProductionConnector: ThirdPartyApplicationProductionConnector                     = mock[ThirdPartyApplicationProductionConnector]
-  val apiPlatformDeskproConnector: ApiPlatformDeskproConnector                             = mock[ApiPlatformDeskproConnector]
-  val flowRepository: FlowRepository                                                       = mock[FlowRepository]
+  val tpoConnector: ThirdPartyOrchestratorConnector                    = mock[ThirdPartyOrchestratorConnector]
+  val tpdConnector: ThirdPartyDeveloperConnector                       = mock[ThirdPartyDeveloperConnector]
+  val tpaProductionConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
+  val apiPlatformDeskproConnector: ApiPlatformDeskproConnector         = mock[ApiPlatformDeskproConnector]
+  val flowRepository: FlowRepository                                   = mock[FlowRepository]
 
   val apmConnector: ApmConnector                                                           = org.mockito.Mockito.mock(
     classOf[TestApmConnector],

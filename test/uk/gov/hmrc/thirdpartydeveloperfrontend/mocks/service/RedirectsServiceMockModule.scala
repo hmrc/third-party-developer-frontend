@@ -34,21 +34,21 @@ trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
     object AddLoginRedirect {
 
       def succeedsWith(uri: LoginRedirectUri) = {
-        when(aMock.addLoginRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.addLoginRedirect(*, *, eqTo(uri))(using *)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object ChangeLoginRedirect {
 
       def succeedsWith(from: LoginRedirectUri, to: LoginRedirectUri) = {
-        when(aMock.changeLoginRedirect(*, *, eqTo(from), eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.changeLoginRedirect(*, *, eqTo(from), eqTo(to))(using *)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object DeleteLoginRedirect {
 
       def succeedsWith(uri: LoginRedirectUri) = {
-        when(aMock.deleteLoginRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.deleteLoginRedirect(*, *, eqTo(uri))(using *)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
   }

@@ -60,7 +60,7 @@ class DeleteApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val sessionId = adminSession.sessionId
 
@@ -69,7 +69,7 @@ class DeleteApplicationSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams   = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withSession(sessionParams*)
   }
 
   "delete application page" should {
@@ -104,7 +104,7 @@ class DeleteApplicationSpec
 
       val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes")).withMethod("POST")
 
-      when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
+      when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(using *))
         .thenReturn(Future.successful(Some("ref")))
 
       val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
@@ -113,7 +113,7 @@ class DeleteApplicationSpec
       val body = contentAsString(result)
 
       body should include("Request submitted")
-      verify(underTest.applicationService).requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
+      verify(underTest.applicationService).requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(using *)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
@@ -133,7 +133,7 @@ class DeleteApplicationSpec
 
     givenApplicationAction(nonApprovedApplication, adminSession)
 
-    when(underTest.applicationService.requestApplicationDeletion(*, *)(*))
+    when(underTest.applicationService.requestApplicationDeletion(*, *)(using *))
       .thenReturn(Future.successful(Some("ref")))
   }
 

@@ -36,11 +36,10 @@ class SessionService @Inject() (
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
     val appsByTeamMember: AppsByTeamMemberService,
     val flowRepository: FlowRepository
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
-  def authenticate(emailAddress: LaxEmailAddress, password: String, deviceSessionId: Option[DeviceSessionId])(implicit hc: HeaderCarrier)
-      : Future[(UserAuthenticationResponse, UserId)] = {
+  def authenticate(emailAddress: LaxEmailAddress, password: String, deviceSessionId: Option[DeviceSessionId])(using HeaderCarrier): Future[(UserAuthenticationResponse, UserId)] = {
     for {
       coreUser           <- thirdPartyDeveloperConnector.findUserId(emailAddress).map(_.getOrElse(throw new InvalidEmail))
       mfaMandatedForUser <- appsByTeamMember.fetchProductionSummariesByAdmin(coreUser.id).map(_.nonEmpty)
@@ -48,18 +47,18 @@ class SessionService @Inject() (
     } yield (response, coreUser.id)
   }
 
-  def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[UserSession] = {
+  def authenticateAccessCode(emailAddress: LaxEmailAddress, accessCode: String, nonce: String, mfaId: MfaId)(using HeaderCarrier): Future[UserSession] = {
     thirdPartyDeveloperConnector.authenticateMfaAccessCode(AccessCodeAuthenticationRequest(emailAddress, accessCode, nonce, mfaId))
   }
 
-  def fetch(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] =
+  def fetch(sessionId: UserSessionId)(using HeaderCarrier): Future[Option[UserSession]] =
     thirdPartyDeveloperConnector.fetchSession(sessionId)
       .map(Some(_))
       .recover {
         case _: SessionInvalid => None
       }
 
-  def destroy(sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Int] =
+  def destroy(sessionId: UserSessionId)(using HeaderCarrier): Future[Int] =
     thirdPartyDeveloperConnector.deleteSession(sessionId)
 
   def updateUserFlowSessions(sessionId: SessionId): Future[Unit] = {

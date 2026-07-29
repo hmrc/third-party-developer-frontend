@@ -43,7 +43,7 @@ class DashboardServiceSpec extends AsyncHmrcSpec
     with FixedClock {
 
   trait Setup extends FixedClock with ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockOrganisationConnector: OrganisationConnector = mock[OrganisationConnector]
     val mockAppsByTeamMemberService                      = mock[AppsByTeamMemberService]
@@ -79,7 +79,7 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
   "fetchByUserId" should {
     "return organisations for given user id" in new Setup {
-      when(mockOrganisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
+      when(mockOrganisationConnector.fetchOrganisationsByUserId(*[UserId])(using *)).thenReturn(successful(List(organisation)))
 
       val result = await(dashboardService.fetchOrganisationsByUserId(userId))
 

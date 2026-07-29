@@ -41,7 +41,7 @@ class SmsSetupSkippedViewSpec extends CommonViewSpec
 
   "SmsSetupSkippedView" should {
     "render as expected" in {
-      val mainView = smsSetupSkippedView()(FakeRequest().withCSRFToken, JoeBloggs.loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupSkippedView()(using FakeRequest().withCSRFToken, JoeBloggs.loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "Get access codes by text later"

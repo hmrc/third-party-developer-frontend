@@ -52,7 +52,7 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
     val mockFutureTimeoutSupport: FutureTimeoutSupport = new FutureTimeoutSupport {
 
-      override def after[T](duration: FiniteDuration, using: Scheduler)(value: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+      override def after[T](duration: FiniteDuration, using: Scheduler)(value: => Future[T])(using ExecutionContext): Future[T] = {
         actualDelay = Some(duration)
         value
       }
@@ -65,12 +65,12 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
         .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
         .build()
     implicit val actorSystem: ActorSystem = app.actorSystem
-    implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
+    given ec: ExecutionContext            = app.injector.instanceOf[ExecutionContext]
 
     def underTest = new RetryTestConnector(mockFutureTimeoutSupport, mockAppConfig)
   }
 
-  class RetryTestConnector(val futureTimeout: FutureTimeoutSupport, val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext, val actorSystem: ActorSystem)
+  class RetryTestConnector(val futureTimeout: FutureTimeoutSupport, val appConfig: ApplicationConfig)(using val ec: ExecutionContext, val actorSystem: ActorSystem)
       extends Retries {}
 
   "Retries" should {

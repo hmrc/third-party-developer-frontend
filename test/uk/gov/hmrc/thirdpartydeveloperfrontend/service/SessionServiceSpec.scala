@@ -41,7 +41,7 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
     with ApplicationWithCollaboratorsFixtures {
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val underTest = new SessionService(mock[ThirdPartyDeveloperConnector], appsByTeamMemberServiceMock, mock[FlowRepository])
 
@@ -76,31 +76,31 @@ class SessionServiceSpec extends AsyncHmrcSpec with UserBuilder with LocalUserId
 
   "authenticate" should {
     "return the user authentication response from the connector when the authentication succeeds and user is not admin on production application" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(using *)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
-      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*)).thenReturn(successful(userAuthenticationResponse))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(using *)).thenReturn(successful(userAuthenticationResponse))
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
-      verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
-      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
+      verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(using *)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(using *)
     }
 
     "return the user authentication response from the connector when the authentication succeeds and user is an admin on production application" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(using *)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsAdminInProduction)
-      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(using *))
         .thenReturn(successful(userAuthenticationResponse))
 
       await(underTest.authenticate(email, password, Some(deviceSessionId))) shouldBe ((userAuthenticationResponse, userId))
 
-      verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(*)
-      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(*)
+      verify(appsByTeamMemberServiceMock).fetchProductionSummariesByAdmin(eqTo(userId))(using *)
+      verify(underTest.thirdPartyDeveloperConnector).authenticate(*)(using *)
     }
 
     "propagate the exception when the connector fails" in new Setup {
-      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+      when(underTest.thirdPartyDeveloperConnector.findUserId(eqTo(email))(using *)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
       fetchProductionSummariesByAdmin(userId, applicationsWhereUserIsDeveloperInProduction)
-      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(*))
+      when(underTest.thirdPartyDeveloperConnector.authenticate(*)(using *))
         .thenThrow(new RuntimeException("this one"))
 
       intercept[RuntimeException](await(underTest.authenticate(email, password, Some(deviceSessionId)))).getMessage shouldBe "this one"

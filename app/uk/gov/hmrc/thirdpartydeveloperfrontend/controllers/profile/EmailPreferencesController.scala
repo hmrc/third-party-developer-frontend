@@ -51,7 +51,7 @@ class EmailPreferencesController @Inject() (
     flowSelectTopicsView: FlowSelectTopicsView,
     selectApisFromSubscriptionsView: SelectApisFromSubscriptionsView,
     selectTopicsFromSubscriptionsView: SelectTopicsFromSubscriptionsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) {
 

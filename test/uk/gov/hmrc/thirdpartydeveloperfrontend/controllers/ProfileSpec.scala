@@ -75,7 +75,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
     val sessionId               = devSession.sessionId
 
     def createRequest: FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withCSRFToken.withMethod("POST")
+      FakeRequest().withLoggedIn(using underTest, implicitly)(sessionId).withCSRFToken.withMethod("POST")
   }
 
   "updateProfile" should {
@@ -88,7 +88,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
-      when(underTest.profileService.updateProfileName(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo("first"), eqTo("last"))(*))
+      when(underTest.profileService.updateProfileName(eqTo(loggedInDeveloper.userId), eqTo(loggedInDeveloper.email), eqTo("first"), eqTo("last"))(using *))
         .thenReturn(Future.successful(OK))
 
       val result = addToken(underTest.updateProfile())(request)
@@ -119,9 +119,9 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(using *))
         .thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))))
-      when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
+      when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(using *))
         .thenReturn(failed(new InvalidCredentials()))
 
       val result = addToken(underTest.updatePassword())(request)
@@ -129,7 +129,7 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       status(result) shouldBe 401
 
       await(result) // Before we verify !
-      verify(underTest.auditService).audit(eqTo(PasswordChangeFailedDueToInvalidCredentials(loggedInDeveloper.email)), eqTo(Map.empty))(*)
+      verify(underTest.auditService).audit(eqTo(PasswordChangeFailedDueToInvalidCredentials(loggedInDeveloper.email)), eqTo(Map.empty))(using *)
     }
 
     "Password updated should have correct page title" in new Setup {
@@ -140,8 +140,8 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       )
 
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
-      when(underTest.sessionService.fetch(eqTo(sessionId))(*)).thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))))
-      when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(*))
+      when(underTest.sessionService.fetch(eqTo(sessionId))(using *)).thenReturn(Future.successful(Some(UserSession(sessionId, LoggedInState.LoggedIn, loggedInDeveloper))))
+      when(underTest.connector.changePassword(eqTo(PasswordChangeRequest(loggedInDeveloper.email, "oldPassword", "StrongNewPwd!2")))(using *))
         .thenReturn(Future.successful(OK))
 
       val result = addToken(underTest.updatePassword())(request)

@@ -40,22 +40,22 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     fetchByApplicationIdReturns(returns.id, returns.withSubscriptions(Set.empty).withFieldValues(Map.empty))
 
   def fetchByApplicationIdReturns(id: ApplicationId, returns: ApplicationWithSubscriptionFields): Unit =
-    when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(Some(returns)))
+    when(applicationServiceMock.fetchByApplicationId(eqTo(id))(using *)).thenReturn(successful(Some(returns)))
 
   def fetchByApplicationIdReturns(appData: ApplicationWithSubscriptions): Unit =
     fetchByApplicationIdReturns(appData.id, appData.withFieldValues(Map.empty))
 
   def fetchByApplicationIdReturnsNone(id: ApplicationId) =
-    when(applicationServiceMock.fetchByApplicationId(eqTo(id))(*)).thenReturn(successful(None))
+    when(applicationServiceMock.fetchByApplicationId(eqTo(id))(using *)).thenReturn(successful(None))
 
   def givenApplicationNameIsValid() =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Valid))
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(using *)).thenReturn(successful(ApplicationNameValidationResult.Valid))
 
   def givenApplicationNameIsInvalid() =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Invalid))
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(using *)).thenReturn(successful(ApplicationNameValidationResult.Invalid))
 
   def givenApplicationNameIsDuplicate() =
-    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(*)).thenReturn(successful(ApplicationNameValidationResult.Duplicate))
+    when(applicationServiceMock.isApplicationNameValid(*, *, *[Option[ApplicationId]])(using *)).thenReturn(successful(ApplicationNameValidationResult.Duplicate))
 
   def givenApplicationExists(application: ApplicationWithCollaborators): Unit = givenApplicationExists(application.withSubscriptions(Set.empty))
 
@@ -66,11 +66,11 @@ trait ApplicationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   }
 
   def acceptResponsibleIndividualVerification(appId: ApplicationId, code: String) = {
-    when(applicationServiceMock.acceptResponsibleIndividualVerification(eqTo(appId), eqTo(code))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+    when(applicationServiceMock.acceptResponsibleIndividualVerification(eqTo(appId), eqTo(code))(using *)).thenReturn(successful(ApplicationUpdateSuccessful))
   }
 
   def declineResponsibleIndividualVerification(appId: ApplicationId, code: String) = {
-    when(applicationServiceMock.declineResponsibleIndividualVerification(eqTo(appId), eqTo(code))(*)).thenReturn(successful(ApplicationUpdateSuccessful))
+    when(applicationServiceMock.declineResponsibleIndividualVerification(eqTo(appId), eqTo(code))(using *)).thenReturn(successful(ApplicationUpdateSuccessful))
   }
 }
 

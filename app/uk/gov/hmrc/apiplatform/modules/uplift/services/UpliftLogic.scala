@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 class UpliftLogic @Inject() (
     apmConnector: ApmConnector,
     appsByTeamMember: AppsByTeamMemberService
-  )(implicit ec: ExecutionContext
+  )(using ExecutionContext
   ) {
 
   import UpliftLogic._
@@ -41,7 +41,7 @@ class UpliftLogic @Inject() (
     summaries.map(s => s.id -> s.subscriptionIds).toMap
   }
 
-  def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[UpliftLogic.Data] = {
+  def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(using HeaderCarrier): Future[UpliftLogic.Data] = {
     // Concurrent requests
     val fApisAvailableInProd  = apmConnector.fetchUpliftableApiIdentifiers
     val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.Sandbox)

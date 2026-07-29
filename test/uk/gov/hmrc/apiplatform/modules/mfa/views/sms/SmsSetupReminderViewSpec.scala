@@ -43,7 +43,7 @@ class SmsSetupReminderViewSpec extends CommonViewSpec
 
   "SmsSetupReminderView" should {
     "render as expected" in {
-      val mainView = smsSetupReminderView()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupReminderView()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "Get access codes by text"

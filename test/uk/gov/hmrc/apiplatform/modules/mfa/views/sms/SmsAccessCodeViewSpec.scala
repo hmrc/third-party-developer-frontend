@@ -57,7 +57,13 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
   "SmsAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
       val mainView: HtmlFormat.Appendable =
-        smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(
+          using flash,
+          stubMessages(),
+          FakeRequest().withCSRFToken,
+          loggedIn,
+          appConfig
+        )
       val document: Document              = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
@@ -70,7 +76,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
         MfaId(UUID.randomUUID()),
         MfaAction.CREATE,
         None
-      )(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      )(using flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document: Document              = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)

@@ -39,7 +39,7 @@ class RemoveMfaCompletedViewSpec extends CommonViewSpec
 
   "RemoveMfaCompletedView" should {
     "render as expected" in {
-      val mainView = removeMfaCompletedView.apply()(FakeRequest(), loggedIn, stubMessages(), appConfig)
+      val mainView = removeMfaCompletedView.apply()(using FakeRequest(), loggedIn, stubMessages(), appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("panel-title").text shouldBe "You've removed this security preference"
       document.getElementById("view-all-apps").attr("href") shouldBe "/developer/applications"

@@ -34,7 +34,7 @@ class ApiPlatformDeskproConnector @Inject() (
     config: ApiPlatformDeskproConnector.Config,
     http: HttpClientV2,
     metrics: ConnectorMetrics
-  )(implicit ec: ExecutionContext
+  )(using ExecutionContext
   ) extends CommonResponseHandlers with ApplicationLogger {
 
   import ApiPlatformDeskproConnector._
@@ -42,7 +42,7 @@ class ApiPlatformDeskproConnector @Inject() (
   val api = API("api-platform-deskpro")
 
   def createTicket(createRequest: CreateTicketRequest, hc: HeaderCarrier): Future[Option[String]] = metrics.record(api) {
-    implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
+    given headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
     http.post(url"${config.serviceBaseUrl}/ticket")
       .withBody(Json.toJson(createRequest))
       .execute[CreateTicketResponse]
@@ -50,7 +50,7 @@ class ApiPlatformDeskproConnector @Inject() (
   }
 
   def updatePersonName(userEmailAddress: LaxEmailAddress, name: String, hc: HeaderCarrier): Future[UpdateProfileResult] = metrics.record(api) {
-    implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
+    given headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
     http.put(url"${config.serviceBaseUrl}/person")
       .withBody(Json.toJson(UpdatePersonRequest(userEmailAddress, name)))
       .execute[ErrorOrUnit]
