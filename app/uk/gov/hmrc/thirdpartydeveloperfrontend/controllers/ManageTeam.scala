@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
 import play.twirl.api.Html
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
@@ -61,7 +61,7 @@ class ManageTeam @Inject() (
   ) extends ApplicationController(mcc)
     with CommandHandlerTypes[DispatchSuccessResult]
     with FraudPreventionNavLinkHelper
-    with WithUnsafeDefaultFormBinding
+    with WithUrlEncodedOnlyFormBinding
     with ApplicationSyntaxes {
 
   private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =

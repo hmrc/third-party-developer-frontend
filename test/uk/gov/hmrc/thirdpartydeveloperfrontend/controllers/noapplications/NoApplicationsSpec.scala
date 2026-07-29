@@ -99,7 +99,7 @@ class NoApplicationsSpec
     "noApplicationsAction" should {
 
       "redirect to email preferences when 'get-emails' choice posted" in new Setup {
-        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "get-emails")
+        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "get-emails").withMethod("POST")
 
         private val result = noApplicationsController.noApplicationsAction()(request)
         status(result) shouldBe SEE_OTHER
@@ -107,7 +107,7 @@ class NoApplicationsSpec
       }
 
       "redirect to start using rest apis when 'use-apis' choice posted" in new Setup {
-        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "use-apis")
+        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "use-apis").withMethod("POST")
 
         private val result = noApplicationsController.noApplicationsAction()(request)
         status(result) shouldBe SEE_OTHER

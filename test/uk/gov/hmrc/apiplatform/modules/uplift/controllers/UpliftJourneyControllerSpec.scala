@@ -252,7 +252,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "true"
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
@@ -268,7 +268,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "false"
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe OK
       contentAsString(result) should include("You need at least 1 API subscription")
@@ -375,7 +375,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "answer" -> testSellResellOrDistribute.value
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
@@ -393,7 +393,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "answer" -> testSellResellOrDistribute.value
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
@@ -419,7 +419,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(prodAppId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "answer" -> testSellResellOrDistribute.value
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${prodAppId.value}/production-credentials-checklist")

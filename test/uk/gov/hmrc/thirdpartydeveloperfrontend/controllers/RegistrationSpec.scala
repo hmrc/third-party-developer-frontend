@@ -76,7 +76,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
         ("confirmpassword", "VALID@1q2w3e")
-      )
+      ).withMethod("POST")
 
       val requestCaptor: ArgumentCaptor[RegistrationRequest] = ArgumentCaptor.forClass(classOf[RegistrationRequest])
       when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
@@ -98,7 +98,7 @@ class RegistrationSpec extends BaseControllerSpec {
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
         ("confirmpassword", "VALID@1q2w3e")
-      )
+      ).withMethod("POST")
 
       val requestCaptor: ArgumentCaptor[RegistrationRequest] = ArgumentCaptor.forClass(classOf[RegistrationRequest])
       when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))

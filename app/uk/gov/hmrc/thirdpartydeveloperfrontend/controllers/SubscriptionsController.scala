@@ -28,7 +28,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import play.twirl.api.Html
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -66,7 +66,7 @@ class SubscriptionsController @Inject() (
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends ApplicationController(mcc)
-    with ApplicationHelper with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding {
+    with ApplicationHelper with FraudPreventionNavLinkHelper with WithUrlEncodedOnlyFormBinding {
 
   private def canManagePrivateApiSubscriptionsAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]) =
     checkActionForAllStates(SupportsSubscriptions, AdministratorOnly)(applicationId)(fun)

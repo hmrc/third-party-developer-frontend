@@ -166,7 +166,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       val result = underTest.authenticate()(request)
 
@@ -229,7 +229,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = underTest.authenticate()(request)
 
@@ -258,7 +258,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = underTest.authenticate()(request)
 
@@ -275,7 +275,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -293,7 +293,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -311,7 +311,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -326,7 +326,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(("userId" -> sessionWithAuthAppMfa.developer.userId.value.toString) +: sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -342,7 +342,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -357,7 +357,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -368,7 +368,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
       private val request = FakeRequest()
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, "wrongPassword1!"))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, "wrongPassword1!")).withMethod("POST")
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe UNAUTHORIZED
@@ -382,7 +382,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
     "return the login page when the password is invalid" in new Setup {
       private val request = FakeRequest()
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, " "))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, " ")).withMethod("POST")
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -396,7 +396,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, unregisteredEmail.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, unregisteredEmail.text), (passwordFieldName, userPassword)).withMethod("POST")
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe UNAUTHORIZED
@@ -413,7 +413,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
       private val result  = addToken(underTest.authenticate())(request)
 
       status(result) shouldBe FORBIDDEN
@@ -427,7 +427,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       private val request = FakeRequest()
         .withCookies(deviceSessionCookie)
         .withSession(sessionParams*)
-        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword))
+        .withFormUrlEncodedBody((emailFieldName, sessionWithAuthAppMfa.developer.email.text), (passwordFieldName, userPassword)).withMethod("POST")
 
       private val result = addToken(underTest.authenticate())(request)
 
@@ -468,7 +468,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
+        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString)).withMethod("POST")
 
       private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
@@ -481,7 +481,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       TPDMFAMock.SendSms.thenReturn(sessionWithAuthAppMfa.developer.userId, smsMfaId)(flag = true)
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("mfaId", smsMfaId.value.toString))
+        .withFormUrlEncodedBody(("mfaId", smsMfaId.value.toString)).withMethod("POST")
 
       private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
@@ -493,7 +493,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(None)
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString))
+        .withFormUrlEncodedBody(("mfaId", authAppMfaId.value.toString)).withMethod("POST")
 
       private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
@@ -517,7 +517,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       TPDMock.FetchDeveloper.thenReturn(sessionWithAuthAppMfa.developer.userId)(Some(developerWithAuthAppAndSmsMfa))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString))
+        .withFormUrlEncodedBody(("mfaId", UUID.randomUUID().toString)).withMethod("POST")
 
       private val result = underTest.selectLoginMfaAction(authAppMfaId, smsMfaId)(request)
 
@@ -569,7 +569,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withFormUrlEncodedBody(("accessCode", accessCode)).withMethod("POST")
 
       private val result = underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false)(request)
 
@@ -586,7 +586,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withFormUrlEncodedBody(("accessCode", accessCode)).withMethod("POST")
         .withSession("access_uri" -> accessUri)
 
       private val result = underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false)(request)
@@ -604,7 +604,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withFormUrlEncodedBody(("accessCode", accessCode)).withMethod("POST")
 
       private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false)(request)
 
@@ -621,7 +621,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withFormUrlEncodedBody(("accessCode", accessCode)).withMethod("POST")
         .withSession("access_uri" -> accessUri)
 
       private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false)(request)
@@ -636,7 +636,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return the error page when mfa method is AUTHENTICATOR_APP and access code is incorrect" in new Setup {
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", "654321"))
+        .withFormUrlEncodedBody(("accessCode", "654321")).withMethod("POST")
 
       private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false))(request)
 
@@ -650,7 +650,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return the error page when mfa method is AUTHENTICATOR_APP and access code is invalid" in new Setup {
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", "123xx"))
+        .withFormUrlEncodedBody(("accessCode", "123xx")).withMethod("POST")
 
       private val result = addToken(underTest.authenticateAccessCode(authAppMfaId, MfaType.AuthenticatorApp, userHasMultipleMfa = false))(request)
 
@@ -663,7 +663,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withFormUrlEncodedBody(("accessCode", accessCode)).withMethod("POST")
 
       private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false)(request)
 
@@ -677,7 +677,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return the error page when mfa method is SMS and access code is incorrect" in new Setup {
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", "654321"))
+        .withFormUrlEncodedBody(("accessCode", "654321")).withMethod("POST")
 
       private val result = addToken(underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false))(request)
 
@@ -691,7 +691,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
 
     "return the error page when mfa method is SMS and access code is invalid" in new Setup {
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", "123xxx"))
+        .withFormUrlEncodedBody(("accessCode", "123xxx")).withMethod("POST")
 
       private val result = addToken(underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = false))(request)
 
@@ -704,7 +704,7 @@ class UserLoginAccountSpec extends BaseControllerSpec with WithCSRFAddToken
       mockAudit(LoginSucceeded, successful(AuditResult.Success))
 
       private val request = testRequest
-        .withFormUrlEncodedBody(("accessCode", accessCode))
+        .withFormUrlEncodedBody(("accessCode", accessCode)).withMethod("POST")
 
       private val result = underTest.authenticateAccessCode(smsMfaId, MfaType.Sms, userHasMultipleMfa = true)(request)
 

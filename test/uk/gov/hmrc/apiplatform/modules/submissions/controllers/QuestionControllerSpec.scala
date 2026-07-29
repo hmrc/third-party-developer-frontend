@@ -179,7 +179,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturns(aSubmission.withIncompleteProgress())
       private val answer1 = "Yes"
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
@@ -189,7 +189,7 @@ class QuestionControllerSpec
 
     "succeed when answer given and trim answer" in new Setup {
       private val answer1 = "  Bob's application  "
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save").withMethod("POST")
 
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsForAnswer(List(answer1.trim()), aSubmission.withIncompleteProgress())
@@ -204,7 +204,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val invalidEmailAnswer = "bob"
-      private val request            = loggedInRequest.withFormUrlEncodedBody("answer" -> invalidEmailAnswer, "submit-action" -> "save")
+      private val request            = loggedInRequest.withFormUrlEncodedBody("answer" -> invalidEmailAnswer, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI2.id)(request.withCSRFToken)
 
@@ -224,7 +224,7 @@ class QuestionControllerSpec
     "fail if no answer provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       private val blankAnswer = ""
-      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
+      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI1.id)(request.withCSRFToken)
 
@@ -244,7 +244,7 @@ class QuestionControllerSpec
     "fail if just spaces provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       private val blankAnswer = " "
-      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
+      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI1.id)(request.withCSRFToken)
 
@@ -263,7 +263,7 @@ class QuestionControllerSpec
 
     "fail if no answer field in form" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
@@ -289,7 +289,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.RecordAnswer.thenReturns(fullyAnsweredSubmission)
 
       private val answer1 = "Yes"
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.updateAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
@@ -343,7 +343,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.RecordAnswer.thenReturns(modifiedSubmission)
 
       private val utrAnswer = "Unique Taxpayer Reference (UTR)"
-      private val request   = loggedInRequest.withFormUrlEncodedBody("answer" -> utrAnswer, "submit-action" -> "save")
+      private val request   = loggedInRequest.withFormUrlEncodedBody("answer" -> utrAnswer, "submit-action" -> "save").withMethod("POST")
 
       private val questionId         = OrganisationDetails.question2.id
       private val followUpQuestionId = OrganisationDetails.question2b.id

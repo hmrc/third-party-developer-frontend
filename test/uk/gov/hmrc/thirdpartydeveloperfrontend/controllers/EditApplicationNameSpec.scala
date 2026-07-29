@@ -127,7 +127,7 @@ class EditApplicationNameSpec
         givenApplicationNameIsInvalid()
 
         private val request = loggedInDevRequest.withCSRFToken
-          .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", ""))
+          .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "SANDBOX"), ("description", "")).withMethod("POST")
 
         private val result = underTest.editApplicationNameAction(Environment.Sandbox)(request)
 
@@ -183,7 +183,7 @@ class EditApplicationNameSpec
         givenApplicationNameIsInvalid()
 
         private val request = loggedInAdminRequest.withCSRFToken
-          .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", ""))
+          .withFormUrlEncodedBody(("applicationName", invalidApplicationName), ("environment", "PRODUCTION"), ("description", "")).withMethod("POST")
 
         private val result = underTest.editApplicationNameAction(Environment.Production)(request)
 
@@ -203,7 +203,7 @@ class EditApplicationNameSpec
         givenApplicationNameIsDuplicate()
 
         private val request = loggedInAdminRequest.withCSRFToken
-          .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", ""))
+          .withFormUrlEncodedBody(("applicationName", applicationName), ("environment", "PRODUCTION"), ("description", "")).withMethod("POST")
 
         private val result = underTest.editApplicationNameAction(Environment.Production)(request)
 

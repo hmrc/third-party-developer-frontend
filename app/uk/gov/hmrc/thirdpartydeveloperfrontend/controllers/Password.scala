@@ -26,7 +26,7 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
@@ -55,7 +55,7 @@ class Password @Inject() (
     signInView: SignInView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUnsafeDefaultFormBinding {
+  ) extends LoggedOutController(mcc) with PasswordChange with ApplicationLogger with WithUrlEncodedOnlyFormBinding {
 
   import ErrorFormBuilder.CommonGlobalErrorsSyntax
 

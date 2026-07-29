@@ -144,7 +144,7 @@ class CancelRequestControllerSpec
     "cancelRequestForProductionCredentialsAction when cancelling the request" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request").withMethod("POST")
 
       ApmConnectorCommandModuleMock.DispatchWithThrow.thenReturnsSuccess(mock[ApplicationWithCollaborators])
 
@@ -157,7 +157,7 @@ class CancelRequestControllerSpec
     "cancelRequestForProductionCredentialsAction fails when app is not in testing state" in new Setup with HasSubscriptions with HasAppInProductionState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request").withMethod("POST")
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 
@@ -167,7 +167,7 @@ class CancelRequestControllerSpec
     "cancelRequestForProductionCredentialsAction when rejecting the cancellation" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request").withMethod("POST")
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 

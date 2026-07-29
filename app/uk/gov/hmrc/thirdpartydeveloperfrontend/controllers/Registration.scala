@@ -25,7 +25,7 @@ import views.html._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
@@ -50,7 +50,7 @@ class Registration @Inject() (
     resendConfirmationView: ResendConfirmationView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends LoggedOutController(mcc) with ApplicationLogger with WithUnsafeDefaultFormBinding {
+  ) extends LoggedOutController(mcc) with ApplicationLogger with WithUrlEncodedOnlyFormBinding {
 
   import ErrorFormBuilder.CommonGlobalErrorsSyntax
   import play.api.data._

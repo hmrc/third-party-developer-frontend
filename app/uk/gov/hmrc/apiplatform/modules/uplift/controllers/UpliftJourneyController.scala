@@ -30,7 +30,7 @@ import play.api.data.Forms._
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -95,7 +95,7 @@ class UpliftJourneyController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   import UpliftJourneyController._
 

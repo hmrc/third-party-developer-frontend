@@ -51,7 +51,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
           .thenReturn(Future.successful(Some(registerSmsResponse)))
 
-        private val result = underTest.setupSmsAction()(mobileNumberRequest())
+        private val result = underTest.setupSmsAction()(mobileNumberRequest().withMethod("POST"))
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
@@ -64,7 +64,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], eqTo(mobileNumber))(*))
           .thenReturn(Future.successful(Some(registerSmsResponse)))
 
-        private val result = underTest.setupSmsAction()(mobileNumberRequest())
+        private val result = underTest.setupSmsAction()(mobileNumberRequest().withMethod("POST"))
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/access-code?mfaId=${smsMfaId.value.toString}&mfaAction=CREATE")
@@ -79,7 +79,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return Bad Request when user is logged in and mobile number is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
-      val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> "INVALID_NUMBER")
+      val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> "INVALID_NUMBER").withMethod("POST")
 
       val result = addToken(underTest.setupSmsAction())(request)
 
@@ -93,7 +93,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
     "return Bad Request when user is logged in and mobile number is valid, fails from Notify Service" in new SetupSuccessfulStart2SV with LoggedIn {
       val badMobileNumber = "05555555555"
-      val request         = createRequest().withFormUrlEncodedBody("mobileNumber" -> badMobileNumber)
+      val request         = createRequest().withFormUrlEncodedBody("mobileNumber" -> badMobileNumber).withMethod("POST")
 
       when(underTest.thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *)(*))
         .thenReturn(Future.successful(None))
@@ -180,7 +180,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
           .thenReturn(Future.successful(true))
 
-        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode))
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup/complete")
@@ -193,7 +193,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
           .thenReturn(Future.successful(true))
 
-        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode))
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup/complete")
@@ -210,7 +210,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return Bad Request when user is logged in and access code is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
-      val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID")
+      val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID").withMethod("POST")
 
       val result = addToken(underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None))(request)
 
@@ -227,7 +227,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*))
           .thenReturn(Future.successful(false))
 
-        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode))
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.CREATE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
         status(result) shouldBe BAD_REQUEST
         val doc            = Jsoup.parse(contentAsString(result))
         validateSmsAccessCodeView(doc)
@@ -244,7 +244,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*))
           .thenReturn(Future.successful(MfaResponse(true)))
 
-        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId))(smsAccessCodeRequest(correctCode))
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId))(smsAccessCodeRequest(correctCode).withMethod("POST"))
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/remove-mfa/complete")
@@ -262,7 +262,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
     }
 
     "return Bad Request when user is logged in and access code is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
-      val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID")
+      val request = createRequest().withFormUrlEncodedBody("mobileNumber" -> mobileNumber, "accessCode" -> "INVALID").withMethod("POST")
       val result  = addToken(underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId)))(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -278,7 +278,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
         when(underTest.mfaService.removeMfaById(*[UserId], eqTo(smsMfaId), eqTo(correctCode), eqTo(smsMfaId))(*))
           .thenReturn(Future.successful(MfaResponse(false)))
 
-        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId))(smsAccessCodeRequest(correctCode))
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, Some(smsMfaId))(smsAccessCodeRequest(correctCode).withMethod("POST"))
 
         validateErrorTemplateView(result, "Unable to verify access code")
         verify(underTest.thirdPartyDeveloperMfaConnector, times(0)).verifyMfa(*[UserId], eqTo(smsMfaId), eqTo(correctCode))(*)
@@ -287,7 +287,7 @@ class MfaControllerSmsSpec extends MfaControllerBaseSpec {
 
     "return error page when user is Logged in and form is valid and mfaIdForRemoval is None" in
       new SetupAuthAppSecurityPreferences with LoggedIn {
-        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, None)(smsAccessCodeRequest(correctCode))
+        private val result = underTest.smsAccessCodeAction(smsMfaId, MfaAction.REMOVE, None)(smsAccessCodeRequest(correctCode).withMethod("POST"))
 
         validateErrorTemplateView(result, "Unable to find Mfa to remove")
 

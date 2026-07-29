@@ -17,14 +17,15 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.mvc.{MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.DevHubAuthorization
 
-abstract class TpdfeBaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher with WithUnsafeDefaultFormBinding {
+abstract class TpdfeBaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with DevHubAuthorization with HeaderEnricher
+    with WithUrlEncodedOnlyFormBinding {
   def errorHandler: ErrorHandler
 
   implicit def appConfig: ApplicationConfig

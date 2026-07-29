@@ -25,7 +25,7 @@ import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmati
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
@@ -54,7 +54,7 @@ class Redirects @Inject() (
     loginRedirectsService: LoginRedirectsService
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding with ApplicationSyntaxes {
+  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUrlEncodedOnlyFormBinding with ApplicationSyntaxes {
 
   def canChangeRedirectInformationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)

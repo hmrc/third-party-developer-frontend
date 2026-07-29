@@ -25,7 +25,7 @@ import cats.data.NonEmptyList
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationState}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
@@ -113,7 +113,7 @@ class ProdCredsChecklistController @Inject() (
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]
     with SubmissionActionBuilders
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   import ProdCredsChecklistController._
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter}

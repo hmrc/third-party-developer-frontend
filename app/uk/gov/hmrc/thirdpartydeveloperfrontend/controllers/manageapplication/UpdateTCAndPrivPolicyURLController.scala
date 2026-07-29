@@ -25,7 +25,7 @@ import views.html._
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
@@ -54,7 +54,7 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding
+    with WithUrlEncodedOnlyFormBinding
     with ClockNow {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =

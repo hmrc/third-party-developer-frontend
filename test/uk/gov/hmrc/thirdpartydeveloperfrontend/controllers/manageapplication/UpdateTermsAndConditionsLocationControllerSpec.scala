@@ -76,7 +76,8 @@ class UpdateTermsAndConditionsLocationControllerSpec
       when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsUrl), *[UserId], eqTo(TermsAndConditionsLocation.Url(newTermsAndConditionsUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> newTermsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "false")
+      private val request =
+        loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> newTermsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "false").withMethod("POST")
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsUrl.id))(request)
 
       status(result) shouldBe SEE_OTHER
@@ -124,7 +125,7 @@ class UpdateTermsAndConditionsLocationControllerSpec
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true").withMethod("POST")
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -134,7 +135,7 @@ class UpdateTermsAndConditionsLocationControllerSpec
       val appWithTermsAndConditionsInDesktop = appWithTermsAndConditionsLocation(TermsAndConditionsLocation.InDesktopSoftware)
       givenApplicationAction(appWithTermsAndConditionsInDesktop, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true").withMethod("POST")
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -146,7 +147,8 @@ class UpdateTermsAndConditionsLocationControllerSpec
       when(applicationServiceMock.updateTermsConditionsLocation(eqTo(appWithTermsAndConditionsInDesktop), *[UserId], eqTo(TermsAndConditionsLocation.Url(termsAndConditionsUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> termsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
+      private val request =
+        loggedInAdminRequest.withFormUrlEncodedBody("termsAndConditionsUrl" -> termsAndConditionsUrl, "isInDesktop" -> "false", "isNewJourney" -> "true").withMethod("POST")
       val result          = addToken(underTest.updateTermsAndConditionsLocationAction(appWithTermsAndConditionsInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER

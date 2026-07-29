@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.http.ForbiddenException
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -56,7 +56,7 @@ class IpAllowListController @Inject() (
     removeCidrBlockView: RemoveCidrBlockView
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc) with WithUnsafeDefaultFormBinding {
+  ) extends ApplicationController(mcc) with WithUrlEncodedOnlyFormBinding {
 
   private def canViewIpAllowlistAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsIpAllowlist, TeamMembersOnly)(applicationId)(fun)

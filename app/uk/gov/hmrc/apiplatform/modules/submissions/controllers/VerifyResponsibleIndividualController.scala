@@ -23,7 +23,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
@@ -73,7 +73,7 @@ class VerifyResponsibleIndividualController @Inject() (
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   import cats.instances.future.catsStdInstancesForFuture
 

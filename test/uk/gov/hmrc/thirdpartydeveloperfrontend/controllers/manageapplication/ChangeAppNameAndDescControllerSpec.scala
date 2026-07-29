@@ -24,7 +24,6 @@ import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import views.html.manageapplication.ChangeAppNameAndDescView
 
-import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -317,8 +316,6 @@ class ChangeAppNameAndDescControllerSpec
       final def withDescription(description: Option[String]): ApplicationWithCollaborators = app.modify(_.copy(description = description))
     }
 
-    implicit val changeAppNameAndDescFormFormat: OFormat[ChangeAppNameAndDescForm] = Json.format[ChangeAppNameAndDescForm]
-
     implicit class ChangeAppNameAndDescAppAugment(val app: ApplicationWithCollaborators) {
 
       final def toChangeAppNameAndDescForm =
@@ -337,7 +334,9 @@ class ChangeAppNameAndDescControllerSpec
       final def callChangeAppNameAndDescActionNotLoggedIn: Future[Result] = callChangeAppNameAndDescAction(loggedOutRequest)
 
       final private def callChangeAppNameAndDescAction[T](request: FakeRequest[T]): Future[Result] = {
-        addToken(underTest.changeAppNameAndDescAction(app.id))(request.withJsonBody(Json.toJson(app.toChangeAppNameAndDescForm)))
+        addToken(underTest.changeAppNameAndDescAction(app.id))(
+          request.withFormUrlEncodedBody(ChangeAppNameAndDescForm.form.fill(app.toChangeAppNameAndDescForm).data.toSeq*).withMethod("POST")
+        )
       }
     }
   }

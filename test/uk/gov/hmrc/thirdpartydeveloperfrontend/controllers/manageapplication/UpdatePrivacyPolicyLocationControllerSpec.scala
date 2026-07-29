@@ -77,7 +77,8 @@ class UpdatePrivacyPolicyLocationControllerSpec
       when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyUrl), *[UserId], eqTo(PrivacyPolicyLocation.Url(newPrivacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> newPrivacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "false")
+      private val request =
+        loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> newPrivacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "false").withMethod("POST")
 
       val result = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyUrl.id))(request)
 
@@ -126,7 +127,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "true", "isNewJourney" -> "true").withMethod("POST")
       val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -136,7 +137,7 @@ class UpdatePrivacyPolicyLocationControllerSpec
       val appWithPrivPolicyInDesktop = appWithPrivacyPolicyLocation(PrivacyPolicyLocation.InDesktopSoftware)
       givenApplicationAction(appWithPrivPolicyInDesktop, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> "", "isInDesktop" -> "false", "isNewJourney" -> "true").withMethod("POST")
       val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -148,7 +149,8 @@ class UpdatePrivacyPolicyLocationControllerSpec
       when(applicationServiceMock.updatePrivacyPolicyLocation(eqTo(appWithPrivPolicyInDesktop), *[UserId], eqTo(PrivacyPolicyLocation.Url(privacyPolicyUrl)))(*))
         .thenReturn(Future.successful(ApplicationUpdateSuccessful))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> privacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "true")
+      private val request =
+        loggedInAdminRequest.withFormUrlEncodedBody("privacyPolicyUrl" -> privacyPolicyUrl, "isInDesktop" -> "false", "isNewJourney" -> "true").withMethod("POST")
       val result          = addToken(underTest.updatePrivacyPolicyLocationAction(appWithPrivPolicyInDesktop.id))(request)
 
       status(result) shouldBe SEE_OTHER

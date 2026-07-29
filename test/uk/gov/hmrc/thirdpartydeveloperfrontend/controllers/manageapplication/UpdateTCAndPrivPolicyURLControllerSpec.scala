@@ -24,7 +24,6 @@ import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import views.html._
 
-import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -321,8 +320,6 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
     }
 
-    implicit val editApplicationFormFormat: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
-
     implicit class ChangeDetailsAppAugment(val app: ApplicationWithCollaborators) {
       private val appAccess = app.access.asInstanceOf[Access.Standard]
 
@@ -336,7 +333,9 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       final def callChangeDetailsActionNotLoggedIn: Future[Result] = callChangeDetailsAction(loggedOutRequest)
 
       final private def callChangeDetailsAction[T](request: FakeRequest[T]): Future[Result] = {
-        addToken(underTest.changeDetailsAction(app.id))(request.withJsonBody(Json.toJson(app.toEditApplicationForm)))
+        addToken(underTest.changeDetailsAction(app.id))(
+          request.withFormUrlEncodedBody(EditApplicationForm.form.fill(app.toEditApplicationForm).data.toSeq*).withMethod("POST")
+        )
       }
     }
   }

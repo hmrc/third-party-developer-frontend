@@ -24,7 +24,7 @@ import views.html._
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -49,7 +49,7 @@ class DeleteApplication @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   def deleteApplication(applicationId: ApplicationId, error: Option[String] = None) =
     canViewDeleteApplicationAction(applicationId) { implicit request =>

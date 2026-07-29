@@ -24,7 +24,7 @@ import views.html.UpdateTermsAndConditionsLocationView
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
@@ -50,7 +50,7 @@ class UpdateTermsAndConditionsLocationController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)

@@ -131,7 +131,7 @@ class RedirectsSpec
     def addRedirectActionShouldRenderAddRedirectPageWithDuplicateUriError(application: ApplicationWithCollaborators, redirectUri: String) = {
       givenApplicationExists(application)
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUri)
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUri).withMethod("POST")
       val result  = underTest.addLoginRedirectAction(application.id)(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -145,7 +145,7 @@ class RedirectsSpec
       givenApplicationExists(application)
       RedirectsServiceMock.AddLoginRedirect.succeedsWith(LoginRedirectUri.unsafeApply(redirectUriToAdd))
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd)
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToAdd).withMethod("POST")
       val result  = underTest.addLoginRedirectAction(application.id)(request)
 
       status(result) shouldBe SEE_OTHER
@@ -163,7 +163,7 @@ class RedirectsSpec
       ) = {
       givenApplicationExists(application)
 
-      val modRequest = request.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete)
+      val modRequest = request.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete).withMethod("POST")
       val result     = underTest.deleteLoginRedirect(application.id)(modRequest)
 
       status(result) shouldBe resultStatus
@@ -182,7 +182,8 @@ class RedirectsSpec
       ) = {
       givenApplicationExists(application)
 
-      val result = underTest.deleteLoginRedirectAction(application.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri))
+      val result =
+        underTest.deleteLoginRedirectAction(application.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> redirectUriToDelete.uri).withMethod("POST"))
 
       status(result) shouldBe resultStatus
 
@@ -201,7 +202,7 @@ class RedirectsSpec
         underTest.deleteLoginRedirectAction(application.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody(
           "redirectUri"           -> redirectUriToDelete.uri,
           "deleteRedirectConfirm" -> "Yes"
-        ))
+        ).withMethod("POST"))
 
       status(result) shouldBe resultStatus
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"
@@ -218,7 +219,7 @@ class RedirectsSpec
         underTest.deleteLoginRedirectAction(application.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody(
           "redirectUri"           -> redirectUriToDelete.uri,
           "deleteRedirectConfirm" -> "no"
-        ))
+        ).withMethod("POST"))
 
       status(result) shouldBe resultStatus
 
@@ -229,7 +230,7 @@ class RedirectsSpec
       givenApplicationExists(application)
 
       val result = underTest.changeLoginRedirect(application.id)(
-        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)
+        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri).withMethod("POST")
       )
 
       status(result) shouldBe resultStatus
@@ -246,7 +247,7 @@ class RedirectsSpec
       givenApplicationExists(application)
 
       val result = underTest.changeLoginRedirectAction(application.id)(
-        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri)
+        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalRedirectUri, "newRedirectUri" -> newRedirectUri).withMethod("POST")
       )
 
       status(result) shouldBe BAD_REQUEST
@@ -284,22 +285,31 @@ class RedirectsSpec
     }
 
     "return not found for deleteRedirect action" in new PreApprovedReturnsNotFound {
-      def executeAction = { (app) => underTest.deleteLoginRedirectAction(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> "test")) }
+      def executeAction = { (app) =>
+        underTest.deleteLoginRedirectAction(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> "test").withMethod("POST"))
+      }
     }
 
     "return not found for deleteRedirectAction action" in new PreApprovedReturnsNotFound {
-      def executeAction = { (app) => underTest.deleteLoginRedirectAction(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> "test")) }
+      def executeAction = { (app) =>
+        underTest.deleteLoginRedirectAction(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("redirectUri" -> "test").withMethod("POST"))
+      }
     }
 
     "return not found for changeRedirect action" in new PreApprovedReturnsNotFound {
       def executeAction = { (app) =>
-        underTest.changeLoginRedirect(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> "test", "newRedirectUri" -> "test"))
+        underTest.changeLoginRedirect(app.id)(
+          loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> "test", "newRedirectUri" -> "test").withMethod("POST")
+        )
       }
     }
 
     "return not found for changeRedirectACtion action" in new PreApprovedReturnsNotFound {
       def executeAction = { (app) =>
-        underTest.changeLoginRedirectAction(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> "test", "newRedirectUri" -> "test"))
+        underTest.changeLoginRedirectAction(app.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody(
+          "originalRedirectUri" -> "test",
+          "newRedirectUri"      -> "test"
+        ).withMethod("POST"))
       }
     }
   }
@@ -446,7 +456,9 @@ class RedirectsSpec
       RedirectsServiceMock.ChangeLoginRedirect.succeedsWith(originalLoginRedirectUri, newLoginRedirectUri)
 
       val result = underTest.changeLoginRedirectAction(application.id)(
-        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalLoginRedirectUri.uri, "newRedirectUri" -> newLoginRedirectUri.uri)
+        loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("originalRedirectUri" -> originalLoginRedirectUri.uri, "newRedirectUri" -> newLoginRedirectUri.uri).withMethod(
+          "POST"
+        )
       )
       status(result) shouldBe SEE_OTHER
       headers(result).apply(LOCATION) shouldBe s"/developer/applications/${application.id.value}/redirect-uris"

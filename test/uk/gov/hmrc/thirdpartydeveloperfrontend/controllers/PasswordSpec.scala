@@ -131,7 +131,9 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     "process password changed unverified user" in new Setup {
       mockConnectorUnverifiedForChangePassword(devEmail, developerPassword, developerPassword)
       val requestWithPassword = requestWithSession
-        .withFormUrlEncodedBody((currentPasswordFieldName, developerPassword), (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
+        .withFormUrlEncodedBody((currentPasswordFieldName, developerPassword), (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword)).withMethod(
+          "POST"
+        )
 
       val result =
         underTest.processPasswordChange(devEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly)
@@ -143,7 +145,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     "request reset unverified user" in new Setup {
       mockConnectorUnverifiedForRequestReset(devEmail)
       val requestWithPasswordAndEmail = requestWithSession
-        .withFormUrlEncodedBody((emailFieldName, devEmail.text))
+        .withFormUrlEncodedBody((emailFieldName, devEmail.text)).withMethod("POST")
 
       val result = addToken(underTest.requestReset())(requestWithPasswordAndEmail)
 
@@ -154,7 +156,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     "reset unverified user" in new Setup {
       mockConnectorUnverifiedForReset(devEmail, developerPassword)
       val requestWithPasswordAndEmail = requestWithSession
-        .withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
+        .withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword)).withMethod("POST")
 
       val result = addToken(underTest.resetPassword())(requestWithPasswordAndEmail)
 
@@ -171,7 +173,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "show the sent reset link page" in new Setup {
       mockRequestResetFor(devEmail)
-      val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, devEmail.text))
+      val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, devEmail.text)).withMethod("POST")
 
       val result = addToken(underTest.requestReset())(requestWithEmail)
 

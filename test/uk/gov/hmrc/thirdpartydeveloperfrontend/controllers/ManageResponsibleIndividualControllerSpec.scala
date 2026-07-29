@@ -191,7 +191,7 @@ class ManageResponsibleIndividualControllerSpec
     "redirect to correct page if user selects 'self'" in new Setup {
       givenTheApplicationExistWithUserRole(adminSession, List.empty)
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "self")
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "self").withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
@@ -201,7 +201,7 @@ class ManageResponsibleIndividualControllerSpec
     "redirect to correct page if user selects 'other'" in new Setup {
       givenTheApplicationExistWithUserRole(adminSession, List.empty)
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "other")
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "other").withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
@@ -211,7 +211,7 @@ class ManageResponsibleIndividualControllerSpec
     "return error if no choice selected" in new Setup {
       givenTheApplicationExistWithUserRole(adminSession, List.empty)
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "")
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "").withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe BAD_REQUEST
@@ -219,7 +219,7 @@ class ManageResponsibleIndividualControllerSpec
     "return error if user is not an admin" in new Setup {
       givenTheApplicationExistWithUserRole(devSession, List.empty)
 
-      val request = loggedInDevRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "self")
+      val request = loggedInDevRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "self").withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToSelfOrOtherAction(appId)(request)
 
       status(result) shouldBe FORBIDDEN
@@ -261,7 +261,7 @@ class ManageResponsibleIndividualControllerSpec
     "return error if user is not an admin" in new Setup {
       givenTheApplicationExistWithUserRole(devSession, List.empty)
 
-      val request = loggedInDevRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "self")
+      val request = loggedInDevRequest.withCSRFToken.withFormUrlEncodedBody("who" -> "self").withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToSelfAction(appId)(request)
 
       status(result) shouldBe FORBIDDEN
@@ -314,7 +314,7 @@ class ManageResponsibleIndividualControllerSpec
       ))
       givenTheApplicationExistWithUserRole(adminSession, List.empty)
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("name" -> name, "email" -> email.text)
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("name" -> name, "email" -> email.text).withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe SEE_OTHER
@@ -324,7 +324,10 @@ class ManageResponsibleIndividualControllerSpec
     "return an error if responsible individual details are not new" in new Setup {
       givenTheApplicationExistWithUserRole(adminSession, List.empty)
 
-      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("name" -> responsibleIndividual.fullName.value, "email" -> responsibleIndividual.emailAddress.text)
+      val request = loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody(
+        "name"  -> responsibleIndividual.fullName.value,
+        "email" -> responsibleIndividual.emailAddress.text
+      ).withMethod("POST")
       val result  = underTest.responsibleIndividualChangeToOtherAction(appId)(request)
 
       status(result) shouldBe BAD_REQUEST

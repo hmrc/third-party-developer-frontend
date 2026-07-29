@@ -23,7 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.fromScreamingSnakeCase
@@ -76,7 +76,7 @@ class MfaController @Inject() (
   )(implicit val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
   val qrCode: QRCode = QRCode(scale = 4)
 
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>

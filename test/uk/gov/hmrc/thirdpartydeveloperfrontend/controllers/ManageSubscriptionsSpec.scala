@@ -114,7 +114,7 @@ class ManageSubscriptionsSpec
     fetchAppsByTeamMemberReturns(Environment.Production)(Seq(application.withSubscriptions(Set.empty)))
 
     def editFormPostRequest(fieldName: FieldName, fieldValue: FieldValue): FakeRequest[AnyContentAsFormUrlEncoded] = {
-      loggedInAdminRequest.withFormUrlEncodedBody(fieldName.value -> fieldValue.toString)
+      loggedInAdminRequest.withFormUrlEncodedBody(fieldName.value -> fieldValue.toString).withMethod("POST")
     }
 
     def assertCommonEditFormFields(result: Future[Result], apiSubscriptionStatus: APISubscriptionStatus): Unit = {
@@ -414,7 +414,7 @@ class ManageSubscriptionsSpec
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
               writableSubSubscriptionValue.definition.name.value -> newSubscriptionValue
-            )
+            ).withMethod("POST")
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr))(
@@ -457,7 +457,7 @@ class ManageSubscriptionsSpec
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
               readonlySubSubscriptionValue.definition.name.value -> newSubscriptionValue
-            )
+            ).withMethod("POST")
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr))(

@@ -310,7 +310,7 @@ class EmailPreferencesControllerSpec
 
     "handle form data and redirectToApisPage" in new Setup {
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("taxRegime[0]" -> "a1", "taxRegime[1]" -> "a2", "taxRegime[2]" -> "a3")
+        .withFormUrlEncodedBody("taxRegime[0]" -> "a1", "taxRegime[1]" -> "a2", "taxRegime[2]" -> "a3").withMethod("POST")
       val categories                                               = Set("a1", "a2", "a3")
 
       fetchSessionByIdReturns(sessionId, session)
@@ -434,7 +434,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("currentCategory" -> category1.toString(), "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "apiRadio" -> "SOME_APIS")
+        .withFormUrlEncodedBody("currentCategory" -> category1.toString(), "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "apiRadio" -> "SOME_APIS").withMethod("POST")
 
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(session)
         .copy(selectedCategories = Set(category1.toString(), category2.toString()), visibleApis = visibleApis)
@@ -452,7 +452,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("currentCategory" -> category2.toString(), "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "apiRadio" -> "SOME_APIS")
+        .withFormUrlEncodedBody("currentCategory" -> category2.toString(), "selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "apiRadio" -> "SOME_APIS").withMethod("POST")
 
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(session)
         .copy(selectedCategories = Set(category1.toString(), category2.toString()), visibleApis = visibleApis)
@@ -466,7 +466,7 @@ class EmailPreferencesControllerSpec
     }
 
     "return 400 when form has missing elements" in new Setup {
-      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> category2.asScreamingSnakeCase)
+      val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest.withFormUrlEncodedBody("currentCategory" -> category2.asScreamingSnakeCase).withMethod("POST")
       val emailFlow: EmailPreferencesFlowV2                        = EmailPreferencesFlowV2.fromDeveloperSession(session)
         .copy(selectedCategories = Set(apiCategory1.category, apiCategory2.category), visibleApis = visibleApis)
 
@@ -535,7 +535,7 @@ class EmailPreferencesControllerSpec
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(session)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
 
-      val requestWithForm        = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL")
+      val requestWithForm        = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL").withMethod("POST")
       when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.userId), *)(*)).thenReturn(Future.successful(true))
       when(mockEmailPreferencesService.deleteFlow(eqTo(sessionId), eqTo(FlowType.EMAIL_PREFERENCES_V2))).thenReturn(Future.successful(true))
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
@@ -555,7 +555,7 @@ class EmailPreferencesControllerSpec
       val emailFlow: EmailPreferencesFlowV2 = EmailPreferencesFlowV2.fromDeveloperSession(session)
       when(mockEmailPreferencesService.fetchEmailPreferencesFlow(*)).thenReturn(Future.successful(emailFlow))
 
-      val requestWithForm = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL")
+      val requestWithForm = loggedInRequest.withFormUrlEncodedBody("topic[0]" -> "TECHNICAL").withMethod("POST")
       when(mockEmailPreferencesService.updateEmailPreferences(eqTo(developer.userId), *)(*)).thenReturn(Future.successful(false))
 
       val result: Future[Result] = controllerUnderTest.flowSelectTopicsAction()(requestWithForm)
@@ -629,7 +629,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.toString())
+        .withFormUrlEncodedBody("selectedApi[0]" -> "a1", "selectedApi[1]" -> "a2", "applicationId" -> applicationId.toString()).withMethod("POST")
 
       when(mockEmailPreferencesService.updateNewApplicationSelectedApis(*, *[ApplicationId], *)(*)).thenReturn(Future.successful(mock[NewApplicationEmailPreferencesFlowV2]))
 
@@ -688,7 +688,7 @@ class EmailPreferencesControllerSpec
       updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
       val requestWithForm: FakeRequest[AnyContentAsFormUrlEncoded] = loggedInRequest
-        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.toString())
+        .withFormUrlEncodedBody("topic[0]" -> "a1", "applicationId" -> applicationId.toString()).withMethod("POST")
 
       when(mockEmailPreferencesService.fetchNewApplicationEmailPreferencesFlow(*, *[ApplicationId])).thenReturn(Future.successful(newApplicationEmailPreferencesFlow))
       when(mockEmailPreferencesService.updateEmailPreferences(*[UserId], *)(*)).thenReturn(Future.successful(true))

@@ -44,7 +44,7 @@ class IpAllowListControllerSpec
       extends ApplicationServiceMock
       with ApplicationActionServiceMock {
 
-    implicit val hc: HeaderCarrier                 = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val mockIpAllowlistService: IpAllowlistService = org.mockito.Mockito.mock(
       classOf[IpAllowlistService],
@@ -242,7 +242,7 @@ class IpAllowListControllerSpec
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
       val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest
-        .withFormUrlEncodedBody("confirm" -> "Yes"))
+        .withFormUrlEncodedBody("confirm" -> "Yes").withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${anApplicationWithoutIpAllowlist.id.value}/ip-allowlist/add")
@@ -252,7 +252,7 @@ class IpAllowListControllerSpec
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
 
       val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest
-        .withFormUrlEncodedBody("confirm" -> "No"))
+        .withFormUrlEncodedBody("confirm" -> "No").withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${anApplicationWithoutIpAllowlist.id.value}/ip-allowlist/activate")
@@ -262,7 +262,8 @@ class IpAllowListControllerSpec
       givenApplicationAction(anApplicationWithoutIpAllowlist, adminSession)
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
-      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> ""))
+      val result: Future[Result] =
+        underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken.withFormUrlEncodedBody("confirm" -> "").withMethod("POST"))
 
       status(result) shouldBe BAD_REQUEST
       val body: String = contentAsString(result)
@@ -273,7 +274,8 @@ class IpAllowListControllerSpec
     "return 403 when a developer tries to access a production app" in new Setup {
       givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
-      val result: Future[Result] = underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest.withFormUrlEncodedBody("confirm" -> "Yes"))
+      val result: Future[Result] =
+        underTest.editIpAllowlistAction(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest.withFormUrlEncodedBody("confirm" -> "Yes").withMethod("POST"))
 
       status(result) shouldBe FORBIDDEN
     }
@@ -311,7 +313,7 @@ class IpAllowListControllerSpec
         .thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set(newCidrBlock))))
 
       val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest
-        .withFormUrlEncodedBody("ipAddress" -> newCidrBlock))
+        .withFormUrlEncodedBody("ipAddress" -> newCidrBlock).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${anApplicationWithoutIpAllowlist.id.value}/ip-allowlist/change")
@@ -323,7 +325,7 @@ class IpAllowListControllerSpec
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
       val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken
-        .withFormUrlEncodedBody("ipAddress" -> "invalid CIDR block"))
+        .withFormUrlEncodedBody("ipAddress" -> "invalid CIDR block").withMethod("POST"))
 
       status(result) shouldBe BAD_REQUEST
       val body: String = contentAsString(result)
@@ -336,7 +338,7 @@ class IpAllowListControllerSpec
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
       val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken
-        .withFormUrlEncodedBody("ipAddress" -> "192.168.1.0/24"))
+        .withFormUrlEncodedBody("ipAddress" -> "192.168.1.0/24").withMethod("POST"))
 
       status(result) shouldBe BAD_REQUEST
       val body: String = contentAsString(result)
@@ -349,7 +351,7 @@ class IpAllowListControllerSpec
       when(mockIpAllowlistService.getIpAllowlistFlow(anApplicationWithoutIpAllowlist, adminSession.sessionId)).thenReturn(successful(IpAllowlistFlow(adminSession.sessionId, Set())))
 
       val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInAdminRequest.withCSRFToken
-        .withFormUrlEncodedBody("ipAddress" -> "2.2.0.0/16"))
+        .withFormUrlEncodedBody("ipAddress" -> "2.2.0.0/16").withMethod("POST"))
 
       status(result) shouldBe BAD_REQUEST
       val body: String = contentAsString(result)
@@ -361,7 +363,7 @@ class IpAllowListControllerSpec
       givenApplicationAction(anApplicationWithoutIpAllowlist, devSession)
 
       val result: Future[Result] = underTest.addCidrBlockAction(anApplicationWithoutIpAllowlist.id)(loggedInDevRequest
-        .withFormUrlEncodedBody("ipAddress" -> "2.2.2.0/24"))
+        .withFormUrlEncodedBody("ipAddress" -> "2.2.2.0/24").withMethod("POST"))
 
       status(result) shouldBe FORBIDDEN
     }

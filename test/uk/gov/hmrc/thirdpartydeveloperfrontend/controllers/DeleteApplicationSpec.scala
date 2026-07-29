@@ -102,7 +102,7 @@ class DeleteApplicationSpec
   "request delete application action" should {
     "return request delete application complete page when confirm selected" in new Setup {
 
-      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
+      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes")).withMethod("POST")
 
       when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
         .thenReturn(Future.successful(Some("ref")))
@@ -118,7 +118,7 @@ class DeleteApplicationSpec
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
 
-      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
+      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No")).withMethod("POST")
 
       val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
 

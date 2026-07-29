@@ -129,7 +129,7 @@ class ChooseApplicationToUpliftActionSpec
 
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInAdminRequest.withFormUrlEncodedBody(("applicationId" -> "")).withCSRFToken)
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInAdminRequest.withFormUrlEncodedBody(("applicationId" -> "")).withCSRFToken.withMethod("POST"))
 
       status(result) shouldBe BAD_REQUEST
 
@@ -143,7 +143,7 @@ class ChooseApplicationToUpliftActionSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInDevRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.toString())))
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInDevRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.toString())).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId).toString
