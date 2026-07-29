@@ -41,11 +41,8 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDelet
 @Singleton
 class ApplicationService @Inject() (
     apmApplicationConnector: ApmConnectorApplicationModule,
-    connectorWrapper: ConnectorsWrapper,
     apmCmdModule: ApmConnectorCommandModule,
-    subscriptionFieldsService: SubscriptionFieldsService,
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
-    developerConnector: ThirdPartyDeveloperConnector,
     thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
     organisationConnector: OrganisationConnector,
     auditService: AuditService,

@@ -30,7 +30,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.CombinedApiTestDataHelper
@@ -61,8 +60,6 @@ class AddApplicationSuccessSpec
     val chooseApplicationToUpliftView: ChooseApplicationToUpliftView                         = app.injector.instanceOf[ChooseApplicationToUpliftView]
     implicit val environmentNameService: EnvironmentNameService                              = new EnvironmentNameService(appConfig)
 
-    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-
     val flowServiceMock: GetProductionCredentialsFlowService = mock[GetProductionCredentialsFlowService]
 
     val underTest = new AddApplication(
@@ -81,7 +78,6 @@ class AddApplicationSuccessSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      beforeYouStartView,
       flowServiceMock
     )
 

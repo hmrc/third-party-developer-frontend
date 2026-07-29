@@ -27,10 +27,9 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.DataEvent
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 @Singleton
-class AuditService @Inject() (auditConnector: AuditConnector, appConfig: ApplicationConfig)(using val ec: ExecutionContext) {
+class AuditService @Inject() (auditConnector: AuditConnector)(using val ec: ExecutionContext) {
 
   def audit(action: AuditAction, data: Map[String, String] = Map.empty)(using hc: HeaderCarrier): Future[AuditResult] =
     auditConnector.sendEvent(DataEvent(

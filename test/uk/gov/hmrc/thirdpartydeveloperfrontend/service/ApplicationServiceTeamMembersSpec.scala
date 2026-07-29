@@ -29,13 +29,11 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
@@ -43,17 +41,8 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
     given hc: HeaderCarrier = HeaderCarrier()
 
-    val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-
     val mockAuditService: AuditService = mock[AuditService]
 
-    val connectorsWrapper = new ConnectorsWrapper(
-      mock[PushPullNotificationsConnector],
-      mock[PushPullNotificationsConnector],
-      mock[ApplicationConfig]
-    )
-
-    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
     val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
 
@@ -62,11 +51,8 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
         classOf[ApmConnector],
         org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
       ),
-      connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
-      mockSubscriptionFieldsService,
       mockApiPlatformDeskproConnector,
-      mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockOrganisationConnector,
       mockAuditService,

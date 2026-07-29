@@ -36,7 +36,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 @Singleton
 class IpAllowlistService @Inject() (
     flowRepository: FlowRepository,
-    connectorWrapper: ConnectorsWrapper,
     apmCmdModule: ApmConnectorCommandModule,
     val clock: Clock
   )(using val ec: ExecutionContext

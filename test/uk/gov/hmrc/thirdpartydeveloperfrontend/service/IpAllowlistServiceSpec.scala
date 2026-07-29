@@ -35,7 +35,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessfu
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.IP_ALLOW_LIST
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.IpAllowlistFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class IpAllowlistServiceSpec
@@ -61,12 +60,8 @@ class IpAllowlistServiceSpec
     given hc: HeaderCarrier = HeaderCarrier()
     val sessionId           = UserSessionId.random
 
-    val mockConnectorsWrapper: ConnectorsWrapper = mock[ConnectorsWrapper]
-    when(mockConnectorsWrapper.forEnvironment(*)).thenReturn(mock[PushPullNotificationsConnector])
-
     val underTest = new IpAllowlistService(
       FlowRepositoryMock.aMock,
-      mockConnectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
       clock
     )

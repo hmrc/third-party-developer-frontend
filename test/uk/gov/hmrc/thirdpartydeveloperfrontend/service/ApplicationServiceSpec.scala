@@ -35,14 +35,12 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -55,21 +53,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
     given hc: HeaderCarrier = HeaderCarrier()
 
-    private val mockAppConfig = mock[ApplicationConfig]
-
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-
-    val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
-
     val mockAuditService: AuditService = mock[AuditService]
 
-    val connectorsWrapper = new ConnectorsWrapper(
-      mockPushPullNotificationsConnector,
-      mockPushPullNotificationsConnector,
-      mockAppConfig
-    )
-
-    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
 
     val mockApmConnector: ApmConnector                   = org.mockito.Mockito.mock(
@@ -80,11 +65,8 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
     val applicationService = new ApplicationService(
       mockApmConnector,
-      connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
-      mockSubscriptionFieldsService,
       mockApiPlatformDeskproConnector,
-      mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockOrganisationConnector,
       mockAuditService,

@@ -25,11 +25,9 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
@@ -38,8 +36,6 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
       with ThirdPartyOrchestratorConnectorMockModule {
     given hc: HeaderCarrier = HeaderCarrier()
 
-    private val mockAppConfig = mock[ApplicationConfig]
-
     val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
       classOf[ApmConnector],
       org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
@@ -47,28 +43,15 @@ class ApplicationServiceUpliftSpec extends AsyncHmrcSpec {
 
     val mockProductionApplicationConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
 
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-
-    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
     val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
-    val mockDeveloperConnector: ThirdPartyDeveloperConnector         = mock[ThirdPartyDeveloperConnector]
 
     val mockAuditService: AuditService = mock[AuditService]
 
-    val connectorsWrapper = new ConnectorsWrapper(
-      mockPushPullNotificationsConnector,
-      mockPushPullNotificationsConnector,
-      mockAppConfig
-    )
-
     val applicationService = new ApplicationService(
       mockApmConnector,
-      connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
-      mockSubscriptionFieldsService,
       mockApiPlatformDeskproConnector,
-      mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockOrganisationConnector,
       mockAuditService,

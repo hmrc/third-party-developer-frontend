@@ -64,7 +64,6 @@ class QuestionsController @Inject() (
     override val submissionService: SubmissionService,
     val cookieSigner: CookieSigner,
     questionView: QuestionView,
-    checkAnswersView: CheckAnswersView,
     mcc: MessagesControllerComponents
   )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig

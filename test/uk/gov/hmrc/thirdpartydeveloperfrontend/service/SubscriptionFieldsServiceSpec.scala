@@ -33,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
   SaveSubscriptionFieldsSuccessResponse,
   SubscriptionFieldValue
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -53,17 +52,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     given hc: HeaderCarrier = HeaderCarrier()
 
-    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-
     val mockApmConnector: ApmConnector = org.mockito.Mockito.mock(
       classOf[ApmConnector],
       org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.stubbing.ReturnsSmartNulls).mockMaker(org.mockito.MockMakers.SUBCLASS)
     )
 
-    val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
-
-    when(mockConnectorsWrapper.forEnvironment(application.deployedTo)).thenReturn(mockPushPullNotificationsConnector)
+    val underTest = new SubscriptionFieldsService(mockApmConnector)
   }
 
   "saveFieldsValues" should {

@@ -31,7 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, QuestionView}
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.QuestionView
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -88,8 +88,7 @@ class QuestionControllerSpec
 
     given hc: HeaderCarrier = HeaderCarrier()
 
-    val questionView     = app.injector.instanceOf[QuestionView]
-    val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
+    val questionView = app.injector.instanceOf[QuestionView]
 
     val controller = new QuestionsController(
       mockErrorHandler,
@@ -99,7 +98,6 @@ class QuestionControllerSpec
       SubmissionServiceMock.aMock,
       cookieSigner,
       questionView,
-      checkAnswersView,
       mcc
     )
 

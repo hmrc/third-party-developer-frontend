@@ -37,7 +37,6 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asS
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.uplift.services._
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
@@ -65,7 +64,6 @@ class AddApplication @Inject() (
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
-    beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
   )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,

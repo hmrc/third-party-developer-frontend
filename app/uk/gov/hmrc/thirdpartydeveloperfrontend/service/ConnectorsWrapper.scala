@@ -22,14 +22,12 @@ import scala.concurrent.ExecutionContext
 import com.google.inject.name.Named
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 
 @Singleton
 class ConnectorsWrapper @Inject() (
     @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
-    @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
-    applicationConfig: ApplicationConfig
+    @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector
   )(using val ec: ExecutionContext
   ) {
 

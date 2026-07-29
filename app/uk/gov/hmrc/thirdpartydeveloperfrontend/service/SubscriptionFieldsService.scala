@@ -31,7 +31,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
 
 @Singleton
-class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(using val ec: ExecutionContext) {
+class SubscriptionFieldsService @Inject() (apmConnector: ApmConnector)(using val ec: ExecutionContext) {
 
   def saveFieldValues(
       role: Collaborator.Role,
