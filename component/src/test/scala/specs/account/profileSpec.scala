@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import ApplicationsSteps._
-import CommonStepsSteps._
-import LoginStepsSteps._
-import ProfileSteps._
+import ApplicationsSteps.*
+import CommonStepsSteps.*
+import LoginStepsSteps.*
+import ProfileSteps.*
 
 class profileSpec extends BaseSpec {
 

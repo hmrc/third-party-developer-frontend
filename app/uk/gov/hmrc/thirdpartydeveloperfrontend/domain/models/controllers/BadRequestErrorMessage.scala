@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.Result
-import play.api.mvc.Results._
+import play.api.mvc.Results.*
 
 object BadRequestWithErrorMessage {
   private case class ErrorMessage(errorMessage: String)

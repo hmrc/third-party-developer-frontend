@@ -18,7 +18,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, get, 
 
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
 object ApiSubscriptionFieldsStub {
 

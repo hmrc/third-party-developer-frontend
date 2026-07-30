@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 import scala.reflect.{ClassTag, classTag}
 
 import cats.Semigroup
-import cats.implicits._
+import cats.implicits.*
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId

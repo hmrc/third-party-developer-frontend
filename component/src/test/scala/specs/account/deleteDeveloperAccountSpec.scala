@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import ApplicationsSteps._
-import CommonStepsSteps._
-import LoginStepsSteps._
+import ApplicationsSteps.*
+import CommonStepsSteps.*
+import LoginStepsSteps.*
 import org.scalatest.BeforeAndAfter
 
 class deleteDeveloperAccountSpec extends BaseSpec with BeforeAndAfter {

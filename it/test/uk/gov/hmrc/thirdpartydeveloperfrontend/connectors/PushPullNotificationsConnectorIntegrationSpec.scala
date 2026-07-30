@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.util.UUID.randomUUID
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.mockito.Mockito
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 

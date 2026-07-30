@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.domain.utils
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 class InvalidEnumException(className: String, input: String)
     extends RuntimeException(s"Enumeration expected of type: '$className', but it does not contain '$input'")

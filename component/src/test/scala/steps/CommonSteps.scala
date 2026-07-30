@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.{By, WebElement}

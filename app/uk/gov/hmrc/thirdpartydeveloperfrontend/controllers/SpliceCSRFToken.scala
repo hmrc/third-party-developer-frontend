@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.mvc.{Call, RequestHeader}
-import play.filters.csrf.CSRF._
+import play.filters.csrf.CSRF.*
 
 object SpliceCSRFToken {
 

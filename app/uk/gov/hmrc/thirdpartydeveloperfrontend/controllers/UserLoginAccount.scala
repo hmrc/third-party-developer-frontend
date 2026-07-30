@@ -21,10 +21,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html._
+import views.html.*
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Session => PlaySession, _}
+import play.api.mvc.{Session as PlaySession, *}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -39,16 +39,16 @@ import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppLoginAccess
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RequestMfaRemovalCompleteView, RequestMfaRemovalView}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AuthenticatorApp, Sms}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models._
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.PhoneNumberHelper.obfuscateNumber
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.*
 
 trait Auditing {
   val auditService: AuditService

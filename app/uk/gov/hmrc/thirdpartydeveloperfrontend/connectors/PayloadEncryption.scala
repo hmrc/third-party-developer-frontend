@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.crypto.json.JsonEncryption
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, _}
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, *}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 

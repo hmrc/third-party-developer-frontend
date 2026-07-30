@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.matchers.should.Matchers
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.{Json, Writes}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger

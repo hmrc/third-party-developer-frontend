@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import play.api.data.Forms._
-import play.api.data._
+import play.api.data.*
+import play.api.data.Forms.*
 import play.api.data.validation.{Invalid, ValidationError, ValidationResult}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.Generators._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.Generators.*
 
 class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Matchers {
 

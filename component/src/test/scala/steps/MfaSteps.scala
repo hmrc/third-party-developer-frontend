@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import org.openqa.selenium.{Cookie => SCookie}
+import org.openqa.selenium.Cookie as SCookie
 import org.scalatest.matchers.should.Matchers
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import uk.gov.hmrc.selenium.webdriver.Driver
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{SessionCreateWithDeviceRequest, UserAuthenticationResponse}
 
 object MfaStepsSteps extends MfaData with Matchers with NavigationSugar {

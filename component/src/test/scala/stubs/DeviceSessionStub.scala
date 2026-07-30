@@ -16,7 +16,7 @@
 
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.json.Json

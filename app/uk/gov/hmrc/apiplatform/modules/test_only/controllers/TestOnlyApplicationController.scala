@@ -23,7 +23,7 @@ import views.helper.EnvironmentNameService
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.*
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment.Production
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}

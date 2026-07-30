@@ -22,7 +22,7 @@ import scala.concurrent.Future.successful
 import org.jsoup.Jsoup
 
 import play.api.http.Status
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.mfa.service.MfaResponse

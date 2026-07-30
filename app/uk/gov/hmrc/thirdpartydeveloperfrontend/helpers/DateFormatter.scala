@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{Clock, Instant, LocalDate, ZoneOffset}
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper._
+import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.*
 
 object DateFormatter {
   val shortFormatter: DateTimeFormatter               = DateTimeFormatter.ofPattern("d MMM yyyy").withZone(ZoneOffset.UTC)

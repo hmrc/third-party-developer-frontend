@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 import org.apache.pekko.stream.Materializer
 import org.mockito.invocation.InvocationOnMock
@@ -29,7 +29,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
 import uk.gov.hmrc.mongo.play.PlayMongoModule
 import uk.gov.hmrc.play.bootstrap.frontend.filters.SessionTimeoutFilterConfig

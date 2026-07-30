@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
 import java.util.UUID
 
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{SubmissionId => AppSubmissionId}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId as AppSubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId}
 
 // Play's routes compiler cannot bind opaque types directly as route parameters. These wrapper

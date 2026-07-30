@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.config
 
 import javax.inject.{Inject, Singleton}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import com.google.inject.Provider
 

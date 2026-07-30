@@ -23,7 +23,7 @@ import views.helper.EnvironmentNameService
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
+import play.api.mvc.*
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.test_only.connectors.TestOnlyTpdConnector

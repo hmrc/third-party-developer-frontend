@@ -27,8 +27,8 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToSelfOrOtherForm
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.inputExistsWithValue
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
 
 class ResponsibleIndividualChangeToSelfOrOtherViewSpec extends CommonViewSpec with WithCSRFAddToken
     with LocalUserIdTracker with CollaboratorTracker with DeveloperSessionBuilder with ApplicationWithCollaboratorsFixtures with UserTestData {

@@ -21,11 +21,11 @@ import scala.concurrent.Future
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Assertion
-import org.scalatest.matchers.should.Matchers._
+import org.scalatest.matchers.should.Matchers.*
 
 import play.api.http.Status
 import play.api.mvc.Result
-import play.api.test.Helpers.{contentAsString, status, _}
+import play.api.test.Helpers.{contentAsString, status, *}
 
 trait MfaViewsValidator {
 

@@ -27,7 +27,7 @@ import views.helper.CommonViewSpec
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper._
+import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.*
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesItemsView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaDetail, MfaId, SmsMfaDetail}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken

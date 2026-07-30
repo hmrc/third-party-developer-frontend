@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import ApplicationsSteps._
-import CommonStepsSteps._
-import LoginStepsSteps._
-import MfaStepsSteps._
+import ApplicationsSteps.*
+import CommonStepsSteps.*
+import LoginStepsSteps.*
+import MfaStepsSteps.*
 import org.scalatest.BeforeAndAfter
 
 class signInJourneysSpec extends BaseSpec with BeforeAndAfter {

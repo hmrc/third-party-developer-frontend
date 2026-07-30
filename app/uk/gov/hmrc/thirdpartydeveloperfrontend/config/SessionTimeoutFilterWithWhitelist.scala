@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import org.apache.pekko.stream.Materializer
 
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 
 case class WhitelistedCall(uri: String, method: String)

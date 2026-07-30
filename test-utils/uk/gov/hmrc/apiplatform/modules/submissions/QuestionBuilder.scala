@@ -18,7 +18,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions
 
 import scala.collection.immutable.ListMap
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 
 trait MakeOptional[T <: Question] {
   def makeOptional(text: String, mark: Mark): T

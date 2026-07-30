@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
 trait CommonResponseHandlers {

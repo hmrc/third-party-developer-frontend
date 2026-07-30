@@ -41,7 +41,7 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asS
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 
 class FlowRepositoryISpec extends AnyWordSpec

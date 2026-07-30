@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 
 import java.time.Clock
-import javax.inject._
+import javax.inject.*
 
 import uk.gov.hmrc.http.HeaderCarrier
 

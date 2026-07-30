@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.{EitherT, OptionT}
-import cats.implicits._
+import cats.implicits.*
 
-import play.api.mvc.{Action, _}
+import play.api.mvc.{Action, *}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 

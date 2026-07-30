@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.uplift.domain.models
 
-import play.api.libs.json.{Format, Json, _}
+import play.api.libs.json.{Format, Json, *}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
 

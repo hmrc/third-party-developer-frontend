@@ -17,13 +17,13 @@
 import ApplicationStub.configureUserApplications
 import org.openqa.selenium.By
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import uk.gov.hmrc.selenium.webdriver.Driver
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
 
 object ApplicationsSteps extends NavigationSugar with ComponentTestDeveloperBuilder with ApplicationWithCollaboratorsFixtures {
 

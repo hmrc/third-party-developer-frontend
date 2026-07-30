@@ -26,9 +26,9 @@ import play.api.mvc.{Action, ActionRefiner, AnyContent, Result}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessLevel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageSubscriptions.toDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, *}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
 
 trait SubscriptionFieldsActions {

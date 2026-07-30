@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessLevel._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessLevel.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.*
 
 class AccessRequirementsSpec extends AnyWordSpec with Matchers {
 

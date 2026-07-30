@@ -19,10 +19,10 @@ package uk.gov.hmrc.apiplatform.modules.submissions
 import scala.collection.immutable.ListMap
 
 import cats.data.NonEmptyList
-import cats.implicits._
+import cats.implicits.*
 
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.AskWhen.Context.Keys
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 
 trait QuestionnaireTestData {
 
