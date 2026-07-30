@@ -26,7 +26,7 @@ trait ApplicationsJsonFormatters {
     val formatTOUA: OFormat[TermsOfUseAgreement] = Json.format[TermsOfUseAgreement]
   }
 
-  implicit val formatTermsOfUseAgreement: OFormat[TermsOfUseAgreement] = TOUAHelper.formatTOUA
+  given OFormat[TermsOfUseAgreement] = TOUAHelper.formatTOUA
 
 }
 

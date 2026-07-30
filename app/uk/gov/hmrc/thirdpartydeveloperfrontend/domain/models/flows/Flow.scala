@@ -61,7 +61,7 @@ object FlowType {
 
   import play.api.libs.json.Format
   import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
-  implicit val format: Format[FlowType] = SimpleEnumJsonFormatting.createStringFormatFor[FlowType]("Flow Type", FlowType.apply)
+  given Format[FlowType] = SimpleEnumJsonFormatting.createStringFormatFor[FlowType]("Flow Type", FlowType.apply)
 }
 
 trait Flow {

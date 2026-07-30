@@ -80,7 +80,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       val email: LaxEmailAddress = "foo@bar.com".toLaxEmail
       val userId: UserId         = UserId.random
 
-      implicit val writes: Writes[FindUserIdResponse] = Json.writes[FindUserIdResponse]
+      given Writes[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))

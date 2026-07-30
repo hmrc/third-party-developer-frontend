@@ -36,7 +36,7 @@ case class CreateTicketRequest(
   )
 
 object CreateTicketRequest {
-  implicit val createTicketRequestFormat: Format[CreateTicketRequest] = Json.format[CreateTicketRequest]
+  given Format[CreateTicketRequest] = Json.format[CreateTicketRequest]
 
   def createForRequestChangeOfProductionApplicationName(
       requestorName: String,

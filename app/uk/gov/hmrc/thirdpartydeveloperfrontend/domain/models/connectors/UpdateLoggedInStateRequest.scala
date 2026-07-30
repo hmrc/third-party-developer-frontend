@@ -23,5 +23,5 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
 case class UpdateLoggedInStateRequest(loggedInState: LoggedInState)
 
 object UpdateLoggedInStateRequest {
-  implicit val format: OFormat[UpdateLoggedInStateRequest] = Json.format[UpdateLoggedInStateRequest]
+  given OFormat[UpdateLoggedInStateRequest] = Json.format[UpdateLoggedInStateRequest]
 }

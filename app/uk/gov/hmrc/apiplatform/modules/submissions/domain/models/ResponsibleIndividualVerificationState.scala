@@ -25,5 +25,5 @@ object ResponsibleIndividualVerificationState extends Enumeration {
 
   val INITIAL, REMINDERS_SENT = Value
 
-  implicit val format: Format[ResponsibleIndividualVerificationState] = EnumJson.enumFormat(ResponsibleIndividualVerificationState)
+  given Format[ResponsibleIndividualVerificationState] = EnumJson.enumFormat(ResponsibleIndividualVerificationState)
 }

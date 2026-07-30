@@ -74,13 +74,13 @@ object ApiPlatformDeskproConnector {
   case class UpdatePersonRequest(email: LaxEmailAddress, name: String)
 
   object UpdatePersonRequest {
-    implicit val format: OFormat[UpdatePersonRequest] = Json.format[UpdatePersonRequest]
+    given OFormat[UpdatePersonRequest] = Json.format[UpdatePersonRequest]
   }
 
   case class CreateTicketResponse(ref: Option[String])
 
   object CreateTicketResponse {
-    implicit val createTicketResponseFormat: Format[CreateTicketResponse] = Json.format[CreateTicketResponse]
+    given Format[CreateTicketResponse] = Json.format[CreateTicketResponse]
   }
 
   sealed trait UpdateProfileResult

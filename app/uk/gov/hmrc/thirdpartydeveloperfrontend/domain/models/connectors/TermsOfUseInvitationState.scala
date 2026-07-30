@@ -25,5 +25,5 @@ object TermsOfUseInvitationState extends Enumeration {
 
   val EMAIL_SENT, REMINDER_EMAIL_SENT, OVERDUE, WARNINGS, FAILED, TERMS_OF_USE_V2_WITH_WARNINGS, TERMS_OF_USE_V2 = Value
 
-  implicit val format: Format[TermsOfUseInvitationState.Value] = EnumJson.enumFormat(TermsOfUseInvitationState)
+  given Format[TermsOfUseInvitationState.Value] = EnumJson.enumFormat(TermsOfUseInvitationState)
 }

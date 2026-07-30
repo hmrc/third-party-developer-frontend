@@ -38,15 +38,15 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService
 
 object QuestionsController {
   case class ErrorMessage(message: String)
-  implicit val writesErrorMessage: OWrites[ErrorMessage] = Json.writes[ErrorMessage]
+  given OWrites[ErrorMessage] = Json.writes[ErrorMessage]
 
   case class InboundRecordAnswersRequest(answers: NonEmptyList[String])
-  implicit val readsInboundRecordAnswersRequest: Reads[InboundRecordAnswersRequest] = Json.reads[InboundRecordAnswersRequest]
+  given Reads[InboundRecordAnswersRequest] = Json.reads[InboundRecordAnswersRequest]
 
   case class ViewErrorInfo private (summary: String, message: String)
 
   object ViewErrorInfo {
-    implicit val format: OFormat[ViewErrorInfo] = Json.format[ViewErrorInfo]
+    given OFormat[ViewErrorInfo] = Json.format[ViewErrorInfo]
 
     def apply(errorInfo: ErrorInfo): ViewErrorInfo = errorInfo match {
       case ErrorInfo(summary, Some(message)) => new ViewErrorInfo(summary, message)

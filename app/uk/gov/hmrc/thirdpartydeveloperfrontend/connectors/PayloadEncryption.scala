@@ -58,7 +58,7 @@ class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends Encry
 case class SecretRequest(data: String)
 
 object SecretRequest {
-  implicit val format: Format[SecretRequest] = Json.format[SecretRequest]
+  given Format[SecretRequest] = Json.format[SecretRequest]
 }
 
 class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {

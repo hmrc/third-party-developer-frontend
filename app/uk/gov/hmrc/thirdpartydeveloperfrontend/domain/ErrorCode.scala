@@ -33,5 +33,5 @@ object ErrorCode {
 
   import play.api.libs.json.Format
   import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
-  implicit val format: Format[ErrorCode] = SimpleEnumJsonFormatting.createStringFormatFor[ErrorCode]("Error Code", ErrorCode.apply)
+  given Format[ErrorCode] = SimpleEnumJsonFormatting.createStringFormatFor[ErrorCode]("Error Code", ErrorCode.apply)
 }

@@ -34,5 +34,5 @@ object ApiSubscriptions {
 
   implicit val keyWritesApiIdentifier: KeyWrites[ApiIdentifier] = { id => s"${id.context.value}###${id.versionNbr.value.replace(".", "_")}" }
 
-  implicit val format: Format[ApiSubscriptions] = Json.format[ApiSubscriptions]
+  given Format[ApiSubscriptions] = Json.format[ApiSubscriptions]
 }

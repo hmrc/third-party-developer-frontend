@@ -37,19 +37,19 @@ object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
 
   case class OutboundRecordAnswersRequest(answers: List[String])
-  implicit val writesOutboundRecordAnswersRequest: Writes[OutboundRecordAnswersRequest] = Json.writes[OutboundRecordAnswersRequest]
+  given Writes[OutboundRecordAnswersRequest] = Json.writes[OutboundRecordAnswersRequest]
 
   case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: LaxEmailAddress)
-  implicit val writesApprovalsRequest: Writes[ApprovalsRequest] = Json.writes[ApprovalsRequest]
+  given Writes[ApprovalsRequest] = Json.writes[ApprovalsRequest]
 
   case class ResponsibleIndividualVerificationRequest(code: String)
-  implicit val writesResponsibleIndividualVerificationRequest: Writes[ResponsibleIndividualVerificationRequest] = Json.writes[ResponsibleIndividualVerificationRequest]
+  given Writes[ResponsibleIndividualVerificationRequest] = Json.writes[ResponsibleIndividualVerificationRequest]
 
   case class ConfirmSetupCompleteRequest(requesterEmailAddress: LaxEmailAddress)
-  implicit val writesConfirmSetupCompleteRequest: Writes[ConfirmSetupCompleteRequest] = Json.writes[ConfirmSetupCompleteRequest]
+  given Writes[ConfirmSetupCompleteRequest] = Json.writes[ConfirmSetupCompleteRequest]
 
   case class CreateSubmissionRequest(requestedBy: LaxEmailAddress)
-  implicit val readsCreateSubmissionRequest: Writes[CreateSubmissionRequest] = Json.writes[CreateSubmissionRequest]
+  given Writes[CreateSubmissionRequest] = Json.writes[CreateSubmissionRequest]
 }
 
 @Singleton

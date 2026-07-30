@@ -65,7 +65,7 @@ abstract class AbstractPushPullNotificationsConnector(using ExecutionContext) ex
 }
 
 object PushPullNotificationsConnector {
-  implicit val readsPushSecret: Reads[PushSecret] = Json.reads[PushSecret]
+  given readsPushSecret: Reads[PushSecret] = Json.reads[PushSecret]
 }
 
 private[connectors] case class PushSecret(value: String)

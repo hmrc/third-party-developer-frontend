@@ -33,5 +33,5 @@ final case class TermsOfUseInvitation(
   )
 
 object TermsOfUseInvitation {
-  implicit val format: Format[TermsOfUseInvitation] = Json.format[TermsOfUseInvitation]
+  given Format[TermsOfUseInvitation] = Json.format[TermsOfUseInvitation]
 }

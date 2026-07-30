@@ -23,7 +23,7 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.ServiceNavig
 case class NavLink(label: String, href: String, truncate: Boolean = false, openInNewWindow: Boolean = false, isSensitive: Boolean = false)
 
 object NavLink {
-  implicit val format: OFormat[NavLink] = Json.format[NavLink]
+  given OFormat[NavLink] = Json.format[NavLink]
 
 }
 

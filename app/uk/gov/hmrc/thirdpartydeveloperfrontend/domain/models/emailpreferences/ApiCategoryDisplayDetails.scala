@@ -30,7 +30,7 @@ case class APICategoryDisplayDetails(category: String, name: String) {
 }
 
 object APICategoryDisplayDetails {
-  implicit val formatApiCategory: OFormat[APICategoryDisplayDetails] = Json.format[APICategoryDisplayDetails]
+  given OFormat[APICategoryDisplayDetails] = Json.format[APICategoryDisplayDetails]
 
   def from(category: ApiCategory): APICategoryDisplayDetails = APICategoryDisplayDetails(category.asScreamingSnakeCase, category.displayText)
 }

@@ -38,7 +38,7 @@ case class DeveloperSession(session: UserSession) {
 }
 
 object DeveloperSession {
-  implicit val format: Format[DeveloperSession] = Json.format[DeveloperSession]
+  given Format[DeveloperSession] = Json.format[DeveloperSession]
 
   def apply(
       loggedInState: LoggedInState,

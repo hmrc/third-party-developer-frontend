@@ -21,5 +21,5 @@ import play.api.libs.json.{Json, OFormat}
 case class FileAttachment(fileReference: String, fileName: String)
 
 object FileAttachment {
-  implicit val fileAttachmentFormat: OFormat[FileAttachment] = Json.format[FileAttachment]
+  given OFormat[FileAttachment] = Json.format[FileAttachment]
 }

@@ -21,5 +21,5 @@ import play.api.libs.json.{Json, OFormat}
 case class ErrorDetails(code: String, message: String)
 
 object ErrorDetails {
-  implicit val formatErrorDetails: OFormat[ErrorDetails] = Json.format[ErrorDetails]
+  given OFormat[ErrorDetails] = Json.format[ErrorDetails]
 }

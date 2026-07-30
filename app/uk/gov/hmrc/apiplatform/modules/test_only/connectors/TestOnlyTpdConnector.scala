@@ -33,8 +33,8 @@ object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
   case class SmsAccessCodeResponse(accessCode: String)
 
-  implicit val formatCloneUserResponse: OFormat[CloneUserResponse]         = Json.format[CloneUserResponse]
-  implicit val formatSmsAccessCodeResponse: OFormat[SmsAccessCodeResponse] = Json.format[SmsAccessCodeResponse]
+  given OFormat[CloneUserResponse]     = Json.format[CloneUserResponse]
+  given OFormat[SmsAccessCodeResponse] = Json.format[SmsAccessCodeResponse]
 }
 
 @Singleton

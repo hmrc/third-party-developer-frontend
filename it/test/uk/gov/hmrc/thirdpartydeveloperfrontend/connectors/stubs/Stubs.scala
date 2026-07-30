@@ -111,7 +111,7 @@ object DeveloperStub {
 
 object ApplicationStub {
 
-  implicit val apiIdentifierFormat: OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
+  given OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
 
   def setupApplicationNameValidation(): StubMapping = {
     val validNameResult: ApplicationNameValidationResult = ApplicationNameValidationResult.Valid
@@ -259,7 +259,7 @@ object ApiSubscriptionFieldsStub {
 
 object ApiPlatformMicroserviceStub {
 
-  implicit val apiIdentifierFormat: OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
+  given OFormat[ApiIdentifier] = Json.format[ApiIdentifier]
 
   def stubFetchAllPossibleSubscriptions(applicationId: ApplicationId, body: String): StubMapping = {
     stubFor(

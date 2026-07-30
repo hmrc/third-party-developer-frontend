@@ -71,7 +71,7 @@ object APISubscriptions {
 case class AjaxSubscriptionResponse(apiName: ApiContext, group: String, numberOfSubscriptionText: String)
 
 object AjaxSubscriptionResponse {
-  implicit val format: OFormat[AjaxSubscriptionResponse] = Json.format[AjaxSubscriptionResponse]
+  given OFormat[AjaxSubscriptionResponse] = Json.format[AjaxSubscriptionResponse]
 
   def from(context: ApiContext, version: ApiVersionNbr, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions

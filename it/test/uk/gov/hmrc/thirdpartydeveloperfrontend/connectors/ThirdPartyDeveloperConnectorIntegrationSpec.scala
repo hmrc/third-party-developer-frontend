@@ -234,8 +234,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
   "Resend verification" should {
     "send verification mail" in new Setup {
       val email: LaxEmailAddress                        = "john.smith@example.com".toLaxEmail
-      implicit val writes1: OWrites[FindUserIdRequest]  = Json.writes[FindUserIdRequest]
-      implicit val writes2: OWrites[FindUserIdResponse] = Json.writes[FindUserIdResponse]
+      given OWrites[FindUserIdRequest]  = Json.writes[FindUserIdRequest]
+      given OWrites[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))

@@ -30,7 +30,7 @@ case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 object ResponsibleIndividualVerificationId {
   import play.api.libs.json.Json
 
-  implicit val JsonFormat: Format[ResponsibleIndividualVerificationId] = Json.valueFormat[ResponsibleIndividualVerificationId]
+  given Format[ResponsibleIndividualVerificationId] = Json.valueFormat[ResponsibleIndividualVerificationId]
 }
 
 sealed trait ResponsibleIndividualVerification {
@@ -82,11 +82,11 @@ object ResponsibleIndividualVerification {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
 
-  implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification]                = Json.format[ResponsibleIndividualToUVerification]
-  implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]
-  implicit val responsibleIndividualUpdateVerificationFormat: OFormat[ResponsibleIndividualUpdateVerification]       = Json.format[ResponsibleIndividualUpdateVerification]
+  given OFormat[ResponsibleIndividualToUVerification]       = Json.format[ResponsibleIndividualToUVerification]
+  given OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]
+  given OFormat[ResponsibleIndividualUpdateVerification]    = Json.format[ResponsibleIndividualUpdateVerification]
 
-  implicit val jsonFormatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Union.from[ResponsibleIndividualVerification]("verificationType")
+  given OFormat[ResponsibleIndividualVerification] = Union.from[ResponsibleIndividualVerification]("verificationType")
     .and[ResponsibleIndividualToUVerification]("termsOfUse")
     .and[ResponsibleIndividualTouUpliftVerification]("termsOfUseUplift")
     .and[ResponsibleIndividualUpdateVerification]("adminUpdate")

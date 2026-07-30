@@ -27,5 +27,5 @@ case class DeleteCollaboratorRequest(
   )
 
 object DeleteCollaboratorRequest {
-  implicit val writesDeleteCollaboratorRequest: Writes[DeleteCollaboratorRequest] = Json.writes[DeleteCollaboratorRequest]
+  given Writes[DeleteCollaboratorRequest] = Json.writes[DeleteCollaboratorRequest]
 }

@@ -34,8 +34,8 @@ object ApmConnectorApplicationModule {
 
   case class RequestUpliftV2(upliftRequest: UpliftRequest)
 
-  implicit val writesV1: Writes[RequestUpliftV1] = Json.writes[RequestUpliftV1]
-  implicit val writesV2: Writes[RequestUpliftV2] = Json.writes[RequestUpliftV2]
+  given Writes[RequestUpliftV1] = Json.writes[RequestUpliftV1]
+  given Writes[RequestUpliftV2] = Json.writes[RequestUpliftV2]
 }
 
 trait ApmConnectorApplicationModule extends ApmConnectorModule {
