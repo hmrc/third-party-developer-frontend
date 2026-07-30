@@ -16,14 +16,6 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import scala.collection.immutable.ListSet
-
-sealed trait APIGroup
-
-object APIGroup {
-  val values: ListSet[APIGroup] = ListSet(API, TEST_API, EXAMPLE)
-
-  case object API      extends APIGroup
-  case object TEST_API extends APIGroup
-  case object EXAMPLE  extends APIGroup
+enum APIGroup {
+  case API, TEST_API, EXAMPLE
 }

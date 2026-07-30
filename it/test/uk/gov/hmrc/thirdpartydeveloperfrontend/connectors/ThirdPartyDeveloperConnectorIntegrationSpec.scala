@@ -233,7 +233,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Resend verification" should {
     "send verification mail" in new Setup {
-      val email: LaxEmailAddress                        = "john.smith@example.com".toLaxEmail
+      val email: LaxEmailAddress        = "john.smith@example.com".toLaxEmail
       given OWrites[FindUserIdRequest]  = Json.writes[FindUserIdRequest]
       given OWrites[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
