@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-@import views.include.teamMembers.TeamMember._
+@import views.include.teamMembers.TeamMember.*
 @(app: ApplicationWithCollaborators, collaboratorUsers: Seq[User], role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
