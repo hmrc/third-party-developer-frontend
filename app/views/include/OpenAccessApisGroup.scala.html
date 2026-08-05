@@ -44,13 +44,13 @@
 
       <div id="accordion-open-access-content-@displayableSectionId(apiDefinition)" class="govuk-accordion__section-content" role="region" aria-labelledby="accordion-open-access-heading-@displayableSectionId(apiDefinition)">
         @apiDefinition.versions.toList.map { case (apiVersionNbr, apiVersion) =>
-          @defining(s"${apiDefinition.name} $apiVersionNbr (${apiVersion.status.toString})") { apiVersionFullName =>
+          @defining(s"${apiDefinition.name} $apiVersionNbr (${apiVersion.status})") { apiVersionFullName =>
             <div class="govuk-grid-row">
               <div class="govuk-grid-column-one-half">
                 <div class="govuk-form-group govuk-!-margin-bottom-0">
                   <p class='govuk-body govuk-!-padding-top-2'>
                     <a href="@applicationConfig.apiDocumentationFrontendUrl/api-documentation/docs/api/service/@apiDefinition.serviceName/@apiVersionNbr.value" aria-label="@apiVersionFullName." data-api-link>
-                      @{apiVersionNbr.value} (@apiVersion.status.toString)
+                      @{apiVersionNbr.value} (@apiVersion.status)
                     </a>
                   </p>
                 </div>
