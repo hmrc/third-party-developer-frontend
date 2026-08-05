@@ -162,7 +162,7 @@ class UserLoginAccount @Inject() (
         }
 
       case (Some(_), true) | (None, false) | (Some(_), false) =>
-        throw new MatchError((userAuthenticationResponse.session, userAuthenticationResponse.accessCodeRequired))
+        throw new MatchError((userAuthenticationResponse.session.isDefined, userAuthenticationResponse.accessCodeRequired))
     }
   }
 
