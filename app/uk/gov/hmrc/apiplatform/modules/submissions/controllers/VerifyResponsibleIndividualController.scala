@@ -77,7 +77,7 @@ class VerifyResponsibleIndividualController @Inject() (
 
   import cats.instances.future.catsStdInstancesForFuture
 
-  private val ET                          = new EitherTHelper[Result] {}
+  private val ET                          = EitherTHelper.make[Result]
   private val noRIVerificationRecordError = "This page has expired"
 
   def verifyPage(code: String) = Action.async { implicit request =>

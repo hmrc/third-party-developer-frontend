@@ -101,7 +101,7 @@ class UpliftJourneyController @Inject() (
 
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
-  private val ET = new EitherTHelper[Result] {}
+  private val ET = EitherTHelper.make[Result]
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
