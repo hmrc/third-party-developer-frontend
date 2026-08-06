@@ -23,7 +23,6 @@ import play.api.libs.json.{Format, OFormat}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
