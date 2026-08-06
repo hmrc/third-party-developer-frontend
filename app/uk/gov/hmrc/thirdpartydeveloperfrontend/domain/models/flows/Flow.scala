@@ -24,7 +24,6 @@ import cats.implicits.*
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromScreamingSnakeCase}
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -65,15 +64,13 @@ object FlowType {
 }
 
 trait Flow {
-  type Type <: SessionId
-  def sessionId: Type
+  def sessionId: UserSessionId
   def flowType: FlowType
 }
 
 /** The name of the class is used on serialisation as a discriminator. Do not change.
   */
 case class IpAllowlistFlow(override val sessionId: UserSessionId, allowlist: Set[String]) extends Flow {
-  type Type = UserSessionId
   override val flowType: FlowType = FlowType.IP_ALLOW_LIST
 }
 case class SupportApi(serviceName: ServiceName, name: String)
@@ -85,8 +82,6 @@ case class EmailPreferencesFlowV2(
     selectedTopics: Set[String],
     visibleApis: List[CombinedApi]
   ) extends Flow with EmailPreferencesProducer {
-
-  type Type = UserSessionId
 
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
 
@@ -143,7 +138,6 @@ case class NewApplicationEmailPreferencesFlowV2(
     selectedTopics: Set[String]
   ) extends Flow with EmailPreferencesProducer {
 
-  type Type = UserSessionId
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
 
   def optionCombine[A: Semigroup](a: A, opt: Option[A]): A = opt.map(a combine _).getOrElse(a)

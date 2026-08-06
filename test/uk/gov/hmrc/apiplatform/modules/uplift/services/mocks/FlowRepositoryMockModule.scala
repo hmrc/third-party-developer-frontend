@@ -23,6 +23,7 @@ import org.mockito.quality.Strictness
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{Flow, FlowType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
@@ -38,15 +39,15 @@ trait FlowRepositoryMockModule extends MockitoSugar with ArgumentMatchersSugar {
     object FetchBySessionIdAndFlowType {
       def thenReturn[A <: Flow](flow: A)(implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(using eqTo(ct))).thenReturn(successful(Some(flow)))
 
-      def thenReturn[A <: Flow](sessionId: SessionId)(flow: A)(implicit ct: ClassTag[A]) =
+      def thenReturn[A <: Flow](sessionId: UserSessionId)(flow: A)(implicit ct: ClassTag[A]) =
         when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))).thenReturn(successful(Some(flow)))
 
       def thenReturnNothing[A <: Flow](implicit ct: ClassTag[A]) = when(aMock.fetchBySessionIdAndFlowType[A](*)(using eqTo(ct))).thenReturn(successful(None))
 
-      def thenReturnNothing[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) =
+      def thenReturnNothing[A <: Flow](sessionId: UserSessionId)(implicit ct: ClassTag[A]) =
         when(aMock.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))).thenReturn(successful(None))
 
-      def verifyCalledWith[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))
+      def verifyCalledWith[A <: Flow](sessionId: UserSessionId)(implicit ct: ClassTag[A]) = verify.fetchBySessionIdAndFlowType[A](eqTo(sessionId))(using eqTo(ct))
     }
 
     object SaveFlow {

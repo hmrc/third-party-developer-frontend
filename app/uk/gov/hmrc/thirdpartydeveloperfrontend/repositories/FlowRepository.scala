@@ -29,6 +29,7 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.*
@@ -90,7 +91,7 @@ class FlowRepository @Inject() (mongo: MongoComponent, appConfig: ApplicationCon
       .map(_.wasAcknowledged())
   }
 
-  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: SessionId)(implicit ct: ClassTag[A]): Future[Option[A]] = {
+  def fetchBySessionIdAndFlowType[A <: Flow](sessionId: UserSessionId)(implicit ct: ClassTag[A]): Future[Option[A]] = {
     val flowType = FlowType.from[A]
     collection.find[A](and(equal("sessionId", sessionId.toString), equal("flowType", Codecs.toBson(flowType)))).headOption()
   }

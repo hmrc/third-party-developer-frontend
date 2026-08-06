@@ -26,7 +26,6 @@ case class GetProductionCredentialsFlow(
     apiSubscriptions: Option[ApiSubscriptions]
   ) extends Flow {
 
-  type Type = UserSessionId
   val flowType: FlowType = FlowType.GET_PRODUCTION_CREDENTIALS
 }
 

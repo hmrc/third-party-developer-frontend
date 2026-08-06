@@ -44,10 +44,11 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.Fields
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.{SessionId, User}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{PasswordChangeRequest, UpdateRequest}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.*
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
@@ -155,7 +156,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 
   def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit ct: ClassTag[A]) = {
-    when(flowRepository.fetchBySessionIdAndFlowType[A](*[SessionId])(using eqTo(ct))).thenReturn(
+    when(flowRepository.fetchBySessionIdAndFlowType[A](*[UserSessionId])(using eqTo(ct))).thenReturn(
       Future.successful(Some(a))
     )
   }
