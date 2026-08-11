@@ -31,6 +31,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessT
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationNameFixtures, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateFormatter
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
@@ -42,7 +43,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsO
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationSummary, ManageApplicationsViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, elementIdentifiedByAttrContainsText}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -176,7 +176,7 @@ class ViewAllApplicationsPageSpec extends CommonViewSpec
     // val appName       = "App name 1"
     val appUserRole   = Collaborator.Roles.ADMINISTRATOR
     val appCreatedOn  = instant.minus(1, DAYS)
-    val appLastAccess = Some(appCreatedOn)
+    val appLastAccess = None
 
     val sandboxAppSummaries = Seq(
       ApplicationSummary(

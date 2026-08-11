@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter.formatLastAccessDate
+@import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateFormatter
 @import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
@@ -189,10 +189,7 @@
               </td>
               <td class="govuk-table__cell govuk-!-width-one-quarter" data-app-lastAccess>
                 @{
-                  formatLastAccessDate(app.lastAccess, app.createdOn, clock) match {
-                    case Some(formattedDate) => formattedDate.capitalize
-                    case _ => "No API called"
-                  }
+                  app.lastAccess.fold("No API called")(d => DateFormatter.standardFormatter.format(d).capitalize)
                 }
               </td>
             } else {
