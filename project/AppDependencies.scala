@@ -8,7 +8,7 @@ object AppDependencies {
   lazy val bootstrapVersion = "10.7.0"
   lazy val mongoVersion = "2.13.0"
   lazy val apiDomainVersion = "1.4.0"
-  lazy val appDomainVersion = "1.3.0"
+  lazy val appDomainVersion = "1.5.0"
   lazy val tpdDomainVersion = "0.15.0"
   private val orgDomainVersion = "1.4.0"
   private val mockitoScalaVersion = "2.0.0"
@@ -25,10 +25,10 @@ object AppDependencies {
     "uk.gov.hmrc"                 %% "play-conditional-form-mapping-play-30"  % "3.5.0",
     "commons-net"                 %  "commons-net"                            % "3.6",
     "com.google.zxing"            %  "core"                                   % "3.2.1",
-    "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion,
+    "uk.gov.hmrc"                 %% "api-platform-api-domain"                % apiDomainVersion exclude("uk.gov.hmrc", "api-platform-common-domain" ),
     "uk.gov.hmrc"                 %% "api-platform-application-domain"        % appDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion,
-    "uk.gov.hmrc"                 %% "api-platform-organisation-domain"       % orgDomainVersion
+    "uk.gov.hmrc"                 %% "api-platform-tpd-domain"                % tpdDomainVersion exclude("uk.gov.hmrc", "api-platform-common-domain" ),
+    "uk.gov.hmrc"                 %% "api-platform-organisation-domain"       % orgDomainVersion exclude("uk.gov.hmrc", "api-platform-common-domain" )
   )
 
   lazy val test =  Seq(
