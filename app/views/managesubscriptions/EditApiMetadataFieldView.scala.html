@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@import include._
+@import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription.*
 @import views.html.include.DevMain
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import views.helper.IdFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMain)
@@ -75,7 +74,7 @@
       <input
         type="text"
         name="@{viewModel.field.name.value}"
-        value="@{viewModel.field.value.value}"
+        value="@{viewModel.field.value.toString}"
         class="govuk-input input--medium @if(viewModel.field.errors.nonEmpty){form-control-error}"
         id="value"
         aria-describedby="hint"

@@ -22,10 +22,10 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaboratorsFixtures, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.NoOne
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{
@@ -33,7 +33,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSu
   SaveSubscriptionFieldsSuccessResponse,
   SubscriptionFieldValue
 }
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuilder with FixedClock with ApplicationWithCollaboratorsFixtures {
@@ -51,20 +50,16 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
 
     lazy val locked = false
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
-    val mockConnectorsWrapper: ConnectorsWrapper                           = mock[ConnectorsWrapper]
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-    val mockApmConnector: ApmConnector                                     = mock[ApmConnector]
+    val mockApmConnector: ApmConnector = subclassMock[ApmConnector]
 
-    val underTest = new SubscriptionFieldsService(mockConnectorsWrapper, mockApmConnector)
-
-    when(mockConnectorsWrapper.forEnvironment(application.deployedTo)).thenReturn(mockPushPullNotificationsConnector)
+    val underTest = new SubscriptionFieldsService(mockApmConnector)
   }
 
   "saveFieldsValues" should {
     "save the fields" in new Setup {
-      val developerRole = Collaborator.Roles.DEVELOPER
+      val developerRole = Collaborator.Role.Developer
 
       val access = AccessRequirements.Default
 
@@ -81,7 +76,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       val newValue1    = FieldValue("newValue")
       val newValuesMap = Map(definition1.name -> newValue1)
 
-      when(mockApmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*))
+      when(mockApmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(using *))
         .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
       val result = await(underTest.saveFieldValues(developerRole, application, apiContext, apiVersion, oldValues, newValuesMap))
@@ -94,12 +89,12 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       )
 
       verify(mockApmConnector)
-        .saveFieldValues(eqTo(Environment.PRODUCTION), eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(*)
+        .saveFieldValues(eqTo(Environment.Production), eqTo(clientId), eqTo(apiContext), eqTo(apiVersion), eqTo(newFields1))(using *)
     }
 
     "save the fields fails with write access denied" in new Setup {
 
-      val developerRole = Collaborator.Roles.DEVELOPER
+      val developerRole = Collaborator.Role.Developer
 
       val access = AccessRequirements(devhub = DevhubAccessRequirements(NoOne, NoOne))
 
@@ -114,7 +109,7 @@ class SubscriptionFieldsServiceSpec extends AsyncHmrcSpec with SubscriptionsBuil
       result shouldBe SaveSubscriptionFieldsAccessDeniedResponse
 
       verify(mockApmConnector, never)
-        .saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(*)
+        .saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *)(using *)
     }
   }
 }

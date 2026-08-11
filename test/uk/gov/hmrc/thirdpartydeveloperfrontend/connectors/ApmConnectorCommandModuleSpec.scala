@@ -16,25 +16,29 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import cats.data.NonEmptyList
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.test.Helpers._
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborators.Administrator
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, DispatchRequest, DispatchSuccessResult}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, UserId, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, UserId, *}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, WireMockSugar}
 
 class ApmConnectorCommandModuleSpec
@@ -44,15 +48,21 @@ class ApmConnectorCommandModuleSpec
     with FixedClock
     with ApplicationWithCollaboratorsFixtures {
 
-  def anApplicationResponse(createdOn: Instant = instant, lastAccess: Instant = instant): ApplicationWithCollaborators = standardApp
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+      .build()
+
+  def anApplicationResponse(): ApplicationWithCollaborators = standardApp
 
   val apiVersion1   = ApiVersionNbr.random
   val applicationId = ApplicationId.random
   val administrator = Administrator(UserId.random, "sample@example.com".toLaxEmail)
   val developer     = Collaborators.Developer(UserId.random, "someone@example.com".toLaxEmail)
 
-  val authToken                  = "Bearer Token"
-  implicit val hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
+  val authToken           = "Bearer Token"
+  given hc: HeaderCarrier = HeaderCarrier().withExtraHeaders(("Authorization", authToken))
 
   val emailAddressToRemove = "toRemove@example.com".toLaxEmail
   val gatekeeperUserName   = "maxpower"
@@ -62,7 +72,7 @@ class ApmConnectorCommandModuleSpec
   val adminsToEmail = Set("admin1@example.com", "admin2@example.com").map(_.toLaxEmail)
   val url           = s"/applications/${applicationId}/dispatch"
 
-  class Setup(proxyEnabled: Boolean = false) {
+  class Setup {
 
     val httpClient = app.injector.instanceOf[HttpClientV2]
 

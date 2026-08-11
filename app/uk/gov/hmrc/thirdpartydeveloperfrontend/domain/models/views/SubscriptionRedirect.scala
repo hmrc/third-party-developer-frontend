@@ -19,8 +19,8 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views
 sealed trait SubscriptionRedirect
 
 object SubscriptionRedirect {
-  final case object MANAGE_PAGE            extends SubscriptionRedirect
-  final case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
+  case object MANAGE_PAGE            extends SubscriptionRedirect
+  case object API_SUBSCRIPTIONS_PAGE extends SubscriptionRedirect
 
   val values = List(MANAGE_PAGE, API_SUBSCRIPTIONS_PAGE)
 

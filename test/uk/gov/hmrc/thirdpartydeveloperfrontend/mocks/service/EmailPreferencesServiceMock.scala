@@ -27,6 +27,6 @@ trait EmailPreferencesServiceMock extends MockitoSugar with ArgumentMatchersSuga
   val emailPreferencesServiceMock = mock[EmailPreferencesService]
 
   def fetchAPIDetailsReturns(apis: List[CombinedApi]) = {
-    when(emailPreferencesServiceMock.fetchAPIDetails(*)(*)).thenReturn(successful(apis))
+    when(emailPreferencesServiceMock.fetchAPIDetails(*)(using *)).thenReturn(successful(apis))
   }
 }

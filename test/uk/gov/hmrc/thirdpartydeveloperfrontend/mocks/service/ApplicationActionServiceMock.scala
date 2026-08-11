@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptionFields, ApplicationWithSubscriptions}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationRequest, UserRequest}
@@ -38,7 +38,7 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
   val applicationActionServiceMock = mock[ApplicationActionService]
 
   def givenApplicationActionReturnsNotFound[A](applicationId: ApplicationId): Unit =
-    when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(*))
+    when(applicationActionServiceMock.process[A](eqTo(applicationId), *)(using *))
       .thenReturn(successful(None))
 
   def givenApplicationAction[A](application: ApplicationWithCollaborators, userSession: UserSession): Unit =
@@ -71,8 +71,8 @@ trait ApplicationActionServiceMock extends MockitoSugar with ArgumentMatchersSug
       }
     }
     reset(applicationActionServiceMock)
-    when(applicationActionServiceMock.process[A](eqTo(appData.id), *)(*))
-      .thenAnswer((a: ApplicationId, request: UserRequest[A], c: HeaderCarrier) => createReturn(request))
+    when(applicationActionServiceMock.process[A](eqTo(appData.id), *)(using *))
+      .thenAnswer((_: ApplicationId, request: UserRequest[A], _: HeaderCarrier) => createReturn(request))
   }
 
 }

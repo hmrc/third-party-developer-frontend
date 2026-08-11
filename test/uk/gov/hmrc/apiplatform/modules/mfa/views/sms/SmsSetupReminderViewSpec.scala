@@ -23,7 +23,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsSetupReminderView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -43,7 +43,7 @@ class SmsSetupReminderViewSpec extends CommonViewSpec
 
   "SmsSetupReminderView" should {
     "render as expected" in {
-      val mainView = smsSetupReminderView()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupReminderView()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "Get access codes by text"

@@ -18,28 +18,30 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import scala.concurrent.Future
 
-import play.api.http.Status._
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse, _}
+import play.api.http.Status.*
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse, *}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.interface.models.UpsertFieldValuesRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{ConnectorSaveSubscriptionFieldsResponse, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{ConnectorSaveSubscriptionFieldsResponse, *}
 
 object ApmConnectorSubscriptionFieldsModule {
 
   def urlSubscriptionFieldValues(baseUrl: String)(environment: Environment, clientId: ClientId, apiContext: ApiContext, apiVersion: ApiVersionNbr) =
-    url"$baseUrl/field/application/${clientId}/context/${apiContext}/version/${apiVersion}?environment=${environment}"
+    url"$baseUrl/field/application/${clientId}/context/${apiContext}/version/${apiVersion}?environment=${environment.asScreamingSnakeCase}"
 }
 
 trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
   import play.api.libs.json._
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/subscription-fields"
+  private val baseUrl = s"${config.serviceBaseUrl}/subscription-fields"
 
-  def getAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
-    http.get(url"${baseUrl}?environment=$environment")
+  def getAllFieldDefinitions(environment: Environment)(using HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
+    http.get(url"${baseUrl}?environment=${environment.asScreamingSnakeCase}")
       .execute[ApiFieldMap[FieldDefinition]]
   }
 
@@ -49,7 +51,7 @@ trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
       apiContext: ApiContext,
       apiVersion: ApiVersionNbr,
       fields: Fields
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ConnectorSaveSubscriptionFieldsResponse] = {
 
     val url = ApmConnectorSubscriptionFieldsModule.urlSubscriptionFieldValues(baseUrl)(environment, clientId, apiContext, apiVersion)
@@ -63,8 +65,8 @@ trait ApmConnectorSubscriptionFieldsModule extends ApmConnectorModule {
 
         case HttpResponse(BAD_REQUEST, body, _) =>
           Json.parse(body).validate[Map[String, String]] match {
-            case s: JsSuccess[Map[String, String]] => SaveSubscriptionFieldsFailureResponse(s.get)
-            case _                                 => SaveSubscriptionFieldsFailureResponse(Map.empty)
+            case s: JsSuccess[Map[String, String]] @unchecked => SaveSubscriptionFieldsFailureResponse(s.get)
+            case _                                            => SaveSubscriptionFieldsFailureResponse(Map.empty)
           }
 
         case HttpResponse(status, body, _) => throw UpstreamErrorResponse(body, status)

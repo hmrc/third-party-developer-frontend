@@ -22,20 +22,20 @@ object MfaDetailHelper {
 
   def isAuthAppMfaVerified(mfaDetails: List[MfaDetail]): Boolean = {
     mfaDetails
-      .exists(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified)
+      .exists(x => x.mfaType == MfaType.AuthenticatorApp && x.verified)
   }
 
   def isSmsMfaVerified(mfaDetails: List[MfaDetail]): Boolean = {
     mfaDetails
-      .exists(x => x.mfaType == MfaType.SMS && x.verified)
+      .exists(x => x.mfaType == MfaType.Sms && x.verified)
   }
 
   def getAuthAppMfaVerified(mfaDetails: List[MfaDetail]): Option[AuthenticatorAppMfaDetail] = {
-    mfaDetails.find(x => x.mfaType == MfaType.AUTHENTICATOR_APP && x.verified).map(_.asInstanceOf[AuthenticatorAppMfaDetail])
+    mfaDetails.find(x => x.mfaType == MfaType.AuthenticatorApp && x.verified).map(_.asInstanceOf[AuthenticatorAppMfaDetail])
   }
 
   def getSmsMfaVerified(mfaDetails: List[MfaDetail]): Option[SmsMfaDetail] = {
-    mfaDetails.find(x => x.mfaType == MfaType.SMS && x.verified).map(_.asInstanceOf[SmsMfaDetail])
+    mfaDetails.find(x => x.mfaType == MfaType.Sms && x.verified).map(_.asInstanceOf[SmsMfaDetail])
   }
 
   def getMfaDetailById(mfaId: MfaId, details: List[MfaDetail]): Option[MfaDetail] = {

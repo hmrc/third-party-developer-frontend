@@ -14,18 +14,17 @@
  * limitations under the License.
  *@
 
-@import include._
+@import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 
 @this(devMain: DevMainWithFormErrors)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeAppNameAndDescForm], applicationViewModel: ApplicationViewModel)(
-  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "details"
+  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig
 )
 
 @app  = @{applicationViewModel.application}

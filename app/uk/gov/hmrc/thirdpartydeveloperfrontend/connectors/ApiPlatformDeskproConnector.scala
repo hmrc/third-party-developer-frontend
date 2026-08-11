@@ -20,10 +20,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.json.{Format, Json, OFormat}
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, _}
-import uk.gov.hmrc.play.http.metrics.common.API
+import uk.gov.hmrc.http.{HeaderCarrier, *}
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
@@ -34,7 +34,7 @@ class ApiPlatformDeskproConnector @Inject() (
     config: ApiPlatformDeskproConnector.Config,
     http: HttpClientV2,
     metrics: ConnectorMetrics
-  )(implicit ec: ExecutionContext
+  )(using ExecutionContext
   ) extends CommonResponseHandlers with ApplicationLogger {
 
   import ApiPlatformDeskproConnector._
@@ -42,7 +42,7 @@ class ApiPlatformDeskproConnector @Inject() (
   val api = API("api-platform-deskpro")
 
   def createTicket(createRequest: CreateTicketRequest, hc: HeaderCarrier): Future[Option[String]] = metrics.record(api) {
-    implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
+    given headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
     http.post(url"${config.serviceBaseUrl}/ticket")
       .withBody(Json.toJson(createRequest))
       .execute[CreateTicketResponse]
@@ -50,7 +50,7 @@ class ApiPlatformDeskproConnector @Inject() (
   }
 
   def updatePersonName(userEmailAddress: LaxEmailAddress, name: String, hc: HeaderCarrier): Future[UpdateProfileResult] = metrics.record(api) {
-    implicit val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
+    given headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(config.authToken)))
     http.put(url"${config.serviceBaseUrl}/person")
       .withBody(Json.toJson(UpdatePersonRequest(userEmailAddress, name)))
       .execute[ErrorOrUnit]
@@ -58,13 +58,13 @@ class ApiPlatformDeskproConnector @Inject() (
       .recover(handleUpstreamErrors[UpdateProfileResult](UpdateProfileFailed))
   }
 
-  private def handleUpstreamErrors[A](returnIfError: A): PartialFunction[Throwable, A] = (err: Throwable) => {
-    logger.warn("Exception occurred when calling Deskpro", err)
-    err match {
-      case e: HttpException         => returnIfError
-      case e: UpstreamErrorResponse => returnIfError
-      case e: Throwable             => throw e
-    }
+  private def handleUpstreamErrors[A](returnIfError: A): PartialFunction[Throwable, A] = {
+    case err: Throwable =>
+      logger.warn("Exception occurred when calling Deskpro", err)
+      err match {
+        case _: HttpException | _: UpstreamErrorResponse => returnIfError
+        case _                                           => throw err
+      }
   }
 }
 
@@ -74,13 +74,13 @@ object ApiPlatformDeskproConnector {
   case class UpdatePersonRequest(email: LaxEmailAddress, name: String)
 
   object UpdatePersonRequest {
-    implicit val format: OFormat[UpdatePersonRequest] = Json.format[UpdatePersonRequest]
+    given OFormat[UpdatePersonRequest] = Json.format[UpdatePersonRequest]
   }
 
   case class CreateTicketResponse(ref: Option[String])
 
   object CreateTicketResponse {
-    implicit val createTicketResponseFormat: Format[CreateTicketResponse] = Json.format[CreateTicketResponse]
+    given Format[CreateTicketResponse] = Json.format[CreateTicketResponse]
   }
 
   sealed trait UpdateProfileResult

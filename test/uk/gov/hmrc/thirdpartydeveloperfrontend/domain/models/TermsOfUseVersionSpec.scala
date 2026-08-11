@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -24,7 +26,7 @@ import play.api.test.Helpers.GET
 import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
-class TermsOfUseVersionSpec extends HmrcSpec {
+class TermsOfUseVersionSpec extends HmrcSpec with MockitoSugar with ArgumentMatchersSugar {
   "fromVersionString" should {
     "return OLD_VERSION for 1.0 version" in {
       TermsOfUseVersion.fromVersionString("1.0") shouldBe Some(TermsOfUseVersion.OLD_JOURNEY)
@@ -52,7 +54,7 @@ class TermsOfUseVersionSpec extends HmrcSpec {
     "return old content for OLD_JOURNEY" in {
       val messagesMock = mock[Messages]
       when(messagesMock("terms.of.use.warning")).thenReturn(termsOfUseWarning)
-      val termsOfUse   = TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], mock[Request[Any]], messagesMock).toString()
+      val termsOfUse   = TermsOfUseVersion.OLD_JOURNEY.getTermsOfUseAsHtml()(using mock[ApplicationConfig], mock[Request[Any]], messagesMock).toString()
       termsOfUse should include("These terms of use explain what you can expect from us and what we expect from you")
       termsOfUse should include(termsOfUseWarning)
     }
@@ -60,7 +62,7 @@ class TermsOfUseVersionSpec extends HmrcSpec {
     "return new content for NEW_JOURNEY" in {
       val messagesMock = mock[Messages]
       when(messagesMock("terms.of.use.warning")).thenReturn(termsOfUseWarning)
-      val termsOfUse   = TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(mock[ApplicationConfig], FakeRequest(GET, "/"), messagesMock).toString()
+      val termsOfUse   = TermsOfUseVersion.NEW_JOURNEY.getTermsOfUseAsHtml()(using mock[ApplicationConfig], FakeRequest(GET, "/"), messagesMock).toString()
       termsOfUse should not include "These terms of use explain what you can expect from us and what we expect from you"
       termsOfUse should include(termsOfUseWarning)
     }

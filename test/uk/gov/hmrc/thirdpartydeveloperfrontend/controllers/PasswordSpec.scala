@@ -20,17 +20,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.Future.failed
 
-import views.html._
+import views.html.*
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.TokenProvider
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidResetCode, UnverifiedAccount}
@@ -68,27 +68,27 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     )
 
     def mockRequestResetFor(email: LaxEmailAddress) =
-      when(mockConnector.requestReset(eqTo(email))(*))
+      when(mockConnector.requestReset(eqTo(email))(using *))
         .thenReturn(Future.successful(OK))
 
     def mockConnectorUnverifiedForReset(email: LaxEmailAddress, password: String) =
-      when(mockConnector.reset(eqTo(PasswordResetRequest(email, password)))(*))
+      when(mockConnector.reset(eqTo(PasswordResetRequest(email, password)))(using *))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForRequestReset(email: LaxEmailAddress) =
-      when(mockConnector.requestReset(eqTo(email))(*))
+      when(mockConnector.requestReset(eqTo(email))(using *))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForChangePassword(email: LaxEmailAddress, oldPassword: String, newPassword: String) =
-      when(mockConnector.changePassword(eqTo(PasswordChangeRequest(email, oldPassword, newPassword)))(*))
+      when(mockConnector.changePassword(eqTo(PasswordChangeRequest(email, oldPassword, newPassword)))(using *))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorUnverifiedForValidateReset(code: String) =
-      when(mockConnector.fetchEmailForResetCode(eqTo(code))(*))
+      when(mockConnector.fetchEmailForResetCode(eqTo(code))(using *))
         .thenReturn(failed(new UnverifiedAccount))
 
     def mockConnectorInvalidResetCodeForValidateReset(code: String) =
-      when(mockConnector.fetchEmailForResetCode(eqTo(code))(*))
+      when(mockConnector.fetchEmailForResetCode(eqTo(code))(using *))
         .thenReturn(failed(new InvalidResetCode))
 
     val emailFieldName           = "emailaddress"
@@ -100,7 +100,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     val developerPassword        = "$Pr4srs1234W0irddd1$"
     val developerCode            = "developerCode"
     val sessionParams            = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val request                  = FakeRequest().withSession(sessionParams: _*)
+    val request                  = FakeRequest().withSession(sessionParams*)
     val requestWithSession       = request.withSession((emailSessionName, devEmail.text))
 
     val mockHeaderCarrier = mock[HeaderCarrier]
@@ -131,35 +131,37 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
     "process password changed unverified user" in new Setup {
       mockConnectorUnverifiedForChangePassword(devEmail, developerPassword, developerPassword)
       val requestWithPassword = requestWithSession
-        .withFormUrlEncodedBody((currentPasswordFieldName, developerPassword), (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
+        .withFormUrlEncodedBody((currentPasswordFieldName, developerPassword), (passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword)).withMethod(
+          "POST"
+        )
 
       val result =
-        underTest.processPasswordChange(devEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(requestWithPassword, mockHeaderCarrier, implicitly)
+        underTest.processPasswordChange(devEmail, play.api.mvc.Results.Ok(HtmlFormat.empty), _ => HtmlFormat.empty)(using requestWithPassword, mockHeaderCarrier, implicitly)
 
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPassword).get("email").mkString shouldBe devEmail.text
+      await(result).session(using requestWithPassword).get("email").mkString shouldBe devEmail.text
     }
 
     "request reset unverified user" in new Setup {
       mockConnectorUnverifiedForRequestReset(devEmail)
       val requestWithPasswordAndEmail = requestWithSession
-        .withFormUrlEncodedBody((emailFieldName, devEmail.text))
+        .withFormUrlEncodedBody((emailFieldName, devEmail.text)).withMethod("POST")
 
       val result = addToken(underTest.requestReset())(requestWithPasswordAndEmail)
 
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe devEmail.text
+      await(result).session(using requestWithPasswordAndEmail).get("email").mkString shouldBe devEmail.text
     }
 
     "reset unverified user" in new Setup {
       mockConnectorUnverifiedForReset(devEmail, developerPassword)
       val requestWithPasswordAndEmail = requestWithSession
-        .withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword))
+        .withFormUrlEncodedBody((passwordFieldName, developerPassword), (confirmPasswordFieldName, developerPassword)).withMethod("POST")
 
       val result = addToken(underTest.resetPassword())(requestWithPasswordAndEmail)
 
       status(result) shouldBe FORBIDDEN
-      await(result).session(requestWithPasswordAndEmail).get("email").mkString shouldBe devEmail.text
+      await(result).session(using requestWithPasswordAndEmail).get("email").mkString shouldBe devEmail.text
     }
 
     "show the forgot password page" in new Setup {
@@ -171,7 +173,7 @@ class PasswordSpec extends BaseControllerSpec with WithCSRFAddToken {
 
     "show the sent reset link page" in new Setup {
       mockRequestResetFor(devEmail)
-      val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, devEmail.text))
+      val requestWithEmail = request.withFormUrlEncodedBody((emailFieldName, devEmail.text)).withMethod("POST")
 
       val result = addToken(underTest.requestReset())(requestWithEmail)
 

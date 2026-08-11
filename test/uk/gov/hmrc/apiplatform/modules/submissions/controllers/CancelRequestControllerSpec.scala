@@ -19,23 +19,22 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.*
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, _}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{WithCSRFAddToken, *}
 
 class CancelRequestControllerSpec
     extends BaseControllerSpec
@@ -88,13 +87,13 @@ class CancelRequestControllerSpec
       clock
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
 
     val extendedSubmission = aSubmission.withIncompleteProgress()
   }
 
   trait HasAppInProductionState {
-    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: Setup & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -106,7 +105,7 @@ class CancelRequestControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: Setup & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -144,9 +143,9 @@ class CancelRequestControllerSpec
     "cancelRequestForProductionCredentialsAction when cancelling the request" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "cancel-request").withMethod("POST")
 
-      ApmConnectorCommandModuleMock.DispatchWithThrow.thenReturnsSuccess(mock[ApplicationWithCollaborators])
+      ApmConnectorCommandModuleMock.DispatchWithThrow.thenReturnsSuccess()
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 
@@ -157,7 +156,7 @@ class CancelRequestControllerSpec
     "cancelRequestForProductionCredentialsAction fails when app is not in testing state" in new Setup with HasSubscriptions with HasAppInProductionState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request").withMethod("POST")
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 
@@ -167,7 +166,7 @@ class CancelRequestControllerSpec
     "cancelRequestForProductionCredentialsAction when rejecting the cancellation" in new Setup with HasSubscriptions with HasAppInTestingState {
       SubmissionServiceMock.FetchLatestExtendedSubmission.thenReturns(extendedSubmission)
 
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "dont-cancel-request").withMethod("POST")
 
       val result = controller.cancelRequestForProductionCredentialsAction(appId)(request.withCSRFToken)
 

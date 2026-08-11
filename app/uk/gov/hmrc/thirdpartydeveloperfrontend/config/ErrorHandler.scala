@@ -37,7 +37,7 @@ class ErrorHandler @Inject() (
     val configuration: Configuration,
     errorTemplateView: ErrorTemplate,
     forbiddenTemplateView: ForbiddenTemplate
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends FrontendErrorHandler {
 
@@ -45,7 +45,7 @@ class ErrorHandler @Inject() (
     successful(errorTemplateView(pageTitle, heading, message))
   }
 
-  def forbiddenTemplate(implicit request: Request[_]): Future[Html] = {
+  def forbiddenTemplate(implicit request: Request[?]): Future[Html] = {
     successful(forbiddenTemplateView())
   }
 

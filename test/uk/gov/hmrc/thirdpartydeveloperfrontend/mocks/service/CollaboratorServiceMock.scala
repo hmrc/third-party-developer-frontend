@@ -23,11 +23,12 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   trait AbstractCollaboratorServiceMock {
     val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
@@ -39,48 +40,49 @@ trait CollaboratorServiceMockModule extends MockitoSugar with ArgumentMatchersSu
     object AddTeamMember {
 
       def succeeds() =
-        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(using *))
           .thenReturn(DispatchSuccessResult(mock[ApplicationWithCollaborators]).asSuccess)
 
       def teamMemberAlreadyExists() =
-        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(using *))
           .thenReturn(CommandFailures.CollaboratorAlreadyExistsOnApp.asFailure)
 
       def applicationNotFound() =
-        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*))
+        when(aMock.addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(using *))
           .thenReturn(CommandFailures.ApplicationNotFound.asFailure)
 
       def verifyCalledFor(newEmail: LaxEmailAddress, newRole: Collaborator.Role, requestingEmail: LaxEmailAddress) =
-        verify(aMock, atLeastOnce).addTeamMember(*, eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(*)
+        verify(aMock, atLeastOnce).addTeamMember(*, eqTo(newEmail), eqTo(newRole), eqTo(requestingEmail))(using *)
 
       def verifyNeverCalled() =
-        verify(aMock, never).addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(*)
+        verify(aMock, never).addTeamMember(*, *[LaxEmailAddress], *[Collaborator.Role], *[LaxEmailAddress])(using *)
     }
 
     object RemoveTeamMember {
 
       def succeeds(app: ApplicationWithCollaborators) =
-        when(aMock.removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(using *)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
       def thenReturnsSuccessFor(requestingEmail: LaxEmailAddress)(app: ApplicationWithCollaborators) =
-        when(aMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(requestingEmail))(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.removeTeamMember(*, *[LaxEmailAddress], eqTo(requestingEmail))(using *)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
       def verifyCalledFor(app: ApplicationWithCollaborators, emailToRemove: LaxEmailAddress, requestingEmail: LaxEmailAddress) =
-        verify(aMock, atLeastOnce).removeTeamMember(eqTo(app), eqTo(emailToRemove), eqTo(requestingEmail))(*)
+        verify(aMock, atLeastOnce).removeTeamMember(eqTo(app), eqTo(emailToRemove), eqTo(requestingEmail))(using *)
 
       def verifyNeverCalled() =
-        verify(aMock, never).removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(*)
+        verify(aMock, never).removeTeamMember(*, *[LaxEmailAddress], *[LaxEmailAddress])(using *)
     }
 
     object GetCollaboratorUsers {
 
       def succeeds() = {
-        when(aMock.getCollaboratorUsers(*)(*)).thenReturn(Future.successful(List.empty[User]))
+        when(aMock.getCollaboratorUsers(*)(using *)).thenReturn(Future.successful(List.empty[User]))
       }
     }
   }
 
   object CollaboratorServiceMock extends AbstractCollaboratorServiceMock {
-    val aMock = mock[CollaboratorService]
+
+    val aMock = subclassMock[CollaboratorService]
   }
 }

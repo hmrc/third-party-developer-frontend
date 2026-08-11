@@ -16,27 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.mockito.Mockito
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, *}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, SessionInvalid, UserSession, UserSessionId}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{UpdateLoggedInStateRequest, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{UpdateLoggedInStateRequest, *}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{InvalidCredentials, InvalidEmail, LockedAccount, UnverifiedAccount}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -51,11 +54,13 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail: LaxEmailAddress = "thirdpartydeveloper@example.com".toLaxEmail
     val userId: UserId             = idOf(userEmail)
@@ -119,7 +124,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
       private val result = await(underTest.fetchSession(sessionId))
 
-      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LOGGED_IN, buildTrackedUser(userEmail))
+      result shouldBe UserSession(sessionId, loggedInState = LoggedInState.LoggedIn, buildTrackedUser(userEmail))
     }
 
     "return Fail with session invalid when the session doesnt exist" in new Setup {
@@ -177,8 +182,8 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "update session logged in state" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
-      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
-      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser())
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LoggedIn)
+      val session: UserSession                                   = UserSession(sessionId, LoggedInState.LoggedIn, buildTrackedUser())
 
       stubFor(
         put(urlEqualTo(url))
@@ -194,7 +199,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
     "error with SessionInvalid if we get a 404 response" in new Setup {
       val url                                                    = s"/session/$sessionId/loggedInState/LOGGED_IN"
-      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN)
+      val updateLoggedInStateRequest: UpdateLoggedInStateRequest = UpdateLoggedInStateRequest(LoggedInState.LoggedIn)
       stubFor(
         put(urlEqualTo(url))
           .willReturn(
@@ -228,9 +233,9 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
 
   "Resend verification" should {
     "send verification mail" in new Setup {
-      val email: LaxEmailAddress                        = "john.smith@example.com".toLaxEmail
-      implicit val writes1: OWrites[FindUserIdRequest]  = Json.writes[FindUserIdRequest]
-      implicit val writes2: OWrites[FindUserIdResponse] = Json.writes[FindUserIdResponse]
+      val email: LaxEmailAddress        = "john.smith@example.com".toLaxEmail
+      given OWrites[FindUserIdRequest]  = Json.writes[FindUserIdRequest]
+      given OWrites[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))
@@ -459,7 +464,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       result shouldBe UserAuthenticationResponse(
         accessCodeRequired = false,
         mfaEnabled = false,
-        session = Some(UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(userEmail)))
+        session = Some(UserSession(sessionId, LoggedInState.LoggedIn, buildTrackedUser(userEmail)))
       )
     }
 
@@ -581,7 +586,7 @@ class ThirdPartyDeveloperConnectorIntegrationSpec extends BaseConnectorIntegrati
       val result: UserSession = await(underTest.authenticateMfaAccessCode(accessCodeAuthenticationRequest))
 
       verify(1, postRequestedFor(urlMatching("/authenticate-mfa")).withRequestBody(equalToJson(encryptedTotpAuthenticationRequest.toString)))
-      result shouldBe UserSession(sessionId, LoggedInState.LOGGED_IN, buildTrackedUser(emailAddress = userEmail))
+      result shouldBe UserSession(sessionId, LoggedInState.LoggedIn, buildTrackedUser(emailAddress = userEmail))
     }
 
     "throw Invalid credentials when the credentials are invalid" in new Setup {

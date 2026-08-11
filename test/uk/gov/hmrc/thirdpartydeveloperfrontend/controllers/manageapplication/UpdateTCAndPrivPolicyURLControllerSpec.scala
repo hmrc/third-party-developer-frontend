@@ -18,29 +18,28 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future._
+import scala.concurrent.Future.*
 
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
-import views.html._
+import views.html.*
 
-import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, EditApplicationForm, routes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class UpdateTCAndPrivPolicyURLControllerSpec
@@ -248,7 +247,7 @@ class UpdateTCAndPrivPolicyURLControllerSpec
 
       await(application.callChangeDetailsAction)
 
-      verify(underTest.applicationService, times(0)).dispatchCmd(*[ApplicationId], *)(*)
+      verify(underTest.applicationService, times(0)).dispatchCmd(*[ApplicationId], *)(using *)
     }
   }
 
@@ -273,15 +272,15 @@ class UpdateTCAndPrivPolicyURLControllerSpec
     val newTermsUrl    = Some("http://example.com/new-terms")
     val newPrivacyUrl  = Some("http://example.com/new-privacy")
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
+    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(using *))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     def captureAllApplicationCmds: List[ApplicationCommand] = {
       val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
+      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(using *)
       captor.values
     }
 
@@ -321,8 +320,6 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       final def withPrivacyPolicyUrl(url: Option[String]): ApplicationWithCollaborators = app.withAccess(standardAccess.copy(privacyPolicyUrl = url))
     }
 
-    implicit val editApplicationFormFormat: OFormat[EditApplicationForm] = Json.format[EditApplicationForm]
-
     implicit class ChangeDetailsAppAugment(val app: ApplicationWithCollaborators) {
       private val appAccess = app.access.asInstanceOf[Access.Standard]
 
@@ -336,7 +333,9 @@ class UpdateTCAndPrivPolicyURLControllerSpec
       final def callChangeDetailsActionNotLoggedIn: Future[Result] = callChangeDetailsAction(loggedOutRequest)
 
       final private def callChangeDetailsAction[T](request: FakeRequest[T]): Future[Result] = {
-        addToken(underTest.changeDetailsAction(app.id))(request.withJsonBody(Json.toJson(app.toEditApplicationForm)))
+        addToken(underTest.changeDetailsAction(app.id))(
+          request.withFormUrlEncodedBody(EditApplicationForm.form.fill(app.toEditApplicationForm).data.toSeq*).withMethod("POST")
+        )
       }
     }
   }

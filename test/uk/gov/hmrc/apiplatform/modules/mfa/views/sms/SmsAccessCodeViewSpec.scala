@@ -30,7 +30,7 @@ import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SmsAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -57,7 +57,13 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
   "SmsAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
       val mainView: HtmlFormat.Appendable =
-        smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        smsAccessCodeView.apply(SmsAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(
+          using flash,
+          stubMessages(),
+          FakeRequest().withCSRFToken,
+          loggedIn,
+          appConfig
+        )
       val document: Document              = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)
@@ -70,7 +76,7 @@ class SmsAccessCodeViewSpec extends CommonViewSpec
         MfaId(UUID.randomUUID()),
         MfaAction.CREATE,
         None
-      )(flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      )(using flash, stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document: Document              = Jsoup.parse(mainView.body)
 
       verifyPageElements(document)

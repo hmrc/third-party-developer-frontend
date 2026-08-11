@@ -16,19 +16,19 @@
 
 import org.openqa.selenium.By
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import uk.gov.hmrc.selenium.webdriver.Driver
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{SessionCreateWithDeviceRequest, UserAuthenticationResponse}
 
 object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilder {
 
-  var developer: User                              = _
+  var developer: User                              = scala.compiletime.uninitialized
   var sessionIdForloggedInDeveloper: UserSessionId = UserSessionId.random
   var sessionIdForMfaMandatingUser: UserSessionId  = UserSessionId.random
 
@@ -74,8 +74,8 @@ object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilde
     Stubs.setupPostRequest("/check-password", NO_CONTENT)
     Stubs.setupPostRequest("/authenticate", UNAUTHORIZED)
 
-    TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN)
-    TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PART_LOGGED_IN_ENABLING_MFA)
+    TestContext.sessionIdForloggedInDeveloper = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LoggedIn)
+    TestContext.sessionIdForMfaMandatingUser = setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.PartLoggedInEnablingMFA)
 
     DeveloperStub.setupGettingDeveloperByUserId(developer)
   }
@@ -97,7 +97,7 @@ object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilde
   def thenIAmLoggedInAs(userFullName: String) = {
     val authCookie = Driver.instance.manage().getCookieNamed("PLAY2AUTH_SESS_ID")
     authCookie should not be null
-    AnyWebPageWithUserLinks.userLink(userFullName) shouldBe ("defined")
+    AnyWebPageWithUserLinks.userLink(userFullName) shouldBe defined
   }
 
   // ^I am not logged in$
@@ -158,7 +158,7 @@ object LoginStepsSteps extends NavigationSugar with ComponentTestDeveloperBuilde
     val session                    = UserSession(sessionId, loggedInState, developer)
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired = false, mfaEnabled = false, session = Some(session))
 
-    val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+    val mfaMandatedForUser = loggedInState == LoggedInState.PartLoggedInEnablingMFA
 
     Stubs.setupEncryptedPostRequest(
       "/authenticate",

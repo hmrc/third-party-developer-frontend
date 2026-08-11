@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json._
+enum TermsOfUseInvitationState {
+  case EMAIL_SENT, REMINDER_EMAIL_SENT, OVERDUE, WARNINGS, FAILED, TERMS_OF_USE_V2_WITH_WARNINGS, TERMS_OF_USE_V2
+}
 
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.utils.EnumJson
+object TermsOfUseInvitationState {
+  def apply(text: String): Option[TermsOfUseInvitationState] = TermsOfUseInvitationState.values.find(_.toString() == text.toUpperCase)
 
-object TermsOfUseInvitationState extends Enumeration {
-  type TermsOfUseInvitationState = Value
+  import play.api.libs.json.Format
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
 
-  val EMAIL_SENT, REMINDER_EMAIL_SENT, OVERDUE, WARNINGS, FAILED, TERMS_OF_USE_V2_WITH_WARNINGS, TERMS_OF_USE_V2 = Value
-
-  implicit val format: Format[TermsOfUseInvitationState.Value] = EnumJson.enumFormat(TermsOfUseInvitationState)
+  given Format[TermsOfUseInvitationState] =
+    SimpleEnumJsonFormatting.createStringFormatFor[TermsOfUseInvitationState]("Terms Of Use Invitation State", TermsOfUseInvitationState.apply)
 }

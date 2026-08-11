@@ -19,7 +19,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
@@ -38,10 +38,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class VerifyResponsibleIndividualControllerSpec
     extends BaseControllerSpec
@@ -66,7 +66,7 @@ class VerifyResponsibleIndividualControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: HasSubscriptions & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       submittedApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -117,7 +117,7 @@ class VerifyResponsibleIndividualControllerSpec
       ResponsibleIndividualVerificationState.INITIAL
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
   }
 
   "verifyPage" should {
@@ -141,7 +141,7 @@ class VerifyResponsibleIndividualControllerSpec
   "verifyAction" should {
     "succeed when RI has accepted" in new Setup {
       ResponsibleIndividualVerificationServiceMock.Accept.thenReturns(riVerification)
-      private val request = loggedInRequest.withFormUrlEncodedBody("verified" -> "yes")
+      private val request = loggedInRequest.withFormUrlEncodedBody("verified" -> "yes").withMethod("POST")
 
       val result = controller.verifyAction(code)(request.withCSRFToken)
 
@@ -150,7 +150,7 @@ class VerifyResponsibleIndividualControllerSpec
 
     "succeed when RI has declined" in new Setup {
       ResponsibleIndividualVerificationServiceMock.Decline.thenReturns(riVerification)
-      private val request = loggedInRequest.withFormUrlEncodedBody("verified" -> "no")
+      private val request = loggedInRequest.withFormUrlEncodedBody("verified" -> "no").withMethod("POST")
 
       val result = controller.verifyAction(code)(request.withCSRFToken)
 

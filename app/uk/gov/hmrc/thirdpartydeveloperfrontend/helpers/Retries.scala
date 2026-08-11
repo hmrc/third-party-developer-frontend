@@ -18,7 +18,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.helpers
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{ExecutionContext, Future}
 
 import org.apache.pekko.actor.ActorSystem

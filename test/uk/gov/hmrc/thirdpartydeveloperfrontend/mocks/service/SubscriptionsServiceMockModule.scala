@@ -22,12 +22,13 @@ import scala.concurrent.Future.successful
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SubscriptionsService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   trait AbstractSubscriptionsServiceMock {
     val CHT = new CommandHandlerTypes[DispatchSuccessResult] {}
@@ -39,49 +40,50 @@ trait SubscriptionsServiceMockModule extends MockitoSugar with ArgumentMatchersS
     object SubscribeToApi {
 
       def succeeds(app: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier) =
-        when(aMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.subscribeToApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(using *)).thenReturn(DispatchSuccessResult(app).asSuccess)
 
       def succeeds() = {
         val mockApp = mock[ApplicationWithCollaborators]
-        when(aMock.subscribeToApi(*, *, *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(mockApp).asSuccess)
+        when(aMock.subscribeToApi(*, *, *[LaxEmailAddress])(using *)).thenReturn(DispatchSuccessResult(mockApp).asSuccess)
       }
     }
 
     object UnsubscribeFromApi {
 
       def succeeds(app: ApplicationWithCollaborators, apiIdentifier: ApiIdentifier) =
-        when(aMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(*)).thenReturn(DispatchSuccessResult(app).asSuccess)
+        when(aMock.unsubscribeFromApi(eqTo(app), eqTo(apiIdentifier), *[LaxEmailAddress])(using *)).thenReturn(DispatchSuccessResult(app).asSuccess)
     }
 
     object IsSubscribedToApi {
 
       def isTrue(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
-        when(aMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(true))
+        when(aMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(using *)).thenReturn(successful(true))
 
       def isFalse(appId: ApplicationId, apiIdentifier: ApiIdentifier) =
-        when(aMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(*)).thenReturn(successful(false))
+        when(aMock.isSubscribedToApi(eqTo(appId), eqTo(apiIdentifier))(using *)).thenReturn(successful(false))
 
       def verifyNotCalled() =
-        verify(aMock, never).isSubscribedToApi(*[ApplicationId], *)(*)
+        verify(aMock, never).isSubscribedToApi(*[ApplicationId], *)(using *)
     }
 
     object RequestApiSubscription {
 
       def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
-        when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
+        when(aMock.requestApiSubscription(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(using *))
           .thenReturn(successful(Some("ref")))
     }
 
     object RequestApiUnsubscribe {
 
       def succeedsFor(loggedInDeveloper: UserSession, app: ApplicationWithCollaborators, apiName: String, apiVersion: ApiVersionNbr) =
-        when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(*))
+        when(aMock.requestApiUnsubscribe(eqTo(loggedInDeveloper), eqTo(app), eqTo(apiName), eqTo(apiVersion))(using *))
           .thenReturn(successful(Some("ref")))
     }
   }
 
   object SubscriptionsServiceMock extends AbstractSubscriptionsServiceMock {
-    val aMock = mock[SubscriptionsService]
+
+    val aMock = subclassMock[SubscriptionsService]
   }
 
 }

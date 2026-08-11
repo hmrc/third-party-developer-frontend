@@ -19,15 +19,15 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import views.html._
+import views.html.*
 
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class RequestChangeOfApplicationNameControllerSpec
@@ -60,24 +60,24 @@ class RequestChangeOfApplicationNameControllerSpec
     "show success page if name changed successfully" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      when(underTest.applicationService.requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*))
+      when(underTest.applicationService.requestProductonApplicationNameChange(*, *[ApplicationName], *, *[LaxEmailAddress])(using *))
         .thenReturn(Future.successful(Some("ref")))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "Legal new app name").withMethod("POST")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
       status(result) shouldBe OK
-      verify(underTest.applicationService).requestProductonApplicationNameChange(*[UserId], *, *[ApplicationName], *, *[LaxEmailAddress])(*)
+      verify(underTest.applicationService).requestProductonApplicationNameChange(*, *[ApplicationName], *, *[LaxEmailAddress])(using *)
       contentAsString(result) should include("We have received your request to change the application name to")
     }
 
     "show error if application name is not valid" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
         .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "HMRC - Illegal new app name").withMethod("POST")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
@@ -88,7 +88,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show error if application name is too short" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "").withMethod("POST")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
@@ -99,7 +99,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show error if application name contains non-allowed chars" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "name£")
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> "name£").withMethod("POST")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
@@ -110,7 +110,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show error if new application name is the same as the old one" in new Setup {
       givenApplicationAction(approvedApplication, adminSession)
 
-      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name.value)
+      private val request = loggedInAdminRequest.withFormUrlEncodedBody("applicationName" -> approvedApplication.name.toString).withMethod("POST")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
@@ -121,7 +121,7 @@ class RequestChangeOfApplicationNameControllerSpec
     "show forbidden if not an admin" in new Setup {
       givenApplicationAction(approvedApplication, devSession)
 
-      private val request = loggedInDevRequest.withFormUrlEncodedBody("applicationName" -> "new app name")
+      private val request = loggedInDevRequest.withFormUrlEncodedBody("applicationName" -> "new app name").withMethod("POST")
 
       val result = addToken(underTest.requestChangeOfAppNameAction(approvedApplication.id))(request)
 
@@ -147,7 +147,7 @@ class RequestChangeOfApplicationNameControllerSpec
       changeOfApplicationNameConfirmationView
     )
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
   }
 }

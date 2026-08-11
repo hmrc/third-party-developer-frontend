@@ -14,19 +14,18 @@
  * limitations under the License.
  *@
 
-@import include._
+@import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.html.include.teamMembers.addTeamMemberPartial
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.AddTeamMemberPageMode.ManageTeamMembers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors)
 
 @(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm], loggedIn: UserSession, fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(
-implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, navSection: String = "manage-team")
+implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig)
 
 
 @app = @{applicationView.application}

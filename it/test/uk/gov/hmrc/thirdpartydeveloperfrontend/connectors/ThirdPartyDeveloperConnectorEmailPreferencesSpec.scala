@@ -16,27 +16,30 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.mockito.Mockito
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.http.HeaderNames
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.FindUserIdResponse
-import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic.*
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.AccessCodeAuthenticationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.SessionCreateWithDeviceRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.InvalidEmail
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite {
 
@@ -49,11 +52,13 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail: LaxEmailAddress                                 = "thirdpartydeveloper@example.com".toLaxEmail
     val userPassword                                               = "password1!"
@@ -75,7 +80,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
       val email: LaxEmailAddress = "foo@bar.com".toLaxEmail
       val userId: UserId         = UserId.random
 
-      implicit val writes: Writes[FindUserIdResponse] = Json.writes[FindUserIdResponse]
+      given Writes[FindUserIdResponse] = Json.writes[FindUserIdResponse]
 
       stubFor(
         post(urlEqualTo("/developers/find-user-id"))
@@ -138,7 +143,7 @@ class ThirdPartyDeveloperConnectorEmailPreferencesSpec extends BaseConnectorInte
   }
 
   "updateEmailPreferences" should {
-    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BUSINESS_AND_POLICY))
+    val emailPreferences = EmailPreferences(List(TaxRegimeInterests("VAT", Set("API1", "API2"))), Set(BusinessAndPolicy))
 
     "return true when NO_CONTENT is returned" in new Setup {
       val userId: UserId = UserId.random

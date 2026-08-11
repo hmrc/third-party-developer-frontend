@@ -27,11 +27,11 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
   ApplicationWithSubscriptionsFixtures,
   CollaboratorData
 }
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Collaborators, Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ThirdPartyOrchestratorConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
@@ -43,7 +43,7 @@ class DashboardServiceSpec extends AsyncHmrcSpec
     with FixedClock {
 
   trait Setup extends FixedClock with ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockOrganisationConnector: OrganisationConnector = mock[OrganisationConnector]
     val mockAppsByTeamMemberService                      = mock[AppsByTeamMemberService]
@@ -68,8 +68,8 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
   "get the list of applications for the given user" should {
     "successfully return the list of applications" in new Setup {
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.PRODUCTION)(Seq(productionApplication))
-      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.SANDBOX)(Seq(sandboxApplication))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Production)(Seq(productionApplication))
+      ThirdPartyOrchestratorConnectorMock.Query.returnsFor(Environment.Sandbox)(Seq(sandboxApplication))
 
       val result = await(dashboardService.fetchApplicationList(userId))
 
@@ -79,7 +79,7 @@ class DashboardServiceSpec extends AsyncHmrcSpec
 
   "fetchByUserId" should {
     "return organisations for given user id" in new Setup {
-      when(mockOrganisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
+      when(mockOrganisationConnector.fetchOrganisationsByUserId(*[UserId])(using *)).thenReturn(successful(List(organisation)))
 
       val result = await(dashboardService.fetchOrganisationsByUserId(userId))
 

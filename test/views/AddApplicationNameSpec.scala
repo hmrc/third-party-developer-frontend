@@ -24,12 +24,11 @@ import play.api.data.Form
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddApplicationNameForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class AddApplicationNameSpec extends CommonViewSpec
@@ -40,9 +39,9 @@ class AddApplicationNameSpec extends CommonViewSpec
 
   val addApplicationNameView = app.injector.instanceOf[AddApplicationNameView]
   val loggedInDeveloper      = adminDeveloper.loggedIn
-  val subordinateEnvironment = Environment.SANDBOX
+  val subordinateEnvironment = Environment.Sandbox
   val appId                  = ApplicationId.random
-  val principalEnvironment   = Environment.PRODUCTION
+  val principalEnvironment   = Environment.Production
 
   "Add application page in subordinate" should {
 

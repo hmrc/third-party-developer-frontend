@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.security
 import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.{EitherT, OptionT}
-import cats.implicits._
+import cats.implicits.*
 
-import play.api.mvc.{Action, _}
+import play.api.mvc.{Action, *}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -41,7 +41,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
     type Type = UserSession => Boolean
 
     val alwaysTrueFilter: DeveloperSessionFilter.Type         = _ => true
-    val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LOGGED_IN
+    val onlyTrueIfLoggedInFilter: DeveloperSessionFilter.Type = _.loggedInState == LoggedInState.LoggedIn
   }
 
   def loggedInActionRefiner(filter: DeveloperSessionFilter.Type = DeveloperSessionFilter.onlyTrueIfLoggedInFilter): ActionRefiner[MessagesRequest, UserRequest] =
@@ -76,7 +76,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
       loggedInActionRefiner(DeveloperSessionFilter.onlyTrueIfLoggedInFilter).invokeBlock(request, block)
     }
 
-  def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
+  def maybeAtLeastPartLoggedInEnablingMfa(body: MaybeUserRequest[AnyContent] => Future[Result])(using ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] => loadSession.flatMap(maybeDeveloperSession => body(new MaybeUserRequest(maybeDeveloperSession, request)))
   }
 
@@ -91,7 +91,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
       .getOrElse(Future.successful(None))
   }
 
-  private def fetchDeveloperSession[A](sessionId: UserSessionId)(implicit hc: HeaderCarrier): Future[Option[UserSession]] = {
+  private def fetchDeveloperSession[A](sessionId: UserSessionId)(using HeaderCarrier): Future[Option[UserSession]] = {
     sessionService.fetch(sessionId)
   }
 }
@@ -99,7 +99,7 @@ trait DevHubAuthorization extends CookieEncoding with ApplicationLogger {
 trait ExtendedDevHubAuthorization extends DevHubAuthorization {
   self: TpdfeBaseController =>
 
-  def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = Action.async {
+  def loggedOutAction(body: MessagesRequest[AnyContent] => Future[Result])(using ExecutionContext): Action[AnyContent] = Action.async {
     implicit request: MessagesRequest[AnyContent] =>
       loadSession.flatMap {
         case Some(developerSession) if developerSession.loggedInState.isLoggedIn => loginSucceeded(request)
@@ -121,7 +121,7 @@ trait ExtendedDevHubAuthorization extends DevHubAuthorization {
     result.withCookies(createUserCookie(sessionId), createDeviceCookie(deviceSessionId))
   }
 
-  def destroyUserSession(request: RequestHeader)(implicit hc: HeaderCarrier): Option[Future[Int]] = {
+  def destroyUserSession(request: RequestHeader)(using HeaderCarrier): Option[Future[Int]] = {
     extractUserSessionIdFromCookie(request)
       .map(sessionId => sessionService.destroy(sessionId))
   }

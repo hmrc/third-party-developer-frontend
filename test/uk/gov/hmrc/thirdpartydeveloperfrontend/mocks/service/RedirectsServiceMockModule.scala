@@ -23,8 +23,9 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.LoginRedirectsService
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
+trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
 
   trait AbstractRedirectsServiceMock {
     def aMock: LoginRedirectsService
@@ -34,26 +35,27 @@ trait RedirectsServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
     object AddLoginRedirect {
 
       def succeedsWith(uri: LoginRedirectUri) = {
-        when(aMock.addLoginRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.addLoginRedirect(*, *, eqTo(uri))(using *)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object ChangeLoginRedirect {
 
       def succeedsWith(from: LoginRedirectUri, to: LoginRedirectUri) = {
-        when(aMock.changeLoginRedirect(*, *, eqTo(from), eqTo(to))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.changeLoginRedirect(*, *, eqTo(from), eqTo(to))(using *)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
 
     object DeleteLoginRedirect {
 
       def succeedsWith(uri: LoginRedirectUri) = {
-        when(aMock.deleteLoginRedirect(*, *, eqTo(uri))(*)).thenReturn(successful(Right(mockDispatchSuccessResult)))
+        when(aMock.deleteLoginRedirect(*, *, eqTo(uri))(using *)).thenReturn(successful(Right(mockDispatchSuccessResult)))
       }
     }
   }
 
   object RedirectsServiceMock extends AbstractRedirectsServiceMock {
-    val aMock = mock[LoginRedirectsService]
+
+    val aMock = subclassMock[LoginRedirectsService]
   }
 }

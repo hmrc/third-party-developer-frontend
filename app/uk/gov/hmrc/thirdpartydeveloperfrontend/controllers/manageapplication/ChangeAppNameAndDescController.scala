@@ -24,22 +24,22 @@ import views.html.manageapplication.ChangeAppNameAndDescView
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ValidatedApplicationName
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, ChangeAppNameAndDescForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOnly
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class ChangeAppNameAndDescController @Inject() (
@@ -51,7 +51,7 @@ class ChangeAppNameAndDescController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     val changeAppNameAndDescView: ChangeAppNameAndDescView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ClockNow {
@@ -93,7 +93,7 @@ class ChangeAppNameAndDescController @Inject() (
       }
 
       def handleInvalidForm(formWithErrors: Form[ChangeAppNameAndDescForm]): Future[Result] =
-        changeAppNameAndDescErrorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest())
+        changeAppNameAndDescErrorView(formWithErrors, applicationViewModelFromApplicationRequest())
 
       ChangeAppNameAndDescForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
@@ -105,12 +105,12 @@ class ChangeAppNameAndDescController @Inject() (
     val effectiveNewName     = if (application.isInTesting || application.deployedTo.isSandbox) {
       form.applicationName.trim
     } else {
-      application.name.value
+      application.name
     }
     val effectiveDescription = form.description.filterNot(_.isBlank()).map(desc => desc.trim)
 
     List(
-      if (effectiveNewName == application.name.value)
+      if (effectiveNewName == application.name)
         List.empty
       else {
         val validateAppName = ValidatedApplicationName.validate(effectiveNewName)
@@ -132,10 +132,9 @@ class ChangeAppNameAndDescController @Inject() (
   }
 
   private def changeAppNameAndDescErrorView(
-      id: ApplicationId,
       form: Form[ChangeAppNameAndDescForm],
       applicationViewModel: ApplicationViewModel
-    )(implicit request: ApplicationRequest[_]
+    )(implicit request: ApplicationRequest[?]
     ): Future[Result] =
     Future.successful(BadRequest(changeAppNameAndDescView(form, applicationViewModel)))
 

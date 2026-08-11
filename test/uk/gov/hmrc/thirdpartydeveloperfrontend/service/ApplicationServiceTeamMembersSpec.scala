@@ -24,46 +24,32 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiStatus, ApiVersion, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with SubscriptionsBuilder with ApplicationBuilder with LocalUserIdTracker with ApplicationWithCollaboratorsFixtures {
 
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-
-    val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockAuditService: AuditService = mock[AuditService]
 
-    val connectorsWrapper = new ConnectorsWrapper(
-      mock[PushPullNotificationsConnector],
-      mock[PushPullNotificationsConnector],
-      mock[ApplicationConfig]
-    )
-
-    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
     val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
 
     val applicationService = new ApplicationService(
-      mock[ApmConnector],
-      connectorsWrapper,
+      subclassMock[ApmConnector],
       ApmConnectorCommandModuleMock.aMock,
-      mockSubscriptionFieldsService,
       mockApiPlatformDeskproConnector,
-      mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockOrganisationConnector,
       mockAuditService,
@@ -81,7 +67,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name: String,
       context: ApiContext,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
     ): APISubscriptionStatus =
@@ -89,7 +75,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name = name,
       serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -101,7 +87,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name: String,
       context: String,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
@@ -110,7 +96,7 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
       name = name,
       serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
@@ -118,20 +104,19 @@ class ApplicationServiceTeamMembersSpec extends AsyncHmrcSpec with Subscriptions
   }
 
   "request delete developer" should {
-    val developerName   = "Testy McTester"
-    val devEmail        = "testy@example.com".toLaxEmail
-    val developerUserId = UserId.random
+    val developerName = "Testy McTester"
+    val devEmail      = "testy@example.com".toLaxEmail
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.requestDeveloperAccountDeletion(developerUserId, developerName, devEmail))
+      await(applicationService.requestDeveloperAccountDeletion(developerName, devEmail))
 
       verify(mockApiPlatformDeskproConnector, times(1)).createTicket(any[CreateTicketRequest], eqTo(hc))
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc))
     }
   }
 }

@@ -24,15 +24,15 @@ import views.html.manageTeamViews.{AddTeamMemberView, ManageTeamView, RemoveTeam
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result as PlayResult}
 import play.twirl.api.Html
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.services.CollaboratorService
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandFailures, CommandHandlerTypes, DispatchSuccessResult}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Applic
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTeamMembers
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class ManageTeam @Inject() (
@@ -56,12 +56,12 @@ class ManageTeam @Inject() (
     addTeamMemberView: AddTeamMemberView,
     removeTeamMemberView: RemoveTeamMemberView,
     val fraudPreventionConfig: FraudPreventionConfig
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with CommandHandlerTypes[DispatchSuccessResult]
     with FraudPreventionNavLinkHelper
-    with WithUnsafeDefaultFormBinding
+    with WithUrlEncodedOnlyFormBinding
     with ApplicationSyntaxes {
 
   private def whenAppSupportsTeamMembers(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[PlayResult]): Action[AnyContent] =
@@ -108,7 +108,7 @@ class ManageTeam @Inject() (
       }
 
       def handleValidForm(form: AddTeamMemberForm): Future[PlayResult] = {
-        val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Roles.DEVELOPER)
+        val role = form.role.flatMap(Collaborator.Role(_)).getOrElse(Collaborator.Role.Developer)
 
         val handleFailure: Failures => Future[PlayResult] = (fails) =>
           fails.head match {

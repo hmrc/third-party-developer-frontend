@@ -21,7 +21,7 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.emailpreferences.EmailPreferencesSummaryViewData
-import views.html.emailpreferences._
+import views.html.emailpreferences.*
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -32,7 +32,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiType, CombinedApi,
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{FlowType, NewApplicationEmailPreferencesFlowV2}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{EmailPreferencesService, SessionService}
@@ -51,7 +51,7 @@ class EmailPreferencesController @Inject() (
     flowSelectTopicsView: FlowSelectTopicsView,
     selectApisFromSubscriptionsView: SelectApisFromSubscriptionsView,
     selectTopicsFromSubscriptionsView: SelectTopicsFromSubscriptionsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) {
 
@@ -213,13 +213,13 @@ class EmailPreferencesController @Inject() (
     ): EmailPreferencesSummaryViewData = {
 
     def decorateXmlApiDisplayName(api: CombinedApi): String = {
-      if (api.apiType == ApiType.XML_API) { api.displayName + " - XML API" }
+      if (api.apiType == ApiType.XmlApi) { api.displayName + " - XML API" }
       else api.displayName
     }
 
     EmailPreferencesSummaryViewData(
       createCategoryMap(categories, emailPreferences.interests.map(_.regime)),
-      filteredAPIs.map(a => (a.serviceName.value, decorateXmlApiDisplayName(a))).toMap,
+      filteredAPIs.map(a => (a.serviceName, decorateXmlApiDisplayName(a))).toMap,
       unsubscribed
     )
   }
@@ -261,7 +261,7 @@ class EmailPreferencesController @Inject() (
       flow: NewApplicationEmailPreferencesFlowV2
     )(implicit request: UserRequest[AnyContent]
     ): Html =
-    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName.value))
+    selectApisFromSubscriptionsView(form, flow.missingSubscriptions.toList.sortBy(_.serviceName), flow.applicationId, flow.selectedApis.map(_.serviceName))
 
   def selectApisFromSubscriptionsAction(applicationId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     val form = SelectApisFromSubscriptionsForm.form.bindFromRequest()

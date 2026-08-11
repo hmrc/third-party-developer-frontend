@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{
@@ -41,12 +41,12 @@ class ResponsibleIndividualVerificationService @Inject() (
     tpaSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
     applicationService: ApplicationService,
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   private val ET = EitherTHelper.make[ErrorDetails]
 
-  def fetchResponsibleIndividualVerification(code: String)(implicit hc: HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] = {
+  def fetchResponsibleIndividualVerification(code: String)(using HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] = {
     tpaSubmissionsConnector.fetchResponsibleIndividualVerification(code)
   }
 
@@ -57,7 +57,7 @@ class ResponsibleIndividualVerificationService @Inject() (
     }
   }
 
-  def accept(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
+  def accept(code: String)(using HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
     (
       for {
         riVerification <- ET.fromOptionF(
@@ -81,7 +81,7 @@ class ResponsibleIndividualVerificationService @Inject() (
       .value
   }
 
-  def decline(code: String)(implicit hc: HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
+  def decline(code: String)(using HeaderCarrier): Future[Either[ErrorDetails, ResponsibleIndividualVerification]] = {
     (
       for {
         riVerification <- ET.fromOptionF(
@@ -99,7 +99,7 @@ class ResponsibleIndividualVerificationService @Inject() (
       submitterName: Option[String],
       submitterEmail: Option[LaxEmailAddress],
       isSubmissionPassed: Boolean
-    )(implicit hc: HeaderCarrier
+    )(using hc: HeaderCarrier
     ) = {
     riVerification match {
       case riv: ResponsibleIndividualToUVerification        => {

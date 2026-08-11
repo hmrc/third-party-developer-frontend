@@ -21,13 +21,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.instances.future.catsStdInstancesForFuture
 
-import play.api.mvc.{ActionRefiner, _}
+import play.api.mvc.{ActionRefiner, *}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator, State}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationActionBuilders, ApplicationRequest, HasApplication, TpdfeBaseController, UserRequest}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -73,13 +73,13 @@ object SubmissionActionBuilders {
 }
 
 trait SubmissionActionBuilders {
-  self: ApplicationActionBuilders with TpdfeBaseController =>
+  self: ApplicationActionBuilders & TpdfeBaseController =>
 
   import SubmissionActionBuilders.{ApplicationStateFilter, RoleFilter, SubmissionStatusFilter}
 
   def submissionService: SubmissionService
 
-  private def submissionRefiner(submissionId: SubmissionId)(implicit ec: ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
+  private def submissionRefiner(submissionId: SubmissionId)(using ExecutionContext): ActionRefiner[UserRequest, SubmissionRequest] =
     new ActionRefiner[UserRequest, SubmissionRequest] {
       def executionContext = ec
 
@@ -87,27 +87,27 @@ trait SubmissionActionBuilders {
         implicit val implicitRequest: MessagesRequest[A] = input
         (
           for {
-            submission <- ETR.fromOptionM(submissionService.fetch(submissionId), errorHandler.notFoundTemplate(input).map(NotFound(_)))
+            submission <- ETR.fromOptionM(submissionService.fetch(submissionId), errorHandler.notFoundTemplate(using input).map(NotFound(_)))
           } yield new SubmissionRequest(submission, input)
         )
           .value
       }
     }
 
-  private def submissionApplicationRefiner(implicit ec: ExecutionContext): ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] =
+  private def submissionApplicationRefiner(using ExecutionContext): ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] =
     new ActionRefiner[SubmissionRequest, SubmissionApplicationRequest] {
       override def executionContext = ec
 
       override def refine[A](request: SubmissionRequest[A]): Future[Either[Result, SubmissionApplicationRequest[A]]] = {
         implicit val implicitRequest: MessagesRequest[A] = request
 
-        ETR.fromOptionM(applicationActionService.process(request.submission.applicationId, request.userRequest), errorHandler.notFoundTemplate(request).map(NotFound(_)))
+        ETR.fromOptionM(applicationActionService.process(request.submission.applicationId, request.userRequest), errorHandler.notFoundTemplate(using request).map(NotFound(_)))
           .map(r => new SubmissionApplicationRequest(r.application, request, r.subscriptions))
           .value
       }
     }
 
-  private def applicationSubmissionRefiner(implicit ec: ExecutionContext): ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] =
+  private def applicationSubmissionRefiner(using ExecutionContext): ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] =
     new ActionRefiner[ApplicationRequest, SubmissionApplicationRequest] {
       override def executionContext = ec
 
@@ -116,7 +116,7 @@ trait SubmissionActionBuilders {
 
         (
           for {
-            submission <- ETR.fromOptionM(submissionService.fetchLatestExtendedSubmission(request.application.id), errorHandler.notFoundTemplate(request).map(NotFound(_)))
+            submission <- ETR.fromOptionM(submissionService.fetchLatestExtendedSubmission(request.application.id), errorHandler.notFoundTemplate(using request).map(NotFound(_)))
           } yield new SubmissionApplicationRequest(request.application, new SubmissionRequest(submission, request.userRequest), request.subscriptions)
         )
           .value
@@ -141,7 +141,7 @@ trait SubmissionActionBuilders {
       }
     }
 
-  private def submissionFilter[SR[_] <: SubmissionRequest[_]](submissionStatusFilter: SubmissionStatusFilter.Type)(redirectOnIncomplete: => Result): ActionFilter[SR] =
+  private def submissionFilter[SR[_] <: SubmissionRequest[?]](submissionStatusFilter: SubmissionStatusFilter.Type)(redirectOnIncomplete: => Result): ActionFilter[SR] =
     new ActionFilter[SR] {
 
       override protected def executionContext: ExecutionContext = ec
@@ -154,7 +154,7 @@ trait SubmissionActionBuilders {
         }
     }
 
-  private def applicationStateFilter[AR[_] <: MessagesRequest[_] with HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] =
+  private def applicationStateFilter[AR[_] <: MessagesRequest[?] & HasApplication](allowedStateFilter: State => Boolean): ActionFilter[AR] =
     new ActionFilter[AR] {
 
       override protected def executionContext: ExecutionContext = ec
@@ -167,7 +167,7 @@ trait SubmissionActionBuilders {
         }
     }
 
-  def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(implicit ec: ExecutionContext): Action[AnyContent] = {
+  def withSubmission(submissionId: SubmissionId)(block: SubmissionApplicationRequest[AnyContent] => Future[Result])(using ExecutionContext): Action[AnyContent] = {
     Action.async { implicit request =>
       (
         loggedInActionRefiner() andThen
@@ -184,7 +184,7 @@ trait SubmissionActionBuilders {
       applicationId: ApplicationId
     )(
       block: SubmissionApplicationRequest[AnyContent] => Future[Result]
-    )(implicit ec: ExecutionContext
+    )(using ExecutionContext
     ): Action[AnyContent] = {
     Action.async { implicit request =>
       (
@@ -207,7 +207,7 @@ trait SubmissionActionBuilders {
       applicationId: ApplicationId
     )(
       block: SubmissionApplicationRequest[AnyContent] => Future[Result]
-    )(implicit ec: ExecutionContext
+    )(using ExecutionContext
     ): Action[AnyContent] = {
     Action.async { implicit request =>
       (

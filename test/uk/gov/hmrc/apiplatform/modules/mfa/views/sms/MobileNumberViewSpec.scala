@@ -22,10 +22,9 @@ import views.helper.CommonViewSpec
 
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MobileNumberForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.MobileNumberView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -34,7 +33,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with UserTestData with DeveloperSessionBuilder
     with LocalUserIdTracker with StubMessagesFactory {
 
-  implicit val request: FakeRequest[_] = FakeRequest()
+  implicit val request: FakeRequest[?] = FakeRequest()
 
   implicit val loggedIn: UserSession = JoeBloggs.loggedIn
   val mobileNumberView               = app.injector.instanceOf[MobileNumberView]
@@ -53,7 +52,7 @@ class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with Use
   "MobileNumberView" should {
 
     "render correctly when form is valid" in new Setup {
-      val mainView           = mobileNumberView.apply(MobileNumberForm.form)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView           = mobileNumberView.apply(MobileNumberForm.form)(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document: Document = Jsoup.parse(mainView.body)
       verifyPageElements(document)
       Option(document.getElementById("data-field-error-mobileNumber")) shouldBe None
@@ -62,7 +61,7 @@ class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with Use
     "render correctly when phone number is invalid" in new Setup {
       val mainView = mobileNumberView.apply(
         MobileNumberForm.form.withError("mobileNumber", "It must be a valid mobile number")
-      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      )(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       verifyPageElements(document)
       document.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It must be a valid mobile number"
@@ -71,7 +70,7 @@ class MobileNumberViewSpec extends CommonViewSpec with WithCSRFAddToken with Use
     "render correctly when phone number length is too short" in new Setup {
       val mainView = mobileNumberView.apply(
         MobileNumberForm.form.withError("mobileNumber", "It must be at least 9 characters long")
-      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      )(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       verifyPageElements(document)
       document.getElementById("data-field-error-mobileNumber").text() shouldBe "Error: It must be at least 9 characters long"

@@ -18,14 +18,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future._
+import scala.concurrent.Future.*
 
 import org.jsoup.Jsoup
 import views.html.ppns.PushSecretsView
 
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures}
@@ -34,9 +34,9 @@ import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDef
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class PushPullNotificationsSpec
@@ -128,7 +128,7 @@ class PushPullNotificationsSpec
       pushPullNotificationsServiceMock
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     FetchSessionById.succeedsWith(devSession.sessionId, devSession)
     UpdateUserFlowSessions.succeedsWith(devSession.sessionId)
@@ -140,16 +140,16 @@ class PushPullNotificationsSpec
       redirectLocation(result) shouldBe Some(routes.UserLoginAccount.login().url)
     }
 
-    def showPushSecretsShouldRenderThePage(session: UserSession, request: FakeRequest[_])(application: ApplicationWithCollaborators) = {
+    def showPushSecretsShouldRenderThePage(session: UserSession, request: FakeRequest[?])(application: ApplicationWithCollaborators) = {
       val subscriptionStatus: APISubscriptionStatus                     = exampleSubscriptionWithFields(application.id, application.clientId)("ppns", 1)
       val newFields: List[ApiSubscriptionFields.SubscriptionFieldValue] = subscriptionStatus.fields.fields
-        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNS_FIELD)))
+        .map(fieldValue => fieldValue.copy(definition = fieldValue.definition.copy(`type` = FieldDefinitionType.PPNSField)))
       val subsData                                                      = List(subscriptionStatus.copy(fields = subscriptionStatus.fields.copy(fields = newFields)))
 
       givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), session, subsData)
 
       val expectedSecrets = Seq("some secret")
-      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(*)).thenReturn(successful(expectedSecrets))
+      when(pushPullNotificationsServiceMock.fetchPushSecrets(eqTo(application))(using *)).thenReturn(successful(expectedSecrets))
 
       val result = underTest.showPushSecrets(application.id)(request)
 

@@ -33,7 +33,7 @@ class UserLogoutAccount @Inject() (
     val errorHandler: ErrorHandler,
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc)
     with ExtendedDevHubAuthorization

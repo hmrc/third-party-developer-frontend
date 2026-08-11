@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import include._
+@import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.helper.EnvironmentNameService
 
@@ -69,6 +69,6 @@
   </p>
 
   <p class="govuk-body">
-      <a id="add" href="@controllers.addapplication.routes.AddApplication.addApplicationName(Environment.SANDBOX, organisationId)" class="govuk-button">Continue</a>
+      <a id="add" href="@controllers.addapplication.routes.AddApplication.addApplicationName(Environment.Sandbox, organisationId)" class="govuk-button">Continue</a>
   </p>
 }

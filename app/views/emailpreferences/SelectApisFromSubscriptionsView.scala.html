@@ -15,10 +15,9 @@
  *@
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import include._
+@import include.*
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.CombinedApi
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectApisFromSubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
@@ -54,7 +53,7 @@
           @for(api <- apis) {
             <div class="govuk-checkboxes__item">
               <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
-              @if(selectedApis.contains(api.serviceName.value)) {checked} />
+              @if(selectedApis.contains(api.serviceName)) {checked} />
               <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName</label>
             </div>
           }

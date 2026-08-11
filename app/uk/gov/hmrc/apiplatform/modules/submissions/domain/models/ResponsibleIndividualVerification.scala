@@ -21,16 +21,15 @@ import java.time.Instant
 import play.api.libs.json.{Format, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.ResponsibleIndividualVerificationState
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
 case class ResponsibleIndividualVerificationId(value: String) extends AnyVal
 
 object ResponsibleIndividualVerificationId {
   import play.api.libs.json.Json
 
-  implicit val JsonFormat: Format[ResponsibleIndividualVerificationId] = Json.valueFormat[ResponsibleIndividualVerificationId]
+  given Format[ResponsibleIndividualVerificationId] = Json.valueFormat[ResponsibleIndividualVerificationId]
 }
 
 sealed trait ResponsibleIndividualVerification {
@@ -81,13 +80,12 @@ case class ResponsibleIndividualUpdateVerification(
 object ResponsibleIndividualVerification {
   import play.api.libs.json.Json
   import uk.gov.hmrc.play.json.Union
-  import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
-  implicit val responsibleIndividualVerificationFormat: OFormat[ResponsibleIndividualToUVerification]                = Json.format[ResponsibleIndividualToUVerification]
-  implicit val responsibleIndividualTouUpliftVerificationFormat: OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]
-  implicit val responsibleIndividualUpdateVerificationFormat: OFormat[ResponsibleIndividualUpdateVerification]       = Json.format[ResponsibleIndividualUpdateVerification]
+  given OFormat[ResponsibleIndividualToUVerification]       = Json.format[ResponsibleIndividualToUVerification]
+  given OFormat[ResponsibleIndividualTouUpliftVerification] = Json.format[ResponsibleIndividualTouUpliftVerification]
+  given OFormat[ResponsibleIndividualUpdateVerification]    = Json.format[ResponsibleIndividualUpdateVerification]
 
-  implicit val jsonFormatResponsibleIndividualVerification: OFormat[ResponsibleIndividualVerification] = Union.from[ResponsibleIndividualVerification]("verificationType")
+  given OFormat[ResponsibleIndividualVerification] = Union.from[ResponsibleIndividualVerification]("verificationType")
     .and[ResponsibleIndividualToUVerification]("termsOfUse")
     .and[ResponsibleIndividualTouUpliftVerification]("termsOfUseUplift")
     .and[ResponsibleIndividualUpdateVerification]("adminUpdate")
@@ -95,9 +93,9 @@ object ResponsibleIndividualVerification {
 
   def getVerificationType(riVerification: ResponsibleIndividualVerification): String = {
     riVerification match {
-      case ritouv: ResponsibleIndividualToUVerification        => "termsOfUse"
-      case ritouuv: ResponsibleIndividualTouUpliftVerification => "termsOfUseUplift"
-      case riuv: ResponsibleIndividualUpdateVerification       => "adminUpdate"
+      case _: ResponsibleIndividualToUVerification       => "termsOfUse"
+      case _: ResponsibleIndividualTouUpliftVerification => "termsOfUseUplift"
+      case _: ResponsibleIndividualUpdateVerification    => "adminUpdate"
     }
   }
 }

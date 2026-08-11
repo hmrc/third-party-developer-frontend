@@ -5,12 +5,20 @@ import uk.gov.hmrc.DefaultBuildSettings
 lazy val appName = "third-party-developer-frontend"
 
 Global / bloopAggregateSourceDependencies := true
-Global / bloopExportJarClassifiers := Some(Set("sources"))
+Global / bloopExportJarClassifiers        := Some(Set("sources"))
 
-ThisBuild / scalaVersion := "2.13.18"
-ThisBuild / majorVersion := 0
-ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+lazy val commonScalacOptions = Seq(
+  // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
+  // suppress warnings in generated routes files
+  "-Wconf:src=routes/.*:s",
+  "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s", // TODO - remove once Play is really Scala 3
+  "-Wconf:msg=unused import&src=html/.*:s"
+)
+
+ThisBuild / scalaVersion                                         := "3.7.4"
+ThisBuild / majorVersion                                         := 0
+ThisBuild / semanticdbEnabled                                    := true
+ThisBuild / semanticdbVersion                                    := scalafixSemanticdb.revision
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
 lazy val microservice = Project(appName, file("."))
@@ -29,23 +37,25 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
     Test / parallelExecution := false,
-    Test / fork := false,
+    Test / fork              := false,
     Test / unmanagedSourceDirectories += baseDirectory.value / "test-utils",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT")
   )
   .settings(
-      routesImport ++= Seq(
-        "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",
-        "uk.gov.hmrc.apiplatform.modules.uplift.controllers._",
-        "uk.gov.hmrc.apiplatform.modules.submissions.controllers.binders._",
-        "uk.gov.hmrc.apiplatform.modules.submissions.domain.models._",
-        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers._",
-        "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._",
-        "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
-        "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
-        "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._",
-        "uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._",
-        "uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._"
+    routesImport ++= Seq(
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.RouteModels._",
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.RouteModels.given",
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.binders._",
+      "uk.gov.hmrc.apiplatform.modules.uplift.controllers._",
+      "uk.gov.hmrc.apiplatform.modules.submissions.controllers.binders._",
+      "uk.gov.hmrc.apiplatform.modules.submissions.domain.models._",
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers._",
+      "uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._",
+      "uk.gov.hmrc.apiplatform.modules.apis.domain.models._",
+      "uk.gov.hmrc.apiplatform.modules.common.domain.models._",
+      "uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._",
+      "uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._",
+      "uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._"
     )
   )
   .settings(
@@ -63,12 +73,7 @@ lazy val microservice = Project(appName, file("."))
     )
   )
   .settings(
-    scalacOptions ++= Seq(
-      "-Wconf:cat=unused&src=views/.*\\.scala:s",
-      // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
-      // suppress warnings in generated routes files
-      "-Wconf:src=routes/.*:s"
-    )
+    scalacOptions ++= commonScalacOptions
   )
 
 lazy val it = (project in file("it"))
@@ -76,18 +81,20 @@ lazy val it = (project in file("it"))
   .dependsOn(microservice % "test->test")
   .settings(
     name := "integration-tests",
-    DefaultBuildSettings.itSettings()
+    DefaultBuildSettings.itSettings(),
+    scalacOptions ++= commonScalacOptions
   )
 
 lazy val component = (project in file("component"))
   .dependsOn(microservice % "test->test")
   .settings(
-    name := "component-tests",
+    name               := "component-tests",
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test ++ AppDependencies.componentTestDependencies,
     Test / unmanagedResourceDirectories += baseDirectory.value / "resources",
     DefaultBuildSettings.itSettings(),
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-eT"),
-    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a"))
+    Test / testOptions := Seq(Tests.Argument(TestFrameworks.JUnit, "-a")),
+    scalacOptions ++= commonScalacOptions
   )
 
 commands ++= Seq(
@@ -99,5 +106,7 @@ commands ++= Seq(
   Command.command("testAll") { state => "test" :: "it/test" :: "component/test" :: state },
   Command.command("run-all-tests") { state => "testAll" :: state },
   Command.command("clean-and-test") { state => "cleanAll" :: "compile" :: "run-all-tests" :: state },
-  Command.command("pre-commit") { state => "cleanAll" :: "fmtAll" :: "fixAll" :: "testAllExcludedFromCoverage" :: "coverage" :: "testAllIncludedInCoverage" :: "coverageOff" :: "coverageAggregate" :: state }
+  Command.command("pre-commit") { state =>
+    "cleanAll" :: "fmtAll" :: "fixAll" :: "testAllExcludedFromCoverage" :: "coverage" :: "testAllIncludedInCoverage" :: "coverageOff" :: "coverageAggregate" :: state
+  }
 )

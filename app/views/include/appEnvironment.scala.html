@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 
 @(app: ApplicationWithCollaborators)(implicit appConfig: ApplicationConfig)
 @principalEnvName = @{appConfig.nameOfPrincipalEnvironment}
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment}
 @envName = @{ if(app.deployedTo.isProduction) {principalEnvName} else subordinateEnvName}
 
-@if(app.access.accessType != AccessType.STANDARD) {
+@if(app.access.accessType != AccessType.Standard) {
   <p class="govuk-body">This application is @applicationType() application.</p>
 }
 
@@ -44,6 +44,6 @@
 </div>
 
 @applicationType() = @{app.access.accessType match {
-  case AccessType.PRIVILEGED => "a privileged"
+  case AccessType.Privileged => "a privileged"
   case _ => "an ROPC"
 }}

@@ -333,7 +333,7 @@ package object controllers {
   val applicationNameConstraint: Constraint[String] = Constraint("constraints.applicationname") { plainText =>
     ValidatedApplicationName.validate(plainText) match {
       case Validated.Invalid(e) => Invalid(Seq(ValidationError(applicationNameInvalidKeyLengthAndCharacters)))
-      case Validated.Valid(e)   => Valid
+      case Validated.Valid(_)   => Valid
     }
   }
 

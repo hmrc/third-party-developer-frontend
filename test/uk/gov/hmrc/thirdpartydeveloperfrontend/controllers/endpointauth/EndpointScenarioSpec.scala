@@ -17,6 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.endpointauth
 
 import java.time.Instant
+import scala.annotation.unused
 import scala.concurrent.Future
 import scala.concurrent.Future.successful
 import scala.io.Source
@@ -30,14 +31,15 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.test.Helpers.{redirectLocation, route, status}
 import play.api.test.{CSRFTokenHelper, FakeRequest, Writeables}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{Endpoint => _, _}
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{Endpoint as _, *}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationTokenData
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{ApplicationNameValidationResult, UpliftRequest}
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.DispatchSuccessResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Question
@@ -46,14 +48,15 @@ import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{PasswordChangeRequest, UpdateRequest}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.*
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector.UpdateProfileSuccess
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitationState.EMAIL_SENT
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.SaveSubscriptionFieldsSuccessResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.ExcludeFromCoverage
@@ -89,6 +92,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .overrides(bind[ThirdPartyApplicationProductionConnector].toInstance(tpaProductionConnector))
       .overrides(bind[ApiPlatformDeskproConnector].toInstance(apiPlatformDeskproConnector))
       .overrides(bind[FlowRepository].toInstance(flowRepository))
+      .disable[PlayMongoModule]
       .overrides(bind[ApmConnector].toInstance(apmConnector))
       .overrides(bind[ApmConnectorApiDefinitionModule].toInstance(apmConnector))
       .overrides(bind[ApmConnectorSubscriptionFieldsModule].toInstance(apmConnector))
@@ -101,23 +105,23 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       .build()
   }
 
-  when(apmConnector.fetchApplicationById(*[ApplicationId])(*)).thenReturn(Future.successful(Some(appWithSubsData)))
-  when(apmConnector.getAllFieldDefinitions(*[Environment])(*)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
-  when(apmConnector.fetchAllOpenAccessApis(*[Environment])(*)).thenReturn(Future.successful(List.empty))
-  when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(allPossibleSubscriptions))
-  when(apmConnector.fetchCombinedApi(*[ServiceName])(*)).thenReturn(Future.successful(Right(CombinedApi(
+  when(apmConnector.fetchApplicationById(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(appWithSubsData)))
+  when(apmConnector.getAllFieldDefinitions(*[Environment])(using *)).thenReturn(Future.successful(Map(apiContext -> Map(apiVersion -> subscriptionFieldDefinitions))))
+  when(apmConnector.fetchAllOpenAccessApis(*[Environment])(using *)).thenReturn(Future.successful(List.empty))
+  when(apmConnector.fetchAllPossibleSubscriptions(*[ApplicationId])(using *)).thenReturn(Future.successful(allPossibleSubscriptions))
+  when(apmConnector.fetchCombinedApi(*[ServiceName])(using *)).thenReturn(Future.successful(Right(CombinedApi(
     "my service display name",
     ServiceName("my service"),
     Set.empty,
-    ApiType.REST_API,
-    ApiAccessType.PUBLIC
+    ApiType.RestApi,
+    ApiAccessType.Public
   ))))
-  when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(*)).thenReturn(Future.successful(List("secret1")))
-  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(*)).thenReturn(Future.successful(List(mock[User])))
-  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.PRODUCTION))(*)).thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
+  when(sandboxPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(using *)).thenReturn(Future.successful(List("secret1")))
+  when(productionPushPullNotificationsConnector.fetchPushSecrets(*[ClientId])(using *)).thenReturn(Future.successful(List("secret1")))
+  when(tpdConnector.fetchByEmails(*[Set[LaxEmailAddress]])(using *)).thenReturn(Future.successful(List(mock[User])))
+  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.Production))(using *)).thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-  when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(*)).thenReturn(Future.successful(Some(TermsOfUseInvitation(
+  when(tpaProductionConnector.fetchTermsOfUseInvitation(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(TermsOfUseInvitation(
     ApplicationId.random,
     Instant.now,
     Instant.now,
@@ -126,31 +130,33 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     EMAIL_SENT
   ))))
 
-  when(apmConnector.dispatchWithThrow(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
-  when(apmConnector.dispatch(*[ApplicationId], *, *)(*)).thenReturn(Future.successful(Right(DispatchSuccessResult(application))))
-  when(apmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(*)).thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
-  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.SANDBOX))(*)).thenReturn(Future.successful(
+  when(apmConnector.dispatchWithThrow(*[ApplicationId], *, *)(using *)).thenReturn(Future.successful(ApplicationUpdateSuccessful))
+  when(apmConnector.dispatch(*[ApplicationId], *, *)(using *)).thenReturn(Future.successful(Right(DispatchSuccessResult(application))))
+  when(apmConnector.saveFieldValues(*[Environment], *[ClientId], *[ApiContext], *[ApiVersionNbr], *[Fields])(using *)).thenReturn(
+    Future.successful(SaveSubscriptionFieldsSuccessResponse)
+  )
+  when(tpoConnector.validateName(*[String], *[Option[ApplicationId]], eqTo(Environment.Sandbox))(using *)).thenReturn(Future.successful(
     ApplicationNameValidationResult.Valid
   ))
-  when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftRequest])(*)).thenAnswer((appId: ApplicationId, _: UpliftRequest) => Future.successful(appId))
-  when(apmConnector.fetchUpliftableApiIdentifiers(*)).thenReturn(Future.successful(Set(apiIdentifier)))
-  when(apmConnector.fetchAllApis(*)(*)).thenReturn(Future.successful(List.empty))
-  when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(*)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
+  when(apmConnector.upliftApplicationV2(*[ApplicationId], *[UpliftRequest])(using *)).thenAnswer((appId: ApplicationId, _: UpliftRequest) => Future.successful(appId))
+  when(apmConnector.fetchUpliftableApiIdentifiers(using *)).thenReturn(Future.successful(Set(apiIdentifier)))
+  when(apmConnector.fetchAllApis(*)(using *)).thenReturn(Future.successful(List.empty))
+  when(apmConnector.fetchUpliftableSubscriptions(*[ApplicationId])(using *)).thenReturn(Future.successful(Set(ApiIdentifier(apiContext, apiVersion))))
   when(apiPlatformDeskproConnector.createTicket(*, *)).thenReturn(Future.successful(Some("ref")))
   when(apiPlatformDeskproConnector.updatePersonName(*[LaxEmailAddress], *, *)).thenReturn(Future.successful(UpdateProfileSuccess))
   when(flowRepository.updateLastUpdated(*)).thenReturn(Future.successful(()))
 
-  when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(*)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
-  when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(*)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
-  when(organisationConnector.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(List(organisation)))
-  when(organisationConnector.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(successful(None))
-  when(organisationConnector.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(successful(None))
+  when(apmConnector.fetchApiDefinitionsVisibleToUser(*[Option[UserId]])(using *)).thenReturn(Future.successful(List(ApiDefinitionData.apiDefinition)))
+  when(apmConnector.fetchExtendedApiDefinition(*[ServiceName])(using *)).thenReturn(Future.successful(Right(ExtendedApiDefinitionData.extendedApiDefinition)))
+  when(organisationConnector.fetchOrganisationsByUserId(*[UserId])(using *)).thenReturn(successful(List(organisation)))
+  when(organisationConnector.fetchOrganisationAllowList(*[UserId])(using *)).thenReturn(successful(None))
+  when(organisationConnector.fetchLatestSubmissionByUserId(*[UserId])(using *)).thenReturn(successful(None))
 
-  import scala.reflect.runtime.universe._
+  import scala.reflect.ClassTag
   import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows._
 
-  def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit tt: TypeTag[A]) = {
-    when(flowRepository.fetchBySessionIdAndFlowType[A](*[A#Type])(eqTo(tt), *)).thenReturn(
+  def mockFetchBySessionIdAndFlowType[A <: Flow](a: A)(implicit ct: ClassTag[A]) = {
+    when(flowRepository.fetchBySessionIdAndFlowType[A](*[UserSessionId])(using eqTo(ct))).thenReturn(
       Future.successful(Some(a))
     )
   }
@@ -185,41 +191,41 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     Set.empty,
     List.empty
   )))
-  when(tpdConnector.fetchEmailForResetCode(*)(*)).thenReturn(Future.successful(userEmail))
-  when(tpdConnector.requestReset(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.getOrCreateUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(UserId.random))
-  when(tpdConnector.reset(*)(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.authenticate(*)(*)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
-  when(tpdConnector.fetchSession(eqTo(sessionId))(*)).thenReturn(Future.successful(session))
-  when(tpdConnector.deleteSession(eqTo(sessionId))(*)).thenReturn(Future.successful(OK))
-  when(tpdConnector.authenticateMfaAccessCode(*)(*)).thenReturn(Future.successful(session))
-  when(tpdConnector.verify(*)(*)).thenReturn(Future.successful(OK))
-  when(tpoConnector.verify(*)(*)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
-  when(tpdConnector.resendVerificationEmail(*[LaxEmailAddress])(*)).thenReturn(Future.successful(OK))
-  when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(*)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[SubmissionId])(*)).thenReturn(Future.successful(Some(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(Future.successful(Some(submission)))
-  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *[List[String]])(*)).thenReturn(Future.successful(Right(extendedSubmission)))
-  when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(submission)))
-  when(tpdConnector.fetchDeveloper(*[UserId])(*)).thenReturn(Future.successful(Some(developer)))
-  when(tpdConnector.updateProfile(*[UserId], *[UpdateRequest])(*)).thenReturn(Future.successful(1))
-  when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(*)).thenReturn(Future.successful(true))
-  when(tpdConnector.removeEmailPreferences(*[UserId])(*)).thenReturn(Future.successful(true))
-  when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(*)).thenReturn(Future.successful(Right(List(CombinedApi(
+  when(tpdConnector.fetchEmailForResetCode(*)(using *)).thenReturn(Future.successful(userEmail))
+  when(tpdConnector.requestReset(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(OK))
+  when(tpdConnector.getOrCreateUserId(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(UserId.random))
+  when(tpdConnector.reset(*)(using *)).thenReturn(Future.successful(OK))
+  when(tpdConnector.authenticate(*)(using *)).thenReturn(Future.successful(UserAuthenticationResponse(false, false, None, Some(session))))
+  when(tpdConnector.fetchSession(eqTo(sessionId))(using *)).thenReturn(Future.successful(session))
+  when(tpdConnector.deleteSession(eqTo(sessionId))(using *)).thenReturn(Future.successful(OK))
+  when(tpdConnector.authenticateMfaAccessCode(*)(using *)).thenReturn(Future.successful(session))
+  when(tpdConnector.verify(*)(using *)).thenReturn(Future.successful(OK))
+  when(tpoConnector.verify(*)(using *)).thenReturn(Future.successful(ApplicationVerificationSuccessful))
+  when(tpdConnector.resendVerificationEmail(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(OK))
+  when(thirdPartyApplicationSubmissionsConnector.fetchResponsibleIndividualVerification(*[String])(using *)).thenReturn(Future.successful(Some(responsibleIndividualVerification)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchSubmission(*[SubmissionId])(using *)).thenReturn(Future.successful(Some(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(using *)).thenReturn(Future.successful(Some(submission)))
+  when(thirdPartyApplicationSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *[List[String]])(using *)).thenReturn(Future.successful(Right(extendedSubmission)))
+  when(thirdPartyApplicationSubmissionsConnector.createSubmission(*[ApplicationId], *[LaxEmailAddress])(using *)).thenReturn(Future.successful(Some(submission)))
+  when(tpdConnector.fetchDeveloper(*[UserId])(using *)).thenReturn(Future.successful(Some(developer)))
+  when(tpdConnector.updateProfile(*[UserId], *[UpdateRequest])(using *)).thenReturn(Future.successful(1))
+  when(tpdConnector.updateEmailPreferences(*[UserId], *[EmailPreferences])(using *)).thenReturn(Future.successful(true))
+  when(tpdConnector.removeEmailPreferences(*[UserId])(using *)).thenReturn(Future.successful(true))
+  when(apmConnector.fetchCombinedApisVisibleToUser(*[UserId])(using *)).thenReturn(Future.successful(Right(List(CombinedApi(
     "display name",
     ServiceName("my service"),
     Set.empty,
-    ApiType.REST_API,
-    ApiAccessType.PUBLIC
+    ApiType.RestApi,
+    ApiAccessType.Public
   )))))
-  when(tpdConnector.changePassword(*[PasswordChangeRequest])(*)).thenReturn(Future.successful(1))
-  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(()))
-  when(thirdPartyDeveloperMfaConnector.createMfaAuthApp(*[UserId])(*)).thenReturn(Future.successful(registerAuthAppResponse))
-  when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(*)).thenReturn(Future.successful(true))
-  when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(*)).thenReturn(Future.successful(Some(registerSmsResponse)))
-  when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+  when(tpdConnector.changePassword(*[PasswordChangeRequest])(using *)).thenReturn(Future.successful(1))
+  when(thirdPartyDeveloperMfaConnector.verifyMfa(*[UserId], *[MfaId], *[String])(using *)).thenReturn(Future.successful(true))
+  when(thirdPartyDeveloperMfaConnector.removeMfaById(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(()))
+  when(thirdPartyDeveloperMfaConnector.createMfaAuthApp(*[UserId])(using *)).thenReturn(Future.successful(registerAuthAppResponse))
+  when(thirdPartyDeveloperMfaConnector.changeName(*[UserId], *[MfaId], *[String])(using *)).thenReturn(Future.successful(true))
+  when(thirdPartyDeveloperMfaConnector.createMfaSms(*[UserId], *[String])(using *)).thenReturn(Future.successful(Some(registerSmsResponse)))
+  when(thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(true))
 
   private def populatePathTemplateWithValues(pathTemplate: String, values: Map[String, String]): String = {
     // TODO fail test if path contains parameters that aren't supplied by the values map
@@ -247,7 +253,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       val request = updateRequestForScenario(FakeRequest(requestValues.endpoint.verb, path))
 
       val result = (requestValues.postBody.isEmpty match {
-        case false => route(app, CSRFTokenHelper.addCSRFToken(request.withFormUrlEncodedBody(requestValues.postBody.toSeq: _*)))
+        case false => route(app, CSRFTokenHelper.addCSRFToken(request.withFormUrlEncodedBody(requestValues.postBody.toSeq*)))
         case true  => route(app, CSRFTokenHelper.addCSRFToken(request))
       }).get
 
@@ -271,7 +277,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
     "aid"            -> applicationId.toString(),
     "qid"            -> question.id.value,
     "sid"            -> submissionId.toString(),
-    "environment"    -> Environment.PRODUCTION.toString(),
+    "environment"    -> Environment.Production.toString(),
     "pageNumber"     -> "1",
     "context"        -> apiContext.value,
     "version"        -> apiVersion.value,
@@ -284,21 +290,21 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
   final def getQueryParameterValues(endpoint: Endpoint): Map[String, String] = {
     endpoint match {
       case Endpoint("GET", "/developer/applications/:id/change-locked-subscription", _)           =>
-        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
+        Map("name" -> applicationName.toString, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)          =>
-        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
+        Map("name" -> applicationName.toString, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
       case Endpoint("GET", "/developer/applications/:id/change-private-subscription", _)          =>
-        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
+        Map("name" -> applicationName.toString, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)         =>
-        Map("name" -> applicationName.value, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
+        Map("name" -> applicationName.toString, "context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                 =>
         Map("context" -> apiContext.value, "version" -> apiVersion.value, "redirectTo" -> loginRedirectUri.toString())
       case Endpoint("GET", "/developer/applications/:id/ip-allowlist/remove", _)                  => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("POST", "/developer/applications/:id/ip-allowlist/remove", _)                 => Map("cidrBlock" -> "192.168.1.2/8")
       case Endpoint("GET", "/developer/verification", _)                                          => Map("code" -> "CODE123")
-      case Endpoint("GET", "/developer/login-mfa", _)                                             => Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AUTHENTICATOR_APP.toString)
+      case Endpoint("GET", "/developer/login-mfa", _)                                             => Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AuthenticatorApp.toString)
       case Endpoint("POST", "/developer/login-mfa", _)                                            =>
-        Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AUTHENTICATOR_APP.toString, "userHasMultipleMfa" -> false.toString)
+        Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AuthenticatorApp.toString, "userHasMultipleMfa" -> false.toString)
       case Endpoint("GET", "/developer/reset-password-link", _)                                   => Map("code" -> "1324")
       case Endpoint("GET", "/developer/application-verification", _)                              => Map("code" -> "1324")
       case Endpoint("GET", "/developer/profile/email-preferences/apis", _)                        => Map("category" -> "AGENTS")
@@ -316,7 +322,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString, "mfaIdForRemoval" -> smsMfaId.value.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)         =>
         Map("mfaId" -> smsMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString, "mfaIdForRemoval" -> authAppMfaId.value.toString)
-      case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa", _)               => Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AUTHENTICATOR_APP.toString)
+      case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa", _)               => Map("mfaId" -> authAppMfaId.value.toString, "mfaType" -> MfaType.AuthenticatorApp.toString)
       case Endpoint("GET", "/developer/profile/security-preferences/select-mfa", _)               => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("POST", "/developer/profile/security-preferences/select-mfa", _)              => Map("mfaId" -> authAppMfaId.value.toString, "mfaAction" -> MfaAction.CREATE.toString)
       case Endpoint("GET", "/developer/login/select-mfa", _)                                      => Map("authAppMfaId" -> authAppMfaId.value.toString, "smsMfaId" -> smsMfaId.value.toString)
@@ -336,7 +342,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/reset-password", _)                                                    => Map("password" -> userPassword, "confirmpassword" -> userPassword)
       case Endpoint("POST", "/developer/applications/:id/team-members/add", _)                                 => Map("email" -> userEmail.text, "role" -> "developer")
       case Endpoint("POST", "/developer/applications/:id/team-members/remove", _)                              => Map("email" -> userEmail.text, "confirm" -> "yes")
-      case Endpoint("POST", "/developer/applications/:id/details/change-app-name", _)                          => Map("applicationName" -> ("new " + applicationName.value))
+      case Endpoint("POST", "/developer/applications/:id/details/change-app-name", _)                          => Map("applicationName" -> ("new " + applicationName.toString))
       case Endpoint("POST", "/developer/applications/:id/details/change-privacy-policy-location", _)           =>
         Map("privacyPolicyUrl" -> "http://example.com", "isInDesktop" -> "false", "isNewJourney" -> "true")
       case Endpoint("POST", "/developer/applications/:id/details/change-terms-conditions-location", _)         =>
@@ -354,10 +360,10 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/applications/:id/change-subscription", _)                              => Map("subscribed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/change-locked-subscription", _)                       => Map("subscribed" -> "true", "confirm" -> "true")
       case Endpoint("POST", "/developer/applications/:id/change-private-subscription", _)                      => Map("subscribed" -> "true", "confirm" -> "true")
-      case Endpoint("POST", "/developer/applications/:id/add/subscription-configuration/:pageNumber", _)       => Map(apiFieldName.value -> apiFieldValue.value)
-      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version", _)                   => Map(apiFieldName.value -> apiFieldValue.value)
+      case Endpoint("POST", "/developer/applications/:id/add/subscription-configuration/:pageNumber", _)       => Map(apiFieldName.value -> apiFieldValue.toString)
+      case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version", _)                   => Map(apiFieldName.value -> apiFieldValue.toString)
       case Endpoint("POST", "/developer/applications/:id/api-metadata/:context/:version/fields/:fieldName", _) =>
-        Map(apiFieldName.value -> apiFieldValue.value)
+        Map(apiFieldName.value -> apiFieldValue.toString)
       case Endpoint("POST", "/developer/no-applications", _)                                                   => Map("choice" -> "use-apis")
       case Endpoint("POST", "/developer/applications/:id/change-api-subscriptions", _)                         => Map("ctx-1_0-subscribed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/sell-resell-or-distribute-your-software", _)          => Map("answer" -> "yes")
@@ -373,20 +379,20 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         )
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-and-conditions", _)               => Map("hasUrl" -> "true", "termsAndConditionsURL" -> "https://example.com/tcs")
       case Endpoint("POST", "/developer/applications/:id/request-check/contact", _)                            => Map("fullname" -> userFullName, "email" -> userEmail.text, "telephone" -> userPhone)
-      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                               => Map("applicationName" -> applicationName.value)
+      case Endpoint("POST", "/developer/applications/:id/request-check/name", _)                               => Map("applicationName" -> applicationName.toString)
       case Endpoint("POST", "/developer/applications/:id/request-check/privacy-policy", _)                     => Map("hasUrl" -> "true", "privacyPolicyURL" -> "https://example.com/priv")
       case Endpoint("POST", "/developer/applications/:id/request-check/team/remove", _)                        => Map("email" -> userEmail.text)
       case Endpoint("POST", "/developer/applications/:id/request-check/terms-of-use", _)                       => Map("termsOfUseAgreed" -> "true")
       case Endpoint("POST", "/developer/applications/:id/details/change-tc-and-priv-pol-url", _)               => Map(
           "applicationId"         -> applicationId.toString(),
-          "applicationName"       -> applicationName.value,
+          "applicationName"       -> applicationName.toString,
           "description"           -> "my description",
           "privacyPolicyUrl"      -> privacyPolicyUrl,
           "termsAndConditionsUrl" -> termsConditionsUrl,
           "grantLength"           -> "1"
         )
       case Endpoint("POST", "/developer/applications/:id/change-app-name-and-desc", _)                         => Map(
-          "applicationName" -> applicationName.value,
+          "applicationName" -> applicationName.toString,
           "description"     -> "my description"
         )
       case Endpoint("POST", "/developer/applications/add/switch", _)                                           => Map("applicationId" -> applicationId.toString())
@@ -508,7 +514,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
       case Endpoint("POST", "/developer/profile/security-preferences/sms/access-code", _)                      => Redirect(s"/developer/profile/security-preferences/sms/setup/complete")
       case Endpoint("GET", "/developer/profile/security-preferences/remove-mfa", _)                            =>
         Redirect(s"/developer/profile/security-preferences/auth-app/access-code?mfaId=${authAppMfaId.value.toString}&mfaAction=REMOVE&mfaIdForRemoval=${authAppMfaId.value.toString}")
-      case Endpoint("POST", "/developer/login/select-mfa", _)                                                  => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AUTHENTICATOR_APP.toString}")
+      case Endpoint("POST", "/developer/login/select-mfa", _)                                                  => Redirect(s"/developer/login-mfa?mfaId=${authAppMfaId.value.toString}&mfaType=${MfaType.AuthenticatorApp.toString}")
       case Endpoint("GET", "/developer/login/select-mfa/try-another-option", _)                                => Unexpected(500)
       case Endpoint("GET", "/developer/applications/terms-of-use", _)                                          => Success()
       case _                                                                                                   => Success()
@@ -518,9 +524,9 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
 
   // Override these methods within scenarios classes
   override def updateRequestForScenario[T](request: FakeRequest[T]): FakeRequest[T] = request
-  def getPathParameterValueOverrides(endpoint: Endpoint)                            = Map.empty[String, String]
-  def getQueryParameterValueOverrides(endpoint: Endpoint)                           = Map.empty[String, String]
-  def getBodyParameterValueOverrides(endpoint: Endpoint)                            = Map.empty[String, String]
+  def getPathParameterValueOverrides(@unused endpoint: Endpoint)                    = Map.empty[String, String]
+  def getQueryParameterValueOverrides(@unused endpoint: Endpoint)                   = Map.empty[String, String]
+  def getBodyParameterValueOverrides(@unused endpoint: Endpoint)                    = Map.empty[String, String]
 
   def populateRequestValues(endpoint: Endpoint): Seq[RequestValues] = {
     val pathParameterValues  = getPathParameterValues() ++ getPathParameterValueOverrides(endpoint)
@@ -543,8 +549,7 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
         Source.fromFile(s"conf/$routesFilePrefix.routes").getLines().flatMap(line => parseEndpoint(line, pathPrefix))
       })
       .flatMap(populateRequestValues)
-      .toSet foreach { requestValues: RequestValues =>
-      {
+      .toSet.foreach { requestValues =>
         val expectedResponse = getExpectedResponse(requestValues.endpoint)
         s"expect response $expectedResponse when calling\n\t$requestValues" taggedAs ExcludeFromCoverage in {
           val result = callEndpoint(requestValues)
@@ -553,7 +558,6 @@ abstract class EndpointScenarioSpec extends AsyncHmrcSpec with GuiceOneAppPerSui
           }
         }
       }
-    }
   }
 
 }

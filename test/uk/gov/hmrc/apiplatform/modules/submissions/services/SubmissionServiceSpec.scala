@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 class SubmissionServiceSpec extends AsyncHmrcSpec {
 
   trait Setup extends FixedClock with SubmissionsTestData {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]
 
@@ -43,7 +43,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
 
   "fetch" should {
     "return extended submission for given submission id" in new Setup {
-      when(mockSubmissionsConnector.fetchSubmission(*[SubmissionId])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
+      when(mockSubmissionsConnector.fetchSubmission(*[SubmissionId])(using *)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
 
       val result = await(underTest.fetch(completelyAnswerExtendedSubmission.submission.id))
 
@@ -52,7 +52,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
     }
 
     "return latest submission for given application id" in new Setup {
-      when(mockSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(aSubmission)))
+      when(mockSubmissionsConnector.fetchLatestSubmission(*[ApplicationId])(using *)).thenReturn(successful(Some(aSubmission)))
 
       val result = await(underTest.fetchLatestSubmission(aSubmission.applicationId))
 
@@ -61,7 +61,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
     }
 
     "return latest extended submission for given application id" in new Setup {
-      when(mockSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
+      when(mockSubmissionsConnector.fetchLatestExtendedSubmission(*[ApplicationId])(using *)).thenReturn(successful(Some(completelyAnswerExtendedSubmission)))
 
       val result = await(underTest.fetchLatestExtendedSubmission(completelyAnswerExtendedSubmission.submission.applicationId))
 
@@ -70,7 +70,7 @@ class SubmissionServiceSpec extends AsyncHmrcSpec {
     }
 
     "record answer for given submisson id and question id" in new Setup {
-      when(mockSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *)(*)).thenReturn(successful(Right(answeringSubmission.withIncompleteProgress())))
+      when(mockSubmissionsConnector.recordAnswer(*[SubmissionId], *[Question.Id], *)(using *)).thenReturn(successful(Right(answeringSubmission.withIncompleteProgress())))
 
       val result = await(underTest.recordAnswer(completelyAnswerExtendedSubmission.submission.id, questionId, List("")))
 

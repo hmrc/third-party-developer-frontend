@@ -16,16 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa
 
-import scala.collection.immutable.ListSet
-
-sealed trait MfaAction
+enum MfaAction {
+  case CREATE, REMOVE
+}
 
 object MfaAction {
-  case object CREATE extends MfaAction
-  case object REMOVE extends MfaAction
-
-  val values: ListSet[MfaAction] = ListSet(CREATE, REMOVE)
-
   def apply(text: String): Option[MfaAction] = MfaAction.values.find(_.toString() == text.toUpperCase)
   def unsafeApply(text: String): MfaAction   = apply(text).getOrElse(throw new RuntimeException(s"$text is not a valid MfaAction"))
 }

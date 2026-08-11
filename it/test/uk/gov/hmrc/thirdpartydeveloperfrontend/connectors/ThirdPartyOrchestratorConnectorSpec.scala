@@ -16,24 +16,26 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.mockito.Mockito
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application => PlayApplication, Configuration, Mode}
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.metrics.common.API
+import play.api.{Application as PlayApplication, Configuration, Mode}
+import uk.gov.hmrc.http.*
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, *}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationCreatedResponse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.{ApplicationVerificationFailed, ApplicationVerificationSuccessful}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WireMockExtensions}
 
 class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite with WireMockExtensions
@@ -53,6 +55,8 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
@@ -63,7 +67,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
       ApplicationName("My Application"),
       CreationAccess.Standard,
       Some("Description"),
-      Environment.SANDBOX,
+      Environment.Sandbox,
       Set("admin@example.com".toLaxEmail.asAdministratorCollaborator),
       None,
       Some(orgId)
@@ -72,7 +76,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
     def applicationResponse(appId: ApplicationId, clientId: ClientId, appName: ApplicationName = ApplicationName("My Application")) =
       standardApp.withId(appId).modify(_.copy(name = appName))
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
   }
 
   "api" should {
@@ -150,7 +154,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
               .withJsonBody(expectedResponse)
           )
       )
-      val result = await(connector.validateName(applicationName, Some(appId), Environment.PRODUCTION))
+      val result = await(connector.validateName(applicationName, Some(appId), Environment.Production))
       result shouldBe ApplicationNameValidationResult.Valid
     }
 
@@ -169,7 +173,7 @@ class ThirdPartyOrchestratorConnectorSpec extends BaseConnectorIntegrationSpec w
               .withJsonBody(expectedResponse)
           )
       )
-      val result = await(connector.validateName(applicationName, None, Environment.PRODUCTION))
+      val result = await(connector.validateName(applicationName, None, Environment.Production))
       result shouldBe ApplicationNameValidationResult.Invalid
     }
 

@@ -19,17 +19,17 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import views.html._
+import views.html.*
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class DeleteApplicationSpec
     extends BaseControllerSpec
@@ -60,7 +60,7 @@ class DeleteApplicationSpec
       deleteSubordinateApplicationCompleteView
     )
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val sessionId = adminSession.sessionId
 
@@ -69,7 +69,7 @@ class DeleteApplicationSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams   = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedInRequest = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using underTest)(sessionId).withSession(sessionParams*)
   }
 
   "delete application page" should {
@@ -102,9 +102,9 @@ class DeleteApplicationSpec
   "request delete application action" should {
     "return request delete application complete page when confirm selected" in new Setup {
 
-      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes"))
+      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "Yes")).withMethod("POST")
 
-      when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*))
+      when(underTest.applicationService.requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(using *))
         .thenReturn(Future.successful(Some("ref")))
 
       val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
@@ -113,12 +113,12 @@ class DeleteApplicationSpec
       val body = contentAsString(result)
 
       body should include("Request submitted")
-      verify(underTest.applicationService).requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(*)
+      verify(underTest.applicationService).requestApplicationDeletion(eqTo(adminSession), eqTo(standardApp))(using *)
     }
 
     "redirect to 'Manage details' page when not-to-confirm selected" in new Setup {
 
-      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No"))
+      val requestWithFormBody = loggedInRequest.withFormUrlEncodedBody(("deleteConfirm", "No")).withMethod("POST")
 
       val result = addToken(underTest.requestDeleteApplicationAction(standardApp.id))(requestWithFormBody)
 
@@ -133,7 +133,7 @@ class DeleteApplicationSpec
 
     givenApplicationAction(nonApprovedApplication, adminSession)
 
-    when(underTest.applicationService.requestApplicationDeletion(*, *)(*))
+    when(underTest.applicationService.requestApplicationDeletion(*, *)(using *))
       .thenReturn(Future.successful(Some("ref")))
   }
 

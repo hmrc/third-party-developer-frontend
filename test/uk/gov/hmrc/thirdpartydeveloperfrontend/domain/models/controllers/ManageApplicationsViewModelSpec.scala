@@ -26,7 +26,7 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.OrganisationName
 import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.{OrganisationAllowList, Submission}
 import uk.gov.hmrc.apiplatform.modules.organisations.submissions.utils.SubmissionsTestData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 
 class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with FixedClock with ApplicationNameFixtures with SubmissionsTestData {
 
@@ -36,15 +36,15 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with Fix
     ApplicationSummary(
       ApplicationId.random,
       appNameOne,
-      Collaborator.Roles.DEVELOPER,
+      Collaborator.Role.Developer,
       TermsOfUseStatus.AGREED,
-      State.TESTING,
+      State.Testing,
       Some(instant),
       grantLength,
       serverTokenUsed = false,
       instant,
-      AccessType.STANDARD,
-      Environment.SANDBOX,
+      AccessType.Standard,
+      Environment.Sandbox,
       Set.empty
     )
 
@@ -52,19 +52,19 @@ class ManageApplicationsViewModelSpec extends AnyWordSpec with Matchers with Fix
     ApplicationSummary(
       ApplicationId.random,
       appNameTwo,
-      Collaborator.Roles.DEVELOPER,
+      Collaborator.Role.Developer,
       TermsOfUseStatus.AGREED,
-      State.TESTING,
+      State.Testing,
       Some(instant),
       grantLength,
       serverTokenUsed = false,
       instant,
-      AccessType.STANDARD,
-      Environment.PRODUCTION,
+      AccessType.Standard,
+      Environment.Production,
       Set.empty
     )
 
-  val liveProductionApp = notYetLiveProductionApp.copy(state = State.PRODUCTION)
+  val liveProductionApp = notYetLiveProductionApp.copy(state = State.Production)
 
   val allowList = Some(OrganisationAllowList(UserId.random, OrganisationName("Test Organisation"), "requestedBy", instant))
 

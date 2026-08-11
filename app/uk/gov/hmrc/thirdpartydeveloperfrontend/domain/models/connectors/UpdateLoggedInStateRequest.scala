@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
 
 case class UpdateLoggedInStateRequest(loggedInState: LoggedInState)
 
 object UpdateLoggedInStateRequest {
-  implicit val format: OFormat[UpdateLoggedInStateRequest] = Json.format[UpdateLoggedInStateRequest]
+  given OFormat[UpdateLoggedInStateRequest] = Json.format[UpdateLoggedInStateRequest]
 }

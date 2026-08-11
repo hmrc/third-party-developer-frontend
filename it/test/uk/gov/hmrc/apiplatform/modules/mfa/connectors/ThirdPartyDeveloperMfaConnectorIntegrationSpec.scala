@@ -16,25 +16,28 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.mockito.Mockito
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, DeviceSessionId, MfaId}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.*
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegrationSpec
@@ -49,11 +52,13 @@ class ThirdPartyDeveloperMfaConnectorIntegrationSpec extends BaseConnectorIntegr
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val userEmail = "thirdpartydeveloper@example.com".toLaxEmail
     val userId    = idOf(userEmail)

@@ -26,25 +26,25 @@ import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, 
 
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{AnyContentAsEmpty, Result}
-import play.api.test.CSRFTokenHelper._
+import play.api.test.CSRFTokenHelper.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, ClientSecretHashingService}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class CredentialsSpec
     extends BaseControllerSpec
@@ -66,8 +66,8 @@ class CredentialsSpec
 
     final def createApplication() = modifiers(anApplication)
   }
-  val productionState: ApplicationState = ApplicationState(State.PRODUCTION, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant)
-  val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PENDING_GATEKEEPER_APPROVAL)
+  val productionState: ApplicationState = ApplicationState(State.Production, Some(userSession.developer.email.text), Some(userSession.developer.displayedName), Some(""), instant)
+  val pendingGatekeeperApproval: ApplicationState = productionState.copy(name = State.PendingGatekeeperApproval)
 
   trait ApplicationProviderWithAdmin extends ApplicationProvider {
     def anApplication: ApplicationWithCollaborators = standardApp.withCollaborators(userSession.developer.email.asAdministratorCollaborator)
@@ -118,15 +118,15 @@ class CredentialsSpec
     val application                                                = createApplication()
     val applicationWithSubscriptions: ApplicationWithSubscriptions = application.withSubscriptions(Set.empty)
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     givenApplicationAction(applicationWithSubscriptions, userSession)
     fetchSessionByIdReturns(sessionId, userSession)
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(using underTest)(sessionId).withSession(sessionParams*)
     val actor: Actors.AppCollaborator                         = Actors.AppCollaborator(userSession.developer.email)
   }
 

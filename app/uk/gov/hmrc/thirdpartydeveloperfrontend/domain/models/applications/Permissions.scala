@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
@@ -49,7 +49,7 @@ object Permissions {
 
     override def hasPermissions(app: ApplicationWithCollaborators, developer: User): Boolean =
       app.deployedTo match {
-        case Environment.SANDBOX => true
+        case Environment.Sandbox => true
         case _                   => false
       }
   }

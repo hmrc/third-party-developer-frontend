@@ -28,7 +28,7 @@ class InvalidResetCode   extends RuntimeException("Invalid reset code")
 case class Error(code: ErrorCode, message: String)
 
 object Error {
-  implicit val formatError: OFormat[Error] = Json.format[Error]
+  given OFormat[Error] = Json.format[Error]
 
   object BadRequestError extends Error(ErrorCode.BAD_REQUEST, "Bad Request")
 }

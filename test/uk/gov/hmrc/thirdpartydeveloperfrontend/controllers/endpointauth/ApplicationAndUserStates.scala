@@ -25,25 +25,25 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ResponsibleIndividualVerificationState.INITIAL
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.Status.Granted
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{AccessRequirements, FieldDefinition, FieldDefinitionType, FieldName, FieldValue}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.*
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.MfaDetailBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector.CoreUserDetails
 
@@ -77,7 +77,7 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
         checkInformation = checkInformation,
         ipAllowlist = IpAllowlist()
       ))
-      .withCollaborators(collabs.toList: _*)
+      .withCollaborators(collabs.toList*)
 
   lazy val loginRedirectUri: LoginRedirectUri           = LoginRedirectUri.unsafeApply("https://example.com/redirect-here")
   lazy val apiContext: ApiContext                       = ApiContext("ctx")
@@ -142,20 +142,21 @@ trait HasApplication extends HasAppDeploymentEnvironment with HasUserWithRole wi
   )
 
   lazy val subscriptionFieldDefinitions: Map[FieldName, FieldDefinition] = Map(
-    apiFieldName     -> FieldDefinition(apiFieldName, "field desc", "hint", FieldDefinitionType.STRING, "field short desc", None, AccessRequirements.Default),
-    apiPpnsFieldName -> FieldDefinition(apiPpnsFieldName, "field desc", "hint", FieldDefinitionType.PPNS_FIELD, "field short desc", None, AccessRequirements.Default)
+    apiFieldName     -> FieldDefinition(apiFieldName, "field desc", "hint", FieldDefinitionType.PlainText, "field short desc", None, AccessRequirements.Default),
+    apiPpnsFieldName -> FieldDefinition(apiPpnsFieldName, "field desc", "hint", FieldDefinitionType.PPNSField, "field short desc", None, AccessRequirements.Default)
   )
 
-  lazy val defaultApiVersion: ApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)
+  lazy val defaultApiVersion: ApiVersion = ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
 
   lazy val defaultApiDefinition: ApiDefinition = ApiDefinition(
     serviceName = ServiceName("service name"),
-    serviceBaseUrl = "http://serviceBaseURL",
-    name = "api name",
-    description = "api description",
+    serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseURL"),
+    name = ApiDefinition.Name("api name"),
+    description = ApiDefinition.Description("api description"),
     context = apiContext,
     versions = Map(apiVersion -> defaultApiVersion),
     isTestSupport = false,
+    lastPublishedAt = None,
     categories = List.empty
   )
 
@@ -230,8 +231,8 @@ trait IsNewJourneyStandardApplication extends HasApplication {
       None,
       responsibleIndividual,
       Set.empty,
-      TermsAndConditionsLocations.Url(termsConditionsUrl),
-      PrivacyPolicyLocations.Url(privacyPolicyUrl),
+      TermsAndConditionsLocation.Url(termsConditionsUrl),
+      PrivacyPolicyLocation.Url(privacyPolicyUrl),
       List.empty
     ))
   )
@@ -272,25 +273,25 @@ trait HasUserWithRole extends MockConnectors with MfaDetailBuilder with FixedClo
 }
 
 trait UserIsTeamMember extends HasUserWithRole with HasApplication {
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.PRODUCTION))(*)(*, *)).thenReturn(Future.successful(List(appWithSubsIds)))
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.SANDBOX))(*)(*, *)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Production))(*)(using *, *)).thenReturn(Future.successful(List(appWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Sandbox))(*)(using *, *)).thenReturn(Future.successful(List(appWithSubsIds)))
 }
 
 trait UserIsAdmin extends UserIsTeamMember {
   def describeUserRole                        = "The user is an Admin on the application team"
-  def maybeCollaborator: Option[Collaborator] = Some(Collaborator(userEmail, Collaborator.Roles.ADMINISTRATOR, userId))
+  def maybeCollaborator: Option[Collaborator] = Some(Collaborator(userEmail, Collaborator.Role.Administrator, userId))
 }
 
 trait UserIsDeveloper extends UserIsTeamMember {
   def describeUserRole                        = "The user is a Developer on the application team"
-  def maybeCollaborator: Option[Collaborator] = Some(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
+  def maybeCollaborator: Option[Collaborator] = Some(Collaborator(userEmail, Collaborator.Role.Developer, userId))
 }
 
 trait UserIsNotOnApplicationTeam extends HasUserWithRole with HasApplication {
-  val otherApp: ApplicationWithCollaborators            = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Roles.DEVELOPER, userId))
+  val otherApp: ApplicationWithCollaborators            = application.withId(ApplicationId.random).withCollaborators(Collaborator(userEmail, Collaborator.Role.Developer, userId))
   val otherAppWithSubsIds: ApplicationWithSubscriptions = otherApp.withSubscriptions(Set(apiIdentifier))
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.PRODUCTION))(*)(*, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
-  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.SANDBOX))(*)(*, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Production))(*)(using *, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
+  when(tpoConnector.query[List[ApplicationWithSubscriptions]](eqTo(Environment.Sandbox))(*)(using *, *)).thenReturn(Future.successful(List(otherAppWithSubsIds)))
   def describeUserRole                                  = "The user is not a member of the application team"
   def maybeCollaborator: Option[Collaborator]           = None
 }
@@ -304,10 +305,10 @@ trait HasUserSession extends HasUserWithRole {
 
 trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
   def describeAuthenticationState  = "and is authenticated"
-  def loggedInState: LoggedInState = LoggedInState.LOGGED_IN
+  def loggedInState: LoggedInState = LoggedInState.LoggedIn
 
-  when(tpdConnector.register(*)(*)).thenReturn(Future.successful(EmailAlreadyInUse))
-  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
+  when(tpdConnector.register(*)(using *)).thenReturn(Future.successful(EmailAlreadyInUse))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(Some(CoreUserDetails(userEmail, userId))))
 
   implicit val cookieSigner: CookieSigner
 
@@ -325,10 +326,10 @@ trait UserIsAuthenticated extends HasUserSession with UpdatesRequest {
 
 trait UserIsNotAuthenticated extends HasUserSession {
   def describeAuthenticationState  = "and is not authenticated"
-  def loggedInState: LoggedInState = LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+  def loggedInState: LoggedInState = LoggedInState.PartLoggedInEnablingMFA
 
-  when(tpdConnector.register(*)(*)).thenReturn(Future.successful(RegistrationSuccessful))
-  when(tpdConnector.findUserId(*[LaxEmailAddress])(*)).thenReturn(Future.successful(None))
+  when(tpdConnector.register(*)(using *)).thenReturn(Future.successful(RegistrationSuccessful))
+  when(tpdConnector.findUserId(*[LaxEmailAddress])(using *)).thenReturn(Future.successful(None))
 }
 
 trait HasAppDeploymentEnvironment {
@@ -337,11 +338,11 @@ trait HasAppDeploymentEnvironment {
 }
 
 trait AppDeployedToProductionEnvironment extends HasAppDeploymentEnvironment {
-  def environment: Environment = Environment.PRODUCTION
+  def environment: Environment = Environment.Production
 }
 
 trait AppDeployedToSandboxEnvironment extends HasAppDeploymentEnvironment {
-  def environment: Environment = Environment.SANDBOX
+  def environment: Environment = Environment.Sandbox
 }
 
 trait HasAppState extends FixedClock {
@@ -350,11 +351,11 @@ trait HasAppState extends FixedClock {
 }
 
 trait AppHasProductionStatus extends HasAppState {
-  def state: ApplicationState = ApplicationState(State.PRODUCTION, Some("requester@example.com"), Some("mr requester"), Some("code123"), instant)
+  def state: ApplicationState = ApplicationState(State.Production, Some("requester@example.com"), Some("mr requester"), Some("code123"), instant)
 }
 
 trait AppHasPendingGatekeeperApprovalStatus extends HasAppState {
-  def state: ApplicationState = ApplicationState(State.PENDING_GATEKEEPER_APPROVAL, Some("requester@example.com"), Some("mr requester"), None, instant)
+  def state: ApplicationState = ApplicationState(State.PendingGatekeeperApproval, Some("requester@example.com"), Some("mr requester"), None, instant)
 }
 
 trait AppHasTestingStatus extends HasAppState {

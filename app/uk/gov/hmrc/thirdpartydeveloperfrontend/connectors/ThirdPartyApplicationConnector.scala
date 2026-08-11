@@ -21,17 +21,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import org.apache.pekko.pattern.FutureTimeoutSupport
 
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.http.metrics.common.API
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 
-abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics: ConnectorMetrics)
+abstract class ThirdPartyApplicationConnector(metrics: ConnectorMetrics)
     extends CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   protected val http: HttpClientV2
@@ -40,7 +39,7 @@ abstract class ThirdPartyApplicationConnector(config: ApplicationConfig, metrics
 
   val api: API = API("third-party-application")
 
-  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
+  def fetchTermsOfUseInvitation(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[TermsOfUseInvitation]] = {
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/terms-of-use/application/${applicationId}")
         .execute[Option[TermsOfUseInvitation]]
@@ -54,7 +53,7 @@ class ThirdPartyApplicationProductionConnector @Inject() (
     val futureTimeout: FutureTimeoutSupport,
     val appConfig: ApplicationConfig,
     val metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
-  ) extends ThirdPartyApplicationConnector(appConfig, metrics) {
+  )(using val ec: ExecutionContext
+  ) extends ThirdPartyApplicationConnector(metrics) {
   val serviceBaseUrl: String = appConfig.thirdPartyApplicationProductionUrl
 }

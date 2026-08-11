@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 
-import scala.reflect.runtime.universe._
+import scala.reflect.{ClassTag, classTag}
 
 import cats.Semigroup
-import cats.implicits._
+import cats.implicits.*
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.SessionId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromScreamingSnakeCase}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -47,32 +47,30 @@ object FlowType {
     GET_PRODUCTION_CREDENTIALS
   )
 
-  def from[A <: Flow: TypeTag]: FlowType = {
-    typeOf[A] match {
-      case t if t =:= typeOf[EmailPreferencesFlowV2]               => FlowType.EMAIL_PREFERENCES_V2
-      case t if t =:= typeOf[IpAllowlistFlow]                      => FlowType.IP_ALLOW_LIST
-      case t if t =:= typeOf[NewApplicationEmailPreferencesFlowV2] => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
-      case t if t =:= typeOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
+  def from[A <: Flow: ClassTag]: FlowType = {
+    classTag[A].runtimeClass match {
+      case c if c == classOf[EmailPreferencesFlowV2]               => FlowType.EMAIL_PREFERENCES_V2
+      case c if c == classOf[IpAllowlistFlow]                      => FlowType.IP_ALLOW_LIST
+      case c if c == classOf[NewApplicationEmailPreferencesFlowV2] => FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
+      case c if c == classOf[GetProductionCredentialsFlow]         => FlowType.GET_PRODUCTION_CREDENTIALS
     }
   }
 
   def apply(text: String): Option[FlowType] = FlowType.values.find(_.toString() == text.toUpperCase)
 
   import play.api.libs.json.Format
-  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
-  implicit val format: Format[FlowType] = SealedTraitJsonFormatting.createFormatFor[FlowType]("Flow Type", FlowType.apply)
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
+  given Format[FlowType] = SimpleEnumJsonFormatting.createStringFormatFor[FlowType]("Flow Type", FlowType.apply)
 }
 
 trait Flow {
-  type Type <: SessionId
-  def sessionId: Type
+  def sessionId: UserSessionId
   def flowType: FlowType
 }
 
 /** The name of the class is used on serialisation as a discriminator. Do not change.
   */
 case class IpAllowlistFlow(override val sessionId: UserSessionId, allowlist: Set[String]) extends Flow {
-  type Type = UserSessionId
   override val flowType: FlowType = FlowType.IP_ALLOW_LIST
 }
 case class SupportApi(serviceName: ServiceName, name: String)
@@ -85,13 +83,11 @@ case class EmailPreferencesFlowV2(
     visibleApis: List[CombinedApi]
   ) extends Flow with EmailPreferencesProducer {
 
-  type Type = UserSessionId
-
   override val flowType: FlowType = FlowType.EMAIL_PREFERENCES_V2
 
   def categoriesInOrder: List[String]                            = selectedCategories.toList.sorted
 // testng for a string against list of apicatrgories/// amazed it doesn't complain about type - how String <: ApiCategory is beyond me...
-  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.toString()).contains(category)).sortBy(_.displayName)
+  def visibleApisByCategory(category: String): List[CombinedApi] = visibleApis.filter(_.categories.map(_.asScreamingSnakeCase).contains(category)).sortBy(_.displayName)
 
   def selectedApisByCategory(category: String): Set[String] = selectedAPIs.getOrElse(category, Set.empty)
 
@@ -103,7 +99,7 @@ case class EmailPreferencesFlowV2(
     val interests: List[TaxRegimeInterests] =
       selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
 
-    EmailPreferences(interests, selectedTopics.map(EmailTopic.unsafeApply(_)))
+    EmailPreferences(interests, selectedTopics.map(t => EmailTopic.unsafeApply(fromScreamingSnakeCase(t))))
   }
 }
 
@@ -119,7 +115,7 @@ object EmailPreferencesFlowV2 {
           userSession.sessionId,
           emailPreferences.interests.map(_.regime).toSet,
           taxRegimeInterestsToCategoryServicesMap(emailPreferences.interests),
-          emailPreferences.topics.map(_.toString),
+          emailPreferences.topics.map(_.asScreamingSnakeCase),
           List.empty
         )
     }
@@ -142,7 +138,6 @@ case class NewApplicationEmailPreferencesFlowV2(
     selectedTopics: Set[String]
   ) extends Flow with EmailPreferencesProducer {
 
-  type Type = UserSessionId
   override val flowType: FlowType = FlowType.NEW_APPLICATION_EMAIL_PREFERENCES_V2
 
   def optionCombine[A: Semigroup](a: A, opt: Option[A]): A = opt.map(a combine _).getOrElse(a)
@@ -159,7 +154,7 @@ case class NewApplicationEmailPreferencesFlowV2(
         .foldLeft(Map.empty[String, Set[String]])(_ ++ _)
 
     // Map[ServiceName -> Set[Category]]
-    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName.value -> api.categories.map(_.toString()).toSet)).toMap
+    val selectedApisCategories: Map[String, Set[String]] = selectedApis.map(api => (api.serviceName -> api.categories.map(_.asScreamingSnakeCase).toSet)).toMap
 
     // Map[Category -> Set.empty[ServiceName]]
     val invertedSelectedApisCategories: Map[String, Set[String]] = selectedApisCategories.values.flatten.map(c => c -> Set.empty[String]).toMap
@@ -175,7 +170,7 @@ case class NewApplicationEmailPreferencesFlowV2(
 
     val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
 
-    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(EmailTopic.unsafeApply(_)))
+    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(t => EmailTopic.unsafeApply(fromScreamingSnakeCase(t))))
   }
 }
 

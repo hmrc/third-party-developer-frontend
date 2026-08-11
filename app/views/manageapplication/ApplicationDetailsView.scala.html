@@ -14,22 +14,19 @@
  * limitations under the License.
  *@
 
-@import include._
+@import include.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.{ApplicationViewModel, Crumb}
 @import views.html.manageapplication.TermsOfUseView
-@import views.html.manageapplication._
+@import views.html.manageapplication.*
 
-@import java.time.Instant
-@import java.time.format.DateTimeFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.TermsOfUseViewModel
 
 @this(
 devMain: DevMain,
-govukTable: GovukTable,
 customerUsageInformation: CustomerUsageInformationView,
 teamMembersView: TeamMembersView,
 authorisationDetailsView: AuthorisationDetailsView,
@@ -42,16 +39,8 @@ applicationView: ApplicationView)
         implicit request: play.api.mvc.Request[Any],
         loggedIn: UserSession,
         messages: Messages,
-        appConfig: ApplicationConfig,
-        navSection: String = "details"
+        appConfig: ApplicationConfig
 )
-
-@formatMaybeDate(maybeDate: Option[Instant], dateFormatter: DateTimeFormatter, defaultString: String) = @{
-    maybeDate match {
-        case Some(date) => dateFormatter.format(date)
-        case _ => defaultString
-    }
-}
 
 @app = @{
     applicationViewModel.application
@@ -83,7 +72,7 @@ applicationView: ApplicationView)
     @customerUsageInformation(app)
     @termsOfUseView(app, termsOfUseModel)
 
-    @if(app.access.accessType == AccessType.STANDARD) {
+    @if(app.access.accessType == AccessType.Standard) {
         <p class="govuk-body govuk-!-margin-top-9">
             <a class="govuk-button govuk-button--warning govuk-link--no-visited-state" href="@controllers.routes.DeleteApplication.deleteApplication(app.id, None)" id="delete-link">
                 @messages("application.details.delete")

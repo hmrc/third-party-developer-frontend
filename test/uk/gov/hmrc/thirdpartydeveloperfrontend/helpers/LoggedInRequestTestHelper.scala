@@ -26,7 +26,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding with UserBuilder with LocalUserIdTracker {
   this: BaseControllerSpec =>
@@ -34,12 +34,12 @@ trait LoggedInRequestTestHelper extends SessionServiceMock with CookieEncoding w
 
   val developer = buildTrackedUser()
   val sessionId = UserSessionId.random
-  val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+  val session   = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
   fetchSessionByIdReturns(sessionId, session)
   updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
   lazy val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    .withLoggedIn(this, implicitly)(sessionId)
-    .withSession(sessionParams: _*)
+    .withLoggedIn(using this)(sessionId)
+    .withSession(sessionParams*)
 }

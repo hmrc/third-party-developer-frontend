@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 
 import play.api.http.Status.{NO_CONTENT, OK}
 import play.api.libs.json.Json
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.{ChangeMfaNameRequest, CreateMfaSmsRequest}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
@@ -33,7 +33,7 @@ object MfaStub {
   val nonce              = "iamanoncevalue"
 
   def stubMfaAccessCodeSuccess(mfaId: MfaId)(implicit encryptedJson: EncryptedJson): Unit = {
-    val session = UserSession(TestContext.sessionIdForloggedInDeveloper, LoggedInState.LOGGED_IN, TestContext.developer)
+    val session = UserSession(TestContext.sessionIdForloggedInDeveloper, LoggedInState.LoggedIn, TestContext.developer)
 
     stubFor(
       post(urlEqualTo("/authenticate-mfa"))
@@ -103,13 +103,13 @@ object MfaStub {
 
   def stubUpliftAuthSession(isMfaMandated: Boolean) = {
     val sessionId = if (isMfaMandated) TestContext.sessionIdForMfaMandatingUser else TestContext.sessionIdForloggedInDeveloper
-    val session   = UserSession(sessionId, LoggedInState.LOGGED_IN, TestContext.developer)
+    val session   = UserSession(sessionId, LoggedInState.LoggedIn, TestContext.developer)
 
     Stubs.setupPutRequest(s"/session/$sessionId/loggedInState/LOGGED_IN", OK, Json.toJson(session).toString())
   }
 
   def setupMfaMandated() = {
-    val session = UserSession(TestContext.sessionIdForMfaMandatingUser, LoggedInState.LOGGED_IN, TestContext.developer)
+    val session = UserSession(TestContext.sessionIdForMfaMandatingUser, LoggedInState.LoggedIn, TestContext.developer)
 
     Stubs.setupRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK, Json.toJson(session).toString())
     Stubs.setupDeleteRequest(s"/session/${TestContext.sessionIdForMfaMandatingUser}", OK)

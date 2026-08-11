@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.apiplatform.modules.mfa.views
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
@@ -26,7 +26,7 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.SelectMfaForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SelectMfaView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -46,7 +46,7 @@ class SelectMfaViewSpec extends CommonViewSpec
 
   "SelectMfaView" should {
     "render correctly with Text Message selected as default" in {
-      val mainView = selectMfaViewView.apply(SelectMfaForm.form, MfaAction.CREATE, None)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = selectMfaViewView.apply(SelectMfaForm.form, MfaAction.CREATE, None)(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "How do you want to get access codes?"

@@ -16,22 +16,30 @@
 
 package views.include
 
-import java.time.Period
-
 import org.jsoup.Jsoup
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.{contentAsString, contentType}
 import play.twirl.api.Html
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with FixedClock with ApplicationWithCollaboratorsFixtures {
+
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+      .build()
 
   val appConfig = mock[ApplicationConfig]
 
@@ -39,7 +47,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Fix
     "render in the right order" in {
 
       val applicationName = ApplicationName("An Application Name")
-      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp.withName(applicationName)), Crumb.viewAllApplications, Crumb.home(appConfig))
+      val crumbs          = Array(Crumb("Another Breadcrumb"), Crumb.application(standardApp.withName(applicationName)), Crumb.viewAllApplications, Crumb.home(using appConfig))
 
       val page: Html = views.html.include.breadcrumbs.render(crumbs)
 
@@ -48,7 +56,7 @@ class BreadcrumbsSpec extends AsyncHmrcSpec with GuiceOneServerPerSuite with Fix
       val document       = Jsoup.parse(contentAsString(page))
       val breadcrumbText = document.body.select("li").text()
 
-      breadcrumbText shouldBe List("Home", "Applications", applicationName.value, "Another Breadcrumb").mkString(" ")
+      breadcrumbText shouldBe List("Home", "Applications", applicationName.toString, "Another Breadcrumb").mkString(" ")
     }
   }
 

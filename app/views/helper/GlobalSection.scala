@@ -20,7 +20,6 @@ object GlobalSection {
 
   import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys._
   import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FieldNameKey
-  import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.GlobalMessageKey
 
   private def a(rawErrorMessageKeyOrMessageText: String)(found: FieldNameKey => String, notFound: () => String) = {
     globalKeys.find(_.value == rawErrorMessageKeyOrMessageText).fold(

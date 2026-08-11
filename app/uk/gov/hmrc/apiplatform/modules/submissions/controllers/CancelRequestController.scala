@@ -45,7 +45,7 @@ object CancelRequestController {
       Form(
         mapping(
           "dummy" -> ignored("dummy")
-        )(DummyForm.apply)(DummyForm.unapply)
+        )(DummyForm.apply)(d => Some(d.dummy))
       )
     }
   }
@@ -64,7 +64,7 @@ class CancelRequestController @Inject() (
     confirmCancelRequestForProductionCredentialsView: ConfirmCancelRequestForProductionCredentialsView,
     cancelledRequestForProductionCredentialsView: CancelledRequestForProductionCredentialsView,
     val clock: Clock
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]
@@ -104,7 +104,7 @@ class CancelRequestController @Inject() (
                               .filter(isValidSubmit),
                             failed("Bad form data")
                           )
-          cancelAction <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
+          _            <- ET.cond(submitAction == "cancel-request", submitAction, goBackToRegularPage)
           _            <- ET.liftF(appCmdModule.dispatchWithThrow(appId, deleteRequest, Set.empty))
         } yield Ok(cancelledRequestForProductionCredentialsView(request.application.name))
       )

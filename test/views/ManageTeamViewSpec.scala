@@ -34,7 +34,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddTeamMemberForm
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.{elementExistsByText, linkExistsWithHref}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
 
@@ -64,7 +64,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     )
   val collaboratorUsers: Seq[User]                        = List(adminDeveloper, standardDeveloper)
   val collaboratorUsersWithUnverifiedAdmin: Seq[User]     = List(adminDeveloper, unverifiedUser(collaborator.developer.email))
-  val application                                         = standardApp.withCollaborators(collaborators.toList: _*)
+  val application                                         = standardApp.withCollaborators(collaborators.toList*)
 
   "manageTeam view" should {
     val manageTeamView = app.injector.instanceOf[ManageTeamView]
@@ -86,13 +86,12 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
         request,
         messagesProvider,
         appConfig,
-        "nav-section",
         loggedInDeveloper
       )
     }
 
     "show Add and Remove links for Admin" in {
-      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.ADMINISTRATOR).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Role.Administrator).body)
 
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
       withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe true)
@@ -116,7 +115,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
 
     "show Remove links for when multiple verified Admin" in {
       val document = Jsoup.parse(renderPage(
-        role = Collaborator.Roles.ADMINISTRATOR,
+        role = Collaborator.Role.Administrator,
         model = ApplicationViewModel(
           standardApp.withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asAdministratorCollaborator),
           hasSubscriptionsFields = false,
@@ -142,7 +141,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
 
     "show (Unverified) suffix for unverified Admin" in {
       val document = Jsoup.parse(renderPage(
-        role = Collaborator.Roles.ADMINISTRATOR,
+        role = Collaborator.Role.Administrator,
         collaboratorUsers = collaboratorUsersWithUnverifiedAdmin,
         model = ApplicationViewModel(
           standardApp.withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asAdministratorCollaborator),
@@ -169,7 +168,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
 
     "disallow sole verified Admin removing self" in {
       val document = Jsoup.parse(renderPage(
-        role = Collaborator.Roles.ADMINISTRATOR,
+        role = Collaborator.Role.Administrator,
         collaboratorUsers = collaboratorUsersWithUnverifiedAdmin,
         model = ApplicationViewModel(
           standardApp.withCollaborators(loggedInDeveloper.developer.email.asAdministratorCollaborator, collaborator.developer.email.asAdministratorCollaborator),
@@ -195,7 +194,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     }
 
     "not show Add and Remove links for Developer" in {
-      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.DEVELOPER).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Role.Developer).body)
 
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
       withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe false)
@@ -214,7 +213,7 @@ class ManageTeamViewSpec extends CommonViewSpec with WithCSRFAddToken with Local
     }
 
     "not show Remove link table column for Developer" in {
-      val document = Jsoup.parse(renderPage(role = Collaborator.Roles.DEVELOPER).body)
+      val document = Jsoup.parse(renderPage(role = Collaborator.Role.Developer).body)
 
       withClue("Heading")(elementExistsByText(document, "h1", "Manage team members") shouldBe true)
       withClue("Add team member link")(elementExistsByText(document, "a", "Add a team member") shouldBe false)

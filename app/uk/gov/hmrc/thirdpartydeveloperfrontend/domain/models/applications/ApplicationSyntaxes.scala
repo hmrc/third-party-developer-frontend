@@ -17,7 +17,7 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 
@@ -61,24 +61,24 @@ trait ApplicationSyntaxes {
     }
 
     def canViewServerToken(developer: User): Boolean = {
-      import Collaborator.Roles._
+      import Collaborator.Role._
 
       (app.deployedTo, app.access.accessType, app.state.name, app.roleFor(developer.userId)) match {
-        case (Environment.SANDBOX, AccessType.STANDARD, State.PRODUCTION, _)                      => true
-        case (Environment.PRODUCTION, AccessType.STANDARD, State.PRODUCTION, Some(ADMINISTRATOR)) => true
+        case (Environment.Sandbox, AccessType.Standard, State.Production, _)                      => true
+        case (Environment.Production, AccessType.Standard, State.Production, Some(Administrator)) => true
         case _                                                                                    => false
       }
     }
 
     def canPerformApprovalProcess(developer: User): Boolean = {
-      import Collaborator.Roles._
+      import Collaborator.Role._
 
       (app.deployedTo, app.access.accessType, app.state.name, app.roleFor(developer.userId)) match {
-        case (Environment.SANDBOX, _, _, _)                                                                           => false
-        case (Environment.PRODUCTION, AccessType.STANDARD, State.TESTING, Some(ADMINISTRATOR))                        => true
-        case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_GATEKEEPER_APPROVAL, Some(ADMINISTRATOR))    => true
-        case (Environment.PRODUCTION, AccessType.STANDARD, State.PENDING_REQUESTER_VERIFICATION, Some(ADMINISTRATOR)) => true
-        case _                                                                                                        => false
+        case (Environment.Sandbox, _, _, _)                                                                         => false
+        case (Environment.Production, AccessType.Standard, State.Testing, Some(Administrator))                      => true
+        case (Environment.Production, AccessType.Standard, State.PendingGatekeeperApproval, Some(Administrator))    => true
+        case (Environment.Production, AccessType.Standard, State.PendingRequesterVerification, Some(Administrator)) => true
+        case _                                                                                                      => false
       }
     }
 

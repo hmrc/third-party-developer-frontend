@@ -22,10 +22,10 @@ import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions.subscriptionNumberLabel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIGroup.*
 
 case class PageData(app: ApplicationWithCollaborators, subscriptions: Option[GroupedSubscriptions], openAccessApis: List[ApiDefinition])
 
@@ -57,7 +57,7 @@ object APISubscriptions {
   }
 
   def groupSubscriptionsByServiceName(subscriptions: Seq[APISubscriptionStatus]): List[APISubscriptions] = {
-    SortedMap(subscriptions.groupBy(_.serviceName).toSeq: _*).map({
+    SortedMap(subscriptions.groupBy(_.serviceName).toSeq*).map({
       case (serviceName, subscriptionsForAPI) => new APISubscriptions(subscriptionsForAPI.head.name, serviceName, subscriptionsForAPI.head.context, subscriptionsForAPI)
     }).toList
   }
@@ -71,7 +71,7 @@ object APISubscriptions {
 case class AjaxSubscriptionResponse(apiName: ApiContext, group: String, numberOfSubscriptionText: String)
 
 object AjaxSubscriptionResponse {
-  implicit val format: OFormat[AjaxSubscriptionResponse] = Json.format[AjaxSubscriptionResponse]
+  given OFormat[AjaxSubscriptionResponse] = Json.format[AjaxSubscriptionResponse]
 
   def from(context: ApiContext, version: ApiVersionNbr, subscriptions: Seq[APISubscriptionStatus]): AjaxSubscriptionResponse = {
     val versionAccessType = subscriptions

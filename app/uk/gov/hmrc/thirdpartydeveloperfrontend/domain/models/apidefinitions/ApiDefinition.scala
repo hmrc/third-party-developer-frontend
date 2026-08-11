@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.{SubscriptionFieldValue, SubscriptionFieldsWrapper}
 
 // TODO - 5090 - Add new open access class
@@ -34,9 +34,9 @@ case class APISubscriptionStatus(
 
   def isPrivate: Boolean = {
     apiVersion.access match {
-      case ApiAccessType.PUBLIC     => false
-      case ApiAccessType.CONTROLLED => true
-      case ApiAccessType.INTERNAL   => true
+      case ApiAccessType.Public     => false
+      case ApiAccessType.Controlled => true
+      case ApiAccessType.Internal   => true
     }
   }
 

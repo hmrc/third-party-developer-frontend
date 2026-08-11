@@ -20,16 +20,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, DispatchSuccessResult}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{AsyncHmrcSpec, *}
 
 class CollaboratorServiceSpec
     extends AsyncHmrcSpec
@@ -42,9 +42,9 @@ class CollaboratorServiceSpec
       with ApmConnectorMockModule
       with ApmConnectorCommandModuleMockModule {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
-    val mockApmConnector: ApmConnector = mock[ApmConnector]
+    val mockApmConnector: ApmConnector = subclassMock[ApmConnector]
 
     val collaboratorService = new CollaboratorService(
       ApmConnectorCommandModuleMock.aMock,
@@ -63,7 +63,7 @@ class CollaboratorServiceSpec
 
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(mockResponse)
 
-      val result = await(collaboratorService.addTeamMember(standardApp, devEmail, Collaborator.Roles.DEVELOPER, adminEmail))
+      val result = await(collaboratorService.addTeamMember(standardApp, devEmail, Collaborator.Role.Developer, adminEmail))
       result.isRight shouldBe true
 
       inside(result) {

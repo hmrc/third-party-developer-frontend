@@ -20,13 +20,13 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 import views.helper.EnvironmentNameService
-import views.html._
+import views.html.*
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class DashboardController @Inject() (
@@ -36,7 +36,7 @@ class DashboardController @Inject() (
     dashboardView: DashboardView,
     mcc: MessagesControllerComponents,
     dashboardService: DashboardService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {

@@ -16,22 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain
 
-import scala.collection.immutable.ListSet
-
-sealed trait ErrorCode
+enum ErrorCode {
+  case LOCKED_ACCOUNT, BAD_REQUEST, INVALID_PASSWORD, PASSWORD_REQUIRED, USER_ALREADY_EXISTS
+}
 
 object ErrorCode {
-  val values: ListSet[ErrorCode] = ListSet(LOCKED_ACCOUNT, BAD_REQUEST, INVALID_PASSWORD, PASSWORD_REQUIRED, USER_ALREADY_EXISTS)
-
-  final case object LOCKED_ACCOUNT      extends ErrorCode
-  final case object BAD_REQUEST         extends ErrorCode
-  final case object INVALID_PASSWORD    extends ErrorCode
-  final case object PASSWORD_REQUIRED   extends ErrorCode
-  final case object USER_ALREADY_EXISTS extends ErrorCode
-
   def apply(text: String): Option[ErrorCode] = ErrorCode.values.find(_.toString() == text.toUpperCase)
 
   import play.api.libs.json.Format
-  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SealedTraitJsonFormatting
-  implicit val format: Format[ErrorCode] = SealedTraitJsonFormatting.createFormatFor[ErrorCode]("Error Code", ErrorCode.apply)
+  import uk.gov.hmrc.apiplatform.modules.common.domain.services.SimpleEnumJsonFormatting
+  given Format[ErrorCode] = SimpleEnumJsonFormatting.createStringFormatFor[ErrorCode]("Error Code", ErrorCode.apply)
 }

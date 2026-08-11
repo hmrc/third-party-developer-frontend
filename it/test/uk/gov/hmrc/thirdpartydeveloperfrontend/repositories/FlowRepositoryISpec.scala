@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.repositories
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.{BsonValue, Document}
 import org.mongodb.scala.model.Aggregates.{filter, project}
 import org.mongodb.scala.model.Projections.fields
@@ -36,10 +37,11 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.{ApiSubscriptions, GetProductionCredentialsFlow}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.{EmailPreferencesFlowV2, Flow, FlowType, IpAllowlistFlow}
 
 class FlowRepositoryISpec extends AnyWordSpec
@@ -66,10 +68,10 @@ class FlowRepositoryISpec extends AnyWordSpec
 
     val flowOfDifferentType: EmailPreferencesFlowV2 = EmailPreferencesFlowV2(
       currentSession,
-      selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
-      selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
+      selectedCategories = Set(ApiCategory.Vat.asScreamingSnakeCase, ApiCategory.Agents.asScreamingSnakeCase),
+      selectedAPIs = Map(ApiCategory.Vat.asScreamingSnakeCase -> Set("qwqw", "asass")),
       selectedTopics = Set("BUSINESS_AND_POLICY"),
-      visibleApis = List(CombinedApi("api1Name", ServiceName("api1ServiceName"), Set(ApiCategory.VAT, ApiCategory.AGENTS), ApiType.REST_API, ApiAccessType.PUBLIC))
+      visibleApis = List(CombinedApi("api1Name", ServiceName("api1ServiceName"), Set(ApiCategory.Vat, ApiCategory.Agents), ApiType.RestApi, ApiAccessType.Public))
     )
 
     await(flowRepository.saveFlow(currentFlow))
@@ -113,10 +115,10 @@ class FlowRepositoryISpec extends AnyWordSpec
       "save email preferences" in {
         val flow = EmailPreferencesFlowV2(
           currentSession,
-          selectedCategories = Set(ApiCategory.VAT.toString(), ApiCategory.AGENTS.toString()),
-          selectedAPIs = Map(ApiCategory.VAT.toString() -> Set("qwqw", "asass")),
+          selectedCategories = Set(ApiCategory.Vat.asScreamingSnakeCase, ApiCategory.Agents.asScreamingSnakeCase),
+          selectedAPIs = Map(ApiCategory.Vat.asScreamingSnakeCase -> Set("qwqw", "asass")),
           selectedTopics = Set("BUSINESS_AND_POLICY", "EVENT_INVITES"),
-          visibleApis = List(CombinedApi("api1DisplayName", ServiceName("api1ServiceName"), Set(ApiCategory.VAT, ApiCategory.AGENTS), ApiType.REST_API, ApiAccessType.PUBLIC))
+          visibleApis = List(CombinedApi("api1DisplayName", ServiceName("api1ServiceName"), Set(ApiCategory.Vat, ApiCategory.Agents), ApiType.RestApi, ApiAccessType.Public))
         )
 
         await(flowRepository.saveFlow(flow))
@@ -125,13 +127,13 @@ class FlowRepositoryISpec extends AnyWordSpec
         val castResult   = result.asInstanceOf[EmailPreferencesFlowV2]
         castResult.sessionId shouldBe currentSession
         castResult.flowType shouldBe EMAIL_PREFERENCES_V2
-        castResult.selectedTopics shouldBe Set(EmailTopic.BUSINESS_AND_POLICY.toString, EmailTopic.EVENT_INVITES.toString)
+        castResult.selectedTopics shouldBe Set(EmailTopic.BusinessAndPolicy.asScreamingSnakeCase, EmailTopic.EventInvites.asScreamingSnakeCase)
         castResult.visibleApis should contain only (CombinedApi(
           "api1DisplayName",
           ServiceName("api1ServiceName"),
-          Set(ApiCategory.VAT, ApiCategory.AGENTS),
-          ApiType.REST_API,
-          ApiAccessType.PUBLIC
+          Set(ApiCategory.Vat, ApiCategory.Agents),
+          ApiType.RestApi,
+          ApiAccessType.Public
         ))
       }
 
@@ -231,8 +233,8 @@ case class ResultSet(lastUpdated: Instant)
 
 object ResultSet {
   import play.api.libs.json.Json
-  implicit val dateFormat: Format[Instant]         = MongoJavatimeFormats.instantFormat
-  implicit val resultSetFormat: OFormat[ResultSet] = Json.format[ResultSet]
+  given Format[Instant]    = MongoJavatimeFormats.instantFormat
+  given OFormat[ResultSet] = Json.format[ResultSet]
 
   def apply(lastUpdated: Instant) = new ResultSet(lastUpdated)
 }

@@ -17,5 +17,5 @@
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 
 case object SmsLoginAccessCodePage extends MfaData {
-  val page = LoginAccessCodePage(smsMfaId.value.toString, MfaType.SMS, "Enter the access code")
+  val page = LoginAccessCodePage(smsMfaId.value.toString, MfaType.Sms, "Enter the access code")
 }

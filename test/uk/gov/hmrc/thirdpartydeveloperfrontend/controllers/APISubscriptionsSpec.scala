@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.CoreApplicationFixtures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiVersionNbr}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.*
 
 class APISubscriptionsSpec
     extends AsyncHmrcSpec
@@ -32,18 +32,18 @@ class APISubscriptionsSpec
   val clientId = clientIdOne
 
   "groupSubscriptions" should {
-    val publicAccess  = ApiAccessType.PUBLIC
-    val privateAccess = ApiAccessType.INTERNAL
+    val publicAccess  = ApiAccessType.Public
+    val privateAccess = ApiAccessType.Internal
 
     "split Private Beta APIs from public APIs " in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA, access = publicAccess),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionThree, ApiStatus.BETA, access = privateAccess),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, ApiVersionNbr("4.0"), ApiStatus.BETA, access = privateAccess),
-            subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.STABLE, isTestSupport = true)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta, access = publicAccess),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionThree, ApiStatus.Beta, access = privateAccess),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, ApiVersionNbr("4.0"), ApiStatus.Beta, access = privateAccess),
+            subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.Stable, isTestSupport = true)
           )
         )
         .get
@@ -56,17 +56,17 @@ class APISubscriptionsSpec
         "Individual Employment",
         "individual-employment",
         List(
-          ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
-          ApiVersion(versionTwo, ApiStatus.BETA, publicAccess, List.empty),
-          ApiVersion(versionThree, ApiStatus.BETA, privateAccess, List.empty),
-          ApiVersion(ApiVersionNbr("4.0"), ApiStatus.BETA, privateAccess, List.empty)
+          ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(versionTwo, ApiStatus.Beta, publicAccess, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(versionThree, ApiStatus.Beta, privateAccess, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(ApiVersionNbr("4.0"), ApiStatus.Beta, privateAccess, List.empty, endpointsEnabled = true, awsRequestId = None)
         )
       )
       verifyApplicationSubscription(
         groupedSubscriptions.testApis.head,
         "Individual Tax",
         "individual-tax",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty))
+        List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None))
       )
     }
 
@@ -74,9 +74,9 @@ class APISubscriptionsSpec
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA),
-            subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.STABLE)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta),
+            subscriptionStatus(appId, clientId, "Individual Tax", "individual-tax", taxContext, versionOne, ApiStatus.Stable)
           )
         )
         .get
@@ -88,17 +88,25 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccessType.PUBLIC, List.empty))
+        List(
+          ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(versionTwo, ApiStatus.Beta, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
+        )
       )
-      verifyApplicationSubscription(groupedSubscriptions.apis(1), "Individual Tax", "individual-tax", List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)))
+      verifyApplicationSubscription(
+        groupedSubscriptions.apis(1),
+        "Individual Tax",
+        "individual-tax",
+        List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None))
+      )
     }
 
     "take first app name if it is different" in {
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus(appId, clientId, "Individual Employment Different for some reason", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+            subscriptionStatus(appId, clientId, "Individual Employment Different for some reason", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta)
           )
         )
         .get
@@ -110,7 +118,10 @@ class APISubscriptionsSpec
         groupedSubscriptions.apis.head,
         "Individual Employment",
         "individual-employment",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty), ApiVersion(versionTwo, ApiStatus.BETA, ApiAccessType.PUBLIC, List.empty))
+        List(
+          ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
+          ApiVersion(versionTwo, ApiStatus.Beta, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)
+        )
       )
     }
 
@@ -131,7 +142,7 @@ class APISubscriptionsSpec
               "api-example-microservice",
               ApiContext("api-example-microservice-context"),
               versionOne,
-              ApiStatus.STABLE,
+              ApiStatus.Stable,
               subscribed = true
             )
           )
@@ -145,7 +156,7 @@ class APISubscriptionsSpec
         groupedSubscriptions.exampleApi.get,
         "Hello World",
         "api-example-microservice",
-        List(ApiVersion(versionOne, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty))
+        List(ApiVersion(versionOne, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None))
       )
     }
   }
@@ -161,8 +172,8 @@ class APISubscriptionsSpec
         serviceName,
         context,
         List(
-          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionOne, ApiStatus.STABLE, subscribed = false),
-          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionTwo, ApiStatus.BETA, subscribed = false)
+          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionOne, ApiStatus.Stable, subscribed = false),
+          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionTwo, ApiStatus.Beta, subscribed = false)
         )
       )
 
@@ -175,8 +186,8 @@ class APISubscriptionsSpec
         serviceName,
         context,
         List(
-          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionOne, ApiStatus.STABLE, subscribed = true),
-          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionTwo, ApiStatus.BETA)
+          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionOne, ApiStatus.Stable, subscribed = true),
+          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionTwo, ApiStatus.Beta)
         )
       )
 
@@ -189,8 +200,8 @@ class APISubscriptionsSpec
         serviceName,
         context,
         List(
-          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionOne, ApiStatus.STABLE, subscribed = true),
-          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionTwo, ApiStatus.BETA, subscribed = true)
+          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionOne, ApiStatus.Stable, subscribed = true),
+          subscriptionStatus(appId, clientId, apiName, serviceName, context, versionTwo, ApiStatus.Beta, subscribed = true)
         )
       )
 
@@ -208,12 +219,12 @@ class APISubscriptionsSpec
 
     "return with api context name and subscriptions count for the specific api for a PUBLIC API" in {
       val subscriptions = List(
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionOne, ApiStatus.STABLE, subscribed = true),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccessType.PUBLIC),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccessType.INTERNAL),
-        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionOne, ApiStatus.STABLE, subscribed = true),
-        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionTwo, ApiStatus.BETA, subscribed = false),
-        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionThree, ApiStatus.STABLE, subscribed = true)
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionOne, ApiStatus.Stable, subscribed = true),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.Beta, subscribed = true, access = ApiAccessType.Public),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.Stable, subscribed = true, access = ApiAccessType.Internal),
+        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionOne, ApiStatus.Stable, subscribed = true),
+        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionTwo, ApiStatus.Beta, subscribed = false),
+        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionThree, ApiStatus.Stable, subscribed = true)
       )
 
       val response = AjaxSubscriptionResponse.from(api1Context, versionTwo, subscriptions)
@@ -223,12 +234,12 @@ class APISubscriptionsSpec
 
     "return with api context name and subscriptions count for the specific api for a PRIVATE API" in {
       val subscriptions = List(
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionOne, ApiStatus.STABLE, subscribed = true),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.BETA, subscribed = true, access = ApiAccessType.PUBLIC),
-        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.STABLE, subscribed = true, access = ApiAccessType.INTERNAL),
-        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionOne, ApiStatus.STABLE, subscribed = true),
-        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionTwo, ApiStatus.BETA, subscribed = false),
-        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionThree, ApiStatus.STABLE, subscribed = true)
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionOne, ApiStatus.Stable, subscribed = true),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionTwo, ApiStatus.Beta, subscribed = true, access = ApiAccessType.Public),
+        subscriptionStatus(appId, clientId, api1Name, api1Service, api1Context, versionThree, ApiStatus.Stable, subscribed = true, access = ApiAccessType.Internal),
+        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionOne, ApiStatus.Stable, subscribed = true),
+        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionTwo, ApiStatus.Beta, subscribed = false),
+        subscriptionStatus(appId, clientId, api2Name, api2Service, api2Context, versionThree, ApiStatus.Stable, subscribed = true)
       )
 
       val response = AjaxSubscriptionResponse.from(api1Context, versionThree, subscriptions)
@@ -242,8 +253,8 @@ class APISubscriptionsSpec
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = false),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA, subscribed = false)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = false),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta, subscribed = false)
           )
         )
         .get
@@ -255,8 +266,8 @@ class APISubscriptionsSpec
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA, subscribed = false)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta, subscribed = false)
           )
         )
         .get
@@ -268,8 +279,8 @@ class APISubscriptionsSpec
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA, subscribed = true)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta, subscribed = true)
           )
         )
         .get
@@ -284,8 +295,8 @@ class APISubscriptionsSpec
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = false),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA, subscribed = false)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = false),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta, subscribed = false)
           )
         )
         .get
@@ -297,8 +308,8 @@ class APISubscriptionsSpec
       val groupedSubscriptions = APISubscriptions
         .groupSubscriptions(
           List(
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.STABLE, subscribed = true),
-            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.BETA, subscribed = false)
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionOne, ApiStatus.Stable, subscribed = true),
+            subscriptionStatus(appId, clientId, "Individual Employment", "individual-employment", employmentContext, versionTwo, ApiStatus.Beta, subscribed = false)
           )
         )
         .get

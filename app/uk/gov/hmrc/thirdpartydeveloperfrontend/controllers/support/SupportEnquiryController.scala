@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TpdfeBaseController
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class SupportEnquiryController @Inject() (
@@ -33,7 +33,7 @@ class SupportEnquiryController @Inject() (
     val cookieSigner: CookieSigner,
     val sessionService: SessionService,
     val errorHandler: ErrorHandler
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends TpdfeBaseController(mcc) {
 

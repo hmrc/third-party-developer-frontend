@@ -38,14 +38,14 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
 }
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividualFixtures, TermsOfUseAcceptanceData}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.{Agreement, TermsOfUseViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
@@ -104,7 +104,7 @@ class ApplicationDetailsViewSpec
 
   val termsOfUseViewModel = TermsOfUseViewModel(true, true, Some(Agreement("user@example.com", instant)))
   val sandboxApp          = standardApp.inSandbox()
-  val prodApp             = standardApp.withEnvironment(Environment.PRODUCTION)
+  val prodApp             = standardApp.withEnvironment(Environment.Production)
 
   val prodAppWithRespIndAndV2TermsOfUse = prodApp.withAccess(standardAccessWithSubmission).withToken(ApplicationTokenData.one)
     .modify(_.copy(description = Some("Some App Description")))
@@ -129,7 +129,6 @@ class ApplicationDetailsViewSpec
 
   "Application details view" when {
     implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-    implicit val navSection: String                           = "details"
 
     "rendering Environment " when {
       "managing a principal application" should {

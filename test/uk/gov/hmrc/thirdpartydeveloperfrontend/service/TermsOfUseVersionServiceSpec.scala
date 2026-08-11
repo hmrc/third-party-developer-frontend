@@ -19,7 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.HmrcSpec
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.ApplicationBuilder
@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.TermsOfUseServiceMo
 class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with LocalUserIdTracker {
 
   trait Setup extends TermsOfUseServiceMock {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val request     = FakeRequest()
     val email       = "test@example.com".toLaxEmail
@@ -40,7 +40,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
 
   "getLatest" should {
     "return NEW_JOURNEY if uplift journey switch is on" in new Setup {
-      val result = underTest.getLatest()(request)
+      val result = underTest.getLatest()(using request)
       result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
   }
@@ -49,7 +49,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
     "return latest ToU version if uplift journey switch is on and no ToU agreements found" in new Setup {
       returnAgreementDetails()
 
-      val result = underTest.getForApplication(application)(request)
+      val result = underTest.getForApplication(application)(using request)
 
       result shouldBe TermsOfUseVersion.latest
     }
@@ -57,7 +57,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
     "return ToU version NEW_JOURNEY if uplift journey switch is on and application has unrecognised version value in CheckInformation" in new Setup {
       returnAgreementDetails(TermsOfUseAgreementDetails(email, None, instant, Some("bad.version")))
 
-      val result = underTest.getForApplication(application)(request)
+      val result = underTest.getForApplication(application)(using request)
 
       result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
@@ -68,7 +68,7 @@ class TermsOfUseVersionServiceSpec extends HmrcSpec with ApplicationBuilder with
         TermsOfUseAgreementDetails(email, None, instant, Some("1.2")),
         TermsOfUseAgreementDetails(email, None, instant, Some("2.0"))
       )
-      val result = underTest.getForApplication(application)(request)
+      val result = underTest.getForApplication(application)(using request)
       result shouldBe TermsOfUseVersion.NEW_JOURNEY
     }
   }

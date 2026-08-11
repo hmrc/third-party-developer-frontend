@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiCategory, ApiType, CombinedApi, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -44,10 +44,10 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     with DeveloperSessionBuilder
     with UserTestData {
 
-  val category1 = ApiCategory.AGENTS
-  val category2 = ApiCategory.BUSINESS_RATES
-  val category3 = ApiCategory.EXAMPLE
-  val category4 = ApiCategory.NATIONAL_INSURANCE
+  val category1 = ApiCategory.Agents
+  val category2 = ApiCategory.BusinessRates
+  val category3 = ApiCategory.Example
+  val category4 = ApiCategory.NationalInsurance
 
   trait Setup {
 
@@ -73,11 +73,11 @@ class FlowSelectApiViewSpec extends CommonViewSpec
     document.getElementById("individual-api-description").text() shouldBe s"Select specific APIs. You will not get emails about new $currentCategory APIs"
 
     apis.foreach(api => {
-      val checkbox = document.getElementById(api.serviceName.value)
+      val checkbox = document.getElementById(api.serviceName.toString)
       checkbox.attr("name") shouldBe "selectedApi[]"
-      checkbox.`val`() shouldBe api.serviceName.value
+      checkbox.`val`() shouldBe api.serviceName.toString
 
-      val expectedText = if (api.apiType == ApiType.XML_API) { s"${api.displayName} - XML API" }
+      val expectedText = if (api.apiType == ApiType.XmlApi) { s"${api.displayName} - XML API" }
       else s"${api.displayName}"
 
       document.select(s"label[for=${api.serviceName}]").text shouldBe expectedText
@@ -110,9 +110,9 @@ class FlowSelectApiViewSpec extends CommonViewSpec
 
   "Email Preferences Select Api view page" should {
     val apiList  = List(
-      CombinedApi("Api One", ServiceName("api1"), Set(category1, category1), ApiType.REST_API, ApiAccessType.PUBLIC),
-      CombinedApi("Api Two", ServiceName("api2"), Set(category2, category4), ApiType.REST_API, ApiAccessType.PUBLIC),
-      CombinedApi("Api Three", ServiceName("api3"), Set(category3, category2), ApiType.REST_API, ApiAccessType.PUBLIC)
+      CombinedApi("Api One", ServiceName("api1"), Set(category1, category1), ApiType.RestApi, ApiAccessType.Public),
+      CombinedApi("Api Two", ServiceName("api2"), Set(category2, category4), ApiType.RestApi, ApiAccessType.Public),
+      CombinedApi("Api Three", ServiceName("api3"), Set(category3, category2), ApiType.RestApi, ApiAccessType.Public)
     )
     val userApis = Set("api1", "api2")
 

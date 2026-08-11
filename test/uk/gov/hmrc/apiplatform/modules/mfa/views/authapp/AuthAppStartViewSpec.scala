@@ -23,7 +23,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppStartView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -42,7 +42,7 @@ class AuthAppStartViewSpec
 
   "AuthAppStartView view" should {
     "render correctly when form is valid" in {
-      val mainView = authAppStartView.apply()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = authAppStartView.apply()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "You need an authenticator app on your device"
       document.getElementById("submit").text shouldBe "Continue"

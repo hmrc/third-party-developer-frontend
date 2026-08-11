@@ -25,13 +25,13 @@ import views.html.TermsOfUseView
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationRequest
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsTermsOfUse
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.SandboxOrAdmin
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService, TermsOfUseVersionService}
 
 @Singleton
@@ -45,7 +45,7 @@ class TermsOfUse @Inject() (
     termsOfUseView: TermsOfUseView,
     termsOfUseVersionService: TermsOfUseVersionService,
     val clock: Clock
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper
@@ -55,7 +55,7 @@ class TermsOfUse @Inject() (
   def canChangeTermsOfUseAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsTermsOfUse, SandboxOrAdmin)(applicationId)(fun)
 
-  def termsOfUsePartial() = Action { implicit request =>
+  def termsOfUsePartial(): Action[AnyContent] = Action { implicit request =>
     Ok(termsOfUseVersionService.getLatest().getTermsOfUseAsHtml())
   }
 

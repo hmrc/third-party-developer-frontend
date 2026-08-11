@@ -18,21 +18,16 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import java.util.UUID
 
-import play.api.data.Forms._
+import play.api.data.Forms.*
 import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError}
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators}
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{
-  PrivacyPolicyLocation,
-  PrivacyPolicyLocations,
-  TermsAndConditionsLocation,
-  TermsAndConditionsLocations
-}
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, OrganisationId}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 
 trait ConfirmPassword {
   val password: String
@@ -55,7 +50,7 @@ object LoginForm {
       .withGlobalError(FormKeys.invalidCredentialsGlobalKey)
   }
 
-  def accountUnverified(form: Form[LoginForm], email: String) = {
+  def accountUnverified(form: Form[LoginForm]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -70,7 +65,7 @@ object LoginForm {
     mapping(
       "emailaddress" -> emailValidator(),
       "password"     -> loginPasswordValidator
-    )(LoginForm.apply)(LoginForm.unapply)
+    )(LoginForm.apply)(l => Some((l.emailaddress, l.password)))
   )
 
 }
@@ -79,7 +74,7 @@ case class PasswordResetForm(password: String, confirmPassword: String) extends 
 
 object PasswordResetForm {
 
-  def accountUnverified[T](form: Form[T], email: String) = {
+  def accountUnverified[T](form: Form[T]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -94,7 +89,7 @@ object PasswordResetForm {
     mapping(
       "password"        -> passwordValidator,
       "confirmpassword" -> text
-    )(PasswordResetForm.apply)(PasswordResetForm.unapply).verifying(passwordsMatch)
+    )(PasswordResetForm.apply)(p => Some((p.password, p.confirmPassword))).verifying(passwordsMatch)
   )
 
 }
@@ -111,7 +106,7 @@ object RegistrationForm {
       "emailaddress"    -> emailValidator(),
       "password"        -> passwordValidator,
       "confirmpassword" -> text
-    )(RegisterForm.apply)(RegisterForm.unapply).verifying(passwordsMatch)
+    )(RegisterForm.apply)(r => Some((r.firstName, r.lastName, r.emailaddress, r.password, r.confirmPassword))).verifying(passwordsMatch)
   )
 
 }
@@ -124,7 +119,7 @@ object DeleteProfileForm {
     mapping(
       "confirmation" -> optional(text)
         .verifying(FormKeys.accountDeleteConfirmationRequiredKey, selection => selection.isDefined)
-    )(DeleteProfileForm.apply)(DeleteProfileForm.unapply)
+    )(DeleteProfileForm.apply)(d => Some(d.confirmation))
   )
 }
 
@@ -136,7 +131,7 @@ object ProfileForm {
     mapping(
       "firstname" -> firstnameValidator,
       "lastname"  -> lastnameValidator
-    )(ProfileForm.apply)(ProfileForm.unapply)
+    )(ProfileForm.apply)(p => Some((p.firstName, p.lastName)))
   )
 }
 
@@ -144,7 +139,7 @@ case class ForgotPasswordForm(emailaddress: String)
 
 object ForgotPasswordForm {
 
-  def accountUnverified(form: Form[ForgotPasswordForm], email: String) = {
+  def accountUnverified(form: Form[ForgotPasswordForm]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -158,7 +153,7 @@ object ForgotPasswordForm {
   val form: Form[ForgotPasswordForm] = Form(
     mapping(
       "emailaddress" -> emailValidator()
-    )(ForgotPasswordForm.apply)(ForgotPasswordForm.unapply)
+    )(ForgotPasswordForm.apply)(f => Some(f.emailaddress))
   )
 
 }
@@ -167,7 +162,7 @@ case class ChangePasswordForm(currentPassword: String, password: String, confirm
 
 object ChangePasswordForm {
 
-  def accountUnverified[T](form: Form[T], email: String) = {
+  def accountUnverified[T](form: Form[T]) = {
     form
       .withError("submissionError", "true")
       .withError(
@@ -190,7 +185,7 @@ object ChangePasswordForm {
       "currentpassword" -> currentPasswordValidator,
       "password"        -> passwordValidator,
       "confirmpassword" -> text
-    )(ChangePasswordForm.apply)(ChangePasswordForm.unapply).verifying(passwordsMatch)
+    )(ChangePasswordForm.apply)(c => Some((c.currentPassword, c.password, c.confirmPassword))).verifying(passwordsMatch)
   )
 
 }
@@ -204,7 +199,7 @@ object RemoveTeamMemberConfirmationForm {
       "email"   -> emailValidator(FormKeys.teamMemberEmailRequired),
       "confirm" -> optional(text)
         .verifying(FormKeys.removeTeamMemberConfirmNoChoiceKey, s => s.isDefined)
-    )(RemoveTeamMemberConfirmationForm.apply)(RemoveTeamMemberConfirmationForm.unapply)
+    )(RemoveTeamMemberConfirmationForm.apply)(r => Some((r.email, r.confirm)))
   )
 }
 
@@ -215,9 +210,7 @@ object RemoveTeamMemberCheckPageConfirmationForm {
   val form: Form[RemoveTeamMemberCheckPageConfirmationForm] = Form(
     mapping(
       "email" -> emailValidator(FormKeys.teamMemberEmailRequired)
-    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(
-      RemoveTeamMemberCheckPageConfirmationForm.unapply
-    )
+    )(RemoveTeamMemberCheckPageConfirmationForm.apply)(r => Some(r.email))
   )
 }
 
@@ -230,7 +223,7 @@ object AddTeamMemberForm {
       "email" -> emailValidator(FormKeys.teamMemberEmailRequired),
       "role"  -> optional(text)
         .verifying(FormKeys.teamMemberRoleRequired, selection => selection.isDefined)
-    )(AddTeamMemberForm.apply)(AddTeamMemberForm.unapply)
+    )(AddTeamMemberForm.apply)(a => Some((a.email, a.role)))
   )
 }
 
@@ -244,7 +237,7 @@ object ChooseApplicationToUpliftForm {
         s => ApplicationId(UUID.fromString(s.get)),
         id => Some(id.value.toString)
       )
-    )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+    )(ChooseApplicationToUpliftForm.apply)(c => Some(c.applicationId))
   )
 }
 
@@ -256,7 +249,7 @@ object AddApplicationNameForm {
     mapping(
       "applicationName" -> applicationNameValidator,
       "organisationId"  -> optional(text.transform[OrganisationId](text => OrganisationId(java.util.UUID.fromString(text)), id => id.toString()))
-    )(AddApplicationNameForm.apply)(AddApplicationNameForm.unapply)
+    )(AddApplicationNameForm.apply)(a => Some((a.applicationName, a.organisationId)))
   )
 }
 
@@ -273,7 +266,7 @@ object EditApplicationForm {
       "applicationId"         -> nonEmptyText.transform[ApplicationId](text => ApplicationId(java.util.UUID.fromString(text)), id => id.toString()),
       "privacyPolicyUrl"      -> optional(privacyPolicyUrlValidator),
       "termsAndConditionsUrl" -> optional(tNcUrlValidator)
-    )(EditApplicationForm.apply)(EditApplicationForm.unapply)
+    )(EditApplicationForm.apply)(e => Some((e.applicationId, e.privacyPolicyUrl, e.termsAndConditionsUrl)))
   )
 
   def withData(app: ApplicationWithCollaborators) = {
@@ -282,8 +275,8 @@ object EditApplicationForm {
       case _                  => (None, None)
     }
 
-    val privacyPolicyUrl: Option[String]      = privacyPolicyLocation collect { case PrivacyPolicyLocations.Url(u) => u }
-    val termsAndConditionsUrl: Option[String] = termsAndConditionsLocation collect { case TermsAndConditionsLocations.Url(u) => u }
+    val privacyPolicyUrl: Option[String]      = privacyPolicyLocation collect { case PrivacyPolicyLocation.Url(u) => u }
+    val termsAndConditionsUrl: Option[String] = termsAndConditionsLocation collect { case TermsAndConditionsLocation.Url(u) => u }
 
     form.fillAndValidate(
       EditApplicationForm(
@@ -304,7 +297,7 @@ object SubmitApplicationNameForm {
       "applicationName"         -> applicationNameValidator,
       "originalApplicationName" -> nonEmptyText,
       "password"                -> nonEmptyText
-    )(SubmitApplicationNameForm.apply)(SubmitApplicationNameForm.unapply)
+    )(SubmitApplicationNameForm.apply)(s => Some((s.applicationName, s.originalApplicationName, s.password)))
   )
 }
 
@@ -316,14 +309,14 @@ object ChangeAppNameAndDescForm {
     mapping(
       "applicationName" -> nonEmptyText.verifying(applicationNameConstraint),
       "description"     -> optional(text)
-    )(ChangeAppNameAndDescForm.apply)(ChangeAppNameAndDescForm.unapply)
+    )(ChangeAppNameAndDescForm.apply)(c => Some((c.applicationName, c.description)))
   )
 
   def withData(app: ApplicationWithCollaborators) = {
 
     form.fillAndValidate(
       ChangeAppNameAndDescForm(
-        app.name.value,
+        app.name,
         app.details.description
       )
     )
@@ -341,7 +334,7 @@ object SignOutSurveyForm {
       "name"                   -> text(0, 100),
       "email"                  -> text(0, 100),
       "isJavascript"           -> boolean
-    )(SignOutSurveyForm.apply)(SignOutSurveyForm.unapply)
+    )(SignOutSurveyForm.apply)(s => Some((s.rating, s.improvementSuggestions, s.name, s.email, s.isJavascript)))
   )
 }
 
@@ -353,7 +346,7 @@ object DeleteApplicationForm {
     mapping(
       "deleteConfirm" -> optional(text)
         .verifying(FormKeys.deleteApplicationConfirmNoChoiceKey, s => s.isDefined)
-    )(DeleteApplicationForm.apply)(DeleteApplicationForm.unapply)
+    )(DeleteApplicationForm.apply)(d => Some(d.deleteConfirm))
   )
 }
 
@@ -366,7 +359,7 @@ object ChangeSubscriptionForm {
       mapping(
         "subscribed" -> optional(boolean)
           .verifying(FormKeys.changeSubscriptionNoChoiceKey, _.isDefined)
-      )(ChangeSubscriptionForm.apply)(ChangeSubscriptionForm.unapply)
+      )(ChangeSubscriptionForm.apply)(c => Some(c.subscribed))
     )
 }
 
@@ -380,7 +373,7 @@ object ChangeSubscriptionConfirmationForm {
         "subscribed" -> boolean,
         "confirm"    -> optional(boolean)
           .verifying(FormKeys.subscriptionConfirmationNoChoiceKey, _.isDefined)
-      )(ChangeSubscriptionConfirmationForm.apply)(ChangeSubscriptionConfirmationForm.unapply)
+      )(ChangeSubscriptionConfirmationForm.apply)(c => Some((c.subscribed, c.confirm)))
     )
 }
 
@@ -389,7 +382,7 @@ final case class AddRedirectForm(redirectUri: String)
 object AddRedirectForm {
 
   val form = Form(
-    mapping("redirectUri" -> loginRedirectUriValidator)(AddRedirectForm.apply)(AddRedirectForm.unapply)
+    mapping("redirectUri" -> loginRedirectUriValidator)(AddRedirectForm.apply)(a => Some(a.redirectUri))
   )
 }
 
@@ -398,7 +391,7 @@ final case class DeleteRedirectForm(redirectUri: String)
 object DeleteRedirectForm {
 
   val form = Form(
-    mapping("redirectUri" -> text)(DeleteRedirectForm.apply)(DeleteRedirectForm.unapply)
+    mapping("redirectUri" -> text)(DeleteRedirectForm.apply)(d => Some(d.redirectUri))
   )
 }
 
@@ -411,7 +404,7 @@ object DeleteRedirectConfirmationForm {
       "redirectUri"           -> text,
       "deleteRedirectConfirm" -> optional(text)
         .verifying(FormKeys.deleteRedirectConfirmationNoChoiceKey, s => s.isDefined)
-    )(DeleteRedirectConfirmationForm.apply)(DeleteRedirectConfirmationForm.unapply)
+    )(DeleteRedirectConfirmationForm.apply)(d => Some((d.redirectUri, d.deleteRedirectConfirm)))
   )
 }
 
@@ -423,7 +416,7 @@ object ChangeRedirectForm {
     mapping(
       "originalRedirectUri" -> text,
       "newRedirectUri"      -> loginRedirectUriValidator
-    )(ChangeRedirectForm.apply)(ChangeRedirectForm.unapply)
+    )(ChangeRedirectForm.apply)(c => Some((c.originalRedirectUri, c.newRedirectUri)))
   )
 }
 
@@ -435,7 +428,7 @@ object Remove2SVConfirmForm {
     mapping(
       "removeConfirm" -> optional(text)
         .verifying(FormKeys.remove2SVConfirmNoChoiceKey, s => s.isDefined)
-    )(Remove2SVConfirmForm.apply)(Remove2SVConfirmForm.unapply)
+    )(Remove2SVConfirmForm.apply)(r => Some(r.removeConfirm))
   )
 }
 
@@ -447,7 +440,7 @@ object AddAnotherCidrBlockConfirmForm {
     mapping(
       "confirm" -> optional(text)
         .verifying(FormKeys.ipAllowlistAddAnotherNoChoiceKey, s => s.isDefined)
-    )(AddAnotherCidrBlockConfirmForm.apply)(AddAnotherCidrBlockConfirmForm.unapply)
+    )(AddAnotherCidrBlockConfirmForm.apply)(a => Some(a.confirm))
   )
 }
 
@@ -456,7 +449,7 @@ final case class AddCidrBlockForm(ipAddress: String)
 object AddCidrBlockForm {
 
   val form: Form[AddCidrBlockForm] = Form(
-    mapping("ipAddress" -> cidrBlockValidator)(AddCidrBlockForm.apply)(AddCidrBlockForm.unapply)
+    mapping("ipAddress" -> cidrBlockValidator)(AddCidrBlockForm.apply)(a => Some(a.ipAddress))
   )
 }
 
@@ -469,23 +462,23 @@ object TaxRegimeEmailPreferencesForm {
   }
 
   val form: Form[TaxRegimeEmailPreferencesForm] =
-    Form(mapping("taxRegime" -> list(text).verifying(nonEmptyList))(TaxRegimeEmailPreferencesForm.apply)(TaxRegimeEmailPreferencesForm.unapply))
+    Form(mapping("taxRegime" -> list(text).verifying(nonEmptyList))(TaxRegimeEmailPreferencesForm.apply)(t => Some(t.taxRegime)))
 }
 
 final case class SelectedApisEmailPreferencesForm(apiRadio: Option[String] = Some(""), selectedApi: Seq[String], currentCategory: String)
 
 object SelectedApisEmailPreferencesForm {
 
-  def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
+  def nonEmpty(message: String): Constraint[String] = Constraint[String]((s: String) =>
     if (Option(s).isDefined) Invalid(message) else Valid
-  }
+  )
 
   def form: Form[SelectedApisEmailPreferencesForm] = Form(mapping(
     "apiRadio"        -> optional(text)
       .verifying(FormKeys.selectedApiRadioGlobalKey, s => s.isDefined),
     "selectedApi"     -> seq(text),
     "currentCategory" -> text
-  )(SelectedApisEmailPreferencesForm.apply)(SelectedApisEmailPreferencesForm.unapply)
+  )(SelectedApisEmailPreferencesForm.apply)(s => Some((s.apiRadio, s.selectedApi, s.currentCategory)))
     .verifying(
       FormKeys.selectedApisNonSelectedGlobalKey,
       fields =>
@@ -506,7 +499,7 @@ object SelectedTopicsEmailPreferencesForm {
 
   def form: Form[SelectedTopicsEmailPreferencesForm] = Form(mapping(
     "topic" -> seq(text).verifying(nonEmptyList)
-  )(SelectedTopicsEmailPreferencesForm.apply)(SelectedTopicsEmailPreferencesForm.unapply))
+  )(SelectedTopicsEmailPreferencesForm.apply)(s => Some(s.topic)))
 }
 
 final case class SelectApisFromSubscriptionsForm(selectedApi: Seq[String], applicationId: ApplicationId)
@@ -519,12 +512,12 @@ object SelectApisFromSubscriptionsForm {
     override def unbind(key: String, value: ApplicationId)    = Map(key -> value.toString)
   }
 
-  def nonEmpty(message: String): Constraint[String] = Constraint[String] { s: String =>
+  def nonEmpty(message: String): Constraint[String] = Constraint[String]((s: String) =>
     if (Option(s).isDefined) Invalid(message) else Valid
-  }
+  )
 
   def form: Form[SelectApisFromSubscriptionsForm] =
-    Form(mapping("selectedApi" -> seq(text), "applicationId" -> of[ApplicationId])(SelectApisFromSubscriptionsForm.apply)(SelectApisFromSubscriptionsForm.unapply)
+    Form(mapping("selectedApi" -> seq(text), "applicationId" -> of[ApplicationId])(SelectApisFromSubscriptionsForm.apply)(s => Some((s.selectedApi, s.applicationId)))
       .verifying(
         FormKeys.selectedApisNonSelectedGlobalKey,
         fields =>
@@ -553,7 +546,7 @@ object SelectTopicsFromSubscriptionsForm {
     mapping(
       "topic"         -> seq(text).verifying(nonEmptyList),
       "applicationId" -> of[ApplicationId]
-    )(SelectTopicsFromSubscriptionsForm.apply)(SelectTopicsFromSubscriptionsForm.unapply)
+    )(SelectTopicsFromSubscriptionsForm.apply)(s => Some((s.topic, s.applicationId)))
   )
 }
 
@@ -564,13 +557,13 @@ object ChangeOfApplicationNameForm {
   val form: Form[ChangeOfApplicationNameForm] = Form(
     mapping(
       "applicationName" -> applicationNameValidator
-    )(ChangeOfApplicationNameForm.apply)(ChangeOfApplicationNameForm.unapply)
+    )(ChangeOfApplicationNameForm.apply)(c => Some(c.applicationName))
   )
 
   def withData(applicationName: ApplicationName) = {
     form.fillAndValidate(
       ChangeOfApplicationNameForm(
-        applicationName.value
+        applicationName
       )
     )
   }
@@ -579,9 +572,9 @@ object ChangeOfApplicationNameForm {
 case class ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: PrivacyPolicyLocation = isInDesktop match {
-    case true                               => PrivacyPolicyLocations.InDesktopSoftware
-    case false if privacyPolicyUrl.nonEmpty => PrivacyPolicyLocations.Url(privacyPolicyUrl)
-    case _                                  => PrivacyPolicyLocations.NoneProvided
+    case true                               => PrivacyPolicyLocation.InDesktopSoftware
+    case false if privacyPolicyUrl.nonEmpty => PrivacyPolicyLocation.Url(privacyPolicyUrl)
+    case _                                  => PrivacyPolicyLocation.NoneProvided
   }
 }
 
@@ -601,17 +594,17 @@ object ChangeOfPrivacyPolicyLocationForm {
       "privacyPolicyUrl" -> text,
       "isInDesktop"      -> boolean,
       "isNewJourney"     -> boolean
-    )(ChangeOfPrivacyPolicyLocationForm.apply)(ChangeOfPrivacyPolicyLocationForm.unapply).verifying(validUrlPresentIfNotInDesktop)
+    )(ChangeOfPrivacyPolicyLocationForm.apply)(c => Some((c.privacyPolicyUrl, c.isInDesktop, c.isNewJourney))).verifying(validUrlPresentIfNotInDesktop)
   )
 
   def withNewJourneyData(privacyPolicyLocation: PrivacyPolicyLocation) = {
     val privacyPolicyUrl = privacyPolicyLocation match {
-      case PrivacyPolicyLocations.Url(value) => value
-      case _                                 => ""
+      case PrivacyPolicyLocation.Url(value) => value
+      case _                                => ""
     }
     val isInDesktop      = privacyPolicyLocation match {
-      case PrivacyPolicyLocations.InDesktopSoftware => true
-      case _                                        => false
+      case PrivacyPolicyLocation.InDesktopSoftware => true
+      case _                                       => false
     }
     form.fillAndValidate(
       ChangeOfPrivacyPolicyLocationForm(privacyPolicyUrl, isInDesktop, true)
@@ -628,9 +621,9 @@ object ChangeOfPrivacyPolicyLocationForm {
 case class ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl: String, isInDesktop: Boolean, isNewJourney: Boolean) {
 
   def toLocation: TermsAndConditionsLocation = isInDesktop match {
-    case true                                    => TermsAndConditionsLocations.InDesktopSoftware
-    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
-    case _                                       => TermsAndConditionsLocations.NoneProvided
+    case true                                    => TermsAndConditionsLocation.InDesktopSoftware
+    case false if !termsAndConditionsUrl.isEmpty => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
+    case _                                       => TermsAndConditionsLocation.NoneProvided
   }
 }
 
@@ -650,17 +643,17 @@ object ChangeOfTermsAndConditionsLocationForm {
       "termsAndConditionsUrl" -> text,
       "isInDesktop"           -> boolean,
       "isNewJourney"          -> boolean
-    )(ChangeOfTermsAndConditionsLocationForm.apply)(ChangeOfTermsAndConditionsLocationForm.unapply).verifying(validUrlPresentIfNotInDesktop)
+    )(ChangeOfTermsAndConditionsLocationForm.apply)(c => Some((c.termsAndConditionsUrl, c.isInDesktop, c.isNewJourney))).verifying(validUrlPresentIfNotInDesktop)
   )
 
   def withNewJourneyData(termsAndConditionsLocation: TermsAndConditionsLocation) = {
     val termsAndConditionsUrl = termsAndConditionsLocation match {
-      case TermsAndConditionsLocations.Url(value) => value
-      case _                                      => ""
+      case TermsAndConditionsLocation.Url(value) => value
+      case _                                     => ""
     }
     val isInDesktop           = termsAndConditionsLocation match {
-      case TermsAndConditionsLocations.InDesktopSoftware => true
-      case _                                             => false
+      case TermsAndConditionsLocation.InDesktopSoftware => true
+      case _                                            => false
     }
     form.fillAndValidate(
       ChangeOfTermsAndConditionsLocationForm(termsAndConditionsUrl, isInDesktop, true)
@@ -685,7 +678,7 @@ object ResponsibleIndividualChangeToSelfOrOtherForm {
   def form(): Form[ResponsibleIndividualChangeToSelfOrOtherForm] = Form(
     mapping(
       whoField -> text.verifying(validValues contains _)
-    )(ResponsibleIndividualChangeToSelfOrOtherForm.apply)(ResponsibleIndividualChangeToSelfOrOtherForm.unapply)
+    )(ResponsibleIndividualChangeToSelfOrOtherForm.apply)(r => Some(r.who))
   )
 }
 
@@ -697,6 +690,6 @@ object ResponsibleIndividualChangeToOtherForm {
     mapping(
       "name"  -> nonEmptyText,
       "email" -> email
-    )(ResponsibleIndividualChangeToOtherForm.apply)(ResponsibleIndividualChangeToOtherForm.unapply)
+    )(ResponsibleIndividualChangeToOtherForm.apply)(r => Some((r.name, r.email)))
   )
 }

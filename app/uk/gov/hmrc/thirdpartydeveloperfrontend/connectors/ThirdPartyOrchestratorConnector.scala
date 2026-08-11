@@ -19,32 +19,33 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http._
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQuery
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.services.QueryParamsToQueryStringMap
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 
 @Singleton
-class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(implicit ec: ExecutionContext)
+class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: ApplicationConfig, metrics: ConnectorMetrics)(using ExecutionContext)
     extends CommonResponseHandlers with ApplicationLogger with HttpErrorFunctions {
 
   val serviceBaseUrl: String = config.thirdPartyOrchestratorUrl
 
   val api: API = API("third-party-orchestrator")
 
-  def create(request: CreateApplicationRequest)(implicit hc: HeaderCarrier): Future[ApplicationCreatedResponse] =
+  def create(request: CreateApplicationRequest)(using HeaderCarrier): Future[ApplicationCreatedResponse] =
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/application")
@@ -53,7 +54,7 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
         .map(a => ApplicationCreatedResponse(a.id))
     }
 
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
+  def verify(verificationCode: String)(using HeaderCarrier): Future[ApplicationVerificationResponse] = metrics.record(api) {
     http.post(url"$serviceBaseUrl/verify-uplift/$verificationCode")
       .execute[ErrorOrUnit]
       .map {
@@ -64,11 +65,11 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       }
   }
 
-  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(implicit hc: HeaderCarrier): Future[ApplicationNameValidationResult] = {
+  def validateName(name: String, selfApplicationId: Option[ApplicationId], environment: Environment)(using HeaderCarrier): Future[ApplicationNameValidationResult] = {
 
     val body = selfApplicationId.fold[ApplicationNameValidationRequest](NewApplicationNameValidationRequest(name))(appId => ChangeApplicationNameValidationRequest(name, appId))
 
-    http.post(url"$serviceBaseUrl/environment/$environment/application/name/validate")
+    http.post(url"$serviceBaseUrl/environment/${environment.asScreamingSnakeCase}/application/name/validate")
       .withBody(Json.toJson[ApplicationNameValidationRequest](body))
       .execute[Option[ApplicationNameValidationResult]]
       .map {
@@ -77,13 +78,13 @@ class ThirdPartyOrchestratorConnector @Inject() (http: HttpClientV2, config: App
       }
   }
 
-  def query[T](environment: Environment)(qry: ApplicationQuery)(implicit hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
+  def query[T](environment: Environment)(qry: ApplicationQuery)(using hc: HeaderCarrier, rds: HttpReads[T]): Future[T] = {
     val qryStringMap = QueryParamsToQueryStringMap.toQuery(qry).map {
-      case (k, vs) => k -> vs.mkString
+      case (k, vs) => k.text -> vs.mkString
     }
 
     http
-      .get(url"${serviceBaseUrl}/environment/$environment/query?$qryStringMap")
+      .get(url"${serviceBaseUrl}/environment/${environment.asScreamingSnakeCase}/query?$qryStringMap")
       .execute[T]
   }
 }

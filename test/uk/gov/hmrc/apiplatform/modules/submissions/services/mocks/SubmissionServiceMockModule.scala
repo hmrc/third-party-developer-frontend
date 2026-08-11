@@ -23,7 +23,7 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 
 trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {
@@ -34,57 +34,57 @@ trait SubmissionServiceMockModule extends MockitoSugar with ArgumentMatchersSuga
     object FetchLatestSubmission {
 
       def thenReturns(out: Submission) =
-        when(aMock.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(out)))
+        when(aMock.fetchLatestSubmission(*[ApplicationId])(using *)).thenReturn(successful(Some(out)))
 
       def thenReturnsNone() = {
-        when(aMock.fetchLatestSubmission(*[ApplicationId])(*)).thenReturn(successful(None))
+        when(aMock.fetchLatestSubmission(*[ApplicationId])(using *)).thenReturn(successful(None))
       }
     }
 
     object FetchLatestExtendedSubmission {
 
       def thenReturns(out: ExtendedSubmission) =
-        when(aMock.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(Some(out)))
+        when(aMock.fetchLatestExtendedSubmission(*[ApplicationId])(using *)).thenReturn(successful(Some(out)))
 
       def thenReturnsNone() = {
-        when(aMock.fetchLatestExtendedSubmission(*[ApplicationId])(*)).thenReturn(successful(None))
+        when(aMock.fetchLatestExtendedSubmission(*[ApplicationId])(using *)).thenReturn(successful(None))
       }
     }
 
     object Fetch {
 
       def thenReturns(out: ExtendedSubmission) = {
-        when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(Some(out)))
+        when(aMock.fetch(*[SubmissionId])(using *)).thenReturn(successful(Some(out)))
       }
 
       def thenReturnsNone() = {
-        when(aMock.fetch(*[SubmissionId])(*)).thenReturn(successful(None))
+        when(aMock.fetch(*[SubmissionId])(using *)).thenReturn(successful(None))
       }
     }
 
     object RecordAnswer {
 
       def thenReturns(out: ExtendedSubmission) = {
-        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], *)(*)).thenReturn(successful(Right(out)))
+        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], *)(using *)).thenReturn(successful(Right(out)))
       }
 
       def thenReturnsForAnswer(answer: List[String], out: ExtendedSubmission) = {
-        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], eqTo(answer))(*)).thenReturn(successful(Right(out)))
+        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], eqTo(answer))(using *)).thenReturn(successful(Right(out)))
       }
 
       def thenReturnsNone() = {
-        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], *)(*)).thenReturn(successful(Left("Failed to record answer for submission")))
+        when(aMock.recordAnswer(*[SubmissionId], *[Question.Id], *)(using *)).thenReturn(successful(Left("Failed to record answer for submission")))
       }
     }
 
     object ConfirmSetupComplete {
 
       def thenReturnSuccessFor(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress) = {
-        when(aMock.confirmSetupComplete(eqTo(applicationId), eqTo(userEmailAddress))(*)).thenReturn(successful(Right(())))
+        when(aMock.confirmSetupComplete(eqTo(applicationId), eqTo(userEmailAddress))(using *)).thenReturn(successful(Right(())))
       }
 
       def thenReturnFailure() = {
-        when(aMock.confirmSetupComplete(*[ApplicationId], *[LaxEmailAddress])(*)).thenReturn(successful(Left("nope")))
+        when(aMock.confirmSetupComplete(*[ApplicationId], *[LaxEmailAddress])(using *)).thenReturn(successful(Left("nope")))
       }
     }
   }

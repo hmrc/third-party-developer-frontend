@@ -23,9 +23,9 @@ import views.helper.EnvironmentNameService
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.*
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment.PRODUCTION
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment.Production
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.test_only.connectors.{TestOnlyTpaProductionConnector, TestOnlyTpaSandboxConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
@@ -40,16 +40,16 @@ class TestOnlyApplicationController @Inject() (
     val sessionService: SessionService,
     val cookieSigner: CookieSigner,
     mcc: MessagesControllerComponents
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends LoggedInController(mcc) {
 
   def cloneApplication(environment: Environment, appId: ApplicationId): Action[AnyContent] = Action.async { implicit request =>
     val connector = environment match {
-      case PRODUCTION => productionConnector
+      case Production => productionConnector
       case _          => sandboxConnector
     }
-    connector.clone(environment)(appId).map(app => Ok(Json.toJson(app)))
+    connector.clone(appId).map(app => Ok(Json.toJson(app)))
   }
 }

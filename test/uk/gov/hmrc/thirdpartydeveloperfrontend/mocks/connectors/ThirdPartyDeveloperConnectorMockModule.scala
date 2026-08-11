@@ -32,32 +32,32 @@ trait ThirdPartyDeveloperConnectorMockModule extends MockitoSugar with ArgumentM
     object FindUserId {
 
       def thenReturn(email: LaxEmailAddress)(userId: UserId) =
-        when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
+        when(aMock.findUserId(eqTo(email))(using *)).thenReturn(successful(Some(ThirdPartyDeveloperConnector.CoreUserDetails(email, userId))))
 
       def thenReturnNone(email: LaxEmailAddress) =
-        when(aMock.findUserId(eqTo(email))(*)).thenReturn(successful(None))
+        when(aMock.findUserId(eqTo(email))(using *)).thenReturn(successful(None))
     }
 
     object FetchDeveloper {
 
       def thenReturn(userId: UserId)(developer: Option[User]) =
-        when(aMock.fetchDeveloper(eqTo(userId))(*)).thenReturn(successful(developer))
+        when(aMock.fetchDeveloper(eqTo(userId))(using *)).thenReturn(successful(developer))
     }
 
     object FetchByEmails {
 
       def returnsEmptySeq() =
-        when(aMock.fetchByEmails(*)(*)).thenReturn(successful(Seq.empty))
+        when(aMock.fetchByEmails(*)(using *)).thenReturn(successful(Seq.empty))
 
       def returnsSuccessFor(in: Set[LaxEmailAddress])(out: Seq[User]) =
-        when(aMock.fetchByEmails(eqTo(in))(*)).thenReturn(successful(out))
+        when(aMock.fetchByEmails(eqTo(in))(using *)).thenReturn(successful(out))
     }
 
     object GetOrCreateUser {
       def succeeds() = succeedsWith(UserId.random)
 
       def succeedsWith(userId: UserId) =
-        when(aMock.getOrCreateUserId(*[LaxEmailAddress])(*)).thenReturn(successful(userId))
+        when(aMock.getOrCreateUserId(*[LaxEmailAddress])(using *)).thenReturn(successful(userId))
     }
   }
 

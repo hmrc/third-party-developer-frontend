@@ -19,7 +19,7 @@ package uk.gov.hmrc.apiplatform.modules.test_only.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
@@ -29,9 +29,8 @@ import uk.gov.hmrc.apiplatform.modules.common.utils.EbridgeConfigurator
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
 abstract class TestOnlyTpaConnector @Inject() (
-    http: HttpClientV2,
-    config: ApplicationConfig
-  )(implicit val ec: ExecutionContext
+    http: HttpClientV2
+  )(using val ec: ExecutionContext
   ) {
 
   val environment: Environment
@@ -40,7 +39,7 @@ abstract class TestOnlyTpaConnector @Inject() (
 
   def configureEbridgeIfRequired: RequestBuilder => RequestBuilder
 
-  def clone(environment: Environment)(appId: ApplicationId)(implicit hc: HeaderCarrier): Future[ApplicationWithCollaborators] = {
+  def clone(appId: ApplicationId)(using HeaderCarrier): Future[ApplicationWithCollaborators] = {
     if (isEnabled) {
       val url = s"$serviceBaseUrl/test-only/application"
 
@@ -58,10 +57,10 @@ abstract class TestOnlyTpaConnector @Inject() (
 class TestOnlyTpaSandboxConnector @Inject() (
     val http: HttpClientV2,
     val appConfig: ApplicationConfig
-  )(implicit ec: ExecutionContext
-  ) extends TestOnlyTpaConnector(http, appConfig)(ec) {
+  )(using ec: ExecutionContext
+  ) extends TestOnlyTpaConnector(http)(using ec) {
 
-  val environment: Environment = Environment.SANDBOX
+  val environment: Environment = Environment.Sandbox
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationSandboxUrl
   val useProxy: Boolean        = appConfig.thirdPartyApplicationSandboxUseProxy
   val apiKey: String           = appConfig.thirdPartyApplicationSandboxApiKey
@@ -76,9 +75,9 @@ class TestOnlyTpaSandboxConnector @Inject() (
 class TestOnlyTpaProductionConnector @Inject() (
     val http: HttpClientV2,
     val appConfig: ApplicationConfig
-  )(implicit ec: ExecutionContext
-  ) extends TestOnlyTpaConnector(http, appConfig)(ec) {
-  val environment: Environment = Environment.PRODUCTION
+  )(using ec: ExecutionContext
+  ) extends TestOnlyTpaConnector(http)(using ec) {
+  val environment: Environment = Environment.Production
   val serviceBaseUrl: String   = appConfig.thirdPartyApplicationProductionUrl
 
   val configureEbridgeIfRequired: RequestBuilder => RequestBuilder = identity

@@ -27,7 +27,7 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -50,7 +50,7 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
     "render correctly when form is valid" in {
 
       val mainView =
-        authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+        authAppAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaAction.CREATE, None)(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"
@@ -64,7 +64,7 @@ class AuthAppAccessCodeViewSpec extends CommonViewSpec
         MfaId(UUID.randomUUID()),
         MfaAction.CREATE,
         None
-      )(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      )(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Enter your access code"
       document.getElementById("submit").text shouldBe "Continue"

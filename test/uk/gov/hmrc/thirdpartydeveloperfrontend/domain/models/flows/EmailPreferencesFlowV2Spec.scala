@@ -19,6 +19,7 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
@@ -30,14 +31,14 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuil
   val category2                   = "CATEGORY_2"
   val category1Apis               = Set("api1", "api2")
   val category2Apis               = Set("api3", "api2", "api4")
-  val emailPreferences            = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.TECHNICAL))
-  val emailPreferencesWithAllApis = EmailPreferences(List(TaxRegimeInterests(category1, Set.empty)), Set(EmailTopic.TECHNICAL))
+  val emailPreferences            = EmailPreferences(List(TaxRegimeInterests(category1, category1Apis), TaxRegimeInterests(category2, category2Apis)), Set(EmailTopic.Technical))
+  val emailPreferencesWithAllApis = EmailPreferences(List(TaxRegimeInterests(category1, Set.empty)), Set(EmailTopic.Technical))
 
   val sessionId = UserSessionId.random
 
   def developerSession(emailPreferences: EmailPreferences): UserSession = {
     val developer: User = buildTrackedUser(emailPreferences = emailPreferences)
-    UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    UserSession(sessionId, LoggedInState.LoggedIn, developer)
   }
 
   def emailPreferencesFlow(selectedCategories: Set[String], selectedAPIs: Map[String, Set[String]], selectedTopics: Set[String]): EmailPreferencesFlowV2 = {
@@ -52,7 +53,7 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuil
         flow.selectedAPIs.keySet should contain allElementsOf (emailPreferences.interests.map(_.regime))
         flow.selectedAPIs.get(category1).head should contain allElementsOf category1Apis
         flow.selectedAPIs.get(category2).head should contain allElementsOf category2Apis
-        flow.selectedTopics should contain allElementsOf Set(EmailTopic.TECHNICAL.toString())
+        flow.selectedTopics should contain allElementsOf Set(EmailTopic.Technical.asScreamingSnakeCase)
       }
 
       "map to EmailPreferencesFlow object when ALL APIS in selected Apis" in {
@@ -60,7 +61,7 @@ class EmailPreferencesFlowV2Spec extends AnyWordSpec with Matchers with UserBuil
         flow.selectedCategories should contain allElementsOf (emailPreferencesWithAllApis.interests.map(_.regime))
         flow.selectedAPIs.keySet should contain allElementsOf (emailPreferencesWithAllApis.interests.map(_.regime))
         flow.selectedAPIs.get(category1).head should contain only ("ALL_APIS")
-        flow.selectedTopics should contain allElementsOf Set(EmailTopic.TECHNICAL.toString())
+        flow.selectedTopics should contain allElementsOf Set(EmailTopic.Technical.asScreamingSnakeCase)
       }
     }
 

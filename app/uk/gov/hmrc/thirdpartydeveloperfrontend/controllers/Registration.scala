@@ -20,14 +20,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-import views.html._
+import views.html.*
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Request}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.{EmailAlreadyInUse, RegistrationSuccessful}
@@ -48,9 +48,9 @@ class Registration @Inject() (
     expiredVerificationLinkView: ExpiredVerificationLinkView,
     confirmationView: ConfirmationView,
     resendConfirmationView: ResendConfirmationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends LoggedOutController(mcc) with ApplicationLogger with WithUnsafeDefaultFormBinding {
+  ) extends LoggedOutController(mcc) with ApplicationLogger with WithUrlEncodedOnlyFormBinding {
 
   import ErrorFormBuilder.CommonGlobalErrorsSyntax
   import play.api.data._
@@ -95,7 +95,7 @@ class Registration @Inject() (
       }
   }
 
-  def ensureLoggedOut(implicit request: Request[_], hc: HeaderCarrier) = {
+  def ensureLoggedOut(using request: Request[?], hc: HeaderCarrier) = {
     extractUserSessionIdFromCookie(request)
       .map(sessionService.destroy)
       .getOrElse(Future.successful(()))

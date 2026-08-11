@@ -20,18 +20,18 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.Logging
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http._
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{DeviceSession, MfaId}
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto._
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.dto.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{CommonResponseHandlers, ConnectorMetrics}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{API, CommonResponseHandlers, ConnectorMetrics}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.session.DeviceSessionInvalid
 
 @Singleton
@@ -39,13 +39,13 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     http: HttpClientV2,
     config: ApplicationConfig,
     metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends CommonResponseHandlers with Logging {
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
   val api: API                    = API("third-party-developer")
 
-  def createMfaAuthApp(userId: UserId)(implicit hc: HeaderCarrier): Future[RegisterAuthAppResponse] = {
+  def createMfaAuthApp(userId: UserId)(using HeaderCarrier): Future[RegisterAuthAppResponse] = {
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developer/$userId/mfa/auth-app")
@@ -53,7 +53,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     }
   }
 
-  def createMfaSms(userId: UserId, mobileNumber: String)(implicit hc: HeaderCarrier): Future[Option[RegisterSmsResponse]] = {
+  def createMfaSms(userId: UserId, mobileNumber: String)(using HeaderCarrier): Future[Option[RegisterSmsResponse]] = {
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developer/$userId/mfa/sms")
@@ -66,7 +66,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     }
   }
 
-  def verifyMfa(userId: UserId, mfaId: MfaId, code: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def verifyMfa(userId: UserId, mfaId: MfaId, code: String)(using HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developer/$userId/mfa/$mfaId/verification")
@@ -80,7 +80,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     }
   }
 
-  def sendSms(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def sendSms(userId: UserId, mfaId: MfaId)(using HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
       http
         .post(url"$serviceBaseUrl/developer/$userId/mfa/$mfaId/send-sms")
@@ -93,7 +93,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     }
   }
 
-  def removeMfaById(userId: UserId, mfaId: MfaId)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def removeMfaById(userId: UserId, mfaId: MfaId)(using HeaderCarrier): Future[Unit] = {
     metrics.record(api) {
       http.delete(url"$serviceBaseUrl/developer/$userId/mfa/$mfaId")
         .execute[ErrorOrUnit]
@@ -101,7 +101,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     }
   }
 
-  def changeName(userId: UserId, mfaId: MfaId, updatedName: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def changeName(userId: UserId, mfaId: MfaId, updatedName: String)(using HeaderCarrier): Future[Boolean] = {
     metrics.record(api) {
       http.post(url"$serviceBaseUrl/developer/$userId/mfa/$mfaId/name")
         .withBody(Json.toJson(ChangeMfaNameRequest(updatedName)))
@@ -114,7 +114,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
     }
   }
 
-  def createDeviceSession(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
+  def createDeviceSession(userId: UserId)(using HeaderCarrier): Future[Option[DeviceSession]] = metrics.record(api) {
     http.post(url"$serviceBaseUrl/device-session/user/$userId")
       .execute[ErrorOr[DeviceSession]]
       .map {
@@ -131,7 +131,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
       }
   }
 
-  def fetchDeviceSession(deviceSessionId: String, userId: UserId)(implicit hc: HeaderCarrier): Future[DeviceSession] = metrics.record(api) {
+  def fetchDeviceSession(deviceSessionId: String, userId: UserId)(using HeaderCarrier): Future[DeviceSession] = metrics.record(api) {
     http.get(url"$serviceBaseUrl/device-session/$deviceSessionId/user/$userId")
       .execute[Option[DeviceSession]]
       .map {
@@ -140,7 +140,7 @@ class ThirdPartyDeveloperMfaConnector @Inject() (
       }
   }
 
-  def deleteDeviceSession(deviceSessionId: String)(implicit hc: HeaderCarrier): Future[Int] = metrics.record(api) {
+  def deleteDeviceSession(deviceSessionId: String)(using HeaderCarrier): Future[Int] = metrics.record(api) {
     http.delete(url"$serviceBaseUrl/device-session/$deviceSessionId")
       .execute[ErrorOr[HttpResponse]]
       .map {

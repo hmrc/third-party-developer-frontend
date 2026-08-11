@@ -26,7 +26,7 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.QrCodeView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -40,7 +40,7 @@ class QrCodeViewSpec extends CommonViewSpec with WithCSRFAddToken with UserTestD
   "QrCodeView view" should {
     "render correctly when form is valid" in {
 
-      val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = qrCodeView.apply("secret", "qrcodeImg", MfaId(UUID.randomUUID()))(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Set up your authenticator app"
       document.getElementById("submit").text shouldBe "Continue"

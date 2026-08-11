@@ -19,10 +19,10 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.support
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.TokenProvider
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -30,7 +30,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.SessionServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddToken with UserBuilder with LocalUserIdTracker {
 
@@ -52,17 +52,17 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
     self: Setup =>
 
     val request = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+      .withLoggedIn(using underTest)(sessionId)
+      .withSession(sessionParams*)
 
-    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LOGGED_IN, developer))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.LoggedIn, developer))
   }
 
   trait NotLoggedIn {
     self: Setup =>
 
     val request = FakeRequest()
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
 
     fetchSessionByIdReturnsNone(sessionId)
   }
@@ -71,10 +71,10 @@ class SupportEnquiryControllerSpec extends BaseControllerSpec with WithCSRFAddTo
     self: Setup =>
 
     val request = FakeRequest()
-      .withLoggedIn(underTest, implicitly)(sessionId)
-      .withSession(sessionParams: _*)
+      .withLoggedIn(using underTest)(sessionId)
+      .withSession(sessionParams*)
 
-    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PART_LOGGED_IN_ENABLING_MFA, developer))
+    fetchSessionByIdReturns(sessionId, UserSession(sessionId, LoggedInState.PartLoggedInEnablingMFA, developer))
   }
 
   "SupportEnquiryController" when {

@@ -19,14 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-import views.html.manageprofile._
+import views.html.manageprofile.*
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, DashboardService, ProfileService, SessionService}
 
 @Singleton
@@ -41,7 +41,7 @@ class ManageProfileController @Inject() (
     val cookieSigner: CookieSigner,
     dashboardService: DashboardService,
     profileDetailsView: ProfileDetailsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) with PasswordChange {
 

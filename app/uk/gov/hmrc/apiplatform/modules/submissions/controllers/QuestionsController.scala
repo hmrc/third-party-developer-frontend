@@ -24,29 +24,29 @@ import cats.data.NonEmptyList
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.{Json, OFormat, OWrites, Reads}
-import play.api.mvc.{MessagesControllerComponents, _}
+import play.api.mvc.{MessagesControllerComponents, *}
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 
-object QuestionsController extends NonEmptyListFormatters {
+object QuestionsController {
   case class ErrorMessage(message: String)
-  implicit val writesErrorMessage: OWrites[ErrorMessage] = Json.writes[ErrorMessage]
+  given OWrites[ErrorMessage] = Json.writes[ErrorMessage]
 
   case class InboundRecordAnswersRequest(answers: NonEmptyList[String])
-  implicit val readsInboundRecordAnswersRequest: Reads[InboundRecordAnswersRequest] = Json.reads[InboundRecordAnswersRequest]
+  given Reads[InboundRecordAnswersRequest] = Json.reads[InboundRecordAnswersRequest]
 
   case class ViewErrorInfo private (summary: String, message: String)
 
   object ViewErrorInfo {
-    implicit val format: OFormat[ViewErrorInfo] = Json.format[ViewErrorInfo]
+    given OFormat[ViewErrorInfo] = Json.format[ViewErrorInfo]
 
     def apply(errorInfo: ErrorInfo): ViewErrorInfo = errorInfo match {
       case ErrorInfo(summary, Some(message)) => new ViewErrorInfo(summary, message)
@@ -64,9 +64,8 @@ class QuestionsController @Inject() (
     override val submissionService: SubmissionService,
     val cookieSigner: CookieSigner,
     questionView: QuestionView,
-    checkAnswersView: CheckAnswersView,
     mcc: MessagesControllerComponents
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with SubmissionActionBuilders
@@ -76,7 +75,6 @@ class QuestionsController @Inject() (
   import QuestionsController._
 
   private def processQuestion(
-      submissionId: SubmissionId,
       questionId: Question.Id,
       onFormAnswer: Option[ActualAnswer],
       errorInfo: Option[ErrorInfo]
@@ -91,8 +89,8 @@ class QuestionsController @Inject() (
 
     (
       for {
-        flowItem <- fromOption(oQuestion, "Question not found in questionnaire")
-        question  = oQuestion.get
+        _       <- fromOption(oQuestion, "Question not found in questionnaire")
+        question = oQuestion.get
       } yield {
         errorInfo.fold[Result](
           Ok(questionView(question, applicationId, submitAction, persistedAnswer, None))
@@ -105,13 +103,13 @@ class QuestionsController @Inject() (
   def showQuestion(submissionId: SubmissionId, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.recordAnswer(submissionId, questionId)
-      processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
+      processQuestion(questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
   def updateQuestion(submissionId: SubmissionId, questionId: Question.Id, onFormAnswer: Option[ActualAnswer] = None, errorInfo: Option[ErrorInfo] = None): Action[AnyContent] =
     withSubmission(submissionId) { implicit request =>
       val submitAction = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.QuestionsController.updateAnswer(submissionId, questionId)
-      processQuestion(submissionId, questionId, onFormAnswer, errorInfo)(submitAction)
+      processQuestion(questionId, onFormAnswer, errorInfo)(submitAction)
     }
 
   private def processAnswer(
@@ -130,13 +128,13 @@ class QuestionsController @Inject() (
       val question = request.submission.findQuestion(questionId).get
 
       val errorInfo = (question match {
-        case q: Question with ErrorMessaging => q.errorInfo
-        case _                               => None
+        case q: (Question & ErrorMessaging) => q.errorInfo
+        case _                              => None
       })
         .getOrElse(ErrorInfo(defaultMessage, defaultMessage))
 
       val onFormAnswer = question match {
-        case q: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer)
+        case _: Question.TextQuestion => answers.headOption.map(ActualAnswer.TextAnswer.apply)
         case _                        => None
       }
 

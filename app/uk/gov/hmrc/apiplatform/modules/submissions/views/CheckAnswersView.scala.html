@@ -16,10 +16,9 @@
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
-@import include._
-@import includes._
+@import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel.*
+@import include.*
+@import includes.*
 
 
 @this(devMain: DevMain)
@@ -27,10 +26,6 @@
 @(model: ViewModel, wasDeclined: Boolean, isNewTermsOfUseUplift: Boolean, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @title = @{ if(wasDeclined) { "Your request" } else { "Check your answers before you send them" }}
-
-@labelAsId(label: String) = @{
-  label.toLowerCase.replaceAll(" ", "-") + "-link"
-}
 
 @devMain(
     title = title,

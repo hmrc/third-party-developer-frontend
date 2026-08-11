@@ -19,23 +19,23 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html._
+import views.html.*
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationName
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.ApplicationNameModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, ChangeOfApplicationNameForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.ProductionAndAdmin
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class RequestChangeOfApplicationNameController @Inject() (
@@ -47,7 +47,7 @@ class RequestChangeOfApplicationNameController @Inject() (
     val cookieSigner: CookieSigner,
     requestChangeOfApplicationNameView: RequestChangeOfApplicationNameView,
     changeOfApplicationNameConfirmationView: ChangeOfApplicationNameConfirmationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) {
 
@@ -65,7 +65,7 @@ class RequestChangeOfApplicationNameController @Inject() (
       val requestForm        = ChangeOfApplicationNameForm.form.bindFromRequest()
       val newApplicationName = form.applicationName.trim()
 
-      if (newApplicationName.equalsIgnoreCase(application.name.value)) {
+      if (newApplicationName.equalsIgnoreCase(application.name)) {
 
         def unchangedNameCheckForm: Form[ChangeOfApplicationNameForm] =
           requestForm.withError(appNameField, "application.name.unchanged.error")
@@ -81,7 +81,6 @@ class RequestChangeOfApplicationNameController @Inject() (
               for {
                 _ <-
                   applicationService.requestProductonApplicationNameChange(
-                    request.userSession.developer.userId,
                     application,
                     ApplicationName(newApplicationName),
                     request.userSession.developer.displayedName,

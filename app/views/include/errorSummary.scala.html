@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import views.helper.GlobalSection._
+@import views.helper.GlobalSection.*
 
-@(form: Form[_])(implicit messages: Messages)
+@(form: Form[?])(implicit messages: Messages)
 
 @if(form.hasGlobalErrors) {
   <div id="error-summary-display" class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">

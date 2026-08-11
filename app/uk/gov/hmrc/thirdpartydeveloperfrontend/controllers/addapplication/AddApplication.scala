@@ -17,11 +17,12 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication
 
 import javax.inject.{Inject, Singleton}
+import scala.annotation.unused
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import views.helper.EnvironmentNameService
-import views.html._
+import views.html.*
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
@@ -30,21 +31,21 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.{CreateApplicationRequestV1, CreationAccess, *}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment, OrganisationId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailPreferences
-import uk.gov.hmrc.apiplatform.modules.uplift.services._
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.apiplatform.modules.uplift.services.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.{appNameField, applicationNameAlreadyExistsKey, applicationNameInvalidKey}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.Error.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationCreatedResponse, Error => DomainError}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.{ApplicationCreatedResponse, Error as DomainError}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class AddApplication @Inject() (
@@ -63,9 +64,8 @@ class AddApplication @Inject() (
     addApplicationSubordinateSuccessView: AddApplicationSubordinateSuccessView,
     addApplicationNameView: AddApplicationNameView,
     chooseApplicationToUpliftView: ChooseApplicationToUpliftView,
-    beforeYouStartView: BeforeYouStartView,
     flowService: GetProductionCredentialsFlowService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig,
     val environmentNameService: EnvironmentNameService
   ) extends ApplicationController(mcc) {
@@ -95,7 +95,7 @@ class AddApplication @Inject() (
     successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId)))
   }
 
-  def soleApplicationToUpliftAction(appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
+  def soleApplicationToUpliftAction(@unused appId: ApplicationId): Action[AnyContent] = loggedInAction { implicit request =>
     (for {
       upliftData <- upliftLogic.aUsersSandboxAdminSummariesAndUpliftIds(request.userId)
     } yield upliftData.upliftableSummaries match {
@@ -164,7 +164,7 @@ class AddApplication @Inject() (
       access = CreationAccess.Standard,
       environment = environment,
       description = None,
-      collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Roles.ADMINISTRATOR, loggedInDeveloper.userId)),
+      collaborators = Set(Collaborator(loggedInDeveloper.email, Collaborator.Role.Administrator, loggedInDeveloper.userId)),
       subscriptions = None,
       organisationId = form.organisationId
     )
@@ -205,12 +205,12 @@ class AddApplication @Inject() (
     def subscriptionsNotInUserEmailPreferences(
         applicationSubscriptions: Seq[APISubscriptionStatus],
         userEmailPreferences: EmailPreferences
-      )(implicit hc: HeaderCarrier
+      )(using HeaderCarrier
       ): Future[Set[String]] = {
       emailPreferencesService.fetchAPIDetails(applicationSubscriptions.map(_.serviceName).toSet) map { apiDetails =>
         val allInCategories = userEmailPreferences.interests.filter(i => i.services.isEmpty).map(_.regime).toSet
-        val filteredApis    = apiDetails.filter(api => api.categories.map(_.toString).intersect(allInCategories).isEmpty) // TODO - types
-        filteredApis.map(_.serviceName.value).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
+        val filteredApis    = apiDetails.filter(api => api.categories.map(_.asScreamingSnakeCase).intersect(allInCategories).isEmpty) // TODO - types
+        filteredApis.map(_.serviceName).diff(userEmailPreferences.interests.flatMap(_.services)).toSet
       }
     }
 
@@ -218,7 +218,7 @@ class AddApplication @Inject() (
       import appRequest._
 
       deployedTo match {
-        case Environment.SANDBOX    => {
+        case Environment.Sandbox    => {
           val alreadySelectedEmailPreferences: Boolean = appRequest.flash.get("emailPreferencesSelected").contains("true")
           subscriptionsNotInUserEmailPreferences(subscriptions.filter(_.subscribed), userSession.developer.emailPreferences) map { missingSubscriptions =>
             if (alreadySelectedEmailPreferences || missingSubscriptions.isEmpty) {
@@ -229,7 +229,7 @@ class AddApplication @Inject() (
             }
           }
         }
-        case Environment.PRODUCTION => errorHandler.notFoundTemplate(appRequest).map(NotFound(_))
+        case Environment.Production => errorHandler.notFoundTemplate(using appRequest).map(NotFound(_))
       }
     }
   }

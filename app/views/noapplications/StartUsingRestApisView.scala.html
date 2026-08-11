@@ -15,14 +15,12 @@
  *@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import include.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import views.helper.EnvironmentNameService
 
 @this(devMain: DevMain, leftHandNav: LeftHandNav)
 
-@()(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig, navSection: String = "manage-account", environmentNameService: EnvironmentNameService)
+@()(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
 @subordinateEnvName = @{appConfig.nameOfSubordinateEnvironment.toLowerCase}
 @pageHeading = @{"Start using our REST APIs"}
@@ -73,6 +71,6 @@
   </p>
 
   <p class="govuk-body">
-    <a id="add" href="@controllers.addapplication.routes.AddApplication.addApplicationName(Environment.SANDBOX, None)" class="govuk-button">Continue</a>
+    <a id="add" href="@controllers.addapplication.routes.AddApplication.addApplicationName(Environment.Sandbox, None)" class="govuk-button">Continue</a>
   </p>
 }

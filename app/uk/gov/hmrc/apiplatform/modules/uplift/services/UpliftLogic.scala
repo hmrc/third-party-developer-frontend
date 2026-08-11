@@ -21,9 +21,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
@@ -32,7 +32,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AppsByTeamMemberService
 class UpliftLogic @Inject() (
     apmConnector: ApmConnector,
     appsByTeamMember: AppsByTeamMemberService
-  )(implicit ec: ExecutionContext
+  )(using ExecutionContext
   ) {
 
   import UpliftLogic._
@@ -41,17 +41,17 @@ class UpliftLogic @Inject() (
     summaries.map(s => s.id -> s.subscriptionIds).toMap
   }
 
-  def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(implicit hc: HeaderCarrier): Future[UpliftLogic.Data] = {
+  def aUsersSandboxAdminSummariesAndUpliftIds(userId: UserId)(using HeaderCarrier): Future[UpliftLogic.Data] = {
     // Concurrent requests
     val fApisAvailableInProd  = apmConnector.fetchUpliftableApiIdentifiers
-    val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.SANDBOX)
+    val fAllSandboxApiDetails = apmConnector.fetchAllApis(Environment.Sandbox)
     val fAllSummaries         = appsByTeamMember.fetchSandboxSummariesByTeamMember(userId)
 
     for {
       apisAvailableInProd    <- fApisAvailableInProd
       sandboxApis            <- fAllSandboxApiDetails
       allSummaries           <- fAllSummaries
-      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType == AccessType.STANDARD)
+      possibleUpliftSummaries = allSummaries.filter(s => s.role.isAdministrator && s.accessType == AccessType.Standard)
 
       subscriptionsForApps = getSubscriptionsByApp(possibleUpliftSummaries)
 
@@ -73,13 +73,13 @@ object UpliftLogic {
   }
 
   def contextsOfTestSupportAndExampleApis(apis: List[ApiDefinition]): Set[ApiContext] = {
-    filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.EXAMPLE))(apis)
+    filterApis(d => d.isTestSupport || d.categories.contains(ApiCategory.Example))(apis)
       .map(_.context)
       .toSet
   }
 
   def apiIdentifiersOfRetiredApis(apis: List[ApiDefinition]): Set[ApiIdentifier] = {
-    (filterApis(_ => true, v => v.status == ApiStatus.RETIRED) _ andThen toApiIdentifiers)(apis)
+    (filterApis(_ => true, v => v.status == ApiStatus.Retired) andThen toApiIdentifiers)(apis)
   }
 
   def filterAppsHavingRealAndAvailableSubscriptions(

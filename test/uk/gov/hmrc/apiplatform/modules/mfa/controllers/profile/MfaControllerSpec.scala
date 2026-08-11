@@ -23,12 +23,13 @@ import org.jsoup.Jsoup
 
 import play.api.http.Status
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class MfaControllerSpec extends MfaControllerBaseSpec {
 
@@ -50,35 +51,35 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
     "selectMfaAction for CREATE" should {
       "redirect to setup sms page when user is logged in and mfaType is SMS" in new SetupSuccessfulStart2SV with LoggedIn {
-        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("SMS"))
+        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("SMS").withMethod("POST"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup")
       }
 
       "redirect to setup sms page when user is part logged in and mfaType is SMS" in new SetupSuccessfulStart2SV with PartLogged {
-        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("SMS"))
+        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("SMS").withMethod("POST"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/sms/setup")
       }
 
       "redirect to setup Auth App page when user is logged in and mfaType is AUTHENTICATOR_APP" in new SetupSuccessfulStart2SV with LoggedIn {
-        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("AUTHENTICATOR_APP"))
+        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("AUTHENTICATOR_APP").withMethod("POST"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/start")
       }
 
       "redirect to setup Auth App page when user is part logged in and mfaType is AUTHENTICATOR_APP" in new SetupSuccessfulStart2SV with PartLogged {
-        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("AUTHENTICATOR_APP"))
+        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("AUTHENTICATOR_APP").withMethod("POST"))
 
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(s"/developer/profile/security-preferences/auth-app/start")
       }
 
       "return errors when user is logged in and mfaType is invalid on the form" in new SetupSuccessfulStart2SV with LoggedIn {
-        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("INVALID_MFA_TYPE"))
+        val result = addToken(underTest.selectMfaAction(None, MfaAction.CREATE))(selectMfaRequest("INVALID_MFA_TYPE").withMethod("POST"))
 
         status(result) shouldBe BAD_REQUEST
         val doc = Jsoup.parse(contentAsString(result))
@@ -96,7 +97,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
       "redirect to Auth App access code page when mfa to be deleted is Auth App and mfa authentication method is Auth App" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
 
-          val result = addToken(underTest.selectMfaAction(Some(authAppMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AUTHENTICATOR_APP.toString))
+          val result = addToken(underTest.selectMfaAction(Some(authAppMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AuthenticatorApp.asScreamingSnakeCase).withMethod("POST"))
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
@@ -106,9 +107,9 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
       "redirect to Sms access code page when mfa to be deleted is Auth App and mfa authentication method is Sms" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+          when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(true))
 
-          val result = addToken(underTest.selectMfaAction(Some(authAppMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.SMS.toString))
+          val result = addToken(underTest.selectMfaAction(Some(authAppMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.Sms.toString).withMethod("POST"))
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
@@ -118,9 +119,9 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
       "redirect to Sms access code page when mfa to be deleted is Sms and mfa authentication method is Sms" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+          when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(true))
 
-          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.SMS.toString))
+          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.Sms.toString).withMethod("POST"))
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
@@ -130,7 +131,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
       "redirect to Auth App access code page when mfa to be deleted is Sms and mfa authentication method is Auth App" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AUTHENTICATOR_APP.toString))
+          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.AuthenticatorApp.asScreamingSnakeCase).withMethod("POST"))
 
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe
@@ -140,18 +141,18 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
       "return error when send sms fails and mfa to be deleted is Sms and mfa authentication method is Sms" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(false))
+          when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(false))
 
-          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.SMS.toString))
+          val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.Sms.toString).withMethod("POST"))
 
           status(result) shouldBe INTERNAL_SERVER_ERROR
           validateErrorTemplateView(result, "Failed to send SMS")
         }
 
       "return error when fetch user returns none and mfa to be deleted is Sms and mfa authentication method is Sms" in new LoggedIn {
-        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*)).thenReturn(successful(None))
+        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *)).thenReturn(successful(None))
 
-        val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.SMS.toString))
+        val result = addToken(underTest.selectMfaAction(Some(smsMfaId), MfaAction.REMOVE))(selectMfaRequest(MfaType.Sms.toString).withMethod("POST"))
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         validateErrorTemplateView(result, "Unable to obtain user information")
@@ -160,12 +161,12 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
     "securityPreferences" should {
       "return 200 and show the Security Preferences page when user is Logged in" in new SetupAuthAppSecurityPreferences with LoggedIn {
-        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest)(sessionId)
         shouldReturnOK(underTest.securityPreferences()(request), validateSecurityPreferences)
       }
 
       "return 200 and show the Security Preferences page when user is Part Logged in" in new SetupAuthAppSecurityPreferences with PartLogged {
-        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest)(sessionId)
         shouldReturnOK(underTest.securityPreferences()(request), validateSecurityPreferences)
       }
 
@@ -175,10 +176,10 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
       }
 
       "redirect to the login page when third party developer returns None for User " in new LoggedIn {
-        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
           .thenReturn(successful(None))
 
-        private val request = FakeRequest().withLoggedIn(underTest, implicitly)(sessionId)
+        private val request = FakeRequest().withLoggedIn(using underTest)(sessionId)
         val result          = underTest.securityPreferences()(request)
 
         validateErrorTemplateView(result, "Unable to obtain User information")
@@ -187,7 +188,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
     "removeMfa" should {
       "redirect to auth app code access page when a logged in user removes auth app" in new SetupAuthAppSecurityPreferences with LoggedIn {
-        val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(createRequest())
+        val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AuthenticatorApp))(createRequest())
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(
@@ -197,9 +198,9 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
       }
 
       "redirect to sms access code page when a logged in user removes sms" in new SetupSmsSecurityPreferences with LoggedIn {
-        when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(true))
+        when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(true))
 
-        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.Sms))(createRequest())
 
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(
@@ -209,26 +210,26 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
       }
 
       "return error page when send sms fails" in new SetupSmsSecurityPreferences with LoggedIn {
-        when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(*)).thenReturn(Future.successful(false))
+        when(underTest.thirdPartyDeveloperMfaConnector.sendSms(*[UserId], *[MfaId])(using *)).thenReturn(Future.successful(false))
 
-        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.Sms))(createRequest())
 
         validateErrorTemplateView(result, "Failed to send SMS")
       }
 
       "redirect to the login page when user is not logged in" in new SetupSuccessfulStart2SV with LoggedIn {
-        private val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(createRequestWithInvalidSession())
+        private val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AuthenticatorApp))(createRequestWithInvalidSession())
         validateRedirectToLoginPage(result)
       }
 
       "redirect to the login page when user is part logged in" in new SetupSuccessfulStart2SV with PartLogged {
-        private val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(authAppAccessCodeRequest(correctCode))
+        private val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AuthenticatorApp))(authAppAccessCodeRequest(correctCode))
         validateRedirectToLoginPage(result)
       }
 
       "redirect to select mfa page when both mfa methods are setup and user wants to remove Auth App" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AUTHENTICATOR_APP))(createRequest())
+          val result = addToken(underTest.removeMfa(authAppMfaId, MfaType.AuthenticatorApp))(createRequest())
 
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result) shouldBe Some(
@@ -238,7 +239,7 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
 
       "redirect to select mfa page when both mfa methods are setup and user wants to remove Sms" in
         new SetupSmsAndAuthAppSecurityPreferences with LoggedIn {
-          val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+          val result = addToken(underTest.removeMfa(smsMfaId, MfaType.Sms))(createRequest())
 
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result) shouldBe Some(
@@ -247,16 +248,16 @@ class MfaControllerSpec extends MfaControllerBaseSpec {
         }
 
       "return error page when there is no valid mfa setup found" in new SetupWithUnverifiedSmsSecurityPreferences with LoggedIn {
-        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.Sms))(createRequest())
 
         validateErrorTemplateView(result, "MFA setup not valid")
       }
 
       "return error page when fetch developer returns None for User " in new LoggedIn {
-        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(*))
+        when(underTest.thirdPartyDeveloperConnector.fetchDeveloper(eqTo(loggedInDeveloper.userId))(using *))
           .thenReturn(successful(None))
 
-        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.SMS))(createRequest())
+        val result = addToken(underTest.removeMfa(smsMfaId, MfaType.Sms))(createRequest())
 
         validateErrorTemplateView(result, "Unable to obtain User information")
       }

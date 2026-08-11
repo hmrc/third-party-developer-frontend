@@ -16,21 +16,24 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
+import org.mockito.Mockito
 import org.scalatest.EitherValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application => PlayApplication, Configuration, Mode}
+import play.api.{Application as PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ApiPlatformMicroserviceStub
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WireMockExtensions
 
 class ApmConnectorIntegrationSpec
@@ -49,12 +52,14 @@ class ApmConnectorIntegrationSpec
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-    val underTest                  = app.injector.instanceOf[ApmConnector]
+    given hc: HeaderCarrier = HeaderCarrier()
+    val underTest           = app.injector.instanceOf[ApmConnector]
 
   }
 
@@ -84,9 +89,9 @@ class ApmConnectorIntegrationSpec
     "retrieve an CombinedApi based on a serviceName" in new Setup {
       val serviceName                            = ServiceName("api1")
       val displayName                            = "API 1"
-      val expectedApi                            = CombinedApi(displayName, serviceName, Set(ApiCategory.VAT), ApiType.REST_API, ApiAccessType.PUBLIC)
+      val expectedApi                            = CombinedApi(displayName, serviceName, Set(ApiCategory.Vat), ApiType.RestApi, ApiAccessType.Public)
       ApiPlatformMicroserviceStub
-        .stubCombinedApiByServiceName(serviceName.value, Json.toJson(expectedApi).toString())
+        .stubCombinedApiByServiceName(serviceName.toString, Json.toJson(expectedApi).toString())
       val result: Either[Throwable, CombinedApi] = await(underTest.fetchCombinedApi(ServiceName("api1")))
       result match {
         case Right(x) =>
@@ -125,14 +130,15 @@ class ApmConnectorIntegrationSpec
     "return api data when successful" in new Setup {
       val apiDefinition               = ApiDefinition(
         serviceName = ServiceName("serviceName"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "name",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("name"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
       val response                    = List(apiDefinition)
       ApiPlatformMicroserviceStub.stubFetchAllPossibleSubscriptions(applicationId, Json.toJson(response).toString())

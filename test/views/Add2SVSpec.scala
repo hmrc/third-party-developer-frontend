@@ -38,7 +38,7 @@ class Add2SVSpec extends CommonViewSpec with WithCSRFAddToken with UserBuilder w
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withCSRFToken
 
   val developer                         = buildTrackedUser()
-  val session                           = UserSession(UserSessionId.random, LoggedInState.LOGGED_IN, developer)
+  val session                           = UserSession(UserSessionId.random, LoggedInState.LoggedIn, developer)
   implicit val userSession: UserSession = session
 
   private def renderPage(isAdminOnProductionApp: Boolean): Html = {

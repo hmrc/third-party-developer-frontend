@@ -26,20 +26,20 @@ import scala.concurrent.Future.successful
 import views.helper.IdFormatter
 import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
-import play.api.data.Forms._
+import play.api.data.Forms.*
 import play.api.data.{Form, FormError}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.submissions.services.SubmissionService
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
 import uk.gov.hmrc.apiplatform.modules.uplift.services.{GetProductionCredentialsFlowService, UpliftJourneyService}
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnectorApplicationModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{APISubscriptions, ApplicationController, FormKeys}
@@ -57,7 +57,7 @@ object UpliftJourneyController {
     val form: Form[ChooseApplicationToUpliftForm] = Form(
       mapping(
         "applicationId" -> nonEmptyText.transform[ApplicationId](text => ApplicationId(UUID.fromString(text)), id => id.toString())
-      )(ChooseApplicationToUpliftForm.apply)(ChooseApplicationToUpliftForm.unapply)
+      )(ChooseApplicationToUpliftForm.apply)(c => Some(c.applicationId))
     )
   }
 
@@ -68,7 +68,7 @@ object UpliftJourneyController {
     def form: Form[SellResellOrDistributeForm] = Form(
       mapping(
         "answer" -> optional(text).verifying(FormKeys.sellResellOrDistributeConfirmNoChoiceKey.value, s => s.isDefined)
-      )(SellResellOrDistributeForm.apply)(SellResellOrDistributeForm.unapply)
+      )(SellResellOrDistributeForm.apply)(s => Some(s.answer))
     )
   }
 }
@@ -92,17 +92,16 @@ class UpliftJourneyController @Inject() (
     weWillCheckYourAnswersView: WeWillCheckYourAnswersView,
     beforeYouStartView: BeforeYouStartView,
     unauthorisedAppDetailsView: UnauthorisedAppDetailsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   import UpliftJourneyController._
 
   val sellResellOrDistributeForm: Form[SellResellOrDistributeForm] = SellResellOrDistributeForm.form
 
-  private val exec = ec
-  private val ET   = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val ET = EitherTHelper.make[Result]
 
   def confirmApiSubscriptionsPage(sandboxAppId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(sandboxAppId) { implicit request =>
     for {
@@ -170,7 +169,7 @@ class UpliftJourneyController @Inject() (
     for {
       sellResellOrDistribute <- flowService.findSellResellOrDistribute(request.userSession)
       form                    =
-        sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.answer))))
+        sellResellOrDistribute.fold[Form[SellResellOrDistributeForm]](sellResellOrDistributeForm)(x => sellResellOrDistributeForm.fill(SellResellOrDistributeForm(Some(x.value))))
     } yield Ok(sellResellOrDistributeSoftwareView(sandboxAppId, form))
   }
 
@@ -194,8 +193,8 @@ class UpliftJourneyController @Inject() (
       validForm.answer match {
         case Some(answer) =>
           request.application.deployedTo match {
-            case Environment.SANDBOX    => storeResultAndGotoApiSubscriptionsPage(answer)
-            case Environment.PRODUCTION => createSubmissionAndGotoQuestionnairePage(answer)
+            case Environment.Sandbox    => storeResultAndGotoApiSubscriptionsPage(answer)
+            case Environment.Production => createSubmissionAndGotoQuestionnairePage(answer)
           }
 
         case None => throw new IllegalStateException("Should never get here")
@@ -245,8 +244,8 @@ class UpliftJourneyController @Inject() (
 
   def weWillCheckYourAnswers(appId: ApplicationId): Action[AnyContent] = whenTeamMemberOnApp(appId) { implicit request =>
     request.application.deployedTo match {
-      case Environment.SANDBOX    => successful(Ok(weWillCheckYourAnswersView(appId)))
-      case Environment.PRODUCTION =>
+      case Environment.Sandbox    => successful(Ok(weWillCheckYourAnswersView(appId)))
+      case Environment.Production =>
         successful(Redirect(uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.sellResellOrDistributeYourSoftware(appId)))
     }
   }
@@ -259,14 +258,14 @@ object DummySubscriptionsForm {
   def form: Form[DummySubscriptionsForm] = Form(
     mapping(
       "hasNonExampleSubscription" -> boolean
-    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+    )(DummySubscriptionsForm.apply)(d => Some(d.hasNonExampleSubscription))
       .verifying("error.must.subscribe", x => x.hasNonExampleSubscription)
   )
 
   def form2: Form[DummySubscriptionsForm] = Form(
     mapping(
       "hasNonExampleSubscription" -> boolean
-    )(DummySubscriptionsForm.apply)(DummySubscriptionsForm.unapply)
+    )(DummySubscriptionsForm.apply)(d => Some(d.hasNonExampleSubscription))
       .verifying("error.turnoffapis.requires.at.least.one", x => x.hasNonExampleSubscription)
   )
 }

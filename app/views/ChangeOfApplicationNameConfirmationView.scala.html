@@ -14,17 +14,15 @@
  * limitations under the License.
  *@
 
-@import include._
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import views.html.include.DevMain
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.ApplicationNameModel
 
 
 @this(devMain: DevMain)
 
-@(model: ApplicationNameModel, newAppName: String)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
+@(model: ApplicationNameModel, newAppName: String)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider)
 
 @devMain(
   title = "Change of application name request received",

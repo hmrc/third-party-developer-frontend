@@ -23,20 +23,20 @@ import views.html.UpdateTermsAndConditionsLocationView
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import play.api.mvc.*
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys.appNameField
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, ChangeOfTermsAndConditionsLocationForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.ProductionAndAdmin
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class UpdateTermsAndConditionsLocationController @Inject() (
@@ -47,10 +47,10 @@ class UpdateTermsAndConditionsLocationController @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     updateTermsAndConditionsLocationView: UpdateTermsAndConditionsLocationView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
@@ -74,8 +74,8 @@ class UpdateTermsAndConditionsLocationController @Inject() (
 
       val oldLocation = application.access match {
         case Access.Standard(_, _, _, _, _, _, Some(ImportantSubmissionData(_, _, _, termsAndConditionsLocation, _, _))) => termsAndConditionsLocation
-        case Access.Standard(_, _, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocations.Url(termsAndConditionsUrl)
-        case _                                                                                                           => PrivacyPolicyLocations.NoneProvided
+        case Access.Standard(_, _, Some(termsAndConditionsUrl), _, _, _, None)                                           => TermsAndConditionsLocation.Url(termsAndConditionsUrl)
+        case _                                                                                                           => TermsAndConditionsLocation.NoneProvided
       }
       val newLocation = form.toLocation
 

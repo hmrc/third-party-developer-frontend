@@ -22,9 +22,9 @@ import org.mockito.quality.Strictness
 import org.mockito.verification.VerificationMode
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.uplift.services.UpliftJourneyService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 
@@ -42,27 +42,27 @@ trait UpliftJourneyServiceMockModule extends MockitoSugar with ArgumentMatchersS
     object ApiSubscriptionData {
 
       def thenReturns(in: Set[String], bool: Boolean) =
-        when(aMock.apiSubscriptionData(*[ApplicationId], *, *)(*)).thenReturn(successful((in, bool)))
+        when(aMock.apiSubscriptionData(*[ApplicationId], *, *)(using *)).thenReturn(successful((in, bool)))
     }
 
     object StoreDefaultSubscriptionsInFlow {
 
       def thenReturns() =
-        when(aMock.storeDefaultSubscriptionsInFlow(*[ApplicationId], *)(*)).thenReturn(successful(mock[ApiSubscriptions]))
+        when(aMock.storeDefaultSubscriptionsInFlow(*[ApplicationId], *)(using *)).thenReturn(successful(mock[ApiSubscriptions]))
     }
 
     object ConfirmAndUplift {
-      def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Right(appId)))
+      def thenReturns(appId: ApplicationId) = when(aMock.confirmAndUplift(*[ApplicationId], *)(using *)).thenReturn(successful(Right(appId)))
 
-      def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *)(*)).thenReturn(successful(Left(err)))
+      def thenLeft(err: String) = when(aMock.confirmAndUplift(*[ApplicationId], *)(using *)).thenReturn(successful(Left(err)))
     }
 
     object ChangeApiSubscriptions {
-      def thenReturns(out: List[APISubscriptionStatus]) = when(aMock.changeApiSubscriptions(*[ApplicationId], *, *)(*)).thenReturn(successful(out))
+      def thenReturns(out: List[APISubscriptionStatus]) = when(aMock.changeApiSubscriptions(*[ApplicationId], *, *)(using *)).thenReturn(successful(out))
     }
 
     object CreateNewSubmission {
-      def thenReturns(out: Submission) = when(aMock.createNewSubmission(*[ApplicationId], *, *)(*)).thenReturn(successful(Right(out)))
+      def thenReturns(out: Submission) = when(aMock.createNewSubmission(*[ApplicationId], *, *)(using *)).thenReturn(successful(Right(out)))
     }
   }
 

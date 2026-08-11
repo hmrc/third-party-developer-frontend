@@ -23,8 +23,6 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.SecurityPreferencesNoItemsView
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SecurityPreferencesNoItemsViewSpec extends CommonViewSpec with WithCSRFAddToken {

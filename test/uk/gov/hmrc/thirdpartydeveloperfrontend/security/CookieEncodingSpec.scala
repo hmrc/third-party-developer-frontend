@@ -24,10 +24,12 @@ import play.api.libs.crypto.CookieSigner
 import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.{Application, Mode}
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ConnectorMetrics, NoopConnectorMetrics}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -36,6 +38,8 @@ class CookieEncodingSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite {
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
       .in(Mode.Test)
       .build()
 

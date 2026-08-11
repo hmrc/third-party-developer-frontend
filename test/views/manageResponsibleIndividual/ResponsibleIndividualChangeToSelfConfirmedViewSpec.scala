@@ -23,7 +23,6 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualChangeToSelfC
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -46,7 +45,7 @@ class ResponsibleIndividualChangeToSelfConfirmedViewSpec extends CommonViewSpec 
     "display name of application correctly" in {
       val document = Jsoup.parse(renderPage().body)
 
-      document.selectFirst("#appName").text() shouldBe application.name.value
+      document.selectFirst("#appName").text() shouldBe application.name.toString
     }
   }
 }

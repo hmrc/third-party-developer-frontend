@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers
 sealed trait AddTeamMemberPageMode
 
 object AddTeamMemberPageMode {
-  final case object ManageTeamMembers extends AddTeamMemberPageMode
-  final case object ApplicationCheck  extends AddTeamMemberPageMode
-  final case object CheckYourAnswers  extends AddTeamMemberPageMode
+  case object ManageTeamMembers extends AddTeamMemberPageMode
+  case object ApplicationCheck  extends AddTeamMemberPageMode
+  case object CheckYourAnswers  extends AddTeamMemberPageMode
 
   val values = List(ManageTeamMembers, ApplicationCheck, CheckYourAnswers)
 

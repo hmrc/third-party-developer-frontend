@@ -26,5 +26,5 @@ trait SampleUserSession {
   lazy val user: User = buildTrackedUser()
   lazy val sessionId  = UserSessionId.random
 
-  lazy val userSession: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, user)
+  lazy val userSession: UserSession = UserSession(sessionId, LoggedInState.LoggedIn, user)
 }

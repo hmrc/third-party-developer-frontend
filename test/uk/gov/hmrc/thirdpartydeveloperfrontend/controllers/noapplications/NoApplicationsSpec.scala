@@ -23,17 +23,17 @@ import views.html.noapplications.{NoApplicationsChoiceView, StartUsingRestApisVi
 
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class NoApplicationsSpec
     extends BaseControllerSpec
@@ -64,12 +64,12 @@ class NoApplicationsSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val loggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(noApplicationsController, implicitly)(sessionId)
-      .withSession(sessionParams: _*).withCSRFToken
+      .withLoggedIn(using noApplicationsController)(sessionId)
+      .withSession(sessionParams*).withCSRFToken
 
     val partLoggedInRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-      .withLoggedIn(noApplicationsController, implicitly)(partLoggedInSession.sessionId)
-      .withSession(sessionParams: _*)
+      .withLoggedIn(using noApplicationsController)(partLoggedInSession.sessionId)
+      .withSession(sessionParams*)
   }
 
   "noApplications" when {
@@ -99,7 +99,7 @@ class NoApplicationsSpec
     "noApplicationsAction" should {
 
       "redirect to email preferences when 'get-emails' choice posted" in new Setup {
-        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "get-emails")
+        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "get-emails").withMethod("POST")
 
         private val result = noApplicationsController.noApplicationsAction()(request)
         status(result) shouldBe SEE_OTHER
@@ -107,7 +107,7 @@ class NoApplicationsSpec
       }
 
       "redirect to start using rest apis when 'use-apis' choice posted" in new Setup {
-        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "use-apis")
+        val request = loggedInRequest.withFormUrlEncodedBody("choice" -> "use-apis").withMethod("POST")
 
         private val result = noApplicationsController.noApplicationsAction()(request)
         status(result) shouldBe SEE_OTHER

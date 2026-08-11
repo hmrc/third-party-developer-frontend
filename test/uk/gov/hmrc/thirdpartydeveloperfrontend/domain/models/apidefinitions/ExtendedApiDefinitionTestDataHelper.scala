@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
 
 trait CombinedApiTestDataHelper {
-  def combinedApi(name: String): CombinedApi = combinedApi(name, List(ApiCategory.VAT))
+  def combinedApi(name: String): CombinedApi = combinedApi(name, List(ApiCategory.Vat))
 
-  def combinedApi(name: String, categories: List[ApiCategory]) = CombinedApi(name, ServiceName(name), categories.toSet, ApiType.REST_API, ApiAccessType.PUBLIC)
+  def combinedApi(name: String, categories: List[ApiCategory]) = CombinedApi(name, ServiceName(name), categories.toSet, ApiType.RestApi, ApiAccessType.Public)
 }

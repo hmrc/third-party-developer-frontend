@@ -26,7 +26,7 @@ import views.html.ppns.PushSecretsView
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.PpnsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.ViewPushSecret
@@ -43,7 +43,7 @@ class PushPullNotifications @Inject() (
     mcc: MessagesControllerComponents,
     pushSecretsView: PushSecretsView,
     pushPullNotificationsService: PushPullNotificationsService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     override val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc) with PpnsActions {
 

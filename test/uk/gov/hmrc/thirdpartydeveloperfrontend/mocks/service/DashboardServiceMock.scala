@@ -33,13 +33,13 @@ trait DashboardServiceMockModule extends MockitoSugar with ArgumentMatchersSugar
     object FetchApplicationList {
 
       def thenReturn(apps: Seq[ApplicationSummary]) =
-        when(aMock.fetchApplicationList(*[UserId])(*)).thenReturn(successful(apps))
+        when(aMock.fetchApplicationList(*[UserId])(using *)).thenReturn(successful(apps))
     }
 
     object FetchOrganisationsByUserId {
 
       def thenReturn(orgs: Seq[Organisation]) =
-        when(aMock.fetchOrganisationsByUserId(*[UserId])(*)).thenReturn(successful(orgs))
+        when(aMock.fetchOrganisationsByUserId(*[UserId])(using *)).thenReturn(successful(orgs))
     }
   }
 

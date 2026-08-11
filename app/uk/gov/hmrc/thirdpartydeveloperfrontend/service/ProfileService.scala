@@ -22,28 +22,28 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.UpdateRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 
 @Singleton
 class ProfileService @Inject() (
     deskproConnector: ApiPlatformDeskproConnector,
     developerConnector: ThirdPartyDeveloperConnector,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow {
 
-  def updateProfileName(userId: UserId, email: LaxEmailAddress, firstName: String, lastName: String)(implicit hc: HeaderCarrier) = {
+  def updateProfileName(userId: UserId, email: LaxEmailAddress, firstName: String, lastName: String)(using hc: HeaderCarrier) = {
     val name = s"$firstName $lastName"
     for {
       response <- developerConnector.updateProfile(userId, UpdateRequest(firstName, lastName))
-      result   <- deskproConnector.updatePersonName(email, name, hc)
+      _        <- deskproConnector.updatePersonName(email, name, hc)
     } yield response
   }
 
-  def lookupDeveloperName(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def lookupDeveloperName(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     developerConnector.fetchByEmails(Set(email))
       .map { users =>
         users.headOption.map { user =>

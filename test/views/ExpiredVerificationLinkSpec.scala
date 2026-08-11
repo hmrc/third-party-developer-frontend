@@ -22,7 +22,7 @@ import views.html.ExpiredVerificationLinkView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ExpiredVerificationLinkSpec extends CommonViewSpec with WithCSRFAddToken {

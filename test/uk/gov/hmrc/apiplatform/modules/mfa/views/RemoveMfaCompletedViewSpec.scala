@@ -22,7 +22,7 @@ import views.helper.CommonViewSpec
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.RemoveMfaCompletedView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -39,7 +39,7 @@ class RemoveMfaCompletedViewSpec extends CommonViewSpec
 
   "RemoveMfaCompletedView" should {
     "render as expected" in {
-      val mainView = removeMfaCompletedView.apply()(FakeRequest(), loggedIn, stubMessages(), appConfig)
+      val mainView = removeMfaCompletedView.apply()(using FakeRequest(), loggedIn, stubMessages(), appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("panel-title").text shouldBe "You've removed this security preference"
       document.getElementById("view-all-apps").attr("href") shouldBe "/developer/applications"

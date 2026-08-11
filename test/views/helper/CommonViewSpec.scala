@@ -16,7 +16,6 @@
 
 package views.helper
 
-import java.time.Period
 import java.util.Locale
 
 import org.scalatest.matchers.should.Matchers
@@ -24,12 +23,15 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.Application
 import play.api.i18n.{Lang, MessagesImpl, MessagesProvider}
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.GrantLength
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Matchers {
@@ -47,6 +49,8 @@ trait CommonViewSpec extends AsyncHmrcSpec with GuiceOneAppPerSuite with Matcher
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(("metrics.jvm", false))
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
       .build()
 
 }

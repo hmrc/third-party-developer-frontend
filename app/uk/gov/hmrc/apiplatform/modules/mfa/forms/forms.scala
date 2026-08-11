@@ -21,8 +21,9 @@ import java.util.regex.Pattern
 import play.api.data.Form
 import play.api.data.Forms.{boolean, mapping, nonEmptyText, text}
 
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
 
 final case class MfaAccessCodeForm(accessCode: String, rememberMe: Boolean)
@@ -33,7 +34,7 @@ object MfaAccessCodeForm {
     mapping(
       "accessCode" -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
       "rememberMe" -> boolean
-    )(MfaAccessCodeForm.apply)(MfaAccessCodeForm.unapply)
+    )(MfaAccessCodeForm.apply)(m => Some((m.accessCode, m.rememberMe)))
   )
 }
 
@@ -42,7 +43,7 @@ final case class MfaNameChangeForm(name: String)
 object MfaNameChangeForm {
 
   def form: Form[MfaNameChangeForm] = Form(
-    mapping("name" -> text.verifying(FormKeys.mfaNameChangeInvalidKey, s => s.length > 3))(MfaNameChangeForm.apply)(MfaNameChangeForm.unapply)
+    mapping("name" -> text.verifying(FormKeys.mfaNameChangeInvalidKey, s => s.length > 3))(MfaNameChangeForm.apply)(m => Some(m.name))
   )
 }
 
@@ -57,7 +58,7 @@ object MobileNumberForm {
     Form(
       mapping("mobileNumber" -> text
         .verifying(FormKeys.mobileNumberTooShortKey, s => s.trim.length >= minimumPhoneNumberLength)
-        .verifying(FormKeys.mobileNumberInvalidKey, s => isValidPhoneNumber(s)))(MobileNumberForm.apply)(MobileNumberForm.unapply)
+        .verifying(FormKeys.mobileNumberInvalidKey, s => isValidPhoneNumber(s)))(MobileNumberForm.apply)(m => Some(m.mobileNumber))
     )
   }
 
@@ -73,7 +74,7 @@ object SmsAccessCodeForm {
       "accessCode"   -> text.verifying(FormKeys.accessCodeInvalidKey, s => s.matches("^[0-9]{6}$")),
       "mobileNumber" -> text,
       "rememberMe"   -> boolean
-    )(SmsAccessCodeForm.apply)(SmsAccessCodeForm.unapply)
+    )(SmsAccessCodeForm.apply)(s => Some((s.accessCode, s.mobileNumber, s.rememberMe)))
   )
 }
 
@@ -84,11 +85,11 @@ object SelectMfaForm {
   def form: Form[SelectMfaForm] = Form(
     mapping(
       "mfaType" -> text.verifying(FormKeys.selectMfaInvalidKey, s => verifyMfaType(s))
-    )(SelectMfaForm.apply)(SelectMfaForm.unapply)
+    )(SelectMfaForm.apply)(s => Some(s.mfaType))
   )
 
   def verifyMfaType(mfaType: String) = {
-    MfaType.values.exists(v => v.toString().equalsIgnoreCase(mfaType))
+    MfaType.values.exists(v => v.asScreamingSnakeCase.equalsIgnoreCase(mfaType))
   }
 }
 
@@ -99,6 +100,6 @@ object SelectLoginMfaForm {
   def form: Form[SelectLoginMfaForm] = Form(
     mapping(
       "mfaId" -> nonEmptyText
-    )(SelectLoginMfaForm.apply)(SelectLoginMfaForm.unapply)
+    )(SelectLoginMfaForm.apply)(s => Some(s.mfaId))
   )
 }

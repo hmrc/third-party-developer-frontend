@@ -26,20 +26,20 @@ import views.html.managesubscriptions.{EditApiMetadataFieldView, EditApiMetadata
 
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator.Roles
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator.Role
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.DevhubAccessRequirement.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationNotFound
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, SubscriptionFieldsService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -54,9 +54,9 @@ class ManageSubscriptionsSpec
   val apiContext: ApiContext    = ApiContext("test")
   val apiVersion: ApiVersionNbr = ApiVersionNbr("1.0")
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  given hc: HeaderCarrier = HeaderCarrier()
 
-  val role: Roles.ADMINISTRATOR.type = Collaborator.Roles.ADMINISTRATOR
+  val role: Role.Administrator.type = Collaborator.Role.Administrator
 
   val application: ApplicationWithCollaborators =
     standardApp
@@ -67,7 +67,7 @@ class ManageSubscriptionsSpec
         termsAndConditionsUrl = Some("http://tnc-url.com")
       ))
 
-  val productionApplication: ApplicationWithCollaborators = application.withEnvironment(Environment.PRODUCTION)
+  val productionApplication: ApplicationWithCollaborators = application.withEnvironment(Environment.Production)
 
   val privilegedApplication: ApplicationWithCollaborators = application.withAccess(Access.Privileged())
 
@@ -111,10 +111,10 @@ class ManageSubscriptionsSpec
     val appId           = standardApp.id
     val clientId        = standardApp.clientId
 
-    fetchAppsByTeamMemberReturns(Environment.PRODUCTION)(Seq(application.withSubscriptions(Set.empty)))
+    fetchAppsByTeamMemberReturns(Environment.Production)(Seq(application.withSubscriptions(Set.empty)))
 
     def editFormPostRequest(fieldName: FieldName, fieldValue: FieldValue): FakeRequest[AnyContentAsFormUrlEncoded] = {
-      loggedInAdminRequest.withFormUrlEncodedBody(fieldName.value -> fieldValue.value)
+      loggedInAdminRequest.withFormUrlEncodedBody(fieldName.value -> fieldValue.toString).withMethod("POST")
     }
 
     def assertCommonEditFormFields(result: Future[Result], apiSubscriptionStatus: APISubscriptionStatus): Unit = {
@@ -140,13 +140,13 @@ class ManageSubscriptionsSpec
     def assertIsApiConfigureEditPage(result: Future[Result]): Unit = {
       contentAsString(result) should include("Subscription configuration")
       contentAsString(result) should include("Environment")
-      contentAsString(result) should include(application.name.value)
+      contentAsString(result) should include(application.name.toString)
     }
 
     def assertIsSandboxJourneyApiConfigureEditPage(result: Future[Result]): Unit = {
       contentAsString(result) should not include "Subscription configuration"
       contentAsString(result) should not include "Environment"
-      contentAsString(result) should not include application.name.value
+      contentAsString(result) should not include application.name.toString
     }
   }
 
@@ -290,7 +290,7 @@ class ManageSubscriptionsSpec
 
           assertCommonEditFormFields(result, apiSubscriptionStatus)
 
-          contentAsString(result) should include(application.name.value)
+          contentAsString(result) should include(application.name.toString)
           contentAsString(result) should include("Sandbox")
         }
       }
@@ -326,7 +326,7 @@ class ManageSubscriptionsSpec
 
           contentAsString(result) should include(field.definition.description)
           contentAsString(result) should include(field.definition.hint)
-          contentAsString(result) should include(field.value.value)
+          contentAsString(result) should include(field.value.toString)
         }
 
         "use the description if no hint text is available" in new ManageSubscriptionsSetup {
@@ -373,7 +373,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(successful(SaveSubscriptionFieldsSuccessResponse))
 
             private val loggedInWithFormValues = editFormPostRequest(subSubscriptionValue.definition.name, FieldValue(newSubscriptionValue))
@@ -396,7 +396,7 @@ class ManageSubscriptionsSpec
                 eqTo(apiSubscriptionStatus.apiVersion.versionNbr),
                 eqTo(apiSubscriptionStatus.fields.fields),
                 eqTo(expectedFields)
-              )(*)
+              )(using *)
           }
 
           s"save action saves valid subscription field values and with a read only field" in new ManageSubscriptionsSetup {
@@ -407,14 +407,14 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsSuccessResponse))
 
             val newSubscriptionValue = "new value"
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
               writableSubSubscriptionValue.definition.name.value -> newSubscriptionValue
-            )
+            ).withMethod("POST")
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr))(
@@ -434,7 +434,7 @@ class ManageSubscriptionsSpec
                 eqTo(apiSubscriptionStatus.apiVersion.versionNbr),
                 eqTo(apiSubscriptionStatus.fields.fields),
                 eqTo(expectedFields)
-              )(*)
+              )(using *)
           }
 
           s"save action saves valid subscription field values fails and with a read only field is passed in by a bad actor" in new ManageSubscriptionsSetup {
@@ -450,14 +450,14 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
             val newSubscriptionValue = "illegal new value"
 
             private val loggedInWithFormValues = loggedInRequest.withFormUrlEncodedBody(
               readonlySubSubscriptionValue.definition.name.value -> newSubscriptionValue
-            )
+            ).withMethod("POST")
 
             private val result =
               addToken(manageSubscriptionController.saveSubscriptionFields(appId, apiSubscriptionStatus.context, apiSubscriptionStatus.apiVersion.versionNbr))(
@@ -475,7 +475,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -501,7 +501,7 @@ class ManageSubscriptionsSpec
             val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
             givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+            when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
               .thenReturn(Future.successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
             private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -554,7 +554,7 @@ class ManageSubscriptionsSpec
           val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
           givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
             .thenReturn(Future.successful(SaveSubscriptionFieldsFailureResponse(fieldErrors)))
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head
@@ -578,7 +578,7 @@ class ManageSubscriptionsSpec
           val subsData: List[APISubscriptionStatus] = List(apiSubscriptionStatus)
           givenApplicationAction(application.withSubscriptions(asSubscriptions(subsData)).withFieldValues(asFields(subsData)), userSession, subsData)
 
-          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(*))
+          when(mockSubscriptionFieldsService.saveFieldValues(*, *, *[ApiContext], *[ApiVersionNbr], *, *)(using *))
             .thenReturn(successful(SaveSubscriptionFieldsAccessDeniedResponse))
 
           private val subSubscriptionValue = apiSubscriptionStatus.fields.fields.head

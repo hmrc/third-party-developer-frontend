@@ -15,7 +15,7 @@
  */
 
 import java.time.Duration
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.openqa.selenium.support.ui.{ExpectedConditions, FluentWait, Wait}
 import org.openqa.selenium.{By, WebDriver, WebElement}
@@ -26,9 +26,9 @@ import uk.gov.hmrc.selenium.webdriver.Driver
 case class Link(href: String, text: String)
 
 trait WebLink extends PageObject {
-  def url(): String
+  def url: String
 
-  def go(): Unit = get(this.url())
+  def go(): Unit = get(this.url)
 
   protected def waitForElementToBePresent(locator: By): WebElement = {
     fluentWait.until(ExpectedConditions.presenceOfElementLocated(locator))

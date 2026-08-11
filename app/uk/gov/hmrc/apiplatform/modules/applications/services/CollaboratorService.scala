@@ -22,19 +22,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchSuccessResult, _}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{DispatchSuccessResult, *}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, LaxEmailAddress}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 
 @Singleton
 class CollaboratorService @Inject() (
     apmCmdModule: ApmConnectorCommandModule,
     developerConnector: ThirdPartyDeveloperConnector,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends CommandHandlerTypes[DispatchSuccessResult]
     with ClockNow {
 
@@ -43,7 +43,7 @@ class CollaboratorService @Inject() (
       newTeamMemberEmail: LaxEmailAddress,
       newTeamMemberRole: Collaborator.Role,
       requestingEmail: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): AppCmdResult = {
     val setOfAdminEmails = app.collaborators.filter(_.isAdministrator).map(_.emailAddress)
 
@@ -67,7 +67,7 @@ class CollaboratorService @Inject() (
       app: ApplicationWithCollaborators,
       teamMemberToRemove: LaxEmailAddress,
       requestingEmail: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): AppCmdResult = {
     val otherAdminEmails = determineOtherAdmins(app.collaborators, Set(requestingEmail, teamMemberToRemove))
 
@@ -80,7 +80,7 @@ class CollaboratorService @Inject() (
     } yield response
   }
 
-  def getCollaboratorUsers(collaborators: Set[Collaborator])(implicit hc: HeaderCarrier): Future[Seq[User]] = {
+  def getCollaboratorUsers(collaborators: Set[Collaborator])(using HeaderCarrier): Future[Seq[User]] = {
     developerConnector.fetchByEmails(collaborators.map(_.emailAddress))
   }
 }

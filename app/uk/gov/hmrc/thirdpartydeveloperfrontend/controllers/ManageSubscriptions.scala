@@ -21,22 +21,22 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import com.google.inject.{Inject, Singleton}
 import views.html.createJourney.{SubscriptionConfigurationPageView, SubscriptionConfigurationStartView, SubscriptionConfigurationStepPageView}
-import views.html.managesubscriptions._
+import views.html.managesubscriptions.*
 
 import play.api.data.FormError
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.{APISubscriptionStatusWithSubscriptionFields, APISubscriptionStatusWithWritableSubscriptionField}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.EditManageSubscription.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.NoSubscriptionFieldsRefinerBehaviour
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, AuditService, SessionService, SubscriptionFieldsService}
 
 object ManageSubscriptions {
@@ -46,11 +46,11 @@ object ManageSubscriptions {
   case class ApiDetails(name: String, context: ApiContext, version: ApiVersionNbr, displayedStatus: String, subsValues: Seq[Field])
 
   def toFieldValue(accessLevel: DevhubAccessLevel)(sfv: SubscriptionFieldValue): Field = {
-    def default(in: String, default: String) = if (in.isEmpty) default else in
+    def default(in: FieldValue, default: String): String = if (in.isEmpty) default else in.toString
 
     val canWrite = sfv.definition.access.devhub.satisfiesWrite(accessLevel)
 
-    Field(sfv.definition.name.value, sfv.definition.shortDescription, default(sfv.value.value, "None"), canWrite)
+    Field(sfv.definition.name, sfv.definition.shortDescription, default(sfv.value, "None"), canWrite)
   }
 
   def toDetails(accessLevel: DevhubAccessLevel)(in: APISubscriptionStatusWithSubscriptionFields): ApiDetails = {
@@ -58,7 +58,7 @@ object ManageSubscriptions {
       name = in.name,
       context = in.context,
       version = in.apiVersion.versionNbr,
-      displayedStatus = in.apiVersion.status.displayText,
+      displayedStatus = in.apiVersion.status.toString,
       subsValues = in.fields.fields.map(toFieldValue(accessLevel))
     )
   }
@@ -80,7 +80,7 @@ class ManageSubscriptions @Inject() (
     subscriptionConfigurationStartView: SubscriptionConfigurationStartView,
     subscriptionConfigurationPageView: SubscriptionConfigurationPageView,
     subscriptionConfigurationStepPageView: SubscriptionConfigurationStepPageView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper
@@ -169,7 +169,7 @@ class ManageSubscriptions @Inject() (
       apiSubscription: APISubscriptionStatusWithSubscriptionFields,
       successRedirect: Call,
       validationFailureView: EditApiConfigurationViewModel => Html
-    )(implicit hc: HeaderCarrier,
+    )(using hc: HeaderCarrier,
       applicationRequest: ApplicationRequest[AnyContent]
     ): Future[Result] = {
 
@@ -198,7 +198,7 @@ class ManageSubscriptions @Inject() (
       apiSubscription: APISubscriptionStatusWithWritableSubscriptionField,
       successRedirect: Call,
       validationFailureView: EditApiConfigurationFieldViewModel => Html
-    )(implicit hc: HeaderCarrier,
+    )(using hc: HeaderCarrier,
       applicationRequest: ApplicationRequest[AnyContent]
     ): Future[Result] = {
 

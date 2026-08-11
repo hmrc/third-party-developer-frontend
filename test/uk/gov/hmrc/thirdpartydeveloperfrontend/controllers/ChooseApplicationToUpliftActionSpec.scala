@@ -20,10 +20,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import views.helper.EnvironmentNameService
-import views.html._
+import views.html.*
 
 import play.api.mvc.Result
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
@@ -31,14 +31,13 @@ import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.*
 
 class ChooseApplicationToUpliftActionSpec
     extends BaseControllerSpec
@@ -66,8 +65,6 @@ class ChooseApplicationToUpliftActionSpec
     val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
 
-    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-
     val flowServiceMock = mock[GetProductionCredentialsFlowService]
 
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
@@ -88,7 +85,6 @@ class ChooseApplicationToUpliftActionSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      beforeYouStartView,
       flowServiceMock
     )
 
@@ -103,13 +99,13 @@ class ChooseApplicationToUpliftActionSpec
 
     def shouldShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should include(summary.name.value)
+        contentAsString(results) should include(summary.name.toString)
       }
     }
 
     def shouldNotShowAppNamesFor(summaries: Seq[ApplicationSummary])(implicit results: Future[Result]) = {
       summaries.map { summary =>
-        contentAsString(results) should not include (summary.name.value)
+        contentAsString(results) should not include (summary.name.toString)
       }
     }
 
@@ -129,7 +125,7 @@ class ChooseApplicationToUpliftActionSpec
 
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInAdminRequest.withFormUrlEncodedBody(("applicationId" -> "")).withCSRFToken)
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInAdminRequest.withFormUrlEncodedBody(("applicationId" -> "")).withCSRFToken.withMethod("POST"))
 
       status(result) shouldBe BAD_REQUEST
 
@@ -143,7 +139,7 @@ class ChooseApplicationToUpliftActionSpec
       aUsersUplfitableAndNotUpliftableAppsReturns(summaries, summaries.map(_.id), List.empty)
       when(flowServiceMock.storeApiSubscriptions(*, *)).thenReturn(Future.successful(GetProductionCredentialsFlow(UserSessionId.random, None, None)))
 
-      val result = underTest.chooseApplicationToUpliftAction()(loggedInDevRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.toString())))
+      val result = underTest.chooseApplicationToUpliftAction()(loggedInDevRequest.withFormUrlEncodedBody(("applicationId" -> sandboxAppId.toString())).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result).value shouldBe uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.beforeYouStart(sandboxAppId).toString

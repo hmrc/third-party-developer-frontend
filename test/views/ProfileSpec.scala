@@ -22,13 +22,12 @@ import views.html.{ChangeProfileView, ProfileView}
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ProfileForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ProfileSpec extends CommonViewSpec
@@ -63,7 +62,7 @@ class ProfileSpec extends CommonViewSpec
         .withError("firstname", "First name error message")
         .withError("lastname", "Last name error message")
 
-      val page = changeProfileView.render(formWithErrors, request, developer, appConfig, messagesProvider, "details")
+      val page = changeProfileView.render(formWithErrors, request, developer, appConfig, messagesProvider)
       page.contentType should include("text/html")
 
       val document = Jsoup.parse(page.body)

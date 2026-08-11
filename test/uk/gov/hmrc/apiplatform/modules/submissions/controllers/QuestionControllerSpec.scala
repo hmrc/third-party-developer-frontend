@@ -22,24 +22,24 @@ import cats.data.NonEmptyList
 import org.scalatest.AppendedClues
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html.{CheckAnswersView, QuestionView}
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.QuestionView
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class QuestionControllerSpec
     extends BaseControllerSpec
@@ -65,7 +65,7 @@ class QuestionControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: HasSubscriptions & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -86,10 +86,9 @@ class QuestionControllerSpec
       with AppendedClues
       with FixedClock {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
-    val questionView     = app.injector.instanceOf[QuestionView]
-    val checkAnswersView = app.injector.instanceOf[CheckAnswersView]
+    val questionView = app.injector.instanceOf[QuestionView]
 
     val controller = new QuestionsController(
       mockErrorHandler,
@@ -99,11 +98,10 @@ class QuestionControllerSpec
       SubmissionServiceMock.aMock,
       cookieSigner,
       questionView,
-      checkAnswersView,
       mcc
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
   }
 
   "showQuestion" should {
@@ -114,7 +112,7 @@ class QuestionControllerSpec
       val result             = controller.showQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      contentAsString(result) contains (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) `contains` (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
     }
 
     "succeed and check for label, hintText and afterStatement" in new Setup {
@@ -124,14 +122,14 @@ class QuestionControllerSpec
       val result             = controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      contentAsString(result) contains (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
-      contentAsString(result) contains ("Email address") shouldBe true withClue ("HTML content did not contain label")
-      contentAsString(result) contains ("Cannot be a shared mailbox") shouldBe true withClue ("HTML content did not contain hintText")
+      contentAsString(result) `contains` (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) `contains` ("Email address") shouldBe true withClue ("HTML content did not contain label")
+      contentAsString(result) `contains` ("Cannot be a shared mailbox") shouldBe true withClue ("HTML content did not contain hintText")
       contentAsString(
         result
-      ) contains (s"""aria-describedby="hint-${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"""") shouldBe true withClue ("HTML content did not contain describeBy")
-      contentAsString(result) contains ("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue ("HTML content did not contain afterStatement")
-      contentAsString(result) contains ("<title>")
+      ) `contains` (s"""aria-describedby="hint-${testQuestionIdsOfInterest.responsibleIndividualEmailId.value}"""") shouldBe true withClue ("HTML content did not contain describeBy")
+      contentAsString(result) `contains` ("We will email a verification link to the responsible individual that expires in 10 working days.") shouldBe true withClue ("HTML content did not contain afterStatement")
+      contentAsString(result) `contains` ("<title>")
     }
 
     "display fail and show error in title when applicable" in new Setup {
@@ -141,7 +139,7 @@ class QuestionControllerSpec
         controller.showQuestion(aSubmission.id, testQuestionIdsOfInterest.responsibleIndividualEmailId, None, Some(ErrorInfo("blah", "message")))(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe BAD_REQUEST
-      contentAsString(result) contains ("<title>Error:") shouldBe true withClue ("Page title should contain `Error: ` prefix")
+      contentAsString(result) `contains` ("<title>Error:") shouldBe true withClue ("Page title should contain `Error: ` prefix")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
@@ -162,7 +160,7 @@ class QuestionControllerSpec
       val result             = controller.updateQuestion(aSubmission.id, questionId)(loggedInRequest.withCSRFToken)
 
       status(result) shouldBe OK
-      contentAsString(result) contains (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
+      contentAsString(result) `contains` (formSubmissionLink) shouldBe true withClue (s"(HTML content did not contain $formSubmissionLink)")
     }
 
     "fail with a BAD REQUEST for an invalid questionId" in new Setup {
@@ -179,7 +177,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturns(aSubmission.withIncompleteProgress())
       private val answer1 = "Yes"
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
@@ -189,7 +187,7 @@ class QuestionControllerSpec
 
     "succeed when answer given and trim answer" in new Setup {
       private val answer1 = "  Bob's application  "
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save").withMethod("POST")
 
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsForAnswer(List(answer1.trim()), aSubmission.withIncompleteProgress())
@@ -204,7 +202,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       SubmissionServiceMock.RecordAnswer.thenReturnsNone()
       private val invalidEmailAnswer = "bob"
-      private val request            = loggedInRequest.withFormUrlEncodedBody("answer" -> invalidEmailAnswer, "submit-action" -> "save")
+      private val request            = loggedInRequest.withFormUrlEncodedBody("answer" -> invalidEmailAnswer, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI2.id)(request.withCSRFToken)
 
@@ -224,7 +222,7 @@ class QuestionControllerSpec
     "fail if no answer provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       private val blankAnswer = ""
-      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
+      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI1.id)(request.withCSRFToken)
 
@@ -244,7 +242,7 @@ class QuestionControllerSpec
     "fail if just spaces provided and returns custom error message" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
       private val blankAnswer = " "
-      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save")
+      private val request     = loggedInRequest.withFormUrlEncodedBody("answer" -> blankAnswer, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, OrganisationDetails.questionRI1.id)(request.withCSRFToken)
 
@@ -263,7 +261,7 @@ class QuestionControllerSpec
 
     "fail if no answer field in form" in new Setup {
       SubmissionServiceMock.Fetch.thenReturns(aSubmission.withIncompleteProgress())
-      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("submit-action" -> "save").withMethod("POST")
 
       val result = controller.recordAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
@@ -289,7 +287,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.RecordAnswer.thenReturns(fullyAnsweredSubmission)
 
       private val answer1 = "Yes"
-      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save")
+      private val request = loggedInRequest.withFormUrlEncodedBody("answer" -> answer1, "submit-action" -> "save").withMethod("POST")
 
       val result = controller.updateAnswer(aSubmission.id, questionId)(request.withCSRFToken)
 
@@ -343,7 +341,7 @@ class QuestionControllerSpec
       SubmissionServiceMock.RecordAnswer.thenReturns(modifiedSubmission)
 
       private val utrAnswer = "Unique Taxpayer Reference (UTR)"
-      private val request   = loggedInRequest.withFormUrlEncodedBody("answer" -> utrAnswer, "submit-action" -> "save")
+      private val request   = loggedInRequest.withFormUrlEncodedBody("answer" -> utrAnswer, "submit-action" -> "save").withMethod("POST")
 
       private val questionId         = OrganisationDetails.question2.id
       private val followUpQuestionId = OrganisationDetails.question2b.id

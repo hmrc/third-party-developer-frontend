@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, Environment, LaxEmailAddress}
@@ -36,7 +36,7 @@ case class CreateTicketRequest(
   )
 
 object CreateTicketRequest {
-  implicit val createTicketRequestFormat: Format[CreateTicketRequest] = Json.format[CreateTicketRequest]
+  given Format[CreateTicketRequest] = Json.format[CreateTicketRequest]
 
   def createForRequestChangeOfProductionApplicationName(
       requestorName: String,
@@ -70,8 +70,8 @@ object CreateTicketRequest {
     ): CreateTicketRequest = {
 
     val actor           = role match {
-      case Collaborator.Roles.ADMINISTRATOR => "an administrator"
-      case _                                => "a developer"
+      case Collaborator.Role.Administrator => "an administrator"
+      case _                               => "a developer"
     }
     def reasonKey()     = if (environment.isProduction) {
       "prod-app-delete"

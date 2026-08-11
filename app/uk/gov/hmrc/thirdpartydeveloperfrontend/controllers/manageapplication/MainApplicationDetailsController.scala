@@ -26,7 +26,7 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 import views.html.manageapplication.ApplicationDetailsView
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, State}
@@ -38,12 +38,12 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.{Agreement, TermsOfUseViewModel}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.TermsOfUseInvitation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.{TermsOfUseV2State, TermsOfUseVersion}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 object MainApplicationDetailsController {
   case class Agreement(who: String, when: Instant)
@@ -73,7 +73,7 @@ class MainApplicationDetailsController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     applicationDetailsView: ApplicationDetailsView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with FraudPreventionNavLinkHelper
@@ -95,7 +95,7 @@ class MainApplicationDetailsController @Inject() (
       }
 
     request.application.state.name match {
-      case State.TESTING =>
+      case State.Testing =>
         lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
         lazy val newUpliftJourney = (s: Submission) =>
@@ -111,34 +111,34 @@ class MainApplicationDetailsController @Inject() (
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
 
-      case State.PENDING_RESPONSIBLE_INDIVIDUAL_VERIFICATION | State.PENDING_GATEKEEPER_APPROVAL | State.PENDING_REQUESTER_VERIFICATION => {
+      case State.PendingResponsibleIndividualVerification | State.PendingGatekeeperApproval | State.PendingRequesterVerification => {
         lazy val oldJourney = BadRequest("You can no longer view or update an old production credentials request.")
 
-        lazy val newUpliftJourney = (s: Submission) =>
+        lazy val newUpliftJourney = (_: Submission) =>
           Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CredentialsRequestedController.credentialsRequestedPage(applicationId))
 
         OptionT(submissionService.fetchLatestSubmission(applicationId)).fold(oldJourney)(newUpliftJourney)
       }
 
-      case State.PRE_PRODUCTION =>
+      case State.PreProduction =>
         request.queryString.contains("forceAppDetails") match {
           case true  => appDetailsPage
           case false =>
             successful(Redirect(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationPage(applicationId)))
         }
 
-      case State.PRODUCTION =>
+      case State.Production =>
         appDetailsPage
 
-      case State.DELETED =>
+      case State.Deleted =>
         successful(BadRequest)
     }
   }
 
   private def buildTermsOfUseViewModel()(implicit request: ApplicationRequest[AnyContent]): Future[TermsOfUseViewModel] = {
-    implicit val hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(request)
-    val application                                 = request.application
-    val requiresTermsOfUse                          = !application.deployedTo.isSandbox && application.access.accessType == AccessType.STANDARD
+    given hc: uk.gov.hmrc.http.HeaderCarrier = super.hc(using request)
+    val application                          = request.application
+    val requiresTermsOfUse                   = !application.deployedTo.isSandbox && application.access.accessType == AccessType.Standard
 
     if (requiresTermsOfUse) {
       val latestTermsOfUseAgreementDetails = termsOfUseService.getAgreementDetails(application).lastOption
@@ -168,7 +168,7 @@ class MainApplicationDetailsController @Inject() (
 
   private def buildV2TermsOfUseState(
       applicationId: ApplicationId
-    )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
+    )(using uk.gov.hmrc.http.HeaderCarrier
     ): Future[Option[TermsOfUseV2State]] = {
     for {
       maybeInvitation <- termsOfUseInvitationService.fetchTermsOfUseInvitation(applicationId)
@@ -180,7 +180,7 @@ class MainApplicationDetailsController @Inject() (
   private def buildState(
       maybeInvitation: Option[TermsOfUseInvitation],
       maybeSubmission: Option[Submission]
-    )(implicit hc: uk.gov.hmrc.http.HeaderCarrier
+    )(using uk.gov.hmrc.http.HeaderCarrier
     ): Future[Option[TermsOfUseV2State]] = {
     (maybeInvitation, maybeSubmission) match {
       case (Some(invitation), None) =>
@@ -203,14 +203,14 @@ class MainApplicationDetailsController @Inject() (
     }
   }
 
-  private def buildStartedState(submission: Submission, deadline: java.time.Instant)(implicit hc: uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
+  private def buildStartedState(submission: Submission, deadline: java.time.Instant)(using uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
     val requestedByEmail = extractRequestedByFromHistory(submission)
     profileService.lookupDeveloperName(LaxEmailAddress(requestedByEmail)).map { maybeName =>
       Some(Started(maybeName.getOrElse(requestedByEmail), deadline))
     }
   }
 
-  private def buildSubmittedState(submission: Submission)(implicit hc: uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
+  private def buildSubmittedState(submission: Submission)(using uk.gov.hmrc.http.HeaderCarrier): Future[Option[TermsOfUseV2State]] = {
     extractSubmittedFromHistory(submission) match {
       case Some(submitted) =>
         profileService.lookupDeveloperName(LaxEmailAddress(submitted.requestedBy)).map { maybeName =>

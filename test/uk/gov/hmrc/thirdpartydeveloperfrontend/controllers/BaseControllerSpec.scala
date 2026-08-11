@@ -21,19 +21,22 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import play.api.Application
 import play.api.i18n.MessagesApi
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import play.filters.csrf.CSRF.TokenProvider
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ErrorHandlerMock, SessionServiceMock}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.security.CookieEncoding
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 abstract class BaseControllerSpec
     extends AsyncHmrcSpec
@@ -58,27 +61,29 @@ abstract class BaseControllerSpec
 
   val sessionParams = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
 
-  val loggedOutRequest = FakeRequest().withSession(sessionParams: _*)
+  val loggedOutRequest = FakeRequest().withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(devSession.sessionId, devSession)
   UpdateUserFlowSessions.succeedsWith(devSession.sessionId)
-  val loggedInDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(devSession.sessionId).withSession(sessionParams: _*)
+  val loggedInDevRequest = FakeRequest().withLoggedIn(using this)(devSession.sessionId).withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(adminSession.sessionId, adminSession)
   UpdateUserFlowSessions.succeedsWith(adminSession.sessionId)
-  val loggedInAdminRequest = FakeRequest().withLoggedIn(this, cookieSigner)(adminSession.sessionId).withSession(sessionParams: _*)
+  val loggedInAdminRequest = FakeRequest().withLoggedIn(using this)(adminSession.sessionId).withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(altDevSession.sessionId, altDevSession)
   UpdateUserFlowSessions.succeedsWith(altDevSession.sessionId)
-  val loggedInAltDevRequest = FakeRequest().withLoggedIn(this, cookieSigner)(altDevSession.sessionId).withSession(sessionParams: _*)
+  val loggedInAltDevRequest = FakeRequest().withLoggedIn(using this)(altDevSession.sessionId).withSession(sessionParams*)
 
   FetchSessionById.succeedsWith(partLoggedInSession.sessionId, partLoggedInSession)
-  val partLoggedInRequest = FakeRequest().withLoggedIn(this, cookieSigner)(partLoggedInSession.sessionId)
+  val partLoggedInRequest = FakeRequest().withLoggedIn(using this)(partLoggedInSession.sessionId)
 
   val mcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure(("metrics.jvm", false))
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
       .build()
 }

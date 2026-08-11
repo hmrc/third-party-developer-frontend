@@ -19,7 +19,7 @@ package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF
 
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
@@ -29,10 +29,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SampleApplication
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class ProdCredsChecklistControllerSpec
     extends BaseControllerSpec
@@ -57,7 +57,7 @@ class ProdCredsChecklistControllerSpec
   }
 
   trait HasAppInTestingState {
-    self: HasSubscriptions with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: HasSubscriptions & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       testingApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),
@@ -89,11 +89,11 @@ class ProdCredsChecklistControllerSpec
       productionCredentialsChecklistView
     )
 
-    val loggedInRequest = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedInRequest = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
   }
 
   trait HasAppInProductionState {
-    self: Setup with ApplicationActionServiceMock with ApplicationServiceMock =>
+    self: Setup & ApplicationActionServiceMock & ApplicationServiceMock =>
 
     givenApplicationAction(
       sampleApp.withSubscriptions(asSubscriptions(List(aSubscription))).withFieldValues(Map.empty),

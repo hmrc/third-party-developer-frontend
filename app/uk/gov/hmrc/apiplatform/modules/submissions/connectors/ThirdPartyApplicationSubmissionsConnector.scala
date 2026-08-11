@@ -21,34 +21,35 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 import play.api.libs.json.{JsValue, Json, Writes}
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
-import uk.gov.hmrc.play.http.metrics.common.API
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.SubmissionId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ConnectorMetrics
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.given
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{API, ConnectorMetrics}
 
 object ThirdPartyApplicationSubmissionsConnector {
   case class Config(serviceBaseUrl: String, apiKey: String)
 
   case class OutboundRecordAnswersRequest(answers: List[String])
-  implicit val writesOutboundRecordAnswersRequest: Writes[OutboundRecordAnswersRequest] = Json.writes[OutboundRecordAnswersRequest]
+  given Writes[OutboundRecordAnswersRequest] = Json.writes[OutboundRecordAnswersRequest]
 
   case class ApprovalsRequest(requestedByName: String, requestedByEmailAddress: LaxEmailAddress)
-  implicit val writesApprovalsRequest: Writes[ApprovalsRequest] = Json.writes[ApprovalsRequest]
+  given Writes[ApprovalsRequest] = Json.writes[ApprovalsRequest]
 
   case class ResponsibleIndividualVerificationRequest(code: String)
-  implicit val writesResponsibleIndividualVerificationRequest: Writes[ResponsibleIndividualVerificationRequest] = Json.writes[ResponsibleIndividualVerificationRequest]
+  given Writes[ResponsibleIndividualVerificationRequest] = Json.writes[ResponsibleIndividualVerificationRequest]
 
   case class ConfirmSetupCompleteRequest(requesterEmailAddress: LaxEmailAddress)
-  implicit val writesConfirmSetupCompleteRequest: Writes[ConfirmSetupCompleteRequest] = Json.writes[ConfirmSetupCompleteRequest]
+  given Writes[ConfirmSetupCompleteRequest] = Json.writes[ConfirmSetupCompleteRequest]
 
   case class CreateSubmissionRequest(requestedBy: LaxEmailAddress)
-  implicit val readsCreateSubmissionRequest: Writes[CreateSubmissionRequest] = Json.writes[CreateSubmissionRequest]
+  given Writes[CreateSubmissionRequest] = Json.writes[CreateSubmissionRequest]
 }
 
 @Singleton
@@ -56,20 +57,19 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     val http: HttpClientV2,
     val config: ThirdPartyApplicationSubmissionsConnector.Config,
     val metrics: ConnectorMetrics
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   import ThirdPartyApplicationSubmissionsConnector._
   import config._
-  import Submission._
 
   val api = API("third-party-application-submissions")
 
-  val environment = Environment.PRODUCTION
+  val environment = Environment.Production
 
-  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(implicit hc: HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
+  def recordAnswer(submissionId: SubmissionId, questionId: Question.Id, rawAnswers: List[String])(using HeaderCarrier): Future[Either[String, ExtendedSubmission]] = {
     import cats.implicits._
-    val failed = (err: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
+    val failed = (_: UpstreamErrorResponse) => s"Failed to record answer for submission $submissionId and question ${questionId.value}"
 
     metrics.record(api) {
       http
@@ -80,7 +80,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchLatestSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchLatestSubmission(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
       http
         .get(url"$serviceBaseUrl/submissions/application/${applicationId}")
@@ -88,7 +88,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def createSubmission(applicationId: ApplicationId, requestedBy: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def createSubmission(applicationId: ApplicationId, requestedBy: LaxEmailAddress)(using HeaderCarrier): Future[Option[Submission]] = {
     metrics.record(api) {
       http.post(url"$serviceBaseUrl/submissions/application/${applicationId}")
         .withBody(Json.toJson(CreateSubmissionRequest(requestedBy)))
@@ -96,21 +96,21 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
     }
   }
 
-  def fetchLatestExtendedSubmission(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchLatestExtendedSubmission(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/submissions/application/${applicationId}/extended")
         .execute[Option[ExtendedSubmission]]
     }
   }
 
-  def fetchSubmission(id: SubmissionId)(implicit hc: HeaderCarrier): Future[Option[ExtendedSubmission]] = {
+  def fetchSubmission(id: SubmissionId)(using HeaderCarrier): Future[Option[ExtendedSubmission]] = {
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/submissions/${id.value}")
         .execute[Option[ExtendedSubmission]]
     }
   }
 
-  def fetchResponsibleIndividualVerification(code: String)(implicit hc: HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] =
+  def fetchResponsibleIndividualVerification(code: String)(using HeaderCarrier): Future[Option[ResponsibleIndividualVerification]] =
     metrics.record(api) {
       http.get(url"$serviceBaseUrl/approvals/responsible-individual-verification/${code}")
         .execute[Option[ResponsibleIndividualVerification]]
@@ -120,7 +120,7 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
       applicationId: ApplicationId,
       requestedByName: String,
       requestedByEmailAddress: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[Either[ErrorDetails, ApplicationWithCollaborators]] =
     metrics.record(api) {
       import play.api.http.Status._
@@ -143,11 +143,11 @@ class ThirdPartyApplicationSubmissionsConnector @Inject() (
         }
     }
 
-  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
+  def confirmSetupComplete(applicationId: ApplicationId, userEmailAddress: LaxEmailAddress)(using HeaderCarrier): Future[Either[String, Unit]] = metrics.record(api) {
     import cats.implicits._
 
     val url    = url"$serviceBaseUrl/application/${applicationId}/confirm-setup-complete"
-    val failed = (err: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId}"
+    val failed = (_: UpstreamErrorResponse) => s"Failed to confirm setup complete for application ${applicationId}"
 
     http.post(url)
       .withBody(Json.toJson(ConfirmSetupCompleteRequest(userEmailAddress)))

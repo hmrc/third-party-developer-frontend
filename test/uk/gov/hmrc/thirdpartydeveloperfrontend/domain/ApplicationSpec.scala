@@ -23,10 +23,10 @@ import org.scalatest.matchers.should.Matchers
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
@@ -43,7 +43,7 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
   val developerCollaborator: Collaborator = developer.email.asDeveloperCollaborator
   val administrator: User                 = adminDeveloper
 
-  val productionApplicationState: ApplicationState = ApplicationState(State.PRODUCTION, Some("other email"), Some("name"), Some("123"), instant)
+  val productionApplicationState: ApplicationState = ApplicationState(State.Production, Some("other email"), Some("name"), Some("123"), instant)
   val testingApplicationState: ApplicationState    = ApplicationState(updatedOn = instant)
   val responsibleIndividual: ResponsibleIndividual = ResponsibleIndividual(FullName("Mr Responsible"), "ri@example.com".toLaxEmail)
 
@@ -51,25 +51,25 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
     Some("http://example.com"),
     responsibleIndividual,
     Set(ServerLocation.InUK),
-    TermsAndConditionsLocations.InDesktopSoftware,
-    PrivacyPolicyLocations.InDesktopSoftware,
+    TermsAndConditionsLocation.InDesktopSoftware,
+    PrivacyPolicyLocation.InDesktopSoftware,
     List(TermsOfUseAcceptance(responsibleIndividual, instant.minus(365, DAYS), SubmissionId.random, 0))
   )
 
   describe("Application.canViewCredentials()") {
     val data: Seq[(Environment, Access, User, Boolean)] = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, true),
-      (Environment.SANDBOX, Access.Standard(), administrator, true),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, true),
-      (Environment.SANDBOX, Access.Ropc(), developer, true),
-      (Environment.SANDBOX, Access.Ropc(), administrator, true),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, true),
-      (Environment.SANDBOX, Access.Privileged(), developer, true),
-      (Environment.SANDBOX, Access.Privileged(), administrator, true),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, true)
+      (Environment.Sandbox, Access.Standard(), developer, true),
+      (Environment.Sandbox, Access.Standard(), administrator, true),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, true),
+      (Environment.Sandbox, Access.Ropc(), developer, true),
+      (Environment.Sandbox, Access.Ropc(), administrator, true),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, true),
+      (Environment.Sandbox, Access.Privileged(), developer, true),
+      (Environment.Sandbox, Access.Privileged(), administrator, true),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, true)
     )
 
     runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ViewCredentials, user, SandboxOrAdmin) })
@@ -77,18 +77,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.isPermittedToEditAppDetails") {
     val data: Seq[(Environment, Access, User, Boolean)] = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, true),
-      (Environment.SANDBOX, Access.Standard(), administrator, true),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, false),
-      (Environment.SANDBOX, Access.Ropc(), developer, false),
-      (Environment.SANDBOX, Access.Ropc(), administrator, false),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, false),
-      (Environment.SANDBOX, Access.Privileged(), developer, false),
-      (Environment.SANDBOX, Access.Privileged(), administrator, false),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, false)
+      (Environment.Sandbox, Access.Standard(), developer, true),
+      (Environment.Sandbox, Access.Standard(), administrator, true),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, false),
+      (Environment.Sandbox, Access.Ropc(), developer, false),
+      (Environment.Sandbox, Access.Ropc(), administrator, false),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, false),
+      (Environment.Sandbox, Access.Privileged(), developer, false),
+      (Environment.Sandbox, Access.Privileged(), administrator, false),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, false)
     )
 
     runTableTests(data, productionApplicationState)({ case (application, user) => application.isPermittedToEditAppDetails(user) })
@@ -96,18 +96,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.isPermittedToEditProductionAppDetails") {
     val data: Seq[(Environment, Access, User, Boolean)] = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, false),
-      (Environment.SANDBOX, Access.Standard(), administrator, false),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, true),
-      (Environment.SANDBOX, Access.Ropc(), developer, false),
-      (Environment.SANDBOX, Access.Ropc(), administrator, false),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, false),
-      (Environment.SANDBOX, Access.Privileged(), developer, false),
-      (Environment.SANDBOX, Access.Privileged(), administrator, false),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, false)
+      (Environment.Sandbox, Access.Standard(), developer, false),
+      (Environment.Sandbox, Access.Standard(), administrator, false),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, true),
+      (Environment.Sandbox, Access.Ropc(), developer, false),
+      (Environment.Sandbox, Access.Ropc(), administrator, false),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, false),
+      (Environment.Sandbox, Access.Privileged(), developer, false),
+      (Environment.Sandbox, Access.Privileged(), administrator, false),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, false)
     )
 
     runTableTests(data, productionApplicationState)({ case (application, user) => application.isPermittedToEditProductionAppDetails(user) })
@@ -115,18 +115,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.isPermittedToAgreeToTermsOfUse") {
     val data: Seq[(Environment, Access, User, Boolean)] = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, false),
-      (Environment.SANDBOX, Access.Standard(), administrator, false),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, true),
-      (Environment.SANDBOX, Access.Ropc(), developer, false),
-      (Environment.SANDBOX, Access.Ropc(), administrator, false),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, false),
-      (Environment.SANDBOX, Access.Privileged(), developer, false),
-      (Environment.SANDBOX, Access.Privileged(), administrator, false),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, false)
+      (Environment.Sandbox, Access.Standard(), developer, false),
+      (Environment.Sandbox, Access.Standard(), administrator, false),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, true),
+      (Environment.Sandbox, Access.Ropc(), developer, false),
+      (Environment.Sandbox, Access.Ropc(), administrator, false),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, false),
+      (Environment.Sandbox, Access.Privileged(), developer, false),
+      (Environment.Sandbox, Access.Privileged(), administrator, false),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, false)
     )
 
     runTableTests(data, productionApplicationState)({ case (application, user) => application.isPermittedToAgreeToTermsOfUse(user) })
@@ -134,18 +134,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.allows(ChangeClientSecret,user, SandboxOrAdmin)") {
     val data: Seq[(Environment, Access, User, Boolean)] = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, true),
-      (Environment.SANDBOX, Access.Standard(), administrator, true),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, true),
-      (Environment.SANDBOX, Access.Ropc(), developer, true),
-      (Environment.SANDBOX, Access.Ropc(), administrator, true),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, true),
-      (Environment.SANDBOX, Access.Privileged(), developer, true),
-      (Environment.SANDBOX, Access.Privileged(), administrator, true),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, true)
+      (Environment.Sandbox, Access.Standard(), developer, true),
+      (Environment.Sandbox, Access.Standard(), administrator, true),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, true),
+      (Environment.Sandbox, Access.Ropc(), developer, true),
+      (Environment.Sandbox, Access.Ropc(), administrator, true),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, true),
+      (Environment.Sandbox, Access.Privileged(), developer, true),
+      (Environment.Sandbox, Access.Privileged(), administrator, true),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, true)
     )
 
     runTableTests(data, productionApplicationState)({ case (application, user) => application.allows(ChangeClientSecret, user, SandboxOrAdmin) })
@@ -153,18 +153,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.canViewServerToken()") {
     val data = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, true),
-      (Environment.SANDBOX, Access.Standard(), administrator, true),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, true),
-      (Environment.SANDBOX, Access.Ropc(), developer, false),
-      (Environment.SANDBOX, Access.Ropc(), administrator, false),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, false),
-      (Environment.SANDBOX, Access.Privileged(), developer, false),
-      (Environment.SANDBOX, Access.Privileged(), administrator, false),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, false)
+      (Environment.Sandbox, Access.Standard(), developer, true),
+      (Environment.Sandbox, Access.Standard(), administrator, true),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, true),
+      (Environment.Sandbox, Access.Ropc(), developer, false),
+      (Environment.Sandbox, Access.Ropc(), administrator, false),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, false),
+      (Environment.Sandbox, Access.Privileged(), developer, false),
+      (Environment.Sandbox, Access.Privileged(), administrator, false),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, false)
     )
 
     runTableTests(data, productionApplicationState)({ case (app, user) => app.canViewServerToken(user) })
@@ -172,18 +172,18 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.canPerformApprovalProcess()") {
     val data = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, false),
-      (Environment.SANDBOX, Access.Standard(), administrator, false),
-      (Environment.PRODUCTION, Access.Standard(), developer, false),
-      (Environment.PRODUCTION, Access.Standard(), administrator, true),
-      (Environment.SANDBOX, Access.Ropc(), developer, false),
-      (Environment.SANDBOX, Access.Ropc(), administrator, false),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, false),
-      (Environment.SANDBOX, Access.Privileged(), developer, false),
-      (Environment.SANDBOX, Access.Privileged(), administrator, false),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, false)
+      (Environment.Sandbox, Access.Standard(), developer, false),
+      (Environment.Sandbox, Access.Standard(), administrator, false),
+      (Environment.Production, Access.Standard(), developer, false),
+      (Environment.Production, Access.Standard(), administrator, true),
+      (Environment.Sandbox, Access.Ropc(), developer, false),
+      (Environment.Sandbox, Access.Ropc(), administrator, false),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, false),
+      (Environment.Sandbox, Access.Privileged(), developer, false),
+      (Environment.Sandbox, Access.Privileged(), administrator, false),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, false)
     )
 
     runTableTests(data, testingApplicationState)({ case (app, user) => app.canPerformApprovalProcess(user) })
@@ -191,25 +191,25 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("Application.isProductionAppButEditDetailsNotAllowed()") {
     val data = Seq(
-      (Environment.SANDBOX, Access.Standard(), developer, false),
-      (Environment.SANDBOX, Access.Standard(), administrator, false),
-      (Environment.PRODUCTION, Access.Standard(), developer, true),
-      (Environment.PRODUCTION, Access.Standard(), administrator, false),
-      (Environment.SANDBOX, Access.Ropc(), developer, false),
-      (Environment.SANDBOX, Access.Ropc(), administrator, false),
-      (Environment.PRODUCTION, Access.Ropc(), developer, false),
-      (Environment.PRODUCTION, Access.Ropc(), administrator, false),
-      (Environment.SANDBOX, Access.Privileged(), developer, false),
-      (Environment.SANDBOX, Access.Privileged(), administrator, false),
-      (Environment.PRODUCTION, Access.Privileged(), developer, false),
-      (Environment.PRODUCTION, Access.Privileged(), administrator, false)
+      (Environment.Sandbox, Access.Standard(), developer, false),
+      (Environment.Sandbox, Access.Standard(), administrator, false),
+      (Environment.Production, Access.Standard(), developer, true),
+      (Environment.Production, Access.Standard(), administrator, false),
+      (Environment.Sandbox, Access.Ropc(), developer, false),
+      (Environment.Sandbox, Access.Ropc(), administrator, false),
+      (Environment.Production, Access.Ropc(), developer, false),
+      (Environment.Production, Access.Ropc(), administrator, false),
+      (Environment.Sandbox, Access.Privileged(), developer, false),
+      (Environment.Sandbox, Access.Privileged(), administrator, false),
+      (Environment.Production, Access.Privileged(), developer, false),
+      (Environment.Production, Access.Privileged(), administrator, false)
     )
 
     runTableTests(data, testingApplicationState)({ case (app, user) => app.isProductionAppButEditDetailsNotAllowed(user) })
   }
 
   describe("Application.findCollaboratorByHash()") {
-    val app = createApp(Environment.PRODUCTION, Access.Standard(), productionApplicationState)
+    val app = createApp(Environment.Production, Access.Standard(), productionApplicationState)
 
     it("should find when an email sha matches") {
       import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.string._
@@ -223,13 +223,13 @@ class ApplicationSpec extends AnyFunSpec with Matchers with UserTestData with Lo
 
   describe("hasResponsibleIndividual") {
     it("should return true for apps with an RI") {
-      createApp(Environment.PRODUCTION, Access.Standard(importantSubmissionData = Some(importantSubmissionData)), productionApplicationState).hasResponsibleIndividual shouldBe true
+      createApp(Environment.Production, Access.Standard(importantSubmissionData = Some(importantSubmissionData)), productionApplicationState).hasResponsibleIndividual shouldBe true
     }
     it("should return false for standard apps without an RI") {
-      createApp(Environment.PRODUCTION, Access.Standard(importantSubmissionData = None), productionApplicationState).hasResponsibleIndividual shouldBe false
+      createApp(Environment.Production, Access.Standard(importantSubmissionData = None), productionApplicationState).hasResponsibleIndividual shouldBe false
     }
     it("should return false for non-standard apps") {
-      createApp(Environment.PRODUCTION, Access.Privileged(), productionApplicationState).hasResponsibleIndividual shouldBe false
+      createApp(Environment.Production, Access.Privileged(), productionApplicationState).hasResponsibleIndividual shouldBe false
     }
   }
 

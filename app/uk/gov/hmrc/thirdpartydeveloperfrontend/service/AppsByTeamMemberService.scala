@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithSubscriptions, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.applications.query.domain.models.ApplicationQueries
@@ -32,10 +32,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Applica
 @Singleton
 class AppsByTeamMemberService @Inject() (
     tpoConnector: ThirdPartyOrchestratorConnector
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
-  def fetchAppsByTeamMember(environment: Environment)(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] = {
+  def fetchAppsByTeamMember(environment: Environment)(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] = {
     tpoConnector.query[List[ApplicationWithSubscriptions]](environment)(ApplicationQueries.applicationsByUserId(userId, includeDeleted = false).copy(wantSubscriptions = true))
   }
 
@@ -47,29 +47,29 @@ class AppsByTeamMemberService @Inject() (
       requiredRole: Collaborator.Role
     )(
       userId: UserId
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[Seq[ApplicationWithSubscriptions]] =
     fetchAppsByTeamMember(environment)(userId).map { apps =>
       apps.filter(_.roleFor(userId) == Some(requiredRole))
     }
 
-  def fetchProductionSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
-    fetchAppsByTeamMember(Environment.PRODUCTION)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
+  def fetchProductionSummariesByTeamMember(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationSummary]] =
+    fetchAppsByTeamMember(Environment.Production)(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
 
-  def fetchProductionSummariesByAdmin(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
-    fetchByTeamMemberWithRole(Environment.PRODUCTION)(Collaborator.Roles.ADMINISTRATOR)(userId: UserId)
+  def fetchProductionSummariesByAdmin(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
+    fetchByTeamMemberWithRole(Environment.Production)(Collaborator.Role.Administrator)(userId: UserId)
 
-  def fetchSandboxAppsByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
-    fetchAppsByTeamMember(Environment.SANDBOX)(userId) recover { case NonFatal(_) => Seq.empty }
+  def fetchSandboxAppsByTeamMember(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationWithSubscriptions]] =
+    fetchAppsByTeamMember(Environment.Sandbox)(userId) recover { case NonFatal(_) => Seq.empty }
 
-  def fetchSandboxSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] =
+  def fetchSandboxSummariesByTeamMember(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationSummary]] =
     fetchSandboxAppsByTeamMember(userId).map(_.sorted.map(ApplicationSummary.from(_, userId)))
 
-  def fetchSandboxSummariesByAdmin(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] = {
+  def fetchSandboxSummariesByAdmin(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationSummary]] = {
     fetchSandboxSummariesByTeamMember(userId).map(_.filter(_.role.isAdministrator))
   }
 
-  def fetchAllSummariesByTeamMember(userId: UserId)(implicit hc: HeaderCarrier): Future[(Seq[ApplicationSummary], Seq[ApplicationSummary])] = {
+  def fetchAllSummariesByTeamMember(userId: UserId)(using HeaderCarrier): Future[(Seq[ApplicationSummary], Seq[ApplicationSummary])] = {
     for {
       productionSummaries <- fetchProductionSummariesByTeamMember(userId)
       sandboxSummaries    <- fetchSandboxSummariesByTeamMember(userId)

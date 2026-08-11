@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import org.openqa.selenium.{Cookie => SCookie}
+import org.openqa.selenium.Cookie as SCookie
 import org.scalatest.matchers.should.Matchers
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.libs.json.Json
 import uk.gov.hmrc.selenium.webdriver.Driver
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper
-import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models._
+import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.{SessionCreateWithDeviceRequest, UserAuthenticationResponse}
 
 object MfaStepsSteps extends MfaData with Matchers with NavigationSugar {
@@ -154,7 +154,7 @@ object MfaStepsSteps extends MfaData with Matchers with NavigationSugar {
     val accessCodeRequired = deviceSessionId.isEmpty && mfaEnabled
 
     TestContext.sessionIdForloggedInDeveloper =
-      setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LOGGED_IN, deviceSessionId, accessCodeRequired, mfaEnabled)
+      setupLoggedOrPartLoggedInDeveloper(developer, password, LoggedInState.LoggedIn, deviceSessionId, accessCodeRequired, mfaEnabled)
 
     deviceSessionId match {
       case Some(_) => deviceSessionId.map(_ =>
@@ -194,7 +194,7 @@ object MfaStepsSteps extends MfaData with Matchers with NavigationSugar {
 
     val userAuthenticationResponse = UserAuthenticationResponse(accessCodeRequired, mfaEnabled, session = actualSession, nonce = nonce)
 
-    val mfaMandatedForUser = loggedInState == LoggedInState.PART_LOGGED_IN_ENABLING_MFA
+    val mfaMandatedForUser = loggedInState == LoggedInState.PartLoggedInEnablingMFA
 
     Stubs.setupEncryptedPostRequest(
       "/authenticate",

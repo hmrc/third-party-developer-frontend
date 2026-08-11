@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
+import java.util as ju
 import java.util.UUID
-import java.{util => ju}
 import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 
@@ -200,6 +200,21 @@ package object binders {
 
     override def unbind(key: String, applicationId: ApplicationId): String = {
       textBinder.unbind(key, applicationId.value.toString())
+    }
+  }
+
+  private def organisationIdFromString(text: String): Either[String, OrganisationId] = {
+    OrganisationId.apply(text).toRight(s"Cannot accept $text as OrganisationId")
+  }
+
+  implicit def organisationIdQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[OrganisationId] = new QueryStringBindable[OrganisationId] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, OrganisationId]] = {
+      textBinder.bind(key, params).map(_.flatMap(organisationIdFromString))
+    }
+
+    override def unbind(key: String, organisationId: OrganisationId): String = {
+      textBinder.unbind(key, organisationId.value.toString())
     }
   }
 }

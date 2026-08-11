@@ -20,24 +20,24 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html._
+import views.html.*
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import play.api.mvc.*
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{ApplicationController, ApplicationRequest, EditApplicationForm}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDetails
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{ProductionAndAdmin, SandboxOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 object UpdateTCAndPrivPolicyURLController {}
 
@@ -51,10 +51,10 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
     val cookieSigner: CookieSigner,
     val clock: Clock,
     updateTCAndPrivPolicyURLView: UpdateTCAndPrivPolicyURLView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding
+    with WithUrlEncodedOnlyFormBinding
     with ClockNow {
 
   def canChangeDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
@@ -67,7 +67,11 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
   private def deriveCommands(form: EditApplicationForm)(implicit request: ApplicationRequest[AnyContent]): List[ApplicationCommand] = {
     val application             = request.application
     val actor                   = Actors.AppCollaborator(request.userRequest.developer.email)
-    val access: Access.Standard = (application.access match { case s: Access.Standard => s }) // Only standard apps attempt this function
+    // Only standard apps attempt this function
+    val access: Access.Standard = (application.access match {
+      case s: Access.Standard                    => s
+      case _: Access.Privileged | _: Access.Ropc => throw new MatchError(application.access)
+    })
 
     List(
       if (form.privacyPolicyUrl == access.privacyPolicyUrl) {
@@ -92,8 +96,6 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
 
   def changeDetailsAction(applicationId: ApplicationId): Action[AnyContent] =
     canChangeDetailsAndIsApprovedAction(applicationId) { implicit request: ApplicationRequest[AnyContent] =>
-      val application = request.application
-
       def handleValidForm(form: EditApplicationForm): Future[Result] = {
         val cmds = deriveCommands(form)
         val futs = Future.sequence(cmds.map(c => applicationService.dispatchCmd(applicationId, c)))
@@ -104,7 +106,7 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
       }
 
       def handleInvalidForm(formWithErrors: Form[EditApplicationForm]): Future[Result] =
-        errorView(application.id, formWithErrors, applicationViewModelFromApplicationRequest())
+        errorView(formWithErrors, applicationViewModelFromApplicationRequest())
 
       EditApplicationForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
     }
@@ -112,6 +114,6 @@ class UpdateTCAndPrivPolicyURLController @Inject() (
   def canChangeProductionDetailsAndIsApprovedAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsDetails, ProductionAndAdmin)(applicationId)(fun)
 
-  private def errorView(id: ApplicationId, form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[_]): Future[Result] =
+  private def errorView(form: Form[EditApplicationForm], applicationViewModel: ApplicationViewModel)(implicit request: ApplicationRequest[?]): Future[Result] =
     Future.successful(BadRequest(updateTCAndPrivPolicyURLView(form, applicationViewModel)))
 }

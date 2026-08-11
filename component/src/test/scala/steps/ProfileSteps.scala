@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import play.api.http.Status._
+import play.api.http.Status.*
 
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.UpdateRequest
 

@@ -14,9 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
-@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsOfUseAcceptance
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, *}
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.TermsOfUseViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary.ApplicationWithCollaboratorsSyntax
@@ -26,7 +25,7 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel)(implicit request: Request[Any], loggedIn: UserSession, messages: Messages)
+@(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel)(implicit loggedIn: UserSession, messages: Messages)
 
 @getResponsibleIndividualName(access: Access): Option[String] = @{
     access match {
@@ -52,7 +51,7 @@
 @showTermsOfUse(app: ApplicationWithCollaborators, termsOfUseModel: TermsOfUseViewModel): Seq[TableRow] = @{
     if(termsOfUseModel.required) {
       termsOfUseModel.termsOfUseV2State match {
-        case Some(TermsOfUseV2State.NotStarted(maybeDeadline)) if !termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isEmpty =>
+        case Some(TermsOfUseV2State.NotStarted(_)) if !termsOfUseModel.appUsesOldVersion && termsOfUseModel.agreement.isEmpty =>
           Seq(
             TableRow(content = Text(messages("application.details.terms.of.use")), attributes = Map("id" -> "termsOfUse")),
             TableRow(content = Text("Not agreed"), attributes = Map("id" -> "termsOfUseNotAgreed")),

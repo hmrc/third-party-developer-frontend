@@ -28,7 +28,7 @@ object EbridgeConfigurator {
     if (useProxy)
       requestBuilder
         .withProxy
-        .setHeader(apiKeyHeader: _*)
+        .setHeader(apiKeyHeader*)
     else
       requestBuilder
   }

@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
@@ -41,7 +41,7 @@ class UserLogoutAccountSpec
     DestroySession.succeedsWith(devSession.sessionId)
 
     val notLoggedInRequestWithCsrfToken = FakeRequest()
-      .withSession(sessionParams: _*)
+      .withSession(sessionParams*)
   }
 
   "logging out" should {
@@ -66,7 +66,7 @@ class UserLogoutAccountSpec
       implicit val request: FakeRequest[AnyContent] = loggedInDevRequest.withSession("access_uri" -> "https://www.example.com")
       val result                                    = await(underTest.logout()(request))
 
-      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(devSession.sessionId))(*)
+      verify(underTest.sessionService, atLeastOnce).destroy(eqTo(devSession.sessionId))(using *)
       result.session.data shouldBe Map.empty
     }
   }

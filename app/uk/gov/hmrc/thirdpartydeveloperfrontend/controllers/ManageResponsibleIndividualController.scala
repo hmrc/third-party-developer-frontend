@@ -21,22 +21,22 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import com.google.inject.{Inject, Singleton}
-import views.html.manageResponsibleIndividual._
+import views.html.manageResponsibleIndividual.*
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.*
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel, formatDateTime}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsResponsibleIndividual
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 object ManageResponsibleIndividualController {
   case class ResponsibleIndividualHistoryItem(name: String, fromDate: String, toDate: String)
@@ -68,7 +68,7 @@ class ManageResponsibleIndividualController @Inject() (
     responsibleIndividualChangeToSelfConfirmedView: ResponsibleIndividualChangeToSelfConfirmedView,
     responsibleIndividualChangeToOtherView: ResponsibleIndividualChangeToOtherView,
     responsibleIndividualChangeToOtherRequestedView: ResponsibleIndividualChangeToOtherRequestedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ApplicationHelper {
@@ -165,6 +165,7 @@ class ManageResponsibleIndividualController @Inject() (
               )
           }
         }
+        case _                                                                                                      => successful(BadRequest("Only Standard apps have Responsible Individual details"))
       }
     }
 

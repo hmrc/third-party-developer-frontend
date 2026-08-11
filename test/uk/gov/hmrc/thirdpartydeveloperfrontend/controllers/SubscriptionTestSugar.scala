@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 trait SubscriptionTestSugar {
@@ -29,7 +29,7 @@ trait SubscriptionTestSugar {
       expectedVersions: List[ApiVersion]
     ): Unit = {
     applicationSubscription.apiHumanReadableAppName shouldBe expectedApiHumanReadableAppName
-    applicationSubscription.apiServiceName.value shouldBe expectedApiServiceName
+    applicationSubscription.apiServiceName.toString shouldBe expectedApiServiceName
     applicationSubscription.subscriptions.map(_.apiVersion) shouldBe expectedVersions
   }
 

@@ -22,14 +22,9 @@ import views.html.RequestDeleteApplicationCompleteView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.{SampleUserSession, UserTestData}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, *}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -49,8 +44,6 @@ class RequestDeleteApplicationCompleteSpec
 
       val request = FakeRequest().withCSRFToken
 
-      val appId             = ApplicationId.random
-      val clientId          = ClientId("clientId123")
       val loggedInDeveloper = standardDeveloper.loggedIn
       val application       = sampleApp
 

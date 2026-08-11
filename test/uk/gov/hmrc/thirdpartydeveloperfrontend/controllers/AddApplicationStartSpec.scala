@@ -20,10 +20,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import views.helper.EnvironmentNameService
-import views.html._
+import views.html.*
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{redirectLocation, _}
+import play.api.test.Helpers.{redirectLocation, *}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
@@ -33,11 +33,10 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSessionId
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.UpliftLogicMock
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html.BeforeYouStartView
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.addapplication.AddApplication
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditService
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -67,9 +66,7 @@ class AddApplicationStartSpec
     val addApplicationSubordinateSuccessView      = app.injector.instanceOf[AddApplicationSubordinateSuccessView]
     val addApplicationNameView                    = app.injector.instanceOf[AddApplicationNameView]
     val chooseApplicationToUpliftView             = app.injector.instanceOf[ChooseApplicationToUpliftView]
-
-    val beforeYouStartView: BeforeYouStartView = app.injector.instanceOf[BeforeYouStartView]
-    val flowServiceMock                        = mock[GetProductionCredentialsFlowService]
+    val flowServiceMock                           = mock[GetProductionCredentialsFlowService]
 
     implicit val environmentNameService: EnvironmentNameService = new EnvironmentNameService(appConfig)
 
@@ -89,7 +86,6 @@ class AddApplicationStartSpec
       addApplicationSubordinateSuccessView,
       addApplicationNameView,
       chooseApplicationToUpliftView,
-      beforeYouStartView,
       flowServiceMock
     )
 

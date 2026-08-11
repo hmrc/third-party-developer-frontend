@@ -17,5 +17,5 @@
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType
 
 case object AuthAppLoginAccessCodePage extends MfaData {
-  val page = LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AUTHENTICATOR_APP, "Enter your access code")
+  val page = LoginAccessCodePage(authAppMfaId.value.toString, MfaType.AuthenticatorApp, "Enter your access code")
 }

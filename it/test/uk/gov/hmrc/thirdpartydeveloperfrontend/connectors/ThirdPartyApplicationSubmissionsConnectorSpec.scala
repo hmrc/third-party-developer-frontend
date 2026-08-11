@@ -18,27 +18,31 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import org.mockito.Mockito
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application => PlayApplication, Configuration, Mode}
+import play.api.{Application as PlayApplication, Configuration, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector.*
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission.given
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.ApplicationsJsonFormatters
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.*
 
 class ThirdPartyApplicationSubmissionsConnectorSpec
     extends BaseConnectorIntegrationSpec
@@ -49,8 +53,6 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     with LocalUserIdTracker
     with SubmissionsTestData
     with ApplicationsJsonFormatters {
-
-  import Submission._
 
   private val apiKey = UUID.randomUUID().toString
   private val code   = "123456789"
@@ -65,11 +67,13 @@ class ThirdPartyApplicationSubmissionsConnectorSpec
     GuiceApplicationBuilder()
       .configure(stubConfig)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val connector = app.injector.instanceOf[ThirdPartyApplicationSubmissionsConnector]
 

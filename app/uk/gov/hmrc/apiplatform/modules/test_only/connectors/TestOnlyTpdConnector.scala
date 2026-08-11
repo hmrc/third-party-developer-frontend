@@ -19,8 +19,9 @@ package uk.gov.hmrc.apiplatform.modules.test_only.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import play.api.libs.json._
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.libs.json.*
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
@@ -32,46 +33,46 @@ object TestOnlyTpdConnector {
   case class CloneUserResponse(userId: UserId, emailAddress: LaxEmailAddress)
   case class SmsAccessCodeResponse(accessCode: String)
 
-  implicit val formatCloneUserResponse: OFormat[CloneUserResponse]         = Json.format[CloneUserResponse]
-  implicit val formatSmsAccessCodeResponse: OFormat[SmsAccessCodeResponse] = Json.format[SmsAccessCodeResponse]
+  given OFormat[CloneUserResponse]     = Json.format[CloneUserResponse]
+  given OFormat[SmsAccessCodeResponse] = Json.format[SmsAccessCodeResponse]
 }
 
 @Singleton
 class TestOnlyTpdConnector @Inject() (
     http: HttpClientV2,
     config: ApplicationConfig
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   import TestOnlyTpdConnector._
 
   lazy val serviceBaseUrl: String = config.thirdPartyDeveloperUrl
 
-  def clone(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[CloneUserResponse] = {
+  def clone(email: LaxEmailAddress)(using HeaderCarrier): Future[CloneUserResponse] = {
     http.post(url"$serviceBaseUrl/test-only/user/clone")
       .withBody(Json.toJson(email))
       .execute[CloneUserResponse]
   }
 
-  def findUserByEmail(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[User]] = {
+  def findUserByEmail(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[User]] = {
     http.post(url"$serviceBaseUrl/test-only/user/find")
       .withBody(Json.toJson(email))
       .execute[Option[User]]
   }
 
-  def peekAtPasswordResetCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def peekAtPasswordResetCode(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtPasswordResetCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]
   }
 
-  def peekAtRegistrationVerificationCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def peekAtRegistrationVerificationCode(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtRegistrationVerificationCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]
   }
 
-  def peekAtSmsAccessCode(email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def peekAtSmsAccessCode(email: LaxEmailAddress)(using HeaderCarrier): Future[Option[String]] = {
     http.post(url"$serviceBaseUrl/test-only/user/peekAtSmsAccessCode")
       .withBody(Json.toJson(email))
       .execute[Option[String]]

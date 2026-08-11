@@ -27,16 +27,16 @@ import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConn
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
 
 @Singleton
-class MfaService @Inject() (thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector)(implicit val ec: ExecutionContext) {
+class MfaService @Inject() (thirdPartyDeveloperMfaConnector: ThirdPartyDeveloperMfaConnector)(using val ec: ExecutionContext) {
 
-  def enableMfa(userId: UserId, mfaId: MfaId, totpCode: String)(implicit hc: HeaderCarrier): Future[MfaResponse] = {
+  def enableMfa(userId: UserId, mfaId: MfaId, totpCode: String)(using HeaderCarrier): Future[MfaResponse] = {
     thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaId, totpCode) flatMap {
       case true => successful(MfaResponse(true))
       case _    => successful(MfaResponse(false))
     }
   }
 
-  def removeMfaById(userId: UserId, mfaIdToVerify: MfaId, totpCode: String, mfaIdForRemoval: MfaId)(implicit hc: HeaderCarrier): Future[MfaResponse] = {
+  def removeMfaById(userId: UserId, mfaIdToVerify: MfaId, totpCode: String, mfaIdForRemoval: MfaId)(using HeaderCarrier): Future[MfaResponse] = {
     thirdPartyDeveloperMfaConnector.verifyMfa(userId, mfaIdToVerify, totpCode) flatMap {
       case true => thirdPartyDeveloperMfaConnector.removeMfaById(userId, mfaIdForRemoval).map(_ => MfaResponse(true))
       case _    => successful(MfaResponse(false))

@@ -23,7 +23,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppSetupCompletedView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -42,7 +42,7 @@ class AuthAppSetupCompletedViewSpec extends CommonViewSpec
 
   "AuthAppSetupCompletedView" should {
     "render correctly when form is valid and showSmsText flag is false" in {
-      val mainView = authAppSetupCompletedView.apply(false)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = authAppSetupCompletedView.apply(false)(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "You can now get access codes by authenticator app"
@@ -53,7 +53,7 @@ class AuthAppSetupCompletedViewSpec extends CommonViewSpec
     }
 
     "render correctly when form is valid and showSmsText flag is true" in {
-      val mainView = authAppSetupCompletedView.apply(true)(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = authAppSetupCompletedView.apply(true)(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "You can now get access codes by authenticator app"
       document.getElementById("paragraph").text should startWith("Keep the app on your smartphone or tablet.")

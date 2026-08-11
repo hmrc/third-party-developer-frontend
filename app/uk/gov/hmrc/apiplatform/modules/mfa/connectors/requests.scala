@@ -21,11 +21,11 @@ import play.api.libs.json.{Json, OFormat}
 case class ChangeMfaNameRequest(name: String)
 
 object ChangeMfaNameRequest {
-  implicit val format: OFormat[ChangeMfaNameRequest] = Json.format[ChangeMfaNameRequest]
+  given OFormat[ChangeMfaNameRequest] = Json.format[ChangeMfaNameRequest]
 }
 
 case class CreateMfaSmsRequest(mobileNumber: String)
 
 object CreateMfaSmsRequest {
-  implicit val formatCreateMfaSmsRequest: OFormat[CreateMfaSmsRequest] = Json.format[CreateMfaSmsRequest]
+  given OFormat[CreateMfaSmsRequest] = Json.format[CreateMfaSmsRequest]
 }

@@ -20,16 +20,18 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.SubclassMockSupport
 
-trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar {
-  val tpoConnector: ThirdPartyOrchestratorConnector                                        = mock[ThirdPartyOrchestratorConnector]
-  val tpdConnector: ThirdPartyDeveloperConnector                                           = mock[ThirdPartyDeveloperConnector]
-  val tpaProductionConnector: ThirdPartyApplicationProductionConnector                     = mock[ThirdPartyApplicationProductionConnector]
-  val apiPlatformDeskproConnector: ApiPlatformDeskproConnector                             = mock[ApiPlatformDeskproConnector]
-  val flowRepository: FlowRepository                                                       = mock[FlowRepository]
-  val apmConnector: ApmConnector                                                           = mock[ApmConnector]
+trait MockConnectors extends MockitoSugar with ArgumentMatchersSugar with SubclassMockSupport {
+  val tpoConnector: ThirdPartyOrchestratorConnector                    = mock[ThirdPartyOrchestratorConnector]
+  val tpdConnector: ThirdPartyDeveloperConnector                       = mock[ThirdPartyDeveloperConnector]
+  val tpaProductionConnector: ThirdPartyApplicationProductionConnector = mock[ThirdPartyApplicationProductionConnector]
+  val apiPlatformDeskproConnector: ApiPlatformDeskproConnector         = mock[ApiPlatformDeskproConnector]
+  val flowRepository: FlowRepository                                   = mock[FlowRepository]
+
+  val apmConnector: ApmConnector                                                           = subclassMock[TestApmConnector]
   val sandboxPushPullNotificationsConnector: SandboxPushPullNotificationsConnector         = mock[SandboxPushPullNotificationsConnector]
   val productionPushPullNotificationsConnector: ProductionPushPullNotificationsConnector   = mock[ProductionPushPullNotificationsConnector]
   val thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector = mock[ThirdPartyApplicationSubmissionsConnector]

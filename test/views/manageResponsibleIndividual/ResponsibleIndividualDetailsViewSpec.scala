@@ -22,17 +22,13 @@ import views.html.manageResponsibleIndividual.ResponsibleIndividualDetailsView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, RedirectUri, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ManageResponsibleIndividualController.{ResponsibleIndividualHistoryItem, ViewModel}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFAddToken with LocalUserIdTracker with UserTestData with DeveloperSessionBuilder
@@ -60,7 +56,7 @@ class ResponsibleIndividualDetailsViewSpec extends CommonViewSpec with WithCSRFA
       )
       val document    = Jsoup.parse(renderPage(ViewModel(environment, currentRiName, previousRis, true, List(), false)).body)
 
-      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name.value)
+      elementBySelector(document, "#applicationName").map(_.text()) shouldBe Some(application.name.toString)
       elementBySelector(document, "#environment").map(_.text()) shouldBe Some(environment)
 
       val oldRiNames = document.select(".riHistoryName")

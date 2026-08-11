@@ -14,10 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-@import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, *}
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary.ApplicationWithCollaboratorsSyntax
 @import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.PrivacyPolicyLocation
@@ -25,14 +23,14 @@
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages, loggedIn: UserSession)
+@(app: ApplicationWithCollaborators)(implicit messages: Messages, loggedIn: UserSession)
 
 <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("application.details.customer.usage")</h2>
 <p class="govuk-body">@messages("application.details.customer.hint")</p>
 
 @getPrivacyPolicyLocation(privacyPolicyLocation: Option[PrivacyPolicyLocation]): String = @{
     privacyPolicyLocation match {
-        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.PrivacyPolicyLocations.NoneProvided) => "Not set"
+        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.PrivacyPolicyLocation.NoneProvided) => "Not set"
         case Some(ppl) => ppl.describe()
         case _ => "Not set"
     }
@@ -40,7 +38,7 @@
 
 @getTermsAndConditionsLocation(termsAndConditionsLocation: Option[TermsAndConditionsLocation]): String = @{
     termsAndConditionsLocation match {
-        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsAndConditionsLocations.NoneProvided) => "Not set"
+        case Some(uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.TermsAndConditionsLocation.NoneProvided) => "Not set"
         case Some(tacl) => tacl.describe()
         case _ => "Not set"
     }

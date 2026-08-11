@@ -16,8 +16,7 @@
 
 package views
 
-import java.time.Period
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -29,16 +28,15 @@ import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.common.domain.models.FullName
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, State}
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocations, ResponsibleIndividual, TermsAndConditionsLocations}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ImportantSubmissionData, PrivacyPolicyLocation, ResponsibleIndividual, TermsAndConditionsLocation}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.CollaboratorTracker
 
@@ -112,7 +110,7 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "include link to push secrets when the application has PPNS fields and the user is an admin or the application is sandbox" in new Setup {
-      val prodAppAsAdmin  = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
+      val prodAppAsAdmin  = standardApp.withEnvironment(Environment.Production).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
       val sandboxAppAsDev = standardApp.inSandbox().withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document  =
@@ -125,9 +123,9 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
     }
 
     "not include link to push secrets when the application does not have PPNS fields, or it does, but the user is only a developer for a production app" in new Setup {
-      val prodAppAsAdmin  = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
+      val prodAppAsAdmin  = standardApp.withEnvironment(Environment.Production).withCollaborators(Set(loggedIn.developer.email.asAdministratorCollaborator))
       val sandboxAppAsDev = standardApp.inSandbox().withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
-      val prodAppAsDev    = standardApp.withEnvironment(Environment.PRODUCTION).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
+      val prodAppAsDev    = standardApp.withEnvironment(Environment.Production).withCollaborators(Set(loggedIn.developer.email.asDeveloperCollaborator))
 
       val prodAppAsAdminDocument: Document  =
         Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(prodAppAsAdmin, hasSubscriptionsFields = true, hasPpnsFields = false)), Some("")).body)
@@ -146,13 +144,13 @@ class LeftHandNavSpec extends CommonViewSpec with CollaboratorTracker with Local
         None,
         responsibleIndividual,
         Set.empty,
-        TermsAndConditionsLocations.InDesktopSoftware,
-        PrivacyPolicyLocations.InDesktopSoftware,
+        TermsAndConditionsLocation.InDesktopSoftware,
+        PrivacyPolicyLocation.InDesktopSoftware,
         List.empty
       )
 
       val application =
-        standardApp.withEnvironment(Environment.PRODUCTION).withState(appStateProduction).withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData)))
+        standardApp.withEnvironment(Environment.Production).withState(appStateProduction).withAccess(Access.Standard(importantSubmissionData = Some(importantSubmissionData)))
 
       val document: Document = Jsoup.parse(leftHandNavView(Some(ApplicationViewModel(application, hasSubscriptionsFields = false, hasPpnsFields = false)), Some("")).body)
 

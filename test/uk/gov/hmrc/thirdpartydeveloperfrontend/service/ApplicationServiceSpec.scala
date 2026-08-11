@@ -24,25 +24,23 @@ import org.mockito.captor.ArgCaptor
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
-import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocations, TermsAndConditionsLocations}
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId, _}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Environment, UserId, *}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.SubscriptionsBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.{ApmConnectorCommandModuleMockModule, ApmConnectorMockModule, ThirdPartyOrchestratorConnectorMockModule}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -53,34 +51,19 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     with FixedClock {
 
   trait Setup extends FixedClock with ApmConnectorMockModule with ApmConnectorCommandModuleMockModule with ThirdPartyOrchestratorConnectorMockModule {
-    implicit val hc: HeaderCarrier = HeaderCarrier()
-
-    private val mockAppConfig = mock[ApplicationConfig]
-
-    val mockPushPullNotificationsConnector: PushPullNotificationsConnector = mock[PushPullNotificationsConnector]
-
-    val mockDeveloperConnector: ThirdPartyDeveloperConnector = mock[ThirdPartyDeveloperConnector]
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val mockAuditService: AuditService = mock[AuditService]
 
-    val connectorsWrapper = new ConnectorsWrapper(
-      mockPushPullNotificationsConnector,
-      mockPushPullNotificationsConnector,
-      mockAppConfig
-    )
-
-    val mockSubscriptionFieldsService: SubscriptionFieldsService     = mock[SubscriptionFieldsService]
     val mockApiPlatformDeskproConnector: ApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
-    val mockApmConnector: ApmConnector                               = mock[ApmConnector]
-    val mockOrganisationConnector: OrganisationConnector             = mock[OrganisationConnector]
+
+    val mockApmConnector: ApmConnector                   = subclassMock[ApmConnector]
+    val mockOrganisationConnector: OrganisationConnector = mock[OrganisationConnector]
 
     val applicationService = new ApplicationService(
       mockApmConnector,
-      connectorsWrapper,
       ApmConnectorCommandModuleMock.aMock,
-      mockSubscriptionFieldsService,
       mockApiPlatformDeskproConnector,
-      mockDeveloperConnector,
       ThirdPartyOrchestratorConnectorMock.aMock,
       mockOrganisationConnector,
       mockAuditService,
@@ -108,9 +91,9 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   val createAppRequest = CreateApplicationRequestV1(
     name = ApplicationName("app name"),
     access = CreationAccess.Standard,
-    environment = Environment.SANDBOX,
+    environment = Environment.Sandbox,
     description = None,
-    collaborators = Set(Collaborator(LaxEmailAddress("bob@example.com"), Collaborator.Roles.ADMINISTRATOR, userId)),
+    collaborators = Set(Collaborator(LaxEmailAddress("bob@example.com"), Collaborator.Role.Administrator, userId)),
     subscriptions = None,
     organisationId = Some(organisationId)
   )
@@ -121,7 +104,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name: String,
       context: ApiContext,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false
     ): APISubscriptionStatus =
@@ -129,7 +112,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name = name,
       serviceName = ServiceName(name),
       context = context,
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = emptySubscriptionFieldsWrapper(appId, clientId, context, version)
@@ -141,7 +124,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name: String,
       context: String,
       version: ApiVersionNbr,
-      status: ApiStatus = ApiStatus.STABLE,
+      status: ApiStatus = ApiStatus.Stable,
       subscribed: Boolean = false,
       requiresTrust: Boolean = false,
       subscriptionFieldWithValues: List[SubscriptionFieldValue] = List.empty
@@ -150,7 +133,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       name = name,
       serviceName = ServiceName(name),
       context = ApiContext(context),
-      apiVersion = ApiVersion(version, status, ApiAccessType.PUBLIC, List.empty),
+      apiVersion = ApiVersion(version, status, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = subscribed,
       requiresTrust = requiresTrust,
       fields = SubscriptionFieldsWrapper(appId, clientId, ApiContext(context), version, subscriptionFieldWithValues)
@@ -160,7 +143,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Privacy Policy Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
-      val newLocation = PrivacyPolicyLocations.Url("http://example.com")
+      val newLocation = PrivacyPolicyLocation.Url("http://example.com")
       val cmd         = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant, newLocation)
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
@@ -173,7 +156,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
   "Update Terms and Conditions Location" should {
     "call the TPA connector correctly" in new Setup {
       val userId      = UserId.random
-      val newLocation = TermsAndConditionsLocations.Url("http://example.com")
+      val newLocation = TermsAndConditionsLocation.Url("http://example.com")
       val cmd         = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant, newLocation)
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccessFor(cmd)(productionApplication)
 
@@ -206,12 +189,12 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       when(mockApiPlatformDeskproConnector.createTicket(*, *))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestApplicationDeletion(adminRequester, sandboxApplication)) shouldBe Some("ref")
 
-      verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService).audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc))
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
 
@@ -228,11 +211,11 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       when(mockApiPlatformDeskproConnector.createTicket(*, *))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
       await(applicationService.requestApplicationDeletion(adminRequester, productionApplication)) shouldBe Some("ref")
-      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService, times(1)).audit(any[AuditAction], any[Map[String, String]])(using eqTo(hc))
       verify(mockApiPlatformDeskproConnector).createTicket(*, *)
     }
 
@@ -286,24 +269,23 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "request 2SV removal" should {
 
-    val email  = "testy@example.com".toLaxEmail
-    val name   = "Bob"
-    val userId = UserId.random
+    val email = "testy@example.com".toLaxEmail
+    val name  = "Bob"
 
     "correctly create a deskpro ticket and audit record" in new Setup {
       val ticketCaptor = ArgCaptor[CreateTicketRequest]
       when(mockApiPlatformDeskproConnector.createTicket(any[CreateTicketRequest], eqTo(hc)))
         .thenReturn(successful(Some("ref")))
-      when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc)))
+      when(mockAuditService.audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(using eqTo(hc)))
         .thenReturn(successful(Success))
 
-      await(applicationService.request2SVRemoval(userId, name, email))
+      await(applicationService.request2SVRemoval(name, email))
 
       verify(mockApiPlatformDeskproConnector, times(1)).createTicket(ticketCaptor, eqTo(hc))
       ticketCaptor.value.email shouldBe email.text
       ticketCaptor.value.fullName shouldBe name
 
-      verify(mockAuditService, times(1)).audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(eqTo(hc))
+      verify(mockAuditService, times(1)).audit(eqTo(AuditAction.Remove2SVRequested), any[Map[String, String]])(using eqTo(hc))
     }
   }
 
@@ -312,10 +294,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.SANDBOX)(ApplicationNameValidationResult.Valid)
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.Sandbox)(ApplicationNameValidationResult.Valid)
 
       private val result =
-        await(applicationService.isApplicationNameValid(applicationName, Environment.SANDBOX, Some(applicationId)))
+        await(applicationService.isApplicationNameValid(applicationName, Environment.Sandbox, Some(applicationId)))
 
       result shouldBe ApplicationNameValidationResult.Valid
 
@@ -325,10 +307,10 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
       private val applicationName = "applicationName"
       private val applicationId   = ApplicationId.random
 
-      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.PRODUCTION)(ApplicationNameValidationResult.Valid)
+      ThirdPartyOrchestratorConnectorMock.ValidateName.succeedsWith(applicationName, Some(applicationId), Environment.Production)(ApplicationNameValidationResult.Valid)
 
       private val result =
-        await(applicationService.isApplicationNameValid(applicationName, Environment.PRODUCTION, Some(applicationId)))
+        await(applicationService.isApplicationNameValid(applicationName, Environment.Production, Some(applicationId)))
 
       result shouldBe ApplicationNameValidationResult.Valid
 
@@ -344,7 +326,6 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
       private val result =
         await(applicationService.requestProductonApplicationNameChange(
-          adminSession.developer.userId,
           productionApplication,
           applicationName,
           adminSession.developer.displayedName,
@@ -372,7 +353,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
 
   "createForUser" should {
     "call the TPO connector correctly" in new Setup {
-      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(Some(organisation)))
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(using *)).thenReturn(successful(Some(organisation)))
       ThirdPartyOrchestratorConnectorMock.Create.succeedsWith(ApplicationCreatedResponse(sandboxApplicationId))
 
       val result = await(applicationService.createForUser(createAppRequest, userId))
@@ -382,7 +363,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
     }
 
     "not call the TPO connector if no organisation found" in new Setup {
-      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(None))
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(using *)).thenReturn(successful(None))
 
       val result = await(applicationService.createForUser(createAppRequest, userId))
 
@@ -398,7 +379,7 @@ class ApplicationServiceSpec extends AsyncHmrcSpec
         instant,
         Set(uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Collaborators.Member(userId))
       )
-      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(*)).thenReturn(successful(Some(organisationNotAdmin)))
+      when(mockOrganisationConnector.fetchOrganisation(*[OrganisationId])(using *)).thenReturn(successful(Some(organisationNotAdmin)))
 
       val result = await(applicationService.createForUser(createAppRequest, userId))
 

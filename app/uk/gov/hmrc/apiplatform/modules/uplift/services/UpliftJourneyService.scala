@@ -26,13 +26,13 @@ import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.{Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommands
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.Submission
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.ApiSubscriptions
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.services._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.services.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorApplicationModule, ApmConnectorCommandModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
@@ -40,14 +40,14 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 @Singleton
 class UpliftJourneyService @Inject() (
     flowService: GetProductionCredentialsFlowService,
-    apmConnector: ApmConnectorApplicationModule with ApmConnectorCommandModule,
+    apmConnector: ApmConnectorApplicationModule & ApmConnectorCommandModule,
     thirdPartyApplicationSubmissionsConnector: ThirdPartyApplicationSubmissionsConnector,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow with EitherTHelper[String] {
   import cats.instances.future.catsStdInstancesForFuture
 
-  def confirmAndUplift(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationId]] =
+  def confirmAndUplift(sandboxAppId: ApplicationId, userSession: UserSession)(using HeaderCarrier): Future[Either[String, ApplicationId]] =
     (
       for {
         flow                   <- liftF(flowService.fetchFlow(userSession))
@@ -66,7 +66,7 @@ class UpliftJourneyService @Inject() (
       sandboxAppId: ApplicationId,
       userSession: UserSession,
       subscriptions: List[APISubscriptionStatus]
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[List[APISubscriptionStatus]] =
     (
       for {
@@ -77,7 +77,7 @@ class UpliftJourneyService @Inject() (
       } yield subscriptionsWithFlowAdjusted
     )
 
-  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, userSession: UserSession)(implicit hc: HeaderCarrier): Future[ApiSubscriptions] =
+  def storeDefaultSubscriptionsInFlow(sandboxAppId: ApplicationId, userSession: UserSession)(using HeaderCarrier): Future[ApiSubscriptions] =
     for {
       upliftableSubscriptions <- apmConnector.fetchUpliftableSubscriptions(sandboxAppId)
       apiSubscriptions         = ApiSubscriptions(upliftableSubscriptions.map(id => (id, true)).toMap)
@@ -88,7 +88,7 @@ class UpliftJourneyService @Inject() (
       sandboxAppId: ApplicationId,
       userSession: UserSession,
       subscriptions: List[APISubscriptionStatus]
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[(Set[String], Boolean)] = {
     def getApiNameForContext(apiContext: ApiContext) =
       subscriptions
@@ -114,7 +114,7 @@ class UpliftJourneyService @Inject() (
     }
   }
 
-  def createNewSubmission(appId: ApplicationId, application: ApplicationWithCollaborators, userSession: UserSession)(implicit hc: HeaderCarrier): Future[Either[String, Submission]] = {
+  def createNewSubmission(appId: ApplicationId, application: ApplicationWithCollaborators, userSession: UserSession)(using HeaderCarrier): Future[Either[String, Submission]] = {
     (
       for {
         flow                   <- liftF(flowService.fetchFlow(userSession))
@@ -134,7 +134,7 @@ class UpliftJourneyService @Inject() (
       application: ApplicationWithCollaborators,
       sellResellOrDistribute: SellResellOrDistribute,
       userSession: UserSession
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ) = {
     def existingSellResellOrDistribute = application.access match {
       case Access.Standard(_, _, _, _, _, sellResellOrDistribute, _) => sellResellOrDistribute

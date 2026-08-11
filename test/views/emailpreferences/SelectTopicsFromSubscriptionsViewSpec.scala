@@ -16,7 +16,7 @@
 
 package views.emailpreferences
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -26,10 +26,10 @@ import views.html.emailpreferences.SelectTopicsFromSubscriptionsView
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic
-import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic._
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.EmailTopic.*
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -75,11 +75,11 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
 
   def validateCheckboxItemsAgainstTopics(document: Document) = {
     EmailTopic.values.foreach(topic => {
-      val checkbox = document.getElementById(topic.toString)
+      val checkbox = document.getElementById(topic.asScreamingSnakeCase)
       checkbox.attr("name") shouldBe "topic[]"
-      checkbox.`val`() shouldBe topic.toString
-      document.select(s"label[for=${topic.toString}]").text.startsWith(topic.displayName) shouldBe true
-      document.select(s"label[for=${topic.toString}] > div[class=govuk-hint]").text() shouldBe topic.description
+      checkbox.`val`() shouldBe topic.asScreamingSnakeCase
+      document.select(s"label[for=${topic.asScreamingSnakeCase}]").text.startsWith(topic.displayName) shouldBe true
+      document.select(s"label[for=${topic.asScreamingSnakeCase}] > div[class=govuk-hint]").text() shouldBe topic.description
     })
   }
 
@@ -102,7 +102,7 @@ class SelectTopicsFromSubscriptionsViewSpec extends CommonViewSpec
     }
 
     "render the topics selection Page with boxes selected when user selected topics passed to the view" in new Setup {
-      val usersTopics = Set(BUSINESS_AND_POLICY.toString, EVENT_INVITES.toString)
+      val usersTopics = Set(BusinessAndPolicy.asScreamingSnakeCase, EventInvites.asScreamingSnakeCase)
       val page        =
         viewUnderTest.render(
           SelectTopicsFromSubscriptionsForm.form,

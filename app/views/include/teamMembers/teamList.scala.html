@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.Collaborator
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-@import views.include.teamMembers.TeamMember._
+@import views.include.teamMembers.TeamMember.*
 @(app: ApplicationWithCollaborators, collaboratorUsers: Seq[User], role: Collaborator.Role, loggedIn: UserSession, addTeamMemberUrl: Call, addMemberStyle: AnchorStyle, createRemoveLink : (ApplicationId, LaxEmailAddress) => Call)(implicit request: play.api.mvc.Request[Any])
 
 @if(role.isDeveloper) {
@@ -56,7 +56,7 @@
     data-teamMember-remove-url="@SpliceCSRFToken(routes.ManageTeam.removeTeamMemberAction(app.id))"
     class="govuk-table__body"
   >
-  @for((teamMember, index) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
+  @for((teamMember, _) <- app.collaborators.toSeq.sortBy(_.emailAddress.text).zipWithIndex) {
       <tr class="govuk-table__row" data-teamMember-row="@teamMember.emailAddress.text">
         <td class="govuk-table__cell center-table-text">@teamMember.emailAddress.text
         @if(displayUnverified(teamMember, collaboratorUsers)){

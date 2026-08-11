@@ -18,10 +18,11 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import scala.concurrent.Future
 
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, InternalServerException, StringContextOps}
 
-import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandHandlerTypes, _}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, _}
+import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{CommandHandlerTypes, *}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, *}
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.ApplicationUpdateSuccessful
 
@@ -30,15 +31,15 @@ trait ApmConnectorCommandModule
     with CommandHandlerTypes[DispatchSuccessResult]
     with ApplicationLogger {
 
-  private[this] val baseUrl                                          = s"${config.serviceBaseUrl}/applications"
-  private[this] def baseApplicationUrl(applicationId: ApplicationId) = s"$baseUrl/${applicationId}"
+  private val baseUrl                                          = s"${config.serviceBaseUrl}/applications"
+  private def baseApplicationUrl(applicationId: ApplicationId) = s"$baseUrl/${applicationId}"
 
   // TODO - rework code so this is not required
   def dispatchWithThrow(
       applicationId: ApplicationId,
       command: ApplicationCommand,
       adminsToEmail: Set[LaxEmailAddress]
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     dispatch(applicationId, command, adminsToEmail).map(_ match {
       case Left(errs) => throw new RuntimeException(CommandFailures.describe(errs.head))
@@ -50,10 +51,10 @@ trait ApmConnectorCommandModule
       applicationId: ApplicationId,
       command: ApplicationCommand,
       adminsToEmail: Set[LaxEmailAddress]
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): AppCmdResult = {
 
-    import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters._
+    import uk.gov.hmrc.apiplatform.modules.common.domain.services.NonEmptyListFormatters.given
     import play.api.libs.json._
     import uk.gov.hmrc.http.HttpReads.Implicits._
     import play.api.http.Status._

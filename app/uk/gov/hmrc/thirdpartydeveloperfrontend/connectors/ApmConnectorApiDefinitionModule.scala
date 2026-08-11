@@ -19,11 +19,12 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, _}
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.{HeaderCarrier, *}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiDefinition, ExtendedApiDefinition, MappedApiDefinitions, ServiceName}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 
 object ApmConnectorApiDefinitionModule {
   val ApplicationIdQueryParam = "applicationId"
@@ -33,43 +34,43 @@ object ApmConnectorApiDefinitionModule {
 trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
   import ApmConnectorApiDefinitionModule._
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/api-definitions"
+  private val baseUrl = s"${config.serviceBaseUrl}/api-definitions"
 
-  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(using HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams = Seq(
       ApplicationIdQueryParam -> applicationId.toString()
     )
     http.get(url"${baseUrl}?$queryParams")
       .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
+      .map(_.values.toList)
   }
 
-  def fetchAllOpenAccessApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+  def fetchAllOpenAccessApis(environment: Environment)(using HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams = Seq(
-      EnvironmentQueryParam -> environment
+      EnvironmentQueryParam -> environment.asScreamingSnakeCase
     )
 
     http.get(url"${baseUrl}/open?$queryParams")
       .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
+      .map(_.values.toList)
   }
 
-  def fetchUpliftableApiIdentifiers(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
+  def fetchUpliftableApiIdentifiers(using HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
       http.get(url"${baseUrl}/upliftable")
         .execute[Set[ApiIdentifier]]
     }
 
-  def fetchAllApis(environment: Environment)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+  def fetchAllApis(environment: Environment)(using HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams = Seq(
-      EnvironmentQueryParam -> environment
+      EnvironmentQueryParam -> environment.asScreamingSnakeCase
     )
     http.get(url"${baseUrl}/all?$queryParams")
       .execute[MappedApiDefinitions]
-      .map(_.wrapped.values.toList)
+      .map(_.values.toList)
   }
 
-  def fetchExtendedApiDefinition(serviceName: ServiceName)(implicit hc: HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
+  def fetchExtendedApiDefinition(serviceName: ServiceName)(using HeaderCarrier): Future[Either[Throwable, ExtendedApiDefinition]] =
     http.get(url"${config.serviceBaseUrl}/combined-api-definitions/$serviceName")
       .execute[ExtendedApiDefinition]
       .map(Right(_))
@@ -77,7 +78,7 @@ trait ApmConnectorApiDefinitionModule extends ApmConnectorModule {
         case NonFatal(e) => Left(e)
       }
 
-  def fetchApiDefinitionsVisibleToUser(userId: Option[UserId])(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+  def fetchApiDefinitionsVisibleToUser(userId: Option[UserId])(using HeaderCarrier): Future[List[ApiDefinition]] = {
     val queryParams: Seq[(String, String)] = userId.fold(Seq.empty[(String, String)])(id => Seq("developerId" -> id.toString()))
 
     http.get(url"${config.serviceBaseUrl}/combined-api-definitions?$queryParams")

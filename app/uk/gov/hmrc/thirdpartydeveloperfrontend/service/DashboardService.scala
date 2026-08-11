@@ -22,8 +22,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.OrganisationConnector
@@ -34,10 +34,10 @@ class DashboardService @Inject() (
     organisationConnector: OrganisationConnector,
     appSvc: AppsByTeamMemberService,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow {
 
-  def fetchApplicationList(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[ApplicationSummary]] = {
+  def fetchApplicationList(userId: UserId)(using HeaderCarrier): Future[Seq[ApplicationSummary]] = {
 
     def createDashboardAppList(prodAppList: Seq[ApplicationWithSubscriptions], sandboxAppList: Seq[ApplicationWithSubscriptions]): Seq[ApplicationSummary] = {
       val combinedApps = prodAppList ++ sandboxAppList;
@@ -46,13 +46,13 @@ class DashboardService @Inject() (
     }
 
     for {
-      productionApps <- appSvc.fetchAppsByTeamMember(Environment.PRODUCTION)(userId)
-      sandboxApps    <- appSvc.fetchAppsByTeamMember(Environment.SANDBOX)(userId)
+      productionApps <- appSvc.fetchAppsByTeamMember(Environment.Production)(userId)
+      sandboxApps    <- appSvc.fetchAppsByTeamMember(Environment.Sandbox)(userId)
       combinedAppList = createDashboardAppList(productionApps, sandboxApps)
     } yield combinedAppList
   }
 
-  def fetchOrganisationsByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Seq[Organisation]] = {
+  def fetchOrganisationsByUserId(userId: UserId)(using HeaderCarrier): Future[Seq[Organisation]] = {
     organisationConnector.fetchOrganisationsByUserId(userId)
   }
 }

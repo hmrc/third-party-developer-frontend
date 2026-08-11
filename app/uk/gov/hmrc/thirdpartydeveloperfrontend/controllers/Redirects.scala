@@ -25,14 +25,14 @@ import views.html.{AddRedirectView, ChangeRedirectView, DeleteRedirectConfirmati
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{Actors, ApplicationId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler, FraudPreventionConfig}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.fraudprevention.FraudPreventionNavLinkHelper
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsRedirects
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
@@ -52,9 +52,9 @@ class Redirects @Inject() (
     changeRedirectView: ChangeRedirectView,
     val fraudPreventionConfig: FraudPreventionConfig,
     loginRedirectsService: LoginRedirectsService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
-  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUnsafeDefaultFormBinding with ApplicationSyntaxes {
+  ) extends ApplicationController(mcc) with FraudPreventionNavLinkHelper with WithUrlEncodedOnlyFormBinding with ApplicationSyntaxes {
 
   def canChangeRedirectInformationAction(applicationId: ApplicationId)(fun: ApplicationRequest[AnyContent] => Future[Result]): Action[AnyContent] =
     checkActionForApprovedApps(SupportsRedirects, SandboxOrAdmin)(applicationId)(fun)
@@ -97,11 +97,11 @@ class Redirects @Inject() (
       successful(Ok(deleteRedirectConfirmationView(applicationViewModelFromApplicationRequest(), DeleteRedirectConfirmationForm.form, form.redirectUri)))
     }
 
-    def handleInvalidForm(formWithErrors: Form[DeleteRedirectForm]) = {
+    def handleInvalidForm() = {
       successful(Redirect(routes.Redirects.loginRedirects(applicationId)))
     }
 
-    DeleteRedirectForm.form.bindFromRequest().fold(handleInvalidForm, handleValidForm)
+    DeleteRedirectForm.form.bindFromRequest().fold(_ => handleInvalidForm(), handleValidForm)
   }
 
   def deleteLoginRedirectAction(applicationId: ApplicationId) = canChangeRedirectInformationAction(applicationId) { implicit request =>
@@ -146,7 +146,7 @@ class Redirects @Inject() (
                   .withError("newRedirectUri", "redirect.uri.duplicate")
               )
             } else
-              loginRedirectsService.changeLoginRedirect(actor, application, new LoginRedirectUri(form.originalRedirectUri), LoginRedirectUri.unsafeApply(form.newRedirectUri))
+              loginRedirectsService.changeLoginRedirect(actor, application, LoginRedirectUri.unsafeApply(form.originalRedirectUri), LoginRedirectUri.unsafeApply(form.newRedirectUri))
                 .map(_ => Redirect(routes.Redirects.loginRedirects(applicationId)))
           case _                    => successful(Redirect(manageapplicationroutes.MainApplicationDetailsController.applicationDetails(applicationId)))
         }

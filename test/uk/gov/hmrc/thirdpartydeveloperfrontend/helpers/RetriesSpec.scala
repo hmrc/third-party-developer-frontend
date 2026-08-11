@@ -26,13 +26,24 @@ import org.apache.pekko.actor.{ActorSystem, Scheduler}
 import org.apache.pekko.pattern.FutureTimeoutSupport
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 
+import play.api.Application
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.BadRequestException
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
 class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
+
+  override def fakeApplication(): Application =
+    new GuiceApplicationBuilder()
+      .configure("metrics.jvm" -> false)
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+      .build()
 
   trait Setup {
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -41,20 +52,25 @@ class RetriesSpec extends AsyncHmrcSpec with GuiceOneAppPerTest {
 
     val mockFutureTimeoutSupport: FutureTimeoutSupport = new FutureTimeoutSupport {
 
-      override def after[T](duration: FiniteDuration, using: Scheduler)(value: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+      override def after[T](duration: FiniteDuration, using: Scheduler)(value: => Future[T])(using ExecutionContext): Future[T] = {
         actualDelay = Some(duration)
         value
       }
     }
 
-    private val app                       = new GuiceApplicationBuilder().configure("metrics.jvm" -> false).build()
+    private val app                       =
+      new GuiceApplicationBuilder()
+        .configure("metrics.jvm" -> false)
+        .disable[PlayMongoModule]
+        .overrides(bind[FlowRepository].toInstance(mock[FlowRepository]))
+        .build()
     implicit val actorSystem: ActorSystem = app.actorSystem
-    implicit val ec: ExecutionContext     = app.injector.instanceOf[ExecutionContext]
+    given ec: ExecutionContext            = app.injector.instanceOf[ExecutionContext]
 
     def underTest = new RetryTestConnector(mockFutureTimeoutSupport, mockAppConfig)
   }
 
-  class RetryTestConnector(val futureTimeout: FutureTimeoutSupport, val appConfig: ApplicationConfig)(implicit val ec: ExecutionContext, val actorSystem: ActorSystem)
+  class RetryTestConnector(val futureTimeout: FutureTimeoutSupport, val appConfig: ApplicationConfig)(using val ec: ExecutionContext, val actorSystem: ActorSystem)
       extends Retries {}
 
   "Retries" should {

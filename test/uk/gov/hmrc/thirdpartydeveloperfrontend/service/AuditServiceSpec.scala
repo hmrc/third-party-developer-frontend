@@ -30,7 +30,6 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{ApplicationUpliftRequestDeniedDueToInvalidCredentials, PasswordChangeFailedDueToInvalidCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
 
@@ -46,10 +45,9 @@ class AuditServiceSpec extends AsyncHmrcSpec {
     )
 
     val mockAuditConnector = mock[AuditConnector]
-    val mockAppConfig      = mock[ApplicationConfig]
-    val underTest          = new AuditService(mockAuditConnector, mockAppConfig)
+    val underTest          = new AuditService(mockAuditConnector)
 
-    def verifyPasswordChangeFailedAuditEventSent(tags: Map[String, String])(implicit hc: HeaderCarrier) = {
+    def verifyPasswordChangeFailedAuditEventSent(tags: Map[String, String])(using HeaderCarrier) = {
 
       val expectedEvent = new DataEvent(
         auditSource = "third-party-developer-frontend",
@@ -62,7 +60,7 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
       underTest.audit(PasswordChangeFailedDueToInvalidCredentials(developerSession.developer.email))
 
-      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(*, any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(using *, any[ExecutionContext])
     }
   }
 
@@ -87,7 +85,7 @@ class AuditServiceSpec extends AsyncHmrcSpec {
 
       underTest.audit(event)
 
-      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(*, any[ExecutionContext])
+      verify(mockAuditConnector).sendEvent(argThat(isSameDataEvent(expectedEvent)))(using *, any[ExecutionContext])
     }
 
     "send an event when the password change fails due to invalid credentials for a user who is logged in" in new Setup {

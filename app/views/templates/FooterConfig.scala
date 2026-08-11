@@ -35,7 +35,7 @@ class FooterConfig @Inject() (config: Configuration) {
   lazy val termsConditions: String = baseUrl + urlFooterConfig.getString("termsConditions")
   lazy val govukHelp: String       = urlFooterConfig.getString("govukHelp")
 
-  def accessibility(implicit request: Request[_]): String =
+  def accessibility(implicit request: Request[?]): String =
     s"$accessibilityBaseUrl${urlFooterConfig.getString("accessibility")}/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}"
 
 }

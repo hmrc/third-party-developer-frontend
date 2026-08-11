@@ -21,21 +21,19 @@ import scala.concurrent.ExecutionContext
 
 import com.google.inject.name.Named
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 
 @Singleton
 class ConnectorsWrapper @Inject() (
     @Named("PPNS-SANDBOX") val sandboxPushPullNotificationsConnector: PushPullNotificationsConnector,
-    @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector,
-    applicationConfig: ApplicationConfig
-  )(implicit val ec: ExecutionContext
+    @Named("PPNS-PRODUCTION") val productionPushPullNotificationsConnector: PushPullNotificationsConnector
+  )(using val ec: ExecutionContext
   ) {
 
   def forEnvironment(environment: Environment): PushPullNotificationsConnector = {
     environment match {
-      case Environment.PRODUCTION => productionPushPullNotificationsConnector
+      case Environment.Production => productionPushPullNotificationsConnector
       case _                      => sandboxPushPullNotificationsConnector
     }
   }

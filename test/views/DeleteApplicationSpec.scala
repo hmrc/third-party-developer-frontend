@@ -22,17 +22,14 @@ import views.html.DeleteApplicationView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithCollaboratorsFixtures, Collaborator}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.{SampleUserSession, UserTestData}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, *}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 
 class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with CollaboratorTracker with LocalUserIdTracker with SampleUserSession with SampleApplication
     with DeveloperSessionBuilder
@@ -52,7 +49,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Production" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(prodApp, Collaborator.Roles.ADMINISTRATOR, request, userSession, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(prodApp, Collaborator.Role.Administrator, request, userSession, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -64,7 +61,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
       "on Sandbox" in {
         val request = FakeRequest().withCSRFToken
 
-        val page = deleteApplicationView.render(sandboxApp, Collaborator.Roles.ADMINISTRATOR, request, userSession, messagesProvider, appConfig)
+        val page = deleteApplicationView.render(sandboxApp, Collaborator.Role.Administrator, request, userSession, messagesProvider, appConfig)
 
         page.contentType should include("text/html")
         val document = Jsoup.parse(page.body)
@@ -78,7 +75,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
         Seq(prodApp, sandboxApp) foreach { application =>
           val request = FakeRequest().withCSRFToken
 
-          val page = deleteApplicationView.render(application, Collaborator.Roles.DEVELOPER, request, userSession, messagesProvider, appConfig)
+          val page = deleteApplicationView.render(application, Collaborator.Role.Developer, request, userSession, messagesProvider, appConfig)
 
           page.contentType should include("text/html")
           val document = Jsoup.parse(page.body)
@@ -96,7 +93,7 @@ class DeleteApplicationSpec extends CommonViewSpec with WithCSRFAddToken with Co
           .foreach { application =>
             val request = FakeRequest().withCSRFToken
 
-            val page = deleteApplicationView.render(application, Collaborator.Roles.DEVELOPER, request, userSession, messagesProvider, appConfig)
+            val page = deleteApplicationView.render(application, Collaborator.Role.Developer, request, userSession, messagesProvider, appConfig)
 
             page.contentType should include("text/html")
             val document = Jsoup.parse(page.body)

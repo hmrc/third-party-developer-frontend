@@ -23,14 +23,14 @@ import scala.concurrent.Future.successful
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.SubmissionActionBuilders.SubmissionStatusFilter
-import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel._
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+import uk.gov.hmrc.apiplatform.modules.submissions.controllers.models.AnswersViewModel.*
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.submissions.services.{RequestProductionCredentials, SubmissionService}
-import uk.gov.hmrc.apiplatform.modules.submissions.views.html._
+import uk.gov.hmrc.apiplatform.modules.submissions.views.html.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
@@ -52,7 +52,7 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials: RequestProductionCredentials,
     checkAnswersView: CheckAnswersView,
     prodCredsRequestReceivedView: ProductionCredentialsRequestReceivedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]
@@ -89,7 +89,7 @@ class CheckAnswersController @Inject() (
     requestProductionCredentials
       .requestProductionCredentials(request.application, request.userSession, requesterIsResponsibleIndividual, isNewTouUplift)
       .map(_ match {
-        case Right(app)                 => {
+        case Right(_)                   => {
           Redirect(routes.CheckAnswersController.requestReceivedPage(productionAppId))
         }
         case Left(ErrorDetails(_, msg)) => Redirect(routes.CheckAnswersController.checkAnswersPage(productionAppId)).flashing("error" -> msg)

@@ -19,18 +19,18 @@ package uk.gov.hmrc.apiplatform.modules.uplift.services
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.implicits._
+import cats.implicits.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.flows.FlowType
 import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 @Singleton
 class GetProductionCredentialsFlowService @Inject() (
     val flowRepository: FlowRepository
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) {
 
   def fetchFlow(session: UserSession): Future[GetProductionCredentialsFlow] =

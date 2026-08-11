@@ -30,15 +30,15 @@ trait OrganisationServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     def aMock: OrganisationService
 
     object FetchOrganisationAllowList {
-      def thenReturn(allowList: OrganisationAllowList) = when(aMock.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(Future.successful(Some(allowList)))
+      def thenReturn(allowList: OrganisationAllowList) = when(aMock.fetchOrganisationAllowList(*[UserId])(using *)).thenReturn(Future.successful(Some(allowList)))
 
-      def thenReturnNone() = when(aMock.fetchOrganisationAllowList(*[UserId])(*)).thenReturn(Future.successful(None))
+      def thenReturnNone() = when(aMock.fetchOrganisationAllowList(*[UserId])(using *)).thenReturn(Future.successful(None))
     }
 
     object FetchLatestSubmissionByUserId {
-      def thenReturn(submission: Submission) = when(aMock.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(Future.successful(Some(submission)))
+      def thenReturn(submission: Submission) = when(aMock.fetchLatestSubmissionByUserId(*[UserId])(using *)).thenReturn(Future.successful(Some(submission)))
 
-      def thenReturnNone() = when(aMock.fetchLatestSubmissionByUserId(*[UserId])(*)).thenReturn(Future.successful(None))
+      def thenReturnNone() = when(aMock.fetchLatestSubmissionByUserId(*[UserId])(using *)).thenReturn(Future.successful(None))
     }
   }
 

@@ -22,23 +22,23 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.organisations.submissions.domain.models.{OrganisationAllowList, Submission}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 
 @Singleton
 class OrganisationService @Inject() (
     organisationConnector: OrganisationConnector,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow {
 
-  def fetchOrganisationAllowList(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[OrganisationAllowList]] = {
+  def fetchOrganisationAllowList(userId: UserId)(using HeaderCarrier): Future[Option[OrganisationAllowList]] = {
     organisationConnector.fetchOrganisationAllowList(userId)
   }
 
-  def fetchLatestSubmissionByUserId(userId: UserId)(implicit hc: HeaderCarrier): Future[Option[Submission]] = {
+  def fetchLatestSubmissionByUserId(userId: UserId)(using HeaderCarrier): Future[Option[Submission]] = {
     organisationConnector.fetchLatestSubmissionByUserId(userId)
   }
 }

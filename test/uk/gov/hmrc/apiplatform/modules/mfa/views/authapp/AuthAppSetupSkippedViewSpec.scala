@@ -23,7 +23,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, StubMessagesFactory}
 
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.AuthAppSetupSkippedView
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -43,7 +43,7 @@ class AuthAppSetupSkippedViewSpec extends CommonViewSpec
 
   "AuthAppSetupSkippedView" should {
     "render as expected" in {
-      val mainView = smsSetupSkippedView()(FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
+      val mainView = smsSetupSkippedView()(using FakeRequest().withCSRFToken, loggedIn, appConfig, stubMessages())
       val document = Jsoup.parse(mainView.body)
 
       document.getElementById("page-heading").text shouldBe "Get access codes by authenticator app later"

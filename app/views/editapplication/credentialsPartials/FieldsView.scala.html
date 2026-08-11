@@ -18,7 +18,7 @@
 
 
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ClientSecret
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 @import _root_.controllers.routes.Assets
 @import views.html.helper.CSPNonce
@@ -29,7 +29,7 @@
 @this(govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, developer: User, clientSecrets: Seq[ClientSecret])(
-  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
+  implicit request: play.api.mvc.Request[Any]
 )
 
 @allowDeletion = @{clientSecrets.size > 1}

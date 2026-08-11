@@ -15,13 +15,11 @@
  *@
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import include._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
+@import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences.APICategoryDisplayDetails
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.CombinedApi
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiType
-@import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedApisEmailPreferencesForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
@@ -84,8 +82,8 @@
             @for(api <- apis) {
               <div class="govuk-checkboxes__item">
                 <input class="govuk-checkboxes__input" id="@api.serviceName" type="checkbox" name="selectedApi[]" value="@api.serviceName"
-                @if(selectedApis.contains(api.serviceName.value)) {checked}/>
-                <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName @if(api.apiType == ApiType.XML_API){-XML API}</label>
+                @if(selectedApis.contains(api.serviceName)) {checked}/>
+                <label class="govuk-label govuk-checkboxes__label" for="@api.serviceName">@api.displayName @if(api.apiType == ApiType.XmlApi){-XML API}</label>
               </div>
             }
           </div>

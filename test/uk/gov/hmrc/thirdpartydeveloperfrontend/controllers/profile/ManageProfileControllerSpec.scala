@@ -23,14 +23,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 import org.jsoup.Jsoup
-import views.html.manageprofile._
+import views.html.manageprofile.*
 
 import play.api.http.Status.OK
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{OrganisationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.{routes => mfaRoutes}
+import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes as mfaRoutes
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.{Organisation, OrganisationName}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{AuthenticatorAppMfaDetail, MfaId}
@@ -40,7 +40,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.BaseControllerSpec
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.ApplicationServiceMock
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{AuditService, DashboardService, ProfileService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionData
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddToken {
@@ -69,7 +69,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
 
   "profileDetails" should {
     "display users profile details" in new Setup {
-      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(*))
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(using *))
         .thenReturn(Future.successful(organisations))
 
       val result = addToken(underTest.profileDetails())(loggedInDevRequest)
@@ -94,7 +94,7 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
 
       fetchSessionByIdReturns(sessionId, sessionWithMfa)
 
-      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(*))
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(using *))
         .thenReturn(Future.successful(organisations))
 
       val result = addToken(underTest.profileDetails())(loggedInDevRequest.withSession("sessionId" -> sessionId.toString))

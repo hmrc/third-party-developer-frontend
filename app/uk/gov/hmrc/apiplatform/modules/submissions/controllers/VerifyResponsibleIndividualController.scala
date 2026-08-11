@@ -20,12 +20,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 import play.api.data.Form
-import play.api.data.Forms._
+import play.api.data.Forms.*
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, ResponsibleIndividualVerification}
 import uk.gov.hmrc.apiplatform.modules.submissions.services.ResponsibleIndividualVerificationService
@@ -52,7 +52,7 @@ object VerifyResponsibleIndividualController {
   val hasVerifiedForm: Form[HasVerifiedForm] = Form(
     mapping(
       "verified" -> nonEmptyText
-    )(HasVerifiedForm.apply)(HasVerifiedForm.unapply)
+    )(HasVerifiedForm.apply)(h => Some(h.verified))
   )
 }
 
@@ -69,22 +69,21 @@ class VerifyResponsibleIndividualController @Inject() (
     responsibleIndividualAcceptedView: ResponsibleIndividualAcceptedView,
     responsibleIndividualDeclinedView: ResponsibleIndividualDeclinedView,
     responsibleIndividualErrorView: ResponsibleIndividualErrorView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with EitherTHelper[String]
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   import cats.instances.future.catsStdInstancesForFuture
 
-  private val exec                        = ec
-  private val ET                          = new EitherTHelper[Result] { implicit val ec: ExecutionContext = exec }
+  private val ET                          = EitherTHelper.make[Result]
   private val noRIVerificationRecordError = "This page has expired"
 
   def verifyPage(code: String) = Action.async { implicit request =>
     lazy val success = (riVerification: ResponsibleIndividualVerification) =>
       Ok(verifyResponsibleIndividualView(
-        VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code),
+        VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code),
         VerifyResponsibleIndividualController.hasVerifiedForm
       ))
 
@@ -110,14 +109,14 @@ class VerifyResponsibleIndividualController @Inject() (
         responsibleIndividualVerificationService.accept(code)
           .map(_ match {
             case Right(riVerification)      =>
-              Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code)))
+              Ok(responsibleIndividualAcceptedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
             case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg))
           })
       } else {
         responsibleIndividualVerificationService.decline(code)
           .map(_ match {
             case Right(riVerification)      =>
-              Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code)))
+              Ok(responsibleIndividualDeclinedView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code)))
             case Left(ErrorDetails(_, msg)) => Ok(responsibleIndividualErrorView(msg))
           })
       }
@@ -125,7 +124,7 @@ class VerifyResponsibleIndividualController @Inject() (
 
     def handleInvalidForm(form: Form[VerifyResponsibleIndividualController.HasVerifiedForm]) = {
       lazy val formValidationError = (riVerification: ResponsibleIndividualVerification) =>
-        BadRequest(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName.value, code), form))
+        BadRequest(verifyResponsibleIndividualView(VerifyResponsibleIndividualController.ViewModel(riVerification.applicationId, riVerification.applicationName, code), form))
 
       (
         for {

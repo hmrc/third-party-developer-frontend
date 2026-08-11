@@ -27,19 +27,19 @@ import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, 
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result => PlayResult}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result as PlayResult}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ClientSecret}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommands, CommandFailure, CommandFailures, CommandHandlerTypes}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
-import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.LocalDateConversionSyntax
+import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, ThirdPartyDeveloperConnector}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class Credentials @Inject() (
@@ -60,7 +60,7 @@ class Credentials @Inject() (
     deleteClientSecretView: DeleteClientSecretView,
     clientSecretsGeneratedView: ClientSecretsGeneratedView,
     val clock: Clock
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with ClockNow

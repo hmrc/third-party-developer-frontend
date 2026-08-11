@@ -28,9 +28,6 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaAccessCodeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.SmsLoginAccessCodeView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class SmsLoginAccessCodeViewSpec extends CommonViewSpec
@@ -52,8 +49,8 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
 
   "SmsLoginAccessCodeView" should {
     "render correctly when form is valid" in new Setup {
-      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.SMS, userHasMultipleMfa = true)(
-        flash,
+      val mainView = smsLoginAccessCodeView.apply(MfaAccessCodeForm.form, MfaId(UUID.randomUUID()), MfaType.Sms, userHasMultipleMfa = true)(
+        using flash,
         stubMessages(),
         FakeRequest().withCSRFToken,
         appConfig
@@ -70,9 +67,9 @@ class SmsLoginAccessCodeViewSpec extends CommonViewSpec
         MfaAccessCodeForm.form
           .withError("accessCode", "You have entered an incorrect access code"),
         MfaId(UUID.randomUUID()),
-        MfaType.SMS,
+        MfaType.Sms,
         userHasMultipleMfa = true
-      )(flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
+      )(using flash, stubMessages(), FakeRequest().withCSRFToken, appConfig)
 
       val document = Jsoup.parse(mainView.body)
 

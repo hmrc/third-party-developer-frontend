@@ -19,19 +19,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html._
+import views.html.*
 
 import play.api.data.Form
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.SupportsDeletion
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{AdministratorOnly, TeamMembersOnly}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
 
 @Singleton
 class DeleteApplication @Inject() (
@@ -46,10 +46,10 @@ class DeleteApplication @Inject() (
     requestDeleteApplicationCompleteView: RequestDeleteApplicationCompleteView,
     deleteSubordinateApplicationConfirmView: DeleteSubordinateApplicationConfirmView,
     deleteSubordinateApplicationCompleteView: DeleteSubordinateApplicationCompleteView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
 
   def deleteApplication(applicationId: ApplicationId, error: Option[String] = None) =
     canViewDeleteApplicationAction(applicationId) { implicit request =>

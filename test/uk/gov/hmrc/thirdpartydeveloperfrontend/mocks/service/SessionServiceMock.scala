@@ -20,7 +20,7 @@ import scala.concurrent.Future.successful
 
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.SessionService
@@ -29,7 +29,7 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   val sessionServiceMock = mock[SessionService]
 
   private def fetchSessionById(sessionId: UserSessionId, returns: Option[UserSession]) =
-    when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(returns))
+    when(sessionServiceMock.fetch(eqTo(sessionId))(using *)).thenReturn(successful(returns))
 
   def fetchSessionByIdReturns(sessionId: UserSessionId, returns: UserSession) =
     fetchSessionById(sessionId, Some(returns))
@@ -38,7 +38,7 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
     fetchSessionById(sessionId, None)
 
   def fetchSessionByIdReturnsNone() =
-    when(sessionServiceMock.fetch(*)(*)).thenReturn(successful(None))
+    when(sessionServiceMock.fetch(*)(using *)).thenReturn(successful(None))
 
   def updateUserFlowSessionsReturnsSuccessfully(sessionId: UserSessionId) =
     when(sessionServiceMock.updateUserFlowSessions(sessionId)).thenReturn(successful(()))
@@ -46,11 +46,11 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   object FetchSessionById {
 
     def succeedsWith(sessionId: UserSessionId, returns: UserSession) =
-      when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(Some(returns)))
+      when(sessionServiceMock.fetch(eqTo(sessionId))(using *)).thenReturn(successful(Some(returns)))
 
-    def returnsNoneForId(sessionId: UserSessionId) = when(sessionServiceMock.fetch(eqTo(sessionId))(*)).thenReturn(successful(None))
+    def returnsNoneForId(sessionId: UserSessionId) = when(sessionServiceMock.fetch(eqTo(sessionId))(using *)).thenReturn(successful(None))
 
-    def returnsNoneForAny() = when(sessionServiceMock.fetch(*)(*)).thenReturn(successful(None))
+    def returnsNoneForAny() = when(sessionServiceMock.fetch(*)(using *)).thenReturn(successful(None))
   }
 
   object UpdateUserFlowSessions {
@@ -63,7 +63,7 @@ trait SessionServiceMock extends MockitoSugar with ArgumentMatchersSugar {
   object DestroySession {
 
     def succeedsWith(sessionId: UserSessionId) = {
-      when(sessionServiceMock.destroy(eqTo(sessionId))(*))
+      when(sessionServiceMock.destroy(eqTo(sessionId))(using *))
         .thenReturn(successful(NO_CONTENT))
     }
   }

@@ -16,23 +16,17 @@
 
 package views
 
-import java.time.Period
-
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
 import views.html.DeleteSubordinateApplicationConfirmView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationState, ApplicationWithCollaboratorsFixtures, RedirectUri, State}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.elementExistsByText
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.{CollaboratorTracker, WithCSRFAddToken}
 
@@ -46,8 +40,6 @@ class DeleteSubordinateApplicationConfirmSpec extends CommonViewSpec with WithCS
   "delete application confirm page" should {
 
     val request           = FakeRequest().withCSRFToken
-    val appId             = ApplicationId.random
-    val clientId          = ClientId("clientId123")
     val loggedInDeveloper = standardDeveloper.loggedIn
     val application       = standardApp
 

@@ -18,27 +18,26 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.Future._
+import scala.concurrent.Future.*
 
 import org.jsoup.Jsoup
 import org.mockito.captor.ArgCaptor
 import views.html.manageapplication.ChangeAppNameAndDescView
 
-import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.ApplicationCommand
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, Environment}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.{routes => manageapplicationroutes}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.routes as manageapplicationroutes
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{BaseControllerSpec, ChangeAppNameAndDescForm, routes}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ChangeAppNameAndDescControllerSpec
@@ -141,7 +140,7 @@ class ChangeAppNameAndDescControllerSpec
     }
 
     "update name which contains HMRC should fail" in new Setup {
-      when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+      when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
         .thenReturn(Future.successful(ApplicationNameValidationResult.Invalid))
 
       val application = subordinateApplication
@@ -152,7 +151,7 @@ class ChangeAppNameAndDescControllerSpec
       status(result) shouldBe BAD_REQUEST
 
       verify(underTest.applicationService).isApplicationNameValid(eqTo("my invalid HMRC application name"), eqTo(application.deployedTo), eqTo(Some(application.id)))(
-        *
+        using *
       )
     }
   }
@@ -234,7 +233,7 @@ class ChangeAppNameAndDescControllerSpec
 
       await(application.withName(newName).callChangeAppNameAndDescAction)
 
-      verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(*)
+      verify(underTest.applicationService, times(1)).dispatchCmd(*[ApplicationId], *)(using *)
     }
   }
 
@@ -258,10 +257,10 @@ class ChangeAppNameAndDescControllerSpec
     val newName        = ApplicationName("new name")
     val newDescription = Some("new description")
 
-    when(underTest.applicationService.isApplicationNameValid(*, *, *)(*))
+    when(underTest.applicationService.isApplicationNameValid(*, *, *)(using *))
       .thenReturn(Future.successful(ApplicationNameValidationResult.Valid))
 
-    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(*))
+    when(underTest.applicationService.dispatchCmd(*[ApplicationId], *)(using *))
       .thenReturn(successful(ApplicationUpdateSuccessful))
 
     def changeAppNameAndDescShouldRenderThePage(userSession: UserSession)(application: ApplicationWithCollaborators) = {
@@ -272,10 +271,10 @@ class ChangeAppNameAndDescControllerSpec
       status(result) shouldBe OK
       val doc = Jsoup.parse(contentAsString(result))
       formExistsWithAction(doc, manageapplicationroutes.ChangeAppNameAndDescController.changeAppNameAndDescAction(application.id).url) shouldBe true
-      if (application.deployedTo == Environment.SANDBOX || application.state.name == State.TESTING) {
-        inputExistsWithValue(doc, "applicationName", "text", application.details.name.value) shouldBe true
+      if (application.deployedTo == Environment.Sandbox || application.state.name == State.Testing) {
+        inputExistsWithValue(doc, "applicationName", "text", application.details.name.toString) shouldBe true
       } else {
-        inputExistsWithValue(doc, "applicationName", "hidden", application.details.name.value) shouldBe true
+        inputExistsWithValue(doc, "applicationName", "hidden", application.details.name.toString) shouldBe true
       }
       textareaExistsWithText(doc, "description", application.details.description.getOrElse("None")) shouldBe true
     }
@@ -304,7 +303,7 @@ class ChangeAppNameAndDescControllerSpec
 
     def captureAllApplicationCmds: List[ApplicationCommand] = {
       val captor = ArgCaptor[ApplicationCommand]
-      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(*)
+      verify(underTest.applicationService, atLeast(1)).dispatchCmd(*[ApplicationId], captor)(using *)
       captor.values
     }
 
@@ -317,12 +316,10 @@ class ChangeAppNameAndDescControllerSpec
       final def withDescription(description: Option[String]): ApplicationWithCollaborators = app.modify(_.copy(description = description))
     }
 
-    implicit val changeAppNameAndDescFormFormat: OFormat[ChangeAppNameAndDescForm] = Json.format[ChangeAppNameAndDescForm]
-
     implicit class ChangeAppNameAndDescAppAugment(val app: ApplicationWithCollaborators) {
 
       final def toChangeAppNameAndDescForm =
-        ChangeAppNameAndDescForm(app.details.name.value, app.details.description)
+        ChangeAppNameAndDescForm(app.details.name.toString, app.details.description)
 
       final def callChangeAppNameAndDesc: Future[Result] = underTest.changeAppNameAndDesc(app.id)(loggedInDevRequest)
 
@@ -337,7 +334,9 @@ class ChangeAppNameAndDescControllerSpec
       final def callChangeAppNameAndDescActionNotLoggedIn: Future[Result] = callChangeAppNameAndDescAction(loggedOutRequest)
 
       final private def callChangeAppNameAndDescAction[T](request: FakeRequest[T]): Future[Result] = {
-        addToken(underTest.changeAppNameAndDescAction(app.id))(request.withJsonBody(Json.toJson(app.toChangeAppNameAndDescForm)))
+        addToken(underTest.changeAppNameAndDescAction(app.id))(
+          request.withFormUrlEncodedBody(ChangeAppNameAndDescForm.form.fill(app.toChangeAppNameAndDescForm).data.toSeq*).withMethod("POST")
+        )
       }
     }
   }

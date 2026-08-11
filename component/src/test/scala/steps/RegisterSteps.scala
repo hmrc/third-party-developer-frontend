@@ -16,7 +16,7 @@
 
 import play.api.http.Status
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
 
 object RegisterSteps extends ComponentTestDeveloperBuilder with NavigationSugar {

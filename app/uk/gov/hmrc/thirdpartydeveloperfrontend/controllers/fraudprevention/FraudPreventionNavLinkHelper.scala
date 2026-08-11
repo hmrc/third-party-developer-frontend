@@ -25,7 +25,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPr
 
 trait FraudPreventionNavLinkHelper {
 
-  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[_]) = {
+  def createFraudNavModel(fraudPreventionConfig: FraudPreventionConfig)(implicit request: ApplicationRequest[?]) = {
     createOptionalFraudPreventionNavLinkViewModel(request.application, request.subscriptions, fraudPreventionConfig)
   }
 
@@ -36,7 +36,7 @@ trait FraudPreventionNavLinkHelper {
     ): Option[FraudPreventionNavLinkViewModel] = {
     if (fraudPreventionConfig.enabled) {
       val apis            = fraudPreventionConfig.apisWithFraudPrevention
-      val isProduction    = application.deployedTo == Environment.PRODUCTION
+      val isProduction    = application.deployedTo == Environment.Production
       val shouldBeVisible = subscriptions.exists(x => apis.contains(x.serviceName) && x.subscribed && isProduction)
       Some(FraudPreventionNavLinkViewModel(shouldBeVisible, fraudPreventionConfig.uri))
     } else {

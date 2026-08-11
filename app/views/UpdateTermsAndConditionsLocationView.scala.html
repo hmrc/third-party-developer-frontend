@@ -14,10 +14,9 @@
  * limitations under the License.
  *@
 
-@import include._
+@import include.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 
 @this(devMain: DevMainWithFormErrors)
 
@@ -56,7 +55,7 @@
     <div class="govuk-radios govuk-form-group" data-module="govuk-radios">
         <input type="hidden" name="isNewJourney" value="true"/>
         <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="termsAndConditionsHasUrl" name="isInDesktop" value="false" type="radio" @{if(form.data.get("isInDesktop") == Some("false")) "checked" } aria-controls="termsAndConditionsUrlInput" aria-expanded="true">
+            <input class="govuk-radios__input" id="termsAndConditionsHasUrl" name="isInDesktop" value="false" type="radio" @{if(form.data.get("isInDesktop") == Some("false")) "checked" else ""} aria-controls="termsAndConditionsUrlInput" aria-expanded="true">
             <label class="govuk-label govuk-radios__label" for="termsAndConditionsHasUrl">
                 The software has a terms and conditions url
             </label>
@@ -70,7 +69,7 @@
             </div>
         </div>
         <div class="govuk-radios__item">
-            <input class="govuk-radios__input" id="termsAndConditionsInDesktop" name="isInDesktop" value="true" type="radio" @{if(form.data.get("isInDesktop") == Some("true"))  "checked" }>
+            <input class="govuk-radios__input" id="termsAndConditionsInDesktop" name="isInDesktop" value="true" type="radio" @{if(form.data.get("isInDesktop") == Some("true")) "checked" else ""}>
             <label class="govuk-label govuk-radios__label" for="termsAndConditionsInDesktop">
                 The terms and conditions are in desktop software
             </label>

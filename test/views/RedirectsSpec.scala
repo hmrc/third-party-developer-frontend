@@ -23,20 +23,12 @@ import views.html.RedirectsView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, ClientId, Environment}
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
-import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
-import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
-import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{DeveloperSessionBuilder, _}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 
 class RedirectsSpec
     extends CommonViewSpec
@@ -70,17 +62,16 @@ class RedirectsSpec
         request,
         userSession,
         messagesProvider,
-        appConfig,
-        "redirects"
+        appConfig
       )
     }
 
     def renderPageForStandardApplicationAsAdminWithRedirectUris(numberOfRedirectUris: Int) = {
-      renderPageWithRedirectUris(Collaborator.Roles.ADMINISTRATOR, numberOfRedirectUris)
+      renderPageWithRedirectUris(Collaborator.Role.Administrator, numberOfRedirectUris)
     }
 
     def renderPageForStandardApplicationAsDeveloperWithRedirectUris(numberOfRedirectUris: Int) = {
-      renderPageWithRedirectUris(Collaborator.Roles.DEVELOPER, numberOfRedirectUris)
+      renderPageWithRedirectUris(Collaborator.Role.Developer, numberOfRedirectUris)
     }
 
     "show a button for adding a redirect uri" in {

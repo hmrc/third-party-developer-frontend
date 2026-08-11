@@ -22,14 +22,14 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{AnyContent, MessagesControllerComponents}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaboratorsFixtures
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.actions.SubscriptionFieldsActions
-import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
@@ -40,7 +40,7 @@ class TestController(
     val errorHandler: ErrorHandler,
     val applicationService: ApplicationService,
     val applicationActionService: ApplicationActionService
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends ApplicationController(mcc)
     with SubscriptionFieldsActions {}
@@ -74,7 +74,7 @@ class ApplicationActionBuildersSpec
       val testResultBody = "was called"
 
       val result = underTest.subFieldsDefinitionsExistActionByApi(applicationWithSubscriptionFields.id, context, version) {
-        definitionsRequest: ApplicationWithSubscriptionFieldsRequest[AnyContent] => Future.successful(underTest.Ok(testResultBody))
+        (_: ApplicationWithSubscriptionFieldsRequest[AnyContent]) => Future.successful(underTest.Ok(testResultBody))
       }(loggedInDevRequest)
       status(result) shouldBe expectedStatus
       if (expectedStatus == OK) {

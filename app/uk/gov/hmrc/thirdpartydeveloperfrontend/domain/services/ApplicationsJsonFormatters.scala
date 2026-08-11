@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 
 trait ApplicationsJsonFormatters {
   import play.api.libs.json._
 
   object TOUAHelper {
-    import uk.gov.hmrc.apiplatform.modules.common.domain.services.InstantJsonFormatter.WithTimeZone._
 
     val formatTOUA: OFormat[TermsOfUseAgreement] = Json.format[TermsOfUseAgreement]
   }
 
-  implicit val formatTermsOfUseAgreement: OFormat[TermsOfUseAgreement] = TOUAHelper.formatTOUA
+  given OFormat[TermsOfUseAgreement] = TOUAHelper.formatTOUA
 
 }
 

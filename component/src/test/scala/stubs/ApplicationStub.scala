@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 
 import play.api.http.Status.OK
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationToken, ApplicationWithSubscriptions}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.ApplicationNameValidationResult
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.asScreamingSnakeCase
 
 object ApplicationStub {
 
@@ -74,7 +75,7 @@ object ApplicationStub {
 
     def stubResponse(environment: Environment, applications: List[ApplicationWithSubscriptions]) = {
       stubFor(
-        get(urlPathEqualTo(s"/environment/${environment}/query"))
+        get(urlPathEqualTo(s"/environment/${environment.asScreamingSnakeCase}/query"))
           .withQueryParam("userId", equalTo(userId.toString()))
           // .withQueryParam("wantSubscriptions", matching("*"))
           .withQueryParam("status", equalTo("EXCLUDING_DELETED"))
@@ -86,10 +87,10 @@ object ApplicationStub {
       )
     }
 
-    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.PRODUCTION)
+    val (prodApps, sandboxApps) = applications.partition(_.deployedTo == Environment.Production)
 
-    stubResponse(Environment.PRODUCTION, prodApps)
-    stubResponse(Environment.SANDBOX, sandboxApps)
+    stubResponse(Environment.Production, prodApps)
+    stubResponse(Environment.Sandbox, sandboxApps)
 
     stubFor(
       get(urlPathEqualTo("/api-definitions/all"))

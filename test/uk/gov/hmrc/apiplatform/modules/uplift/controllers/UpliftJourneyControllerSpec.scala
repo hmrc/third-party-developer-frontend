@@ -25,14 +25,14 @@ import views.html.checkpages.applicationcheck.UnauthorisedAppDetailsView
 
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.HeaderCarrier
 
-import uk.gov.hmrc.apiplatform.modules.apis.domain.models._
+import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
@@ -41,17 +41,17 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState,
 import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.UserBuilder
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.SampleUserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
-import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks._
-import uk.gov.hmrc.apiplatform.modules.uplift.views.html._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.builder._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.uplift.services.mocks.*
+import uk.gov.hmrc.apiplatform.modules.uplift.views.html.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.connectors.ApmConnectorMockModule
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock, SessionServiceMock, TermsOfUseInvitationServiceMockModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
 
 class UpliftJourneyControllerSpec extends BaseControllerSpec
     with SampleUserSession
@@ -82,7 +82,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       title.get
     }
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+    given hc: HeaderCarrier = HeaderCarrier()
 
     val confirmApisView: ConfirmApisView                                       = app.injector.instanceOf[ConfirmApisView]
     val turnOffApisMasterView: TurnOffApisMasterView                           = app.injector.instanceOf[TurnOffApisMasterView]
@@ -116,7 +116,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
     val developer: User      = buildTrackedUser()
     val sessionId            = UserSessionId.random
-    val session: UserSession = UserSession(sessionId, LoggedInState.LOGGED_IN, developer)
+    val session: UserSession = UserSession(sessionId, LoggedInState.LoggedIn, developer)
 
     val testingApp: ApplicationWithCollaborators = sampleApp.withState(ApplicationState(updatedOn = instant)).inSandbox()
 
@@ -124,8 +124,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     updateUserFlowSessionsReturnsSuccessfully(sessionId)
 
     val sessionParams: Seq[(String, String)]                  = Seq("csrfToken" -> app.injector.instanceOf[TokenProvider].generateToken)
-    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams: _*)
-    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(controller, implicitly)(sessionId).withSession(sessionParams: _*)
+    val loggedOutRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(sessionParams*)
+    val loggedInRequest: FakeRequest[AnyContentAsEmpty.type]  = FakeRequest().withLoggedIn(using controller)(sessionId).withSession(sessionParams*)
 
     val apiIdentifier1: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-1"), ApiVersionNbr("1.0"))
     val apiIdentifier2: ApiIdentifier = ApiIdentifier(ApiContext("test-api-context-2"), ApiVersionNbr("1.0"))
@@ -136,7 +136,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-1",
       ServiceName("api-example-microservice"),
       apiIdentifier1.context,
-      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier1.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -146,7 +146,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       "test-api-2",
       ServiceName("api-example-microservice"),
       apiIdentifier2.context,
-      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty),
+      ApiVersion(apiIdentifier2.versionNbr, ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None),
       subscribed = true,
       requiresTrust = false,
       fields = emptyFields
@@ -155,39 +155,42 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
     val singleApi: List[ApiDefinition] = List(
       ApiDefinition(
         serviceName = ServiceName("test-api-context-1"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-1",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-1"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("context/name"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
     )
 
     val multipleApis: List[ApiDefinition] = List(
       ApiDefinition(
         serviceName = ServiceName("test-api-context-1"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-1",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-1"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-1"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       ),
       ApiDefinition(
         serviceName = ServiceName("test-api-context-2"),
-        serviceBaseUrl = "http://serviceBaseUrl",
-        name = "test-api-context-2",
-        description = "Description",
+        serviceBaseUrl = ApiDefinition.ServiceBaseUrl("http://serviceBaseUrl"),
+        name = ApiDefinition.Name("test-api-context-2"),
+        description = ApiDefinition.Description("Description"),
         context = ApiContext("test-api-context-2"),
         versions = Map(ApiVersionNbr("1.0") ->
-          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.STABLE, ApiAccessType.PUBLIC, List.empty)),
+          ApiVersion(ApiVersionNbr("1.0"), ApiStatus.Stable, ApiAccessType.Public, List.empty, endpointsEnabled = true, awsRequestId = None)),
         isTestSupport = false,
-        categories = List(ApiCategory.EXAMPLE)
+        lastPublishedAt = None,
+        categories = List(ApiCategory.Example)
       )
     )
 
@@ -249,7 +252,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "true"
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
@@ -265,7 +268,7 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
 
       private val result = controller.saveApiSubscriptionsSubmit(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
         "test_api_context_1-1_0-subscribed" -> "false"
-      ))
+      ).withMethod("POST"))
 
       status(result) shouldBe OK
       contentAsString(result) should include("You need at least 1 API subscription")
@@ -371,8 +374,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "answer" -> testSellResellOrDistribute.answer
-      ))
+        "answer" -> testSellResellOrDistribute.value
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
@@ -389,8 +392,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(appId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "answer" -> testSellResellOrDistribute.answer
-      ))
+        "answer" -> testSellResellOrDistribute.value
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/applications/${appId}/confirm-subscriptions")
@@ -415,8 +418,8 @@ class UpliftJourneyControllerSpec extends BaseControllerSpec
       UpliftJourneyServiceMock.StoreDefaultSubscriptionsInFlow.thenReturns()
 
       private val result = controller.sellResellOrDistributeYourSoftwareAction(prodAppId)(loggedInRequest.withCSRFToken.withFormUrlEncodedBody(
-        "answer" -> testSellResellOrDistribute.answer
-      ))
+        "answer" -> testSellResellOrDistribute.value
+      ).withMethod("POST"))
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(s"/developer/submissions/application/${prodAppId.value}/production-credentials-checklist")

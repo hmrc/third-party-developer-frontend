@@ -21,26 +21,27 @@ import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
 import play.api.libs.crypto.CookieSigner
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.fromScreamingSnakeCase
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
-import uk.gov.hmrc.apiplatform.modules.mfa.forms._
+import uk.gov.hmrc.apiplatform.modules.mfa.forms.*
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
-import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper._
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp._
-import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms._
+import uk.gov.hmrc.apiplatform.modules.mfa.utils.MfaDetailHelper.*
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.*
+import uk.gov.hmrc.apiplatform.modules.mfa.views.html.sms.*
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.{RemoveMfaCompletedView, SecurityPreferencesView, SelectMfaView}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AUTHENTICATOR_APP, SMS}
+import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaType.{AuthenticatorApp, Sms}
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.{MfaId, MfaType}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.LoggedInState
 import uk.gov.hmrc.apiplatform.modules.tpd.session.dto.UpdateLoggedInStateRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Conversions.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.{FormKeys, LoggedInController}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.mfa.MfaAction.{CREATE, REMOVE}
@@ -72,10 +73,10 @@ class MfaController @Inject() (
     authAppSetupReminderView: AuthAppSetupReminderView,
     selectMfaView: SelectMfaView,
     removeMfaCompletedView: RemoveMfaCompletedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc)
-    with WithUnsafeDefaultFormBinding {
+    with WithUrlEncodedOnlyFormBinding {
   val qrCode: QRCode = QRCode(scale = 4)
 
   def securityPreferences: Action[AnyContent] = atLeastPartLoggedInEnablingMfaAction { implicit request =>
@@ -102,29 +103,29 @@ class MfaController @Inject() (
   }
 
   private def setupSelectedMfa(mfaType: String): Future[Result] = {
-    MfaType.unsafeApply(mfaType) match {
-      case SMS               => successful(Redirect(routes.MfaController.setupSms()))
-      case AUTHENTICATOR_APP => successful(Redirect(routes.MfaController.authAppStart()))
+    MfaType.unsafeApply(fromScreamingSnakeCase(mfaType)) match {
+      case Sms              => successful(Redirect(routes.MfaController.setupSms()))
+      case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppStart()))
     }
   }
 
-  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+  private def removeSelectedMfa(userId: UserId, mfaTypeForAuthentication: String, mfaIdForRemoval: Option[MfaId])(using request: Request[?], hc: HeaderCarrier): Future[Result] = {
 
     def authenticateToRemoveMfa(mfaType: MfaType, mfaIdForAuthentication: MfaId): Future[Result] = {
       mfaType match {
-        case SMS               =>
+        case Sms              =>
           thirdPartyDeveloperMfaConnector.sendSms(userId, mfaIdForAuthentication) flatMap {
             case true  => successful(Redirect(routes.MfaController.smsAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
             case false => internalServerErrorTemplate("Failed to send SMS")
           }
-        case AUTHENTICATOR_APP => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
+        case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaIdForAuthentication, MfaAction.REMOVE, mfaIdForRemoval)))
       }
     }
 
     thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
       case None                  => internalServerErrorTemplate("Unable to obtain user information")
       case Some(developer: User) =>
-        val mfaType                = MfaType.unsafeApply(mfaTypeForAuthentication)
+        val mfaType                = MfaType.unsafeApply(fromScreamingSnakeCase(mfaTypeForAuthentication))
         val mfaIdForAuthentication = getMfaDetailByType(mfaType, developer.mfaDetails).id
         authenticateToRemoveMfa(mfaType, mfaIdForAuthentication)
     }
@@ -152,7 +153,7 @@ class MfaController @Inject() (
   def authAppAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LoggedIn))
         Redirect(routes.MfaController.nameChangePage(mfaId))
       }
 
@@ -247,7 +248,7 @@ class MfaController @Inject() (
   def smsAccessCodeAction(mfaId: MfaId, mfaAction: MfaAction, mfaIdForRemoval: Option[MfaId]): Action[AnyContent] =
     atLeastPartLoggedInEnablingMfaAction { implicit request =>
       def logonAndComplete(): Result = {
-        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LOGGED_IN))
+        thirdPartyDeveloperConnector.updateSessionLoggedInState(request.sessionId, UpdateLoggedInStateRequest(LoggedInState.LoggedIn))
         Redirect(routes.MfaController.smsSetupCompletedPage())
       }
 
@@ -292,10 +293,10 @@ class MfaController @Inject() (
     successful(Ok(removeMfaCompletedView()))
   }
 
-  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  private def removeMfaUserWithOneMfaMethod(mfaId: MfaId, mfaType: MfaType, userId: UserId)(using hc: HeaderCarrier, request: Request[?]): Future[Result] = {
     mfaType match {
-      case AUTHENTICATOR_APP => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
-      case SMS               =>
+      case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
+      case Sms              =>
         thirdPartyDeveloperMfaConnector.sendSms(userId, mfaId).flatMap {
           case true  => successful(Redirect(routes.MfaController.smsAccessCodePage(mfaId, MfaAction.REMOVE, Some(mfaId))))
           case false => internalServerErrorTemplate("Failed to send SMS")
@@ -308,7 +309,7 @@ class MfaController @Inject() (
       accessCode: String,
       mfaIdToVerify: MfaId,
       mfaIdForRemoval: Option[MfaId]
-    )(implicit request: Request[_]
+    )(implicit request: Request[?]
     ): Future[Result] = {
     mfaIdForRemoval match {
       case Some(mfaId) =>
@@ -320,7 +321,7 @@ class MfaController @Inject() (
     }
   }
 
-  private def internalServerErrorTemplate(errorMessage: String)(implicit request: Request[_]): Future[Result] = {
+  private def internalServerErrorTemplate(errorMessage: String)(implicit request: Request[?]): Future[Result] = {
     errorHandler.standardErrorTemplate(errorMessage, errorMessage, errorMessage).map(InternalServerError(_))
   }
 }

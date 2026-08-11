@@ -19,9 +19,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.crypto.json.JsonEncryption
-import uk.gov.hmrc.crypto.{Decrypter, Encrypter, _}
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, *}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ApplicationConfig
 
@@ -46,7 +46,7 @@ class PayloadEncryption @Inject() (implicit val crypto: LocalCrypto) {
 
 @Singleton
 class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends Encrypter with Decrypter {
-  implicit val aesCrypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesCrypto(applicationConfig.jsonEncryptionKey)
+  implicit val aesCrypto: Encrypter & Decrypter = SymmetricCryptoFactory.aesCrypto(applicationConfig.jsonEncryptionKey)
 
   override def encrypt(plain: PlainContent): Crypted = aesCrypto.encrypt(plain)
 
@@ -58,7 +58,7 @@ class LocalCrypto @Inject() (applicationConfig: ApplicationConfig) extends Encry
 case class SecretRequest(data: String)
 
 object SecretRequest {
-  implicit val format: Format[SecretRequest] = Json.format[SecretRequest]
+  given Format[SecretRequest] = Json.format[SecretRequest]
 }
 
 class EncryptedJson @Inject() (payloadEncryption: PayloadEncryption) {

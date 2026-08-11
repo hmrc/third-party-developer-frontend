@@ -24,7 +24,7 @@ import views.html.ApplicationVerificationView
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class ApplicationVerificationSpec extends CommonViewSpec with WithCSRFAddToken {

@@ -14,12 +14,12 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, _}
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.{GovukTable, *}
 
 @this(govukTable: GovukTable)
 
-@(app: ApplicationWithCollaborators)(implicit request: Request[Any], messages: Messages)
+@(app: ApplicationWithCollaborators)(implicit messages: Messages)
 
 @formatTeamMembers(app: ApplicationWithCollaborators): String = @{
     app.collaborators.size match {

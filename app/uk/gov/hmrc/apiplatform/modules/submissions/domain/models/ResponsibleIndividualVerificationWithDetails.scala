@@ -22,7 +22,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.Re
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress
 
 object ResponsibleIndividualVerificationWithDetails {
-  implicit val responsibleIndividualVerificationWithDetailsReader: Reads[ResponsibleIndividualVerificationWithDetails] = Json.reads[ResponsibleIndividualVerificationWithDetails]
+  given Reads[ResponsibleIndividualVerificationWithDetails] = Json.reads[ResponsibleIndividualVerificationWithDetails]
 }
 
 case class ResponsibleIndividualVerificationWithDetails(

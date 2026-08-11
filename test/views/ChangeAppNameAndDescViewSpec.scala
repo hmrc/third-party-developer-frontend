@@ -23,7 +23,7 @@ import views.html.manageapplication.ChangeAppNameAndDescView
 
 import play.api.test.FakeRequest
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
@@ -53,7 +53,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
       val request  = FakeRequest().withCSRFToken
 
       val form = ChangeAppNameAndDescForm.form.fill(
-        ChangeAppNameAndDescForm(application.details.name.value, application.details.description)
+        ChangeAppNameAndDescForm(application.details.name.toString, application.details.description)
       )
 
       changeDetails.render(
@@ -62,8 +62,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
         request,
         loggedIn,
         messagesProvider,
-        appConfig,
-        "nav-section"
+        appConfig
       )
     }
 
@@ -92,7 +91,7 @@ class ChangeAppNameAndDescViewSpec extends CommonViewSpec
       val application  = standardApp.inSandbox().withState(appStateTesting).modify(_.copy(description = aDescription))
       val document     = Jsoup.parse(renderPage(application).body)
 
-      withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.value) shouldBe true)
+      withClue("App Name")(formGroupWithLabelIsPrepopulated(document, "Application name", standardApp.name.toString) shouldBe true)
       withClue("Description")(textareaExistsWithText(document, "description", aDescription.get) shouldBe true)
     }
 

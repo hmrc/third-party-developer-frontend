@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.libs.json.Json
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.tpd.core.domain.models.User
-import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, _}
+import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.{FindUserIdRequest, FindUserIdResponse, *}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.EncryptedJson
 
 object DeveloperStub extends ComponentTestDeveloperBuilder {

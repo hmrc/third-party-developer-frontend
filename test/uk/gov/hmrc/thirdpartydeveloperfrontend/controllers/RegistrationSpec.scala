@@ -20,14 +20,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future.{failed, successful}
 
 import org.mockito.ArgumentCaptor
-import views.html._
+import views.html.*
 
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.filters.csrf.CSRF.TokenProvider
 import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse}
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.RegistrationRequest
 import uk.gov.hmrc.apiplatform.modules.tpd.domain.models.RegistrationSuccessful
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
@@ -65,21 +65,21 @@ class RegistrationSpec extends BaseControllerSpec {
     self: Setup =>
     val email            = "john.smith@example.com".toLaxEmail
     val newSessionParams = Seq(("email", email.text), sessionParams.head)
-    val request          = FakeRequest().withSession(newSessionParams: _*)
+    val request          = FakeRequest().withSession(newSessionParams*)
   }
 
   "registration" should {
     "register with normalized firstname, lastname, email" in new Setup {
-      val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(sessionParams*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
         ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
         ("confirmpassword", "VALID@1q2w3e")
-      )
+      ).withMethod("POST")
 
       val requestCaptor: ArgumentCaptor[RegistrationRequest] = ArgumentCaptor.forClass(classOf[RegistrationRequest])
-      when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
+      when(underTest.connector.register(requestCaptor.capture())(using *)).thenReturn(successful(RegistrationSuccessful))
 
       val result = underTest.register()(request)
 
@@ -92,16 +92,16 @@ class RegistrationSpec extends BaseControllerSpec {
       requestCaptor.getValue.password shouldBe "VALID@1q2w3e"
     }
     "register with no organisation" in new Setup {
-      val request = FakeRequest().withSession(sessionParams: _*).withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(sessionParams*).withFormUrlEncodedBody(
         ("firstname", "   first  "), // with whitespaces before and after
         ("lastname", "  last  "),    // with whitespaces before and after
         ("emailaddress", "email@example.com"),
         ("password", "VALID@1q2w3e"),
         ("confirmpassword", "VALID@1q2w3e")
-      )
+      ).withMethod("POST")
 
       val requestCaptor: ArgumentCaptor[RegistrationRequest] = ArgumentCaptor.forClass(classOf[RegistrationRequest])
-      when(underTest.connector.register(requestCaptor.capture())(*)).thenReturn(successful(RegistrationSuccessful))
+      when(underTest.connector.register(requestCaptor.capture())(using *)).thenReturn(successful(RegistrationSuccessful))
 
       await(underTest.register()(request))
     }
@@ -111,7 +111,7 @@ class RegistrationSpec extends BaseControllerSpec {
     val code = "verificationCode"
 
     "redirect the user to login if their verification link matches an account" in new Setup {
-      when(underTest.connector.verify(eqTo(code))(*)).thenReturn(successful(OK))
+      when(underTest.connector.verify(eqTo(code))(using *)).thenReturn(successful(OK))
       val result = underTest.verify(code)(FakeRequest())
 
       status(result) shouldBe OK
@@ -119,7 +119,7 @@ class RegistrationSpec extends BaseControllerSpec {
     }
 
     "invite user to register again when the verification link has expired" in new Setup {
-      when(underTest.connector.verify(eqTo(code))(*)).thenReturn(failed(new BadRequestException("")))
+      when(underTest.connector.verify(eqTo(code))(using *)).thenReturn(failed(new BadRequestException("")))
 
       val result = underTest.verify(code)(FakeRequest())
 
@@ -128,7 +128,7 @@ class RegistrationSpec extends BaseControllerSpec {
     }
 
     "redirect the user to confirmation page when resending verification" in new Setup with RequestWithSession {
-      when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(successful(NO_CONTENT))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(using *)).thenReturn(successful(NO_CONTENT))
 
       val result = underTest.resendVerification()(request)
 
@@ -136,7 +136,7 @@ class RegistrationSpec extends BaseControllerSpec {
     }
 
     "show error page when resending verification fails" in new Setup with RequestWithSession {
-      when(underTest.connector.resendVerificationEmail(eqTo(email))(*)).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
+      when(underTest.connector.resendVerificationEmail(eqTo(email))(using *)).thenReturn(failed(UpstreamErrorResponse("Bang", NOT_FOUND)))
 
       val result = underTest.resendVerification()(request)
 

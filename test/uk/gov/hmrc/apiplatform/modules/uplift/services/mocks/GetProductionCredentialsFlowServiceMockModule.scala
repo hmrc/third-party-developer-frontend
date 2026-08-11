@@ -23,7 +23,7 @@ import org.mockito.verification.VerificationMode
 import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.SellResellOrDistribute
-import uk.gov.hmrc.apiplatform.modules.uplift.domain.models._
+import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.uplift.services.GetProductionCredentialsFlowService
 
 trait GetProductionCredentialsFlowServiceMockModule extends MockitoSugar with ArgumentMatchersSugar {

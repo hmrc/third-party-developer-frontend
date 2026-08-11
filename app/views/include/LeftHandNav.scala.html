@@ -17,15 +17,14 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.FraudPreventionNavLinkViewModel
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.LeftHandNavFlags
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 
 @this()
 
-@(application: Option[ApplicationViewModel] = None, navSection: Option[String] = None, flags: Map[String, Boolean] = Map.empty, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig)
+@(application: Option[ApplicationViewModel] = None, navSection: Option[String] = None, flags: Map[String, Boolean] = Map.empty, fraudPreventionModel : Option[FraudPreventionNavLinkViewModel] = None)(implicit loggedIn: UserSession, appConfig: ApplicationConfig)
 
 @theSandbox = @{"the sandbox"}
 @subordinateWording = @{ if(appConfig.nameOfSubordinateEnvironment == "Sandbox") {theSandbox} else {appConfig.nameOfSubordinateEnvironment}}
@@ -78,7 +77,7 @@
               </a>
             </li>
           }
-          @if(app.access.accessType == AccessType.STANDARD) {
+          @if(app.access.accessType == AccessType.Standard) {
             <li class="side-nav__list @if(section == "redirects") { side-nav__list--selected }">
               <a id="nav-manage-redirects" class="side-nav__link" href="@controllers.routes.Redirects.loginRedirects(app.id)">
                 Redirect URIs
@@ -114,7 +113,7 @@
               Team members
             </a>
           </li>
-          @if(app.access.accessType == AccessType.STANDARD) {
+          @if(app.access.accessType == AccessType.Standard) {
             <li class="side-nav__list @if(section == "delete-application") { side-nav__list--selected }">
               <a id="nav-delete-application" class="side-nav__link" href="@controllers.routes.DeleteApplication.deleteApplication(app.id, None)">
                 Delete application

@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import play.api.data.Forms._
-import play.api.data._
+import play.api.data.*
+import play.api.data.Forms.*
 import play.api.data.validation.{Invalid, ValidationError, ValidationResult}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.AsyncHmrcSpec
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.Generators._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.Generators.*
 
 class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Matchers {
 
@@ -169,7 +169,7 @@ class ValidatorsSpec extends AsyncHmrcSpec with ScalaCheckPropertyChecks with Ma
       val res: ValidationResult = passwordsMatch.apply(RegisterForm("name", "last name", "john@example.com", "A1@wwwwwwwww", "A1@wwwwwwwww"))
 
       res match {
-        case v: Invalid => fail("passwords matching validation should have succeeded")
+        case _: Invalid => fail("passwords matching validation should have succeeded")
         case _          =>
       }
     }

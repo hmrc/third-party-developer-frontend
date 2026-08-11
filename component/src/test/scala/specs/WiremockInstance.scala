@@ -16,7 +16,7 @@
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
 
 import uk.gov.hmrc.apiplatform.modules.common.services.ApplicationLogger
 

@@ -21,7 +21,7 @@ import java.time.Clock
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names.named
 
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.PushPullNotificationsService.PushPullNotificationsConnector
 
 class JavaBasedConfigurationModule extends AbstractModule {

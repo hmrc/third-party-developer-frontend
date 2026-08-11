@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import ApplicationsSteps._
-import CommonStepsSteps._
-import MfaStepsSteps._
+import ApplicationsSteps.*
+import CommonStepsSteps.*
+import MfaStepsSteps.*
 
 class authAppMfaEnabledWithoutDeviceSessionSpec extends BaseSpec {
 

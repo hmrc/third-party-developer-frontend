@@ -19,19 +19,19 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.service
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import cats.implicits._
+import cats.implicits.*
 
 import uk.gov.hmrc.http.HeaderCarrier
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, Collaborator}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.{ApiFieldMap, DevhubAccessLevel, FieldDefinition, FieldValue, Fields}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApmConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields.*
 
 @Singleton
-class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper, apmConnector: ApmConnector)(implicit val ec: ExecutionContext) {
+class SubscriptionFieldsService @Inject() (apmConnector: ApmConnector)(using val ec: ExecutionContext) {
 
   def saveFieldValues(
       role: Collaborator.Role,
@@ -40,7 +40,7 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
       apiVersion: ApiVersionNbr,
       oldValues: Seq[SubscriptionFieldValue],
       newValues: Fields
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ServiceSaveSubscriptionFieldsResponse] = {
     case object AccessDenied
 
@@ -74,11 +74,11 @@ class SubscriptionFieldsService @Inject() (connectorsWrapper: ConnectorsWrapper,
     }
   }
 
-  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[List[ApiDefinition]] = {
+  def fetchAllPossibleSubscriptions(applicationId: ApplicationId)(using HeaderCarrier): Future[List[ApiDefinition]] = {
     apmConnector.fetchAllPossibleSubscriptions(applicationId)
   }
 
-  def fetchAllFieldDefinitions(environment: Environment)(implicit hc: HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
+  def fetchAllFieldDefinitions(environment: Environment)(using HeaderCarrier): Future[ApiFieldMap[FieldDefinition]] = {
     apmConnector.getAllFieldDefinitions(environment)
   }
 }

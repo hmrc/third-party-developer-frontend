@@ -16,8 +16,8 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.SubscriptionRedirect
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
-@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
+@import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiDefinition
 
 @this(subscriptionsGroup: SubscriptionsGroup, openAccessApisGroup: OpenAccessApisGroup)
@@ -31,7 +31,7 @@
   showSubscriptionFields: Boolean,
   showSectionHeadings: Boolean = true
 )(
-  implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig
+  implicit request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig
 )
 
 @if(subscriptions.exampleApi.nonEmpty) {

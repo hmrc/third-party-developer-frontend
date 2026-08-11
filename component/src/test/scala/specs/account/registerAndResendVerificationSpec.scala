@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import CommonStepsSteps._
-import RegisterSteps._
+import CommonStepsSteps.*
+import RegisterSteps.*
 
 class registerAndResendVerificationSpec extends BaseSpec {
 

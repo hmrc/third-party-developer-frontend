@@ -19,14 +19,14 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-import views.html._
+import views.html.*
 
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ThirdPartyDeveloperConnector
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationService, AuditService, ProfileService, SessionService}
 
 @Singleton
@@ -46,7 +46,7 @@ class Profile @Inject() (
     passwordUpdatedView: PasswordUpdatedView,
     profileDeleteConfirmationView: ProfileDeleteConfirmationView,
     profileDeleteSubmittedView: ProfileDeleteSubmittedView
-  )(implicit val ec: ExecutionContext,
+  )(using val ec: ExecutionContext,
     val appConfig: ApplicationConfig
   ) extends LoggedInController(mcc) with PasswordChange {
 
@@ -57,7 +57,7 @@ class Profile @Inject() (
   val passwordForm: Form[ChangePasswordForm]     = ChangePasswordForm.form
   val deleteProfileForm: Form[DeleteProfileForm] = DeleteProfileForm.form
 
-  private def changeProfileView()(implicit req: UserRequest[_]) = {
+  private def changeProfileView()(implicit req: UserRequest[?]) = {
     changeProfileViewTemplate(profileForm.fill(ProfileForm(
       req.userSession.developer.firstName,
       req.userSession.developer.lastName
@@ -118,7 +118,7 @@ class Profile @Inject() (
       validForm => {
         validForm.confirmation match {
           case Some("true") => applicationService
-              .requestDeveloperAccountDeletion(request.userSession.developer.userId, request.userSession.developer.displayedName, request.userSession.developer.email)
+              .requestDeveloperAccountDeletion(request.userSession.developer.displayedName, request.userSession.developer.email)
               .map(_ => Ok(profileDeleteSubmittedView()))
 
           case _ => Future.successful(Ok(changeProfileView()))

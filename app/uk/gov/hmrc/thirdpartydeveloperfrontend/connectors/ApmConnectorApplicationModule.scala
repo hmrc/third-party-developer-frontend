@@ -19,12 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 import scala.concurrent.Future
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, _}
+import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.{HeaderCarrier, *}
 
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
 object ApmConnectorApplicationModule {
   import play.api.libs.json._
@@ -33,26 +34,26 @@ object ApmConnectorApplicationModule {
 
   case class RequestUpliftV2(upliftRequest: UpliftRequest)
 
-  implicit val writesV1: Writes[RequestUpliftV1] = Json.writes[RequestUpliftV1]
-  implicit val writesV2: Writes[RequestUpliftV2] = Json.writes[RequestUpliftV2]
+  given Writes[RequestUpliftV1] = Json.writes[RequestUpliftV1]
+  given Writes[RequestUpliftV2] = Json.writes[RequestUpliftV2]
 }
 
 trait ApmConnectorApplicationModule extends ApmConnectorModule {
   import ApmConnectorApplicationModule._
 
-  private[this] val baseUrl = s"${config.serviceBaseUrl}/applications"
+  private val baseUrl = s"${config.serviceBaseUrl}/applications"
 
-  def fetchApplicationById(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
+  def fetchApplicationById(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] =
     http.get(url"${baseUrl}/${applicationId}")
       .execute[Option[ApplicationWithSubscriptionFields]]
 
-  def fetchUpliftableSubscriptions(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Set[ApiIdentifier]] =
+  def fetchUpliftableSubscriptions(applicationId: ApplicationId)(using HeaderCarrier): Future[Set[ApiIdentifier]] =
     metrics.record(api) {
       http.get(url"${baseUrl}/$applicationId/upliftableSubscriptions")
         .execute[Set[ApiIdentifier]]
     }
 
-  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(implicit hc: HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
+  def upliftApplicationV2(applicationId: ApplicationId, upliftData: UpliftRequest)(using HeaderCarrier): Future[ApplicationId] = metrics.record(api) {
     http.post(url"${baseUrl}/${applicationId}/uplift")
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
       .execute[ApplicationId]

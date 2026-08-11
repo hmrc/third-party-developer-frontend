@@ -15,21 +15,19 @@
  *@
 
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import include._
+@import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREEMENT_REQUIRED
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.TermsOfUseStatus.AGREED
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseVersion
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
-@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes._
+@import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes.*
 
 
 @this(devMain: DevMain)
 
 
 @(applicationView: ApplicationViewModel, termsOfUseVersion: TermsOfUseVersion)(
-  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig, navSection: String = "details"
+  implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, appConfig: ApplicationConfig
 )
 
 @app = @{applicationView.application}

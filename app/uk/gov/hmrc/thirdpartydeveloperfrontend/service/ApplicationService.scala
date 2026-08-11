@@ -24,66 +24,63 @@ import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiCategory, ApiDefinition}
 import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.AccessType
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models._
-import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models._
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
+import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{PrivacyPolicyLocation, TermsAndConditionsLocation}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.{ApplicationCommand, ApplicationCommands}
-import uk.gov.hmrc.apiplatform.modules.common.domain.models._
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.{ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.organisations.domain.models.Organisation
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain._
-import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.AuditAction.{AccountDeletionRequested, ApplicationDeletionRequested, Remove2SVRequested}
 
 @Singleton
 class ApplicationService @Inject() (
     apmApplicationConnector: ApmConnectorApplicationModule,
-    connectorWrapper: ConnectorsWrapper,
     apmCmdModule: ApmConnectorCommandModule,
-    subscriptionFieldsService: SubscriptionFieldsService,
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
-    developerConnector: ThirdPartyDeveloperConnector,
     thirdPartyOrchestratorConnector: ThirdPartyOrchestratorConnector,
     organisationConnector: OrganisationConnector,
     auditService: AuditService,
     val clock: Clock
-  )(implicit val ec: ExecutionContext
+  )(using val ec: ExecutionContext
   ) extends ClockNow
     with EitherTHelper[String] {
 
-  def createForUser(createApplicationRequest: CreateApplicationRequest, userId: UserId)(implicit hc: HeaderCarrier): Future[Either[String, ApplicationCreatedResponse]] = {
+  def createForUser(createApplicationRequest: CreateApplicationRequest, userId: UserId)(using HeaderCarrier): Future[Either[String, ApplicationCreatedResponse]] = {
     (
       for {
-        maybeOrg <- fromEitherF(checkMaybeOrganisationId(createApplicationRequest.organisationId, userId))
+        _        <- fromEitherF(checkMaybeOrganisationId(createApplicationRequest.organisationId, userId))
         response <- liftF(thirdPartyOrchestratorConnector.create(createApplicationRequest))
       } yield response
     ).value
   }
 
-  private def checkMaybeOrganisationId(maybeOrganisationId: Option[OrganisationId], userId: UserId)(implicit hc: HeaderCarrier): Future[Either[String, Option[Organisation]]] = {
+  private def checkMaybeOrganisationId(maybeOrganisationId: Option[OrganisationId], userId: UserId)(using HeaderCarrier): Future[Either[String, Option[Organisation]]] = {
     maybeOrganisationId match {
       case Some(orgId) => checkOrganisation(orgId, userId)
       case _           => Future.successful(Right(None))
     }
   }
 
-  private def checkOrganisation(organisationId: OrganisationId, userId: UserId)(implicit hc: HeaderCarrier): Future[Either[String, Option[Organisation]]] = {
+  private def checkOrganisation(organisationId: OrganisationId, userId: UserId)(using HeaderCarrier): Future[Either[String, Option[Organisation]]] = {
     (
       for {
         organisation <- fromOptionF(organisationConnector.fetchOrganisation(organisationId), "Error - organisation not found")
-        collaborator <- fromOption(organisation.collaborators.find(c => c.userId == userId && c.isAdministrator), "Error - user is not an administrator")
+        _            <- fromOption(organisation.collaborators.find(c => c.userId == userId && c.isAdministrator), "Error - user is not an administrator")
       } yield Some(organisation)
     ).value
   }
 
-  def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def dispatchCmd(appId: ApplicationId, cmd: ApplicationCommand)(using HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     apmCmdModule.dispatch(appId, cmd, Set.empty).map(_ => ApplicationUpdateSuccessful)
   }
 
-  def updatePrivacyPolicyLocation(application: ApplicationWithCollaborators, userId: UserId, newLocation: PrivacyPolicyLocation)(implicit hc: HeaderCarrier)
+  def updatePrivacyPolicyLocation(application: ApplicationWithCollaborators, userId: UserId, newLocation: PrivacyPolicyLocation)(using HeaderCarrier)
       : Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeProductionApplicationPrivacyPolicyLocation(userId, instant, newLocation)
     dispatchCmd(application.id, request)
@@ -94,7 +91,7 @@ class ApplicationService @Inject() (
       userId: UserId,
       fullName: String,
       emailAddress: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeResponsibleIndividualToSelf(userId, instant, fullName, emailAddress)
     dispatchCmd(application.id, request)
@@ -104,18 +101,18 @@ class ApplicationService @Inject() (
       application: ApplicationWithCollaborators,
       userId: UserId,
       newLocation: TermsAndConditionsLocation
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeProductionApplicationTermsAndConditionsLocation(userId, instant, newLocation)
     dispatchCmd(application.id, request)
   }
 
-  def acceptResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def acceptResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(using HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.ChangeResponsibleIndividualToOther(code, instant)
     dispatchCmd(applicationId, request)
   }
 
-  def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def declineResponsibleIndividualVerification(applicationId: ApplicationId, code: String)(using HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.DeclineResponsibleIndividual(code, instant)
     dispatchCmd(applicationId, request)
   }
@@ -126,17 +123,17 @@ class ApplicationService @Inject() (
       requesterName: String,
       riName: String,
       riEmail: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using HeaderCarrier
     ): Future[ApplicationUpdateSuccessful] = {
     val request = ApplicationCommands.VerifyResponsibleIndividual(userId, instant, requesterName, riName, riEmail)
     dispatchCmd(application.id, request)
   }
 
-  def fetchByApplicationId(applicationId: ApplicationId)(implicit hc: HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] = {
+  def fetchByApplicationId(applicationId: ApplicationId)(using HeaderCarrier): Future[Option[ApplicationWithSubscriptionFields]] = {
     apmApplicationConnector.fetchApplicationById(applicationId)
   }
 
-  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def requestApplicationDeletion(requester: UserSession, application: ApplicationWithCollaborators)(using hc: HeaderCarrier): Future[Option[String]] = {
 
     val requesterName    = requester.developer.displayedName
     val requesterEmail   = requester.developer.email
@@ -166,7 +163,7 @@ class ApplicationService @Inject() (
     }
   }
 
-  def deleteSubordinateApplication(requester: UserSession, application: ApplicationWithCollaborators)(implicit hc: HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
+  def deleteSubordinateApplication(requester: UserSession, application: ApplicationWithCollaborators)(using HeaderCarrier): Future[ApplicationUpdateSuccessful] = {
 
     val requesterEmail   = requester.developer.email
     val environment      = application.deployedTo
@@ -175,7 +172,7 @@ class ApplicationService @Inject() (
     val instigator       = requester.developer.userId
     val deleteRestricted = !(application.details.deleteRestriction == DeleteRestriction.NoRestriction)
 
-    if (environment == Environment.SANDBOX && requesterRole == Collaborator.Roles.ADMINISTRATOR && application.access.accessType == AccessType.STANDARD && !deleteRestricted) {
+    if (environment == Environment.Sandbox && requesterRole == Collaborator.Role.Administrator && application.access.accessType == AccessType.Standard && !deleteRestricted) {
 
       val deleteRequest = ApplicationCommands.DeleteApplicationByCollaborator(instigator, reasons, instant)
       dispatchCmd(application.id, deleteRequest)
@@ -188,11 +185,11 @@ class ApplicationService @Inject() (
   private def roleForApplication(application: ApplicationWithCollaborators, email: LaxEmailAddress) =
     application.collaborators.find(_.emailAddress == email).getOrElse(throw new ApplicationNotFound).role
 
-  def verify(verificationCode: String)(implicit hc: HeaderCarrier): Future[ApplicationVerificationResponse] = {
+  def verify(verificationCode: String)(using HeaderCarrier): Future[ApplicationVerificationResponse] = {
     thirdPartyOrchestratorConnector.verify(verificationCode)
   }
 
-  def requestDeveloperAccountDeletion(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def requestDeveloperAccountDeletion(name: String, email: LaxEmailAddress)(using hc: HeaderCarrier): Future[Option[String]] = {
     val deleteDeveloperTicket = CreateTicketRequest.deleteDeveloperAccount(name, email)
 
     for {
@@ -201,7 +198,7 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def request2SVRemoval(userId: UserId, name: String, email: LaxEmailAddress)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def request2SVRemoval(name: String, email: LaxEmailAddress)(using hc: HeaderCarrier): Future[Option[String]] = {
     val remove2SVTicket = CreateTicketRequest.removeDeveloper2SV(name, email)
 
     for {
@@ -210,8 +207,7 @@ class ApplicationService @Inject() (
     } yield ticketResponse
   }
 
-  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(implicit hc: HeaderCarrier)
-      : Future[ApplicationNameValidationResult] = {
+  def isApplicationNameValid(name: String, environment: Environment, selfApplicationId: Option[ApplicationId])(using HeaderCarrier): Future[ApplicationNameValidationResult] = {
     if (ValidatedApplicationName.validate(name).isInvalid) {
       Future.successful(ApplicationNameValidationResult.Invalid)
     }
@@ -219,12 +215,11 @@ class ApplicationService @Inject() (
   }
 
   def requestProductonApplicationNameChange(
-      userId: UserId,
       application: ApplicationWithCollaborators,
       newApplicationName: ApplicationName,
       requesterName: String,
       requesterEmail: LaxEmailAddress
-    )(implicit hc: HeaderCarrier
+    )(using hc: HeaderCarrier
     ) = {
 
     def createDeskproTicket(application: ApplicationWithCollaborators, newApplicationName: ApplicationName, requesterName: String, requesterEmail: LaxEmailAddress) = {
@@ -255,7 +250,7 @@ object ApplicationService {
       apiIdentifier =>
         apiDefinitions.find(_.context == apiIdentifier.context) match {
           case None      => false
-          case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.EXAMPLE)
+          case Some(api) => api.isTestSupport || api.categories.contains(ApiCategory.Example)
         }
 
   val filterSubscriptionsToRemoveTestAndExampleApis: List[ApiDefinition] => Map[ApplicationId, Set[ApiIdentifier]] => Map[ApplicationId, Set[ApiIdentifier]] =

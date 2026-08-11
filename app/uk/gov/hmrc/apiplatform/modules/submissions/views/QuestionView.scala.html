@@ -14,9 +14,9 @@
  * limitations under the License.
  *@
 
-@import include._
+@import include.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-@import uk.gov.hmrc.apiplatform.modules.submissions.domain.models._
+@import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import play.api.mvc.Call
 @import play.api.mvc.Request
@@ -39,7 +39,6 @@
     fragment match {
       case st: StatementText => renderStatementText(st)
       case sl: StatementLink => renderStatementLink(sl)
-      case _ => Html("<p />")
     }
   ).toList
 }
@@ -221,7 +220,7 @@
   @renderButtonOrButtons(question.absenceText)
 }
 
-@renderAcknowledgementOnly(question: Question.AcknowledgementOnly) = {
+@renderAcknowledgementOnly() = {
     <button id="submit" class="govuk-button" type="submit" name="submit-action" value="acknowledgement">Continue</button>
 }
 
@@ -231,8 +230,7 @@
     case q: Question.SingleChoiceQuestion => renderSingleChoiceQuestion(q, false)
     case q: Question.MultiChoiceQuestion  => renderMultiChoiceQuestion(q)
     case q: Question.TextQuestion         => renderTextInputQuestion(q)
-    case q: Question.AcknowledgementOnly  => renderAcknowledgementOnly(q)
-    case _ => <p>TODO</p>
+    case _: Question.AcknowledgementOnly  => renderAcknowledgementOnly()
   }
 }
 

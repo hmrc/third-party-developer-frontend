@@ -23,7 +23,7 @@ import views.html.RegistrationView
 import play.api.test.FakeRequest
 
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegistrationForm
-import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers._
+import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
 class RegistrationSpec extends CommonViewSpec with WithCSRFAddToken {

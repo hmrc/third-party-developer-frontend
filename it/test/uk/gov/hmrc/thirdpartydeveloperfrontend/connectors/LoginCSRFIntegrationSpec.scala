@@ -18,8 +18,9 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.{status => _, _}
+import com.github.tomakehurst.wiremock.client.WireMock.{status as _, *}
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
@@ -28,13 +29,14 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Headers
-import play.api.test.CSRFTokenHelper._
+import play.api.test.CSRFTokenHelper.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.{Application, Configuration, Mode}
 import play.filters.csrf.CSRF
+import uk.gov.hmrc.mongo.play.PlayMongoModule
 
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{LaxEmailAddress, UserId}
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.core.dto.FindUserIdRequest
@@ -44,6 +46,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.test.builders.{MfaDetailBuilder, User
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.stubs.ThirdPartyDeveloperStub.fetchDeveloper
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+import uk.gov.hmrc.thirdpartydeveloperfrontend.repositories.FlowRepository
 
 class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOneAppPerSuite
     with BeforeAndAfterEach with UserBuilder with LocalUserIdTracker with MfaDetailBuilder with FixedClock {
@@ -67,6 +70,8 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     GuiceApplicationBuilder()
       .configure(config)
       .overrides(bind[ConnectorMetrics].to[NoopConnectorMetrics])
+      .disable[PlayMongoModule]
+      .overrides(bind[FlowRepository].toInstance(Mockito.mock(classOf[FlowRepository])))
       .in(Mode.Test)
       .build()
 
@@ -96,7 +101,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
     val headers              = Headers(AUTHORIZATION -> "AUTH_TOKEN")
     val loginRequest         = FakeRequest(POST, "/developer/login").withHeaders(headers)
     val loginRequestWithCSRF = new FakeRequest(addCSRFToken(FakeRequest(POST, "/developer/login").withHeaders(headers)))
-    val csrftoken            = CSRF.getToken(loginRequestWithCSRF)
+    val csrftoken            = CSRF.getToken(using loginRequestWithCSRF)
     val developer            = buildTrackedUser(emailAddress = userEmail, mfaDetails = List(verifiedAuthenticatorAppMfaDetail))
     val mfaId                = verifiedAuthenticatorAppMfaDetail.id
   }
@@ -203,7 +208,7 @@ class LoginCSRFIntegrationSpec extends BaseConnectorIntegrationSpec with GuiceOn
         private val result = route(app, request).get
 
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(mfaId, MfaType.AUTHENTICATOR_APP).url)
+        redirectLocation(result) shouldBe Some(routes.UserLoginAccount.loginAccessCodePage(mfaId, MfaType.AuthenticatorApp).url)
       }
     }
   }

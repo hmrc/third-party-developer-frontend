@@ -27,7 +27,7 @@ import play.api.test.{FakeRequest, StubMessagesFactory}
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.MfaNameChangeForm
 import uk.gov.hmrc.apiplatform.modules.mfa.views.html.authapp.NameChangeView
 import uk.gov.hmrc.apiplatform.modules.tpd.mfa.domain.models.MfaId
-import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
+import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.DeveloperSessionBuilder
@@ -42,7 +42,7 @@ class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with UserT
   "NameChangeView view" should {
     "render correctly when form is valid" in {
 
-      val mainView = nameChangeView.apply(MfaNameChangeForm.form, MfaId(UUID.randomUUID()))(stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
+      val mainView = nameChangeView.apply(MfaNameChangeForm.form, MfaId(UUID.randomUUID()))(using stubMessages(), FakeRequest().withCSRFToken, loggedIn, appConfig)
       val document = Jsoup.parse(mainView.body)
       document.getElementById("page-heading").text shouldBe "Create a name for your authenticator app"
       document.getElementById("paragraph").text shouldBe "Use a name that will help you remember the app when you sign in."
@@ -53,7 +53,7 @@ class NameChangeViewSpec extends CommonViewSpec with WithCSRFAddToken with UserT
     "render correctly when form is invalid" in {
 
       val mainView = nameChangeView.apply(MfaNameChangeForm.form.withError("name", "The name must be more than 3 characters in length"), MfaId(UUID.randomUUID()))(
-        stubMessages(),
+        using stubMessages(),
         FakeRequest().withCSRFToken,
         loggedIn,
         appConfig

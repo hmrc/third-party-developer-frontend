@@ -21,13 +21,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import org.apache.pekko.stream.Materializer
 
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{SessionTimeoutFilter, SessionTimeoutFilterConfig}
 
 case class WhitelistedCall(uri: String, method: String)
 
 @Singleton
-class SessionTimeoutFilterWithWhitelist @Inject() (config: SessionTimeoutFilterConfig)(implicit ec: ExecutionContext, override val mat: Materializer)
+class SessionTimeoutFilterWithWhitelist @Inject() (config: SessionTimeoutFilterConfig)(using ec: ExecutionContext, override val mat: Materializer)
     extends SessionTimeoutFilter(config) {
 
   val loginUrl                               = "/developer/login" // routes.UserLoginAccount.login().url

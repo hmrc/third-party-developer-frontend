@@ -17,14 +17,14 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 
 import play.api.mvc.{Call, RequestHeader}
-import play.filters.csrf.CSRF._
+import play.filters.csrf.CSRF.*
 
 object SpliceCSRFToken {
 
   // Not materially different from play's play.filters.csrf.CSRF helper, but rather than
   // appending the token to the end of the query args, inserts it as the first query arg.
   def apply(call: Call)(implicit rh: RequestHeader): Call = {
-    val token = getToken(rh).getOrElse { sys.error("No CSRF token present!") }
+    val token = getToken(using rh).getOrElse { sys.error("No CSRF token present!") }
     val url   = if (call.url.contains("?")) call.url.replace("?", s"?${token.name}=${token.value}&")
     else s"${call.url}?${token.name}=${token.value}"
 
