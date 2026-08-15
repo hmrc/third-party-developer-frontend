@@ -36,6 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.*
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApplicationId, LaxEmailAddress}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateFormatter
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.services.mocks.SubmissionServiceMockModule
 import uk.gov.hmrc.apiplatform.modules.subscriptionfields.domain.models.FieldDefinitionType
@@ -49,7 +50,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APIS
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.{TermsOfUseInvitation, TermsOfUseInvitationState}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.ViewHelpers.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
