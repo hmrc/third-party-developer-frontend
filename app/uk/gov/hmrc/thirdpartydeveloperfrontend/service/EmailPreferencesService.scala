@@ -40,7 +40,7 @@ class EmailPreferencesService @Inject() (
     val apmConnector: ApmConnector,
     val thirdPartyDeveloperConnector: ThirdPartyDeveloperConnector,
     val flowRepository: FlowRepository
-  )(using val ec: ExecutionContext
+  )(using ec: ExecutionContext
   ) extends ApplicationLogger {
 
   def fetchCategoriesVisibleToUser(userSession: UserSession, existingFlow: EmailPreferencesFlowV2)(using HeaderCarrier): Future[List[APICategoryDisplayDetails]] =

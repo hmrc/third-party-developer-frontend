@@ -23,7 +23,7 @@ import cats.implicits.*
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{CombinedApi, ServiceName}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.ApplicationId
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromScreamingSnakeCase}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromSnakeCase}
 import uk.gov.hmrc.apiplatform.modules.tpd.emailpreferences.domain.models.{EmailPreferences, EmailTopic, TaxRegimeInterests}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{UserSession, UserSessionId}
 import uk.gov.hmrc.apiplatform.modules.uplift.domain.models.GetProductionCredentialsFlow
@@ -99,7 +99,7 @@ case class EmailPreferencesFlowV2(
     val interests: List[TaxRegimeInterests] =
       selectedAPIs.map(x => TaxRegimeInterests(x._1, handleAllApis(x._2))).toList
 
-    EmailPreferences(interests, selectedTopics.map(t => EmailTopic.unsafeApply(fromScreamingSnakeCase(t))))
+    EmailPreferences(interests, selectedTopics.map(t => EmailTopic.unsafeApply(fromSnakeCase(t))))
   }
 }
 
@@ -170,7 +170,7 @@ case class NewApplicationEmailPreferencesFlowV2(
 
     val updatedTaxRegimeInterests = combinedInterests.map(i => TaxRegimeInterests(i._1, i._2)).toList
 
-    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(t => EmailTopic.unsafeApply(fromScreamingSnakeCase(t))))
+    EmailPreferences(updatedTaxRegimeInterests, selectedTopics.map(t => EmailTopic.unsafeApply(fromSnakeCase(t))))
   }
 }
 

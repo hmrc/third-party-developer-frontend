@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.UserId
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.fromScreamingSnakeCase
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.fromSnakeCase
 import uk.gov.hmrc.apiplatform.modules.mfa.connectors.ThirdPartyDeveloperMfaConnector
 import uk.gov.hmrc.apiplatform.modules.mfa.forms.*
 import uk.gov.hmrc.apiplatform.modules.mfa.service.{MfaResponse, MfaService}
@@ -103,7 +103,7 @@ class MfaController @Inject() (
   }
 
   private def setupSelectedMfa(mfaType: String): Future[Result] = {
-    MfaType.unsafeApply(fromScreamingSnakeCase(mfaType)) match {
+    MfaType.unsafeApply(fromSnakeCase(mfaType)) match {
       case Sms              => successful(Redirect(routes.MfaController.setupSms()))
       case AuthenticatorApp => successful(Redirect(routes.MfaController.authAppStart()))
     }
@@ -125,7 +125,7 @@ class MfaController @Inject() (
     thirdPartyDeveloperConnector.fetchDeveloper(userId) flatMap {
       case None                  => internalServerErrorTemplate("Unable to obtain user information")
       case Some(developer: User) =>
-        val mfaType                = MfaType.unsafeApply(fromScreamingSnakeCase(mfaTypeForAuthentication))
+        val mfaType                = MfaType.unsafeApply(fromSnakeCase(mfaTypeForAuthentication))
         val mfaIdForAuthentication = getMfaDetailByType(mfaType, developer.mfaDetails).id
         authenticateToRemoveMfa(mfaType, mfaIdForAuthentication)
     }

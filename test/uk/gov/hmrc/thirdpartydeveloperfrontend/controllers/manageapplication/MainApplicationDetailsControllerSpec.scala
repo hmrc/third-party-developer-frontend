@@ -116,13 +116,13 @@ class MainApplicationDetailsControllerSpec
         returnAgreementDetails(v1Agreement)
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
-        detailsShouldRenderThePageForDeveloper(devSession, v1TOUWording = Some(v1AgreementWording))(prodAppWithRespIndAndV1TermsOfUse)
+        detailsShouldRenderThePageForDeveloper(devSession)(prodAppWithRespIndAndV1TermsOfUse)
       }
       "return the view for a standard production app with V2 terms of use" in new Setup {
         returnAgreementDetails(v2Agreement)
         TermsOfUseInvitationServiceMock.FetchTermsOfUseInvitation.thenReturnNone()
         SubmissionServiceMock.FetchLatestSubmission.thenReturnsNone()
-        detailsShouldRenderThePageForDeveloper(devSession, v2TOUWording = Some(v2AgreementWording))(prodAppWithRespIndAndV2TermsOfUse)
+        detailsShouldRenderThePageForDeveloper(devSession)(prodAppWithRespIndAndV2TermsOfUse)
       }
       "return the view for a standard sandbox app" in new Setup {
         returnAgreementDetails()
@@ -785,9 +785,7 @@ class MainApplicationDetailsControllerSpec
     }
 
     def detailsShouldRenderThePageForDeveloper(
-        userSession: UserSession,
-        v1TOUWording: Option[String] = None,
-        v2TOUWording: Option[String] = None
+        userSession: UserSession
       )(
         application: ApplicationWithSubscriptionFields
       ): Any = {
