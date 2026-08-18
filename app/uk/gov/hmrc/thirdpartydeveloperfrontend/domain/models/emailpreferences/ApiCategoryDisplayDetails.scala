@@ -19,13 +19,13 @@ package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.emailpreferences
 import play.api.libs.json.{Json, OFormat}
 
 import uk.gov.hmrc.apiplatform.modules.apis.domain.models.ApiCategory
-import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromScreamingSnakeCase}
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.EnumJsonHelper.{asScreamingSnakeCase, fromSnakeCase}
 
 // TODO - make category an APICategory
 case class APICategoryDisplayDetails(category: String, name: String) {
 
   def toAPICategory(): ApiCategory = {
-    ApiCategory.unsafeApply(fromScreamingSnakeCase(category))
+    ApiCategory.unsafeApply(fromSnakeCase(category))
   }
 }
 

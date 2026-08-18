@@ -39,6 +39,7 @@ import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{
 import uk.gov.hmrc.apiplatform.modules.applications.submissions.domain.models.{ResponsibleIndividualFixtures, TermsOfUseAcceptanceData}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Environment
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
+import uk.gov.hmrc.apiplatform.modules.common.domain.services.DateFormatter
 import uk.gov.hmrc.apiplatform.modules.common.utils.FixedClock
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.manageapplication.MainApplicationDetailsController.{Agreement, TermsOfUseViewModel}
@@ -48,7 +49,6 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.TermsOfUseV2State
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.services.TermsOfUseService.TermsOfUseAgreementDetails
-import uk.gov.hmrc.thirdpartydeveloperfrontend.helpers.DateFormatter
 import uk.gov.hmrc.thirdpartydeveloperfrontend.testdata.CommonSessionFixtures
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithCSRFAddToken
 
