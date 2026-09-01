@@ -7,11 +7,11 @@ object AppDependencies {
   lazy val seleniumVersion        = "4.14.0"
   lazy val bootstrapVersion       = "10.7.0"
   lazy val mongoVersion           = "2.13.0"
-  lazy val commonDomainVersion    = "1.3.0"
+  lazy val commonDomainVersion    = "1.4.0"
   lazy val apiDomainVersion       = "1.8.0"
   lazy val appDomainVersion       = "1.6.0"
   lazy val tpdDomainVersion       = "1.3.0"
-  private val orgDomainVersion    = "1.11.0"
+  private val orgDomainVersion    = "1.12.0"
   private val mockitoScalaVersion = "2.2.1"
 
   lazy val compile = Seq(
