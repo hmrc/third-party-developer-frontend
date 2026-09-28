@@ -62,13 +62,16 @@
           TableRow(content = HtmlContent(s"<a href='${controllers.profile.routes.Profile.changeProfile()}' class='govuk-link govuk-link--no-visited-state'>Change</a>"), attributes = Map("id" -> "nameChangeLink"))),
       Seq(TableRow(content = Text(messages("profile.details.email"))),
           TableRow(content = Text(user.email.text), attributes = Map("id" -> "email")),
-          TableRow(content = Empty)),
-      Seq(TableRow(content = Text(messages("profile.details.organisation"))),
-          TableRow(content = HtmlContent(formatListOfOrganisations(organisations, "None")), attributes = Map("id" -> "organisation")),
           TableRow(content = Empty))
     )
   ))
-
+    <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.email.preferences")</h2>
+    <p class="govuk-body">
+    @messages("profile.details.email.hint")
+    </p>
+    <p class="govuk-body">
+        <a class="govuk-link govuk-link--no-visited-state" href="@controllers.profile.routes.EmailPreferencesController.emailPreferencesSummaryPage()" id="account-deletion">@messages("profile.details.email.link")</a>
+    </p>
   <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.security.preferences")</h2>
   <p class="govuk-body">
     @messages("profile.details.security.hint")
