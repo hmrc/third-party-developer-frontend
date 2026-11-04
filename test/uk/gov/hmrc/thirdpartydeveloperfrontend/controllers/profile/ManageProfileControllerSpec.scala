@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile
 
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.{ZoneId, ZoneOffset}
 import java.util.Locale
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -110,6 +110,27 @@ class ManageProfileControllerSpec extends BaseControllerSpec with WithCSRFAddTok
       withClue("MFA name")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", mfaDetail.name) shouldBe true)
       withClue("MFA creation date")(elementExistsContainsText(doc, s"#mfa-details-${mfaDetail.id.value}", s"Added $expectedDate at") shouldBe true)
       withClue("Remove link")(linkExistsWithHref(doc, mfaRoutes.MfaController.removeMfa(mfaDetail.id, mfaDetail.mfaType).url) shouldBe true)
+    }
+
+    "display password details" in new Setup {
+      val userWithPasswordChange    = loggedInDeveloper.copy(lastPasswordChange = Some(instant))
+      val sessionWithPasswordChange = devSession.copy(developer = userWithPasswordChange)
+
+      fetchSessionByIdReturns(sessionId, sessionWithPasswordChange)
+
+      when(mockDashboardService.fetchOrganisationsByUserId(*[UserId])(using *))
+        .thenReturn(Future.successful(organisations))
+
+      val result = addToken(underTest.profileDetails())(loggedInDevRequest.withSession("sessionId" -> sessionId.toString))
+
+      status(result) shouldBe OK
+      val doc = Jsoup.parse(contentAsString(result))
+
+      val expectedDateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mm a", Locale.UK)
+      val expectedDate       = expectedDateFormat.format(instant.atZone(ZoneId.of("Europe/London")))
+
+      withClue("Password change date")(elementExistsContainsText(doc, ".govuk-hint", s"Last changed $expectedDate") shouldBe true)
+      withClue("Change password link")(linkExistsWithHref(doc, routes.Profile.showPasswordPage().url) shouldBe true)
     }
   }
 }
