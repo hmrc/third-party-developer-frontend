@@ -17,7 +17,6 @@
 package uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors
 
 import play.api.libs.json.*
-
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, Collaborator}
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiVersionNbr, ApplicationId, Environment, LaxEmailAddress}
 
@@ -173,10 +172,20 @@ object CreateTicketRequest {
     )
   }
 
-  def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId)
-      : CreateTicketRequest = {
-    val ticketMessage =
-      s"""$requestorName has submitted their application $applicationName for production use on the Developer Hub."""
+  def createForRequestProductionCredentials(
+      requestorName: String,
+      requestorEmail: LaxEmailAddress,
+      applicationName: ApplicationName,
+      applicationId: ApplicationId,
+      extraInfo: Option[String] = None
+    ): CreateTicketRequest = {
+    val baseMessage   = s"""$requestorName has submitted their application $applicationName for production use on the Developer Hub."""
+    val ticketMessage = {
+      extraInfo.match {
+        case (None)         => baseMessage
+        case Some(moreInfo) => baseMessage + s" $moreInfo"
+      }
+    }
 
     CreateTicketRequest(
       fullName = requestorName,

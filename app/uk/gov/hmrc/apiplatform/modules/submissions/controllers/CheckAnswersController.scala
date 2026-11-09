@@ -16,13 +16,8 @@
 
 package uk.gov.hmrc.apiplatform.modules.submissions.controllers
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future.successful
-
 import play.api.libs.crypto.CookieSigner
 import play.api.mvc.MessagesControllerComponents
-
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.services.EitherTHelper
 import uk.gov.hmrc.apiplatform.modules.submissions.controllers.CheckAnswersController.ProdCredsRequestReceivedViewModel
@@ -35,6 +30,10 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorH
 import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ApplicationController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.BadRequestWithErrorMessage
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.{ApplicationActionService, ApplicationService, SessionService}
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future.successful
 
 object CheckAnswersController {
   case class ProdCredsRequestReceivedViewModel(appId: ApplicationId, requesterIsResponsibleIndividual: Boolean, isNewTermsOfUseUplift: Boolean, isGranted: Boolean)
@@ -87,7 +86,7 @@ class CheckAnswersController @Inject() (
     val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(request.submission)
     val isNewTouUplift                   = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
     requestProductionCredentials
-      .requestProductionCredentials(request.application, request.userSession, requesterIsResponsibleIndividual, isNewTouUplift)
+      .requestProductionCredentials(request.application, request.userSession, requesterIsResponsibleIndividual, isNewTouUplift, request.subscriptions)
       .map(_ match {
         case Right(_)                   => {
           Redirect(routes.CheckAnswersController.requestReceivedPage(productionAppId))
