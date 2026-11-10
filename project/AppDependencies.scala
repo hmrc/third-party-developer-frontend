@@ -10,7 +10,7 @@ object AppDependencies {
   lazy val commonDomainVersion    = "1.4.0"
   lazy val apiDomainVersion       = "1.8.0"
   lazy val appDomainVersion       = "1.6.0"
-  lazy val tpdDomainVersion       = "1.4.0"
+  lazy val tpdDomainVersion       = "1.5.0"
   private val orgDomainVersion    = "1.26.0"
 
   lazy val compile = Seq(

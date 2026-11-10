@@ -85,6 +85,14 @@
         TableRow(content = HtmlContent(s"<a href='${routes.MfaController.removeMfa(mfaDetail.id, mfaDetail.mfaType)}' class='govuk-link govuk-link--no-visited-state'>Remove</a>"))
       ))
     ))
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.your.password")</h2>
+    <p class="govuk-body govuk-hint">
+      @messages("profile.details.last.changed") @user.lastPasswordChange.map(dateFormatter.format).getOrElse("Not recorded")
+    </p>
+    <p class="govuk-body">
+      <a class="govuk-link govuk-link--no-visited-state" href="@controllers.profile.routes.Profile.showPasswordPage()" id="change-password">Change your password</a>
+    </p>
   }
 
   <h2 class="govuk-heading-m govuk-!-margin-top-9">@messages("profile.details.delete.account")</h2>

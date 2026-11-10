@@ -101,7 +101,7 @@ class Profile @Inject() (
   }
 
   def updatePassword(): Action[AnyContent] = loggedInAction { implicit request =>
-    processPasswordChange(request.userSession.developer.email, Ok(passwordUpdatedView("password changed", "Password changed", "change-password")), changeProfilePasswordView(_))
+    processPasswordChange(request.userSession.developer.email, Ok(passwordUpdatedView("password changed", "Password changed")), changeProfilePasswordView(_))
   }
 
   def requestDeletion(): Action[AnyContent] = loggedInAction { implicit request =>
