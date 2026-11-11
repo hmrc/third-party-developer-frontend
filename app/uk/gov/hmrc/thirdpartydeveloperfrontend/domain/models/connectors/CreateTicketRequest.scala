@@ -173,10 +173,20 @@ object CreateTicketRequest {
     )
   }
 
-  def createForRequestProductionCredentials(requestorName: String, requestorEmail: LaxEmailAddress, applicationName: ApplicationName, applicationId: ApplicationId)
-      : CreateTicketRequest = {
-    val ticketMessage =
-      s"""$requestorName has submitted their application $applicationName for production use on the Developer Hub."""
+  def createForRequestProductionCredentials(
+      requestorName: String,
+      requestorEmail: LaxEmailAddress,
+      applicationName: ApplicationName,
+      applicationId: ApplicationId,
+      extraInfo: Option[String] = None
+    ): CreateTicketRequest = {
+    val baseMessage   = s"""$requestorName has submitted their application $applicationName for production use on the Developer Hub."""
+    val ticketMessage = {
+      extraInfo.match {
+        case (None)         => baseMessage
+        case Some(moreInfo) => baseMessage + s" $moreInfo"
+      }
+    }
 
     CreateTicketRequest(
       fullName = requestorName,

@@ -25,14 +25,16 @@ import cats.data.NonEmptyList
 
 import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.apiplatform.modules.applications.access.domain.models.Access
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithCollaborators
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.*
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.Actors
 import uk.gov.hmrc.apiplatform.modules.common.services.{ApplicationLogger, ClockNow, EitherTHelper}
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
-import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
+import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.{ErrorDetails, Submission}
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, *}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.*
+import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 
 @Singleton
@@ -48,7 +50,8 @@ class RequestProductionCredentials @Inject() (
       application: ApplicationWithCollaborators,
       requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
-      isNewTouUplift: Boolean
+      isNewTouUplift: Boolean,
+      subscriptions: List[APISubscriptionStatus]
     )(using HeaderCarrier
     ): Future[Either[ErrorDetails, ApplicationWithCollaborators]] = {
 
@@ -73,8 +76,8 @@ class RequestProductionCredentials @Inject() (
     def handleCmdSuccess(app: ApplicationWithCollaborators) = {
       val ET = EitherTHelper.make[ErrorDetails]
       (for {
-        submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
-        _          <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift, submission.status.isGranted))
+        submission: Submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
+        _                      <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift, submission.status.isGranted, submission, subscriptions))
       } yield app).value
 
     }
@@ -102,7 +105,9 @@ class RequestProductionCredentials @Inject() (
       requestedBy: UserSession,
       requesterIsResponsibleIndividual: Boolean,
       isNewTouUplift: Boolean,
-      isSubmissionPassed: Boolean
+      isSubmissionPassed: Boolean,
+      submission: Submission,
+      subscriptions: List[APISubscriptionStatus]
     )(using hc: HeaderCarrier
     ): Future[Option[String]] = {
     if (requesterIsResponsibleIndividual) {
@@ -115,12 +120,33 @@ class RequestProductionCredentials @Inject() (
           apiPlatformDeskproConnector.createTicket(ticket, hc)
         }
       } else {
-        val ticket = CreateTicketRequest.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id)
+        val extraInfo = formatExtraInfo(app, submission, subscriptions)
+        val ticket    = CreateTicketRequest.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id, Some(extraInfo))
         apiPlatformDeskproConnector.createTicket(ticket, hc)
       }
     } else {
       // Don't create a Deskpro ticket if the requester is not the responsible individual
       Future.successful(None)
     }
+  }
+
+  private def formatExtraInfo(app: ApplicationWithCollaborators, submission: Submission, subscriptions: List[APISubscriptionStatus]): String = {
+    val status                           = submission.latestInstance.status.toString.takeWhile(_ != '(')
+    val inHouseOrCommercial              = app.access match {
+      case Access.Standard(_, _, _, _, _, Some(sellResellOrDistribute), _) =>
+        if (sellResellOrDistribute.value == "Yes") "Commercial developer" else "In House developer"
+      case Access.Standard(_, _, _, _, _, sellResellOrDistribute, _)       => ""
+    }
+    val subs: Seq[APISubscriptionStatus] = subscriptions.filter(_.subscribed)
+    val subsList                         = subs
+      .filter(sub => sub.name != null && sub.name.trim.nonEmpty)
+      .map(sub => s"<li>${sub.name} ${sub.apiVersion.versionNbr} (${sub.apiVersion.status})</li>").mkString("")
+    val subscriptionsHtml                = if (subs.nonEmpty) s"Subscriptions:<br><ul style='font-size: inherit;'>$subsList</ul>" else ""
+
+    s"""<div>
+       |  ToU - $status<br>
+       |  $inHouseOrCommercial<br>
+       |  $subscriptionsHtml
+       |</div>""".stripMargin
   }
 }

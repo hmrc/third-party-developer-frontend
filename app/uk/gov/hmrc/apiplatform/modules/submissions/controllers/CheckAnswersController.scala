@@ -87,7 +87,7 @@ class CheckAnswersController @Inject() (
     val requesterIsResponsibleIndividual = isRequesterResponsibleIndividual(request.submission)
     val isNewTouUplift                   = request.submission.context.getOrElse(AskWhen.Context.Keys.NEW_TERMS_OF_USE_UPLIFT, "No") == "Yes"
     requestProductionCredentials
-      .requestProductionCredentials(request.application, request.userSession, requesterIsResponsibleIndividual, isNewTouUplift)
+      .requestProductionCredentials(request.application, request.userSession, requesterIsResponsibleIndividual, isNewTouUplift, request.subscriptions)
       .map(_ match {
         case Right(_)                   => {
           Redirect(routes.CheckAnswersController.requestReceivedPage(productionAppId))
