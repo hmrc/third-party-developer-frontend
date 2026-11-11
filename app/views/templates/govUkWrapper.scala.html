@@ -179,16 +179,26 @@
 }
 
 @siteFooter = {
-  @hmrcFooter(new Footer(meta = Some(
-    Meta(
-      items = Some(
-        Seq(
-          FooterItem(text = Some("Cookies"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/help/cookies")),
-          FooterItem(text = Some("Accessibility statement"), href = Some(s"${applicationConfig.platformFrontendHost}/accessibility-statement/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}")),
-          FooterItem(text = Some("Privacy Policy"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/privacy")),
-          FooterItem(text = Some("Terms and conditions"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/terms-and-conditions")),
-          FooterItem(text = Some("Help using GOV.UK "), href = Some("https://www.gov.uk/help"))
-        )
+  @hmrcFooter(new Footer(navigation = Seq(
+    FooterNavigation(
+      title = Some("Help and service status"),
+      columns = Some(1),
+      width = Some("one-third"),
+      items = Seq(
+        FooterItem(text = Some("Support"), href = Some(s"${applicationConfig.devhubSupportFrontendUrl}/devhub-support/")),
+        FooterItem(text = Some("Service availability"), href = Some("https://api-platform-status.production.tax.service.gov.uk/")),
+        FooterItem(text = Some("Help using GOV.UK"), href = Some("https://www.gov.uk/help"))
+      )
+    ),
+    FooterNavigation(
+      title = Some("About this service"),
+      columns = Some(2),
+      width = Some("two-thirds"),
+      items = Seq(
+        FooterItem(text = Some("Cookies"), href = Some(s"${applicationConfig.apiDocumentationFrontendUrl}/api-documentation/docs/help/cookies")),
+        FooterItem(text = Some("Accessibility statement"), href = Some(s"${applicationConfig.platformFrontendHost}/accessibility-statement/hmrc-developer-hub?referrerUrl=${helper.urlEncode(request.uri)}")),
+        FooterItem(text = Some("Privacy Policy"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/privacy")),
+        FooterItem(text = Some("Terms and conditions"), href = Some(s"${applicationConfig.thirdPartyDeveloperFrontendUrl}/api-documentation/docs/help/terms-and-conditions")),
       )
     )
   ), language = En))
