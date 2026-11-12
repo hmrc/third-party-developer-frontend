@@ -51,7 +51,7 @@ object Crumb {
   def applicationMetadata(application: ApplicationWithCollaborators) =
     Crumb("Subscription configuration", s"${routes.ManageSubscriptions.listApiSubscriptions(application.id)}", Some("data-breadcrumb-app-metadata"))
 
-  def manageProfile = Crumb("Manage profile", s"${profile.routes.Profile.showProfile()}", Some("data-breadcrumb-manage-profile"))
+  def manageProfile = Crumb("Manage profile", s"${profile.routes.ManageProfileController.profileDetails()}", Some("data-breadcrumb-manage-profile"))
 
   def changePassword = Crumb("Change password", s"${profile.routes.Profile.showPasswordPage()}", Some("data-breadcrumb-change-password"))
 

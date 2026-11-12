@@ -40,7 +40,6 @@ class Profile @Inject() (
     mcc: MessagesControllerComponents,
     val cookieSigner: CookieSigner,
     changeProfileViewTemplate: ChangeProfileView,
-    profileView: ProfileView,
     profileUpdatedView: ProfileUpdatedView,
     changeProfilePasswordView: ChangeProfilePasswordView,
     passwordUpdatedView: PasswordUpdatedView,
@@ -62,10 +61,6 @@ class Profile @Inject() (
       req.userSession.developer.firstName,
       req.userSession.developer.lastName
     )))
-  }
-
-  def showProfile(): Action[AnyContent] = loggedInAction { implicit request =>
-    Future.successful(Ok(profileView()))
   }
 
   def changeProfile(): Action[AnyContent] = loggedInAction { implicit request =>

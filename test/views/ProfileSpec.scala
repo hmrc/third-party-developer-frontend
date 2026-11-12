@@ -18,7 +18,7 @@ package views
 
 import org.jsoup.Jsoup
 import views.helper.CommonViewSpec
-import views.html.{ChangeProfileView, ProfileView}
+import views.html.ChangeProfileView
 
 import play.api.test.FakeRequest
 
@@ -39,20 +39,6 @@ class ProfileSpec extends CommonViewSpec
   private val request = FakeRequest().withCSRFToken
 
   val developer = buildUser("developer@example.com".toLaxEmail, "FirstName", "LastName").loggedIn
-
-  "Profile page" should {
-    val profileView = app.injector.instanceOf[ProfileView]
-
-    "render" in {
-      val page = profileView.render(request, developer, appConfig, messagesProvider, "details")
-      page.contentType should include("text/html")
-
-      val document = Jsoup.parse(page.body)
-      elementExistsByText(document, "h1", "Manage profile") shouldBe true
-      elementExistsByText(document, "h2", "Delete account") shouldBe true
-      elementIdentifiedByIdContainsText(document, "account-deletion", "Request account deletion") shouldBe true
-    }
-  }
 
   "Change profile page" should {
     val changeProfileView = app.injector.instanceOf[ChangeProfileView]
