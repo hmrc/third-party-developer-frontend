@@ -57,7 +57,7 @@ class profileSpec extends BaseSpec {
       givenIWantToSuccessfullyChangeMyProfile() // auto-chosen (score=1.00, ProfileStepsSteps.scala)
 
       When("I click on the button with id change")
-      whenIClickOnTheButtonWithId("nameChangeLink") // auto-chosen (score=0.91, CommonStepsSteps.scala)
+      whenIClickOnTheButtonWithId("nameChangeLink")
 
       Then("I am on the Change profile details page")
       thenIAmOnThePage("Change profile details") // auto-chosen (score=0.88, CommonStepsSteps.scala)
@@ -118,7 +118,7 @@ class profileSpec extends BaseSpec {
       givenIWantToSuccessfullyChangeMyPassword() // auto-chosen (score=1.00, ProfileStepsSteps.scala)
 
       When("I click on the Change password link")
-      whenIClickOnTheButtonWithId("change-password") // ⚠️ No step-def match found for: I click on the Change password link
+      whenIClickOnTheButtonWithId("change-password")
 
       When("I enter all the fields:")
       givenIEnterAllTheFields(

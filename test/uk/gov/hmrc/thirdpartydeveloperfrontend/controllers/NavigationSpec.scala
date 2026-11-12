@@ -24,7 +24,7 @@ import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.{ManageProfileController, Profile}
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.ManageProfileController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
