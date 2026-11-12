@@ -41,8 +41,7 @@ class NavLinkSpec extends AsyncHmrcSpec {
           ServiceNavigationItem(Text("Getting started"), "http://localhost:9680/api-documentation/docs/using-the-hub"),
           ServiceNavigationItem(Text("API documentation"), "http://localhost:9680/api-documentation/docs/api"),
           ServiceNavigationItem(Text("Applications"), "http://localhost:9685/developer/applications", active = true),
-          ServiceNavigationItem(Text("Support"), "http://localhost:9695/devhub-support/"),
-          ServiceNavigationItem(Text("Service availability"), "https://api-platform-status.production.tax.service.gov.uk/", attributes = Map("target" -> "_blank"))
+          ServiceNavigationItem(Text("Support"), "http://localhost:9695/devhub-support/")
         )
     }
   }
