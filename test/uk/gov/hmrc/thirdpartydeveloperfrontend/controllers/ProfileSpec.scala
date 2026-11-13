@@ -46,7 +46,6 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
 
   trait Setup extends ApplicationServiceMock with FixedClock {
     val changeProfileView             = app.injector.instanceOf[ChangeProfileView]
-    val profileView                   = app.injector.instanceOf[ProfileView]
     val profileUpdatedView            = app.injector.instanceOf[ProfileUpdatedView]
     val changeProfilePasswordView     = app.injector.instanceOf[ChangeProfilePasswordView]
     val passwordUpdatedView           = app.injector.instanceOf[PasswordUpdatedView]
@@ -63,7 +62,6 @@ class ProfileSpec extends BaseControllerSpec with WithCSRFAddToken {
       mcc,
       cookieSigner,
       changeProfileView,
-      profileView,
       profileUpdatedView,
       changeProfilePasswordView,
       passwordUpdatedView,

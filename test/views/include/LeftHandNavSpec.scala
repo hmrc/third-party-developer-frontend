@@ -151,8 +151,6 @@ class LeftHandNavSpec extends CommonViewSpec
 
         val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to the sandbox") shouldBe true
-
-        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
       "render get production credentials when flag is set" in new Setup {
@@ -182,8 +180,6 @@ class LeftHandNavSpec extends CommonViewSpec
         val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Development") shouldBe true
         elementExistsByText(document, "a", "Add an application to QA") shouldBe true
-
-        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
       "do not render wording for QA and Development when flag is clear" in new Setup {
@@ -197,8 +193,6 @@ class LeftHandNavSpec extends CommonViewSpec
         val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Development") shouldBe true
         elementExistsByText(document, "a", "Add an application to QA") shouldBe false
-
-        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
       "render correct wording for Staging" in new Setup {
@@ -210,8 +204,6 @@ class LeftHandNavSpec extends CommonViewSpec
 
         val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Staging") shouldBe true
-
-        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
 
       "render correct wording for Integration" in new Setup {
@@ -223,15 +215,7 @@ class LeftHandNavSpec extends CommonViewSpec
 
         val document: Document = Jsoup.parse(page.body)
         elementExistsByText(document, "a", "Add an application to Integration") shouldBe true
-
-        userProfileSectionCorrectlyDisplayed(document) shouldBe true
       }
     }
   }
-
-  def userProfileSectionCorrectlyDisplayed(document: Document): Boolean =
-    elementExistsByText(document, "a", "Manage profile") &&
-      elementExistsByText(document, "a", "Email preferences") &&
-      elementExistsByText(document, "a", "Change password") &&
-      elementExistsByText(document, "a", "Security preferences")
 }

@@ -24,7 +24,7 @@ import play.api.test.Helpers.*
 
 import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.{LoggedInState, UserSession}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.ErrorHandler
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.Profile
+import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes.ManageProfileController
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.NavLink
 import uk.gov.hmrc.thirdpartydeveloperfrontend.mocks.service.{ApplicationActionServiceMock, ApplicationServiceMock}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.utils.WithLoggedInSession.*
@@ -87,7 +87,7 @@ class NavigationSpec extends BaseControllerSpec {
       }
 
       "return the user's profile link" in new Setup(loggedInState = Some(LoggedInState.LoggedIn)) {
-        links.head shouldBe NavLink(devUser.displayedName, Profile.showProfile().url, isSensitive = true)
+        links.head shouldBe NavLink(devUser.displayedName, ManageProfileController.profileDetails().url, isSensitive = true)
       }
 
       "return a sign-out link" in new Setup(loggedInState = Some(LoggedInState.LoggedIn)) {
