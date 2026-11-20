@@ -32,7 +32,8 @@ case class CreateTicketRequest(
     supportReason: Option[String] = None,
     reasonKey: Option[String] = None,
     teamMemberEmail: Option[String] = None,
-    attachments: List[FileAttachment] = List.empty
+    attachments: List[FileAttachment] = List.empty,
+    sandboxApplicationId: Option[String] = None
   )
 
 object CreateTicketRequest {
@@ -178,7 +179,8 @@ object CreateTicketRequest {
       requestorEmail: LaxEmailAddress,
       applicationName: ApplicationName,
       applicationId: ApplicationId,
-      extraInfo: Option[String] = None
+      extraInfo: Option[String] = None,
+      subordinateAppId: Option[String] = None
     ): CreateTicketRequest = {
     val baseMessage   = s"""$requestorName has submitted their application $applicationName for production use on the Developer Hub."""
     val ticketMessage = {
@@ -193,9 +195,10 @@ object CreateTicketRequest {
       email = requestorEmail.text,
       subject = "Production Application Credential Request",
       message = ticketMessage,
-      applicationId = Some(applicationId.toString()),
+      applicationId = Some(applicationId.toString),
       supportReason = Some("Production Application Credential Request"),
-      reasonKey = Some("prod-app-credentials")
+      reasonKey = Some("prod-app-credentials"),
+      sandboxApplicationId = subordinateAppId
     )
   }
 

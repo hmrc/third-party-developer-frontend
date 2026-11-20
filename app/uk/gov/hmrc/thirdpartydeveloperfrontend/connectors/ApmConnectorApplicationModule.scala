@@ -23,7 +23,7 @@ import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.{HeaderCarrier, *}
 
-import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.ApplicationWithSubscriptionFields
+import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationWithCollaborators, ApplicationWithSubscriptionFields}
 import uk.gov.hmrc.apiplatform.modules.applications.core.interface.models.UpliftRequest
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.*
 
@@ -58,4 +58,8 @@ trait ApmConnectorApplicationModule extends ApmConnectorModule {
       .withBody(Json.toJson(RequestUpliftV2(upliftData)))
       .execute[ApplicationId]
   }
+
+  def fetchLinkedSubordinateApplication(prodApplicationId: ApplicationId)(using HeaderCarrier): Future[Option[ApplicationWithCollaborators]] =
+    http.get(url"${baseUrl}/$prodApplicationId/linked-subordinate")
+      .execute[Option[ApplicationWithCollaborators]]
 }

@@ -41,6 +41,7 @@ import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTi
 class RequestProductionCredentials @Inject() (
     tpaConnector: ThirdPartyApplicationSubmissionsConnector,
     apmCmdModule: ApmConnectorCommandModule,
+    apmConnectorApplicationModule: ApmConnectorApplicationModule,
     apiPlatformDeskproConnector: ApiPlatformDeskproConnector,
     val clock: Clock
   )(using val ec: ExecutionContext
@@ -76,8 +77,21 @@ class RequestProductionCredentials @Inject() (
     def handleCmdSuccess(app: ApplicationWithCollaborators) = {
       val ET = EitherTHelper.make[ErrorDetails]
       (for {
-        submission: Submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
-        _                      <- ET.liftF(createDeskproTicketIfNeeded(app, requestedBy, requesterIsResponsibleIndividual, isNewTouUplift, submission.status.isGranted, submission, subscriptions))
+        submission: Submission                       <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
+        subordinateApp: ApplicationWithCollaborators <- ET.fromOptionF(
+                                                          apmConnectorApplicationModule.fetchLinkedSubordinateApplication(app.id),
+                                                          ErrorDetails("submitSubmission001", s"No subordinate application record found for production application: ${app.id}")
+                                                        )
+        _                                            <- ET.liftF(createDeskproTicketIfNeeded(
+                                                          app,
+                                                          requestedBy,
+                                                          requesterIsResponsibleIndividual,
+                                                          isNewTouUplift,
+                                                          submission.status.isGranted,
+                                                          submission,
+                                                          subscriptions,
+                                                          subordinateApp
+                                                        ))
       } yield app).value
 
     }
@@ -107,7 +121,8 @@ class RequestProductionCredentials @Inject() (
       isNewTouUplift: Boolean,
       isSubmissionPassed: Boolean,
       submission: Submission,
-      subscriptions: List[APISubscriptionStatus]
+      subscriptions: List[APISubscriptionStatus],
+      subordinateApp: ApplicationWithCollaborators
     )(using hc: HeaderCarrier
     ): Future[Option[String]] = {
     if (requesterIsResponsibleIndividual) {
@@ -121,7 +136,14 @@ class RequestProductionCredentials @Inject() (
         }
       } else {
         val extraInfo = formatExtraInfo(app, submission, subscriptions)
-        val ticket    = CreateTicketRequest.createForRequestProductionCredentials(requestedBy.developer.displayedName, requestedBy.developer.email, app.name, app.id, Some(extraInfo))
+        val ticket    = CreateTicketRequest.createForRequestProductionCredentials(
+          requestedBy.developer.displayedName,
+          requestedBy.developer.email,
+          app.name,
+          app.id,
+          Some(extraInfo),
+          Some(subordinateApp.id.toString)
+        )
         apiPlatformDeskproConnector.createTicket(ticket, hc)
       }
     } else {

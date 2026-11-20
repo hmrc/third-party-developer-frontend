@@ -27,7 +27,7 @@ import uk.gov.hmrc.apiplatform.modules.apis.domain.models.{ApiAccessType, ApiSta
 import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.{ApplicationName, ApplicationWithCollaboratorsFixtures}
 import uk.gov.hmrc.apiplatform.modules.commands.applications.domain.models.CommandFailures
 import uk.gov.hmrc.apiplatform.modules.common.domain.models.LaxEmailAddress.StringSyntax.toLaxEmail
-import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr, UserId}
+import uk.gov.hmrc.apiplatform.modules.common.domain.models.{ApiContext, ApiIdentifier, ApiVersionNbr, ApplicationId, UserId}
 import uk.gov.hmrc.apiplatform.modules.submissions.SubmissionsTestData
 import uk.gov.hmrc.apiplatform.modules.submissions.connectors.ThirdPartyApplicationSubmissionsConnector
 import uk.gov.hmrc.apiplatform.modules.submissions.domain.models.ErrorDetails
@@ -36,7 +36,7 @@ import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 import uk.gov.hmrc.apiplatform.modules.tpd.test.data.UserTestData
 import uk.gov.hmrc.apiplatform.modules.tpd.test.utils.LocalUserIdTracker
 import uk.gov.hmrc.thirdpartydeveloperfrontend.builder.{SampleApplication, SubscriptionsBuilder}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.ApiPlatformDeskproConnector
+import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApiPlatformDeskproConnector, ApmConnectorApplicationModule}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.apidefinitions.APISubscriptionStatus
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.connectors.CreateTicketRequest
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.subscriptions.ApiSubscriptionFields
@@ -70,13 +70,16 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     when(devInSession.email).thenReturn(email)
     when(devInSession.displayedName).thenReturn(name)
 
-    val mockApiPlatformDeskproConnector = mock[ApiPlatformDeskproConnector]
+    val mockApiPlatformDeskproConnector   = mock[ApiPlatformDeskproConnector]
+    val mockApmConnectorApplicationModule = mock[ApmConnectorApplicationModule]
 
-    val underTest = new RequestProductionCredentials(mockSubmissionsConnector, ApmConnectorCommandModuleMock.aMock, mockApiPlatformDeskproConnector, clock)
+    val underTest =
+      new RequestProductionCredentials(mockSubmissionsConnector, ApmConnectorCommandModuleMock.aMock, mockApmConnectorApplicationModule, mockApiPlatformDeskproConnector, clock)
 
-    val app           = standardApp.withCollaborators(email.asAdministratorCollaborator).withAccess(standardAccess.copy(sellResellOrDistribute = Some(resellNo)))
-    val applicationId = app.id
-    val clientId      = app.clientId
+    val app            = standardApp.withCollaborators(email.asAdministratorCollaborator).withAccess(standardAccess.copy(sellResellOrDistribute = Some(resellNo)))
+    val applicationId  = app.id
+    val clientId       = app.clientId
+    val subordinateApp = app.inSandbox().withId(ApplicationId.random)
 
     val apiIdentifier1: ApiIdentifier                                = ApiIdentifier(ApiContext("api-context-one"), ApiVersionNbr("1.0"))
     val apiIdentifier2: ApiIdentifier                                = ApiIdentifier(ApiContext("api-context-two"), ApiVersionNbr("1.0"))
@@ -110,6 +113,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       val appAfterCommand = app.withName(ApplicationName("New app name"))
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(appAfterCommand)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(submittedSubmission)))
+      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result          = await(underTest.requestProductionCredentials(app, userSession, true, false, subscriptions))
 
@@ -126,7 +130,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.message should include("Subscriptions:")
       ticketCapture.value.message should include("Api one 1.0 (Beta)")
       ticketCapture.value.message should include("Api two 1.0 (Stable)")
-      ticketCapture.value.applicationId shouldBe Some(app.id.toString())
+      ticketCapture.value.applicationId shouldBe Some(app.id.toString)
+      ticketCapture.value.sandboxApplicationId shouldBe Some(subordinateApp.id.toString)
       ticketCapture.value.supportReason shouldBe Some("Production Application Credential Request")
       ticketCapture.value.reasonKey shouldBe Some("prod-app-credentials")
     }
@@ -134,6 +139,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
+      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true, List.empty))
 
@@ -147,7 +153,8 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.email shouldBe email.text
       ticketCapture.value.message should include(app.name.toString)
       ticketCapture.value.message should include("for Terms of Use review")
-      ticketCapture.value.applicationId shouldBe Some(app.id.toString())
+      ticketCapture.value.applicationId shouldBe Some(app.id.toString)
+      ticketCapture.value.sandboxApplicationId shouldBe None
       ticketCapture.value.supportReason shouldBe Some("Terms of Use Uplift Request")
       ticketCapture.value.reasonKey shouldBe Some("terms-of-use-uplift")
     }
@@ -155,6 +162,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(grantedSubmission)))
+      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true, List.empty))
 
       result.isRight shouldBe true
@@ -166,6 +174,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "not create a ticket if requester is not responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
+      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       val result = await(underTest.requestProductionCredentials(app, userSession, false, false, List.empty))
 
       result.isRight shouldBe true
@@ -181,6 +190,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - App is not in TESTING state")
 
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
 
@@ -192,6 +202,21 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
 
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"No submission record found for ${applicationId}")
+
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
+      verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
+    }
+
+    "fails to create a ticket if the production application is not found" in new Setup {
+      val appAfterCommand = app.withName(ApplicationName("New app name"))
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(appAfterCommand)
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(submittedSubmission)))
+      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(None))
+
+      val result = await(underTest.requestProductionCredentials(app, userSession, true, false, List.empty))
+
+      result.isLeft shouldBe true
+      result.left.value shouldBe ErrorDetails("submitSubmission001", s"No subordinate application record found for production application: ${app.id}")
 
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
