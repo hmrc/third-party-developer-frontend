@@ -139,7 +139,6 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
     "successfully create a ticket if terms of use uplift and requester is responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
-      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true, List.empty))
 
@@ -157,29 +156,58 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       ticketCapture.value.sandboxApplicationId shouldBe None
       ticketCapture.value.supportReason shouldBe Some("Terms of Use Uplift Request")
       ticketCapture.value.reasonKey shouldBe Some("terms-of-use-uplift")
+
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
+    }
+
+    "successfully creates a ticket WITHOUT the sandboxId if the sandbox application is not found" in new Setup {
+      val appAfterCommand = app.withName(ApplicationName("New app name"))
+      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(appAfterCommand)
+      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(submittedSubmission)))
+      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(None))
+      when(mockApiPlatformDeskproConnector.createTicket(*, *)).thenReturn(successful(Some("ref")))
+      val result          = await(underTest.requestProductionCredentials(app, userSession, true, false, subscriptions))
+
+      result.isRight shouldBe true
+      result shouldBe Right(appAfterCommand)
+
+      val ticketCapture = ArgCaptor[CreateTicketRequest]
+      verify(mockApiPlatformDeskproConnector).createTicket(ticketCapture.capture, *)
+      ticketCapture.value.subject shouldBe "Production Application Credential Request"
+      ticketCapture.value.email shouldBe email.text
+      ticketCapture.value.message should include(s"$name has submitted their application ${appAfterCommand.name} for production use on the Developer Hub.")
+      ticketCapture.value.message should include("ToU - Submitted")
+      ticketCapture.value.message should include("In House developer")
+      ticketCapture.value.message should include("Subscriptions:")
+      ticketCapture.value.message should include("Api one 1.0 (Beta)")
+      ticketCapture.value.message should include("Api two 1.0 (Stable)")
+      ticketCapture.value.applicationId shouldBe Some(app.id.toString)
+      ticketCapture.value.sandboxApplicationId shouldBe None
+      ticketCapture.value.supportReason shouldBe Some("Production Application Credential Request")
+      ticketCapture.value.reasonKey shouldBe Some("prod-app-credentials")
     }
 
     "not create a ticket if terms of use uplift and requester is responsible individual but submission is passed" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(grantedSubmission)))
-      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       val result = await(underTest.requestProductionCredentials(app, userSession, true, true, List.empty))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
 
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
 
     "not create a ticket if requester is not responsible individual" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(app)
       when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(aSubmission)))
-      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(Some(subordinateApp)))
       val result = await(underTest.requestProductionCredentials(app, userSession, false, false, List.empty))
 
       result.isRight shouldBe true
       result shouldBe Right(app)
 
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
 
@@ -207,20 +235,6 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
 
-    "fails to create a ticket if the sandbox application is not found" in new Setup {
-      val appAfterCommand = app.withName(ApplicationName("New app name"))
-      ApmConnectorCommandModuleMock.Dispatch.thenReturnsSuccess(appAfterCommand)
-      when(mockSubmissionsConnector.fetchLatestSubmission(eqTo(applicationId))(using *)).thenReturn(successful(Some(submittedSubmission)))
-      when(mockApmConnectorApplicationModule.fetchLinkedSubordinateApplication(applicationId)).thenReturn(successful(None))
-
-      val result = await(underTest.requestProductionCredentials(app, userSession, true, false, List.empty))
-
-      result.isLeft shouldBe true
-      result.left.value shouldBe ErrorDetails("submitSubmission001", s"No subordinate application record found for production application: ${app.id}")
-
-      verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
-    }
-
     "fails to create a ticket if application already exists" in new Setup {
       ApmConnectorCommandModuleMock.Dispatch.thenFailsWith(CommandFailures.DuplicateApplicationName("New app name"))
 
@@ -228,6 +242,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - An application already exists for the name 'New app name' ")
 
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
 
@@ -238,6 +253,7 @@ class RequestProductionCredentialsSpec extends AsyncHmrcSpec
       result.isLeft shouldBe true
       result.left.value shouldBe ErrorDetails("submitSubmission001", s"Submission failed - The application name 'Rude word name' contains words that are prohibited")
 
+      verify(mockApmConnectorApplicationModule, never).fetchLinkedSubordinateApplication(*[ApplicationId])(using *)
       verify(mockApiPlatformDeskproConnector, never).createTicket(*, *)
     }
   }

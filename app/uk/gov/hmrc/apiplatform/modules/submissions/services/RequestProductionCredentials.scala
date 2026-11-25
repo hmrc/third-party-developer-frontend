@@ -77,21 +77,16 @@ class RequestProductionCredentials @Inject() (
     def handleCmdSuccess(app: ApplicationWithCollaborators) = {
       val ET = EitherTHelper.make[ErrorDetails]
       (for {
-        submission: Submission                       <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
-        subordinateApp: ApplicationWithCollaborators <- ET.fromOptionF(
-                                                          apmConnectorApplicationModule.fetchLinkedSubordinateApplication(app.id),
-                                                          ErrorDetails("submitSubmission001", s"No subordinate application record found for production application: ${app.id}")
-                                                        )
-        _                                            <- ET.liftF(createDeskproTicketIfNeeded(
-                                                          app,
-                                                          requestedBy,
-                                                          requesterIsResponsibleIndividual,
-                                                          isNewTouUplift,
-                                                          submission.status.isGranted,
-                                                          submission,
-                                                          subscriptions,
-                                                          subordinateApp
-                                                        ))
+        submission: Submission <- ET.fromOptionF(tpaConnector.fetchLatestSubmission(app.id), ErrorDetails("submitSubmission001", s"No submission record found for ${app.id}"))
+        _                      <- ET.liftF(createDeskproTicketIfNeeded(
+                                    app,
+                                    requestedBy,
+                                    requesterIsResponsibleIndividual,
+                                    isNewTouUplift,
+                                    submission.status.isGranted,
+                                    submission,
+                                    subscriptions
+                                  ))
       } yield app).value
 
     }
@@ -121,8 +116,7 @@ class RequestProductionCredentials @Inject() (
       isNewTouUplift: Boolean,
       isSubmissionPassed: Boolean,
       submission: Submission,
-      subscriptions: List[APISubscriptionStatus],
-      subordinateApp: ApplicationWithCollaborators
+      subscriptions: List[APISubscriptionStatus]
     )(using hc: HeaderCarrier
     ): Future[Option[String]] = {
     if (requesterIsResponsibleIndividual) {
@@ -136,15 +130,18 @@ class RequestProductionCredentials @Inject() (
         }
       } else {
         val extraInfo = formatExtraInfo(app, submission, subscriptions)
-        val ticket    = CreateTicketRequest.createForRequestProductionCredentials(
-          requestedBy.developer.displayedName,
-          requestedBy.developer.email,
-          app.name,
-          app.id,
-          Some(extraInfo),
-          Some(subordinateApp.id.toString)
-        )
-        apiPlatformDeskproConnector.createTicket(ticket, hc)
+        for {
+          subordinateApp: Option[ApplicationWithCollaborators] <- apmConnectorApplicationModule.fetchLinkedSubordinateApplication(app.id)
+          ticket                                                = CreateTicketRequest.createForRequestProductionCredentials(
+                                                                    requestedBy.developer.displayedName,
+                                                                    requestedBy.developer.email,
+                                                                    app.name,
+                                                                    app.id,
+                                                                    Some(extraInfo),
+                                                                    subordinateApp.map(_.id.toString)
+                                                                  )
+          ticketRef                                            <- apiPlatformDeskproConnector.createTicket(ticket, hc)
+        } yield ticketRef
       }
     } else {
       // Don't create a Deskpro ticket if the requester is not the responsible individual
@@ -157,7 +154,7 @@ class RequestProductionCredentials @Inject() (
     val inHouseOrCommercial              = app.access match {
       case Access.Standard(_, _, _, _, _, Some(sellResellOrDistribute), _) =>
         if (sellResellOrDistribute.value == "Yes") "Commercial developer" else "In House developer"
-      case Access.Standard(_, _, _, _, _, sellResellOrDistribute, _)       => ""
+      case _                                                               => ""
     }
     val subs: Seq[APISubscriptionStatus] = subscriptions.filter(_.subscribed)
     val subsList                         = subs
