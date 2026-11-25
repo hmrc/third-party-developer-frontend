@@ -80,7 +80,7 @@ export DESKPRO_KEY=testkey
 
 * Navigate to http://localhost:9685/developer/login
 * Click Register for an account
-* Setup a test account for your local MondoDB instance
+* Setup a test account for your local MongoDB instance
 * Navigate to http://localhost:8185/viewMessages
 * Once the event comes through click view source to find the verification link
 ```
