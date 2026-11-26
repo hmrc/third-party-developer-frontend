@@ -41,8 +41,8 @@ class DashboardService @Inject() (
 
     def createDashboardAppList(prodAppList: Seq[ApplicationWithSubscriptions], sandboxAppList: Seq[ApplicationWithSubscriptions]): Seq[ApplicationSummary] = {
       val combinedApps = prodAppList ++ sandboxAppList;
-      // Filter out any apps that don't have a state of production, sort by created date (descending) and take the first 5
-      combinedApps.filter(app => app.details.isInProduction).map(app => ApplicationSummary.from(app, userId)).sorted.take(5)
+      // Filter out any apps that don't have a state of production or pre-production, sort by created date (descending) and take the first 5
+      combinedApps.filter(app => app.details.isInPreProductionOrProduction).map(app => ApplicationSummary.from(app, userId)).sorted.take(5)
     }
 
     for {
