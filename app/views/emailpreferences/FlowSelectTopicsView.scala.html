@@ -21,8 +21,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedTopicsEmailPreferencesForm
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[SelectedTopicsEmailPreferencesForm], selectedTopics: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -93,7 +94,12 @@
 
           <br />
         </div>
-        <button id="selectTopics" class="govuk-button" type="submit">Continue</button>
+        @govukButton(Button(
+          id = Some("selectTopics"),
+          content = Text("Continue"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
       }
     </fieldset>
 }

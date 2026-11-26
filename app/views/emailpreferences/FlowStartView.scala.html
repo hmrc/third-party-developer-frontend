@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @()(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -43,6 +44,11 @@
   @EmailPrefsBulletInfoView()
 
   <form id="emailPreferencesStartForm" method="GET" action="@routes.EmailPreferencesController.flowSelectCategoriesPage()">
-    <button id="submit" class="govuk-button" type="submit">Continue</button>
+    @govukButton(Button(
+      id = Some("submit"),
+      content = Text("Continue"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
   </form>
 }

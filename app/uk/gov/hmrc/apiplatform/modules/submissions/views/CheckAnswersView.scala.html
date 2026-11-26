@@ -20,8 +20,9 @@
 @import include.*
 @import includes.*
 
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(model: ViewModel, wasDeclined: Boolean, isNewTermsOfUseUplift: Boolean, error: Option[String])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -67,9 +68,11 @@
     @answersFragment(model, canChange = true)
 
     <div class="govuk-button-group">
-        <a href="@uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersAction(model.appId)" class="govuk-button" data-module="govuk-button">
-            Confirm and send
-        </a>
+        @govukButton(Button(
+            href = Some(uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.CheckAnswersController.checkAnswersAction(model.appId).url),
+            content = Text("Confirm and send"),
+            attributes = Map("data-prevent-double-click" -> "true")
+        ))
 
         <a href="@controllers.routes.ManageApplications.manageApps()" class="govuk-button govuk-button--secondary">
             Save and come back later

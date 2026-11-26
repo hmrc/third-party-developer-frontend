@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.HasVerifiedForm
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.VerifyResponsibleIndividualController.ViewModel
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(model: ViewModel, form: Form[HasVerifiedForm])(
   implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
@@ -66,6 +67,13 @@
       </div>
     </div>
     
-    <button id="submit-ok" class="govuk-button" type="submit" name="submit-action" value="save-and-continue">Save and continue</button>
+    @govukButton(Button(
+      id = Some("submit-ok"),
+      name = Some("submit-action"),
+      value = Some("save-and-continue"),
+      content = Text("Save and continue"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
   }
 }

@@ -20,8 +20,9 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonToUrl
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ResponsibleIndividualChangeToOtherForm
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, form: Form[ResponsibleIndividualChangeToOtherForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -70,7 +71,12 @@
         </p>
 
         <div class="govuk-button-group">
-            <button id="continue" class="govuk-button" data-module="govuk-button">Save and continue</button>
+            @govukButton(Button(
+              id = Some("continue"),
+              content = Text("Save and continue"),
+              inputType = Some("submit"),
+              preventDoubleClick = Some(true)
+            ))
 
             <a id="cancel" class="govuk-link govuk-link--no-visited-state" href="@routes.ManageResponsibleIndividualController.showResponsibleIndividualDetails(app.id)">Cancel</a>
         </div>

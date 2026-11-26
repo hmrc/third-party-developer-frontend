@@ -22,8 +22,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.APISubscriptions
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 @import uk.gov.hmrc.apiplatform.modules.apis.domain.models.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 @(
     applicationId: ApplicationId,
     role: Collaborator.Role,
@@ -129,7 +130,12 @@
         </div>
 
         <div class="govuk-button-group">
-          <button id="submit" class="govuk-button" data-module="govuk-button" type="submit">Save and continue</button>
+          @govukButton(Button(
+            id = Some("submit"),
+            content = Text("Save and continue"),
+            inputType = Some("submit"),
+            preventDoubleClick = Some(true)
+          ))
           <a href="@uk.gov.hmrc.apiplatform.modules.uplift.controllers.routes.UpliftJourneyController.confirmApiSubscriptionsPage(applicationId)" class="govuk-link">
             Cancel
           </a>

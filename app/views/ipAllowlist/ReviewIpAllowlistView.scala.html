@@ -21,8 +21,9 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, ipAllowlistFlow: IpAllowlistFlow)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
@@ -121,13 +122,12 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
     @helper.form(action = routes.IpAllowListController.activateIpAllowlist(app.id)) {
       @helper.CSRF.formField
       <div class="govuk-button-group">
-        <button id="submit" class="govuk-button" type="submit">
-          @if(app.details.ipAllowlist.allowlist.isEmpty) {
-            Make IP allow list active
-          } else {
-            Make changes active
-          }
-        </button>
+        @govukButton(Button(
+          id = Some("submit"),
+          content = Text(if(app.details.ipAllowlist.allowlist.isEmpty) "Make IP allow list active" else "Make changes active"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
         @if(app.details.ipAllowlist.allowlist.isEmpty) {
           <a class="govuk-button govuk-button--secondary" href="@controllers.manageapplication.routes.MainApplicationDetailsController.applicationDetails(app.id)">Cancel</a>
         } else {

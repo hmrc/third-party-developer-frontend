@@ -21,8 +21,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectApisFromSubscriptionsForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[SelectApisFromSubscriptionsForm], apis: List[CombinedApi], applicationId: ApplicationId, selectedApis: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], applicationConfig: ApplicationConfig)
 
@@ -61,13 +62,24 @@
         </div>
         <br />
         <br />
-        <button id="submit" class="govuk-button" type="submit">Continue</button>
+        @govukButton(Button(
+          id = Some("submit"),
+          content = Text("Continue"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
       }
     </fieldset>
   </div>
 
   @helper.form(action = routes.EmailPreferencesController.selectNoApisFromSubscriptionsAction(applicationId), Symbol("class") -> "form", Symbol("id") -> "selectNoApisFromSubscriptionsForm") {
     @helper.CSRF.formField
-    <button id="noSelectAPIs" class="govuk-button govuk-button--secondary" type="submit">I don't want emails about these APIs</button>
+    @govukButton(Button(
+      id = Some("noSelectAPIs"),
+      classes = "govuk-button--secondary",
+      content = Text("I don't want emails about these APIs"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
   }
 }
