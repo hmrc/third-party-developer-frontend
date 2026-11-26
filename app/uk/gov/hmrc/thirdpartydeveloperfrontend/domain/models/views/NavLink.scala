@@ -33,6 +33,7 @@ case object StaticNavItems {
     Seq(
       ServiceNavigationItem(Text("Getting started"), s"$apiDocumentationFrontendUrl/api-documentation/docs/using-the-hub"),
       ServiceNavigationItem(Text("API documentation"), s"$apiDocumentationFrontendUrl/api-documentation/docs/api"),
+      ServiceNavigationItem(Text("Guides and tutorials"), s"$apiDocumentationFrontendUrl/api-documentation/docs/guides-and-tutorials"),
       ServiceNavigationItem(Text("Applications"), s"$thirdPartyDeveloperFrontendUrl/developer/applications", active = true),
       ServiceNavigationItem(Text("Support"), s"$devhubSupportFrontendUrl/devhub-support/")
     )

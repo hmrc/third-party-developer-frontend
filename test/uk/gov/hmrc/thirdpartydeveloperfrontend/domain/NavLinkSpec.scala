@@ -40,6 +40,7 @@ class NavLinkSpec extends AsyncHmrcSpec {
         Seq(
           ServiceNavigationItem(Text("Getting started"), "http://localhost:9680/api-documentation/docs/using-the-hub"),
           ServiceNavigationItem(Text("API documentation"), "http://localhost:9680/api-documentation/docs/api"),
+          ServiceNavigationItem(Text("Guides and tutorials"), "http://localhost:9680/api-documentation/docs/guides-and-tutorials"),
           ServiceNavigationItem(Text("Applications"), "http://localhost:9685/developer/applications", active = true),
           ServiceNavigationItem(Text("Support"), "http://localhost:9695/devhub-support/")
         )
