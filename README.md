@@ -62,3 +62,28 @@ Various security tests can be run within ZAP and the different types of attacks 
 
 * Unit tests should make up the majority of tests so that test coverage should drop marginally when run against only unit tests.
 * Component tests should be a thin layer of coverage on happy paths only to ensure that journeys hang together.
+
+## Running locally
+
+* Setup a dummy DESKPRO key as an environment variable
+```
+export DESKPRO_KEY=testkey
+```
+* Ensure Docker and MongoDB are running as background processes
+* Run the start up script
+```
+./run_local_with_dependencies.sh
+```
+  * Note: Ignore the error about MondoDB failing to start since it is already running in the background
+
+## Setup test user
+
+* Navigate to http://localhost:9685/developer/login
+* Click Register for an account
+* Setup a test account for your local MongoDB instance
+* Navigate to http://localhost:8185/viewMessages
+* Once the event comes through click view source to find the verification link
+```
+http://localhost:9685/developer/verification?code=<UUID>
+```
+* Navigate to that address to verify the email
