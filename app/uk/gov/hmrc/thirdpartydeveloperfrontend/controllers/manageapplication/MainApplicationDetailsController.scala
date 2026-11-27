@@ -192,10 +192,10 @@ class MainApplicationDetailsController @Inject() (
       case (maybeInv, Some(submission)) if submission.status.isCreated || submission.status.isAnswering =>
         buildStartedState(submission, maybeInv.map(_.dueBy).getOrElse(instant))
 
-      case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings || submission.status.isGrantedWithWarnings =>
+      case (_, Some(submission)) if submission.status.isSubmitted || submission.status.isFailed || submission.status.isWarnings =>
         buildSubmittedState(submission)
 
-      case (_, Some(submission)) if submission.status.isGranted =>
+      case (_, Some(submission)) if submission.status.isGrantedWithOrWithoutWarnings =>
         buildApprovedState(submission)
 
       case (_, Some(_)) =>

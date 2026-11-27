@@ -593,7 +593,7 @@ class MainApplicationDetailsControllerSpec
 
           viewModel.required shouldBe true
           viewModel.agreement shouldBe None
-          viewModel.termsOfUseV2State should contain(Submitted("bob@example.com", submission.status.timestamp))
+          viewModel.termsOfUseV2State should contain(Approved("bob@example.com", submission.status.timestamp))
 
           verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
@@ -620,7 +620,7 @@ class MainApplicationDetailsControllerSpec
           viewModel.required shouldBe true
           viewModel.appUsesOldVersion shouldBe true
           viewModel.agreement shouldBe Some(Agreement(v1Agreement.emailAddress.text, v1Agreement.date))
-          viewModel.termsOfUseV2State.get shouldBe Submitted("bob@example.com", submission.status.timestamp)
+          viewModel.termsOfUseV2State.get shouldBe Approved("bob@example.com", submission.status.timestamp)
 
           verify(TermsOfUseInvitationServiceMock.aMock).fetchTermsOfUseInvitation(eqTo(approvedApplication.id))(using *)
           verify(SubmissionServiceMock.aMock).fetchLatestSubmission(eqTo(approvedApplication.id))(using *)
