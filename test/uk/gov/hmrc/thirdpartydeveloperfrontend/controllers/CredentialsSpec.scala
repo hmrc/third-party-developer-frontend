@@ -22,7 +22,7 @@ import scala.concurrent.Future
 
 import org.apache.pekko.util.ByteString
 import views.html.editapplication.DeleteClientSecretView
-import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView}
 
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{AnyContentAsEmpty, Result}
@@ -90,7 +90,6 @@ class CredentialsSpec
     val credentialsView: CredentialsView                       = app.injector.instanceOf[CredentialsView]
     val clientIdView: ClientIdView                             = app.injector.instanceOf[ClientIdView]
     val clientSecretsView: ClientSecretsView                   = app.injector.instanceOf[ClientSecretsView]
-    val serverTokenView: ServerTokenView                       = app.injector.instanceOf[ServerTokenView]
     val deleteClientSecretView: DeleteClientSecretView         = app.injector.instanceOf[DeleteClientSecretView]
     val clientSecretsGeneratedView: ClientSecretsGeneratedView = app.injector.instanceOf[ClientSecretsGeneratedView]
     val clientSecretHashingService: ClientSecretHashingService = app.injector.instanceOf[ClientSecretHashingService]
@@ -109,7 +108,6 @@ class CredentialsSpec
       credentialsView,
       clientIdView,
       clientSecretsView,
-      serverTokenView,
       deleteClientSecretView,
       clientSecretsGeneratedView,
       FixedClock.clock
@@ -189,44 +187,6 @@ class CredentialsSpec
       override def modifiers = (app) => app.withState(pendingGatekeeperApproval)
 
       val result: Accumulator[ByteString, Result] = underTest.clientSecrets(applicationId)(loggedInRequest.withCSRFToken)
-
-      status(result) shouldBe BAD_REQUEST
-    }
-  }
-
-  "The server token page" should {
-    val dateBeforeCutoff = Credentials.serverTokenCutoffDate.minus(1, DAYS)
-    val dateAfterCutoff  = Credentials.serverTokenCutoffDate.plus(1, DAYS)
-
-    "be displayed for an app" in new Setup with ApplicationProviderWithAdmin {
-      override def modifiers = _.modify(_.copy(createdOn = dateBeforeCutoff))
-
-      val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
-
-      status(result) shouldBe OK
-      contentAsString(result) should include("Server token")
-    }
-
-    "return 404 for new apps" in new Setup with ApplicationProviderWithAdmin {
-      override def modifiers = _.modify(_.copy(createdOn = dateAfterCutoff))
-
-      val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
-
-      status(result) shouldBe NOT_FOUND
-    }
-
-    "return 403 when the user has the developer role and the app is in PROD" in new Setup with ApplicationProviderWithDev {
-      override def modifiers = _.modify(_.copy(createdOn = dateBeforeCutoff))
-
-      val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
-
-      status(result) shouldBe FORBIDDEN
-    }
-
-    "return 400 when the application has not reached production state" in new Setup with ApplicationProviderWithAdmin {
-      override def modifiers = _.modify(_.copy(createdOn = dateBeforeCutoff)).withState(pendingGatekeeperApproval)
-
-      val result: Future[Result] = underTest.serverToken(applicationId)(loggedInRequest)
 
       status(result) shouldBe BAD_REQUEST
     }

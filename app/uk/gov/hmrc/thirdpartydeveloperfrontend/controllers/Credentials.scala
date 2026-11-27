@@ -23,7 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.NonEmptyList
 import views.html.editapplication.DeleteClientSecretView
-import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView}
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
@@ -36,7 +36,6 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, ThirdPartyDeveloperConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
@@ -56,7 +55,6 @@ class Credentials @Inject() (
     credentialsView: CredentialsView,
     clientIdView: ClientIdView,
     clientSecretsView: ClientSecretsView,
-    serverTokenView: ServerTokenView,
     deleteClientSecretView: DeleteClientSecretView,
     clientSecretsGeneratedView: ClientSecretsGeneratedView,
     val clock: Clock
@@ -84,18 +82,6 @@ class Credentials @Inject() (
       val secrets = app.details.token.clientSecrets
 
       successful(Ok(clientSecretsView(app, secrets)))
-    }
-
-  def serverToken(applicationId: ApplicationId): Action[AnyContent] =
-    canChangeClientSecrets(applicationId) { implicit request =>
-      if (request.application.details.createdOn.isBefore(serverTokenCutoffDate)) {
-        val app         = request.application
-        val accessToken = app.details.token.accessToken
-
-        successful(Ok(serverTokenView(app, accessToken)))
-      } else {
-        errorHandler.notFoundTemplate.map(NotFound(_))
-      }
     }
 
   private def fails(applicationId: ApplicationId)(e: Failures): PlayResult = {
