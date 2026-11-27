@@ -18,8 +18,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteProfileForm
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav, govukButton: GovukButton)
 
 @(form: Form[DeleteProfileForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messagesProvider: MessagesProvider, navSection: String = "manage-profile")
 
@@ -60,7 +63,11 @@
     </div>
 
     <div class="govuk-button-group">
-      <button id="submit" class="govuk-button" type="submit">Continue</button>
+      @govukButton(Button(
+        id = Some("submit"),
+        content = Text("Continue"),
+        preventDoubleClick = Some(true)
+      ))
       <a id="cancel" href="@controllers.profile.routes.ManageProfileController.profileDetails()" class="govuk-link govuk-link--no-visited-state">Cancel</a>
     </div>
   }

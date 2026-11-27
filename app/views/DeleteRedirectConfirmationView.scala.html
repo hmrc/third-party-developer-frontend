@@ -20,8 +20,11 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteRedirectConfirmationForm
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[DeleteRedirectConfirmationForm], redirectUri: String)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -71,7 +74,11 @@
       </fieldset>
     </div>
     <div class="govuk-button-group">
-      <button id="submit" class="govuk-button" type="submit">Submit</button>
+      @govukButton(Button(
+        id = Some("submit"),
+        content = Text("Submit"),
+        preventDoubleClick = Some(true)
+      ))
       <a id="cancel" href="@controllers.routes.Redirects.loginRedirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }

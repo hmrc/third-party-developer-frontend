@@ -19,8 +19,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChangeRedirectForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(applicationViewModel: ApplicationViewModel, form: Form[ChangeRedirectForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
 
@@ -59,8 +62,11 @@
       </label>
       <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@form.data.get("originalRedirectUri")">
     </div>
-
-    <button id="add" class="govuk-button" type="submit">Continue</button>
+    @govukButton(Button(
+      id = Some("add"),
+      content = Text("Continue"),
+      preventDoubleClick = Some(true)
+    ))
     <a href="@controllers.routes.Redirects.loginRedirects(application.id)" class="govuk-button govuk-button--secondary">Cancel</a>
   }
 }

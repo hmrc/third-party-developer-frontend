@@ -20,8 +20,11 @@
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.DeleteApplicationForm
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, form: Form[DeleteApplicationForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
@@ -65,7 +68,11 @@
       </fieldset>
     </div>
     <div class="govuk-button-group">
-      <button id="submit" class="govuk-button" type="submit">Submit request</button>
+      @govukButton(Button(
+        id = Some("submit"),
+        content = Text("Submit request"),
+        preventDoubleClick = Some(true)
+      ))
       <a id="cancel" href="@routes.DeleteApplication.deleteApplication(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }
