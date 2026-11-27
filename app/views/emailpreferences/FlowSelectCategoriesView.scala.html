@@ -20,8 +20,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.TaxRegimeEmailPreferencesForm
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[TaxRegimeEmailPreferencesForm], categories: List[APICategoryDisplayDetails], selectedCategories: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -64,11 +65,16 @@
     </div>
 
     <br />
-    <button id="selectCategories" class="govuk-button" type="submit">Continue</button>
+    @govukButton(Button(
+      id = Some("selectCategories"),
+      content = Text("Continue"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
   }
 
   @helper.form(action = routes.EmailPreferencesController.flowSelectNoCategoriesAction(), Symbol("class") -> "form", Symbol("id") -> "emailPreferencesNoCategoriesForm") {
     @helper.CSRF.formField
-    <button id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
+    <button data-module="govuk-button" data-prevent-double-click="true" id="noSelectCategories" class="govuk-link govuk-link--no-visited-state link-button govuk-!-font-size-19" type="submit" style="padding-left: 0">I'm not interested in any of these categories</button>
   }
 }

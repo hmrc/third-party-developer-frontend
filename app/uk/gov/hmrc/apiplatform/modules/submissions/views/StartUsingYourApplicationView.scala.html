@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
 @import include.*
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.StartUsingYourApplicationController.ViewModel
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(model: ViewModel)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -64,7 +65,13 @@
         @helper.form(action = uk.gov.hmrc.apiplatform.modules.submissions.controllers.routes.StartUsingYourApplicationController.startUsingYourApplicationAction(model.appId), Symbol("class") -> "form") {
             @helper.CSRF.formField
             <div class="govuk-button-group">
-                <button id="submit-ok" class="govuk-button govuk-!-margin-top-3 govuk-!-margin-bottom-7" data-module="govuk-button" type="submit">I have finished</button>
+                @govukButton(Button(
+                  id = Some("submit-ok"),
+                  classes = "govuk-!-margin-top-3 govuk-!-margin-bottom-7",
+                  content = Text("I have finished"),
+                  inputType = Some("submit"),
+                  preventDoubleClick = Some(true)
+                ))
                 <a class="govuk-button govuk-button--secondary" href="@uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes.ManageApplications.manageApps().url" role="button" draggable="false"  data-module="govuk-button">I will do this later</a>
             </div>
         }

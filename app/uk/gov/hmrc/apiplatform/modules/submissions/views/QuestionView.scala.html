@@ -21,8 +21,9 @@
 @import play.api.mvc.Call
 @import play.api.mvc.Request
 @import uk.gov.hmrc.apiplatform.modules.submissions.controllers.QuestionsController.ViewErrorInfo
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)(implicit applicationConfig: ApplicationConfig)
+@this(devMain: DevMain, govukButton: GovukButton)(implicit applicationConfig: ApplicationConfig)
 
 @(question: Question, applicationId: ApplicationId, submitAction: Call, currentAnswers: Option[ActualAnswer], errorInfo: Option[ViewErrorInfo])(implicit request: Request[Any], messages: Messages, loggedIn: UserSession)
 
@@ -113,17 +114,38 @@
 }
 
 @renderButtonOrButtons(absenceText: Option[String]) = {
-  @{
-    val html = absenceText match {
-      case Some(text) =>
+  @absenceText match {
+    case Some(text) => {
       <div class="govuk-button-group">
-        <button id="submit-save" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
-        <button id="submit-noanswer" class="govuk-button govuk-button--secondary" type="submit" name="submit-action" value="no-answer">{text}</button>
+        @govukButton(Button(
+          id = Some("submit-save"),
+          name = Some("submit-action"),
+          value = Some("save"),
+          content = Text("Save and continue"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
+        @govukButton(Button(
+          id = Some("submit-noanswer"),
+          name = Some("submit-action"),
+          value = Some("no-answer"),
+          classes = "govuk-button--secondary",
+          content = Text(text),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
       </div>
-      case None =>
-        <button id="submit" class="govuk-button" type="submit" name="submit-action" value="save">Save and continue</button>
     }
-    html
+    case None => {
+      @govukButton(Button(
+        id = Some("submit"),
+        name = Some("submit-action"),
+        value = Some("save"),
+        content = Text("Save and continue"),
+        inputType = Some("submit"),
+        preventDoubleClick = Some(true)
+      ))
+    }
   }
 }
 
@@ -221,7 +243,14 @@
 }
 
 @renderAcknowledgementOnly() = {
-    <button id="submit" class="govuk-button" type="submit" name="submit-action" value="acknowledgement">Continue</button>
+    @govukButton(Button(
+      id = Some("submit"),
+      name = Some("submit-action"),
+      value = Some("acknowledgement"),
+      content = Text("Continue"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
 }
 
 @renderQuestionType(question: Question) = @{

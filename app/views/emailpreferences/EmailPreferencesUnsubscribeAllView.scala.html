@@ -18,7 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import views.html.include.DevMain
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
-@this(devMain: DevMain)
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
+
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @()(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
 
@@ -42,7 +44,12 @@
   @helper.form(action = routes.EmailPreferencesController.unsubscribeAllAction(), Symbol("class") -> "form", Symbol("id") -> "unsubscribeForm") {
     @helper.CSRF.formField
     <div class="govuk-button-group">
-      <button id="submit" class="govuk-button" type="submit">Unsubscribe</button>
+      @govukButton(Button(
+        id = Some("submit"),
+        content = Text("Unsubscribe"),
+        inputType = Some("submit"),
+        preventDoubleClick = Some(true)
+      ))
       <a id="cancelLink" href="@routes.EmailPreferencesController.emailPreferencesSummaryPage()" class="govuk-link govuk-link--no-visited-state">Cancel</a>
     </div>
   }

@@ -20,8 +20,9 @@
 @import views.html.include.DevMain
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(
   app: ApplicationWithCollaborators,
@@ -82,7 +83,12 @@
     </div>
 
     <div class="govuk-button-group">
-      <button id="submit" class="govuk-button" type="submit">Save and continue</button>
+      @govukButton(Button(
+        id = Some("submit"),
+        content = Text("Save and continue"),
+        inputType = Some("submit"),
+        preventDoubleClick = Some(true)
+      ))
       <a href="@{routes.ManageSubscriptions.listApiSubscriptions(app.id)}" class="govuk-button govuk-button--secondary">Cancel</a>
     </div>
   }

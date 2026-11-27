@@ -18,8 +18,11 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationSummary
 @import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.views.BackButtonWithJavaScript
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.ChooseApplicationToUpliftForm], upliftableApps: Seq[ApplicationSummary], showFluff: Boolean)(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -81,8 +84,11 @@
       @if(showFluff == true) {
         @invalidAppsSignpost
       }
-
-      <button id="submit" class="govuk-button" type="submit">Continue</button>
+      @govukButton(Button(
+        id = Some("submit"),
+        content = Text("Continue"),
+        preventDoubleClick = Some(true)
+      ))
     }
   } else {
     <h1 class="govuk-heading-l">You are requesting production credentials for</h1>

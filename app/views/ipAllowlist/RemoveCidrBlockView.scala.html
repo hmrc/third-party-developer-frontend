@@ -20,8 +20,9 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, cidrBlock: String)(
 implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig)
@@ -68,7 +69,13 @@ implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Me
     @helper.form(action = routes.IpAllowListController.removeCidrBlockAction(app.id, cidrBlock)) {
       @helper.CSRF.formField
       <div class="govuk-button-group">
-        <button id="submit" class="govuk-button govuk-button--warning" type="submit">Remove IP address</button>
+        @govukButton(Button(
+          id = Some("submit"),
+          classes = "govuk-button--warning",
+          content = Text("Remove IP address"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
         <a class="govuk-button govuk-button--secondary" href="@routes.IpAllowListController.editIpAllowlist(app.id)">Cancel</a>
       </div>
     }

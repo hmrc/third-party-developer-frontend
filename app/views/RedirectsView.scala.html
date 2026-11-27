@@ -23,8 +23,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.LoginRedirectUri
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.ApplicationSyntaxes.*
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(applicationViewModel: ApplicationViewModel, loginRedirectUris: List[LoginRedirectUri], fraudPreventionNavLinkViewModel: Option[FraudPreventionNavLinkViewModel])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig)
 
@@ -89,7 +90,14 @@
                     <input id="originalRedirectUri" name="originalRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
                     <label class="govuk-visually-hidden" for="newRedirectUri">New Redirect Uri</label>
                     <input id="newRedirectUri" name="newRedirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                    <button id="@uri change" class="govuk-button govuk-!-margin-0" type="submit" value="Change">Change</button>
+                    @govukButton(Button(
+                      id = Some(s"${uri} change"),
+                      value = Some("Change"),
+                      classes = "govuk-!-margin-0",
+                      content = Text("Change"),
+                      inputType = Some("submit"),
+                      preventDoubleClick = Some(true)
+                    ))
                   }
                 </div>
                 <div>
@@ -97,7 +105,14 @@
                     @helper.CSRF.formField
                     <label class="govuk-visually-hidden" for="redirectUri">Redirect Uri</label>
                     <input id="redirectUri" name="redirectUri" class="govuk-input" hidden aria-hidden="true" type="text" value="@uri">
-                    <button id="@uri delete" class="govuk-button govuk-button--secondary govuk-!-margin-0" type="submit" value="Delete">Delete</button>
+                    @govukButton(Button(
+                      id = Some(s"${uri} delete"),
+                      value = Some("Delete"),
+                      classes = "govuk-button--secondary govuk-!-margin-0",
+                      content = Text("Delete"),
+                      inputType = Some("submit"),
+                      preventDoubleClick = Some(true)
+                    ))
                   }
                 </div>
               }

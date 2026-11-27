@@ -23,8 +23,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.profile.routes
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.SelectedApisEmailPreferencesForm
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.FormKeys
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 
 @(form: Form[SelectedApisEmailPreferencesForm], currentCategory: APICategoryDisplayDetails, apis: List[CombinedApi], selectedApis: Set[String])(implicit messages: Messages, loggedIn: UserSession, request: play.api.mvc.Request[Any], appConfig: ApplicationConfig)
@@ -94,6 +95,11 @@
     <br/>
 
     <input class="govuk-visually-hidden" id="current-category" type="hidden" name="currentCategory" value="@currentCategory.category" />
-    <button id="submit" class="govuk-button" type="submit">Continue</button>
+    @govukButton(Button(
+      id = Some("submit"),
+      content = Text("Continue"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
   }
 }

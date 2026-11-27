@@ -19,8 +19,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.ApplicationViewModel
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(applicationView: ApplicationViewModel, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RemoveTeamMemberConfirmationForm], emailAsString: String = "")(
         implicit request: play.api.mvc.Request[Any], messages: Messages, applicationConfig: ApplicationConfig, loggedIn: UserSession)
@@ -71,7 +72,12 @@
       <br>
     </div>
 
-    <button id="submit" class="govuk-button" type="submit">Submit</button>
+    @govukButton(Button(
+      id = Some("submit"),
+      content = Text("Submit"),
+      inputType = Some("submit"),
+      preventDoubleClick = Some(true)
+    ))
     <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>
   }
 }

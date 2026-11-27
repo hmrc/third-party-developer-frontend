@@ -82,7 +82,7 @@
   </div>
 
   <div class="govuk-button-group">
-    <button id="submit" class="govuk-button" type="submit">Add team member</button>
+    <button data-module="govuk-button" data-prevent-double-click="true" id="submit" class="govuk-button" type="submit">Add team member</button>
 
     @if(showCancel) {
       <a href="@routes.ManageTeam.manageTeam(app.id, None)" class="govuk-button govuk-button--secondary">Cancel</a>

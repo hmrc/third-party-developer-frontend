@@ -16,8 +16,11 @@
 
 @import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.PasswordResetForm])(implicit request: play.api.mvc.Request[Any],
   messages: Messages, applicationConfig: ApplicationConfig)
@@ -33,7 +36,10 @@
     @helper.CSRF.formField
 
     @passwords("Enter new password", "Confirm new password", form)
-
-    <button id="submit" class="govuk-button" type="submit">Save password</button>
+    @govukButton(Button(
+      id = Some("submit"),
+      content = Text("Save password"),
+      preventDoubleClick = Some(true)
+    ))
   }
 }

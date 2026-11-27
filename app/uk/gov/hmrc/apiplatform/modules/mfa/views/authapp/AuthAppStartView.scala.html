@@ -18,8 +18,9 @@
 @import views.html.include.DevMain
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.apiplatform.modules.mfa.controllers.profile.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @()(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, appConfig: ApplicationConfig, messages: Messages)
 
@@ -38,7 +39,12 @@
         <h2 class="govuk-heading-m">Before you start</h2>
         <p class="govuk-body">You will need your smartphone or tablet to hand.</p>
 
-        <a id="submit" class="govuk-button" href="@routes.MfaController.setupAuthApp()">Continue</a>
+        @govukButton(Button(
+            id = Some("submit"),
+            href = Some(routes.MfaController.setupAuthApp().url),
+            content = Text("Continue"),
+            attributes = Map("data-prevent-double-click" -> "true")
+        ))
 
 
 }

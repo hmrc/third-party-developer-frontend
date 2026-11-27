@@ -19,8 +19,9 @@
 @import uk.gov.hmrc.apiplatform.modules.applications.core.domain.models.*
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMain)
+@this(devMain: DevMain, govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators)(
   implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, applicationConfig: ApplicationConfig
@@ -46,9 +47,13 @@
 
     @helper.CSRF.formField
     <div class="govuk-button-group">
-      <button class="govuk-button govuk-button--warning" id="submit" type="submit" href="@routes.DeleteApplication.deleteSubordinateApplicationAction(app.id)">
-        Delete application
-      </button>
+      @govukButton(Button(
+        id = Some("submit"),
+        classes = "govuk-button--warning",
+        content = Text("Delete application"),
+        inputType = Some("submit"),
+        preventDoubleClick = Some(true)
+      ))
       <a id="cancel" href="@controllers.manageapplication.routes.MainApplicationDetailsController.applicationDetails(app.id)" class="govuk-button govuk-button--secondary">
         Cancel
       </a>

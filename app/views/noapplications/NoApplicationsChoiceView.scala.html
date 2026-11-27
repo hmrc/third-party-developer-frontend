@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.apiplatform.modules.tpd.session.domain.models.UserSession
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.noapplications.NoApplications.NoApplicationsChoiceForm
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav)
+@this(devMain: DevMainWithFormErrors, leftHandNav: LeftHandNav, govukButton: GovukButton)
 
 @(form: Form[NoApplicationsChoiceForm])(implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -69,9 +70,12 @@
             </fieldset>
         </div>
 
-        <button id="submit" class="govuk-button" data-module="govuk-button">
-            Continue
-        </button>
+        @govukButton(Button(
+          id = Some("submit"),
+          content = Text("Continue"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
 
     }
 }

@@ -17,8 +17,11 @@
 @import include.*
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.button.Button
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukButton
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.RegisterForm])(implicit request: play.api.mvc.Request[Any], messagesProvider: MessagesProvider, appConfig: ApplicationConfig)
 
@@ -109,8 +112,11 @@
       <a class="govuk-link" href="/api-documentation/docs/help/privacy">privacy policy</a> and
       <a class="govuk-link" href="/api-documentation/docs/help/cookies">cookie policy</a>.
     </p>
-
-    <button id="submit" class="govuk-button" type="submit">Register</button>
+    @govukButton(Button(
+      id = Some("submit"),
+      content = Text("Register"),
+      preventDoubleClick = Some(true)
+    ))
   }
   <p class="govuk-body">
     Already registered? <a class="govuk-link" href="@routes.UserLoginAccount.login()">Sign in to your account.</a>

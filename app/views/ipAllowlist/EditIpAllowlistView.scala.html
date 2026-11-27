@@ -21,8 +21,9 @@
 
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.controllers.Crumb
 @import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.*
 
-@this(devMain: DevMainWithFormErrors)
+@this(devMain: DevMainWithFormErrors, govukButton: GovukButton)
 
 @(app: ApplicationWithCollaborators, ipAllowlistFlow: IpAllowlistFlow, form: Form[uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.AddAnotherCidrBlockConfirmForm])(
   implicit request: play.api.mvc.Request[Any], loggedIn: UserSession, messages: Messages, applicationConfig: ApplicationConfig
@@ -138,7 +139,12 @@
           </fieldset>
         </div>
 
-        <button id="submit" class="govuk-button" type="submit">Continue</button>
+        @govukButton(Button(
+          id = Some("submit"),
+          content = Text("Continue"),
+          inputType = Some("submit"),
+          preventDoubleClick = Some(true)
+        ))
 
         @if(!canRemove && !app.details.ipAllowlist.required) {
           <br>
