@@ -23,7 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import cats.data.NonEmptyList
 import views.html.editapplication.DeleteClientSecretView
-import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView, ServerTokenView}
+import views.html.{ClientIdView, ClientSecretsGeneratedView, ClientSecretsView, CredentialsView}
 
 import play.api.libs.crypto.CookieSigner
 import play.api.libs.json.Json
@@ -36,7 +36,6 @@ import uk.gov.hmrc.apiplatform.modules.common.services.ClockNow
 import uk.gov.hmrc.apiplatform.modules.common.services.DateTimeHelper.*
 import uk.gov.hmrc.thirdpartydeveloperfrontend.config.{ApplicationConfig, ErrorHandler}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.connectors.{ApmConnectorCommandModule, ThirdPartyDeveloperConnector}
-import uk.gov.hmrc.thirdpartydeveloperfrontend.controllers.Credentials.serverTokenCutoffDate
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Capabilities.{ChangeClientSecret, ViewCredentials}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.domain.models.applications.Permissions.{SandboxOrAdmin, TeamMembersOnly}
 import uk.gov.hmrc.thirdpartydeveloperfrontend.service.*
